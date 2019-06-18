@@ -72,15 +72,27 @@ public class Mapper {
                 if (mappingView != null && fromProperty != null) {
                     Class<?> view = mappingView.value();
                     FromProperty annotation = field.getAnnotation(FromProperty.class);
-
-                    String converterId = String.format("ViewListPropertyConverter:%s[%d]", view.getName(), hashCode());
                     if (annotation.toElement()) {
                         String[] strings = annotation.value().split("\\{");
                         String sourceFieldName = strings[0];
                         String property = strings[1].replace("}", "").trim();
+                        String converterId = String.format("ViewListPropertyConverter:%s:%s[%d]", property, view.getName(), hashCode());
                         if (mapperFactory.getConverterFactory().getConverter(converterId) == null)
                             mapperFactory.getConverterFactory().registerConverter(converterId, new ViewListPropertyConverter(this, view, property));
                         classMapBuilder = classMapBuilder.fieldMap(sourceFieldName, field.getName()).converter(converterId).add();
+                    } else if (annotation.toMapEntry()) {
+                        String[] strings = annotation.value().split("\\{");
+                        String valueFieldName = strings[0];
+                        String valueProperty = strings[1].replace("}", "").trim();
+                        strings = annotation.key().split("\\{");
+                        String keyFieldName = strings[0];
+                        String keyProperty = strings[1].replace("}", "").trim();
+                        String converterId = String.format("ViewMapPropertyConverter:%s:%s:%s[%d]", keyProperty, valueProperty, view.getName(), hashCode());
+                        if (!valueFieldName.equals(keyFieldName))
+                            throw new IllegalArgumentException("Key and Value source property should be same");
+                        if (mapperFactory.getConverterFactory().getConverter(converterId) == null)
+                            mapperFactory.getConverterFactory().registerConverter(converterId, new ViewMapPropertyConverter(this, view, keyProperty, valueProperty));
+                        classMapBuilder = classMapBuilder.fieldMap(valueFieldName, field.getName()).converter(converterId).add();
                     }
                 }
             }

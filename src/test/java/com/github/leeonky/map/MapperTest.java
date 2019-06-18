@@ -4,6 +4,7 @@ import com.github.leeonky.map.beans.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ class MapperTest {
     private OrderWrapper orderWrapper = new OrderWrapper();
     private ProductLine productLine = new ProductLine();
     private ServiceLine serviceLine = new ServiceLine();
+    private OrderWrapperMap orderWrapperMap = new OrderWrapperMap();
 
     @BeforeEach
     void buildOrder() {
@@ -36,6 +38,14 @@ class MapperTest {
                     lineWrapper.line = l;
                     return lineWrapper;
                 }).collect(Collectors.toList());
+
+        orderWrapperMap.lines = new HashMap<>();
+        LineWrapper lineWrapper1 = new LineWrapper();
+        lineWrapper1.line = productLine;
+        orderWrapperMap.lines.put(lineWrapper1.line.id, lineWrapper1);
+        LineWrapper lineWrapper2 = new LineWrapper();
+        lineWrapper2.line = serviceLine;
+        orderWrapperMap.lines.put(lineWrapper2.line.id, lineWrapper2);
     }
 
     @Test
@@ -124,7 +134,7 @@ class MapperTest {
     }
 
     @Test
-    void support_both_specify_from_property_and_map_view_for_list() {
+    void support_both_specify_from_property_and_map_view_list_to_list() {
         OrderWrapperVO vo = mapper.map(orderWrapper, OrderWrapperVO.class);
 
         assertThat(vo.lines).hasSize(2);
@@ -137,7 +147,7 @@ class MapperTest {
     }
 
     @Test
-    void support_both_specify_from_property_and_map_view_for_list_class() {
+    void support_both_specify_from_property_and_map_view_list_to_array() {
         OrderWrapperArrayVO vo = mapper.map(orderWrapper, OrderWrapperArrayVO.class);
 
         assertThat(vo.lines).hasSize(2);
@@ -145,6 +155,45 @@ class MapperTest {
                 .isInstanceOf(ProductLineVO.class)
                 .hasFieldOrPropertyWithValue("product", "p1");
         assertThat(vo.lines[1])
+                .isInstanceOf(ServiceLineVO.class)
+                .hasFieldOrPropertyWithValue("service", "s2");
+    }
+
+    @Test
+    void support_both_specify_from_property_and_map_view_map_to_list() {
+        OrderWrapperMapVO vo = mapper.map(orderWrapperMap, OrderWrapperMapVO.class);
+
+        assertThat(vo.lines).hasSize(2);
+        assertThat(vo.lines.get(0))
+                .isInstanceOf(ProductLineVO.class)
+                .hasFieldOrPropertyWithValue("product", "p1");
+        assertThat(vo.lines.get(1))
+                .isInstanceOf(ServiceLineVO.class)
+                .hasFieldOrPropertyWithValue("service", "s2");
+    }
+
+    @Test
+    void support_both_specify_from_property_and_map_view_map_to_map() {
+        OrderWrapperMapToMapVO vo = mapper.map(orderWrapperMap, OrderWrapperMapToMapVO.class);
+
+        assertThat(vo.lines).hasSize(2);
+        assertThat(vo.lines.get("1"))
+                .isInstanceOf(ProductLineVO.class)
+                .hasFieldOrPropertyWithValue("product", "p1");
+        assertThat(vo.lines.get("2"))
+                .isInstanceOf(ServiceLineVO.class)
+                .hasFieldOrPropertyWithValue("service", "s2");
+    }
+
+    @Test
+    void support_both_specify_from_property_and_map_view_list_to_map() {
+        OrderWrapperListToMapVO vo = mapper.map(orderWrapper, OrderWrapperListToMapVO.class);
+
+        assertThat(vo.lines).hasSize(2);
+        assertThat(vo.lines.get("1"))
+                .isInstanceOf(ProductLineVO.class)
+                .hasFieldOrPropertyWithValue("product", "p1");
+        assertThat(vo.lines.get("2"))
                 .isInstanceOf(ServiceLineVO.class)
                 .hasFieldOrPropertyWithValue("service", "s2");
     }
@@ -200,5 +249,33 @@ class MapperTest {
         @FromProperty(value = "lines{line}", toElement = true)
         @MappingView(Simple.class)
         public LineVO[] lines;
+    }
+
+    public static class OrderWrapperMap {
+        public Map<String, LineWrapper> lines;
+    }
+
+    @MappingFrom(OrderWrapperMap.class)
+    public static class OrderWrapperMapVO {
+
+        @FromProperty(value = "lines{value.line}", toElement = true)
+        @MappingView(Simple.class)
+        public List<LineVO> lines;
+    }
+
+    @MappingFrom(OrderWrapperMap.class)
+    public static class OrderWrapperMapToMapVO {
+
+        @FromProperty(value = "lines{value.line}", key = "lines{key}", toMapEntry = true)
+        @MappingView(Simple.class)
+        public Map<String, LineVO> lines;
+    }
+
+    @MappingFrom(OrderWrapper.class)
+    public static class OrderWrapperListToMapVO {
+
+        @FromProperty(value = "lines{line}", key = "lines{line.id}", toMapEntry = true)
+        @MappingView(Simple.class)
+        public Map<String, LineVO> lines;
     }
 }
