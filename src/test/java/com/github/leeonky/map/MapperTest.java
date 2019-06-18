@@ -1,7 +1,11 @@
 package com.github.leeonky.map;
 
 import com.github.leeonky.map.beans.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,6 +13,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MapperTest {
     private Bean bean = new Bean().setKey("key").setValue("value");
     private Mapper mapper = new Mapper(getClass().getPackage().getName());
+    private Order order = new Order();
+    private ProductLine productLine = new ProductLine();
+    private ServiceLine serviceLine = new ServiceLine();
+
+    @BeforeEach
+    void buildOrder() {
+        productLine.id = "1";
+        productLine.product = "p1";
+        productLine.productDetail = "book";
+        serviceLine.id = "2";
+        serviceLine.service = "s2";
+        serviceLine.serviceDetail = "subscribe";
+        order.lines = asList(productLine, serviceLine);
+        order.number = "100";
+    }
 
     @Test
     void map_object_via_view() {
@@ -45,17 +64,6 @@ class MapperTest {
 
     @Test
     void support_nested_polymorphism_mapping() {
-        Order order = new Order();
-        ProductLine productLine = new ProductLine();
-        productLine.id = "1";
-        productLine.product = "p1";
-        productLine.productDetail = "book";
-        ServiceLine serviceLine = new ServiceLine();
-        serviceLine.id = "2";
-        serviceLine.service = "s2";
-        serviceLine.serviceDetail = "subscribe";
-        order.lines = asList(productLine, serviceLine);
-        order.number = "100";
 
         OrderVO orderVO = mapper.map(order, Simple.class);
         assertThat(orderVO).hasFieldOrPropertyWithValue("number", "100");
@@ -82,7 +90,57 @@ class MapperTest {
                 .hasFieldOrPropertyWithValue("service", "s2");
     }
 
+    @Test
+    void support_map_from_nested_property() {
+        BeanWrapper beanWrapper = new BeanWrapper();
+        beanWrapper.bean.setKey("hello");
+
+        NestedSimpleBeanVO vo = mapper.map(beanWrapper, NestedSimpleBeanVO.class);
+        assertThat(vo.beanKey).isEqualTo("hello");
+    }
+
+    @Test
+    void support_map_from_nested_list_property() {
+        OrderInfo orderInfo = mapper.map(order, OrderInfo.class);
+        assertThat(orderInfo.lines).containsOnly("1", "2");
+    }
+
+    @Test
+    void support_map_from_nested_list_property_to_map() {
+        OrderInfoMap orderInfoMap = mapper.map(order, OrderInfoMap.class);
+
+        assertThat(orderInfoMap.lines)
+                .hasSize(2)
+                .containsEntry("1", "1")
+                .containsEntry("2", "2");
+    }
+
     @MappingView(SubSimpleBeanVO.class)
     public static class SubSimpleBeanVO extends SimpleBeanVO {
+    }
+
+    public static class BeanWrapper {
+        public Bean bean = new Bean();
+    }
+
+    @MappingFrom(BeanWrapper.class)
+    public static class NestedSimpleBeanVO {
+
+        @FromProperty("bean.key")
+        public String beanKey;
+    }
+
+    @MappingFrom(Order.class)
+    public static class OrderInfo {
+
+        @FromProperty(value = "lines{id}", toElement = true)
+        public List<String> lines;
+    }
+
+    @MappingFrom(Order.class)
+    public static class OrderInfoMap {
+
+        @FromProperty(value = "lines{id}", key = "lines{id}", toMapEntry = true)
+        public Map<String, Object> lines;
     }
 }

@@ -42,7 +42,10 @@ public class Mapper {
     private void configMapping(Class<?> from, Class<?> to) {
         List<Field> nestedField = Stream.of(to.getFields()).filter(f -> f.getAnnotation(MappingView.class) != null)
                 .collect(Collectors.toList());
-        if (!nestedField.isEmpty()) {
+        List<Field> fromPropertyField = Stream.of(to.getFields()).filter(f -> f.getAnnotation(FromProperty.class) != null)
+                .collect(Collectors.toList());
+
+        if (!nestedField.isEmpty() || !fromPropertyField.isEmpty()) {
             ClassMapBuilder<?, ?> classMapBuilder = mapperFactory.classMap(from, to);
             nestedField.forEach(f -> {
                 Class<?> view = f.getAnnotation(MappingView.class).value();
@@ -51,6 +54,18 @@ public class Mapper {
                     mapperFactory.getConverterFactory().registerConverter(converterId, new ViewConverter(this, view));
                 classMapBuilder.fieldMap(f.getName(), f.getName()).converter(converterId).add();
             });
+
+            fromPropertyField.forEach(f -> {
+                FromProperty annotation = f.getAnnotation(FromProperty.class);
+                if (annotation.toElement())
+                    classMapBuilder.field(annotation.value(), f.getName() + "{}");
+                else if (annotation.toMapEntry()) {
+                    classMapBuilder.field(annotation.key(), f.getName() + "{key}");
+                    classMapBuilder.field(annotation.value(), f.getName() + "{value}");
+                } else
+                    classMapBuilder.field(annotation.value(), f.getName());
+            });
+
             classMapBuilder.byDefault().register();
         }
     }
