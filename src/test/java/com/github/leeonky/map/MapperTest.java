@@ -23,6 +23,13 @@ class MapperTest {
     }
 
     @Test
+    void map_object_from_sub_class() {
+        assertThat((Object) mapper.map(bean, SubSimpleBeanVO.class))
+                .isInstanceOf(SubSimpleBeanVO.class)
+                .hasFieldOrPropertyWithValue("key", "key");
+    }
+
+    @Test
     void map_object_via_view_and_scope() {
         mapper.setScope(Customer.class);
 
@@ -75,4 +82,7 @@ class MapperTest {
                 .hasFieldOrPropertyWithValue("service", "s2");
     }
 
+    @MappingView(SubSimpleBeanVO.class)
+    public static class SubSimpleBeanVO extends SimpleBeanVO {
+    }
 }

@@ -106,35 +106,35 @@ class ViewConverterTest {
                 .hasFieldOrPropertyWithValue("id", "2");
     }
 
-    @Mapping(from = Order.class, view = ListLineOrderVO.class)
+    @MappingFrom(Order.class)
     public static class ListLineOrderVO {
 
         @MappingView(Simple.class)
         public List<LineVO> lines;
     }
 
-    @Mapping(from = Order.class, view = LinkedListLineOrderVO.class)
+    @MappingFrom(Order.class)
     public static class LinkedListLineOrderVO {
 
         @MappingView(Simple.class)
         public LinkedList<LineVO> lines;
     }
 
-    @Mapping(from = Order.class, view = SetLineOrderVO.class)
+    @MappingFrom(Order.class)
     public static class SetLineOrderVO {
 
         @MappingView(Simple.class)
         public Set<LineVO> lines;
     }
 
-    @Mapping(from = Order.class, view = LinkedSetLineOrderVO.class)
+    @MappingFrom(Order.class)
     public static class LinkedSetLineOrderVO {
 
         @MappingView(Simple.class)
         public LinkedHashSet<LineVO> lines;
     }
 
-    @Mapping(from = Order.class, view = ArrayLineOrderVO.class)
+    @MappingFrom(Order.class)
     public static class ArrayLineOrderVO {
 
         @MappingView(Simple.class)
@@ -145,14 +145,14 @@ class ViewConverterTest {
         public Map<String, Line> lineMap;
     }
 
-    @Mapping(from = LineMap.class, view = LineMapVO.class)
+    @MappingFrom(LineMap.class)
     public static class LineMapVO {
 
         @MappingView(Simple.class)
         public Map<String, LineVO> lineMap;
     }
 
-    @Mapping(from = LineMap.class, view = LineLinkedMapVO.class)
+    @MappingFrom(LineMap.class)
     public static class LineLinkedMapVO {
 
         @MappingView(Simple.class)

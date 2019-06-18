@@ -29,9 +29,7 @@ public class Mapper {
         MappingView mappingView = clazz.getAnnotation(MappingView.class);
         MappingScope mappingScope = clazz.getAnnotation(MappingScope.class);
         Class<?>[] froms = mapping == null ? mappingFrom.value() : mapping.from();
-        if (mapping == null && mappingView == null)
-            throw new IllegalArgumentException("Missed view annotation for type " + clazz.getName());
-        Class<?> view = mappingView != null ? mappingView.value() : mapping.view();
+        Class<?> view = mappingView != null ? mappingView.value() : (mapping != null ? mapping.view() : clazz);
         Class<?> scope = mappingScope != null ? mappingScope.value() : (mapping == null ? void.class : mapping.scope());
         for (Class<?> from : froms) {
             mappings.computeIfAbsent(from, f -> new HashMap<>())

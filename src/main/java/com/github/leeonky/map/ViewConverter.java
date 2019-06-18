@@ -24,11 +24,8 @@ public class ViewConverter extends CustomConverter<Object, Object> {
             return mapCollection((Iterable) source, newCollection(rawType));
         if (rawType.isArray())
             return mapCollection((Iterable) source, new ArrayList<>()).toArray((Object[]) Array.newInstance(rawType.getComponentType(), 0));
-        if (Map.class.isAssignableFrom(rawType)) {
-            Map map = newMap(rawType);
-            mapMap((Map) source, map);
-            return map;
-        }
+        if (Map.class.isAssignableFrom(rawType))
+            return mapMap((Map) source, newMap(rawType));
         return mapper.map(source, view);
     }
 
