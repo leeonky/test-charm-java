@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,6 +15,7 @@ class MapperTest {
     private Bean bean = new Bean().setKey("key").setValue("value");
     private Mapper mapper = new Mapper(getClass().getPackage().getName());
     private Order order = new Order();
+    private OrderWrapper orderWrapper = new OrderWrapper();
     private ProductLine productLine = new ProductLine();
     private ServiceLine serviceLine = new ServiceLine();
 
@@ -27,6 +29,13 @@ class MapperTest {
         serviceLine.serviceDetail = "subscribe";
         order.lines = asList(productLine, serviceLine);
         order.number = "100";
+
+        orderWrapper.lines = asList(productLine, serviceLine).stream()
+                .map(l -> {
+                    LineWrapper lineWrapper = new LineWrapper();
+                    lineWrapper.line = l;
+                    return lineWrapper;
+                }).collect(Collectors.toList());
     }
 
     @Test
@@ -101,18 +110,43 @@ class MapperTest {
 
     @Test
     void support_map_from_nested_list_property() {
-        OrderInfo orderInfo = mapper.map(order, OrderInfo.class);
-        assertThat(orderInfo.lines).containsOnly("1", "2");
+        OrderInfoList vo = mapper.map(order, OrderInfoList.class);
+        assertThat(vo.lines).containsOnly("1", "2");
     }
 
     @Test
     void support_map_from_nested_list_property_to_map() {
-        OrderInfoMap orderInfoMap = mapper.map(order, OrderInfoMap.class);
+        OrderInfoMap vo = mapper.map(order, OrderInfoMap.class);
 
-        assertThat(orderInfoMap.lines)
-                .hasSize(2)
+        assertThat(vo.lines).hasSize(2)
                 .containsEntry("1", "1")
                 .containsEntry("2", "2");
+    }
+
+    @Test
+    void support_both_specify_from_property_and_map_view_for_list() {
+        OrderWrapperVO vo = mapper.map(orderWrapper, OrderWrapperVO.class);
+
+        assertThat(vo.lines).hasSize(2);
+        assertThat(vo.lines.get(0))
+                .isInstanceOf(ProductLineVO.class)
+                .hasFieldOrPropertyWithValue("product", "p1");
+        assertThat(vo.lines.get(1))
+                .isInstanceOf(ServiceLineVO.class)
+                .hasFieldOrPropertyWithValue("service", "s2");
+    }
+
+    @Test
+    void support_both_specify_from_property_and_map_view_for_list_class() {
+        OrderWrapperArrayVO vo = mapper.map(orderWrapper, OrderWrapperArrayVO.class);
+
+        assertThat(vo.lines).hasSize(2);
+        assertThat(vo.lines[0])
+                .isInstanceOf(ProductLineVO.class)
+                .hasFieldOrPropertyWithValue("product", "p1");
+        assertThat(vo.lines[1])
+                .isInstanceOf(ServiceLineVO.class)
+                .hasFieldOrPropertyWithValue("service", "s2");
     }
 
     @MappingView(SubSimpleBeanVO.class)
@@ -131,7 +165,7 @@ class MapperTest {
     }
 
     @MappingFrom(Order.class)
-    public static class OrderInfo {
+    public static class OrderInfoList {
 
         @FromProperty(value = "lines{id}", toElement = true)
         public List<String> lines;
@@ -141,6 +175,30 @@ class MapperTest {
     public static class OrderInfoMap {
 
         @FromProperty(value = "lines{id}", key = "lines{id}", toMapEntry = true)
-        public Map<String, Object> lines;
+        public Map<String, String> lines;
+    }
+
+    public static class OrderWrapper {
+        public List<LineWrapper> lines;
+    }
+
+    public static class LineWrapper {
+        public Line line;
+    }
+
+    @MappingFrom(OrderWrapper.class)
+    public static class OrderWrapperVO {
+
+        @FromProperty(value = "lines{line}", toElement = true)
+        @MappingView(Simple.class)
+        public List<LineVO> lines;
+    }
+
+    @MappingFrom(OrderWrapper.class)
+    public static class OrderWrapperArrayVO {
+
+        @FromProperty(value = "lines{line}", toElement = true)
+        @MappingView(Simple.class)
+        public LineVO[] lines;
     }
 }

@@ -9,8 +9,8 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 public class ViewConverter extends CustomConverter<Object, Object> {
-    private final Class<?> view;
-    private final Mapper mapper;
+    protected final Class<?> view;
+    protected final Mapper mapper;
 
     public ViewConverter(Mapper mapper, Class<?> view) {
         this.view = view;
@@ -35,7 +35,7 @@ public class ViewConverter extends CustomConverter<Object, Object> {
         return result;
     }
 
-    private Map newMap(Class<?> rawType) {
+    protected Map newMap(Class<?> rawType) {
         Map map;
         if (rawType.isInterface())
             map = new HashMap();
@@ -56,7 +56,7 @@ public class ViewConverter extends CustomConverter<Object, Object> {
     }
 
     @SuppressWarnings("unchecked")
-    private Collection<Object> newCollection(Class<?> rawType) {
+    protected Collection<Object> newCollection(Class<?> rawType) {
         Collection<Object> result;
         if (rawType.isInterface()) {
             if (Set.class.isAssignableFrom(rawType))

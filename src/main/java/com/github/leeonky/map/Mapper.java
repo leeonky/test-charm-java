@@ -6,9 +6,7 @@ import ma.glasnost.orika.metadata.ClassMapBuilder;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,27 +43,47 @@ public class Mapper {
         List<Field> fromPropertyField = Stream.of(to.getFields()).filter(f -> f.getAnnotation(FromProperty.class) != null)
                 .collect(Collectors.toList());
 
-        if (!nestedField.isEmpty() || !fromPropertyField.isEmpty()) {
+        Set<Field> fields = new HashSet<>();
+        fields.addAll(nestedField);
+        fields.addAll(fromPropertyField);
+
+        if (!fields.isEmpty()) {
             ClassMapBuilder<?, ?> classMapBuilder = mapperFactory.classMap(from, to);
-            nestedField.forEach(f -> {
-                Class<?> view = f.getAnnotation(MappingView.class).value();
-                String converterId = String.format("%s[%d]", view.getName(), hashCode());
-                if (mapperFactory.getConverterFactory().getConverter(converterId) == null)
-                    mapperFactory.getConverterFactory().registerConverter(converterId, new ViewConverter(this, view));
-                classMapBuilder.fieldMap(f.getName(), f.getName()).converter(converterId).add();
-            });
+            for (Field field : fields) {
+                MappingView mappingView = field.getAnnotation(MappingView.class);
+                FromProperty fromProperty = field.getAnnotation(FromProperty.class);
+                if (mappingView != null && fromProperty == null) {
+                    Class<?> view = mappingView.value();
+                    String converterId = String.format("ViewConverter:%s[%d]", view.getName(), hashCode());
+                    if (mapperFactory.getConverterFactory().getConverter(converterId) == null)
+                        mapperFactory.getConverterFactory().registerConverter(converterId, new ViewConverter(this, view));
+                    classMapBuilder = classMapBuilder.fieldMap(field.getName(), field.getName()).converter(converterId).add();
+                }
+                if (mappingView == null && fromProperty != null) {
+                    FromProperty annotation = field.getAnnotation(FromProperty.class);
+                    if (annotation.toElement())
+                        classMapBuilder = classMapBuilder.field(annotation.value(), field.getName() + "{}");
+                    else if (annotation.toMapEntry()) {
+                        classMapBuilder = classMapBuilder.field(annotation.key(), field.getName() + "{key}")
+                                .field(annotation.value(), field.getName() + "{value}");
+                    } else
+                        classMapBuilder = classMapBuilder.field(annotation.value(), field.getName());
+                }
+                if (mappingView != null && fromProperty != null) {
+                    Class<?> view = mappingView.value();
+                    FromProperty annotation = field.getAnnotation(FromProperty.class);
 
-            fromPropertyField.forEach(f -> {
-                FromProperty annotation = f.getAnnotation(FromProperty.class);
-                if (annotation.toElement())
-                    classMapBuilder.field(annotation.value(), f.getName() + "{}");
-                else if (annotation.toMapEntry()) {
-                    classMapBuilder.field(annotation.key(), f.getName() + "{key}");
-                    classMapBuilder.field(annotation.value(), f.getName() + "{value}");
-                } else
-                    classMapBuilder.field(annotation.value(), f.getName());
-            });
-
+                    String converterId = String.format("ViewListPropertyConverter:%s[%d]", view.getName(), hashCode());
+                    if (annotation.toElement()) {
+                        String[] strings = annotation.value().split("\\{");
+                        String sourceFieldName = strings[0];
+                        String property = strings[1].replace("}", "").trim();
+                        if (mapperFactory.getConverterFactory().getConverter(converterId) == null)
+                            mapperFactory.getConverterFactory().registerConverter(converterId, new ViewListPropertyConverter(this, view, property));
+                        classMapBuilder = classMapBuilder.fieldMap(sourceFieldName, field.getName()).converter(converterId).add();
+                    }
+                }
+            }
             classMapBuilder.byDefault().register();
         }
     }
