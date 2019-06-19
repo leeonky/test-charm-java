@@ -102,7 +102,8 @@ public class Mapper {
 
     @SuppressWarnings("unchecked")
     public <T> T map(Object from, Class<?> view) {
-        return (T) mapperFactory.getMapperFacade().map(from, getTargetClass(from, view));
+        Class<?> targetClass = getTargetClass(from, view);
+        return targetClass == null ? null : (T) mapperFactory.getMapperFacade().map(from, targetClass);
     }
 
     private Class<?> getTargetClass(Object from, Class<?> view) {
