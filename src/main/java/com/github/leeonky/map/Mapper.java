@@ -107,7 +107,12 @@ public class Mapper {
     }
 
     private Class<?> getTargetClass(Object from, Class<?> view) {
-        Map<Class<?>, Class<?>> scopeMapping = mappings.get(from.getClass()).get(view);
+        Map<Class<?>, Map<Class<?>, Class<?>>> classMapMap = mappings.get(from.getClass());
+        if (classMapMap == null)
+            return null;
+        Map<Class<?>, Class<?>> scopeMapping = classMapMap.get(view);
+        if (scopeMapping == null)
+            return null;
         Class<?> to = scopeMapping.get(scope);
         if (to == null)
             to = scopeMapping.get(void.class);

@@ -49,15 +49,15 @@ public class ViewConverter extends CustomConverter<Object, Object> {
         return map;
     }
 
-    private Collection<Object> mapCollection(Iterable source, Collection<Object> result) {
+    @SuppressWarnings("unchecked")
+    private Collection mapCollection(Iterable source, Collection result) {
         for (Object e : source)
             result.add(mapper.map(e, view));
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    protected Collection<Object> newCollection(Class<?> rawType) {
-        Collection<Object> result;
+    protected Collection newCollection(Class<?> rawType) {
+        Collection result;
         if (rawType.isInterface()) {
             if (Set.class.isAssignableFrom(rawType))
                 result = new HashSet<>();
@@ -65,7 +65,7 @@ public class ViewConverter extends CustomConverter<Object, Object> {
                 result = new ArrayList<>();
         } else {
             try {
-                result = (Collection<Object>) rawType.getConstructor().newInstance();
+                result = (Collection) rawType.getConstructor().newInstance();
             } catch (Exception e) {
                 throw new IllegalStateException("Can not create instance of " + rawType.getName(), e);
             }

@@ -198,6 +198,16 @@ class MapperTest {
                 .hasFieldOrPropertyWithValue("service", "s2");
     }
 
+    @Test
+    void should_return_null_when_source_class_not_register() {
+        assertThat((Object) mapper.map("", Simple.class)).isNull();
+    }
+
+    @Test
+    void should_return_null_when_view_not_register() {
+        assertThat((Object) mapper.map(bean, String.class)).isNull();
+    }
+
     @MappingView(SubSimpleBeanVO.class)
     public static class SubSimpleBeanVO extends SimpleBeanVO {
     }
