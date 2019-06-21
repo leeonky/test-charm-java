@@ -208,6 +208,29 @@ class MapperTest {
         assertThat((Object) mapper.map(bean, String.class)).isNull();
     }
 
+    @Test
+    void should_return_all_candidate_class_for_super_class_and_view() {
+        assertThat(mapper.findSubDestClasses(ProductLineVO.class, Simple.class))
+                .containsOnly(ProductLineVO.class);
+
+        assertThat(mapper.findSubDestClasses(DetailProductLineVO.class, Detail.class))
+                .containsOnly(DetailProductLineVO.class, DetailOnlineProductLineVO.class);
+
+        mapper.setScope(Customer.class);
+
+        assertThat(mapper.findSubDestClasses(DetailProductLineVO.class, Detail.class))
+                .containsOnly(DetailProductLineVO.class, DetailOnlineProductLineVO.class, ScopedDetailOnlineProductLineVO.class);
+    }
+
+    @MappingFrom(OnlineProductLine.class)
+    @MappingScope(Customer.class)
+    public static class ScopedDetailOnlineProductLineVO extends DetailProductLineVO {
+    }
+
+    @MappingFrom(OnlineProductLine.class)
+    public static class DetailOnlineProductLineVO extends DetailProductLineVO {
+    }
+
     @MappingView(SubSimpleBeanVO.class)
     public static class SubSimpleBeanVO extends SimpleBeanVO {
     }
@@ -287,5 +310,9 @@ class MapperTest {
         @FromProperty(value = "lines{line}", key = "lines{line.id}", toMapEntry = true)
         @MappingView(Simple.class)
         public Map<String, LineVO> lines;
+    }
+
+    public class OnlineProductLine extends ProductLine {
+
     }
 }

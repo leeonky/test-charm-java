@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Mapper {
-    private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> mappings = new HashMap<>();
+    private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> sourceViewScopeDestMap = new HashMap<>();
+    private Map<Class<?>, Map<Class<?>, List<Class<?>>>> viewScopeDestListMap = new HashMap<>();
     private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
     private Class<?> scope = void.class;
 
@@ -30,9 +31,12 @@ public class Mapper {
         Class<?> view = mappingView != null ? mappingView.value() : (mapping != null ? mapping.view() : clazz);
         Class<?> scope = mappingScope != null ? mappingScope.value() : (mapping == null ? void.class : mapping.scope());
         for (Class<?> from : froms) {
-            mappings.computeIfAbsent(from, f -> new HashMap<>())
+            sourceViewScopeDestMap.computeIfAbsent(from, f -> new HashMap<>())
                     .computeIfAbsent(view, f -> new HashMap<>())
                     .put(scope, clazz);
+            viewScopeDestListMap.computeIfAbsent(view, f -> new HashMap<>())
+                    .computeIfAbsent(scope, f -> new ArrayList<>())
+                    .add(clazz);
             configMapping(from, clazz);
         }
     }
@@ -101,17 +105,13 @@ public class Mapper {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T map(Object from, Class<?> view) {
-        return findTargetClass(from, view).map(t -> (T) mapperFactory.getMapperFacade().map(from, t)).orElse(null);
+    public <T> T map(Object source, Class<?> view) {
+        return findDestClass(source, view).map(t -> (T) mapperFactory.getMapperFacade().map(source, t)).orElse(null);
     }
 
-    public Optional<Class<?>> findTargetClass(Object from, Class<?> view) {
-        Map<Class<?>, Map<Class<?>, Class<?>>> classMapMap = mappings.get(from.getClass());
-        if (classMapMap == null)
-            return Optional.empty();
-        Map<Class<?>, Class<?>> scopeMapping = classMapMap.get(view);
-        if (scopeMapping == null)
-            return Optional.empty();
+    public Optional<Class<?>> findDestClass(Object from, Class<?> view) {
+        Map<Class<?>, Class<?>> scopeMapping = sourceViewScopeDestMap.getOrDefault(from.getClass(), new HashMap<>())
+                .getOrDefault(view, new HashMap<>());
         Class<?> to = scopeMapping.get(scope);
         if (to == null)
             to = scopeMapping.get(void.class);
@@ -120,5 +120,13 @@ public class Mapper {
 
     public void setScope(Class<?> scope) {
         this.scope = scope;
+    }
+
+    public List<Class<?>> findSubDestClasses(Class<?> baseDestType, Class<?> view) {
+        Map<Class<?>, List<Class<?>>> scopeDestListMap = viewScopeDestListMap.getOrDefault(view, new HashMap<>());
+        return Stream.concat(scopeDestListMap.getOrDefault(scope, new ArrayList<>()).stream(),
+                scopeDestListMap.getOrDefault(void.class, new ArrayList<>()).stream())
+                .filter(baseDestType::isAssignableFrom)
+                .collect(Collectors.toList());
     }
 }
