@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Mapper {
-    private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> sourceViewScopeDestMap = new HashMap<>();
-    private Map<Class<?>, Map<Class<?>, List<Class<?>>>> viewScopeDestListMap = new HashMap<>();
+    private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> sourceViewScopeMappingMap = new HashMap<>();
+    private Map<Class<?>, Map<Class<?>, List<Class<?>>>> viewScopeMappingListMap = new HashMap<>();
     private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
     private Class<?> scope = void.class;
 
@@ -29,14 +29,18 @@ public class Mapper {
         MappingScope mappingScope = clazz.getAnnotation(MappingScope.class);
         Class<?>[] froms = mapping == null ? mappingFrom.value() : mapping.from();
         Class<?> view = mappingView != null ? mappingView.value() : (mapping != null ? mapping.view() : clazz);
-        Class<?> scope = mappingScope != null ? mappingScope.value() : (mapping == null ? void.class : mapping.scope());
+        Class<?>[] scopes = mappingScope != null ? mappingScope.value() : (mapping == null ? null : mapping.scope());
+        if (scopes == null || scopes.length == 0)
+            scopes = new Class<?>[]{void.class};
         for (Class<?> from : froms) {
-            sourceViewScopeDestMap.computeIfAbsent(from, f -> new HashMap<>())
-                    .computeIfAbsent(view, f -> new HashMap<>())
-                    .put(scope, clazz);
-            viewScopeDestListMap.computeIfAbsent(view, f -> new HashMap<>())
-                    .computeIfAbsent(scope, f -> new ArrayList<>())
-                    .add(clazz);
+            Map<Class<?>, Class<?>> sourceViewMap = sourceViewScopeMappingMap.computeIfAbsent(from, f -> new HashMap<>())
+                    .computeIfAbsent(view, f -> new HashMap<>());
+            for (Class<?> scope : scopes)
+                sourceViewMap.put(scope, clazz);
+
+            Map<Class<?>, List<Class<?>>> viewMap = viewScopeMappingListMap.computeIfAbsent(view, f -> new HashMap<>());
+            for (Class<?> scope : scopes)
+                viewMap.computeIfAbsent(scope, f -> new ArrayList<>()).add(clazz);
             configMapping(from, clazz);
         }
     }
@@ -106,11 +110,11 @@ public class Mapper {
 
     @SuppressWarnings("unchecked")
     public <T> T map(Object source, Class<?> view) {
-        return findDestClass(source, view).map(t -> (T) mapperFactory.getMapperFacade().map(source, t)).orElse(null);
+        return findMapping(source, view).map(t -> (T) mapperFactory.getMapperFacade().map(source, t)).orElse(null);
     }
 
-    public Optional<Class<?>> findDestClass(Object from, Class<?> view) {
-        Map<Class<?>, Class<?>> scopeMapping = sourceViewScopeDestMap.getOrDefault(from.getClass(), new HashMap<>())
+    public Optional<Class<?>> findMapping(Object from, Class<?> view) {
+        Map<Class<?>, Class<?>> scopeMapping = sourceViewScopeMappingMap.getOrDefault(from.getClass(), new HashMap<>())
                 .getOrDefault(view, new HashMap<>());
         Class<?> to = scopeMapping.get(scope);
         if (to == null)
@@ -122,11 +126,11 @@ public class Mapper {
         this.scope = scope;
     }
 
-    public List<Class<?>> findSubDestClasses(Class<?> baseDestType, Class<?> view) {
-        Map<Class<?>, List<Class<?>>> scopeDestListMap = viewScopeDestListMap.getOrDefault(view, new HashMap<>());
+    public List<Class<?>> findSubMappings(Class<?> baseMapping, Class<?> view) {
+        Map<Class<?>, List<Class<?>>> scopeDestListMap = viewScopeMappingListMap.getOrDefault(view, new HashMap<>());
         return Stream.concat(scopeDestListMap.getOrDefault(scope, new ArrayList<>()).stream(),
                 scopeDestListMap.getOrDefault(void.class, new ArrayList<>()).stream())
-                .filter(baseDestType::isAssignableFrom)
+                .filter(baseMapping::isAssignableFrom)
                 .collect(Collectors.toList());
     }
 }

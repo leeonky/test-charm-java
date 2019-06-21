@@ -15,5 +15,5 @@ public @interface Mapping {
 
     Class<?> view();
 
-    Class<?> scope() default void.class;
+    Class<?>[] scope() default {};
 }

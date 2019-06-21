@@ -210,15 +210,15 @@ class MapperTest {
 
     @Test
     void should_return_all_candidate_class_for_super_class_and_view() {
-        assertThat(mapper.findSubDestClasses(ProductLineVO.class, Simple.class))
+        assertThat(mapper.findSubMappings(ProductLineVO.class, Simple.class))
                 .containsOnly(ProductLineVO.class);
 
-        assertThat(mapper.findSubDestClasses(DetailProductLineVO.class, Detail.class))
+        assertThat(mapper.findSubMappings(DetailProductLineVO.class, Detail.class))
                 .containsOnly(DetailProductLineVO.class, DetailOnlineProductLineVO.class);
 
         mapper.setScope(Customer.class);
 
-        assertThat(mapper.findSubDestClasses(DetailProductLineVO.class, Detail.class))
+        assertThat(mapper.findSubMappings(DetailProductLineVO.class, Detail.class))
                 .containsOnly(DetailProductLineVO.class, DetailOnlineProductLineVO.class, ScopedDetailOnlineProductLineVO.class);
     }
 
