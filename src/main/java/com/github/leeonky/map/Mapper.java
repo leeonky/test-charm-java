@@ -102,21 +102,20 @@ public class Mapper {
 
     @SuppressWarnings("unchecked")
     public <T> T map(Object from, Class<?> view) {
-        Class<?> targetClass = getTargetClass(from, view);
-        return targetClass == null ? null : (T) mapperFactory.getMapperFacade().map(from, targetClass);
+        return findTargetClass(from, view).map(t -> (T) mapperFactory.getMapperFacade().map(from, t)).orElse(null);
     }
 
-    private Class<?> getTargetClass(Object from, Class<?> view) {
+    public Optional<Class<?>> findTargetClass(Object from, Class<?> view) {
         Map<Class<?>, Map<Class<?>, Class<?>>> classMapMap = mappings.get(from.getClass());
         if (classMapMap == null)
-            return null;
+            return Optional.empty();
         Map<Class<?>, Class<?>> scopeMapping = classMapMap.get(view);
         if (scopeMapping == null)
-            return null;
+            return Optional.empty();
         Class<?> to = scopeMapping.get(scope);
         if (to == null)
             to = scopeMapping.get(void.class);
-        return to;
+        return Optional.ofNullable(to);
     }
 
     public void setScope(Class<?> scope) {
