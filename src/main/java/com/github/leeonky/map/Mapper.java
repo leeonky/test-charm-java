@@ -113,11 +113,13 @@ public class Mapper {
         return findMapping(source, view).map(t -> (T) mapTo(source, t)).orElse(null);
     }
 
-    public <T> Object mapTo(Object source, Class<T> t) {
+    public <T> T mapTo(Object source, Class<T> t) {
         return mapperFactory.getMapperFacade().map(source, t);
     }
 
     public Optional<Class<?>> findMapping(Object from, Class<?> view) {
+        if (from == null)
+            return Optional.empty();
         Map<Class<?>, Class<?>> scopeMapping = sourceViewScopeMappingMap.getOrDefault(from.getClass(), new HashMap<>())
                 .getOrDefault(view, new HashMap<>());
         Class<?> to = scopeMapping.get(scope);

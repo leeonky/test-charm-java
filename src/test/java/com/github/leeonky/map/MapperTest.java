@@ -222,6 +222,11 @@ class MapperTest {
                 .containsOnly(DetailProductLineVO.class, DetailOnlineProductLineVO.class, ScopedDetailOnlineProductLineVO.class);
     }
 
+    @Test
+    void source_object_is_null() {
+        assertThat((Object) mapper.map(null, Object.class)).isNull();
+    }
+
     @MappingFrom(OnlineProductLine.class)
     @MappingScope(Customer.class)
     public static class ScopedDetailOnlineProductLineVO extends DetailProductLineVO {
