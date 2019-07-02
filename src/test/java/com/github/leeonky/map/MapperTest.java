@@ -225,6 +225,7 @@ class MapperTest {
     @Test
     void source_object_is_null() {
         assertThat((Object) mapper.map(null, Object.class)).isNull();
+        assertThat((Object) mapper.mapTo(null, Object.class)).isNull();
     }
 
     @MappingFrom(OnlineProductLine.class)

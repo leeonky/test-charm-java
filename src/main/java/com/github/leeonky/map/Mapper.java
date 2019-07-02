@@ -3,6 +3,7 @@ package com.github.leeonky.map;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
+import ma.glasnost.orika.metadata.MapperKey;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
@@ -10,7 +11,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ma.glasnost.orika.metadata.TypeFactory.valueOf;
+
 public class Mapper {
+    private final Class[] annotations = new Class[]{Mapping.class, MappingFrom.class, MappingView.class, MappingScope.class};
     private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> sourceViewScopeMappingMap = new HashMap<>();
     private Map<Class<?>, Map<Class<?>, List<Class<?>>>> viewScopeMappingListMap = new HashMap<>();
     private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
@@ -57,6 +61,7 @@ public class Mapper {
 
         if (!fields.isEmpty()) {
             ClassMapBuilder<?, ?> classMapBuilder = mapperFactory.classMap(from, to);
+            registerAllSuppers(from, to.getSuperclass());
             for (Field field : fields) {
                 MappingView mappingView = field.getAnnotation(MappingView.class);
                 FromProperty fromProperty = field.getAnnotation(FromProperty.class);
@@ -105,6 +110,14 @@ public class Mapper {
                 }
             }
             classMapBuilder.byDefault().register();
+        }
+    }
+
+    private void registerAllSuppers(Class<?> from, Class<?> to) {
+        if (Stream.of(annotations).anyMatch(a -> to.getAnnotation(a) != null)) {
+            if (mapperFactory.getClassMap(new MapperKey(valueOf(from), valueOf(to))) == null)
+                mapperFactory.classMap(from, to).byDefault().register();
+            registerAllSuppers(from, to.getSuperclass());
         }
     }
 
