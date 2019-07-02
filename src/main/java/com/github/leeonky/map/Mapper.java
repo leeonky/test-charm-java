@@ -110,7 +110,11 @@ public class Mapper {
 
     @SuppressWarnings("unchecked")
     public <T> T map(Object source, Class<?> view) {
-        return findMapping(source, view).map(t -> (T) mapperFactory.getMapperFacade().map(source, t)).orElse(null);
+        return findMapping(source, view).map(t -> (T) mapTo(source, t)).orElse(null);
+    }
+
+    public <T> Object mapTo(Object source, Class<T> t) {
+        return mapperFactory.getMapperFacade().map(source, t);
     }
 
     public Optional<Class<?>> findMapping(Object from, Class<?> view) {
