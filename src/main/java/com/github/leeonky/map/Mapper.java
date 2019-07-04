@@ -22,8 +22,9 @@ public class Mapper {
 
     public Mapper(String... packages) {
         Reflections reflections = new Reflections((Object[]) packages);
-        reflections.getTypesAnnotatedWith(Mapping.class).forEach(this::scanClass);
-        reflections.getTypesAnnotatedWith(MappingFrom.class).forEach(this::scanClass);
+        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Mapping.class);
+        classes.addAll(reflections.getTypesAnnotatedWith(MappingFrom.class));
+        classes.forEach(this::scanClass);
     }
 
     private void scanClass(Class<?> clazz) {
@@ -31,7 +32,7 @@ public class Mapper {
         MappingFrom mappingFrom = clazz.getAnnotation(MappingFrom.class);
         MappingView mappingView = clazz.getAnnotation(MappingView.class);
         MappingScope mappingScope = clazz.getAnnotation(MappingScope.class);
-        Class<?>[] froms = mapping == null ? mappingFrom.value() : mapping.from();
+        Class<?>[] froms = mappingFrom != null ? mappingFrom.value() : mapping.from();
         Class<?> view = mappingView != null ? mappingView.value() : (mapping != null ? mapping.view() : clazz);
         Class<?>[] scopes = mappingScope != null ? mappingScope.value() : (mapping == null ? null : mapping.scope());
         if (scopes == null || scopes.length == 0)
