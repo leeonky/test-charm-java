@@ -2,17 +2,17 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.Field;
 
-class FieldPropertyReader<T> implements PropertyReader<T> {
+class FieldPropertyWriter<T> implements PropertyWriter<T> {
     private final Field field;
 
-    FieldPropertyReader(Field field) {
+    public FieldPropertyWriter(Field field) {
         this.field = field;
     }
 
     @Override
-    public Object getValue(T bean) {
+    public void setValue(T bean, Object value) {
         try {
-            return field.get(bean);
+            field.set(bean, value);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }

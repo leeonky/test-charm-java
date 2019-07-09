@@ -3,16 +3,16 @@ package com.github.leeonky.util;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.github.leeonky.util.StringUtil.unCapitalize;
+
 class MethodPropertyReader<T> implements PropertyReader<T> {
+    public static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
+    public static final int GETTER_PREFIX_LENGTH = 3;
     private final Method method;
     private String name;
 
     MethodPropertyReader(Method method) {
         this.method = method;
-    }
-
-    private static String unCapitalize(String str) {
-        return str.isEmpty() ? str : str.toLowerCase().substring(0, 1) + str.substring(1);
     }
 
     static boolean isGetter(Method method) {
@@ -33,14 +33,12 @@ class MethodPropertyReader<T> implements PropertyReader<T> {
 
     @Override
     public String getName() {
-        if (name == null)
-            return name = propertyName(method);
+        if (name == null) {
+            String methodName = method.getName();
+            return name = unCapitalize(method.getReturnType().equals(boolean.class) ?
+                    methodName.substring(BOOLEAN_GETTER_PREFIX_LENGTH) : methodName.substring(GETTER_PREFIX_LENGTH));
+        }
         return name;
     }
 
-    private String propertyName(Method method) {
-        String methodName = method.getName();
-        return unCapitalize(method.getReturnType().equals(boolean.class) ?
-                methodName.replaceFirst("^is", "") : methodName.replaceFirst("^get", ""));
-    }
 }

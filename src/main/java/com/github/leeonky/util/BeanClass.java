@@ -7,20 +7,29 @@ import java.util.Map;
 
 public class BeanClass<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
+    private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Class<T> type;
 
     public BeanClass(Class<T> type) {
         this.type = type;
-        for (Field field : type.getFields())
-            if (FieldPropertyReader.isCandidate(field))
-                addReader(new FieldPropertyReader<>(field));
-        for (Method method : type.getMethods())
+        for (Field field : type.getFields()) {
+            addReader(new FieldPropertyReader<>(field));
+            addWriter(new FieldPropertyWriter<>(field));
+        }
+        for (Method method : type.getMethods()) {
             if (MethodPropertyReader.isGetter(method))
                 addReader(new MethodPropertyReader<>(method));
+            if (method.getName().startsWith("set") && method.getParameterTypes().length == 1)
+                addWriter(new MethodPropertyWriter<>(method));
+        }
     }
 
     private void addReader(PropertyReader<T> reader) {
         readers.put(reader.getName(), reader);
+    }
+
+    private void addWriter(PropertyWriter<T> writer) {
+        writers.put(writer.getName(), writer);
     }
 
     public Object getPropertyValue(String field, T bean) {
@@ -33,4 +42,16 @@ public class BeanClass<T> {
             throw new IllegalArgumentException("No available property reader for " + type.getSimpleName() + "." + field);
         return reader;
     }
+
+    public void setPropertyValue(String field, T bean, Object value) {
+        getPropertyWriter(field).setValue(bean, value);
+    }
+
+    private PropertyWriter<T> getPropertyWriter(String field) {
+        PropertyWriter<T> writer = writers.get(field);
+        if (writer == null)
+            throw new IllegalArgumentException("No available property writer for " + type.getSimpleName() + "." + field);
+        return writer;
+    }
+
 }
