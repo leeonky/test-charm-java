@@ -19,9 +19,17 @@ public class BeanClass<T> {
         for (Method method : type.getMethods()) {
             if (MethodPropertyReader.isGetter(method))
                 addReader(new MethodPropertyReader<>(method));
-            if (method.getName().startsWith("set") && method.getParameterTypes().length == 1)
+            if (MethodPropertyWriter.isSetter(method))
                 addWriter(new MethodPropertyWriter<>(method));
         }
+    }
+
+    public Map<String, PropertyReader<T>> getPropertyReaders() {
+        return readers;
+    }
+
+    public Map<String, PropertyWriter<T>> getPropertyWriters() {
+        return writers;
     }
 
     private void addReader(PropertyReader<T> reader) {

@@ -22,4 +22,9 @@ class FieldPropertyReader<T> implements PropertyReader<T> {
     public String getName() {
         return field.getName();
     }
+
+    @Override
+    public Class<?> getPropertyType() {
+        return field.getType();
+    }
 }

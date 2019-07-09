@@ -6,12 +6,16 @@ import java.lang.reflect.Method;
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
 class MethodPropertyWriter<T> implements PropertyWriter<T> {
-    public static final int SETTER_PREFIX_LENGTH = 3;
+    private static final int SETTER_PREFIX_LENGTH = 3;
     private final Method method;
     private String name;
 
     MethodPropertyWriter(Method method) {
         this.method = method;
+    }
+
+    static boolean isSetter(Method method) {
+        return method.getName().startsWith("set") && method.getParameterTypes().length == 1;
     }
 
     @Override
@@ -28,5 +32,10 @@ class MethodPropertyWriter<T> implements PropertyWriter<T> {
         if (name == null)
             return name = unCapitalize(method.getName().substring(SETTER_PREFIX_LENGTH));
         return name;
+    }
+
+    @Override
+    public Class<?> getPropertyType() {
+        return method.getParameterTypes()[0];
     }
 }

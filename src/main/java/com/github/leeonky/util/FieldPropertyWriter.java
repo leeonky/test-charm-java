@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 class FieldPropertyWriter<T> implements PropertyWriter<T> {
     private final Field field;
 
-    public FieldPropertyWriter(Field field) {
+    FieldPropertyWriter(Field field) {
         this.field = field;
     }
 
@@ -21,5 +21,10 @@ class FieldPropertyWriter<T> implements PropertyWriter<T> {
     @Override
     public String getName() {
         return field.getName();
+    }
+
+    @Override
+    public Class<?> getPropertyType() {
+        return field.getType();
     }
 }

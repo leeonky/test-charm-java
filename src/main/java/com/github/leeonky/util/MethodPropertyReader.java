@@ -6,8 +6,8 @@ import java.lang.reflect.Method;
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
 class MethodPropertyReader<T> implements PropertyReader<T> {
-    public static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
-    public static final int GETTER_PREFIX_LENGTH = 3;
+    private static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
+    private static final int GETTER_PREFIX_LENGTH = 3;
     private final Method method;
     private String name;
 
@@ -39,6 +39,11 @@ class MethodPropertyReader<T> implements PropertyReader<T> {
                     methodName.substring(BOOLEAN_GETTER_PREFIX_LENGTH) : methodName.substring(GETTER_PREFIX_LENGTH));
         }
         return name;
+    }
+
+    @Override
+    public Class<?> getPropertyType() {
+        return method.getReturnType();
     }
 
 }
