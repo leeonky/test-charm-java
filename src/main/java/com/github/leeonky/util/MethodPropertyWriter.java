@@ -5,13 +5,12 @@ import java.lang.reflect.Method;
 
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
-class MethodPropertyWriter<T> implements PropertyWriter<T> {
+class MethodPropertyWriter<T> extends MethodProperty implements PropertyWriter<T> {
     private static final int SETTER_PREFIX_LENGTH = 3;
-    private final Method method;
     private String name;
 
     MethodPropertyWriter(Method method) {
-        this.method = method;
+        super(method);
     }
 
     static boolean isSetter(Method method) {

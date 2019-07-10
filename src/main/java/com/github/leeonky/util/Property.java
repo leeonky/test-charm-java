@@ -1,5 +1,7 @@
 package com.github.leeonky.util;
 
+import java.lang.annotation.Annotation;
+
 public interface Property {
 
     String getName();
@@ -9,4 +11,6 @@ public interface Property {
     default BeanClass<?> getPropertyTypeWrapper() {
         return new BeanClass<>(getPropertyType());
     }
+
+    <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 }

@@ -2,11 +2,9 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.Field;
 
-class FieldPropertyWriter<T> implements PropertyWriter<T> {
-    private final Field field;
-
+class FieldPropertyWriter<T> extends FieldProperty implements PropertyWriter<T> {
     FieldPropertyWriter(Field field) {
-        this.field = field;
+        super(field);
     }
 
     @Override
@@ -16,15 +14,5 @@ class FieldPropertyWriter<T> implements PropertyWriter<T> {
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public String getName() {
-        return field.getName();
-    }
-
-    @Override
-    public Class<?> getPropertyType() {
-        return field.getType();
     }
 }

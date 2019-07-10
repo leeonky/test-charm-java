@@ -44,7 +44,7 @@ public class BeanClass<T> {
         return getPropertyReader(field).getValue(bean);
     }
 
-    private PropertyReader<T> getPropertyReader(String field) {
+    public PropertyReader<T> getPropertyReader(String field) {
         PropertyReader<T> reader = readers.get(field);
         if (reader == null)
             throw new IllegalArgumentException("No available property reader for " + type.getSimpleName() + "." + field);
@@ -55,11 +55,10 @@ public class BeanClass<T> {
         getPropertyWriter(field).setValue(bean, value);
     }
 
-    private PropertyWriter<T> getPropertyWriter(String field) {
+    public PropertyWriter<T> getPropertyWriter(String field) {
         PropertyWriter<T> writer = writers.get(field);
         if (writer == null)
             throw new IllegalArgumentException("No available property writer for " + type.getSimpleName() + "." + field);
         return writer;
     }
-
 }
