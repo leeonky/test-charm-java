@@ -43,26 +43,26 @@ class PropertyReaderTest {
 
         @Test
         void get_field_value() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyValue("field", new BeanWithPubField())).isEqualTo(100);
+            assertThat(beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "field")).isEqualTo(100);
         }
 
         @Test
         void get_value_via_getter_override_field() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyValue("field2", new BeanWithPubField())).isEqualTo(200);
+            assertThat(beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "field2")).isEqualTo(200);
         }
 
         @Test
         void should_support_boolean_getter() {
-            assertTrue((Boolean) beanWithPubFieldBeanClass.getPropertyValue("bool", new BeanWithPubField()));
+            assertTrue((Boolean) beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "bool"));
         }
 
         @Test
         void should_raise_error_when_no_reader() {
             assertThrows(IllegalArgumentException.class, () ->
-                    beanWithPubFieldBeanClass.getPropertyValue("boolean", new BeanWithPubField()));
+                    beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "boolean"));
 
             assertThrows(IllegalArgumentException.class, () ->
-                    beanWithPubFieldBeanClass.getPropertyValue("privateField", new BeanWithPubField()));
+                    beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "privateField"));
         }
     }
 

@@ -33,21 +33,21 @@ class PropertyWriterTest {
         @Test
         void set_field_value() {
             BeanWithPubField bean = new BeanWithPubField();
-            beanWithPubFieldBeanClass.setPropertyValue("field", bean, 100);
+            beanWithPubFieldBeanClass.setPropertyValue(bean, "field", 100);
             assertThat(bean.field).isEqualTo(100);
         }
 
         @Test
         void set_value_via_setter_override_field() {
             BeanWithPubField bean = new BeanWithPubField();
-            beanWithPubFieldBeanClass.setPropertyValue("field2", bean, 100);
+            beanWithPubFieldBeanClass.setPropertyValue(bean, "field2", 100);
             assertThat(bean.field2).isEqualTo(200);
         }
 
         @Test
         void should_raise_error_when_no_reader() {
             assertThrows(IllegalArgumentException.class, () ->
-                    beanWithPubFieldBeanClass.setPropertyValue("notExist", new BeanWithPubField(), null));
+                    beanWithPubFieldBeanClass.setPropertyValue(new BeanWithPubField(), "notExist", null));
         }
     }
 

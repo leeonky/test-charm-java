@@ -40,7 +40,7 @@ public class BeanClass<T> {
         writers.put(writer.getName(), writer);
     }
 
-    public Object getPropertyValue(String field, T bean) {
+    public Object getPropertyValue(T bean, String field) {
         return getPropertyReader(field).getValue(bean);
     }
 
@@ -51,7 +51,7 @@ public class BeanClass<T> {
         return reader;
     }
 
-    public void setPropertyValue(String field, T bean, Object value) {
+    public void setPropertyValue(T bean, String field, Object value) {
         getPropertyWriter(field).setValue(bean, value);
     }
 
