@@ -1,9 +1,14 @@
 package com.github.leeonky.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BeanClass<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
@@ -22,6 +27,18 @@ public class BeanClass<T> {
             if (MethodPropertyWriter.isSetter(method))
                 addWriter(new MethodPropertyWriter<>(method));
         }
+    }
+
+    public Class<T> getType() {
+        return type;
+    }
+
+    public String getName() {
+        return type.getName();
+    }
+
+    public String getSimpleName() {
+        return type.getSimpleName();
     }
 
     public Map<String, PropertyReader<T>> getPropertyReaders() {
@@ -60,5 +77,37 @@ public class BeanClass<T> {
         if (writer == null)
             throw new IllegalArgumentException("No available property writer for " + type.getSimpleName() + "." + field);
         return writer;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T newInstance(Object... args) {
+        try {
+            List<Constructor<?>> constructors = Stream.of(type.getConstructors())
+                    .filter(c -> isRightConstructor(c, args))
+                    .collect(Collectors.toList());
+            if (constructors.size() != 1)
+                throw new IllegalArgumentException(String.format("No appropriate %s constructor for params [%s]",
+                        type.getName(), toString(args)));
+            return (T) constructors.get(0).newInstance(args);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private String toString(Object[] args) {
+        return Stream.of(args)
+                .map(o -> o == null ? "null" : o.getClass().getName() + ":" + o)
+                .collect(Collectors.joining(", "));
+    }
+
+    private boolean isRightConstructor(Constructor<?> constructor, Object[] args) {
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        if (parameterTypes.length == args.length) {
+            for (int i = 0; i < parameterTypes.length; i++)
+                if (!parameterTypes[i].isInstance(args[i]))
+                    return false;
+            return true;
+        }
+        return false;
     }
 }
