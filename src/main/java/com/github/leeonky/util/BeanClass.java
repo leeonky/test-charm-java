@@ -14,19 +14,24 @@ public class BeanClass<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Class<T> type;
+    private final Converter converter = Converter.createDefaultConverter();
 
     public BeanClass(Class<T> type) {
         this.type = type;
         for (Field field : type.getFields()) {
-            addReader(new FieldPropertyReader<>(field));
-            addWriter(new FieldPropertyWriter<>(field));
+            addReader(new FieldPropertyReader<>(this, field));
+            addWriter(new FieldPropertyWriter<>(this, field));
         }
         for (Method method : type.getMethods()) {
             if (MethodPropertyReader.isGetter(method))
-                addReader(new MethodPropertyReader<>(method));
+                addReader(new MethodPropertyReader<>(this, method));
             if (MethodPropertyWriter.isSetter(method))
-                addWriter(new MethodPropertyWriter<>(method));
+                addWriter(new MethodPropertyWriter<>(this, method));
         }
+    }
+
+    public Converter getConverter() {
+        return converter;
     }
 
     public Class<T> getType() {
@@ -68,8 +73,9 @@ public class BeanClass<T> {
         return reader;
     }
 
-    public void setPropertyValue(T bean, String field, Object value) {
+    public BeanClass<T> setPropertyValue(T bean, String field, Object value) {
         getPropertyWriter(field).setValue(bean, value);
+        return this;
     }
 
     public PropertyWriter<T> getPropertyWriter(String field) {

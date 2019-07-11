@@ -2,17 +2,19 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.Field;
 
-class FieldPropertyWriter<T> extends FieldProperty implements PropertyWriter<T> {
-    FieldPropertyWriter(Field field) {
-        super(field);
+class FieldPropertyWriter<T> extends FieldProperty<T> implements PropertyWriter<T> {
+
+    FieldPropertyWriter(BeanClass<T> beanClass, Field field) {
+        super(beanClass, field);
     }
 
     @Override
     public void setValue(T bean, Object value) {
         try {
-            field.set(bean, value);
+            field.set(bean, tryConvert(value));
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
     }
+
 }

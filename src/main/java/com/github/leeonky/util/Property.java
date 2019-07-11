@@ -2,11 +2,15 @@ package com.github.leeonky.util;
 
 import java.lang.annotation.Annotation;
 
-public interface Property {
+public interface Property<T> {
 
     String getName();
 
     Class<?> getPropertyType();
+
+    Object tryConvert(Object value);
+
+    BeanClass<T> getBeanClass();
 
     default BeanClass<?> getPropertyTypeWrapper() {
         return new BeanClass<>(getPropertyType());

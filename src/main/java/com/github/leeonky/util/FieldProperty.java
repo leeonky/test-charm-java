@@ -3,10 +3,11 @@ package com.github.leeonky.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-abstract class FieldProperty implements Property {
+abstract class FieldProperty<T> extends AbstractProperty<T> {
     final Field field;
 
-    FieldProperty(Field field) {
+    FieldProperty(BeanClass<T> beanClass, Field field) {
+        super(beanClass);
         this.field = field;
     }
 
@@ -24,4 +25,5 @@ abstract class FieldProperty implements Property {
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         return AnnotationGetter.getInstance().getAnnotation(field, annotationClass);
     }
+
 }

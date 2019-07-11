@@ -29,17 +29,16 @@ class PropertyWriterTest {
 
     @Nested
     class GetSetValue {
+        BeanWithPubField bean = new BeanWithPubField();
 
         @Test
         void set_field_value() {
-            BeanWithPubField bean = new BeanWithPubField();
             beanWithPubFieldBeanClass.setPropertyValue(bean, "field", 100);
             assertThat(bean.field).isEqualTo(100);
         }
 
         @Test
         void set_value_via_setter_override_field() {
-            BeanWithPubField bean = new BeanWithPubField();
             beanWithPubFieldBeanClass.setPropertyValue(bean, "field2", 100);
             assertThat(bean.field2).isEqualTo(200);
         }
@@ -48,6 +47,17 @@ class PropertyWriterTest {
         void should_raise_error_when_no_reader() {
             assertThrows(IllegalArgumentException.class, () ->
                     beanWithPubFieldBeanClass.setPropertyValue(new BeanWithPubField(), "notExist", null));
+        }
+
+        @Test
+        void should_support_type_convert() {
+            beanWithPubFieldBeanClass.setPropertyValue(bean, "field", "100");
+
+            assertThat(bean.field).isEqualTo(100);
+
+            beanWithPubFieldBeanClass.setPropertyValue(bean, "field2", "100");
+
+            assertThat(bean.field2).isEqualTo(200);
         }
     }
 

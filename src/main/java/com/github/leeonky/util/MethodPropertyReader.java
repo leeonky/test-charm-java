@@ -5,13 +5,13 @@ import java.lang.reflect.Method;
 
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
-class MethodPropertyReader<T> extends MethodProperty implements PropertyReader<T> {
+class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReader<T> {
     private static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
     private static final int GETTER_PREFIX_LENGTH = 3;
     private String name;
 
-    MethodPropertyReader(Method method) {
-        super(method);
+    MethodPropertyReader(BeanClass<T> beanClass, Method method) {
+        super(beanClass, method);
     }
 
     static boolean isGetter(Method method) {

@@ -2,10 +2,10 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.Field;
 
-class FieldPropertyReader<T> extends FieldProperty implements PropertyReader<T> {
+class FieldPropertyReader<T> extends FieldProperty<T> implements PropertyReader<T> {
 
-    FieldPropertyReader(Field field) {
-        super(field);
+    FieldPropertyReader(BeanClass<T> beanClass, Field field) {
+        super(beanClass, field);
     }
 
     @Override
