@@ -14,10 +14,15 @@ public class BeanClass<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Class<T> type;
-    private final Converter converter = Converter.createDefaultConverter();
+    private final Converter converter;
 
     public BeanClass(Class<T> type) {
+        this(type, Converter.createDefaultConverter());
+    }
+
+    public BeanClass(Class<T> type, Converter converter) {
         this.type = type;
+        this.converter = converter;
         for (Field field : type.getFields()) {
             addReader(new FieldPropertyReader<>(this, field));
             addWriter(new FieldPropertyWriter<>(this, field));
