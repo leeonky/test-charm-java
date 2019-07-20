@@ -35,6 +35,10 @@ public class BeanClass<T> {
         }
     }
 
+    public static String getClassName(Class<String> clazz) {
+        return clazz == null ? null : clazz.getName();
+    }
+
     public Converter getConverter() {
         return converter;
     }

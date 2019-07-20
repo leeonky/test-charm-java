@@ -36,4 +36,11 @@ class BeanClassTest {
     void new_instance_failed_when_no_candidate_constructor() {
         assertThrows(IllegalArgumentException.class, () -> new BeanClass<>(BeanClassTest.class).newInstance("hello"));
     }
+
+    @Test
+    void support_get_class_name() {
+        assertThat(BeanClass.getClassName(String.class)).isEqualTo(String.class.getName());
+
+        assertThat(BeanClass.getClassName(null)).isEqualTo(null);
+    }
 }
