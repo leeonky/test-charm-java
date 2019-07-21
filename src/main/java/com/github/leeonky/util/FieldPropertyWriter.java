@@ -16,5 +16,4 @@ class FieldPropertyWriter<T> extends FieldProperty<T> implements PropertyWriter<
             throw new IllegalStateException(e);
         }
     }
-
 }

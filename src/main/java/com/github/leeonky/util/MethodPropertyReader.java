@@ -2,6 +2,7 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
@@ -28,6 +29,11 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    protected Type provideGenericType() {
+        return method.getGenericReturnType();
     }
 
     @Override

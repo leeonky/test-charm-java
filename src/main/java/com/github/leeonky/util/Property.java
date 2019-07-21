@@ -17,4 +17,6 @@ public interface Property<T> {
     }
 
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+
+    GenericType getGenericType();
 }

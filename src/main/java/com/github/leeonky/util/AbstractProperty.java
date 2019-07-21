@@ -1,5 +1,7 @@
 package com.github.leeonky.util;
 
+import java.lang.reflect.Type;
+
 abstract class AbstractProperty<T> implements Property<T> {
     private final BeanClass beanClass;
 
@@ -15,5 +17,12 @@ abstract class AbstractProperty<T> implements Property<T> {
     @Override
     public BeanClass<T> getBeanClass() {
         return beanClass;
+    }
+
+    protected abstract Type provideGenericType();
+
+    @Override
+    public GenericType getGenericType() {
+        return GenericType.createGenericType(provideGenericType());
     }
 }

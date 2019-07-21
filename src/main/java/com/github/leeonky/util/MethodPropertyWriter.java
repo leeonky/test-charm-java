@@ -2,6 +2,7 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
@@ -36,5 +37,10 @@ class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWrite
     @Override
     public Class<?> getPropertyType() {
         return method.getParameterTypes()[0];
+    }
+
+    @Override
+    protected Type provideGenericType() {
+        return method.getGenericParameterTypes()[0];
     }
 }
