@@ -29,9 +29,6 @@ class PropertyReaderTest {
             return null;
         }
 
-        public void setGenericMethod(List<Long> list) {
-        }
-
         @Attr("v1")
         public int getField2() {
             return 200;
@@ -48,6 +45,10 @@ class PropertyReaderTest {
         public int getField3() {
             return field3;
         }
+    }
+
+    public static class InvalidGenericType<T> {
+        public List<T> list;
     }
 
     @Nested
@@ -104,6 +105,12 @@ class PropertyReaderTest {
     class GetGenericType {
 
         @Test
+        void should_return_empty_when_not_specify_generic_type() {
+            assertThat(new BeanClass<>(InvalidGenericType.class).getPropertyReader("list").getGenericType().getGenericTypeParameter(0))
+                    .isEmpty();
+        }
+
+        @Test
         void should_support_get_generic_type_from_setter_field() {
             GenericType genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getGenericType();
 
@@ -134,24 +141,6 @@ class PropertyReaderTest {
             assertThat(genericType.getRawType()).isEqualTo(List.class);
 
             assertThat(genericType.getGenericTypeParameter(ANY_INT)).isEmpty();
-        }
-
-        @Test
-        void should_support_get_generic_type_from_getter_field() {
-            GenericType genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericField").getGenericType();
-
-            assertThat(genericType.getRawType()).isEqualTo(List.class);
-
-            assertThat(genericType.getGenericTypeParameter(0).get().getRawType()).isEqualTo(Long.class);
-        }
-
-        @Test
-        void should_support_get_generic_type_from_getter_method() {
-            GenericType genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericMethod").getGenericType();
-
-            assertThat(genericType.getRawType()).isEqualTo(List.class);
-
-            assertThat(genericType.getGenericTypeParameter(0).get().getRawType()).isEqualTo(Long.class);
         }
     }
 }

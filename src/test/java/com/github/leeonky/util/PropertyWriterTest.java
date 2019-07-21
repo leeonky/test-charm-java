@@ -3,6 +3,8 @@ package com.github.leeonky.util;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -13,10 +15,13 @@ class PropertyWriterTest {
         @Attr("v1")
         public int field;
         public int field2;
-
+        public List<Long> genericField;
         @Attr("v1")
         private int field3;
         private int privateField;
+
+        public void setGenericMethod(List<Long> list) {
+        }
 
         @Attr("v1")
         public void setField2(int i) {
@@ -80,6 +85,28 @@ class PropertyWriterTest {
         void should_try_to_return_field_annotation_when_method_has_no_annotation() {
             Attr annotation = beanWithPubFieldBeanClass.getPropertyWriter("field3").getAnnotation(Attr.class);
             assertThat(annotation.value()).isEqualTo("v1");
+        }
+    }
+
+    @Nested
+    class GetGenericType {
+
+        @Test
+        void should_support_get_generic_type_from_getter_field() {
+            GenericType genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericField").getGenericType();
+
+            assertThat(genericType.getRawType()).isEqualTo(List.class);
+
+            assertThat(genericType.getGenericTypeParameter(0).get().getRawType()).isEqualTo(Long.class);
+        }
+
+        @Test
+        void should_support_get_generic_type_from_getter_method() {
+            GenericType genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericMethod").getGenericType();
+
+            assertThat(genericType.getRawType()).isEqualTo(List.class);
+
+            assertThat(genericType.getGenericTypeParameter(0).get().getRawType()).isEqualTo(Long.class);
         }
     }
 }

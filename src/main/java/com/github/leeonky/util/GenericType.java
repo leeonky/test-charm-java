@@ -22,8 +22,11 @@ public class GenericType {
     }
 
     public Optional<GenericType> getGenericTypeParameter(int i) {
-        if (type instanceof ParameterizedType)
-            return Optional.of(new GenericType(((ParameterizedType) type).getActualTypeArguments()[i]));
+        if (type instanceof ParameterizedType) {
+            Type typeArgument = ((ParameterizedType) type).getActualTypeArguments()[i];
+            if (typeArgument instanceof Class || typeArgument instanceof ParameterizedType)
+                return Optional.of(new GenericType(typeArgument));
+        }
         return Optional.empty();
     }
 }
