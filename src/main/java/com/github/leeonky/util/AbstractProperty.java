@@ -3,7 +3,7 @@ package com.github.leeonky.util;
 import java.lang.reflect.Type;
 
 abstract class AbstractProperty<T> implements Property<T> {
-    private final BeanClass beanClass;
+    private final BeanClass<T> beanClass;
 
     AbstractProperty(BeanClass<T> beanClass) {
         this.beanClass = beanClass;
