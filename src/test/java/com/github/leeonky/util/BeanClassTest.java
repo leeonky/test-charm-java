@@ -39,7 +39,7 @@ class BeanClassTest {
 
     @Test
     void support_get_class_name() {
-        assertThat(BeanClass.getClassName(String.class)).isEqualTo(String.class.getName());
+        assertThat(BeanClass.getClassName("")).isEqualTo(String.class.getName());
 
         assertThat(BeanClass.getClassName(null)).isEqualTo(null);
     }

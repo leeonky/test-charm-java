@@ -19,7 +19,7 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
         String methodName = method.getName();
         return method.getParameters().length == 0 &&
                 (method.getReturnType().equals(boolean.class) ?
-                        methodName.startsWith("is") : methodName.startsWith("get"));
+                        methodName.startsWith("is") : (methodName.startsWith("get") && !methodName.equals("getClass")));
     }
 
     @Override

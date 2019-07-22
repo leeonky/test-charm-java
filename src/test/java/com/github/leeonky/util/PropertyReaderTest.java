@@ -77,6 +77,11 @@ class PropertyReaderTest {
             assertThrows(IllegalArgumentException.class, () ->
                     beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "privateField"));
         }
+
+        @Test
+        void should_skip_get_class_method() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("class");
+        }
     }
 
     @Nested
