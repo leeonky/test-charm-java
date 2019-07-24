@@ -7,20 +7,18 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BeanClass<T> {
+    private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Class<T> type;
     private final Converter converter;
 
-    public BeanClass(Class<T> type) {
-        this(type, Converter.createDefaultConverter());
-    }
-
-    public BeanClass(Class<T> type, Converter converter) {
+    private BeanClass(Class<T> type, Converter converter) {
         this.type = type;
         this.converter = converter;
         for (Field field : type.getFields()) {
@@ -37,6 +35,14 @@ public class BeanClass<T> {
 
     public static String getClassName(Object object) {
         return object == null ? null : object.getClass().getName();
+    }
+
+    public static <T> BeanClass<T> createBeanClass(Class<T> type, Converter converter) {
+        return new BeanClass<>(type, converter);
+    }
+
+    public static <T> BeanClass<T> createBeanClass(Class<T> type) {
+        return (BeanClass<T>) instanceCache.computeIfAbsent(type, t -> createBeanClass(t, Converter.createDefaultConverter()));
     }
 
     public Converter getConverter() {

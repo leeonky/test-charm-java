@@ -13,7 +13,7 @@ public interface Property<T> {
     BeanClass<T> getBeanClass();
 
     default BeanClass<?> getPropertyTypeWrapper() {
-        return new BeanClass<>(getPropertyType());
+        return BeanClass.createBeanClass(getPropertyType());
     }
 
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);

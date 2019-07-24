@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PropertyReaderTest {
     public static final int ANY_INT = 100;
-    BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = new BeanClass<>(BeanWithPubField.class);
+    BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.createBeanClass(BeanWithPubField.class);
 
     public static class BeanWithPubField {
 
@@ -111,7 +111,7 @@ class PropertyReaderTest {
 
         @Test
         void should_return_empty_when_not_specify_generic_type() {
-            assertThat(new BeanClass<>(InvalidGenericType.class).getPropertyReader("list").getGenericType().getGenericTypeParameter(0))
+            assertThat(BeanClass.createBeanClass(InvalidGenericType.class).getPropertyReader("list").getGenericType().getGenericTypeParameter(0))
                     .isEmpty();
         }
 
