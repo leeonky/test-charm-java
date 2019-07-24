@@ -41,6 +41,7 @@ public class BeanClass<T> {
         return new BeanClass<>(type, converter);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> BeanClass<T> createBeanClass(Class<T> type) {
         return (BeanClass<T>) instanceCache.computeIfAbsent(type, t -> createBeanClass(t, Converter.createDefaultConverter()));
     }
