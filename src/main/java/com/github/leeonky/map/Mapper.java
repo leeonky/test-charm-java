@@ -24,10 +24,10 @@ public class Mapper {
         Reflections reflections = new Reflections((Object[]) packages);
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(Mapping.class);
         classes.addAll(reflections.getTypesAnnotatedWith(MappingFrom.class));
-        classes.forEach(this::scanClass);
+        classes.forEach(this::register);
     }
 
-    private void scanClass(Class<?> clazz) {
+    private void register(Class<?> clazz) {
         Mapping mapping = clazz.getAnnotation(Mapping.class);
         MappingFrom mappingFrom = clazz.getAnnotation(MappingFrom.class);
         MappingView mappingView = clazz.getAnnotation(MappingView.class);

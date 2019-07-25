@@ -28,7 +28,7 @@ public class ViewListPropertyConverter extends ViewConverter {
     @SuppressWarnings("unchecked")
     public static Object getPropertyValue(Object e, String propertyChain) {
         for (String property : propertyChain.split("\\."))
-            e = new BeanClass(e.getClass()).getPropertyValue(e, property);
+            e = ((BeanClass) BeanClass.createBeanClass(e.getClass())).getPropertyValue(e, property);
         return e;
     }
 
