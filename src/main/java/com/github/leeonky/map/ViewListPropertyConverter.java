@@ -1,6 +1,6 @@
 package com.github.leeonky.map;
 
-import com.github.leeonky.map.util.BeanUtil;
+import com.github.leeonky.util.BeanClass;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.Type;
 
@@ -25,17 +25,14 @@ public class ViewListPropertyConverter extends ViewConverter {
                 .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     public static Object getPropertyValue(Object e, String propertyChain) {
-        for (String property : propertyChain.split("\\.")) {
-            try {
-                e = BeanUtil.getPropertyValue(e, property);
-            } catch (Exception ex) {
-                throw new IllegalStateException(ex);
-            }
-        }
+        for (String property : propertyChain.split("\\."))
+            e = new BeanClass(e.getClass()).getPropertyValue(e, property);
         return e;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object convert(Object source, Type destinationType, MappingContext mappingContext) {
         Class<?> rawType = destinationType.getRawType();
