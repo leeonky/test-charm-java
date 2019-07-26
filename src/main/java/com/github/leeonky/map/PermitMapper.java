@@ -5,10 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 import org.reflections.Reflections;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class PermitMapper {
     private static final HashMap<Class<?>, Class<?>> EMPTY_MAP = new HashMap<>();
@@ -33,11 +30,21 @@ public class PermitMapper {
     public Map<String, ?> permit(Map<String, ?> map, Class<?> permit) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         BeanClass beanClass = BeanClass.createBeanClass(permit);
-        Map<String, PropertyWriter> propertyWriters = beanClass.getPropertyWriters();
-        map.forEach((k, v) -> {
-            PropertyWriter propertyWriter = propertyWriters.get(k);
-            if (propertyWriter != null)
-                result.put(k, propertyWriter.tryConvert(v));
+        ((Map<String, PropertyWriter>) beanClass.getPropertyWriters()).forEach((key, propertyWriter) -> {
+            if (map.containsKey(key)) {
+                Object value = map.get(key);
+                if (value instanceof Map)
+                    result.put(key, permit((Map<String, ?>) value, propertyWriter.getPropertyType()));
+                else if (value instanceof Iterable) {
+                    ArrayList<Object> list = new ArrayList<>();
+                    result.put(key, list);
+                    Class<?> type = propertyWriter.getGenericType().getGenericTypeParameter(0).get().getRawType();
+                    for (Object e : (Iterable) value) {
+                        list.add(permit((Map<String, ?>) e, type));
+                    }
+                } else
+                    result.put(key, propertyWriter.tryConvert(value));
+            }
         });
         return result;
     }
