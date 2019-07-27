@@ -2,10 +2,17 @@ package com.github.leeonky.map;
 
 import com.github.leeonky.map.schemas.Permit;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.GenericType;
 import com.github.leeonky.util.PropertyWriter;
 import org.reflections.Reflections;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class PermitMapper {
     private static final HashMap<Class<?>, Class<?>> EMPTY_MAP = new HashMap<>();
@@ -31,22 +38,23 @@ public class PermitMapper {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         BeanClass beanClass = BeanClass.createBeanClass(permit);
         ((Map<String, PropertyWriter>) beanClass.getPropertyWriters()).forEach((key, propertyWriter) -> {
-            if (map.containsKey(key)) {
-                Object value = map.get(key);
-                if (value instanceof Map)
-                    result.put(key, permit((Map<String, ?>) value, propertyWriter.getPropertyType()));
-                else if (value instanceof Iterable) {
-                    ArrayList<Object> list = new ArrayList<>();
-                    result.put(key, list);
-                    Class<?> type = propertyWriter.getGenericType().getGenericTypeParameter(0).get().getRawType();
-                    for (Object e : (Iterable) value) {
-                        list.add(permit((Map<String, ?>) e, type));
-                    }
-                } else
-                    result.put(key, propertyWriter.tryConvert(value));
-            }
+            if (map.containsKey(key))
+                result.put(key, permitValue(map.get(key), beanClass.getConverter(), propertyWriter.getGenericType()));
         });
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object permitValue(Object value, Converter converter, GenericType genericType) {
+        if (value instanceof Map)
+            return permit((Map<String, ?>) value, genericType.getRawType());
+        else if (value instanceof Iterable) {
+            GenericType subType = genericType.getGenericTypeParameter(0).get();
+            return StreamSupport.stream(((Iterable) value).spliterator(), false)
+                    .map(e -> permitValue(e, converter, subType))
+                    .collect(Collectors.toList());
+        } else
+            return converter.tryConvert(genericType.getRawType(), value);
     }
 
     public Optional<Class<?>> findPermit(Class<?> target, Class<?> action) {

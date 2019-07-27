@@ -9,4 +9,5 @@ public class UserPermit {
     public String name;
     public AddressPermit address;
     public List<UserPermit> partners;
+    public List<List<UserPermit>> neighbors;
 }

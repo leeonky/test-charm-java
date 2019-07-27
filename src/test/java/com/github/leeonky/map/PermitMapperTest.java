@@ -73,4 +73,18 @@ class PermitMapperTest {
             put("name", "tom");
         }});
     }
+
+    @Test
+    void should_support_permit_nested_list_list() {
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("neighbors", singletonList(singletonList(new HashMap<String, Object>() {{
+                put("name", "tom");
+                put("age", 22);
+            }})));
+        }}, User.class, Create.class);
+        assertThat(value.get("neighbors")).isInstanceOf(List.class);
+        assertThat((List) value.get("neighbors")).containsOnly(singletonList(new HashMap<String, String>() {{
+            put("name", "tom");
+        }}));
+    }
 }
