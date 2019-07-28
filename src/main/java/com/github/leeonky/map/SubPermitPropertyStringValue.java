@@ -1,4 +1,4 @@
-package com.github.leeonky.map.schemas;
+package com.github.leeonky.map;
 
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -10,8 +10,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({TYPE})
 @Retention(RUNTIME)
 @Inherited
-public @interface Permit {
-    Class<?> target();
-
-    Class<?> action();
+public @interface SubPermitPropertyStringValue {
+    String value();
 }

@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -86,5 +87,28 @@ class PermitMapperTest {
         assertThat((List) value.get("neighbors")).containsOnly(singletonList(new HashMap<String, String>() {{
             put("name", "tom");
         }}));
+    }
+
+    @Test
+    void should_support_permit_sub_class() {
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("ids", asList(new HashMap<String, Object>() {{
+                put("type", "PASSPORT");
+                put("name", "tom");
+                put("number", "123");
+            }}, new HashMap<String, Object>() {{
+                put("type", "IDENTITY");
+                put("name", "tom");
+                put("number", "123");
+            }}));
+        }}, User.class, Create.class);
+
+        assertThat((List) value.get("ids")).containsOnly(new HashMap<String, Object>() {{
+            put("type", "PASSPORT");
+            put("name", "tom");
+        }}, new HashMap<String, Object>() {{
+            put("type", "IDENTITY");
+            put("number", "123");
+        }});
     }
 }
