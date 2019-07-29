@@ -11,11 +11,13 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class PermitMapper {
-    private static final HashMap<Class<?>, Class<?>> EMPTY_MAP = new HashMap<>();
-    private static final HashMap<Class<?>, List<Class<?>>> EMPTY_MAP2 = new HashMap<>();
-    private static final List<Class<?>> EMPTY_LIST = new ArrayList<>();
-    private Map<Class<?>, Map<Class<?>, Class<?>>> targetActionPermits = new HashMap<>();
-    private Map<Object, Map<Class<?>, List<Class<?>>>> typeActionSubPermits = new HashMap<>();
+    private static final ArrayList<Class<?>> EMPTY_LIST = new ArrayList<>();
+    private static final HashMap<Class<?>, Map<Class<?>, Class<?>>> EMPTY_MAP1 = new HashMap<>();
+    private static final Map<Class<?>, Map<Class<?>, List<Class<?>>>> EMPTY_MAP2 = new HashMap<>();
+    private static final Map<Class<?>, List<Class<?>>> EMPTY_MAP3 = new HashMap<>();
+    private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> targetActionScopePermits = new HashMap<>();
+    private Map<Object, Map<Class<?>, Map<Class<?>, List<Class<?>>>>> typeActionScopeSubPermits = new HashMap<>();
+    private Class<?> scope = void.class;
 
     public PermitMapper(String... packages) {
         new Reflections((Object[]) packages).getTypesAnnotatedWith(Permit.class)
@@ -24,14 +26,23 @@ public class PermitMapper {
 
     private void register(Class<?> type) {
         Permit permit = type.getAnnotation(Permit.class);
-        targetActionPermits.computeIfAbsent(permit.target(), k -> new HashMap<>())
-                .put(permit.action(), type);
+        PermitScope annotation = type.getAnnotation(PermitScope.class);
+        Class<?>[] scopes = annotation == null ? permit.scope() : annotation.value();
+        if (scopes.length == 0)
+            scopes = new Class<?>[]{void.class};
+
+        Map<Class<?>, Class<?>> scopePermits = targetActionScopePermits.computeIfAbsent(permit.target(), k -> new HashMap<>())
+                .computeIfAbsent(permit.action(), k -> new HashMap<>());
+        for (Class<?> scope : scopes)
+            scopePermits.put(scope, type);
 
         SubPermitPropertyStringValue typeAnnotation = type.getAnnotation(SubPermitPropertyStringValue.class);
-        if (typeAnnotation != null)
-            typeActionSubPermits.computeIfAbsent(typeAnnotation.value(), t -> new HashMap<>())
-                    .computeIfAbsent(permit.action(), a -> new ArrayList<>())
-                    .add(type);
+        if (typeAnnotation != null) {
+            Map<Class<?>, List<Class<?>>> subScopePermits = typeActionScopeSubPermits.computeIfAbsent(typeAnnotation.value(), t -> new HashMap<>())
+                    .computeIfAbsent(permit.action(), a -> new HashMap<>());
+            for (Class<?> scope : scopes)
+                subScopePermits.computeIfAbsent(scope, s -> new ArrayList<>()).add(type);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -74,8 +85,10 @@ public class PermitMapper {
 
                 String polymorphismPropertyName = annotation.value();
                 Object polymophismValue = ((Map) value).get(polymorphismPropertyName);
-                Class<?> subType = typeActionSubPermits.getOrDefault(polymophismValue, EMPTY_MAP2)
-                        .getOrDefault(action.value(), EMPTY_LIST).stream()
+                Map<Class<?>, List<Class<?>>> scopeSubPermits = typeActionScopeSubPermits.getOrDefault(polymophismValue, EMPTY_MAP2)
+                        .getOrDefault(action.value(), EMPTY_MAP3);
+                List<Class<?>> subPermits = scopeSubPermits.get(scope);
+                Class<?> subType = (subPermits != null ? subPermits : scopeSubPermits.getOrDefault(void.class, EMPTY_LIST)).stream()
                         .filter(rawType::isAssignableFrom)
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException(String.format("Cannot find permit for %s[%s] in '%s::%s'",
@@ -95,6 +108,13 @@ public class PermitMapper {
     }
 
     public Optional<Class<?>> findPermit(Class<?> target, Class<?> action) {
-        return Optional.ofNullable(targetActionPermits.getOrDefault(target, EMPTY_MAP).get(action));
+        Map<Class<?>, Class<?>> scopePermits = targetActionScopePermits.getOrDefault(target, EMPTY_MAP1)
+                .getOrDefault(action, new HashMap<>());
+        Class<?> permit = scopePermits.get(scope);
+        return Optional.ofNullable(permit != null ? permit : scopePermits.get(void.class));
+    }
+
+    public void setScope(Class<?> scope) {
+        this.scope = scope;
     }
 }

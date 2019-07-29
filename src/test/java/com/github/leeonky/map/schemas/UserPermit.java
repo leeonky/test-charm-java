@@ -36,4 +36,10 @@ public class UserPermit {
     public static class IdentityPermit extends IdPermit {
         public String number;
     }
+
+    @Permit(target = Void.class, action = Create.class, scope = NewScope.class)
+    @SubPermitPropertyStringValue("PASSPORT")
+    public static class NewScopePassportPermit extends IdPermit {
+        public int age;
+    }
 }

@@ -14,4 +14,6 @@ public @interface Permit {
     Class<?> target();
 
     Class<?> action();
+
+    Class<?>[] scope() default {};
 }

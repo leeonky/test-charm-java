@@ -1,5 +1,6 @@
 package com.github.leeonky.map;
 
+import com.github.leeonky.map.schemas.NewScope;
 import com.github.leeonky.map.schemas.User;
 import org.junit.jupiter.api.Test;
 
@@ -157,6 +158,35 @@ class PermitMapperTest {
         }}, User.class, Create.class));
 
         assertThat(runtimeException).hasMessage("Cannot find permit for type[UNKNOWN] in 'com.github.leeonky.map.schemas.UserPermit::ids'");
+    }
+
+    @Test
+    void should_support_scope() {
+        permitMapper.setScope(NewScope.class);
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("name", "tom");
+            put("age", 22);
+        }}, User.class, Create.class);
+
+        assertThat(value).isInstanceOf(LinkedHashMap.class);
+        assertThat(value).containsOnly(new SimpleEntry("age", 22));
+    }
+
+    @Test
+    void should_support_scope_in_polymorphism_permit() {
+        permitMapper.setScope(NewScope.class);
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("ids", singletonList(new HashMap<String, Object>() {{
+                put("type", "PASSPORT");
+                put("name", "tom");
+                put("age", 22);
+            }}));
+        }}, User.class, Create.class);
+
+        assertThat((List) value.get("ids")).containsOnly(new HashMap<String, Object>() {{
+            put("type", "PASSPORT");
+            put("age", 22);
+        }});
     }
 
     private static class NotExistTarget {
