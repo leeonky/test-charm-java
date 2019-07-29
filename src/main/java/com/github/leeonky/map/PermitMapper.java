@@ -67,9 +67,20 @@ public class PermitMapper {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         BeanClass beanClass = BeanClass.createBeanClass(permit);
         ((Map<String, PropertyWriter<?>>) beanClass.getPropertyWriters()).forEach((key, propertyWriter) -> {
-            if (map.containsKey(key))
-                result.put(key, permitValue(map.get(key), beanClass.getConverter(), propertyWriter.getGenericType(),
-                        propertyWriter.getAnnotation(PermitAction.class), key, permit));
+            if (map.containsKey(key)) {
+                Object value = permitValue(map.get(key), beanClass.getConverter(), propertyWriter.getGenericType(),
+                        propertyWriter.getAnnotation(PermitAction.class), key, permit);
+                ToProperty toProperty = propertyWriter.getAnnotation(ToProperty.class);
+                if (toProperty != null) {
+                    String[] nests = toProperty.value().split("\\.");
+                    LinkedHashMap<String, Object> newMap = result;
+                    int i;
+                    for (i = 0; i < nests.length - 1; i++)
+                        newMap = (LinkedHashMap<String, Object>) newMap.computeIfAbsent(nests[i], k -> new LinkedHashMap<>());
+                    newMap.put(nests[i], value);
+                } else
+                    result.put(key, value);
+            }
         });
         return result;
     }

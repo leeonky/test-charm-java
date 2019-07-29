@@ -11,6 +11,12 @@ public class UserPermit {
     public List<UserPermit> partners;
     public List<List<UserPermit>> neighbors;
 
+    @ToProperty("name")
+    public String nickName;
+
+    @ToProperty("id.type")
+    public String idType;
+
     @PermitAction(Create.class)
     public List<IdPermit> ids;
 

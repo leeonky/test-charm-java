@@ -189,6 +189,28 @@ class PermitMapperTest {
         }});
     }
 
+    @Test
+    void should_support_rename_property() {
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("nickName", "tom");
+        }}, User.class, Create.class);
+
+        assertThat(value).isInstanceOf(LinkedHashMap.class);
+        assertThat(value).containsOnly(new SimpleEntry("name", "tom"));
+    }
+
+    @Test
+    void should_support_move_property_to_new_map() {
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("idType", "ID");
+        }}, User.class, Create.class);
+
+        assertThat(value).isInstanceOf(LinkedHashMap.class);
+        assertThat(value).containsOnly(new SimpleEntry("id", new HashMap<String, Object>() {{
+            put("type", "ID");
+        }}));
+    }
+
     private static class NotExistTarget {
     }
 }
