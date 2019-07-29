@@ -14,6 +14,12 @@ public class UserPermit {
     @PermitAction(Create.class)
     public List<IdPermit> ids;
 
+    @PermitAction(Create.class)
+    public Object error1;
+
+    @PermitAction(Create.class)
+    public List error2;
+
     @SubPermitProperty("type")
     public abstract static class IdPermit {
         public String type;

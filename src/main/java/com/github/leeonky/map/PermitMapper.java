@@ -35,43 +35,47 @@ public class PermitMapper {
     }
 
     public Map<String, ?> permit(Map<String, ?> map, Class<?> target, Class<?> action) {
-        //TODO error handler
-        return findPermit(target, action).map(p -> permit(map, p)).get();
+        return findPermit(target, action).<Map<String, ?>>map(p -> permitMap(map, p)).orElse(map);
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, ?> permit(Map<String, ?> map, Class<?> permit) {
+    private Map<String, ?> permitMap(Map<String, ?> map, Class<?> permit) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         BeanClass beanClass = BeanClass.createBeanClass(permit);
         ((Map<String, PropertyWriter<?>>) beanClass.getPropertyWriters()).forEach((key, propertyWriter) -> {
             if (map.containsKey(key))
                 result.put(key, permitValue(map.get(key), beanClass.getConverter(), propertyWriter.getGenericType(),
-                        propertyWriter.getAnnotation(PermitAction.class)));
+                        propertyWriter.getAnnotation(PermitAction.class), key, permit));
         });
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    private Object permitValue(Object value, Converter converter, GenericType genericType, PermitAction action) {
+    private Object permitValue(Object value, Converter converter, GenericType genericType, PermitAction action, String key, Class<?> type) {
         Class<?> rawType = genericType.getRawType();
         if (value instanceof Map) {
             if (action != null) {
-                //TODO error handler(may null)
                 SubPermitProperty annotation = rawType.getAnnotation(SubPermitProperty.class);
+                if (annotation == null)
+                    throw new IllegalStateException("Should specify property name via @SubPermitProperty in '" + rawType.getName() + "'");
 
-                Class<?> subType = typeActionSubPermits.getOrDefault(((Map) value).get(annotation.value()), EMPTY_MAP2)
+                String polymorphismPropertyName = annotation.value();
+                Object polymophismValue = ((Map) value).get(polymorphismPropertyName);
+                Class<?> subType = typeActionSubPermits.getOrDefault(polymophismValue, EMPTY_MAP2)
                         .getOrDefault(action.value(), EMPTY_LIST).stream()
-                        .filter(c -> rawType.isAssignableFrom(c))
-                        .findFirst().get(); //TODO error handler may empty
+                        .filter(rawType::isAssignableFrom)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException(String.format("Cannot find permit for %s[%s] in '%s::%s'",
+                                polymorphismPropertyName, polymophismValue, type.getName(), key)));
 
-                return permit((Map<String, ?>) value, subType);
+                return permitMap((Map<String, ?>) value, subType);
             }
-            return permit((Map<String, ?>) value, rawType);
+            return permitMap((Map<String, ?>) value, rawType);
         } else if (value instanceof Iterable) {
-            //TODO error handler may empty
-            GenericType subType = genericType.getGenericTypeParameter(0).get();
+            GenericType subType = genericType.getGenericTypeParameter(0)
+                    .orElseThrow(() -> new IllegalStateException(String.format("Should specify element type in '%s::%s'", type.getName(), key)));
             return StreamSupport.stream(((Iterable) value).spliterator(), false)
-                    .map(e -> permitValue(e, converter, subType, action))
+                    .map(e -> permitValue(e, converter, subType, action, key, type))
                     .collect(Collectors.toList());
         } else
             return converter.tryConvert(rawType, value);
