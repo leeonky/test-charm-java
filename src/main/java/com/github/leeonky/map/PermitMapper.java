@@ -34,8 +34,21 @@ public class PermitMapper {
                     .add(type);
     }
 
-    public Map<String, ?> permit(Map<String, ?> map, Class<?> target, Class<?> action) {
-        return findPermit(target, action).<Map<String, ?>>map(p -> permitMap(map, p)).orElse(map);
+    @SuppressWarnings("unchecked")
+    public <T> T permit(T map, Class<?> target, Class<?> action) {
+        return (T) findPermit(target, action).map(p -> {
+            if (map instanceof Map)
+                return permitMap((Map<String, ?>) map, p);
+            else if (map instanceof List)
+                return permitList((List<?>) map, p);
+            else
+                throw new IllegalArgumentException("Not support type " + map.getClass().getName());
+        }).orElse(map);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<?> permitList(List<?> list, Class<?> permit) {
+        return list.stream().map(m -> permitMap((Map<String, ?>) m, permit)).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")

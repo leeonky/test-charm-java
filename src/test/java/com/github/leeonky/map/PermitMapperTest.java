@@ -46,6 +46,15 @@ class PermitMapperTest {
     }
 
     @Test
+    void should_support_permit_list() {
+        List value = permitMapper.permit(singletonList(new HashMap<String, Object>() {{
+            put("name", 100);
+        }}), User.class, Create.class);
+
+        assertThat((Map) value.get(0)).containsOnly(new SimpleEntry("name", "100"));
+    }
+
+    @Test
     void should_support_permit_nested_map() {
         Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
             put("address", new HashMap<String, Object>() {{
@@ -140,7 +149,7 @@ class PermitMapperTest {
     @Test
     void should_raise_error_when_no_sub_permit() {
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> permitMapper.permit(new HashMap<String, Object>() {{
-            put("ids", asList(new HashMap<String, Object>() {{
+            put("ids", singletonList(new HashMap<String, Object>() {{
                 put("type", "UNKNOWN");
                 put("name", "tom");
                 put("number", "123");
