@@ -60,6 +60,10 @@ class ConverterTest {
         V getValue();
     }
 
+    public static class Type {
+
+    }
+
     @Nested
     class TypeHandler {
         @Test
@@ -85,14 +89,14 @@ class ConverterTest {
         }
 
         @Test
-        void candidate_converter() {
+        void convert_via_registered_converter() {
             converter.addTypeConverter(String.class, Integer.class, Integer::valueOf);
 
             assertThat(converter.tryConvert(Integer.class, "100")).isEqualTo(100);
         }
 
         @Test
-        void candidate_converter_as_base_type() {
+        void convert_via_registered_converter_as_base_type_matches() {
             converter.addTypeConverter(Object.class, String.class, o -> "Hello");
 
             assertThat(converter.tryConvert(String.class, new Bean())).isEqualTo("Hello");
@@ -137,7 +141,7 @@ class ConverterTest {
 
     @Nested
     class DefaultConvert {
-        Converter converter = Converter.createDefaultConverter();
+        Converter converter = Converter.createDefault();
 
         @Test
         void parse_string() throws ParseException {
@@ -170,6 +174,13 @@ class ConverterTest {
 
         private void assertConvert(Class<?> type, Object value, Object toValue) {
             assertThat(converter.tryConvert(type, value)).isEqualTo(toValue);
+        }
+
+        @Test
+        void register_config() {
+            Converter.configDefaultConverter(converter -> converter.addTypeConverter(Type.class, String.class, t -> "customer converter"));
+            assertThat(Converter.createDefault().tryConvert(String.class, new Type())).isEqualTo("customer converter");
+
         }
 
         @Nested

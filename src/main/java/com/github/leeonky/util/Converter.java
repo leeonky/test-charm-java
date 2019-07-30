@@ -8,16 +8,18 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static java.util.Collections.emptyList;
 
 public class Converter {
-    private Map<Class<?>, List<TypeHandler<Function>>> typeConverters = new HashMap<>();
-    private Map<Class<?>, List<TypeHandler<BiFunction>>> enumConverters = new HashMap<>();
+    private static Consumer<Converter> defaultConverterConfig = (c) -> {
+    };
+    private TypeHandlerSet<Function> typeConverterSet = new TypeHandlerSet<>();
+    private TypeHandlerSet<BiFunction> enumConverterSet = new TypeHandlerSet<>();
 
     public static Class<?> boxedClass(Class<?> source) {
         if (source.isPrimitive())
@@ -36,8 +38,8 @@ public class Converter {
         return source;
     }
 
-    public static Converter createDefaultConverter() {
-        return new Converter()
+    public static Converter createDefault() {
+        Converter converter = new Converter()
                 .addTypeConverter(Object.class, String.class, Object::toString)
                 .addTypeConverter(String.class, long.class, Long::valueOf)
                 .addTypeConverter(String.class, int.class, Integer::valueOf)
@@ -76,47 +78,41 @@ public class Converter {
                 .addTypeConverter(Short.class, BigDecimal.class, BigDecimal::new)
                 .addTypeConverter(Byte.class, BigDecimal.class, BigDecimal::new)
                 .addTypeConverter(Float.class, BigDecimal.class, BigDecimal::new)
-                .addTypeConverter(Double.class, BigDecimal.class, BigDecimal::new)
-                ;
+                .addTypeConverter(Double.class, BigDecimal.class, BigDecimal::new);
+        defaultConverterConfig.accept(converter);
+        return converter;
+    }
+
+    public static void configDefaultConverter(Consumer<Converter> config) {
+        defaultConverterConfig = config;
     }
 
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
-        typeConverters.computeIfAbsent(target, k -> new ArrayList<>())
-                .add(new TypeHandler<>(boxedClass(source), converter));
+        typeConverterSet.add(boxedClass(source), target, converter);
         return this;
     }
 
-    private <T> Optional<TypeHandler<T>> findTypeConverter(Class<?> source, Class<?> target,
-                                                           Map<Class<?>, List<TypeHandler<T>>> typeConverters, List<TypeHandler<T>> defaultValue) {
-        List<TypeHandler<T>> converters = typeConverters.getOrDefault(target, defaultValue);
-        return Stream.concat(converters.stream().filter(t -> t.isPreciseType(source)),
-                converters.stream().filter(t -> t.isBaseType(source))).findFirst();
+    public Object tryConvert(Class<?> target, Object value) {
+        Class<?> source = value.getClass();
+        return target.isAssignableFrom(source) ? value : convert(source, target, value);
     }
 
     @SuppressWarnings("unchecked")
-    public Object tryConvert(Class<?> type, Object value) {
-        Class<?> sourceType = value.getClass();
-        return type.isAssignableFrom(sourceType) ? value
-                : findTypeConverter(sourceType, type, typeConverters, emptyList())
+    private Object convert(Class<?> source, Class<?> target, Object value) {
+        return typeConverterSet.findHandler(source, target, Collections::emptyList)
                 .map(c -> c.getHandler().apply(value))
-                .orElseGet(() -> type.isEnum() ?
-                        findTypeConverter(sourceType, type, enumConverters, getBaseEnumTypeConverts(type, enumConverters))
-                                .map(c -> c.getHandler().apply(type, value))
-                                .orElseGet(() -> Enum.valueOf((Class) type, value.toString())) :
-                        value);
+                .orElseGet(() -> target.isEnum() ? convertEnum(source, target, value) : value);
     }
 
-    private List<TypeHandler<BiFunction>> getBaseEnumTypeConverts(Class<?> type,
-                                                                  Map<Class<?>, List<TypeHandler<BiFunction>>> enumConverters) {
-        return enumConverters.entrySet().stream()
-                .filter(e -> e.getKey().isAssignableFrom(type))
-                .map(Map.Entry::getValue)
-                .findFirst().orElse(emptyList());
+    @SuppressWarnings("unchecked")
+    private Object convertEnum(Class<?> source, Class<?> target, Object value) {
+        return enumConverterSet.findHandler(source, target)
+                .map(c -> c.getHandler().apply(target, value))
+                .orElseGet(() -> Enum.valueOf((Class) target, value.toString()));
     }
 
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
-        enumConverters.computeIfAbsent(target, k -> new ArrayList<>())
-                .add(new TypeHandler<>(boxedClass(source), converter));
+        enumConverterSet.add(boxedClass(source), target, converter);
         return this;
     }
 }

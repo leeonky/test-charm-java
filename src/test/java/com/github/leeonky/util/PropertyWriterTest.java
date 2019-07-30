@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PropertyWriterTest {
-    private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.createBeanClass(BeanWithPubField.class);
+    private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.create(BeanWithPubField.class);
 
     public static class BeanWithPubField {
         @Attr("v1")
