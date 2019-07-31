@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Mapping {
     Class<?>[] from();
 
-    Class<?> view();
+    Class<?>[] view();
 
     Class<?>[] scope() default {};
 }

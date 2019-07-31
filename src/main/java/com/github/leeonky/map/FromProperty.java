@@ -12,9 +12,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface FromProperty {
     String value();
 
-    boolean toElement() default false;
-
-    boolean toMapEntry() default false;
-
     String key() default "";
 }

@@ -81,4 +81,8 @@ public class ViewConverter extends CustomConverter<Object, Object> {
         }
         return result;
     }
+
+    public String buildConvertId() {
+        return String.format("ViewConverter:%s[%d]", view.getName(), mapper.hashCode());
+    }
 }

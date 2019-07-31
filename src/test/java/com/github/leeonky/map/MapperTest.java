@@ -255,14 +255,14 @@ class MapperTest {
     @MappingFrom(Order.class)
     public static class OrderInfoList {
 
-        @FromProperty(value = "lines{id}", toElement = true)
+        @FromProperty(value = "lines{id}")
         public List<String> lines;
     }
 
     @MappingFrom(Order.class)
     public static class OrderInfoMap {
 
-        @FromProperty(value = "lines{id}", key = "lines{id}", toMapEntry = true)
+        @FromProperty(value = "lines{id}", key = "lines{id}")
         public Map<String, String> lines;
     }
 
@@ -277,7 +277,7 @@ class MapperTest {
     @MappingFrom(OrderWrapper.class)
     public static class OrderWrapperVO {
 
-        @FromProperty(value = "lines{line}", toElement = true)
+        @FromProperty(value = "lines{line}")
         @MappingView(Simple.class)
         public List<LineVO> lines;
     }
@@ -285,7 +285,7 @@ class MapperTest {
     @MappingFrom(OrderWrapper.class)
     public static class OrderWrapperArrayVO {
 
-        @FromProperty(value = "lines{line}", toElement = true)
+        @FromProperty(value = "lines{line}")
         @MappingView(Simple.class)
         public LineVO[] lines;
     }
@@ -297,7 +297,7 @@ class MapperTest {
     @MappingFrom(OrderWrapperMap.class)
     public static class OrderWrapperMapVO {
 
-        @FromProperty(value = "lines{value.line}", toElement = true)
+        @FromProperty(value = "lines{value.line}")
         @MappingView(Simple.class)
         public List<LineVO> lines;
     }
@@ -305,7 +305,7 @@ class MapperTest {
     @MappingFrom(OrderWrapperMap.class)
     public static class OrderWrapperMapToMapVO {
 
-        @FromProperty(value = "lines{value.line}", key = "lines{key}", toMapEntry = true)
+        @FromProperty(value = "lines{value.line}", key = "lines{key}")
         @MappingView(Simple.class)
         public Map<String, LineVO> lines;
     }
@@ -313,7 +313,7 @@ class MapperTest {
     @MappingFrom(OrderWrapper.class)
     public static class OrderWrapperListToMapVO {
 
-        @FromProperty(value = "lines{line}", key = "lines{line.id}", toMapEntry = true)
+        @FromProperty(value = "lines{line}", key = "lines{line.id}")
         @MappingView(Simple.class)
         public Map<String, LineVO> lines;
     }

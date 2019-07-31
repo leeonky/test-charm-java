@@ -11,11 +11,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ViewListPropertyConverter extends ViewConverter {
-    protected final String valueProperty;
+    protected final String propertyName;
 
-    public ViewListPropertyConverter(Mapper mapper, Class<?> view, String valueProperty) {
+    public ViewListPropertyConverter(Mapper mapper, Class<?> view, String propertyName) {
         super(mapper, view);
-        this.valueProperty = valueProperty;
+        this.propertyName = propertyName;
     }
 
     @SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ public class ViewListPropertyConverter extends ViewConverter {
     @SuppressWarnings("unchecked")
     public static Object getPropertyValue(Object e, String propertyChain) {
         for (String property : propertyChain.split("\\."))
-            e = ((BeanClass) BeanClass.createBeanClass(e.getClass())).getPropertyValue(e, property);
+            e = ((BeanClass) BeanClass.create(e.getClass())).getPropertyValue(e, property);
         return e;
     }
 
@@ -41,13 +41,18 @@ public class ViewListPropertyConverter extends ViewConverter {
             return mapCollection(collection, newCollection(rawType), mappingContext);
         else if (rawType.isArray())
             return mapCollection(collection, new ArrayList<>(), mappingContext).toArray((Object[]) Array.newInstance(rawType.getComponentType(), 0));
-        throw new IllegalStateException("Only support map " + valueProperty + " to list or array, but target type is " + rawType.getName());
+        throw new IllegalStateException("Only support map " + propertyName + " to list or array, but target type is " + rawType.getName());
     }
 
     private Collection<Object> mapCollection(Iterable source, Collection<Object> result, MappingContext mappingContext) {
         for (Object e : source)
-            result.add(map(getPropertyValue(e, valueProperty), mappingContext));
+            result.add(map(getPropertyValue(e, propertyName), mappingContext));
         return result;
+    }
+
+    @Override
+    public String buildConvertId() {
+        return String.format("ViewListPropertyConverter:%s:%s[%d]", propertyName, view.getName(), mapper.hashCode());
     }
 
     public static class Entry {

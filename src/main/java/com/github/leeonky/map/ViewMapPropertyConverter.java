@@ -6,11 +6,11 @@ import ma.glasnost.orika.metadata.Type;
 import java.util.Map;
 
 public class ViewMapPropertyConverter extends ViewListPropertyConverter {
-    private final String keyProperty;
+    private final String keyPropertyName;
 
-    public ViewMapPropertyConverter(Mapper mapper, Class<?> view, String keyProperty, String valueProperty) {
-        super(mapper, view, valueProperty);
-        this.keyProperty = keyProperty;
+    public ViewMapPropertyConverter(Mapper mapper, Class<?> view, String keyPropertyName, String propertyName) {
+        super(mapper, view, propertyName);
+        this.keyPropertyName = keyPropertyName;
     }
 
     @Override
@@ -22,7 +22,12 @@ public class ViewMapPropertyConverter extends ViewListPropertyConverter {
 
     @SuppressWarnings("unchecked")
     private Map mapMap(Iterable source, Map result, MappingContext mappingContext) {
-        source.forEach(e -> result.put(getPropertyValue(e, keyProperty), map(getPropertyValue(e, valueProperty), mappingContext)));
+        source.forEach(e -> result.put(getPropertyValue(e, keyPropertyName), map(getPropertyValue(e, propertyName), mappingContext)));
         return result;
+    }
+
+    @Override
+    public String buildConvertId() {
+        return String.format("ViewMapPropertyConverter:%s:%s:%s[%d]", keyPropertyName, propertyName, view.getName(), mapper.hashCode());
     }
 }
