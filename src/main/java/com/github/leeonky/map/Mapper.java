@@ -29,10 +29,6 @@ public class Mapper {
         classes.forEach(this::registerMapping);
     }
 
-    public MapperFactory getMapperFactory() {
-        return mapperFactory;
-    }
-
     private void registerMapping(Class<?> clazz) {
         for (Class<?> view : getViews(clazz))
             for (Class<?> from : getFroms(clazz))
@@ -125,8 +121,8 @@ public class Mapper {
 
     public String registerConverter(ViewConverter converter) {
         String converterId = converter.buildConvertId();
-        if (getMapperFactory().getConverterFactory().getConverter(converterId) == null)
-            getMapperFactory().getConverterFactory().registerConverter(converterId, converter);
+        if (mapperFactory.getConverterFactory().getConverter(converterId) == null)
+            mapperFactory.getConverterFactory().registerConverter(converterId, converter);
         return converterId;
     }
 }

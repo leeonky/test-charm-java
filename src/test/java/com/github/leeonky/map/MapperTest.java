@@ -225,7 +225,20 @@ class MapperTest {
     @Test
     void source_object_is_null() {
         assertThat((Object) mapper.map(null, Object.class)).isNull();
-        assertThat((Object) mapper.mapTo(null, Object.class)).isNull();
+        assertThat(mapper.mapTo(null, Object.class)).isNull();
+    }
+
+    @Test
+    void should_support_map_list_element_to_map_value() {
+        OrderMapVO vo = mapper.map(order, OrderMapVO.class);
+
+        assertThat(vo.lines).hasSize(2);
+        assertThat(vo.lines.get("1"))
+                .isInstanceOf(LineVO.class)
+                .hasFieldOrPropertyWithValue("id", "1");
+        assertThat(vo.lines.get("2"))
+                .isInstanceOf(LineVO.class)
+                .hasFieldOrPropertyWithValue("id", "2");
     }
 
     @MappingFrom(OnlineProductLine.class)
@@ -280,6 +293,14 @@ class MapperTest {
         @FromProperty(value = "lines{line}")
         @MappingView(Simple.class)
         public List<LineVO> lines;
+    }
+
+    @MappingFrom(Order.class)
+    public static class OrderMapVO {
+
+        @MappingView(Simple.class)
+        @FromProperty(value = "lines{}", key = "lines{id}")
+        public Map<String, LineVO> lines;
     }
 
     @MappingFrom(OrderWrapper.class)
