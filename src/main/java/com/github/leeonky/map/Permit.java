@@ -11,9 +11,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Inherited
 public @interface Permit {
-    Class<?> target();
+    Class<?>[] target();
 
-    Class<?> action();
+    Class<?>[] action();
 
     Class<?>[] scope() default {};
 }

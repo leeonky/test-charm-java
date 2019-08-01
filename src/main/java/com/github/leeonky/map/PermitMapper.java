@@ -8,52 +8,65 @@ import org.reflections.Reflections;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
 public class PermitMapper {
     private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> targetActionScopePermits = new HashMap<>();
-    private Map<Object, Map<Class<?>, Map<Class<?>, List<Class<?>>>>> typeActionScopeSubPermits = new HashMap<>();
+    private Map<Object, Map<Class<?>, Map<Class<?>, List<Class<?>>>>> typeActionScopePolymorphicPermits = new HashMap<>();
     private Class<?> scope = void.class;
+    private Converter converter = Converter.createDefault();
 
     public PermitMapper(String... packages) {
         new Reflections((Object[]) packages).getTypesAnnotatedWith(Permit.class)
-                .forEach(this::register);
+                .forEach(type -> {
+                    registerPermit(type);
+                    registerPolymorphicTypePermit(type);
+                });
     }
 
-    private void register(Class<?> type) {
-        Permit permit = type.getAnnotation(Permit.class);
-        PermitScope annotation = type.getAnnotation(PermitScope.class);
-        Class<?>[] scopes = annotation == null ? permit.scope() : annotation.value();
+    private void registerPolymorphicTypePermit(Class<?> type) {
+        for (Class<?> action : type.getAnnotation(Permit.class).action())
+            if (type.getAnnotation(SubPermitPropertyStringValue.class) != null) {
+                Map<Class<?>, List<Class<?>>> subScopePermits = typeActionScopePolymorphicPermits.computeIfAbsent(
+                        type.getAnnotation(SubPermitPropertyStringValue.class).value(), t -> new HashMap<>())
+                        .computeIfAbsent(action, a -> new HashMap<>());
+                for (Class<?> scope : getScopes(type))
+                    subScopePermits.computeIfAbsent(scope, s -> new ArrayList<>()).add(type);
+            }
+    }
+
+    private void registerPermit(Class<?> type) {
+        for (Class<?> action : type.getAnnotation(Permit.class).action())
+            for (Class<?> target : type.getAnnotation(Permit.class).target())
+                targetActionScopePermits.computeIfAbsent(target, k -> new HashMap<>())
+                        .computeIfAbsent(action, k -> new HashMap<>())
+                        .putAll(getScopes(type).stream().collect(Collectors.toMap(s -> s, s -> type)));
+    }
+
+    private List<Class<?>> getScopes(Class<?> type) {
+        Class<?>[] scopes = type.getAnnotation(PermitScope.class) == null ?
+                type.getAnnotation(Permit.class).scope()
+                : type.getAnnotation(PermitScope.class).value();
         if (scopes.length == 0)
             scopes = new Class<?>[]{void.class};
-
-        Map<Class<?>, Class<?>> scopePermits = targetActionScopePermits.computeIfAbsent(permit.target(), k -> new HashMap<>())
-                .computeIfAbsent(permit.action(), k -> new HashMap<>());
-        for (Class<?> scope : scopes)
-            scopePermits.put(scope, type);
-
-        SubPermitPropertyStringValue typeAnnotation = type.getAnnotation(SubPermitPropertyStringValue.class);
-        if (typeAnnotation != null) {
-            Map<Class<?>, List<Class<?>>> subScopePermits = typeActionScopeSubPermits.computeIfAbsent(typeAnnotation.value(), t -> new HashMap<>())
-                    .computeIfAbsent(permit.action(), a -> new HashMap<>());
-            for (Class<?> scope : scopes)
-                subScopePermits.computeIfAbsent(scope, s -> new ArrayList<>()).add(type);
-        }
+        return asList(scopes);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T permit(T map, Class<?> target, Class<?> action) {
+    public <T> T permit(T object, Class<?> target, Class<?> action) {
         return (T) findPermit(target, action).map(p -> {
-            if (map instanceof Map)
-                return permitMap((Map<String, ?>) map, p);
-            else if (map instanceof List)
-                return permitList((List<?>) map, p);
+            if (object instanceof Map)
+                return permitMap((Map<String, ?>) object, p);
+            else if (object instanceof List)
+                return permitList((List<?>) object, p);
             else
-                throw new IllegalArgumentException("Not support type " + map.getClass().getName());
-        }).orElse(map);
+                throw new IllegalArgumentException("Not support type " + object.getClass().getName() + ", only support Map or List<Map>");
+        }).orElse(object);
     }
 
     @SuppressWarnings("unchecked")
@@ -61,60 +74,34 @@ public class PermitMapper {
         return list.stream().map(m -> permitMap((Map<String, ?>) m, permit)).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     private Map<String, ?> permitMap(Map<String, ?> map, Class<?> permit) {
-        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-        BeanClass beanClass = BeanClass.create(permit);
-        ((Map<String, PropertyWriter<?>>) beanClass.getPropertyWriters()).forEach((key, propertyWriter) -> {
-            if (map.containsKey(key)) {
-                Object value = permitValue(map.get(key), beanClass.getConverter(), propertyWriter.getGenericType(),
-                        propertyWriter.getAnnotation(PermitAction.class), key, permit);
-                ToProperty toProperty = propertyWriter.getAnnotation(ToProperty.class);
-                if (toProperty != null) {
-                    String[] nests = toProperty.value().split("\\.");
-                    LinkedHashMap<String, Object> newMap = result;
-                    int i;
-                    for (i = 0; i < nests.length - 1; i++)
-                        newMap = (LinkedHashMap<String, Object>) newMap.computeIfAbsent(nests[i], k -> new LinkedHashMap<>());
-                    newMap.put(nests[i], value);
-                } else
-                    result.put(key, value);
-            }
-        });
+        return permittedProperties(map, permit)
+                .reduce(new LinkedHashMap<>(), (result, property) -> assignToMap(result, property,
+                        new PermitActionSpec(property.getAnnotation(PermitAction.class), property.getName(), permit)
+                                .permitValue(map.get(property.getName()), property.getGenericType())),
+                        Mapper::NotSupportParallelStreamReduce);
+    }
+
+    private Stream<? extends PropertyWriter<?>> permittedProperties(Map<String, ?> map, Class<?> permit) {
+        return BeanClass.create(permit).getPropertyWriters().values().stream()
+                .filter(property -> map.containsKey(property.getName()));
+    }
+
+    private LinkedHashMap<String, Object> assignToMap(LinkedHashMap<String, Object> result, PropertyWriter<?> property, Object value) {
+        ToProperty toProperty = property.getAnnotation(ToProperty.class);
+        if (toProperty != null)
+            assignToNestedMap(result, value, toProperty.value().split("\\."));
+        else
+            result.put(property.getName(), value);
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    private Object permitValue(Object value, Converter converter, GenericType genericType, PermitAction action, String key, Class<?> type) {
-        Class<?> rawType = genericType.getRawType();
-        if (value instanceof Map) {
-            if (action != null) {
-                SubPermitProperty annotation = rawType.getAnnotation(SubPermitProperty.class);
-                if (annotation == null)
-                    throw new IllegalStateException("Should specify property name via @SubPermitProperty in '" + rawType.getName() + "'");
-
-                String polymorphismPropertyName = annotation.value();
-                Object polymorphismValue = ((Map) value).get(polymorphismPropertyName);
-                Map<Class<?>, List<Class<?>>> scopeSubPermits = typeActionScopeSubPermits.getOrDefault(polymorphismValue, emptyMap())
-                        .getOrDefault(action.value(), emptyMap());
-                List<Class<?>> subPermits = scopeSubPermits.get(scope);
-                Class<?> subType = (subPermits != null ? subPermits : scopeSubPermits.getOrDefault(void.class, emptyList())).stream()
-                        .filter(rawType::isAssignableFrom)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalStateException(String.format("Cannot find permit for %s[%s] in '%s::%s'",
-                                polymorphismPropertyName, polymorphismValue, type.getName(), key)));
-
-                return permitMap((Map<String, ?>) value, subType);
-            }
-            return permitMap((Map<String, ?>) value, rawType);
-        } else if (value instanceof Iterable) {
-            GenericType subType = genericType.getGenericTypeParameter(0)
-                    .orElseThrow(() -> new IllegalStateException(String.format("Should specify element type in '%s::%s'", type.getName(), key)));
-            return StreamSupport.stream(((Iterable) value).spliterator(), false)
-                    .map(e -> permitValue(e, converter, subType, action, key, type))
-                    .collect(Collectors.toList());
-        } else
-            return converter.tryConvert(rawType, value);
+    private void assignToNestedMap(LinkedHashMap<String, Object> result, Object value, String[] propertyChain) {
+        Arrays.stream(propertyChain, 0, propertyChain.length - 1)
+                .reduce(result, (m, p) -> (LinkedHashMap<String, Object>) m.computeIfAbsent(p, k -> new LinkedHashMap<>()),
+                        Mapper::NotSupportParallelStreamReduce)
+                .put(propertyChain[propertyChain.length - 1], value);
     }
 
     public Optional<Class<?>> findPermit(Class<?> target, Class<?> action) {
@@ -126,5 +113,55 @@ public class PermitMapper {
 
     public void setScope(Class<?> scope) {
         this.scope = scope;
+    }
+
+    class PermitActionSpec {
+        final PermitAction action;
+        final String key;
+        final Class<?> type;
+
+        PermitActionSpec(PermitAction action, String key, Class<?> type) {
+            this.action = action;
+            this.key = key;
+            this.type = type;
+        }
+
+        @SuppressWarnings("unchecked")
+        Object permitValue(Object value, GenericType genericType) {
+            Class<?> rawType = genericType.getRawType();
+            if (value instanceof Map) {
+                return processPolymorphicAndPermitMap((Map<String, ?>) value, rawType);
+            } else if (value instanceof Iterable) {
+                return processPolymorphicAndPermitList((Iterable<?>) value, genericType);
+            } else
+                return converter.tryConvert(rawType, value);
+        }
+
+        private Object processPolymorphicAndPermitList(Iterable<?> value, GenericType genericType) {
+            GenericType subType = genericType.getGenericTypeParameter(0)
+                    .orElseThrow(() -> new IllegalStateException(String.format("Should specify element type in '%s::%s'", type.getName(), key)));
+            return StreamSupport.stream(value.spliterator(), false)
+                    .map(e -> permitValue(e, subType))
+                    .collect(Collectors.toList());
+        }
+
+        private Object processPolymorphicAndPermitMap(Map<String, ?> value, Class<?> rawType) {
+            if (action != null) {
+                SubPermitProperty annotation = rawType.getAnnotation(SubPermitProperty.class);
+                if (annotation == null)
+                    throw new IllegalStateException("Should specify property name via @SubPermitProperty in '" + rawType.getName() + "'");
+
+                Map<Class<?>, List<Class<?>>> scopeSubPermits = typeActionScopePolymorphicPermits.getOrDefault(value.get(annotation.value()), emptyMap())
+                        .getOrDefault(action.value(), emptyMap());
+                List<Class<?>> subPermits = scopeSubPermits.get(scope);
+                Class<?> subType = (subPermits != null ? subPermits : scopeSubPermits.getOrDefault(void.class, emptyList())).stream()
+                        .filter(rawType::isAssignableFrom)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException(String.format("Cannot find permit for %s[%s] in '%s::%s'",
+                                annotation.value(), value.get(annotation.value()), type.getName(), key)));
+                return permitMap(value, subType);
+            }
+            return permitMap(value, rawType);
+        }
     }
 }
