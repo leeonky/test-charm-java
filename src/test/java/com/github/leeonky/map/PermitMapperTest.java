@@ -127,7 +127,7 @@ class PermitMapperTest {
             put("error1", new HashMap<>());
         }}, User.class, Create.class));
 
-        assertThat(runtimeException).hasMessage("Should specify property name via @SubPermitProperty in 'java.lang.Object'");
+        assertThat(runtimeException).hasMessage("Should specify property name via @PolymorphicPermitIdentity in 'java.lang.Object'");
     }
 
     @Test

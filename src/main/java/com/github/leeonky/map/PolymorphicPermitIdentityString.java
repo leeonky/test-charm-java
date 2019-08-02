@@ -10,6 +10,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({TYPE})
 @Retention(RUNTIME)
 @Inherited
-public @interface SubPermitProperty {
+public @interface PolymorphicPermitIdentityString {
     String value();
 }

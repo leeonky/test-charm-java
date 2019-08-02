@@ -39,7 +39,7 @@ public class ViewListPropertyConverter extends ViewConverter {
         Class<?> rawType = destinationType.getRawType();
         Iterable collection = source instanceof Map ? wrapperEntry((Map) source) : (Iterable) source;
         if (Iterable.class.isAssignableFrom(rawType))
-            return mapCollection(collection, newCollection(rawType), mappingContext);
+            return mapCollection(collection, createCollection(rawType), mappingContext);
         else if (rawType.isArray())
             return mapCollection(collection, new ArrayList<>(), mappingContext).toArray((Object[]) Array.newInstance(rawType.getComponentType(), 0));
         throw new IllegalStateException("Only support map " + propertyName + " to list or array, but target type is " + rawType.getName());

@@ -26,25 +26,25 @@ public class UserPermit {
     @PermitAction(Create.class)
     public List error2;
 
-    @SubPermitProperty("type")
+    @PolymorphicPermitIdentity("type")
     public abstract static class IdPermit {
         public String type;
     }
 
     @Permit(target = Void.class, action = Create.class)
-    @SubPermitPropertyStringValue("PASSPORT")
+    @PolymorphicPermitIdentityString("PASSPORT")
     public static class PassportPermit extends IdPermit {
         public String name;
     }
 
     @Permit(target = Void.class, action = Create.class)
-    @SubPermitPropertyStringValue("IDENTITY")
+    @PolymorphicPermitIdentityString("IDENTITY")
     public static class IdentityPermit extends IdPermit {
         public String number;
     }
 
     @Permit(target = Void.class, action = Create.class, scope = NewScope.class)
-    @SubPermitPropertyStringValue("PASSPORT")
+    @PolymorphicPermitIdentityString("PASSPORT")
     public static class NewScopePassportPermit extends IdPermit {
         public int age;
     }

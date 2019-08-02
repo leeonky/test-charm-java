@@ -23,11 +23,11 @@ public class ViewConverter extends CustomConverter<Object, Object> {
     public Object convert(Object source, Type destinationType, MappingContext mappingContext) {
         Class<?> rawType = destinationType.getRawType();
         if (Iterable.class.isAssignableFrom(rawType))
-            return mapCollection((Iterable) source, newCollection(rawType), mappingContext);
+            return mapCollection((Iterable) source, createCollection(rawType), mappingContext);
         if (rawType.isArray())
             return mapCollection((Iterable) source, new ArrayList<>(), mappingContext).toArray((Object[]) Array.newInstance(rawType.getComponentType(), 0));
         if (Map.class.isAssignableFrom(rawType))
-            return mapMap((Map) source, newMap(rawType), mappingContext);
+            return mapMap((Map) source, createMap(rawType), mappingContext);
         return map(source, mappingContext);
     }
 
@@ -44,10 +44,10 @@ public class ViewConverter extends CustomConverter<Object, Object> {
         return result;
     }
 
-    protected Map newMap(Class<?> rawType) {
+    protected Map createMap(Class<?> rawType) {
         Map map;
         if (rawType.isInterface())
-            map = new HashMap();
+            map = new LinkedHashMap();
         else {
             try {
                 map = (Map) rawType.getConstructor().newInstance();
@@ -65,11 +65,11 @@ public class ViewConverter extends CustomConverter<Object, Object> {
         return result;
     }
 
-    protected Collection newCollection(Class<?> rawType) {
+    protected Collection createCollection(Class<?> rawType) {
         Collection result;
         if (rawType.isInterface()) {
             if (Set.class.isAssignableFrom(rawType))
-                result = new HashSet<>();
+                result = new LinkedHashSet();
             else
                 result = new ArrayList<>();
         } else {

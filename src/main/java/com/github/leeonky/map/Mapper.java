@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import static ma.glasnost.orika.metadata.TypeFactory.valueOf;
 
 public class Mapper {
+    private static final Class<?>[] VOID_SCOPES = {void.class};
     private final Class[] annotations = new Class[]{Mapping.class, MappingFrom.class, MappingView.class, MappingScope.class};
     private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
     private MappingRegisterData mappingRegisterData = new MappingRegisterData();
@@ -48,9 +49,7 @@ public class Mapper {
         Mapping mapping = mapTo.getAnnotation(Mapping.class);
         MappingScope mappingScope = mapTo.getAnnotation(MappingScope.class);
         Class<?>[] scopes = mappingScope != null ? mappingScope.value() : (mapping == null ? null : mapping.scope());
-        if (scopes == null || scopes.length == 0)
-            scopes = new Class<?>[]{void.class};
-        return scopes;
+        return (scopes == null || scopes.length == 0) ? VOID_SCOPES : scopes;
     }
 
     private Class<?>[] getViews(Class<?> mapTo) {

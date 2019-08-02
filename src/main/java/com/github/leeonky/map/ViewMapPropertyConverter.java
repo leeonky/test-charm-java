@@ -17,7 +17,7 @@ public class ViewMapPropertyConverter extends ViewListPropertyConverter {
     public Object convert(Object source, Type destinationType, MappingContext mappingContext) {
         Class<?> rawType = destinationType.getRawType();
         Iterable collection = source instanceof Map ? wrapperEntry((Map) source) : (Iterable) source;
-        return mapMap(collection, newMap(rawType), mappingContext);
+        return mapMap(collection, createMap(rawType), mappingContext);
     }
 
     @SuppressWarnings("unchecked")
