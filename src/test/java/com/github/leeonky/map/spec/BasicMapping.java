@@ -59,7 +59,7 @@ class BasicMapping {
     @Getter
     @Setter
     @Accessors(chain = true)
-    static class Book {
+    public static class Book {
         private String name;
         private BigDecimal price;
     }

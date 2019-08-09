@@ -49,6 +49,12 @@ class PropertyViewMapping {
                 .hasFieldOrPropertyWithValue("cardNumber", "6602");
     }
 
+    @Test
+    void should_return_all_candidate_class_for_super_class_and_view() {
+        assertThat(mapper.findSubMappings(SimpleTransactionDTO.class, Simple.class))
+                .containsOnly(SimplePaypalTransactionDTO.class, SimpleCreditCardTransactionDTO.class);
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -59,28 +65,28 @@ class PropertyViewMapping {
     @Getter
     @Setter
     @Accessors(chain = true)
-    static class PaypalTransaction extends Transaction {
+    public static class PaypalTransaction extends Transaction {
         private String paypalId;
     }
 
     @Getter
     @Setter
     @Accessors(chain = true)
-    static class CreditCardTransaction extends Transaction {
+    public static class CreditCardTransaction extends Transaction {
         private String cardNumber;
     }
 
     @Getter
     @Setter
     @Accessors(chain = true)
-    static class TransactionLog {
+    public static class TransactionLog {
         private Transaction transaction;
     }
 
     @Getter
     @Setter
     @Accessors(chain = true)
-    static class TransactionLogs {
+    public static class TransactionLogs {
         private List<Transaction> transactions;
     }
 
