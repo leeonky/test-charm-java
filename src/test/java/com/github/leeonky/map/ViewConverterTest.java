@@ -27,40 +27,6 @@ class ViewConverterTest {
     }
 
     @Test
-    void support_auto_map_to_list_interface() {
-        ListLineOrderVO vo = mapper.map(order, ListLineOrderVO.class);
-        assertThat(vo.lines.get(0))
-                .hasFieldOrPropertyWithValue("id", "1");
-        assertThat(vo.lines.get(1))
-                .hasFieldOrPropertyWithValue("id", "2");
-    }
-
-    @Test
-    void support_auto_map_to_list_class() {
-        LinkedListLineOrderVO vo = mapper.map(order, LinkedListLineOrderVO.class);
-
-        assertThat(vo.lines).isInstanceOf(LinkedList.class);
-
-        assertThat(vo.lines.get(0))
-                .hasFieldOrPropertyWithValue("id", "1");
-        assertThat(vo.lines.get(1))
-                .hasFieldOrPropertyWithValue("id", "2");
-    }
-
-    @Test
-    void support_auto_map_to_set_interface() {
-        SetLineOrderVO vo = mapper.map(order, SetLineOrderVO.class);
-
-        assertThat(vo.lines).isInstanceOf(Set.class);
-        assertThat(vo.lines.size()).isEqualTo(2);
-
-        assertThat(vo.lines.stream().filter(ProductLineVO.class::isInstance).findFirst().get())
-                .hasFieldOrPropertyWithValue("id", "1");
-        assertThat(vo.lines.stream().filter(ServiceLineVO.class::isInstance).findFirst().get())
-                .hasFieldOrPropertyWithValue("id", "2");
-    }
-
-    @Test
     void support_auto_map_to_set_class() {
         LinkedSetLineOrderVO vo = mapper.map(order, LinkedSetLineOrderVO.class);
 

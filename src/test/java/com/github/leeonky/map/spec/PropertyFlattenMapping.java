@@ -7,9 +7,7 @@ import lombok.experimental.Accessors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,58 +40,6 @@ class PropertyFlattenMapping {
         studentMap.studentMap = new HashMap<>();
         studentMap.studentMap.put(studentMike.getName(), studentMike);
         studentMap.studentMap.put(studentJohn.getName(), studentJohn);
-    }
-
-    @Test
-    void support_map_from_child_property() {
-        assertThat((Object) mapper.map(studentMike, Simple.class))
-                .hasFieldOrPropertyWithValue("teacherName", "Tom");
-    }
-
-    @Test
-    void support_map_list_element_property_to_list() {
-        assertThat((Object) mapper.map(teacherTom, Simple.class))
-                .hasFieldOrPropertyWithValue("studentNames", asList("Mike", "John"));
-    }
-
-    @Test
-    void support_map_list_element_property_to_new_map() {
-        assertThat((Object) mapper.map(teacherTom, TeacherStudentAgeDTO.class))
-                .hasFieldOrPropertyWithValue("studentAges", new HashMap<String, Integer>() {{
-                    put("Mike", 19);
-                    put("John", 20);
-                }});
-
-    }
-
-    @Test
-    void support_map_list_element_property_to_list_with_from_property_and_map_view() {
-        List<Object> bicycleOwners = ((SchoolBicycleOwnersDTO) mapper.map(school, SchoolBicycleOwnersDTO.class)).bicycleOwnerList;
-
-        assertThat(bicycleOwners).hasSize(2);
-
-        assertThat(bicycleOwners.get(0))
-                .isInstanceOf(SimpleTeacherDTO.class)
-                .hasFieldOrPropertyWithValue("name", "Tom");
-
-        assertThat(bicycleOwners.get(1))
-                .isInstanceOf(SimpleStudentDTO.class)
-                .hasFieldOrPropertyWithValue("name", "John");
-    }
-
-    @Test
-    void support_map_list_element_property_to_array_with_from_property_and_map_view() {
-        Object[] bicycleOwners = ((SchoolBicycleOwnersDTO) mapper.map(school, SchoolBicycleOwnersDTO.class)).bicycleOwnerArray;
-
-        assertThat(bicycleOwners).hasSize(2);
-
-        assertThat(bicycleOwners[0])
-                .isInstanceOf(SimpleTeacherDTO.class)
-                .hasFieldOrPropertyWithValue("name", "Tom");
-
-        assertThat(bicycleOwners[1])
-                .isInstanceOf(SimpleStudentDTO.class)
-                .hasFieldOrPropertyWithValue("name", "John");
     }
 
     @Test
@@ -238,7 +184,15 @@ class PropertyFlattenMapping {
 
         @FromProperty("bicycles{owner}")
         @MappingView(Simple.class)
+        public LinkedList<Object> bicycleOwnerLinkedList;
+
+        @FromProperty("bicycles{owner}")
+        @MappingView(Simple.class)
         public Object[] bicycleOwnerArray;
+
+        @FromProperty("bicycles{owner}")
+        @MappingView(Simple.class)
+        public Set<Object> bicycleOwnerSet;
 
         @FromProperty(key = "bicycles{owner.name}", value = "bicycles{owner}")
         @MappingView(Simple.class)

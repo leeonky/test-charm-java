@@ -19,10 +19,7 @@ class BasicMapping {
         assertThat(mapper.<Object>map(javaProgrammingBook, Simple.class))
                 .isInstanceOf(SimpleBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming");
-    }
 
-    @Test
-    void support_specify_mapping_view_in_sub_mapping_class() {
         assertThat(mapper.<Object>map(javaProgrammingBook, Detail.class))
                 .isInstanceOf(DetailBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming")
@@ -36,7 +33,35 @@ class BasicMapping {
         assertThat(mapper.<Object>map(javaProgrammingBook, Simple.class))
                 .isInstanceOf(FrontEndSimpleBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming")
+                .hasFieldOrPropertyWithValue("price", new BigDecimal(100));
+    }
+
+    @Test
+    void support_map_property_from_different_name() {
+        assertThat(mapper.<Object>map(javaProgrammingBook, BookNameDTO.class))
+                .isInstanceOf(BookNameDTO.class)
+                .hasFieldOrPropertyWithValue("bookName", "Java Programming");
+    }
+
+    @Test
+    void support_type_convert_in_mapping() {
+        assertThat(mapper.<Object>map(javaProgrammingBook, BookPriceDTO.class))
                 .hasFieldOrPropertyWithValue("price", "100");
+    }
+
+    @Test
+    void support_map_property_with_both_public_field_and_getter_setter() {
+        Bean bean = new Bean();
+        bean.setPrivateField1(1);
+        bean.setPrivateField2(2);
+        bean.publicField1 = 3;
+        bean.publicField2 = 4;
+
+        BeanDTO beanDTO = mapper.map(bean, BeanDTO.class);
+        assertThat(beanDTO.privateField1).isEqualTo(1);
+        assertThat(beanDTO.privateField2).isEqualTo(2);
+        assertThat(beanDTO.getPublicField1()).isEqualTo(3);
+        assertThat(beanDTO.getPublicField2()).isEqualTo(4);
     }
 
     @Test
@@ -73,10 +98,23 @@ class BasicMapping {
 
     @Getter
     @Setter
+    @MappingFrom(Book.class)
+    static class BookNameDTO {
+        @FromProperty("name")
+        private String bookName;
+    }
+
+    @MappingFrom(Book.class)
+    static class BookPriceDTO {
+        public String price;
+    }
+
+    @Getter
+    @Setter
     @Mapping(from = Book.class, view = Simple.class, scope = FrontEnd.class)
     static class FrontEndSimpleBookDTO {
         private String name;
-        private String price;
+        private BigDecimal price;
     }
 
     @Getter
@@ -87,5 +125,30 @@ class BasicMapping {
     }
 
     private static class FrontEnd {
+    }
+
+    public static class Bean {
+        public int publicField1;
+        public int publicField2;
+
+        @Getter
+        @Setter
+        private int privateField1;
+
+        @Getter
+        @Setter
+        private int privateField2;
+    }
+
+    @MappingFrom(Bean.class)
+    static class BeanDTO {
+        public int privateField1;
+        public int privateField2;
+        @Getter
+        @Setter
+        private int publicField1;
+        @Getter
+        @Setter
+        private int publicField2;
     }
 }
