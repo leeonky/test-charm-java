@@ -200,21 +200,4 @@ class FlattenMapping {
 //        @FromProperty(key = "studentMap{key}", value = "studentMap{value.teacher}")
 //        public Map<String, Teacher> studentTeacherMap;
     }
-
-    @Getter
-    @Setter
-    @Accessors(chain = true)
-    public static class StudentMap {
-        private Map<String, Student> studentMap;
-    }
-
-    @MappingFrom(StudentMap.class)
-    public static class SchoolMapDTO {
-        @FromProperty("studentMap{key}")
-        public List<String> studentNames;
-
-        @FromProperty("studentMap{value.teacher.name}")
-        public List<String> teacherNames;
-
-    }
 }

@@ -6,7 +6,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +21,12 @@ class PolymorphicMappingViaView {
     private final Transaction creditCardTransaction = new CreditCardTransaction()
             .setCardNumber("6602")
             .setId("P2");
+    private final TransactionLogs transactionLogs = new TransactionLogs().setTransactions(asList(paypalTransaction, creditCardTransaction));
+
+    private final TransactionLogMap transactionLogMap = new TransactionLogMap().setTransactionMap(new HashMap<String, Transaction>() {{
+        put(paypalTransaction.getId(), paypalTransaction);
+        put(creditCardTransaction.getId(), creditCardTransaction);
+    }});
 
     @Test
     void support_property_polymorphic_mapping_via_mapping_view() {
@@ -31,19 +39,42 @@ class PolymorphicMappingViaView {
     }
 
     @Test
-    void support_property_list_element_polymorphic_mapping_via_mapping_view() {
-        TransactionLogs transactionLogs = new TransactionLogs().setTransactions(asList(paypalTransaction, creditCardTransaction));
+    void support_property_collection_element_polymorphic_mapping_via_mapping_view() {
+        List<SimpleTransactionDTO> transactionList = ((TransactionLogListDTO) mapper.map(transactionLogs, TransactionLogListDTO.class)).transactions;
 
-        List<SimpleTransactionDTO> transactions = ((DetailTransactionLogsDTO) mapper.map(transactionLogs, Detail.class)).transactions;
-
-        assertThat(transactions).hasSize(2);
-
-        assertThat(transactions.get(0))
+        assertThat(transactionList).hasSize(2);
+        assertThat(transactionList.get(0))
                 .isInstanceOf(SimpleTransactionDTO.class)
                 .hasFieldOrPropertyWithValue("id", "P1")
                 .hasFieldOrPropertyWithValue("paypalId", "001");
+        assertThat(transactionList.get(1))
+                .isInstanceOf(SimpleCreditCardTransactionDTO.class)
+                .hasFieldOrPropertyWithValue("id", "P2")
+                .hasFieldOrPropertyWithValue("cardNumber", "6602");
 
-        assertThat(transactions.get(1))
+        SimpleTransactionDTO[] transactionArray = ((TransactionLogArrayDTO) mapper.map(transactionLogs, TransactionLogArrayDTO.class)).transactions;
+
+        assertThat(transactionArray).hasSize(2);
+        assertThat(transactionArray[0])
+                .isInstanceOf(SimpleTransactionDTO.class)
+                .hasFieldOrPropertyWithValue("id", "P1")
+                .hasFieldOrPropertyWithValue("paypalId", "001");
+        assertThat(transactionArray[1])
+                .isInstanceOf(SimpleCreditCardTransactionDTO.class)
+                .hasFieldOrPropertyWithValue("id", "P2")
+                .hasFieldOrPropertyWithValue("cardNumber", "6602");
+    }
+
+    @Test
+    void support_property_map_element_polymorphic_mapping_via_mapping_view() {
+        Map<String, SimpleTransactionDTO> transactionMap = ((TransactionLogMapDTO) mapper.map(transactionLogMap, TransactionLogMapDTO.class)).transactionMap;
+
+        assertThat(transactionMap).hasSize(2);
+        assertThat(transactionMap.get("P1"))
+                .isInstanceOf(SimpleTransactionDTO.class)
+                .hasFieldOrPropertyWithValue("id", "P1")
+                .hasFieldOrPropertyWithValue("paypalId", "001");
+        assertThat(transactionMap.get("P2"))
                 .isInstanceOf(SimpleCreditCardTransactionDTO.class)
                 .hasFieldOrPropertyWithValue("id", "P2")
                 .hasFieldOrPropertyWithValue("cardNumber", "6602");
@@ -90,6 +121,13 @@ class PolymorphicMappingViaView {
         private List<Transaction> transactions;
     }
 
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class TransactionLogMap {
+        private Map<String, Transaction> transactionMap;
+    }
+
     static abstract class SimpleTransactionDTO {
         public String id;
     }
@@ -111,10 +149,24 @@ class PolymorphicMappingViaView {
         public SimpleTransactionDTO transaction;
     }
 
-    @Mapping(from = TransactionLogs.class, view = Detail.class)
-    static class DetailTransactionLogsDTO {
+    @MappingFrom(TransactionLogs.class)
+    static class TransactionLogListDTO {
 
         @MappingView(Simple.class)
         public List<SimpleTransactionDTO> transactions;
+    }
+
+    @MappingFrom(TransactionLogs.class)
+    static class TransactionLogArrayDTO {
+
+        @MappingView(Simple.class)
+        public SimpleTransactionDTO[] transactions;
+    }
+
+    @MappingFrom(TransactionLogMap.class)
+    static class TransactionLogMapDTO {
+
+        @MappingView(Simple.class)
+        public Map<String, SimpleTransactionDTO> transactionMap;
     }
 }
