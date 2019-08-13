@@ -1,4 +1,4 @@
-package com.github.leeonky.map.spec;
+package com.github.leeonky.map.spec.map;
 
 import com.github.leeonky.map.*;
 import lombok.Getter;
