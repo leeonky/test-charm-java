@@ -79,7 +79,7 @@ class PropertyReaderTest {
         }
 
         @Test
-        void should_skip_get_class_method() {
+        void should_not_contain_java_get_class_getter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("class");
         }
     }

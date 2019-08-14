@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -78,7 +75,9 @@ public class Converter {
                 .addTypeConverter(Short.class, BigDecimal.class, BigDecimal::new)
                 .addTypeConverter(Byte.class, BigDecimal.class, BigDecimal::new)
                 .addTypeConverter(Float.class, BigDecimal.class, BigDecimal::new)
-                .addTypeConverter(Double.class, BigDecimal.class, BigDecimal::new);
+                .addTypeConverter(Double.class, BigDecimal.class, BigDecimal::new)
+                .addTypeConverter(String.class, OffsetDateTime.class, OffsetDateTime::parse)
+                .addTypeConverter(String.class, ZonedDateTime.class, ZonedDateTime::parse);
         defaultConverterConfig.accept(converter);
         return converter;
     }

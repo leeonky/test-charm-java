@@ -8,10 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
@@ -170,6 +167,15 @@ class ConverterTest {
             assertConvert(LocalTime.class, "00:00:01", LocalTime.parse("00:00:01"));
             assertConvert(LocalDate.class, "1996-01-24", LocalDate.parse("1996-01-24"));
             assertConvert(LocalDateTime.class, "1996-01-23T00:00:01", LocalDateTime.parse("1996-01-23T00:00:01"));
+
+            assertConvert(OffsetDateTime.class, "1996-01-23T00:00:01+08:00",
+                    LocalDateTime.parse("1996-01-23T00:00:01").atOffset(ZoneOffset.of("+08:00")));
+
+            assertConvert(ZonedDateTime.class, "2017-04-26T15:13:12.006+02:00[Europe/Paris]",
+                    LocalDateTime.parse("2017-04-26T15:13:12.006").atZone(ZoneId.of("Europe/Paris")));
+
+            assertConvert(ZonedDateTime.class, "1996-01-23T00:00:01+08:00",
+                    LocalDateTime.parse("1996-01-23T00:00:01").atZone(ZoneOffset.of("+08:00")));
         }
 
         private void assertConvert(Class<?> type, Object value, Object toValue) {
