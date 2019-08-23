@@ -95,8 +95,12 @@ public class BeanClass<T> {
         });
     }
 
-    @SuppressWarnings("unchecked")
     public T newInstance(Object... args) {
+        return newInstance(type, args);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T newInstance(Class<T> type, Object... args) {
         List<Constructor<?>> constructors = Stream.of(type.getConstructors())
                 .filter(c -> isProperConstructor(c, args))
                 .collect(Collectors.toList());
