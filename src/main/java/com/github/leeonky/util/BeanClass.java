@@ -42,6 +42,33 @@ public class BeanClass<T> {
         return (BeanClass<T>) instanceCache.computeIfAbsent(type, BeanClass::new);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(Class<T> type, Object... args) {
+        List<Constructor<?>> constructors = Stream.of(type.getConstructors())
+                .filter(c -> isProperConstructor(c, args))
+                .collect(Collectors.toList());
+        if (constructors.size() != 1)
+            throw new IllegalArgumentException(String.format("No appropriate %s constructor for params [%s]",
+                    type.getName(), toString(args)));
+        try {
+            return (T) constructors.get(0).newInstance(args);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static boolean isProperConstructor(Constructor<?> constructor, Object[] parameters) {
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        return parameterTypes.length == parameters.length && IntStream.range(0, parameterTypes.length)
+                .allMatch(i -> parameterTypes[i].isInstance(parameters[i]));
+    }
+
+    private static String toString(Object[] parameters) {
+        return Stream.of(parameters)
+                .map(o -> o == null ? "null" : o.getClass().getName() + ":" + o)
+                .collect(Collectors.joining(", "));
+    }
+
     public Converter getConverter() {
         return converter;
     }
@@ -97,32 +124,5 @@ public class BeanClass<T> {
 
     public T newInstance(Object... args) {
         return newInstance(type, args);
-    }
-
-    @SuppressWarnings("unchecked")
-    public T newInstance(Class<T> type, Object... args) {
-        List<Constructor<?>> constructors = Stream.of(type.getConstructors())
-                .filter(c -> isProperConstructor(c, args))
-                .collect(Collectors.toList());
-        if (constructors.size() != 1)
-            throw new IllegalArgumentException(String.format("No appropriate %s constructor for params [%s]",
-                    type.getName(), toString(args)));
-        try {
-            return (T) constructors.get(0).newInstance(args);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private String toString(Object[] parameters) {
-        return Stream.of(parameters)
-                .map(o -> o == null ? "null" : o.getClass().getName() + ":" + o)
-                .collect(Collectors.joining(", "));
-    }
-
-    private boolean isProperConstructor(Constructor<?> constructor, Object[] parameters) {
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
-        return parameterTypes.length == parameters.length && IntStream.range(0, parameterTypes.length)
-                .allMatch(i -> parameterTypes[i].isInstance(parameters[i]));
     }
 }
