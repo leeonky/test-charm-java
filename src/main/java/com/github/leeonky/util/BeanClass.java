@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +22,20 @@ public class BeanClass<T> {
 
     private BeanClass(Class<T> type) {
         this.type = type;
+        Map<String, Field> addedReaderFields = new HashMap<>();
+        Map<String, Field> addedWriterFields = new HashMap<>();
+
         for (Field field : type.getFields()) {
-            addReader(new FieldPropertyReader<>(this, field));
-            addWriter(new FieldPropertyWriter<>(this, field));
+            Field addedReaderField = addedReaderFields.get(field.getName());
+            if (addedReaderField == null || addedReaderField.getType().equals(type)) {
+                addReader(new FieldPropertyReader<>(this, field));
+                addedReaderFields.put(field.getName(), field);
+            }
+            Field addedWriterField = addedWriterFields.get(field.getName());
+            if (addedWriterField == null || addedWriterField.getType().equals(type)) {
+                addWriter(new FieldPropertyWriter<>(this, field));
+                addedWriterFields.put(field.getName(), field);
+            }
         }
         for (Method method : type.getMethods()) {
             if (MethodPropertyReader.isGetter(method))

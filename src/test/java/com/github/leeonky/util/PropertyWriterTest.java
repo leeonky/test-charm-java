@@ -32,6 +32,10 @@ class PropertyWriterTest {
         }
     }
 
+    public static class SubBeanWithPubField extends BeanWithPubField {
+        public int field;
+    }
+
     @Nested
     class GetSetValue {
         BeanWithPubField bean = new BeanWithPubField();
@@ -63,6 +67,13 @@ class PropertyWriterTest {
             beanWithPubFieldBeanClass.setPropertyValue(bean, "field2", "100");
 
             assertThat(bean.field2).isEqualTo(200);
+        }
+
+        @Test
+        void should_override_fields_in_super_class() {
+            SubBeanWithPubField bean = new SubBeanWithPubField();
+            BeanClass.create(SubBeanWithPubField.class).setPropertyValue(bean, "field", 200);
+            assertThat(bean.field).isEqualTo(200);
         }
     }
 

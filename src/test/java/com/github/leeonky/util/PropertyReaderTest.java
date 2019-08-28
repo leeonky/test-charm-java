@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PropertyReaderTest {
-    public static final int ANY_INT = 100;
-    BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.create(BeanWithPubField.class);
+    private static final int ANY_INT = 100;
+    private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.create(BeanWithPubField.class);
 
     public static class BeanWithPubField {
 
@@ -45,6 +45,10 @@ class PropertyReaderTest {
         public int getField3() {
             return field3;
         }
+    }
+
+    public static class SubBeanWithPubField extends BeanWithPubField {
+        public final int field = 200;
     }
 
     public static class InvalidGenericType<T> {
@@ -81,6 +85,11 @@ class PropertyReaderTest {
         @Test
         void should_not_contain_java_get_class_getter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("class");
+        }
+
+        @Test
+        void should_override_fields_in_super_class() {
+            assertThat(BeanClass.create(SubBeanWithPubField.class).getPropertyValue(new SubBeanWithPubField(), "field")).isEqualTo(200);
         }
     }
 
