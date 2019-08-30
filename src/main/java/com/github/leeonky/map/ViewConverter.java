@@ -1,20 +1,21 @@
 package com.github.leeonky.map;
 
 
-import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.metadata.Type;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 import static ma.glasnost.orika.metadata.TypeFactory.valueOf;
 
-public class ViewConverter extends CustomConverter<Object, Object> {
+class ViewConverter extends BaseConverter {
     protected final Class<?> view;
     protected final Mapper mapper;
 
-    public ViewConverter(Mapper mapper, Class<?> view) {
+    ViewConverter(Mapper mapper, Class<?> view) {
         this.view = view;
         this.mapper = mapper;
     }
@@ -44,20 +45,6 @@ public class ViewConverter extends CustomConverter<Object, Object> {
         return result;
     }
 
-    protected Map createMap(Class<?> rawType) {
-        Map map;
-        if (rawType.isInterface())
-            map = new LinkedHashMap();
-        else {
-            try {
-                map = (Map) rawType.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new IllegalStateException("Can not create instance of " + rawType.getName(), e);
-            }
-        }
-        return map;
-    }
-
     @SuppressWarnings("unchecked")
     private Collection mapCollection(Iterable source, Collection result, MappingContext mappingContext) {
         for (Object e : source)
@@ -65,23 +52,7 @@ public class ViewConverter extends CustomConverter<Object, Object> {
         return result;
     }
 
-    protected Collection createCollection(Class<?> rawType) {
-        Collection result;
-        if (rawType.isInterface()) {
-            if (Set.class.isAssignableFrom(rawType))
-                result = new LinkedHashSet();
-            else
-                result = new ArrayList<>();
-        } else {
-            try {
-                result = (Collection) rawType.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new IllegalStateException("Can not create instance of " + rawType.getName(), e);
-            }
-        }
-        return result;
-    }
-
+    @Override
     public String buildConvertId() {
         return String.format("ViewConverter:%s[%d]", view.getName(), mapper.hashCode());
     }

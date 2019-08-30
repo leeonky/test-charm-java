@@ -81,7 +81,11 @@ class MapThroughFromPropertyToElement extends MapThroughFromProperty {
 
     @Override
     public ClassMapBuilder<?, ?> configMapping(ClassMapBuilder<?, ?> classMapBuilder) {
-        return classMapBuilder.field(fromPropertyWrapper.value.original(), property.getName() + "{}");
+//        return classMapBuilder.field(fromPropertyWrapper.value.original(), property.getName() + "{}");
+
+        return classMapBuilder.fieldMap(fromPropertyWrapper.value.name, property.getName())
+                .converter(mapper.registerConverter(fromPropertyWrapper.createListPropertyConverter(mapper, property.getName())))
+                .add();
     }
 }
 
@@ -178,5 +182,9 @@ class FromPropertyWrapper {
 
     ViewListPropertyConverter createViewListPropertyConverter(Mapper mapper, Class<?> view) {
         return new ViewListPropertyConverter(mapper, view, value.elementName);
+    }
+
+    BaseConverter createListPropertyConverter(Mapper mapper, String desName) {
+        return new ListPropertyConverter(mapper, value.elementName, desName);
     }
 }

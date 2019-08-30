@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OverrideBasicMapping {
+class OverrideBasicMapping {
     @Test
     void sub_class_could_use_mapping_from_override_super_class_mapping_annotation() {
         Mapper mapper = new Mapper("com.github.leeonky.map.bug");

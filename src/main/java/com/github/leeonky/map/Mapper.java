@@ -84,6 +84,7 @@ public class Mapper {
         return mapperFactory.classMap(mapFrom, mapTo);
     }
 
+    @SuppressWarnings("unchecked")
     private void explicitRegisterSupperClassesWithDefaultMapping(Class<?> mapFrom, Class<?> mapTo) {
         if (Stream.of(annotations).anyMatch(a -> mapTo.getAnnotation(a) != null)) {
             if (mapperFactory.getClassMap(new MapperKey(valueOf(mapFrom), valueOf(mapTo))) == null)
@@ -115,7 +116,7 @@ public class Mapper {
         return mappingRegisterData.findAllSubMapTo(mapTo, view, scope);
     }
 
-    public String registerConverter(ViewConverter converter) {
+    public String registerConverter(BaseConverter converter) {
         String converterId = converter.buildConvertId();
         if (mapperFactory.getConverterFactory().getConverter(converterId) == null)
             mapperFactory.getConverterFactory().registerConverter(converterId, converter);
