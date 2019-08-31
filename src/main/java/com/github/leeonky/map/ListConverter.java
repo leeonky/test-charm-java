@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-class ListPropertyConverter extends BaseConverter {
+class ListConverter extends BaseConverter {
     private final Mapper mapper;
     private final String elementName;
     private final String desName;
 
-    ListPropertyConverter(Mapper mapper, String elementName, String desName) {
+    ListConverter(Mapper mapper, String elementName, String desName) {
         this.mapper = mapper;
         this.elementName = elementName;
         this.desName = desName;
@@ -21,7 +21,7 @@ class ListPropertyConverter extends BaseConverter {
 
     @Override
     public String buildConvertId() {
-        return String.format("ListPropertyConverter:%s-%s[%d]", elementName, desName, mapper.hashCode());
+        return String.format("ListConverter:%s-%s[%d]", elementName, desName, mapper.hashCode());
     }
 
     @Override

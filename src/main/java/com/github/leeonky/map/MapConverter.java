@@ -5,13 +5,13 @@ import ma.glasnost.orika.metadata.Type;
 
 import java.util.Map;
 
-class MapPropertyConverter extends BaseConverter {
+class MapConverter extends BaseConverter {
     private final Mapper mapper;
     private final String keyPropertyName;
     private final String propertyName;
     private final String desName;
 
-    MapPropertyConverter(Mapper mapper, String keyPropertyName, String propertyName, String desName) {
+    MapConverter(Mapper mapper, String keyPropertyName, String propertyName, String desName) {
         this.mapper = mapper;
         this.keyPropertyName = keyPropertyName;
         this.propertyName = propertyName;
@@ -20,7 +20,7 @@ class MapPropertyConverter extends BaseConverter {
 
     @Override
     public String buildConvertId() {
-        return String.format("MapPropertyConverter:%s:%s-%s[%d]", keyPropertyName, propertyName, desName, mapper.hashCode());
+        return String.format("MapConverter:%s:%s-%s[%d]", keyPropertyName, propertyName, desName, mapper.hashCode());
     }
 
     @Override

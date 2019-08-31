@@ -32,7 +32,7 @@ abstract class BaseConverter extends CustomConverter<Object, Object> {
     @SuppressWarnings("unchecked")
     static Iterable wrapperEntry(Map map) {
         return (Iterable) map.entrySet().stream()
-                .map(e -> new ViewListPropertyConverter.Entry((Map.Entry) e))
+                .map(e -> new ViewListConverter.Entry((Map.Entry) e))
                 .collect(Collectors.toList());
     }
 

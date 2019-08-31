@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-class ViewListPropertyConverter extends ViewConverter {
+class ViewListConverter extends ViewConverter {
     protected final String propertyName;
 
-    ViewListPropertyConverter(Mapper mapper, Class<?> view, String propertyName) {
+    ViewListConverter(Mapper mapper, Class<?> view, String propertyName) {
         super(mapper, view);
         this.propertyName = propertyName;
     }
@@ -36,7 +36,7 @@ class ViewListPropertyConverter extends ViewConverter {
 
     @Override
     public String buildConvertId() {
-        return String.format("ViewListPropertyConverter:%s:%s[%d]", propertyName, view.getName(), mapper.hashCode());
+        return String.format("ViewListConverter:%s:%s[%d]", propertyName, view.getName(), mapper.hashCode());
     }
 
     public static class Entry {

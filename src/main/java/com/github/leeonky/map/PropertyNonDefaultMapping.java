@@ -18,18 +18,18 @@ abstract class PropertyNonDefaultMapping {
         if (mappingView != null) {
             if (fromProperty != null) {
                 FromPropertyWrapper fromPropertyWrapper = new FromPropertyWrapper(fromProperty);
-                if (fromPropertyWrapper.isFlatFromList())
-                    return new MapThroughViewAndFromPropertyToElement(mapper, property, mappingView, fromPropertyWrapper);
-                else if (fromPropertyWrapper.isFlatFromMap())
+                if (fromPropertyWrapper.isFlatToCollection())
+                    return new MapThroughViewAndFromPropertyToCollection(mapper, property, mappingView, fromPropertyWrapper);
+                else if (fromPropertyWrapper.isFlatToMap())
                     return new MapThroughViewAndFromPropertyToMap(mapper, property, mappingView, fromPropertyWrapper);
             } else
                 return new MapThroughView(mapper, property, mappingView);
         } else {
             if (fromProperty != null) {
                 FromPropertyWrapper fromPropertyWrapper = new FromPropertyWrapper(fromProperty);
-                if (fromPropertyWrapper.isFlatFromList())
-                    return new MapThroughFromPropertyToElement(mapper, property, fromPropertyWrapper);
-                else if (fromPropertyWrapper.isFlatFromMap())
+                if (fromPropertyWrapper.isFlatToCollection())
+                    return new MapThroughFromPropertyToCollection(mapper, property, fromPropertyWrapper);
+                else if (fromPropertyWrapper.isFlatToMap())
                     return new MapThroughFromPropertyToMap(mapper, property, fromPropertyWrapper);
                 else
                     return new MapThroughFromProperty(mapper, property, fromPropertyWrapper);
@@ -73,9 +73,9 @@ class MapThroughFromProperty extends PropertyNonDefaultMapping {
     }
 }
 
-class MapThroughFromPropertyToElement extends MapThroughFromProperty {
+class MapThroughFromPropertyToCollection extends MapThroughFromProperty {
 
-    MapThroughFromPropertyToElement(Mapper mapper, Property<?> property, FromPropertyWrapper fromPropertyWrapper) {
+    MapThroughFromPropertyToCollection(Mapper mapper, Property<?> property, FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, fromPropertyWrapper);
     }
 
@@ -110,21 +110,21 @@ class MapThroughViewAndFromProperty extends MapThroughFromProperty {
     }
 }
 
-class MapThroughViewAndFromPropertyToElement extends MapThroughViewAndFromProperty {
-    MapThroughViewAndFromPropertyToElement(Mapper mapper, Property<?> property, MappingView mappingView, FromPropertyWrapper fromPropertyWrapper) {
+class MapThroughViewAndFromPropertyToCollection extends MapThroughViewAndFromProperty {
+    MapThroughViewAndFromPropertyToCollection(Mapper mapper, Property<?> property, MappingView mappingView, FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, mappingView, fromPropertyWrapper);
     }
 
     @Override
     public ClassMapBuilder<?, ?> configMapping(ClassMapBuilder<?, ?> classMapBuilder) {
         return classMapBuilder.fieldMap(fromPropertyWrapper.value.name, property.getName())
-                .converter(mapper.registerConverter(fromPropertyWrapper.createViewListPropertyConverter(mapper, mappingView.value())))
+                .converter(mapper.registerConverter(fromPropertyWrapper.createViewListConverter(mapper, mappingView.value())))
                 .add();
     }
 
 }
 
-class MapThroughViewAndFromPropertyToMap extends MapThroughViewAndFromPropertyToElement {
+class MapThroughViewAndFromPropertyToMap extends MapThroughViewAndFromPropertyToCollection {
 
     MapThroughViewAndFromPropertyToMap(Mapper mapper, Property<?> property, MappingView mappingView, FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, mappingView, fromPropertyWrapper);
@@ -135,7 +135,7 @@ class MapThroughViewAndFromPropertyToMap extends MapThroughViewAndFromPropertyTo
         if (fromPropertyWrapper.isDifferentSourceProperty())
             throw new IllegalArgumentException("Key and Value source property should be same");
         return classMapBuilder.fieldMap(fromPropertyWrapper.value.name, property.getName())
-                .converter(mapper.registerConverter(fromPropertyWrapper.createViewMapPropertyConverter(mapper, mappingView.value())))
+                .converter(mapper.registerConverter(fromPropertyWrapper.createViewMapConverter(mapper, mappingView.value())))
                 .add();
     }
 
@@ -163,11 +163,11 @@ class FromPropertyWrapper {
         key = fromProperty.key().isEmpty() ? null : new ElementProperty(fromProperty.key());
     }
 
-    boolean isFlatFromList() {
+    boolean isFlatToCollection() {
         return value.elementName != null && (key == null || key.elementName == null);
     }
 
-    boolean isFlatFromMap() {
+    boolean isFlatToMap() {
         return value.elementName != null && key != null && key.elementName != null;
     }
 
@@ -175,19 +175,19 @@ class FromPropertyWrapper {
         return !value.name.equals(key.name);
     }
 
-    ViewMapPropertyConverter createViewMapPropertyConverter(Mapper mapper, Class<?> view) {
-        return new ViewMapPropertyConverter(mapper, view, key.elementName, value.elementName);
+    ViewMapConverter createViewMapConverter(Mapper mapper, Class<?> view) {
+        return new ViewMapConverter(mapper, view, key.elementName, value.elementName);
     }
 
-    ViewListPropertyConverter createViewListPropertyConverter(Mapper mapper, Class<?> view) {
-        return new ViewListPropertyConverter(mapper, view, value.elementName);
+    ViewListConverter createViewListConverter(Mapper mapper, Class<?> view) {
+        return new ViewListConverter(mapper, view, value.elementName);
     }
 
-    ListPropertyConverter createListPropertyConverter(Mapper mapper, String desName) {
-        return new ListPropertyConverter(mapper, value.elementName, desName);
+    ListConverter createListPropertyConverter(Mapper mapper, String desName) {
+        return new ListConverter(mapper, value.elementName, desName);
     }
 
-    BaseConverter createMapPropertyConverter(Mapper mapper, String desName) {
-        return new MapPropertyConverter(mapper, key.elementName, value.elementName, desName);
+    MapConverter createMapPropertyConverter(Mapper mapper, String desName) {
+        return new MapConverter(mapper, key.elementName, value.elementName, desName);
     }
 }
