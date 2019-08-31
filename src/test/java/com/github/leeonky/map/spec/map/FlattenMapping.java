@@ -55,16 +55,19 @@ class FlattenMapping {
                     put("John", "Smith");
                 }});
 
+        assertThat(listToMap.studentMap.get("Mike"))
+                .hasFieldOrPropertyWithValue("name", "Mike");
+        assertThat(listToMap.studentMap.get("Mike").getTeacher()).isEqualToComparingFieldByField(studentMike.getTeacher());
+
+        assertThat(listToMap.studentMap.get("John"))
+                .hasFieldOrPropertyWithValue("name", "John");
+        assertThat(listToMap.studentMap.get("John").getTeacher()).isEqualToComparingFieldByField(studentJohn.getTeacher());
+
         assertThat(listToMap.teacherNameLinkedHashMap).isInstanceOf(LinkedHashMap.class)
                 .isEqualTo(new HashMap<String, String>() {{
                     put("Mike", "Tom");
                     put("John", "Smith");
                 }})
-// TODO
-//                .hasFieldOrPropertyWithValue("studentMap", new HashMap<String, Student>() {{
-//                    put("Mike", studentMike);
-//                    put("John", studentJohn);
-//                }})
         ;
     }
 
@@ -97,13 +100,9 @@ class FlattenMapping {
                     put("Mike", "Tom");
                     put("John", "Smith");
                 }});
-//        TODO
-//        assertThat(mapToMap.studentTeacherMap).isInstanceOf(Map.class)
-//                .isEqualTo(new HashMap<String, Teacher>() {{
-//                    put("Mike", teacherTom);
-//                    put("John", teacherSmith);
-//                }});
 
+        assertThat(mapToMap.studentTeacherMap.get("Mike")).isEqualToComparingFieldByField(teacherTom);
+        assertThat(mapToMap.studentTeacherMap.get("John")).isEqualToComparingFieldByField(teacherSmith);
     }
 
     @Getter
@@ -167,9 +166,8 @@ class FlattenMapping {
         @FromProperty(key = "studentList{name}", value = "studentList{teacher.name}")
         public LinkedHashMap<String, String> teacherNameLinkedHashMap;
 
-//        TODO
-//        @FromProperty(key = "studentList{name}", value = "studentList{}")
-//        public Map<String, Student> studentMap;
+        @FromProperty(key = "studentList{name}", value = "studentList{}")
+        public Map<String, Student> studentMap;
     }
 
     @MappingFrom(School.class)
@@ -196,8 +194,7 @@ class FlattenMapping {
         @FromProperty(key = "studentMap{key}", value = "studentMap{value.teacher.name}")
         public LinkedHashMap<String, String> teacherNameLinkedHashMap;
 
-//        TODO
-//        @FromProperty(key = "studentMap{key}", value = "studentMap{value.teacher}")
-//        public Map<String, Teacher> studentTeacherMap;
+        @FromProperty(key = "studentMap{key}", value = "studentMap{value.teacher}")
+        public Map<String, Teacher> studentTeacherMap;
     }
 }

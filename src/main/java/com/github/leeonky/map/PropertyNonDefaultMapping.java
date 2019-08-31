@@ -81,8 +81,6 @@ class MapThroughFromPropertyToElement extends MapThroughFromProperty {
 
     @Override
     public ClassMapBuilder<?, ?> configMapping(ClassMapBuilder<?, ?> classMapBuilder) {
-//        return classMapBuilder.field(fromPropertyWrapper.value.original(), property.getName() + "{}");
-
         return classMapBuilder.fieldMap(fromPropertyWrapper.value.name, property.getName())
                 .converter(mapper.registerConverter(fromPropertyWrapper.createListPropertyConverter(mapper, property.getName())))
                 .add();
@@ -97,8 +95,9 @@ class MapThroughFromPropertyToMap extends MapThroughFromProperty {
 
     @Override
     public ClassMapBuilder<?, ?> configMapping(ClassMapBuilder<?, ?> classMapBuilder) {
-        return classMapBuilder.field(fromPropertyWrapper.key.original(), property.getName() + "{key}")
-                .field(fromPropertyWrapper.value.original(), property.getName() + "{value}");
+        return classMapBuilder.fieldMap(fromPropertyWrapper.value.name, property.getName())
+                .converter(mapper.registerConverter(fromPropertyWrapper.createMapPropertyConverter(mapper, property.getName())))
+                .add();
     }
 }
 
@@ -184,7 +183,11 @@ class FromPropertyWrapper {
         return new ViewListPropertyConverter(mapper, view, value.elementName);
     }
 
-    BaseConverter createListPropertyConverter(Mapper mapper, String desName) {
+    ListPropertyConverter createListPropertyConverter(Mapper mapper, String desName) {
         return new ListPropertyConverter(mapper, value.elementName, desName);
+    }
+
+    BaseConverter createMapPropertyConverter(Mapper mapper, String desName) {
+        return new MapPropertyConverter(mapper, key.elementName, value.elementName, desName);
     }
 }

@@ -57,13 +57,4 @@ class ViewConverter extends BaseConverter {
         return String.format("ViewConverter:%s[%d]", view.getName(), mapper.hashCode());
     }
 
-    @Override
-    public int hashCode() {
-        return buildConvertId().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return (other instanceof ViewConverter) && buildConvertId().equals(((ViewConverter) other).buildConvertId());
-    }
 }

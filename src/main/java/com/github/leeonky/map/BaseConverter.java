@@ -37,4 +37,14 @@ abstract class BaseConverter extends CustomConverter<Object, Object> {
     }
 
     public abstract String buildConvertId();
+
+    @Override
+    public int hashCode() {
+        return buildConvertId().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return (other instanceof ViewConverter) && buildConvertId().equals(((ViewConverter) other).buildConvertId());
+    }
 }

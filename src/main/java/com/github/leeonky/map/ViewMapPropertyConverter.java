@@ -5,10 +5,10 @@ import ma.glasnost.orika.metadata.Type;
 
 import java.util.Map;
 
-public class ViewMapPropertyConverter extends ViewListPropertyConverter {
+class ViewMapPropertyConverter extends ViewListPropertyConverter {
     private final String keyPropertyName;
 
-    public ViewMapPropertyConverter(Mapper mapper, Class<?> view, String keyPropertyName, String propertyName) {
+    ViewMapPropertyConverter(Mapper mapper, Class<?> view, String keyPropertyName, String propertyName) {
         super(mapper, view, propertyName);
         this.keyPropertyName = keyPropertyName;
     }
