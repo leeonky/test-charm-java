@@ -29,17 +29,17 @@ class ListPropertyConverter extends BaseConverter {
         Class<?> rawType = destinationType.getRawType();
         Iterable collection = source instanceof Map ? wrapperEntry((Map) source) : (Iterable) source;
         if (Iterable.class.isAssignableFrom(rawType))
-            return mapCollection(collection, createCollection(rawType));
+            return mapCollection(collection, createCollection(rawType), ((Type) destinationType.getActualTypeArguments()[0]).getRawType());
         if (rawType.isArray())
-            return mapCollection(collection, new ArrayList<>()).toArray((Object[]) Array.newInstance(rawType.getComponentType(), 0));
+            return mapCollection(collection, new ArrayList<>(), rawType.getComponentType()).toArray((Object[]) Array.newInstance(rawType.getComponentType(), 0));
         throw new IllegalStateException(String.format("Type of '%s.%s' is invalid, expect Iterable or Array",
                 mappingContext.getResolvedDestinationType().getName(), desName));
     }
 
     @SuppressWarnings("unchecked")
-    private Collection<Object> mapCollection(Iterable source, Collection result) {
+    private Collection<Object> mapCollection(Iterable source, Collection result, Class elementType) {
         for (Object object : source)
-            result.add(getPropertyValue(object, elementName));
+            result.add(mapper.mapTo(getPropertyValue(object, elementName), elementType));
         return result;
     }
 }

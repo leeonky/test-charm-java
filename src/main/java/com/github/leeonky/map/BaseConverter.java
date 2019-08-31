@@ -9,33 +9,15 @@ import java.util.stream.Collectors;
 abstract class BaseConverter extends CustomConverter<Object, Object> {
 
     static Map createMap(Class<?> rawType) {
-        Map map;
-        if (rawType.isInterface())
-            map = new LinkedHashMap();
-        else {
-            try {
-                map = (Map) rawType.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new IllegalStateException("Can not create instance of " + rawType.getName(), e);
-            }
-        }
-        return map;
+        return rawType.isInterface() ? new LinkedHashMap() : (Map) BeanClass.newInstance(rawType);
     }
 
     static Collection createCollection(Class<?> rawType) {
         Collection result;
         if (rawType.isInterface()) {
-            if (Set.class.isAssignableFrom(rawType))
-                result = new LinkedHashSet();
-            else
-                result = new ArrayList<>();
-        } else {
-            try {
-                result = (Collection) rawType.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new IllegalStateException("Can not create instance of " + rawType.getName(), e);
-            }
-        }
+            result = Set.class.isAssignableFrom(rawType) ? new LinkedHashSet() : new ArrayList<>();
+        } else
+            result = (Collection) BeanClass.newInstance(rawType);
         return result;
     }
 
