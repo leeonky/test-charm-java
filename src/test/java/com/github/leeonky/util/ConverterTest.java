@@ -28,6 +28,11 @@ class ConverterTest {
         assertThat(Converter.boxedClass(boolean.class)).isEqualTo(Boolean.class);
     }
 
+    @Test
+    void support_convert_null() {
+        assertThat(converter.tryConvert(String.class, null)).isNull();
+    }
+
     enum NameEnums {
         E1, E2
     }

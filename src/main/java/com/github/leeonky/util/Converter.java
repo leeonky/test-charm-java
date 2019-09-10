@@ -92,8 +92,7 @@ public class Converter {
     }
 
     public Object tryConvert(Class<?> target, Object value) {
-        Class<?> source = value.getClass();
-        return target.isAssignableFrom(source) ? value : convert(source, target, value);
+        return value == null ? null : target.isAssignableFrom(value.getClass()) ? value : convert(value.getClass(), target, value);
     }
 
     @SuppressWarnings("unchecked")
