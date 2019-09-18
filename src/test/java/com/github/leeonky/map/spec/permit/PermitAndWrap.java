@@ -1,6 +1,6 @@
 package com.github.leeonky.map.spec.permit;
 
-import com.github.leeonky.map.Create;
+import com.github.leeonky.map.Action;
 import com.github.leeonky.map.Permit;
 import com.github.leeonky.map.PermitMapper;
 import com.github.leeonky.map.ToProperty;
@@ -22,7 +22,7 @@ public class PermitAndWrap {
     void should_support_rename_property() {
         Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
             put("nickName", "tom");
-        }}, User.class, Create.class);
+        }}, User.class, Action.Create.class);
 
         assertThat(value).isInstanceOf(LinkedHashMap.class);
         assertThat(value).containsOnly(new SimpleEntry("name", "tom"));
@@ -32,7 +32,7 @@ public class PermitAndWrap {
     void should_support_map_property_to_new_map() {
         Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
             put("identityId", "001");
-        }}, User.class, Create.class);
+        }}, User.class, Action.Create.class);
 
         assertThat(value).isInstanceOf(LinkedHashMap.class);
         assertThat(value).containsOnly(new SimpleEntry("identity", new HashMap<String, Object>() {{
@@ -43,7 +43,7 @@ public class PermitAndWrap {
     public static class User {
     }
 
-    @Permit(target = User.class, action = Create.class)
+    @Permit(target = User.class, action = Action.Create.class)
     public static class UserPermit {
 
         @ToProperty("name")

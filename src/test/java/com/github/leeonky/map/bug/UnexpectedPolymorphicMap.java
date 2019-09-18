@@ -51,23 +51,23 @@ public class UnexpectedPolymorphicMap {
         public Action action;
     }
 
-    @Mapping(from = Action.class, view = Simple.class)
+    @Mapping(from = Action.class, view = View.Simple.class)
     public static class SimpleAction {
         public String action;
     }
 
-    @MappingView(Detail.class)
+    @MappingView(View.Detail.class)
     public static class DetailAction extends SimpleAction {
         @FromProperty("orderLine")
         public DetailOrderLine orderLine;
     }
 
-    @Mapping(from = OrderLine.class, view = Simple.class)
+    @Mapping(from = OrderLine.class, view = View.Simple.class)
     public static class SimpleOrderLine {
         public long id;
     }
 
-    @MappingView(Detail.class)
+    @MappingView(View.Detail.class)
     public static class DetailOrderLine extends SimpleOrderLine {
         public List<SimpleAction> actions;
         public SimpleAction action;

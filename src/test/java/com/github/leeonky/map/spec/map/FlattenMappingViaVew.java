@@ -154,12 +154,12 @@ class FlattenMappingViaVew {
         private Map<String, Student> studentMap;
     }
 
-    @Mapping(from = Student.class, view = Simple.class)
+    @Mapping(from = Student.class, view = View.Simple.class)
     static class StudentDTO {
         public String name;
     }
 
-    @Mapping(from = Teacher.class, view = Simple.class)
+    @Mapping(from = Teacher.class, view = View.Simple.class)
     static class TeacherDTO {
         public String name;
     }
@@ -167,60 +167,60 @@ class FlattenMappingViaVew {
     @MappingFrom(School.class)
     public static class ListToCollection {
         @FromProperty("studentList{}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public List<Object> studentList;
 
         @FromProperty("studentList{}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public Object[] studentArray;
 
         @FromProperty("studentList{teacher}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public Set<Object> studentTeacherSet;
 
         @FromProperty("studentList{teacher}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public LinkedList<Object> studentTeacherLinkedList;
     }
 
     @MappingFrom(School.class)
     public static class ListToMap {
         @FromProperty(key = "studentList{name}", value = "studentList{}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public Map<String, Object> studentMap;
 
         @FromProperty(key = "studentList{name}", value = "studentList{teacher}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public HashMap<String, Object> studentTeacherMap;
     }
 
     @MappingFrom(School.class)
     public static class MapToCollection {
         @FromProperty("studentMap{value}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public List<Object> studentList;
 
         @FromProperty("studentMap{value}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public Object[] studentArray;
 
         @FromProperty("studentMap{value.teacher}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public Set<Object> studentTeacherSet;
 
         @FromProperty("studentMap{value.teacher}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public LinkedList<Object> studentTeacherLinkedList;
     }
 
     @MappingFrom(School.class)
     public static class MapToMap {
         @FromProperty(key = "studentMap{key}", value = "studentMap{value}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public Map<String, Object> studentMap;
 
         @FromProperty(key = "studentMap{key}", value = "studentMap{value.teacher}")
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public HashMap<String, Object> studentTeacherMap;
     }
 }

@@ -16,11 +16,11 @@ class BasicMapping {
 
     @Test
     void map_object_via_view() {
-        assertThat(mapper.<Object>map(javaProgrammingBook, Simple.class))
+        assertThat(mapper.<Object>map(javaProgrammingBook, View.Simple.class))
                 .isInstanceOf(SimpleBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming");
 
-        assertThat(mapper.<Object>map(javaProgrammingBook, Detail.class))
+        assertThat(mapper.<Object>map(javaProgrammingBook, View.Detail.class))
                 .isInstanceOf(DetailBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming")
                 .hasFieldOrPropertyWithValue("price", new BigDecimal(100));
@@ -30,7 +30,7 @@ class BasicMapping {
     void map_object_via_view_and_scope() {
         mapper.setScope(FrontEnd.class);
 
-        assertThat(mapper.<Object>map(javaProgrammingBook, Simple.class))
+        assertThat(mapper.<Object>map(javaProgrammingBook, View.Simple.class))
                 .isInstanceOf(FrontEndSimpleBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming")
                 .hasFieldOrPropertyWithValue("price", new BigDecimal(100));
@@ -67,7 +67,7 @@ class BasicMapping {
     @Test
     void should_return_null_when_source_class_not_register() {
         String notRegisterClassInstance = "";
-        assertThat((Object) mapper.map(notRegisterClassInstance, Simple.class)).isNull();
+        assertThat((Object) mapper.map(notRegisterClassInstance, View.Simple.class)).isNull();
     }
 
     @Test
@@ -91,7 +91,7 @@ class BasicMapping {
 
     @Getter
     @Setter
-    @Mapping(from = Book.class, view = Simple.class)
+    @Mapping(from = Book.class, view = View.Simple.class)
     static class SimpleBookDTO {
         private String name;
     }
@@ -111,7 +111,7 @@ class BasicMapping {
 
     @Getter
     @Setter
-    @Mapping(from = Book.class, view = Simple.class, scope = FrontEnd.class)
+    @Mapping(from = Book.class, view = View.Simple.class, scope = FrontEnd.class)
     static class FrontEndSimpleBookDTO {
         private String name;
         private BigDecimal price;
@@ -119,7 +119,7 @@ class BasicMapping {
 
     @Getter
     @Setter
-    @MappingView(Detail.class)
+    @MappingView(View.Detail.class)
     static class DetailBookDTO extends SimpleBookDTO {
         private BigDecimal price;
     }

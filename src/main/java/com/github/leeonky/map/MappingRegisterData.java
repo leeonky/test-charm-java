@@ -15,8 +15,10 @@ class MappingRegisterData {
     void register(Class<?> mapFrom, Class<?> view, Class<?> scope, Class<?> mapTo) {
         if (!Modifier.isPublic(mapFrom.getModifiers()))
             throw new IllegalArgumentException(mapFrom.getName() + " should be public");
-        sourceViewScopeMappingMap.computeIfAbsent(mapFrom, f -> new HashMap<>()).computeIfAbsent(view, f -> new HashMap<>()).put(scope, mapTo);
-        viewScopeMappingListMap.computeIfAbsent(view, f1 -> new HashMap<>()).computeIfAbsent(scope, f2 -> new ArrayList<>()).add(mapTo);
+        sourceViewScopeMappingMap.computeIfAbsent(mapFrom, f -> new HashMap<>())
+                .computeIfAbsent(view, f -> new HashMap<>()).put(scope, mapTo);
+        viewScopeMappingListMap.computeIfAbsent(view, f1 -> new HashMap<>())
+                .computeIfAbsent(scope, f2 -> new ArrayList<>()).add(mapTo);
     }
 
     Optional<Class<?>> findMapTo(Object mapFrom, Class<?> view, Class<?> scope) {

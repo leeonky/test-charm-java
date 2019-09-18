@@ -1,6 +1,6 @@
 package com.github.leeonky.map.spec.permit;
 
-import com.github.leeonky.map.Create;
+import com.github.leeonky.map.Action;
 import com.github.leeonky.map.Permit;
 import com.github.leeonky.map.PermitMapper;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class PermitNestedCollectionAndMap {
                 put("name", "tom");
                 put("age", 22);
             }}));
-        }}, UserList.class, Create.class);
+        }}, UserList.class, Action.Create.class);
         assertThat(value.get("users")).isInstanceOf(List.class);
         assertThat((List) value.get("users")).containsOnly(new HashMap<String, String>() {{
             put("name", "tom");
@@ -40,7 +40,7 @@ class PermitNestedCollectionAndMap {
                 put("name", "tom");
                 put("age", 22);
             }})));
-        }}, UserList.class, Create.class);
+        }}, UserList.class, Action.Create.class);
         assertThat(value.get("usersList")).isInstanceOf(List.class);
         assertThat((List) value.get("usersList")).containsOnly(singletonList(new HashMap<String, String>() {{
             put("name", "tom");
@@ -56,7 +56,7 @@ class PermitNestedCollectionAndMap {
                     put("age", 22);
                 }});
             }});
-        }}, Order.class, Create.class);
+        }}, Order.class, Action.Create.class);
 
         assertThat(value).isInstanceOf(LinkedHashMap.class);
         assertThat(value).containsOnly(new SimpleEntry("product", new HashMap<String, Object>() {{
@@ -73,7 +73,7 @@ class PermitNestedCollectionAndMap {
         public String name;
     }
 
-    @Permit(target = UserList.class, action = Create.class)
+    @Permit(target = UserList.class, action = Action.Create.class)
     static class UserListPermit {
         public List<UserPermit> users;
         public List<List<UserPermit>> usersList;
@@ -86,7 +86,7 @@ class PermitNestedCollectionAndMap {
     static class Order {
     }
 
-    @Permit(target = Order.class, action = Create.class)
+    @Permit(target = Order.class, action = Action.Create.class)
     static class OrderPermit {
         public ProductPermit product;
     }

@@ -11,12 +11,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ma.glasnost.orika.metadata.TypeFactory.valueOf;
 
 public class Mapper {
+    public static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
     private static final Class<?>[] VOID_SCOPES = {void.class};
     private final Class[] annotations = new Class[]{Mapping.class, MappingFrom.class, MappingView.class, MappingScope.class};
     private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
@@ -25,17 +27,23 @@ public class Mapper {
 
     public Mapper(String... packages) {
         collectAllClasses(packages).forEach(mapTo -> {
-            for (Class<?> view : getViews(mapTo))
-                for (Class<?> from : getFroms(mapTo)) {
-                    for (Class<?> scope : getScopes(mapTo))
-                        mappingRegisterData.register(from, view, scope, mapTo);
-                    configNonDefaultMapping(from, mapTo);
-                }
+            register(mapTo);
+            for (Class<?> nested : mapTo.getDeclaredClasses())
+                register(nested);
         });
     }
 
     static <T> T NotSupportParallelStreamReduce(T u1, T u2) {
         throw new IllegalStateException("Not support parallel stream");
+    }
+
+    private void register(Class<?> mapTo) {
+        for (Class<?> view : getViews(mapTo))
+            for (Class<?> from : getFroms(mapTo)) {
+                for (Class<?> scope : getScopes(mapTo))
+                    mappingRegisterData.register(from, view, scope, mapTo);
+                configNonDefaultMapping(from, mapTo);
+            }
     }
 
     private Set<Class<?>> collectAllClasses(Object[] packages) {
@@ -59,8 +67,44 @@ public class Mapper {
     }
 
     private Class<?>[] getFroms(Class<?> mapTo) {
-        MappingFrom mappingFrom = mapTo.getAnnotation(MappingFrom.class);
-        return mappingFrom != null ? mappingFrom.value() : mapTo.getAnnotation(Mapping.class).from();
+        return Stream.<Function<Class<?>, Class<?>[]>>of(this::getFromFromMappingFrom,
+                this::getFromFromMapping,
+                this::getFromFromDeclaring,
+                this::getFromFromSuper)
+                .map(f -> f.apply(mapTo))
+                .filter(froms -> froms.length != 0)
+                .findFirst().orElse(EMPTY_CLASS_ARRAY);
+    }
+
+    private Class<?>[] getFromFromMapping(Class<?> mapTo) {
+        Mapping declaredMapping = mapTo.getDeclaredAnnotation(Mapping.class);
+        if (declaredMapping != null)
+            return declaredMapping.from();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getFromFromMappingFrom(Class<?> mapTo) {
+        MappingFrom declaredMappingFrom = mapTo.getDeclaredAnnotation(MappingFrom.class);
+        if (declaredMappingFrom != null)
+            return declaredMappingFrom.value();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getFromFromDeclaring(Class<?> mapTo) {
+        Class<?> declaringClass = mapTo.getDeclaringClass();
+        if (declaringClass != null) {
+            Class<?>[] declaringClassFroms = getFroms(declaringClass);
+            if (declaringClassFroms.length != 0)
+                return declaringClassFroms;
+        }
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getFromFromSuper(Class<?> mapTo) {
+        Class<?> superclass = mapTo.getSuperclass();
+        if (superclass != null)
+            return getFroms(superclass);
+        return EMPTY_CLASS_ARRAY;
     }
 
     private void configNonDefaultMapping(Class<?> mapFrom, Class<?> mapTo) {

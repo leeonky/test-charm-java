@@ -25,7 +25,7 @@ class PolymorphicPermit {
                 put("name", "tom");
                 put("number", "123");
             }});
-        }}, User.class, Create.class);
+        }}, User.class, Action.Create.class);
 
         assertThat(value.get("id")).isEqualTo(new HashMap<String, Object>() {{
             put("type", "PASSPORT");
@@ -45,7 +45,7 @@ class PolymorphicPermit {
                 put("name", "tom");
                 put("number", "123");
             }}));
-        }}, User.class, Create.class);
+        }}, User.class, Action.Create.class);
 
         assertThat(value.get("ids")).isEqualTo(asList(new HashMap<String, Object>() {{
             put("type", "PASSPORT");
@@ -60,7 +60,7 @@ class PolymorphicPermit {
     void should_raise_error_when_no_specify_SubPermitProperty() {
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> permitMapper.permit(new HashMap<String, Object>() {{
             put("error1", new HashMap<>());
-        }}, InvalidPermit.class, Create.class));
+        }}, InvalidPermit.class, Action.Create.class));
 
         assertThat(runtimeException).hasMessage("Should specify property name via @PolymorphicPermitIdentity in 'java.lang.Object'");
     }
@@ -69,7 +69,7 @@ class PolymorphicPermit {
     void should_raise_error_when_list_element_type_is_not_specified() {
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> permitMapper.permit(new HashMap<String, Object>() {{
             put("error2", new ArrayList<>());
-        }}, InvalidPermit.class, Create.class));
+        }}, InvalidPermit.class, Action.Create.class));
 
         assertThat(runtimeException).hasMessage("Should specify element type in 'com.github.leeonky.map.spec.permit.PolymorphicPermit$InvalidPermit::error2'");
     }
@@ -82,7 +82,7 @@ class PolymorphicPermit {
                 put("name", "tom");
                 put("number", "123");
             }}));
-        }}, User.class, Create.class));
+        }}, User.class, Action.Create.class));
 
         assertThat(runtimeException).hasMessage("Cannot find permit for type[UNKNOWN] in 'com.github.leeonky.map.spec.permit.PolymorphicPermit$UserPermit::ids'");
     }
@@ -96,7 +96,7 @@ class PolymorphicPermit {
                 put("name", "tom");
                 put("age", 22);
             }}));
-        }}, User.class, Create.class);
+        }}, User.class, Action.Create.class);
 
         assertThat((List) value.get("ids")).containsOnly(new HashMap<String, Object>() {{
             put("type", "PASSPORT");
@@ -109,13 +109,13 @@ class PolymorphicPermit {
         public String type;
     }
 
-    @Permit(target = Void.class, action = Create.class)
+    @Permit(target = Void.class, action = Action.Create.class)
     @PolymorphicPermitIdentityString("PASSPORT")
     public static class PassportPermit extends IdPermit {
         public String name;
     }
 
-    @Permit(target = Void.class, action = Create.class)
+    @Permit(target = Void.class, action = Action.Create.class)
     @PolymorphicPermitIdentityString("IDENTITY")
     public static class IdentityPermit extends IdPermit {
         public String number;
@@ -124,29 +124,29 @@ class PolymorphicPermit {
     static class User {
     }
 
-    @Permit(target = User.class, action = Create.class)
+    @Permit(target = User.class, action = Action.Create.class)
     public static class UserPermit {
 
-        @PermitAction(Create.class)
+        @PermitAction(Action.Create.class)
         public IdPermit id;
 
-        @PermitAction(Create.class)
+        @PermitAction(Action.Create.class)
         public List<IdPermit> ids;
     }
 
-    @Permit(target = InvalidPermit.class, action = Create.class)
+    @Permit(target = InvalidPermit.class, action = Action.Create.class)
     public static class InvalidPermit {
-        @PermitAction(Create.class)
+        @PermitAction(Action.Create.class)
         public Object error1;
 
-        @PermitAction(Create.class)
+        @PermitAction(Action.Create.class)
         public List error2;
     }
 
     static class NewScope {
     }
 
-    @Permit(target = Void.class, action = Create.class, scope = NewScope.class)
+    @Permit(target = Void.class, action = Action.Create.class, scope = NewScope.class)
     @PolymorphicPermitIdentityString("PASSPORT")
     public static class NewScopePassportPermit extends IdPermit {
         public int age;

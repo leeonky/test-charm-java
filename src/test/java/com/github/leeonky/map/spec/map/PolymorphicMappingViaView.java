@@ -32,7 +32,7 @@ class PolymorphicMappingViaView {
     void support_property_polymorphic_mapping_via_mapping_view() {
         TransactionLog transactionLog = new TransactionLog().setTransaction(paypalTransaction);
 
-        assertThat(((DetailTransactionLogDTO) mapper.map(transactionLog, Detail.class)).transaction)
+        assertThat(((DetailTransactionLogDTO) mapper.map(transactionLog, View.Detail.class)).transaction)
                 .isInstanceOf(SimplePaypalTransactionDTO.class)
                 .hasFieldOrPropertyWithValue("id", "P1")
                 .hasFieldOrPropertyWithValue("paypalId", "001");
@@ -82,7 +82,7 @@ class PolymorphicMappingViaView {
 
     @Test
     void should_return_all_candidate_class_for_super_class_and_view() {
-        assertThat(mapper.findSubMappings(SimpleTransactionDTO.class, Simple.class))
+        assertThat(mapper.findSubMappings(SimpleTransactionDTO.class, View.Simple.class))
                 .containsOnly(SimplePaypalTransactionDTO.class, SimpleCreditCardTransactionDTO.class);
     }
 
@@ -132,41 +132,41 @@ class PolymorphicMappingViaView {
         public String id;
     }
 
-    @Mapping(from = PaypalTransaction.class, view = Simple.class)
+    @Mapping(from = PaypalTransaction.class, view = View.Simple.class)
     static class SimplePaypalTransactionDTO extends SimpleTransactionDTO {
         public String paypalId;
     }
 
-    @Mapping(from = CreditCardTransaction.class, view = Simple.class)
+    @Mapping(from = CreditCardTransaction.class, view = View.Simple.class)
     static class SimpleCreditCardTransactionDTO extends SimpleTransactionDTO {
         public String cardNumber;
     }
 
-    @Mapping(from = TransactionLog.class, view = Detail.class)
+    @Mapping(from = TransactionLog.class, view = View.Detail.class)
     static class DetailTransactionLogDTO {
 
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public SimpleTransactionDTO transaction;
     }
 
     @MappingFrom(TransactionLogs.class)
     static class TransactionLogListDTO {
 
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public List<SimpleTransactionDTO> transactions;
     }
 
     @MappingFrom(TransactionLogs.class)
     static class TransactionLogArrayDTO {
 
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public SimpleTransactionDTO[] transactions;
     }
 
     @MappingFrom(TransactionLogMap.class)
     static class TransactionLogMapDTO {
 
-        @MappingView(Simple.class)
+        @MappingView(View.Simple.class)
         public Map<String, SimpleTransactionDTO> transactionMap;
     }
 }
