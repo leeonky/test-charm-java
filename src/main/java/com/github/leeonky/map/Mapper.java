@@ -61,8 +61,8 @@ public class Mapper {
     }
 
     private Class<?>[] getViews(Class<?> mapTo) {
-        Mapping mapping = mapTo.getAnnotation(Mapping.class);
-        MappingView mappingView = mapTo.getAnnotation(MappingView.class);
+        Mapping mapping = mapTo.getDeclaredAnnotation(Mapping.class);
+        MappingView mappingView = mapTo.getDeclaredAnnotation(MappingView.class);
         return mappingView != null ? new Class[]{mappingView.value()} : (mapping != null ? mapping.view() : new Class[]{mapTo});
     }
 

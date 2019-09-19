@@ -1,9 +1,6 @@
 package com.github.leeonky.map.bug;
 
-import com.github.leeonky.map.Mapper;
-import com.github.leeonky.map.Mapping;
-import com.github.leeonky.map.MappingFrom;
-import com.github.leeonky.map.View;
+import com.github.leeonky.map.*;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +29,7 @@ class OverrideBasicMapping {
     }
 
     @MappingFrom(Sub.class)
+    @MappingView(View.Simple.class)
     public static class SubVO extends BaseVO {
 
     }
