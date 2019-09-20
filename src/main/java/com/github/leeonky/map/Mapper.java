@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import static ma.glasnost.orika.metadata.TypeFactory.valueOf;
 
 public class Mapper {
-    public static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
+    private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
     private static final Class<?>[] VOID_SCOPES = {void.class};
     private final Class[] annotations = new Class[]{Mapping.class, MappingFrom.class, MappingView.class, MappingScope.class};
     private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
@@ -54,10 +54,42 @@ public class Mapper {
     }
 
     private Class<?>[] getScopes(Class<?> mapTo) {
-        Mapping mapping = mapTo.getAnnotation(Mapping.class);
-        MappingScope mappingScope = mapTo.getAnnotation(MappingScope.class);
-        Class<?>[] scopes = mappingScope != null ? mappingScope.value() : (mapping == null ? null : mapping.scope());
-        return (scopes == null || scopes.length == 0) ? VOID_SCOPES : scopes;
+        return guessValueInSequence(mapTo, VOID_SCOPES,
+                this::getScopeFromMappingFrom,
+                this::getScopeFromMapping,
+                this::getScopeFromDeclaring,
+                this::getScopeFromSuper);
+    }
+
+    private Class<?>[] getScopeFromMapping(Class<?> mapTo) {
+        Mapping declaredMapping = mapTo.getDeclaredAnnotation(Mapping.class);
+        if (declaredMapping != null)
+            return declaredMapping.scope();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getScopeFromMappingFrom(Class<?> mapTo) {
+        MappingScope declaredMappingScope = mapTo.getDeclaredAnnotation(MappingScope.class);
+        if (declaredMappingScope != null)
+            return declaredMappingScope.value();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getScopeFromDeclaring(Class<?> mapTo) {
+        Class<?> declaringClass = mapTo.getDeclaringClass();
+        if (declaringClass != null) {
+            Class<?>[] declaringClassScopes = getScopes(declaringClass);
+            if (declaringClassScopes.length != 0)
+                return declaringClassScopes;
+        }
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getScopeFromSuper(Class<?> mapTo) {
+        Class<?> superclass = mapTo.getSuperclass();
+        if (superclass != null)
+            return getScopes(superclass);
+        return EMPTY_CLASS_ARRAY;
     }
 
     private Class<?>[] getViews(Class<?> mapTo) {
@@ -67,13 +99,18 @@ public class Mapper {
     }
 
     private Class<?>[] getFroms(Class<?> mapTo) {
-        return Stream.<Function<Class<?>, Class<?>[]>>of(this::getFromFromMappingFrom,
+        return guessValueInSequence(mapTo, EMPTY_CLASS_ARRAY,
+                this::getFromFromMappingFrom,
                 this::getFromFromMapping,
                 this::getFromFromDeclaring,
-                this::getFromFromSuper)
+                this::getFromFromSuper);
+    }
+
+    private Class<?>[] guessValueInSequence(Class<?> mapTo, Class[] defaultReturn, Function<Class<?>, Class<?>[]>... functions) {
+        return Stream.<Function<Class<?>, Class<?>[]>>of(functions)
                 .map(f -> f.apply(mapTo))
                 .filter(froms -> froms.length != 0)
-                .findFirst().orElse(EMPTY_CLASS_ARRAY);
+                .findFirst().orElse(defaultReturn);
     }
 
     private Class<?>[] getFromFromMapping(Class<?> mapTo) {
