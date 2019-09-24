@@ -40,7 +40,7 @@ public class Mapper {
     private void register(Class<?> mapTo) {
         for (Class<?> view : getViews(mapTo))
             for (Class<?> from : getFroms(mapTo)) {
-                for (Class<?> scope : getScopes(mapTo))
+                for (Class<?> scope : getScopes(mapTo, VOID_SCOPES))
                     mappingRegisterData.register(from, view, scope, mapTo);
                 configNonDefaultMapping(from, mapTo);
             }
@@ -53,8 +53,8 @@ public class Mapper {
         return classes;
     }
 
-    private Class<?>[] getScopes(Class<?> mapTo) {
-        return guessValueInSequence(mapTo, VOID_SCOPES,
+    private Class<?>[] getScopes(Class<?> mapTo, Class<?>[] defaultReturn) {
+        return guessValueInSequence(mapTo, defaultReturn,
                 this::getScopeFromMappingFrom,
                 this::getScopeFromMapping,
                 this::getScopeFromDeclaring,
@@ -77,18 +77,15 @@ public class Mapper {
 
     private Class<?>[] getScopeFromDeclaring(Class<?> mapTo) {
         Class<?> declaringClass = mapTo.getDeclaringClass();
-        if (declaringClass != null) {
-            Class<?>[] declaringClassScopes = getScopes(declaringClass);
-            if (declaringClassScopes.length != 0)
-                return declaringClassScopes;
-        }
+        if (declaringClass != null)
+            return getScopes(declaringClass, EMPTY_CLASS_ARRAY);
         return EMPTY_CLASS_ARRAY;
     }
 
     private Class<?>[] getScopeFromSuper(Class<?> mapTo) {
         Class<?> superclass = mapTo.getSuperclass();
         if (superclass != null)
-            return getScopes(superclass);
+            return getScopes(superclass, EMPTY_CLASS_ARRAY);
         return EMPTY_CLASS_ARRAY;
     }
 
@@ -129,11 +126,8 @@ public class Mapper {
 
     private Class<?>[] getFromFromDeclaring(Class<?> mapTo) {
         Class<?> declaringClass = mapTo.getDeclaringClass();
-        if (declaringClass != null) {
-            Class<?>[] declaringClassFroms = getFroms(declaringClass);
-            if (declaringClassFroms.length != 0)
-                return declaringClassFroms;
-        }
+        if (declaringClass != null)
+            return getFroms(declaringClass);
         return EMPTY_CLASS_ARRAY;
     }
 
