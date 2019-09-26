@@ -26,11 +26,7 @@ public class Mapper {
     private Class<?> scope = void.class;
 
     public Mapper(String... packages) {
-        collectAllClasses(packages).forEach(mapTo -> {
-            register(mapTo);
-            for (Class<?> nested : mapTo.getDeclaredClasses())
-                register(nested);
-        });
+        collectAllClasses(packages).forEach(this::register);
     }
 
     static <T> T NotSupportParallelStreamReduce(T u1, T u2) {
@@ -44,6 +40,8 @@ public class Mapper {
                     mappingRegisterData.register(from, view, scope, mapTo);
                 configNonDefaultMapping(from, mapTo);
             }
+        for (Class<?> nested : mapTo.getDeclaredClasses())
+            register(nested);
     }
 
     private Set<Class<?>> collectAllClasses(Object[] packages) {
