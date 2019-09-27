@@ -1,11 +1,9 @@
 package com.github.leeonky.map;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Stream.of;
 
 class PermitRegisterConfig {
     private Map<Class<?>, Map<Class<?>, Map<Class<?>, Class<?>>>> targetActionScopePermits = new HashMap<>();
@@ -23,10 +21,16 @@ class PermitRegisterConfig {
 
     void register(Class<?>[] actions, Class<?>[] targets, Class<?>[] scopes, Class<?> permit) {
         for (Class<?> action : actions)
-            for (Class<?> target : targets)
-                targetActionScopePermits.computeIfAbsent(target, k -> new HashMap<>())
-                        .computeIfAbsent(action, k -> new HashMap<>())
-                        .putAll(of(scopes).collect(Collectors.toMap(s -> s, s -> permit)));
+            for (Class<?> target : targets) {
+                Map<Class<?>, Class<?>> scopePermitMap = targetActionScopePermits.computeIfAbsent(target, k -> new HashMap<>())
+                        .computeIfAbsent(action, k -> new HashMap<>());
+                for (Class<?> scope : scopes) {
+                    Class<?> exist = scopePermitMap.put(scope, permit);
+                    if (exist != null && exist != permit)
+                        System.err.println(String.format("Warning: %s and %s have the same view and scope in permit mapper ",
+                                exist.getName(), permit.getName()));
+                }
+            }
     }
 
     Optional<Class<?>> findPermit(Class<?> target, Class<?> action, Class<?> scope) {

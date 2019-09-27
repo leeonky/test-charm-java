@@ -17,7 +17,7 @@ class MappingRegisterData {
             throw new IllegalArgumentException(mapFrom.getName() + " should be public");
         Class<?> exist = sourceViewScopeMappingMap.computeIfAbsent(mapFrom, f -> new HashMap<>())
                 .computeIfAbsent(view, f -> new HashMap<>()).put(scope, mapTo);
-        if (exist != null)
+        if (exist != null && exist != mapTo)
             System.err.println(String.format("Warning: %s and %s have the same view and scope in view mapper ", exist.getName(), mapTo.getName()));
         viewScopeMappingListMap.computeIfAbsent(view, f1 -> new HashMap<>())
                 .computeIfAbsent(scope, f2 -> new ArrayList<>()).add(mapTo);

@@ -3,11 +3,11 @@ package com.github.leeonky.map;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-@Target({METHOD, FIELD, TYPE})
+@Target({TYPE})
 @Retention(RUNTIME)
-public @interface PermitAction {
-    Class<?> value();
+public @interface PermitTarget {
+    Class<?>[] value();
 }

@@ -18,18 +18,32 @@ public class PermitMapper {
     private PermitRegisterConfig permitRegisterConfig = new PermitRegisterConfig();
 
     public PermitMapper(String... packages) {
-        new Reflections((Object[]) packages)
-                .getTypesAnnotatedWith(Permit.class)
+        Reflections reflections = new Reflections((Object[]) packages);
+        reflections.getTypesAnnotatedWith(Permit.class)
+                .forEach(this::register);
+        reflections.getTypesAnnotatedWith(PermitTarget.class)
                 .forEach(this::register);
     }
 
     private void register(Class<?> type) {
-        permitRegisterConfig.register(type.getAnnotation(Permit.class).action(),
-                type.getAnnotation(Permit.class).target(), getScopes(type), type);
+        permitRegisterConfig.register(getActions(type), getTargets(type), getScopes(type), type);
         PolymorphicPermitIdentityString identityString = type.getAnnotation(PolymorphicPermitIdentityString.class);
         if (identityString != null)
-            permitRegisterConfig.registerPolymorphic(type.getAnnotation(Permit.class).action(),
-                    getScopes(type), identityString.value(), type);
+            permitRegisterConfig.registerPolymorphic(getActions(type), getScopes(type), identityString.value(), type);
+    }
+
+    private Class<?>[] getTargets(Class<?> type) {
+        PermitTarget permitTarget = type.getDeclaredAnnotation(PermitTarget.class);
+        if (permitTarget != null)
+            return permitTarget.value();
+        return type.getAnnotation(Permit.class).target();
+    }
+
+    private Class<?>[] getActions(Class<?> type) {
+        PermitAction permitAction = type.getDeclaredAnnotation(PermitAction.class);
+        if (permitAction != null)
+            return new Class<?>[]{permitAction.value()};
+        return type.getAnnotation(Permit.class).action();
     }
 
     private Class<?>[] getScopes(Class<?> type) {
