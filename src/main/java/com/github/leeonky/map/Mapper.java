@@ -33,6 +33,13 @@ public class Mapper {
         throw new IllegalStateException("Not support parallel stream");
     }
 
+    static Class<?>[] guessValueInSequence(Class<?> mapTo, Class[] defaultReturn, Function<Class<?>, Class<?>[]>... functions) {
+        return Stream.<Function<Class<?>, Class<?>[]>>of(functions)
+                .map(f -> f.apply(mapTo))
+                .filter(froms -> froms.length != 0)
+                .findFirst().orElse(defaultReturn);
+    }
+
     private void register(Class<?> mapTo) {
         for (Class<?> view : getViews(mapTo))
             for (Class<?> from : getFroms(mapTo)) {
@@ -99,13 +106,6 @@ public class Mapper {
                 this::getFromFromMapping,
                 this::getFromFromDeclaring,
                 this::getFromFromSuper);
-    }
-
-    private Class<?>[] guessValueInSequence(Class<?> mapTo, Class[] defaultReturn, Function<Class<?>, Class<?>[]>... functions) {
-        return Stream.<Function<Class<?>, Class<?>[]>>of(functions)
-                .map(f -> f.apply(mapTo))
-                .filter(froms -> froms.length != 0)
-                .findFirst().orElse(defaultReturn);
     }
 
     private Class<?>[] getFromFromMapping(Class<?> mapTo) {

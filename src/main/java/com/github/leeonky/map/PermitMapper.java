@@ -11,18 +11,43 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.github.leeonky.map.Mapper.guessValueInSequence;
+
 public class PermitMapper {
     private static final Class<?>[] VOID_SCOPES = {void.class};
+    private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
     private Class<?> scope = void.class;
     private Converter converter = Converter.createDefault();
     private PermitRegisterConfig permitRegisterConfig = new PermitRegisterConfig();
 
     public PermitMapper(String... packages) {
+        Set<Class<?>> classes = new HashSet<>();
         Reflections reflections = new Reflections((Object[]) packages);
-        reflections.getTypesAnnotatedWith(Permit.class)
-                .forEach(this::register);
-        reflections.getTypesAnnotatedWith(PermitTarget.class)
-                .forEach(this::register);
+        classes.addAll(reflections.getTypesAnnotatedWith(Permit.class));
+        classes.addAll(reflections.getTypesAnnotatedWith(PermitTarget.class));
+        classes.addAll(reflections.getTypesAnnotatedWith(PermitAction.class));
+        classes.forEach(this::register);
+    }
+
+    private Class<?>[] getTargetsFromPermitTarget(Class<?> type) {
+        PermitTarget permitTarget = type.getDeclaredAnnotation(PermitTarget.class);
+        if (permitTarget != null)
+            return permitTarget.value();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getTargetsFromPermit(Class<?> type) {
+        Permit permit = type.getDeclaredAnnotation(Permit.class);
+        if (permit != null)
+            return permit.target();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getTargetsFromDeclaring(Class<?> type) {
+        Class<?> declaringClass = type.getDeclaringClass();
+        if (declaringClass != null)
+            return getTargets(declaringClass);
+        return EMPTY_CLASS_ARRAY;
     }
 
     private void register(Class<?> type) {
@@ -33,10 +58,19 @@ public class PermitMapper {
     }
 
     private Class<?>[] getTargets(Class<?> type) {
-        PermitTarget permitTarget = type.getDeclaredAnnotation(PermitTarget.class);
-        if (permitTarget != null)
-            return permitTarget.value();
-        return type.getAnnotation(Permit.class).target();
+        return guessValueInSequence(type, EMPTY_CLASS_ARRAY,
+                this::getTargetsFromPermitTarget,
+                this::getTargetsFromPermit,
+                this::getTargetsFromDeclaring,
+                this::getTargetsFromSuper
+        );
+    }
+
+    private Class<?>[] getTargetsFromSuper(Class<?> type) {
+        Class<?> superclass = type.getSuperclass();
+        if (superclass != null)
+            return getTargets(superclass);
+        return EMPTY_CLASS_ARRAY;
     }
 
     private Class<?>[] getActions(Class<?> type) {
@@ -46,11 +80,24 @@ public class PermitMapper {
         return type.getAnnotation(Permit.class).action();
     }
 
+    private Class<?>[] getScopesFromPermitScope(Class<?> type) {
+        PermitScope permitScope = type.getAnnotation(PermitScope.class);
+        if (permitScope != null)
+            return permitScope.value();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getScopesFromPermit(Class<?> type) {
+        Permit permit = type.getAnnotation(Permit.class);
+        if (permit != null)
+            return permit.scope();
+        return EMPTY_CLASS_ARRAY;
+    }
+
     private Class<?>[] getScopes(Class<?> type) {
-        Class<?>[] scopes = type.getAnnotation(PermitScope.class) == null ?
-                type.getAnnotation(Permit.class).scope()
-                : type.getAnnotation(PermitScope.class).value();
-        return scopes.length == 0 ? VOID_SCOPES : scopes;
+        return guessValueInSequence(type, VOID_SCOPES,
+                this::getScopesFromPermitScope,
+                this::getScopesFromPermit);
     }
 
     @SuppressWarnings("unchecked")
