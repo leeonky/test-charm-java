@@ -51,10 +51,10 @@ public class PermitMapper {
     }
 
     private void register(Class<?> type) {
-        permitRegisterConfig.register(getActions(type), getTargets(type), getScopes(type), type);
+        permitRegisterConfig.register(getActions(type), getTargets(type), getScopes(type, VOID_SCOPES), type);
         PolymorphicPermitIdentityString identityString = type.getAnnotation(PolymorphicPermitIdentityString.class);
         if (identityString != null)
-            permitRegisterConfig.registerPolymorphic(getActions(type), getScopes(type), identityString.value(), type);
+            permitRegisterConfig.registerPolymorphic(getActions(type), getScopes(type, VOID_SCOPES), identityString.value(), type);
     }
 
     private Class<?>[] getTargets(Class<?> type) {
@@ -94,10 +94,27 @@ public class PermitMapper {
         return EMPTY_CLASS_ARRAY;
     }
 
-    private Class<?>[] getScopes(Class<?> type) {
-        return guessValueInSequence(type, VOID_SCOPES,
+    private Class<?>[] getScopes(Class<?> type, Class<?>[] defaultReturn) {
+        return guessValueInSequence(type, defaultReturn,
                 this::getScopesFromPermitScope,
-                this::getScopesFromPermit);
+                this::getScopesFromPermit,
+                this::getScopesFromDeclaring,
+                this::getScopesFromSuper
+        );
+    }
+
+    private Class<?>[] getScopesFromSuper(Class<?> type) {
+        Class<?> superclass = type.getSuperclass();
+        if (superclass != null)
+            return getScopes(superclass, EMPTY_CLASS_ARRAY);
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getScopesFromDeclaring(Class<?> type) {
+        Class<?> declaringClass = type.getDeclaringClass();
+        if (declaringClass != null)
+            return getScopes(declaringClass, EMPTY_CLASS_ARRAY);
+        return EMPTY_CLASS_ARRAY;
     }
 
     @SuppressWarnings("unchecked")
