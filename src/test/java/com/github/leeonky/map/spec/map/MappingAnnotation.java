@@ -9,103 +9,127 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MappingAnnotation {
     private final Mapper mapper = new Mapper(getClass().getPackage().getName());
 
-    interface Frontend {
+    interface Scope1 {
     }
 
-    interface Backend {
+    interface Scope2 {
+    }
+
+    interface Scope3 {
+    }
+
+    interface Scope4 {
     }
 
     public static class Entity {
-        public int i = 1;
-        public int j = 2;
+        public int f1 = 1, f2 = 2, f3 = 3, f4 = 4, f5 = 5;
     }
 
-    public static class AnotherEntity {
-        public int i = 1;
-        public int j = 2;
+    @Mapping(from = Entity.class, view = EntityFromDto1.class)
+    public static class EntityFromDto1 {
+        public int f1;
     }
 
-    @Mapping(from = Entity.class, view = Dto.class)
-    public static class Dto {
-        public int j;
-
-        public static class DtoFromDeclaring {
-            public int j;
-        }
-    }
-
-    @MappingView(DtoFromSuper.class)
-    public static class DtoFromSuper extends Dto {
-    }
-
-    @Mapping(from = String.class, view = DtoDirectlyFrom.class)
+    @Mapping(from = String.class, view = EntityFromDto2.class)
     @MappingFrom(Entity.class)
-    public static class DtoDirectlyFrom {
-        public int i;
+    public static class EntityFromDto2 {
+        public int f2;
     }
 
-    @MappingFrom(AnotherEntity.class)
-    public static class DtoSuperView extends Dto {
-
-    }
-
-    public static class Order {
-        public int id = 1;
-        public String number = "a";
-    }
-
-    @Mapping(from = Order.class, view = View.Simple.class, scope = Frontend.class)
-    public static class FrontendOrder {
-        public String number;
-
-        @MappingView(View.Detail.class)
-        public static class Detail {
-            public int id;
-            public String number;
+    @MappingFrom(Entity.class)
+    public static class EntityFromDto3 {
+        public static class Dto {
+            public int f3;
         }
     }
 
-    @Mapping(from = Order.class, view = View.Simple.class)
-    @MappingScope(Backend.class)
-    public static class BackendOrder {
-        public int id;
+    public static class EntityFromDto4 extends EntityFromDto3 {
+        public int f4;
     }
 
-    @MappingView(View.Detail.class)
-    public static class DetailBackendOrder extends BackendOrder {
-        public int id;
-        public String number;
+    @Mapping(from = Entity.class, view = String.class)
+    @MappingView(EntityViewDto1.class)
+    public static class EntityViewDto1 {
+        public int f1;
     }
+
+    @MappingView(EntityViewDto2.class)
+    public static class EntityViewDto2 {
+    }
+
+    @MappingFrom(Entity.class)
+    public static class EntityViewDto3 extends EntityViewDto2 {
+        public int f2;
+    }
+
+    @Mapping(from = Entity.class, view = View.Simple.class, scope = Scope1.class)
+    public static class EntityScopeDto1 {
+        public int f1;
+    }
+
+    @Mapping(from = Entity.class, view = View.Simple.class)
+    public static class EntityScopeDto2 {
+        public int f2;
+    }
+
+    @Mapping(from = Entity.class, view = View.Simple.class, scope = Scope1.class)
+    @MappingScope(Scope2.class)
+    public static class EntityScopeDto3 {
+        public int f3;
+    }
+
+    @MappingScope(Scope3.class)
+    public static class EntityScopeDto4 {
+        @Mapping(from = Entity.class, view = View.Simple.class)
+        public static class EntityScopeDto5 {
+            public int f4;
+        }
+    }
+
+    @Mapping(from = Entity.class, view = View.Detail.class)
+    public static class EntityScopeDto6 extends EntityScopeDto4 {
+        public int f4;
+    }
+
+    @Mapping(from = Entity.class, view = View.Detail.class)
+    public static class EntityScopeDto7 {
+        public int f3;
+    }
+
 
     @Nested
     class GuessMappingFrom {
 
         @Test
         void should_get_mapping_from_class_from_current_class_mapping_annotation() {
-            Object dto = mapper.map(new Entity(), Dto.class);
+            Object o = mapper.map(new Entity(), EntityFromDto1.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("j", 2);
+            assertThat(o)
+                    .isInstanceOf(EntityFromDto1.class)
+                    .hasFieldOrPropertyWithValue("f1", 1);
         }
 
         @Test
         void should_get_mapping_from_class_from_current_class_mapping_from_annotation() {
-            Object dto = mapper.map(new Entity(), DtoDirectlyFrom.class);
+            Object o = mapper.map(new Entity(), EntityFromDto2.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("i", 1);
+            assertThat(o)
+                    .isInstanceOf(EntityFromDto2.class)
+                    .hasFieldOrPropertyWithValue("f2", 2);
         }
 
         @Test
         void should_get_mapping_from_class_from_declaring_class() {
-            Object dto = mapper.map(new Entity(), Dto.DtoFromDeclaring.class);
+            Object o = mapper.map(new Entity(), EntityFromDto3.Dto.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("j", 2);
+            assertThat(o).hasFieldOrPropertyWithValue("f3", 3);
         }
 
         @Test
         void should_get_mapping_from_class_from_super_class() {
-            Object dto = mapper.map(new Entity(), DtoFromSuper.class);
+            Object o = mapper.map(new Entity(), EntityFromDto4.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("j", 2);
+            assertThat(o).hasFieldOrPropertyWithValue("f4", 4);
         }
     }
 
@@ -114,23 +138,27 @@ class MappingAnnotation {
 
         @Test
         void should_get_mapping_view_class_from_current_class_mapping_annotation() {
-            Object dto = mapper.map(new Entity(), Dto.class);
+            Object o = mapper.map(new Entity(), EntityFromDto1.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("j", 2);
+            assertThat(o)
+                    .isInstanceOf(EntityFromDto1.class)
+                    .hasFieldOrPropertyWithValue("f1", 1);
         }
 
         @Test
-        void should_get_mapping_from_class_from_current_class_mapping_from_annotation() {
-            Object dto = mapper.map(new Entity(), DtoDirectlyFrom.class);
+        void should_get_mapping_from_class_from_current_class_mapping_view_annotation() {
+            Object o = mapper.map(new Entity(), EntityViewDto1.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("i", 1);
+            assertThat(o).hasFieldOrPropertyWithValue("f1", 1);
         }
 
         @Test
+        // TODO to be removed feature
+        @Deprecated
         void should_not_guess_view_from_supper_class() {
-            Object dto = mapper.map(new AnotherEntity(), Dto.class);
+            Object o = mapper.map(new Entity(), EntityViewDto3.class);
 
-            assertThat(dto).isNull();
+            assertThat(o).hasFieldOrPropertyWithValue("f2", 2);
         }
     }
 
@@ -139,40 +167,46 @@ class MappingAnnotation {
 
         @Test
         void should_get_mapping_scope_class_from_current_class_mapping_annotation() {
-            mapper.setScope(Frontend.class);
+            mapper.setScope(Scope1.class);
 
-            Object dto = mapper.map(new Order(), View.Simple.class);
+            Object o = mapper.map(new Entity(), View.Simple.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("number", "a");
+            assertThat(o)
+                    .isInstanceOf(EntityScopeDto1.class)
+                    .hasFieldOrPropertyWithValue("f1", 1);
         }
 
         @Test
         void should_get_mapping_scope_class_from_current_class_mapping_scope_annotation() {
-            mapper.setScope(Backend.class);
+            mapper.setScope(Scope2.class);
 
-            Object dto = mapper.map(new Order(), View.Simple.class);
+            Object dto = mapper.map(new Entity(), View.Simple.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("id", 1);
+            assertThat(dto)
+                    .isInstanceOf(EntityScopeDto3.class)
+                    .hasFieldOrPropertyWithValue("f3", 3);
         }
 
         @Test
         void should_get_mapping_scope_class_from_declaring_class() {
-            mapper.setScope(Frontend.class);
+            mapper.setScope(Scope3.class);
 
-            Object dto = mapper.map(new Order(), View.Detail.class);
+            Object o = mapper.map(new Entity(), View.Simple.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("number", "a")
-                    .hasFieldOrPropertyWithValue("id", 1);
+            assertThat(o)
+                    .isInstanceOf(EntityScopeDto4.EntityScopeDto5.class)
+                    .hasFieldOrPropertyWithValue("f4", 4);
         }
 
         @Test
         void should_get_mapping_scope_class_from_super_class() {
-            mapper.setScope(Backend.class);
+            mapper.setScope(Scope3.class);
 
-            Object dto = mapper.map(new Order(), View.Detail.class);
+            Object dto = mapper.map(new Entity(), View.Detail.class);
 
-            assertThat(dto).hasFieldOrPropertyWithValue("number", "a")
-                    .hasFieldOrPropertyWithValue("id", 1);
+            assertThat(dto)
+                    .isInstanceOf(EntityScopeDto6.class)
+                    .hasFieldOrPropertyWithValue("f4", 4);
         }
     }
 }
