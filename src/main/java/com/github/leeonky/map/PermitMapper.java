@@ -77,7 +77,10 @@ public class PermitMapper {
         PermitAction permitAction = type.getDeclaredAnnotation(PermitAction.class);
         if (permitAction != null)
             return new Class<?>[]{permitAction.value()};
-        return type.getAnnotation(Permit.class).action();
+        Permit annotation = type.getAnnotation(Permit.class);
+        if (annotation != null)
+            return annotation.action();
+        return EMPTY_CLASS_ARRAY;
     }
 
     private Class<?>[] getScopesFromPermitScope(Class<?> type) {
