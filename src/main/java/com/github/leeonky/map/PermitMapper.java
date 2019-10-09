@@ -51,10 +51,22 @@ public class PermitMapper {
     }
 
     private void register(Class<?> type) {
-        permitRegisterConfig.register(getActions(type), getTargets(type), getScopes(type, VOID_SCOPES), type);
+        permitRegisterConfig.register(getActions(type), getTargets(type), getScopes(type, VOID_SCOPES), getParents(type, VOID_SCOPES), type);
         PolymorphicPermitIdentityString identityString = type.getAnnotation(PolymorphicPermitIdentityString.class);
         if (identityString != null)
             permitRegisterConfig.registerPolymorphic(getActions(type), getScopes(type, VOID_SCOPES), identityString.value(), type);
+    }
+
+    private Class<?>[] getParentsFromPermit(Class<?> type) {
+        Permit permit = type.getDeclaredAnnotation(Permit.class);
+        if (permit != null)
+            return permit.parent();
+        return EMPTY_CLASS_ARRAY;
+    }
+
+    private Class<?>[] getParents(Class<?> type, Class<?>[] defaultReturn) {
+        return guessValueInSequence(type, defaultReturn,
+                this::getParentsFromPermit);
     }
 
     private Class<?>[] getTargets(Class<?> type) {
@@ -120,9 +132,13 @@ public class PermitMapper {
         return EMPTY_CLASS_ARRAY;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T permit(T object, Class<?> target, Class<?> action) {
-        return (T) findPermit(target, action).map(p -> {
+        return permit(object, target, action, void.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T permit(T object, Class<?> target, Class<?> action, Class<?> parent) {
+        return (T) findPermit(target, action, parent).map(p -> {
             if (object instanceof Map)
                 return permitMap((Map<String, ?>) object, p);
             else if (object instanceof List)
@@ -166,8 +182,8 @@ public class PermitMapper {
                 .put(propertyChain[propertyChain.length - 1], value);
     }
 
-    public Optional<Class<?>> findPermit(Class<?> target, Class<?> action) {
-        return permitRegisterConfig.findPermit(target, action, scope);
+    public Optional<Class<?>> findPermit(Class<?> target, Class<?> action, Class<?> parent) {
+        return permitRegisterConfig.findPermit(target, action, scope, parent);
     }
 
     public void setScope(Class<?> scope) {

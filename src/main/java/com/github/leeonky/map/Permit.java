@@ -16,4 +16,6 @@ public @interface Permit {
     Class<?>[] action();
 
     Class<?>[] scope() default {};
+
+    Class<?>[] parent() default {};
 }

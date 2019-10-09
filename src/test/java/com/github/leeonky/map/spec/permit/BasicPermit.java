@@ -78,7 +78,22 @@ class BasicPermit {
         assertSame(permitMapper.permit(map, NotExistTarget.class, Action.Create.class), map);
     }
 
+    @Test
+    void should_support_permit_with_different_parent_target() {
+        HashMap<String, Object> map = new HashMap<String, Object>() {{
+            put("name", "tom");
+            put("age", 10);
+        }};
+
+        Map<String, ?> value = permitMapper.permit(map, User.class, Action.Create.class, Company.class);
+        assertThat(value).hasSize(1);
+        assertThat(value.get("name")).isEqualTo("tom");
+    }
+
     static class User {
+    }
+
+    static class Company {
     }
 
     @Permit(target = User.class, action = Action.Create.class)
@@ -95,5 +110,10 @@ class BasicPermit {
     @Permit(target = User.class, action = Action.Create.class, scope = NewScope.class)
     public class NewScopeUserPermit {
         public int age;
+    }
+
+    @Permit(target = User.class, parent = Company.class, action = Action.Create.class)
+    public class CompanyUserPermit {
+        public String name;
     }
 }
