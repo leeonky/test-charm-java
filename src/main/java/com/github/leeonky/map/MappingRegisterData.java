@@ -23,8 +23,8 @@ class MappingRegisterData {
                 .computeIfAbsent(scope, f2 -> new ArrayList<>()).add(mapTo);
     }
 
-    Optional<Class<?>> findMapTo(Object mapFrom, Class<?> view, Class<?> scope) {
-        Map<Class<?>, Class<?>> scopeMapping = sourceViewScopeMappingMap.getOrDefault(mapFrom.getClass(), emptyMap())
+    Optional<Class<?>> findMapTo(Class<?> fromClass, Class<?> view, Class<?> scope) {
+        Map<Class<?>, Class<?>> scopeMapping = sourceViewScopeMappingMap.getOrDefault(fromClass, emptyMap())
                 .getOrDefault(view, emptyMap());
         Class<?> to = scopeMapping.get(scope);
         return Optional.ofNullable(to != null ? to : scopeMapping.get(void.class));

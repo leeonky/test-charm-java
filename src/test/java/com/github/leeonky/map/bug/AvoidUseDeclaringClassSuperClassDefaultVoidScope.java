@@ -16,9 +16,9 @@ class AvoidUseDeclaringClassSuperClassDefaultVoidScope {
     @Test
     void avoid_use_declaring_default_void_scope() {
         Entity entity = new Entity();
-        Optional<Class<?>> mapping1 = mapper.findMapping(entity, View.Detail.class);
+        Optional<Class<?>> mapping1 = mapper.findMapping(entity.getClass(), View.Detail.class);
         mapper.setScope(Frontend.class);
-        Optional<Class<?>> mapping2 = mapper.findMapping(entity, View.Detail.class);
+        Optional<Class<?>> mapping2 = mapper.findMapping(entity.getClass(), View.Detail.class);
 
         assertThat(mapping1).isNotEqualTo(mapping2);
     }
