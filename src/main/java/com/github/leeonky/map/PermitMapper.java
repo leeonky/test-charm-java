@@ -70,19 +70,31 @@ public class PermitMapper {
 
     private LinkedHashMap<String, Object> assignToResult(LinkedHashMap<String, Object> result, PropertyWriter<?> property, Object value) {
         ToProperty toProperty = property.getAnnotation(ToProperty.class);
-        if (toProperty != null)
-            assignToNestedMap(result, value, toProperty.value().split("\\."));
-        else
+        if (toProperty != null) {
+            String propertyChain = toProperty.value();
+            if (propertyChain.contains("{")) {
+                String[] chains = propertyChain.replace("}", "").split("\\{", 2);
+                List<LinkedHashMap<String, Object>> listValue = ((Collection<Object>) value).stream()
+                        .map(o -> assignToNestedMap(new LinkedHashMap<>(), o, chains[1].split("\\.")))
+                        .collect(Collectors.toList());
+                if (chains[0].isEmpty())
+                    result.put(property.getName(), listValue);
+                else
+                    assignToNestedMap(result, listValue, chains[0].split("\\."));
+            } else
+                assignToNestedMap(result, value, propertyChain.split("\\."));
+        } else
             result.put(property.getName(), value);
         return result;
     }
 
     @SuppressWarnings("unchecked")
-    private void assignToNestedMap(LinkedHashMap<String, Object> result, Object value, String[] propertyChain) {
-        Arrays.stream(propertyChain, 0, propertyChain.length - 1)
+    private LinkedHashMap<String, Object> assignToNestedMap(LinkedHashMap<String, Object> result, Object value, String[] propertyChain) {
+        LinkedHashMap<String, Object> reduce = Arrays.stream(propertyChain, 0, propertyChain.length - 1)
                 .reduce(result, (m, p) -> (LinkedHashMap<String, Object>) m.computeIfAbsent(p, k -> new LinkedHashMap<>()),
-                        Mapper::NotSupportParallelStreamReduce)
-                .put(propertyChain[propertyChain.length - 1], value);
+                        Mapper::NotSupportParallelStreamReduce);
+        reduce.put(propertyChain[propertyChain.length - 1], value);
+        return reduce;
     }
 
     public Optional<Class<?>> findPermit(Class<?> target, Class<?> action) {

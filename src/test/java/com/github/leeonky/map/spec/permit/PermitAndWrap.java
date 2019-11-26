@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("unchecked")
@@ -40,6 +42,22 @@ public class PermitAndWrap {
         }}));
     }
 
+    @Test
+    void should_support_map_list_property_to_list_map() {
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("members", asList("001"));
+            put("leaders", asList("001"));
+        }}, User.class, Action.Create.class);
+
+        assertThat(value).isInstanceOf(LinkedHashMap.class);
+
+        assertThat(value).contains(new SimpleEntry("members", asList(new HashMap<String, Object>() {{
+            put("id", "001");
+        }}))).contains(new SimpleEntry("boss", asList(new HashMap<String, Object>() {{
+            put("id", "001");
+        }})));
+    }
+
     public static class User {
     }
 
@@ -51,5 +69,11 @@ public class PermitAndWrap {
 
         @ToProperty("identity.id")
         public String identityId;
+
+        @ToProperty("{id}")
+        public List<String> members;
+
+        @ToProperty("boss{id}")
+        public List<String> leaders;
     }
 }
