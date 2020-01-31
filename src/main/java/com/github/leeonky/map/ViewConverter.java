@@ -33,7 +33,7 @@ class ViewConverter extends BaseConverter {
     }
 
     protected Object map(Object source, MappingContext mappingContext) {
-        return mapper.findMapping(source, view).map(d -> {
+        return mapper.findMapping(source.getClass(), view).map(d -> {
             Object mappedObject = mappingContext.getMappedObject(source, valueOf(d));
             return mappedObject != null ? mappedObject : mapper.mapTo(source, d);
         }).orElse(null);

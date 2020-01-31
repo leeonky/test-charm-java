@@ -169,15 +169,15 @@ public class Mapper {
     @SuppressWarnings("unchecked")
     public <T> T map(Object source, Class<?> view) {
         if (source == null) return null;
-        return findMapping(source, view).map(t -> (T) mapTo(source, t)).orElse(null);
+        return findMapping(source.getClass(), view).map(t -> (T) mapTo(source, t)).orElse(null);
     }
 
     public <T> T mapTo(Object source, Class<T> t) {
         return mapperFactory.getMapperFacade().map(source, t);
     }
 
-    public Optional<Class<?>> findMapping(Object from, Class<?> view) {
-        return mappingRegisterData.findMapTo(from, view, scope);
+    public Optional<Class<?>> findMapping(Class<?> fromClass, Class<?> view) {
+        return mappingRegisterData.findMapTo(fromClass, view, scope);
     }
 
     public void setScope(Class<?> scope) {
