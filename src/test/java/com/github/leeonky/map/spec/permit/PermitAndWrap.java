@@ -1,9 +1,6 @@
 package com.github.leeonky.map.spec.permit;
 
-import com.github.leeonky.map.Action;
-import com.github.leeonky.map.Permit;
-import com.github.leeonky.map.PermitMapper;
-import com.github.leeonky.map.ToProperty;
+import com.github.leeonky.map.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -58,6 +55,15 @@ public class PermitAndWrap {
         }})));
     }
 
+    @Test
+    void should_support_transform_field() {
+        Map<String, ?> value = permitMapper.permit(new HashMap<String, Object>() {{
+            put("gender", "female");
+        }}, User.class, Action.Create.class);
+
+        assertThat(value).containsOnly(new SimpleEntry("gender", "FEMALE"));
+    }
+
     public static class User {
     }
 
@@ -75,5 +81,15 @@ public class PermitAndWrap {
 
         @ToProperty("boss{id}")
         public List<String> leaders;
+
+        @Transform(ToUpper.class)
+        public String gender;
+    }
+
+    public static class ToUpper implements Transformer<String> {
+        @Override
+        public String transform(String object) {
+            return object != null ? object.toUpperCase() : null;
+        }
     }
 }

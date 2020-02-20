@@ -209,8 +209,12 @@ public class PermitMapper {
             return processPolymorphicAndPermitMap((Map<String, ?>) value, permit, containingPermit, property);
         } else if (value instanceof Iterable) {
             return processPolymorphicAndPermitList((Iterable<?>) value, genericType, containingPermit, property);
-        } else
+        } else {
+            Transform transform = property.getAnnotation(Transform.class);
+            if (transform != null)
+                value = BeanClass.newInstance(transform.value()).transform(value);
             return converter.tryConvert(permit, value);
+        }
     }
 
     private Object processPolymorphicAndPermitList(Iterable<?> value, GenericType genericType, Class<?> containingPermit, PropertyWriter<?> property) {
