@@ -19,4 +19,14 @@ public interface Property<T> {
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
     GenericType getGenericType();
+
+    default Class<?> getElementPropertyType() {
+        Class<?> propertyType = getPropertyType();
+        if (propertyType.isArray())
+            return propertyType.getComponentType();
+        if (Iterable.class.isAssignableFrom(propertyType))
+            return getGenericType().getGenericTypeParameter(0)
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Should specify generic type %s.%s", getBeanClass().getName(), getName()))).getRawType();
+        return null;
+    }
 }
