@@ -20,7 +20,7 @@ public interface Property<T> {
 
     GenericType getGenericType();
 
-    default Class<?> getElementPropertyType() {
+    default Class<?> getElementType() {
         Class<?> propertyType = getPropertyType();
         if (propertyType.isArray())
             return propertyType.getComponentType();
@@ -28,5 +28,10 @@ public interface Property<T> {
             return getGenericType().getGenericTypeParameter(0)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("Should specify generic type %s.%s", getBeanClass().getName(), getName()))).getRawType();
         return null;
+    }
+
+    default Class<?> getElementOrPropertyType() {
+        Class<?> elementType = getElementType();
+        return elementType == null ? getPropertyType() : elementType;
     }
 }

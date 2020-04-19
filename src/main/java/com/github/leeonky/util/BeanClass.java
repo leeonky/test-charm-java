@@ -1,13 +1,7 @@
 package com.github.leeonky.util;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -136,5 +130,28 @@ public class BeanClass<T> {
 
     public T newInstance(Object... args) {
         return newInstance(type, args);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Object createCollection(List<?> elements) {
+        if (getType().isArray()) {
+            Object array = Array.newInstance(getType().getComponentType(), elements.size());
+            for (int i = 0; i < elements.size(); i++)
+                Array.set(array, i, elements.get(i));
+            return array;
+        }
+        if (getType().isInterface()) {
+            if (Set.class.isAssignableFrom(getType()))
+                return new LinkedHashSet<>(elements);
+            if (Iterable.class.isAssignableFrom(getType()))
+                return new ArrayList<>(elements);
+        } else {
+            if (Collection.class.isAssignableFrom(getType())) {
+                Collection<Object> collection = (Collection<Object>) newInstance();
+                collection.addAll(elements);
+                return collection;
+            }
+        }
+        throw new IllegalStateException(String.format("Cannot create instance of collection type %s", getName()));
     }
 }
