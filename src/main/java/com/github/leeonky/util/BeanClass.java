@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
@@ -73,6 +74,18 @@ public class BeanClass<T> {
         return Stream.of(parameters)
                 .map(o -> o == null ? "null" : o.getClass().getName() + ":" + o)
                 .collect(Collectors.joining(", "));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E> Optional<Stream<E>> getElements(Object collection) {
+        if (collection != null) {
+            Class<?> collectionType = collection.getClass();
+            if (collectionType.isArray())
+                return Optional.of(Stream.of((E[]) collection));
+            else if (collection instanceof Iterable)
+                return Optional.of(StreamSupport.stream(((Iterable<E>) collection).spliterator(), false));
+        }
+        return Optional.empty();
     }
 
     public Converter getConverter() {

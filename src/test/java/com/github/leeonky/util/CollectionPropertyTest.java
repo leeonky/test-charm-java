@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,6 +68,11 @@ class CollectionPropertyTest {
     @Nested
     class CreateReadWrite {
 
+        @Test
+        void support_get_elements_return_null() {
+            assertThat(BeanClass.getElements(null)).isEmpty();
+        }
+
         @Nested
         class Array {
 
@@ -77,6 +83,12 @@ class CollectionPropertyTest {
                 Object collection = beanClass.createCollection(asList("a", "b"));
 
                 assertThat(collection).isEqualTo(new String[]{"a", "b"});
+            }
+
+            @Test
+            void support_get_elements() {
+                assertThat(BeanClass.getElements(new String[]{"hello", "world"}).get().collect(Collectors.toList()))
+                        .isEqualTo(asList("hello", "world"));
             }
         }
 
@@ -108,6 +120,12 @@ class CollectionPropertyTest {
                 Object collection = beanClass.createCollection(asList("a", "b"));
 
                 assertThat(collection).isEqualTo(new LinkedList<>(asList("a", "b")));
+            }
+
+            @Test
+            void support_get_elements() {
+                assertThat(BeanClass.getElements(asList("hello", "world")).get().collect(Collectors.toList()))
+                        .isEqualTo(asList("hello", "world"));
             }
         }
     }
