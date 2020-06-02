@@ -70,7 +70,7 @@ class CollectionPropertyTest {
 
         @Test
         void support_get_elements_return_null() {
-            assertThat(BeanClass.getElements(null)).isEmpty();
+            assertThat(BeanClass.arrayCollectionToStream(null)).isEmpty();
         }
 
         @Nested
@@ -87,7 +87,7 @@ class CollectionPropertyTest {
 
             @Test
             void support_get_elements() {
-                assertThat(BeanClass.getElements(new String[]{"hello", "world"}).get().collect(Collectors.toList()))
+                assertThat(BeanClass.arrayCollectionToStream(new String[]{"hello", "world"}).get().collect(Collectors.toList()))
                         .isEqualTo(asList("hello", "world"));
             }
         }
@@ -124,7 +124,7 @@ class CollectionPropertyTest {
 
             @Test
             void support_get_elements() {
-                assertThat(BeanClass.getElements(asList("hello", "world")).get().collect(Collectors.toList()))
+                assertThat(BeanClass.arrayCollectionToStream(asList("hello", "world")).get().collect(Collectors.toList()))
                         .isEqualTo(asList("hello", "world"));
             }
         }

@@ -77,7 +77,7 @@ public class BeanClass<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E> Optional<Stream<E>> getElements(Object collection) {
+    public static <E> Optional<Stream<E>> arrayCollectionToStream(Object collection) {
         if (collection != null) {
             Class<?> collectionType = collection.getClass();
             if (collectionType.isArray())
