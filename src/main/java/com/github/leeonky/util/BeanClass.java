@@ -220,4 +220,9 @@ public class BeanClass<T> {
     public PropertyReader<?> getPropertyChainReaderInner(LinkedList<Object> chain) {
         return getPropertyReader((String) chain.removeFirst()).getPropertyChainReader(chain);
     }
+
+    @SuppressWarnings("unchecked")
+    public T createDefault() {
+        return (T) Array.get(Array.newInstance(getType(), 1), 0);
+    }
 }

@@ -43,4 +43,10 @@ class BeanClassTest {
 
         assertThat(BeanClass.getClassName(null)).isEqualTo(null);
     }
+
+    @Test
+    void create_default_value() {
+        assertThat(BeanClass.create(int.class).createDefault()).isEqualTo(0);
+        assertThat(BeanClass.create(Integer.class).createDefault()).isNull();
+    }
 }
