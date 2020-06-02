@@ -208,4 +208,16 @@ public class BeanClass<T> {
             return propertyReader.getPropertyTypeWrapper().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
         }
     }
+
+    public PropertyReader<?> getPropertyChainReader(String chain) {
+        return getPropertyChainReader(toChainNodes(chain));
+    }
+
+    public PropertyReader<?> getPropertyChainReader(List<Object> chain) {
+        return getPropertyChainReaderInner(new LinkedList<>(chain));
+    }
+
+    public PropertyReader<?> getPropertyChainReaderInner(LinkedList<Object> chain) {
+        return getPropertyReader((String) chain.removeFirst()).getPropertyChainReader(chain);
+    }
 }

@@ -93,6 +93,28 @@ class PropertyChainTest {
         }
     }
 
+    @Nested
+    class GetReader {
+
+        @Test
+        void top_level_property() {
+            assertThat(BeanClass.create(Bean.class).getPropertyChainReader("intValue"))
+                    .isEqualTo(BeanClass.create(Bean.class).getPropertyReader("intValue"));
+        }
+
+        @Test
+        void property_chain() {
+            assertThat(BeanClass.create(Beans.class).getPropertyChainReader("bean.intValue"))
+                    .isEqualTo(BeanClass.create(Bean.class).getPropertyReader("intValue"));
+        }
+
+        @Test
+        void chain_has_collection() {
+            assertThat(BeanClass.create(Beans.class).getPropertyChainReader("beans[0].intValue"))
+                    .isEqualTo(BeanClass.create(Bean.class).getPropertyReader("intValue"));
+        }
+    }
+
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -107,7 +129,7 @@ class PropertyChainTest {
     @Setter
     @Accessors(chain = true)
     class Beans {
-        private Bean[] bean;
+        private Bean bean;
         private Bean[] beans;
     }
 }
