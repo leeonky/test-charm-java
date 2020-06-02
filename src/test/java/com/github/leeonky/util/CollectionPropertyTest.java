@@ -69,8 +69,8 @@ class CollectionPropertyTest {
     class CreateReadWrite {
 
         @Test
-        void support_get_elements_return_null() {
-            assertThat(BeanClass.arrayCollectionToStream(null)).isEmpty();
+        void support_null_input() {
+            assertThrows(IllegalArgumentException.class, () -> BeanClass.arrayCollectionToStream(null));
         }
 
         @Nested
@@ -87,7 +87,7 @@ class CollectionPropertyTest {
 
             @Test
             void support_get_elements() {
-                assertThat(BeanClass.arrayCollectionToStream(new String[]{"hello", "world"}).get().collect(Collectors.toList()))
+                assertThat(BeanClass.arrayCollectionToStream(new String[]{"hello", "world"}).collect(Collectors.toList()))
                         .isEqualTo(asList("hello", "world"));
             }
         }
@@ -124,7 +124,7 @@ class CollectionPropertyTest {
 
             @Test
             void support_get_elements() {
-                assertThat(BeanClass.arrayCollectionToStream(asList("hello", "world")).get().collect(Collectors.toList()))
+                assertThat(BeanClass.arrayCollectionToStream(asList("hello", "world")).collect(Collectors.toList()))
                         .isEqualTo(asList("hello", "world"));
             }
         }

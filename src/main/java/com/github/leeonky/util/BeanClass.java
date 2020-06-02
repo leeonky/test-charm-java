@@ -77,15 +77,25 @@ public class BeanClass<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <E> Optional<Stream<E>> arrayCollectionToStream(Object collection) {
+    public static <E> Stream<E> arrayCollectionToStream(Object collection) {
         if (collection != null) {
             Class<?> collectionType = collection.getClass();
             if (collectionType.isArray())
-                return Optional.of(Stream.of((E[]) collection));
+                return IntStream.range(0, Array.getLength(collection)).mapToObj(i -> (E) Array.get(collection, i));
             else if (collection instanceof Iterable)
-                return Optional.of(StreamSupport.stream(((Iterable<E>) collection).spliterator(), false));
+                return StreamSupport.stream(((Iterable<E>) collection).spliterator(), false);
         }
-        return Optional.empty();
+        throw new IllegalArgumentException("`" + collection + "` is not collection or array");
+    }
+
+    public static List<Object> toChainNodes(String chain) {
+        return Arrays.stream(chain.split("[\\[\\].]")).filter(s -> !s.isEmpty()).map(s -> {
+            try {
+                return Integer.valueOf(s);
+            } catch (Exception ignore) {
+                return s;
+            }
+        }).collect(Collectors.toList());
     }
 
     public Converter getConverter() {
@@ -166,5 +176,36 @@ public class BeanClass<T> {
             }
         }
         throw new IllegalStateException(String.format("Cannot create instance of collection type %s", getName()));
+    }
+
+    public Object getPropertyChainValue(T object, String chain) {
+        return getPropertyChainValue(object, toChainNodes(chain));
+    }
+
+    public Object getPropertyChainValue(T object, List<Object> chain) {
+        return getPropertyChainValueInner(chain, 0, object, new LinkedList<>(chain));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object getPropertyChainValueInner(List<Object> originalChain, int level, T object, LinkedList<Object> chain) {
+        if (chain.isEmpty())
+            return object;
+        if (object == null)
+            throw new NullPointerInChainException(originalChain, level);
+        Object p = chain.removeFirst();
+        if (p instanceof Integer) {
+            Object[] array = BeanClass.arrayCollectionToStream(object).toArray();
+            if ((int) p >= array.length)
+                throw new NullPointerInChainException(originalChain, level);
+            Object element = array[(int) p];
+            if (chain.isEmpty())
+                return element;
+            if (element == null)
+                throw new NullPointerInChainException(originalChain, level + 1);
+            return ((BeanClass) BeanClass.create(element.getClass())).getPropertyChainValueInner(originalChain, level + 1, element, chain);
+        } else {
+            PropertyReader propertyReader = getPropertyReader((String) p);
+            return propertyReader.getPropertyTypeWrapper().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
+        }
     }
 }
