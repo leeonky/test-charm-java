@@ -12,9 +12,9 @@ public interface PropertyReader<T> extends Property<T> {
         while (!linkedChain.isEmpty()) {
             Object p = linkedChain.removeFirst();
             if (p instanceof Integer)
-                return BeanClass.create(getElementType()).getPropertyChainReader(linkedChain);
+                return BeanClass.create(getPropertyType().getElementType().getType()).getPropertyChainReader(linkedChain);
             else
-                reader = getPropertyTypeWrapper().getPropertyReader((String) p);
+                reader = getPropertyType().getPropertyReader((String) p);
         }
         return reader;
     }

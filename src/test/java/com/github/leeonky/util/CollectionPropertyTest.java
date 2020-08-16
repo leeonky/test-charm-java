@@ -28,8 +28,8 @@ class CollectionPropertyTest {
 
         @Test
         void get_element_or_property_type() {
-            assertThat(beanClass.getPropertyReader("array").getElementOrPropertyType()).isEqualTo(String.class);
-            assertThat(beanClass.getPropertyReader("str").getElementOrPropertyType()).isEqualTo(String.class);
+            assertThat(((Property<Bean>) beanClass.getPropertyReader("array")).getPropertyType().getElementOrPropertyType().getType()).isEqualTo(String.class);
+            assertThat(((Property<Bean>) beanClass.getPropertyReader("str")).getPropertyType().getElementOrPropertyType().getType()).isEqualTo(String.class);
         }
 
         @Nested
@@ -37,10 +37,10 @@ class CollectionPropertyTest {
 
             @Test
             void get_element_type() {
-                assertThat(beanClass.getPropertyReader("array").getElementType())
+                assertThat(((Property<Bean>) beanClass.getPropertyReader("array")).getPropertyType().getElementType().getType())
                         .isEqualTo(String.class);
 
-                assertThat(beanClass.getPropertyReader("array").getElementType())
+                assertThat(((Property<Bean>) beanClass.getPropertyReader("array")).getPropertyType().getElementType().getType())
                         .isEqualTo(String.class);
             }
         }
@@ -50,17 +50,17 @@ class CollectionPropertyTest {
 
             @Test
             void get_element_type() {
-                assertThat(beanClass.getPropertyReader("iterable").getElementType())
+                assertThat(((Property<Bean>) beanClass.getPropertyReader("iterable")).getPropertyType().getElementType().getType())
                         .isEqualTo(String.class);
 
-                assertThat(beanClass.getPropertyReader("iterable").getElementType())
+                assertThat(((Property<Bean>) beanClass.getPropertyReader("iterable")).getPropertyType().getElementType().getType())
                         .isEqualTo(String.class);
             }
 
             @Test
             void should_raise_error_when_generic_type_params_not_specify() {
-                assertThrows(IllegalArgumentException.class, () -> beanClass.getPropertyReader("invalidIterable1").getElementType());
-                assertThrows(IllegalArgumentException.class, () -> beanClass.getPropertyReader("invalidIterable2").getElementType());
+                assertThrows(IllegalArgumentException.class, () -> ((Property<Bean>) beanClass.getPropertyReader("invalidIterable1")).getPropertyType().getElementType().getType());
+                assertThrows(IllegalArgumentException.class, () -> ((Property<Bean>) beanClass.getPropertyReader("invalidIterable2")).getPropertyType().getElementType().getType());
             }
         }
     }

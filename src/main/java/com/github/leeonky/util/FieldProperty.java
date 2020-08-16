@@ -18,7 +18,7 @@ abstract class FieldProperty<T> extends AbstractProperty<T> {
     }
 
     @Override
-    public Class<?> getPropertyType() {
+    public Class<?> getPropertyClass() {
         return field.getType();
     }
 

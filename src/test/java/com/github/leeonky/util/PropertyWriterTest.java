@@ -104,7 +104,7 @@ class PropertyWriterTest {
 
         @Test
         void should_support_get_generic_type_from_getter_field() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericField").getPropertyTypeWrapper();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericField").getPropertyType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 
@@ -113,7 +113,7 @@ class PropertyWriterTest {
 
         @Test
         void should_support_get_generic_type_from_getter_method() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericMethod").getPropertyTypeWrapper();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericMethod").getPropertyType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 

@@ -47,7 +47,7 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
     }
 
     @Override
-    public Class<?> getPropertyType() {
+    public Class<?> getPropertyClass() {
         return method.getReturnType();
     }
 }

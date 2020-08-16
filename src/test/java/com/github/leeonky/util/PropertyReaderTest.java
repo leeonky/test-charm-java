@@ -120,13 +120,13 @@ class PropertyReaderTest {
 
         @Test
         void should_return_empty_when_not_specify_generic_type() {
-            assertThat(BeanClass.create(InvalidGenericType.class).getPropertyReader("list").getPropertyTypeWrapper().getTypeArguments(0))
+            assertThat(BeanClass.create(InvalidGenericType.class).getPropertyReader("list").getPropertyType().getTypeArguments(0))
                     .isEmpty();
         }
 
         @Test
         void should_support_get_generic_type_from_setter_field() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getPropertyTypeWrapper();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getPropertyType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 
@@ -135,7 +135,7 @@ class PropertyReaderTest {
 
         @Test
         void should_support_get_generic_type_from_setter_method() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericMethod").getPropertyTypeWrapper();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericMethod").getPropertyType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 
@@ -145,12 +145,12 @@ class PropertyReaderTest {
         @Test
         void should_support_nested_generic_parameter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("nestedGenericField")
-                    .getPropertyTypeWrapper().getTypeArguments(0).get().getTypeArguments(0).get().getType()).isEqualTo(Long.class);
+                    .getPropertyType().getTypeArguments(0).get().getTypeArguments(0).get().getType()).isEqualTo(Long.class);
         }
 
         @Test
         void should_return_emtpy_when_type_is_not_generic() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("notGenericField").getPropertyTypeWrapper();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("notGenericField").getPropertyType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 

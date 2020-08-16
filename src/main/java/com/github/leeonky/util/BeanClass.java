@@ -212,7 +212,7 @@ public class BeanClass<T> {
             return ((BeanClass) BeanClass.create(element.getClass())).getPropertyChainValueInner(originalChain, level + 1, element, chain);
         } else {
             PropertyReader propertyReader = getPropertyReader((String) p);
-            return propertyReader.getPropertyTypeWrapper().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
+            return propertyReader.getPropertyType().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
         }
     }
 
@@ -239,5 +239,19 @@ public class BeanClass<T> {
 
     public Optional<BeanClass<?>> getTypeArguments(int position) {
         return Optional.empty();
+    }
+
+    public BeanClass<?> getElementType() {
+        if (type.isArray())
+            return BeanClass.create(type.getComponentType());
+        if (Iterable.class.isAssignableFrom(type))
+            return getTypeArguments(0)
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Should specify generic type %s.%s", getName(), getName())));
+        return null;
+    }
+
+    public BeanClass<?> getElementOrPropertyType() {
+        BeanClass<?> elementType = getElementType();
+        return elementType == null ? this : elementType;
     }
 }

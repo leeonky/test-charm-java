@@ -11,7 +11,7 @@ abstract class AbstractProperty<T> implements Property<T> {
 
     @Override
     public Object tryConvert(Object value) {
-        return beanClass.getConverter().tryConvert(getPropertyType(), value);
+        return beanClass.getConverter().tryConvert(getPropertyClass(), value);
     }
 
     @Override
@@ -22,7 +22,7 @@ abstract class AbstractProperty<T> implements Property<T> {
     protected abstract Type provideGenericType();
 
     @Override
-    public BeanClass<?> getPropertyTypeWrapper() {
+    public BeanClass<?> getPropertyType() {
         return BeanClass.create(GenericType.createGenericType(provideGenericType()));
     }
 }

@@ -35,7 +35,7 @@ class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWrite
     }
 
     @Override
-    public Class<?> getPropertyType() {
+    public Class<?> getPropertyClass() {
         return method.getParameterTypes()[0];
     }
 
