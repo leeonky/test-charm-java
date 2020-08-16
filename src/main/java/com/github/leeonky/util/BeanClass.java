@@ -10,12 +10,13 @@ import java.util.stream.StreamSupport;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
+    private final static BeanClass[] EMPTY_BEAN_CLASS_ARRAY = new BeanClass[0];
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Class<T> type;
     private final Converter converter = Converter.createDefault();
 
-    private BeanClass(Class<T> type) {
+    protected BeanClass(Class<T> type) {
         this.type = type;
         Map<String, Field> addedReaderFields = new HashMap<>();
         Map<String, Field> addedWriterFields = new HashMap<>();
@@ -96,6 +97,12 @@ public class BeanClass<T> {
                 return s;
             }
         }).collect(Collectors.toList());
+    }
+
+    public static BeanClass<?> create(GenericType type) {
+        if (!type.hasTypeArguments())
+            return create(type.getRawType());
+        return GenericBeanClass.create(type);
     }
 
     public Converter getConverter() {
@@ -224,5 +231,13 @@ public class BeanClass<T> {
     @SuppressWarnings("unchecked")
     public T createDefault() {
         return (T) Array.get(Array.newInstance(getType(), 1), 0);
+    }
+
+    public boolean hasTypeArguments() {
+        return false;
+    }
+
+    public Optional<BeanClass<?>> getTypeArguments(int position) {
+        return Optional.empty();
     }
 }

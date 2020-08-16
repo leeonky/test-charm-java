@@ -29,4 +29,8 @@ public class GenericType {
         }
         return Optional.empty();
     }
+
+    public boolean hasTypeArguments() {
+        return type instanceof ParameterizedType;
+    }
 }

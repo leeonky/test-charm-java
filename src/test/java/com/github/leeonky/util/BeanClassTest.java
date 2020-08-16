@@ -49,4 +49,10 @@ class BeanClassTest {
         assertThat(BeanClass.create(int.class).createDefault()).isEqualTo(0);
         assertThat(BeanClass.create(Integer.class).createDefault()).isNull();
     }
+
+    @Test
+    void get_generic_params() {
+        assertThat(BeanClass.create(Integer.class).hasTypeArguments()).isFalse();
+        assertThat(BeanClass.create(Integer.class).getTypeArguments(0)).isEmpty();
+    }
 }

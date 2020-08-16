@@ -12,14 +12,14 @@ public interface Property<T> {
 
     BeanClass<T> getBeanClass();
 
-    default BeanClass<?> getPropertyTypeWrapper() {
-        return BeanClass.create(getPropertyType());
-    }
+    BeanClass<?> getPropertyTypeWrapper();
 
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
+    @Deprecated
     GenericType getGenericType();
 
+    @Deprecated
     default Class<?> getElementType() {
         Class<?> propertyType = getPropertyType();
         if (propertyType.isArray())
@@ -30,6 +30,7 @@ public interface Property<T> {
         return null;
     }
 
+    @Deprecated
     default Class<?> getElementOrPropertyType() {
         Class<?> elementType = getElementType();
         return elementType == null ? getPropertyType() : elementType;
