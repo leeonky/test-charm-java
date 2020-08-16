@@ -22,11 +22,6 @@ abstract class AbstractProperty<T> implements Property<T> {
     protected abstract Type provideGenericType();
 
     @Override
-    public GenericType getGenericType() {
-        return GenericType.createGenericType(provideGenericType());
-    }
-
-    @Override
     public BeanClass<?> getPropertyTypeWrapper() {
         return BeanClass.create(GenericType.createGenericType(provideGenericType()));
     }

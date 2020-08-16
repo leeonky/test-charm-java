@@ -120,41 +120,41 @@ class PropertyReaderTest {
 
         @Test
         void should_return_empty_when_not_specify_generic_type() {
-            assertThat(BeanClass.create(InvalidGenericType.class).getPropertyReader("list").getGenericType().getGenericTypeParameter(0))
+            assertThat(BeanClass.create(InvalidGenericType.class).getPropertyReader("list").getPropertyTypeWrapper().getTypeArguments(0))
                     .isEmpty();
         }
 
         @Test
         void should_support_get_generic_type_from_setter_field() {
-            GenericType genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getGenericType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getPropertyTypeWrapper();
 
-            assertThat(genericType.getRawType()).isEqualTo(List.class);
+            assertThat(genericType.getType()).isEqualTo(List.class);
 
-            assertThat(genericType.getGenericTypeParameter(0).get().getRawType()).isEqualTo(Long.class);
+            assertThat(genericType.getTypeArguments(0).get().getType()).isEqualTo(Long.class);
         }
 
         @Test
         void should_support_get_generic_type_from_setter_method() {
-            GenericType genericType = beanWithPubFieldBeanClass.getPropertyReader("genericMethod").getGenericType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericMethod").getPropertyTypeWrapper();
 
-            assertThat(genericType.getRawType()).isEqualTo(List.class);
+            assertThat(genericType.getType()).isEqualTo(List.class);
 
-            assertThat(genericType.getGenericTypeParameter(0).get().getRawType()).isEqualTo(Long.class);
+            assertThat(genericType.getTypeArguments(0).get().getType()).isEqualTo(Long.class);
         }
 
         @Test
         void should_support_nested_generic_parameter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("nestedGenericField")
-                    .getGenericType().getGenericTypeParameter(0).get().getGenericTypeParameter(0).get().getRawType()).isEqualTo(Long.class);
+                    .getPropertyTypeWrapper().getTypeArguments(0).get().getTypeArguments(0).get().getType()).isEqualTo(Long.class);
         }
 
         @Test
         void should_return_emtpy_when_type_is_not_generic() {
-            GenericType genericType = beanWithPubFieldBeanClass.getPropertyReader("notGenericField").getGenericType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("notGenericField").getPropertyTypeWrapper();
 
-            assertThat(genericType.getRawType()).isEqualTo(List.class);
+            assertThat(genericType.getType()).isEqualTo(List.class);
 
-            assertThat(genericType.getGenericTypeParameter(ANY_INT)).isEmpty();
+            assertThat(genericType.getTypeArguments(ANY_INT)).isEmpty();
         }
     }
 }

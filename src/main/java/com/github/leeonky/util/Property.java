@@ -17,16 +17,13 @@ public interface Property<T> {
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
     @Deprecated
-    GenericType getGenericType();
-
-    @Deprecated
     default Class<?> getElementType() {
         Class<?> propertyType = getPropertyType();
         if (propertyType.isArray())
             return propertyType.getComponentType();
         if (Iterable.class.isAssignableFrom(propertyType))
-            return getGenericType().getGenericTypeParameter(0)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("Should specify generic type %s.%s", getBeanClass().getName(), getName()))).getRawType();
+            return getPropertyTypeWrapper().getTypeArguments(0)
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Should specify generic type %s.%s", getBeanClass().getName(), getName()))).getType();
         return null;
     }
 
