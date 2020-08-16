@@ -18,7 +18,6 @@ class PropertyWriterTest {
         public List<Long> genericField;
         @Attr("v1")
         private int field3;
-        private int field4;
         private int privateField;
 
         public void setGenericMethod(List<Long> list) {

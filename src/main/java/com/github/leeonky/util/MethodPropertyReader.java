@@ -1,10 +1,10 @@
 package com.github.leeonky.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import static com.github.leeonky.util.StringUtil.unCapitalize;
+import static com.github.leeonky.util.Suppressor.get;
 
 class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReader<T> {
     private static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
@@ -24,11 +24,7 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
 
     @Override
     public Object getValue(T bean) {
-        try {
-            return method.invoke(bean);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
+        return get(() -> method.invoke(bean));
     }
 
     @Override

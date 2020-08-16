@@ -1,6 +1,5 @@
 package com.github.leeonky.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
@@ -20,11 +19,7 @@ class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWrite
 
     @Override
     public void setValue(T bean, Object value) {
-        try {
-            method.invoke(bean, tryConvert(value));
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
+        Suppressor.run(() -> method.invoke(bean, tryConvert(value)));
     }
 
     @Override

@@ -1,12 +1,17 @@
 package com.github.leeonky.util;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static com.github.leeonky.util.Suppressor.get;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
@@ -57,11 +62,7 @@ public class BeanClass<T> {
         if (constructors.size() != 1)
             throw new IllegalArgumentException(String.format("No appropriate %s constructor for params [%s]",
                     type.getName(), toString(args)));
-        try {
-            return (T) constructors.get(0).newInstance(args);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
+        return get(() -> (T) constructors.get(0).newInstance(args));
     }
 
     private static boolean isProperConstructor(Constructor<?> constructor, Object[] parameters) {
