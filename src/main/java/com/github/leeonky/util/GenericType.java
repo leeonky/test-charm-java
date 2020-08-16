@@ -2,6 +2,7 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Objects;
 import java.util.Optional;
 
 public class GenericType {
@@ -32,5 +33,15 @@ public class GenericType {
 
     public boolean hasTypeArguments() {
         return type instanceof ParameterizedType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(GenericType.class, type);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof GenericType && Objects.equals(type, ((GenericType) obj).type);
     }
 }

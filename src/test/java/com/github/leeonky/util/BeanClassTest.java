@@ -2,6 +2,8 @@ package com.github.leeonky.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -54,5 +56,16 @@ class BeanClassTest {
     void get_generic_params() {
         assertThat(BeanClass.create(Integer.class).hasTypeArguments()).isFalse();
         assertThat(BeanClass.create(Integer.class).getTypeArguments(0)).isEmpty();
+    }
+
+    @Test
+    void hash_code() {
+        assertThat(BeanClass.create(Integer.class).hashCode())
+                .isEqualTo(Objects.hash(BeanClass.class, Integer.class));
+    }
+
+    @Test
+    void bean_class_equal() {
+        assertThat(new BeanClass<>(Integer.class)).isEqualTo(new BeanClass<>(Integer.class));
     }
 }

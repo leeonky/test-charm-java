@@ -10,7 +10,6 @@ import java.util.stream.StreamSupport;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
-    private final static BeanClass[] EMPTY_BEAN_CLASS_ARRAY = new BeanClass[0];
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Class<T> type;
@@ -253,5 +252,15 @@ public class BeanClass<T> {
     public BeanClass<?> getElementOrPropertyType() {
         BeanClass<?> elementType = getElementType();
         return elementType == null ? this : elementType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(BeanClass.class, type);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass().equals(BeanClass.class) && Objects.equals(((BeanClass) obj).getType(), type);
     }
 }

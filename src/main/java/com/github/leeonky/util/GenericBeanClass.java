@@ -1,12 +1,13 @@
 package com.github.leeonky.util;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class GenericBeanClass<T> extends BeanClass<T> {
     private final GenericType genericType;
 
     @SuppressWarnings("unchecked")
-    private GenericBeanClass(GenericType genericType) {
+    protected GenericBeanClass(GenericType genericType) {
         super((Class<T>) genericType.getRawType());
         this.genericType = genericType;
     }
@@ -23,5 +24,15 @@ public class GenericBeanClass<T> extends BeanClass<T> {
     @Override
     public boolean hasTypeArguments() {
         return genericType.hasTypeArguments();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(GenericBeanClass.class, genericType);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof GenericBeanClass && Objects.equals(genericType, ((GenericBeanClass) obj).genericType);
     }
 }
