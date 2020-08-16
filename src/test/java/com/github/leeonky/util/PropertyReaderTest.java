@@ -3,6 +3,8 @@ package com.github.leeonky.util;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,6 +55,15 @@ class PropertyReaderTest {
 
     public static class InvalidGenericType<T> {
         public List<T> list;
+    }
+
+    @Nested
+    class GetParentType {
+
+        @Test
+        void get_bean_class() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyReader("field").getBeanType()).isEqualTo(beanWithPubFieldBeanClass);
+        }
     }
 
     @Nested
@@ -113,6 +124,19 @@ class PropertyReaderTest {
             Attr annotation = beanWithPubFieldBeanClass.getPropertyReader("field3").getAnnotation(Attr.class);
             assertThat(annotation.value()).isEqualTo("v1");
         }
+
+        @Test
+        void support_use_customer_annotation_getter() {
+            AnnotationGetter.setAnnotationGetter(new AnnotationGetter() {
+                @Override
+                public <A extends Annotation> A getAnnotation(Field field, Class<A> annotationClass) {
+                    return null;
+                }
+            });
+
+            assertThat(beanWithPubFieldBeanClass.getPropertyReader("field3").getAnnotation(Attr.class)).isNull();
+            AnnotationGetter.setAnnotationGetter(new AnnotationGetter());
+        }
     }
 
     @Nested
@@ -120,13 +144,13 @@ class PropertyReaderTest {
 
         @Test
         void should_return_empty_when_not_specify_generic_type() {
-            assertThat(BeanClass.create(InvalidGenericType.class).getPropertyReader("list").getPropertyType().getTypeArguments(0))
+            assertThat(BeanClass.create(InvalidGenericType.class).getPropertyReader("list").getType().getTypeArguments(0))
                     .isEmpty();
         }
 
         @Test
         void should_support_get_generic_type_from_setter_field() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getPropertyType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 
@@ -135,7 +159,7 @@ class PropertyReaderTest {
 
         @Test
         void should_support_get_generic_type_from_setter_method() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericMethod").getPropertyType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericMethod").getType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 
@@ -145,12 +169,12 @@ class PropertyReaderTest {
         @Test
         void should_support_nested_generic_parameter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("nestedGenericField")
-                    .getPropertyType().getTypeArguments(0).get().getTypeArguments(0).get().getType()).isEqualTo(Long.class);
+                    .getType().getTypeArguments(0).get().getTypeArguments(0).get().getType()).isEqualTo(Long.class);
         }
 
         @Test
         void should_return_emtpy_when_type_is_not_generic() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("notGenericField").getPropertyType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("notGenericField").getType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 

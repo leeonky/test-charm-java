@@ -211,7 +211,7 @@ public class BeanClass<T> {
             return ((BeanClass) BeanClass.create(element.getClass())).getPropertyChainValueInner(originalChain, level + 1, element, chain);
         } else {
             PropertyReader propertyReader = getPropertyReader((String) p);
-            return propertyReader.getPropertyType().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
+            return propertyReader.getType().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
         }
     }
 

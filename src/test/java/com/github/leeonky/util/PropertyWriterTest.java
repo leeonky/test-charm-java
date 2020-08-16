@@ -18,6 +18,7 @@ class PropertyWriterTest {
         public List<Long> genericField;
         @Attr("v1")
         private int field3;
+        private int field4;
         private int privateField;
 
         public void setGenericMethod(List<Long> list) {
@@ -29,6 +30,9 @@ class PropertyWriterTest {
         }
 
         public void setField3(int i) {
+        }
+
+        public void setField4(int i) {
         }
     }
 
@@ -88,7 +92,7 @@ class PropertyWriterTest {
 
         @Test
         void should_support_get_annotation_from_method() {
-            Attr annotation = beanWithPubFieldBeanClass.getPropertyWriter("field2").getAnnotation(Attr.class);
+            Attr annotation = beanWithPubFieldBeanClass.getPropertyWriters().get("field2").getAnnotation(Attr.class);
             assertThat(annotation.value()).isEqualTo("v1");
         }
 
@@ -97,6 +101,11 @@ class PropertyWriterTest {
             Attr annotation = beanWithPubFieldBeanClass.getPropertyWriter("field3").getAnnotation(Attr.class);
             assertThat(annotation.value()).isEqualTo("v1");
         }
+
+        @Test
+        void should_return_null_when_no_annotation() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyWriter("field4").getAnnotation(Attr.class)).isNull();
+        }
     }
 
     @Nested
@@ -104,7 +113,7 @@ class PropertyWriterTest {
 
         @Test
         void should_support_get_generic_type_from_getter_field() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericField").getPropertyType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericField").getType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 
@@ -113,7 +122,7 @@ class PropertyWriterTest {
 
         @Test
         void should_support_get_generic_type_from_getter_method() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericMethod").getPropertyType();
+            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyWriter("genericMethod").getType();
 
             assertThat(genericType.getType()).isEqualTo(List.class);
 

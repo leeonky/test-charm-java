@@ -6,13 +6,11 @@ public interface Property<T> {
 
     String getName();
 
-    Class<?> getPropertyClass();
-
     Object tryConvert(Object value);
 
-    BeanClass<T> getBeanClass();
+    BeanClass<T> getBeanType();
 
-    BeanClass<?> getPropertyType();
+    BeanClass<?> getType();
 
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 

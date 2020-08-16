@@ -24,9 +24,4 @@ public class AnnotationGetter {
     public <A extends Annotation> A getAnnotation(Method method, Class<A> annotationClass) {
         return method.getAnnotation(annotationClass);
     }
-
-
-    public <A extends Annotation> A getAnnotation(Class<?> type, Class<A> annotationClass) {
-        return type.getAnnotation(annotationClass);
-    }
 }

@@ -18,11 +18,6 @@ abstract class FieldProperty<T> extends AbstractProperty<T> {
     }
 
     @Override
-    public Class<?> getPropertyClass() {
-        return field.getType();
-    }
-
-    @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         return AnnotationGetter.getInstance().getAnnotation(field, annotationClass);
     }

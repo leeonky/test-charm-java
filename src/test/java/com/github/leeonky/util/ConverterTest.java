@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConverterTest {
     private Converter converter = new Converter();
@@ -192,6 +193,11 @@ class ConverterTest {
             Converter.configDefaultConverter(converter -> converter.addTypeConverter(Type.class, String.class, t -> "customer converter"));
             assertThat(Converter.createDefault().tryConvert(String.class, new Type())).isEqualTo("customer converter");
 
+        }
+
+        @Test
+        void should_raise_error_when_invalid_date_format() {
+            assertThrows(IllegalArgumentException.class, () -> Converter.createDefault().tryConvert(Date.class, "invalid date"));
         }
 
         @Nested
