@@ -2,18 +2,21 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GenericType {
+    private final static Map<Type, GenericType> instanceCache = new ConcurrentHashMap<>();
     private final Type type;
 
     private GenericType(Type type) {
-        this.type = type;
+        this.type = Objects.requireNonNull(type);
     }
 
     public static GenericType createGenericType(Type type) {
-        return new GenericType(Objects.requireNonNull(type));
+        return instanceCache.computeIfAbsent(type, GenericType::new);
     }
 
     public Class<?> getRawType() {

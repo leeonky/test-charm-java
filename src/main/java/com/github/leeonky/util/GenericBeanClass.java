@@ -1,9 +1,12 @@
 package com.github.leeonky.util;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GenericBeanClass<T> extends BeanClass<T> {
+    private final static Map<GenericType, GenericBeanClass<?>> instanceCache = new ConcurrentHashMap<>();
     private final GenericType genericType;
 
     @SuppressWarnings("unchecked")
@@ -13,7 +16,7 @@ public class GenericBeanClass<T> extends BeanClass<T> {
     }
 
     public static BeanClass<?> create(GenericType genericType) {
-        return new GenericBeanClass<>(genericType);
+        return instanceCache.computeIfAbsent(genericType, GenericBeanClass::new);
     }
 
     @Override
