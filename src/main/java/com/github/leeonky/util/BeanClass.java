@@ -1,9 +1,6 @@
 package com.github.leeonky.util;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -12,6 +9,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.util.Suppressor.get;
+import static java.util.Arrays.asList;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
@@ -21,7 +19,7 @@ public class BeanClass<T> {
     private final Converter converter = Converter.createDefault();
 
     protected BeanClass(Class<T> type) {
-        this.type = type;
+        this.type = Objects.requireNonNull(type);
         Map<String, Field> addedReaderFields = new HashMap<>();
         Map<String, Field> addedWriterFields = new HashMap<>();
 
@@ -263,5 +261,22 @@ public class BeanClass<T> {
     @Override
     public boolean equals(Object obj) {
         return obj.getClass().equals(BeanClass.class) && Objects.equals(((BeanClass) obj).getType(), type);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <S> BeanClass<S> getSuper(Class<S> target) {
+        List<BeanClass> superBeanClasses = supers();
+        return (BeanClass<S>) superBeanClasses.stream().filter(beanClass -> beanClass.getType().equals(target))
+                .findFirst().orElseGet(() -> (BeanClass<S>) superBeanClasses.stream()
+                        .map(beanClass -> beanClass.getSuper(target))
+                        .filter(Objects::nonNull).findFirst().orElse(null));
+    }
+
+    private List<BeanClass> supers() {
+        List<Type> suppers = new ArrayList<>(asList(type.getGenericInterfaces()));
+        suppers.add(type.getGenericSuperclass());
+        return suppers.stream().filter(Objects::nonNull)
+                .map(t -> BeanClass.create(GenericType.createGenericType(t)))
+                .collect(Collectors.toList());
     }
 }

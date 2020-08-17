@@ -1,8 +1,11 @@
 package com.github.leeonky.util;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -67,5 +70,57 @@ class BeanClassTest {
     @Test
     void bean_class_equal() {
         assertThat(new BeanClass<>(Integer.class)).isEqualTo(new BeanClass<>(Integer.class));
+    }
+
+    static class StringList extends ArrayList<String> {
+    }
+
+    static class SubStringList extends StringList {
+    }
+
+    static class StringSupplier implements Supplier<String> {
+        @Override
+        public String get() {
+            return null;
+        }
+    }
+
+    static class SubStringSupplier extends StringSupplier {
+    }
+
+    @Nested
+    class GetSuper {
+
+        @Test
+        void should_return_bean_class_by_given_class() {
+            BeanClass<ArrayList> beanClass = BeanClass.create(StringList.class).getSuper(ArrayList.class);
+
+            assertThat(beanClass.getType()).isEqualTo(ArrayList.class);
+            assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
+        }
+
+        @Test
+        void should_return_bean_class_bygiven__grand_farther_class() {
+            BeanClass<ArrayList> beanClass = BeanClass.create(SubStringList.class).getSuper(ArrayList.class);
+
+            assertThat(beanClass.getType()).isEqualTo(ArrayList.class);
+            assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
+        }
+
+        @Test
+        void should_return_bean_class_by_given_interface() {
+            BeanClass<Supplier> beanClass = BeanClass.create(StringSupplier.class).getSuper(Supplier.class);
+
+            assertThat(beanClass.getType()).isEqualTo(Supplier.class);
+            assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
+        }
+
+        @Test
+        void should_return_bean_class_by_given_grand_farther_interface() {
+            BeanClass<Supplier> beanClass = BeanClass.create(SubStringSupplier.class).getSuper(Supplier.class);
+
+            assertThat(beanClass.getType()).isEqualTo(Supplier.class);
+            assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
+        }
     }
 }

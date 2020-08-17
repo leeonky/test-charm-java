@@ -13,7 +13,7 @@ public class GenericType {
     }
 
     public static GenericType createGenericType(Type type) {
-        return new GenericType(type);
+        return new GenericType(Objects.requireNonNull(type));
     }
 
     public Class<?> getRawType() {
