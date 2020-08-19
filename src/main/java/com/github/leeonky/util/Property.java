@@ -12,6 +12,10 @@ public interface Property<T> {
 
     BeanClass<?> getType();
 
+    default Class<?> getTypeClass() {
+        return getType().getType();
+    }
+
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 
 }
