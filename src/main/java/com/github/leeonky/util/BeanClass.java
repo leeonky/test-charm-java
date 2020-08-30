@@ -113,9 +113,7 @@ public class BeanClass<T> {
     }
 
     public PropertyReader<T> getPropertyReader(String property) {
-        return getPropertyReaders().computeIfAbsent(property, k -> {
-            throw new IllegalArgumentException("No available property reader for " + type.getSimpleName() + "." + property);
-        });
+        return typeInfo.getReader(property);
     }
 
     public BeanClass<T> setPropertyValue(T bean, String property, Object value) {
@@ -124,9 +122,7 @@ public class BeanClass<T> {
     }
 
     public PropertyWriter<T> getPropertyWriter(String property) {
-        return getPropertyWriters().computeIfAbsent(property, k -> {
-            throw new IllegalArgumentException("No available property writer for " + type.getSimpleName() + "." + property);
-        });
+        return typeInfo.getWriter(property);
     }
 
     public T newInstance(Object... args) {
@@ -251,5 +247,9 @@ public class BeanClass<T> {
         return suppers.stream().filter(Objects::nonNull)
                 .map(t -> BeanClass.create(GenericType.createGenericType(t)))
                 .collect(Collectors.toList());
+    }
+
+    public boolean isCollection() {
+        return getType().isArray() || Iterable.class.isAssignableFrom(getType());
     }
 }

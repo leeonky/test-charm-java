@@ -9,8 +9,10 @@ import java.util.Map;
 class TypeTypeInfo<T> implements TypeInfo<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
+    private final BeanClass<T> type;
 
     public TypeTypeInfo(BeanClass<T> type) {
+        this.type = type;
         Map<String, Field> addedReaderFields = new HashMap<>();
         Map<String, Field> addedWriterFields = new HashMap<>();
 
@@ -40,6 +42,20 @@ class TypeTypeInfo<T> implements TypeInfo<T> {
 
     private void addWriter(PropertyWriter<T> writer) {
         writers.put(writer.getName(), writer);
+    }
+
+    @Override
+    public PropertyReader<T> getReader(String property) {
+        return readers.computeIfAbsent(property, k -> {
+            throw new IllegalArgumentException("No available property reader for " + type.getSimpleName() + "." + property);
+        });
+    }
+
+    @Override
+    public PropertyWriter<T> getWriter(String property) {
+        return writers.computeIfAbsent(property, k -> {
+            throw new IllegalArgumentException("No available property writer for " + type.getSimpleName() + "." + property);
+        });
     }
 
     @Override

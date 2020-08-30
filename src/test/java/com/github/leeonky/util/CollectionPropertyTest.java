@@ -135,4 +135,43 @@ class CollectionPropertyTest {
             }
         }
     }
+
+    @Nested
+    class SupportElementReadWrite {
+
+        @Nested
+        class Read {
+
+            @Test
+            void get_property_type_in_array_or_collection() {
+                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
+
+                assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyReader("0").getType().getType())
+                        .isEqualTo(String.class);
+
+                assertThat(beanClass.getPropertyReader("array").getType().getPropertyReader("0").getType().getType())
+                        .isEqualTo(String.class);
+            }
+
+            @Test
+            void property_readers_should_return_empty() {
+                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
+
+                assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyReaders())
+                        .isEmpty();
+
+                assertThat(beanClass.getPropertyReader("array").getType().getPropertyReaders())
+                        .isEmpty();
+            }
+
+            @Test
+            void read_array_value_by_index() {
+                int[] ints = new int[]{2, 3};
+
+                BeanClass<int[]> beanClass = BeanClass.create(int[].class);
+
+                assertThat(beanClass.getPropertyValue(ints, "0")).isEqualTo(2);
+            }
+        }
+    }
 }
