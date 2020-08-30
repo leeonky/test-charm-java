@@ -1,6 +1,8 @@
 package com.github.leeonky.util;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -13,34 +15,13 @@ import static java.util.Arrays.asList;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
-    private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
-    private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
+    private final TypeInfo<T> typeInfo;
     private final Class<T> type;
     private final Converter converter = Converter.createDefault();
 
     protected BeanClass(Class<T> type) {
         this.type = Objects.requireNonNull(type);
-        Map<String, Field> addedReaderFields = new HashMap<>();
-        Map<String, Field> addedWriterFields = new HashMap<>();
-
-        for (Field field : type.getFields()) {
-            Field addedReaderField = addedReaderFields.get(field.getName());
-            if (addedReaderField == null || addedReaderField.getType().equals(type)) {
-                addReader(new FieldPropertyReader<>(this, field));
-                addedReaderFields.put(field.getName(), field);
-            }
-            Field addedWriterField = addedWriterFields.get(field.getName());
-            if (addedWriterField == null || addedWriterField.getType().equals(type)) {
-                addWriter(new FieldPropertyWriter<>(this, field));
-                addedWriterFields.put(field.getName(), field);
-            }
-        }
-        for (Method method : type.getMethods()) {
-            if (MethodPropertyReader.isGetter(method))
-                addReader(new MethodPropertyReader<>(this, method));
-            if (MethodPropertyWriter.isSetter(method))
-                addWriter(new MethodPropertyWriter<>(this, method));
-        }
+        typeInfo = TypeInfo.create(this);
     }
 
     public static String getClassName(Object object) {
@@ -120,19 +101,11 @@ public class BeanClass<T> {
     }
 
     public Map<String, PropertyReader<T>> getPropertyReaders() {
-        return readers;
+        return typeInfo.getReaders();
     }
 
     public Map<String, PropertyWriter<T>> getPropertyWriters() {
-        return writers;
-    }
-
-    private void addReader(PropertyReader<T> reader) {
-        readers.put(reader.getName(), reader);
-    }
-
-    private void addWriter(PropertyWriter<T> writer) {
-        writers.put(writer.getName(), writer);
+        return typeInfo.getWriters();
     }
 
     public Object getPropertyValue(T bean, String property) {
@@ -140,7 +113,7 @@ public class BeanClass<T> {
     }
 
     public PropertyReader<T> getPropertyReader(String property) {
-        return readers.computeIfAbsent(property, k -> {
+        return getPropertyReaders().computeIfAbsent(property, k -> {
             throw new IllegalArgumentException("No available property reader for " + type.getSimpleName() + "." + property);
         });
     }
@@ -151,7 +124,7 @@ public class BeanClass<T> {
     }
 
     public PropertyWriter<T> getPropertyWriter(String property) {
-        return writers.computeIfAbsent(property, k -> {
+        return getPropertyWriters().computeIfAbsent(property, k -> {
             throw new IllegalArgumentException("No available property writer for " + type.getSimpleName() + "." + property);
         });
     }
