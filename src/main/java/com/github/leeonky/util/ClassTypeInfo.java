@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-class TypeTypeInfo<T> implements TypeInfo<T> {
+class ClassTypeInfo<T> implements TypeInfo<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final BeanClass<T> type;
 
-    public TypeTypeInfo(BeanClass<T> type) {
+    public ClassTypeInfo(BeanClass<T> type) {
         this.type = type;
         Map<String, Field> addedReaderFields = new HashMap<>();
         Map<String, Field> addedWriterFields = new HashMap<>();

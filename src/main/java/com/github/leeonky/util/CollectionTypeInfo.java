@@ -17,7 +17,7 @@ class CollectionTypeInfo<T> implements TypeInfo<T> {
 
     @Override
     public PropertyWriter<T> getWriter(String property) {
-        return null;
+        return new CollectionDataPropertyWriter<>(type, property, type.getElementType());
     }
 
     @Override
@@ -27,6 +27,6 @@ class CollectionTypeInfo<T> implements TypeInfo<T> {
 
     @Override
     public Map<String, PropertyWriter<T>> getWriters() {
-        return null;
+        return Collections.emptyMap();
     }
 }

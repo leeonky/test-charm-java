@@ -212,8 +212,7 @@ public class BeanClass<T> {
         if (type.isArray())
             return BeanClass.create(type.getComponentType());
         if (Iterable.class.isAssignableFrom(type))
-            return getTypeArguments(0)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("Should specify generic type %s.%s", getName(), getName())));
+            return getTypeArguments(0).orElseGet(() -> BeanClass.create(Object.class));
         return null;
     }
 

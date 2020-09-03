@@ -6,7 +6,7 @@ interface TypeInfo<T> {
     static <T> TypeInfo<T> create(BeanClass<T> type) {
         if (type.isCollection())
             return new CollectionTypeInfo<>(type);
-        return new TypeTypeInfo<>(type);
+        return new ClassTypeInfo<>(type);
     }
 
     PropertyReader<T> getReader(String property);

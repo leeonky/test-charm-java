@@ -3,9 +3,7 @@ package com.github.leeonky.util;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -19,8 +17,8 @@ class CollectionPropertyTest {
         public String[] array;
         public String str;
         public Iterable<String> iterable;
-        public Iterable<?> invalidIterable1;
-        public Iterable invalidIterable2;
+        public Iterable<?> uncheckedIterable;
+        public Iterable rawIterable;
     }
 
     @Nested
@@ -29,8 +27,8 @@ class CollectionPropertyTest {
 
         @Test
         void get_element_or_property_type() {
-            assertThat(((Property<Bean>) beanClass.getPropertyReader("array")).getType().getElementOrPropertyType().getType()).isEqualTo(String.class);
-            assertThat(((Property<Bean>) beanClass.getPropertyReader("str")).getType().getElementOrPropertyType().getType()).isEqualTo(String.class);
+            assertThat(beanClass.getPropertyReader("array").getType().getElementOrPropertyType().getType()).isEqualTo(String.class);
+            assertThat(beanClass.getPropertyReader("str").getType().getElementOrPropertyType().getType()).isEqualTo(String.class);
         }
 
         @Nested
@@ -38,10 +36,10 @@ class CollectionPropertyTest {
 
             @Test
             void get_element_type() {
-                assertThat(((Property<Bean>) beanClass.getPropertyReader("array")).getType().getElementType().getType())
+                assertThat(beanClass.getPropertyReader("array").getType().getElementType().getType())
                         .isEqualTo(String.class);
 
-                assertThat(((Property<Bean>) beanClass.getPropertyReader("array")).getType().getElementType().getType())
+                assertThat(beanClass.getPropertyReader("array").getType().getElementType().getType())
                         .isEqualTo(String.class);
             }
         }
@@ -51,17 +49,17 @@ class CollectionPropertyTest {
 
             @Test
             void get_element_type() {
-                assertThat(((Property<Bean>) beanClass.getPropertyReader("iterable")).getType().getElementType().getType())
+                assertThat(beanClass.getPropertyReader("iterable").getType().getElementType().getType())
                         .isEqualTo(String.class);
 
-                assertThat(((Property<Bean>) beanClass.getPropertyReader("iterable")).getType().getElementType().getType())
+                assertThat(beanClass.getPropertyReader("iterable").getType().getElementType().getType())
                         .isEqualTo(String.class);
             }
 
             @Test
-            void should_raise_error_when_generic_type_params_not_specify() {
-                assertThrows(IllegalArgumentException.class, () -> ((Property<Bean>) beanClass.getPropertyReader("invalidIterable1")).getType().getElementType().getType());
-                assertThrows(IllegalArgumentException.class, () -> ((Property<Bean>) beanClass.getPropertyReader("invalidIterable2")).getType().getElementType().getType());
+            void should_return_object_class_when_generic_type_params_not_specify() {
+                assertThat(beanClass.getPropertyReader("uncheckedIterable").getType().getElementType().getType()).isEqualTo(Object.class);
+                assertThat(beanClass.getPropertyReader("rawIterable").getType().getElementType().getType()).isEqualTo(Object.class);
             }
         }
     }
@@ -167,10 +165,63 @@ class CollectionPropertyTest {
             @Test
             void read_array_value_by_index() {
                 int[] ints = new int[]{2, 3};
-
                 BeanClass<int[]> beanClass = BeanClass.create(int[].class);
 
                 assertThat(beanClass.getPropertyValue(ints, "0")).isEqualTo(2);
+
+                BeanClass<List> listBeanClass = BeanClass.create(List.class);
+
+                assertThat(listBeanClass.getPropertyValue(asList("", "hello"), "1")).isEqualTo("hello");
+            }
+        }
+
+        @Nested
+        class Write {
+
+            @Test
+            void get_property_type_in_array_or_collection() {
+                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
+
+                assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyWriter("0").getType().getType())
+                        .isEqualTo(String.class);
+
+                assertThat(beanClass.getPropertyReader("array").getType().getPropertyWriter("0").getType().getType())
+                        .isEqualTo(String.class);
+            }
+
+            @Test
+            void property_readers_should_return_empty() {
+                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
+
+                assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyWriters())
+                        .isEmpty();
+
+                assertThat(beanClass.getPropertyReader("array").getType().getPropertyWriters())
+                        .isEmpty();
+            }
+
+            @Test
+            void read_array_value_by_index() {
+                int[] ints = new int[]{2, 3};
+                BeanClass<int[]> beanClass = BeanClass.create(int[].class);
+
+                beanClass.setPropertyValue(ints, "0", 0);
+
+                assertThat(ints[0]).isEqualTo(0);
+
+                BeanClass<List> listBeanClass = BeanClass.create(List.class);
+                List<String> stringList = new ArrayList<>();
+                stringList.add("");
+                stringList.add("");
+                listBeanClass.setPropertyValue(stringList, "0", "hello");
+
+                assertThat(stringList).containsOnly("hello", "");
+            }
+
+            @Test
+            void should_raise_error_when_collection_not_support_set() {
+                assertThrows(IllegalArgumentException.class, () ->
+                        BeanClass.create(Set.class).setPropertyValue(new HashSet(), "1", null));
             }
         }
     }
