@@ -68,6 +68,12 @@ public class BeanClass<T> {
         throw new IllegalArgumentException("`" + collection + "` is not collection or array");
     }
 
+    public static <T> Optional<T> cast(Object value, Class<T> type) {
+        return Optional.ofNullable(value)
+                .filter(type::isInstance)
+                .map(type::cast);
+    }
+
     public static List<Object> toChainNodes(String chain) {
         return Arrays.stream(chain.split("[\\[\\].]")).filter(s -> !s.isEmpty()).map(s -> {
             try {
@@ -177,10 +183,9 @@ public class BeanClass<T> {
             if (element == null)
                 throw new NullPointerInChainException(originalChain, level + 1);
             return ((BeanClass) BeanClass.create(element.getClass())).getPropertyChainValueInner(originalChain, level + 1, element, chain);
-        } else {
-            PropertyReader propertyReader = getPropertyReader((String) p);
-            return propertyReader.getType().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
         }
+        PropertyReader propertyReader = getPropertyReader((String) p);
+        return propertyReader.getType().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
     }
 
     public PropertyReader<?> getPropertyChainReader(String chain) {
