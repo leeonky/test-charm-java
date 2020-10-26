@@ -3,7 +3,7 @@ package com.github.leeonky.util;
 import java.util.LinkedList;
 import java.util.List;
 
-public interface PropertyReader<T> extends Property<T> {
+public interface PropertyReader<T> extends PropertyAccessor<T> {
     Object getValue(T bean);
 
     default PropertyReader<?> getPropertyChainReader(List<Object> chain) {

@@ -9,6 +9,7 @@ import java.util.Map;
 class ClassTypeInfo<T> implements TypeInfo<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
+    private final Map<String, Property<T>> properties = new LinkedHashMap<>();
     private final BeanClass<T> type;
 
     public ClassTypeInfo(BeanClass<T> type) {
@@ -19,29 +20,26 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
         for (Field field : type.getType().getFields()) {
             Field addedReaderField = addedReaderFields.get(field.getName());
             if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
-                addReader(new FieldPropertyReader<>(type, field));
+                addAccessor(new FieldPropertyReader<>(type, field), readers);
                 addedReaderFields.put(field.getName(), field);
             }
             Field addedWriterField = addedWriterFields.get(field.getName());
             if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
-                addWriter(new FieldPropertyWriter<>(type, field));
+                addAccessor(new FieldPropertyWriter<>(type, field), writers);
                 addedWriterFields.put(field.getName(), field);
             }
         }
         for (Method method : type.getType().getMethods()) {
             if (MethodPropertyReader.isGetter(method))
-                addReader(new MethodPropertyReader<>(type, method));
+                addAccessor(new MethodPropertyReader<>(type, method), readers);
             if (MethodPropertyWriter.isSetter(method))
-                addWriter(new MethodPropertyWriter<>(type, method));
+                addAccessor(new MethodPropertyWriter<>(type, method), writers);
         }
     }
 
-    private void addReader(PropertyReader<T> reader) {
-        readers.put(reader.getName(), reader);
-    }
-
-    private void addWriter(PropertyWriter<T> writer) {
-        writers.put(writer.getName(), writer);
+    private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap) {
+        properties.put(accessor.getName(), new DefaultProperty<>(accessor.getName(), accessor.getBeanType()));
+        accessorMap.put(accessor.getName(), accessor);
     }
 
     @Override
@@ -66,5 +64,17 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     @Override
     public Map<String, PropertyWriter<T>> getWriters() {
         return writers;
+    }
+
+    @Override
+    public Map<String, Property<T>> getProperties() {
+        return properties;
+    }
+
+    @Override
+    public Property<T> getProperty(String name) {
+        return properties.computeIfAbsent(name, k -> {
+            throw new IllegalArgumentException("No available property for " + type.getSimpleName() + "." + name);
+        });
     }
 }

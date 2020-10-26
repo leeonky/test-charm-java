@@ -2,10 +2,10 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.Type;
 
-abstract class AbstractProperty<T> implements Property<T> {
+abstract class AbstractPropertyAccessor<T> implements PropertyAccessor<T> {
     private final BeanClass<T> beanClass;
 
-    AbstractProperty(BeanClass<T> beanClass) {
+    AbstractPropertyAccessor(BeanClass<T> beanClass) {
         this.beanClass = beanClass;
     }
 

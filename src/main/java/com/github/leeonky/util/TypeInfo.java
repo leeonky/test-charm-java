@@ -16,4 +16,8 @@ interface TypeInfo<T> {
     Map<String, PropertyReader<T>> getReaders();
 
     Map<String, PropertyWriter<T>> getWriters();
+
+    Map<String, Property<T>> getProperties();
+
+    Property<T> getProperty(String name);
 }

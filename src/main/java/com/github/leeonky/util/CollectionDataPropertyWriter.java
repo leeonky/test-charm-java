@@ -3,7 +3,7 @@ package com.github.leeonky.util;
 import java.lang.reflect.Array;
 import java.util.List;
 
-class CollectionDataPropertyWriter<T> extends DataProperty<T> implements PropertyWriter<T> {
+class CollectionDataPropertyWriter<T> extends DataPropertyAccessor<T> implements PropertyWriter<T> {
     public CollectionDataPropertyWriter(BeanClass<T> beanClass, String name, BeanClass<?> type) {
         super(beanClass, name, type);
     }

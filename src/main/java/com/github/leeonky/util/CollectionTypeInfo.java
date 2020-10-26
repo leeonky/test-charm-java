@@ -1,7 +1,8 @@
 package com.github.leeonky.util;
 
-import java.util.Collections;
 import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 class CollectionTypeInfo<T> implements TypeInfo<T> {
     private final BeanClass<T> type;
@@ -22,11 +23,22 @@ class CollectionTypeInfo<T> implements TypeInfo<T> {
 
     @Override
     public Map<String, PropertyReader<T>> getReaders() {
-        return Collections.emptyMap();
+        return emptyMap();
     }
 
     @Override
     public Map<String, PropertyWriter<T>> getWriters() {
-        return Collections.emptyMap();
+        return emptyMap();
+    }
+
+    @Override
+    public Map<String, Property<T>> getProperties() {
+        return emptyMap();
+    }
+
+    @Override
+    public Property<T> getProperty(String name) {
+        //TODO not implement
+        return null;
     }
 }

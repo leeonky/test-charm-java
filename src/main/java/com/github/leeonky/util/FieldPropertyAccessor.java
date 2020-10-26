@@ -4,10 +4,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
-abstract class FieldProperty<T> extends AbstractProperty<T> {
+abstract class FieldPropertyAccessor<T> extends AbstractPropertyAccessor<T> {
     final Field field;
 
-    FieldProperty(BeanClass<T> beanClass, Field field) {
+    FieldPropertyAccessor(BeanClass<T> beanClass, Field field) {
         super(beanClass);
         this.field = field;
     }

@@ -3,7 +3,7 @@ package com.github.leeonky.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-abstract class MethodProperty<T> extends AbstractProperty<T> {
+abstract class MethodProperty<T> extends AbstractPropertyAccessor<T> {
     final Method method;
 
     MethodProperty(BeanClass<T> beanClass, Method method) {

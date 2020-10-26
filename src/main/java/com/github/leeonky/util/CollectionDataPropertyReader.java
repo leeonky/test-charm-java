@@ -1,6 +1,6 @@
 package com.github.leeonky.util;
 
-class CollectionDataPropertyReader<T> extends DataProperty<T> implements PropertyReader<T> {
+class CollectionDataPropertyReader<T> extends DataPropertyAccessor<T> implements PropertyReader<T> {
     CollectionDataPropertyReader(BeanClass<T> beanClass, String name, BeanClass<?> type) {
         super(beanClass, name, type);
     }

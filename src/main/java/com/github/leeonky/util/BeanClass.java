@@ -256,4 +256,12 @@ public class BeanClass<T> {
     public boolean isCollection() {
         return getType().isArray() || Iterable.class.isAssignableFrom(getType());
     }
+
+    public Map<String, Property<T>> getProperties() {
+        return typeInfo.getProperties();
+    }
+
+    public Property<T> getProperty(String name) {
+        return typeInfo.getProperty(name);
+    }
 }
