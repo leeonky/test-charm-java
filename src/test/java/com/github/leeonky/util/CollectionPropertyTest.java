@@ -224,5 +224,20 @@ class CollectionPropertyTest {
                         BeanClass.create(Set.class).setPropertyValue(new HashSet(), "1", null));
             }
         }
+
+        @Nested
+        class _Property {
+
+            @Test
+            void get_collection_property() {
+                BeanClass<?> type = BeanClass.create(Bean.class).getPropertyReader("iterable").getType();
+
+                Property<?> property = type.getProperty("0");
+
+                assertThat(property)
+                        .hasFieldOrPropertyWithValue("name", "0")
+                        .hasFieldOrPropertyWithValue("beanType", type);
+            }
+        }
     }
 }

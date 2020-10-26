@@ -38,7 +38,6 @@ class CollectionTypeInfo<T> implements TypeInfo<T> {
 
     @Override
     public Property<T> getProperty(String name) {
-        //TODO not implement
-        return null;
+        return new DefaultProperty<>(name, type);
     }
 }
