@@ -18,4 +18,14 @@ class DefaultProperty<T> implements Property<T> {
     public BeanClass<T> getBeanType() {
         return beanType;
     }
+
+    @Override
+    public PropertyReader<T> getReader() {
+        return beanType.getPropertyReader(name);
+    }
+
+    @Override
+    public PropertyWriter<T> getWriter() {
+        return beanType.getPropertyWriter(name);
+    }
 }

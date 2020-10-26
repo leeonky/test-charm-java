@@ -23,8 +23,8 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
     }
 
     @Override
-    public Object getValue(T bean) {
-        return get(() -> method.invoke(bean));
+    public Object getValue(T instance) {
+        return get(() -> method.invoke(instance));
     }
 
     @Override

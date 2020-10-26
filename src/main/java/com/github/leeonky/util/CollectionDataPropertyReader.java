@@ -6,7 +6,7 @@ class CollectionDataPropertyReader<T> extends DataPropertyAccessor<T> implements
     }
 
     @Override
-    public Object getValue(T bean) {
-        return BeanClass.arrayCollectionToStream(bean).toArray()[Integer.valueOf(getName())];
+    public Object getValue(T instance) {
+        return BeanClass.arrayCollectionToStream(instance).toArray()[Integer.valueOf(getName())];
     }
 }

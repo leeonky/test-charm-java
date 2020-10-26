@@ -11,7 +11,7 @@ class FieldPropertyReader<T> extends FieldPropertyAccessor<T> implements Propert
     }
 
     @Override
-    public Object getValue(T bean) {
-        return get(() -> field.get(bean));
+    public Object getValue(T instance) {
+        return get(() -> field.get(instance));
     }
 }

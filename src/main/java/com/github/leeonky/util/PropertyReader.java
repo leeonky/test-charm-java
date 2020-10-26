@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public interface PropertyReader<T> extends PropertyAccessor<T> {
-    Object getValue(T bean);
+    Object getValue(T instance);
 
     default PropertyReader<?> getPropertyChainReader(List<Object> chain) {
         PropertyReader<?> reader = this;
