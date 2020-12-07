@@ -1,18 +1,18 @@
 package com.github.leeonky.map;
 
-import com.github.leeonky.util.Property;
+import com.github.leeonky.util.PropertyAccessor;
 import ma.glasnost.orika.metadata.ClassMapBuilder;
 
 abstract class PropertyNonDefaultMapping {
-    protected final Property<?> property;
+    protected final PropertyAccessor<?> property;
     final Mapper mapper;
 
-    PropertyNonDefaultMapping(Mapper mapper, Property<?> property) {
+    PropertyNonDefaultMapping(Mapper mapper, PropertyAccessor<?> property) {
         this.mapper = mapper;
         this.property = property;
     }
 
-    static PropertyNonDefaultMapping create(Mapper mapper, Property<?> property) {
+    static PropertyNonDefaultMapping create(Mapper mapper, PropertyAccessor<?> property) {
         MappingView mappingView = property.getAnnotation(MappingView.class);
         FromProperty fromProperty = property.getAnnotation(FromProperty.class);
         if (mappingView != null) {
@@ -45,7 +45,7 @@ abstract class PropertyNonDefaultMapping {
 class MapThroughView extends PropertyNonDefaultMapping {
     private final MappingView mappingView;
 
-    MapThroughView(Mapper mapper, Property<?> property, MappingView mappingView) {
+    MapThroughView(Mapper mapper, PropertyAccessor<?> property, MappingView mappingView) {
         super(mapper, property);
         this.mappingView = mappingView;
     }
@@ -62,7 +62,7 @@ class MapThroughView extends PropertyNonDefaultMapping {
 class MapThroughFromProperty extends PropertyNonDefaultMapping {
     protected final FromPropertyWrapper fromPropertyWrapper;
 
-    MapThroughFromProperty(Mapper mapper, Property<?> property, FromPropertyWrapper fromPropertyWrapper) {
+    MapThroughFromProperty(Mapper mapper, PropertyAccessor<?> property, FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property);
         this.fromPropertyWrapper = fromPropertyWrapper;
     }
@@ -75,7 +75,7 @@ class MapThroughFromProperty extends PropertyNonDefaultMapping {
 
 class MapThroughFromPropertyToCollection extends MapThroughFromProperty {
 
-    MapThroughFromPropertyToCollection(Mapper mapper, Property<?> property, FromPropertyWrapper fromPropertyWrapper) {
+    MapThroughFromPropertyToCollection(Mapper mapper, PropertyAccessor<?> property, FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, fromPropertyWrapper);
     }
 
@@ -89,7 +89,7 @@ class MapThroughFromPropertyToCollection extends MapThroughFromProperty {
 
 class MapThroughFromPropertyToMap extends MapThroughFromProperty {
 
-    MapThroughFromPropertyToMap(Mapper mapper, Property<?> property, FromPropertyWrapper fromPropertyWrapper) {
+    MapThroughFromPropertyToMap(Mapper mapper, PropertyAccessor<?> property, FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, fromPropertyWrapper);
     }
 
@@ -104,14 +104,16 @@ class MapThroughFromPropertyToMap extends MapThroughFromProperty {
 class MapThroughViewAndFromProperty extends MapThroughFromProperty {
     protected final MappingView mappingView;
 
-    MapThroughViewAndFromProperty(Mapper mapper, Property<?> property, MappingView mappingView, FromPropertyWrapper fromPropertyWrapper) {
+    MapThroughViewAndFromProperty(Mapper mapper, PropertyAccessor<?> property, MappingView mappingView,
+                                  FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, fromPropertyWrapper);
         this.mappingView = mappingView;
     }
 }
 
 class MapThroughViewAndFromPropertyToCollection extends MapThroughViewAndFromProperty {
-    MapThroughViewAndFromPropertyToCollection(Mapper mapper, Property<?> property, MappingView mappingView, FromPropertyWrapper fromPropertyWrapper) {
+    MapThroughViewAndFromPropertyToCollection(Mapper mapper, PropertyAccessor<?> property, MappingView mappingView,
+                                              FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, mappingView, fromPropertyWrapper);
     }
 
@@ -126,7 +128,8 @@ class MapThroughViewAndFromPropertyToCollection extends MapThroughViewAndFromPro
 
 class MapThroughViewAndFromPropertyToMap extends MapThroughViewAndFromPropertyToCollection {
 
-    MapThroughViewAndFromPropertyToMap(Mapper mapper, Property<?> property, MappingView mappingView, FromPropertyWrapper fromPropertyWrapper) {
+    MapThroughViewAndFromPropertyToMap(Mapper mapper, PropertyAccessor<?> property, MappingView mappingView,
+                                       FromPropertyWrapper fromPropertyWrapper) {
         super(mapper, property, mappingView, fromPropertyWrapper);
     }
 

@@ -2,7 +2,6 @@ package com.github.leeonky.map;
 
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.GenericType;
 import com.github.leeonky.util.PropertyWriter;
 import org.reflections.Reflections;
 
@@ -51,10 +50,12 @@ public class PermitMapper {
     }
 
     private void register(Class<?> type) {
-        permitRegisterConfig.register(getActions(type), getTargets(type), getScopes(type, VOID_SCOPES), getParents(type, VOID_SCOPES), type);
+        permitRegisterConfig.register(getActions(type), getTargets(type), getScopes(type, VOID_SCOPES),
+                getParents(type, VOID_SCOPES), type);
         PolymorphicPermitIdentityString identityString = type.getAnnotation(PolymorphicPermitIdentityString.class);
         if (identityString != null)
-            permitRegisterConfig.registerPolymorphic(getActions(type), getScopes(type, VOID_SCOPES), identityString.value(), type);
+            permitRegisterConfig.registerPolymorphic(getActions(type), getScopes(type, VOID_SCOPES),
+                    identityString.value(), type);
     }
 
     private Class<?>[] getParentsFromPermit(Class<?> type) {
@@ -144,7 +145,8 @@ public class PermitMapper {
             else if (object instanceof List)
                 return permitList((List<?>) object, p);
             else
-                throw new IllegalArgumentException("Not support type " + object.getClass().getName() + ", only support Map or List<Map>");
+                throw new IllegalArgumentException("Not support type " + object.getClass().getName()
+                        + ", only support Map or List<Map>");
         }).orElse(object);
     }
 
@@ -156,7 +158,7 @@ public class PermitMapper {
     private Map<String, ?> permitMap(Map<String, ?> map, Class<?> permit) {
         return collectPermittedProperties(map, permit)
                 .reduce(new LinkedHashMap<>(), (result, property) -> assignToResult(result, property,
-                        permitPropertyObjectValue(map.get(property.getName()), property.getGenericType(), permit, property)),
+                        permitPropertyObjectValue(property.getType(), map.get(property.getName()), permit, property)),
                         Mapper::NotSupportParallelStreamReduce);
     }
 
@@ -165,7 +167,8 @@ public class PermitMapper {
                 .filter(property -> map.containsKey(property.getName()));
     }
 
-    private LinkedHashMap<String, Object> assignToResult(LinkedHashMap<String, Object> result, PropertyWriter<?> property, Object value) {
+    private LinkedHashMap<String, Object> assignToResult(LinkedHashMap<String, Object> result,
+                                                         PropertyWriter<?> property, Object value) {
         ToProperty toProperty = property.getAnnotation(ToProperty.class);
         if (toProperty != null) {
             String propertyChain = toProperty.value();
@@ -186,7 +189,8 @@ public class PermitMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private LinkedHashMap<String, Object> assignToNestedMap(LinkedHashMap<String, Object> result, Object value, String[] propertyChain) {
+    private LinkedHashMap<String, Object> assignToNestedMap(LinkedHashMap<String, Object> result, Object value,
+                                                            String[] propertyChain) {
         LinkedHashMap<String, Object> reduce = Arrays.stream(propertyChain, 0, propertyChain.length - 1)
                 .reduce(result, (m, p) -> (LinkedHashMap<String, Object>) m.computeIfAbsent(p, k -> new LinkedHashMap<>()),
                         Mapper::NotSupportParallelStreamReduce);
@@ -203,12 +207,13 @@ public class PermitMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private Object permitPropertyObjectValue(Object value, GenericType genericType, Class<?> containingPermit, PropertyWriter<?> property) {
-        Class<?> permit = genericType.getRawType();
+    private Object permitPropertyObjectValue(BeanClass<?> type, Object value, Class<?> containingPermit,
+                                             PropertyWriter<?> property) {
+        Class<?> permit = type.getType();
         if (value instanceof Map) {
             return processPolymorphicAndPermitMap((Map<String, ?>) value, permit, containingPermit, property);
         } else if (value instanceof Iterable) {
-            return processPolymorphicAndPermitList((Iterable<?>) value, genericType, containingPermit, property);
+            return processPolymorphicAndPermitList(type, (Iterable<?>) value, containingPermit, property);
         } else {
             Transform transform = property.getAnnotation(Transform.class);
             if (transform != null)
@@ -217,23 +222,29 @@ public class PermitMapper {
         }
     }
 
-    private Object processPolymorphicAndPermitList(Iterable<?> value, GenericType genericType, Class<?> containingPermit, PropertyWriter<?> property) {
-        GenericType subGenericType = genericType.getGenericTypeParameter(0)
-                .orElseThrow(() -> new IllegalStateException(String.format("Should specify element type in '%s::%s'", containingPermit.getName(), property.getName())));
+    private Object processPolymorphicAndPermitList(BeanClass<?> type, Iterable<?> value, Class<?> containingPermit,
+                                                   PropertyWriter<?> property) {
+        BeanClass<?> subGenericType = type.getTypeArguments(0)
+                .orElseThrow(() -> new IllegalStateException(String.format("Should specify element type in '%s::%s'",
+                        containingPermit.getName(), property.getName())));
         return StreamSupport.stream(value.spliterator(), false)
-                .map(e -> permitPropertyObjectValue(e, subGenericType, containingPermit, property))
+                .map(e -> permitPropertyObjectValue(subGenericType, e, containingPermit, property))
                 .collect(Collectors.toList());
     }
 
-    private Object processPolymorphicAndPermitMap(Map<String, ?> value, Class<?> permit, Class<?> containingPermit, PropertyWriter<?> property) {
+    private Object processPolymorphicAndPermitMap(Map<String, ?> value, Class<?> permit, Class<?> containingPermit,
+                                                  PropertyWriter<?> property) {
         PermitAction action = property.getAnnotation(PermitAction.class);
         if (action != null) {
             PolymorphicPermitIdentity polymorphicPermitIdentity = permit.getAnnotation(PolymorphicPermitIdentity.class);
             if (polymorphicPermitIdentity == null)
-                throw new IllegalStateException("Should specify property name via @PolymorphicPermitIdentity in '" + permit.getName() + "'");
-            return permitMap(value, permitRegisterConfig.findPolymorphicPermit(permit, action.value(), scope, value.get(polymorphicPermitIdentity.value()))
+                throw new IllegalStateException("Should specify property name via @PolymorphicPermitIdentity in '"
+                        + permit.getName() + "'");
+            return permitMap(value, permitRegisterConfig.findPolymorphicPermit(permit, action.value(), scope,
+                    value.get(polymorphicPermitIdentity.value()))
                     .orElseThrow(() -> new IllegalStateException(String.format("Cannot find permit for %s[%s] in '%s::%s'",
-                            polymorphicPermitIdentity.value(), value.get(polymorphicPermitIdentity.value()), containingPermit.getName(), property.getName()))));
+                            polymorphicPermitIdentity.value(), value.get(polymorphicPermitIdentity.value()),
+                            containingPermit.getName(), property.getName()))));
         }
         return permitMap(value, permit);
     }
