@@ -51,6 +51,9 @@ dependencies {
     implementation 'com.github.leeonky:jfactory:0.1.0'
     implementation 'javax.persistence:javax.persistence-api:2.2'
 
+    testImplementation 'org.hibernate:hibernate-core:5.4.0.Final'
+    testImplementation 'org.hibernate:hibernate-entitymanager:5.4.0.Final'
+    testImplementation 'com.h2database:h2:1.4.200'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.3'
     testImplementation 'org.assertj:assertj-core:3.15.0'
     testImplementation 'org.projectlombok:lombok:1.18.12'
