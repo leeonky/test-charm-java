@@ -32,7 +32,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.1.0' + System.env.VERSION_SCOPE
+version = '0.1.1' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -47,7 +47,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.leeonky:bean-util:0.2.2'
     implementation 'com.github.leeonky:jfactory:0.1.0'
     implementation 'javax.persistence:javax.persistence-api:2.2'
 
