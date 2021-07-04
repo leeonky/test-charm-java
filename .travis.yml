@@ -36,8 +36,6 @@ jobs:
 
 stages:
   - name: test
-    if: branch IN (master, hotfix, release)
-  - name: snapshot
-    if: branch IN (master, hotfix)
+    if: branch IN (master)
   - name: release
     if: branch = release

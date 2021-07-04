@@ -4,7 +4,6 @@ import com.github.leeonky.jfactory.DataRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.Collection;
 
@@ -18,14 +17,15 @@ public class JPADataRepository implements DataRepository {
 
     @Override
     public <T> Collection<T> queryAll(Class<T> type) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<T> query = criteriaBuilder.createQuery(type);
+        CriteriaQuery<T> query = entityManager.getCriteriaBuilder().createQuery(type);
         query.from(type);
+        entityManager.clear();
         return entityManager.createQuery(query).getResultList();
     }
 
     @Override
     public void clear() {
+        entityManager.clear();
     }
 
     @Override

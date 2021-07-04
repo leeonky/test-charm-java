@@ -1,6 +1,6 @@
 # JFactory JPA DataRepository
 
-[![travis-ci](https://travis-ci.org/leeonky/jfactory-repo-jpa.svg?branch=master)](https://travis-ci.org/leeonky/jfactory-repo-jpa)
+[![travis-ci](https://travis-ci.com/leeonky/jfactory-repo-jpa.svg?branch=master)](https://travis-ci.com/github/leeonky/jfactory-repo-jpa)
 [![coveralls](https://img.shields.io/coveralls/github/leeonky/jfactory-repo-jpa/master.svg)](https://coveralls.io/github/leeonky/jfactory-repo-jpa)
 [![Lost commit](https://img.shields.io/github/last-commit/leeonky/jfactory-repo-jpa.svg)](https://github.com/leeonky/jfactory-repo-jpa)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.leeonky/jfactory-repo-jpa.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.leeonky/jfactory-repo-jpa)
@@ -20,11 +20,11 @@
 
 # 使用
 ```java
-EntityManager entityManager;
-JFactory jfactory = new JFactory(new JPADataRepository(entityManager));
+EntityManagerFactory entityManagerFactory
+JFactory jfactory = new JFactory(new JPADataRepository(entityManagerFactory));
 
 // jfactory.create(xxx);
 ```
 
 注意
-- 考虑到关联表和外键问题，JPADataRepository::clear方法不会清除数据库数据，需要测试代码额外添加清理数据逻辑。
+- 考虑到关联表和外键问题，JPADataRepository::clear方法仅调用`EntityManager::clear()`清除缓存，不会清除数据库数据，需要测试代码额外添加清理数据逻辑。
