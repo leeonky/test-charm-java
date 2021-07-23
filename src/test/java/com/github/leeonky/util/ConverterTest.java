@@ -214,4 +214,23 @@ class ConverterTest {
             }
         }
     }
+
+    @Nested
+    class ConvertWithException {
+
+        @Test
+        void same_type_convert() {
+            assertThat(converter.convert(Integer.class, 1)).isEqualTo(Integer.valueOf(1));
+        }
+
+        @Test
+        void sub_type_convert() {
+            assertThat(converter.convert(CharSequence.class, "Hello")).isInstanceOf(CharSequence.class);
+        }
+
+        @Test
+        void should_raise_error_when_can_not_convert() {
+            assertThrows(ConvertException.class, () -> converter.convert(Integer.class, "hello"));
+        }
+    }
 }

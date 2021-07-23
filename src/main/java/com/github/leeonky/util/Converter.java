@@ -12,6 +12,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.github.leeonky.util.BeanClass.getClassName;
+
 public class Converter {
     private static Consumer<Converter> defaultConverterConfig = (c) -> {
     };
@@ -92,14 +94,19 @@ public class Converter {
     }
 
     public Object tryConvert(Class<?> target, Object value) {
-        return value == null ? null : target.isAssignableFrom(value.getClass()) ? value : convert(value.getClass(), target, value);
+        return convert(target, value, Function.identity());
     }
 
     @SuppressWarnings("unchecked")
-    private Object convert(Class<?> source, Class<?> target, Object value) {
+    private Object convert(Class<?> target, Object value, Function<Object, Object> defaultValue) {
+        if (value == null)
+            return null;
+        Class<?> source = value.getClass();
+        if (target.isAssignableFrom(source))
+            return value;
         return typeConverterSet.findHandler(source, target, Collections::emptyList)
                 .map(c -> c.getHandler().apply(value))
-                .orElseGet(() -> target.isEnum() ? convertEnum(source, target, value) : value);
+                .orElseGet(() -> target.isEnum() ? convertEnum(source, target, value) : defaultValue.apply(value));
     }
 
     @SuppressWarnings("unchecked")
@@ -112,5 +119,12 @@ public class Converter {
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
         enumConverterSet.add(boxedClass(source), target, converter);
         return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T convert(Class<T> target, Object value) {
+        return (T) convert(target, value, v -> {
+            throw new ConvertException(String.format("Cannot convert from %s to %s", getClassName(value), target));
+        });
     }
 }
