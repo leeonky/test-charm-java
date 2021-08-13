@@ -102,6 +102,15 @@ class PropertyReaderTest {
         void should_override_fields_in_super_class() {
             assertThat(BeanClass.create(SubBeanWithPubField.class).getPropertyValue(new SubBeanWithPubField(), "field")).isEqualTo(200);
         }
+
+        @Test
+        void should_support_get_class_value() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "class"))
+                    .isEqualTo(BeanWithPubField.class);
+
+            assertThat(beanWithPubFieldBeanClass.getPropertyChainValue(new BeanWithPubField(), "class.simpleName"))
+                    .isEqualTo("BeanWithPubField");
+        }
     }
 
     @Nested

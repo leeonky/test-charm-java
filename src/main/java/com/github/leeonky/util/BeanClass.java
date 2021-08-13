@@ -119,6 +119,13 @@ public class BeanClass<T> {
     }
 
     public PropertyReader<T> getPropertyReader(String property) {
+        if (property.equals("class")) {
+            try {
+                return new MethodPropertyReader<>(this, getType().getMethod("getClass"));
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(e);
+            }
+        }
         return typeInfo.getReader(property);
     }
 
@@ -196,7 +203,7 @@ public class BeanClass<T> {
         return getPropertyChainReaderInner(new LinkedList<>(chain));
     }
 
-    public PropertyReader<?> getPropertyChainReaderInner(LinkedList<Object> chain) {
+    private PropertyReader<?> getPropertyChainReaderInner(LinkedList<Object> chain) {
         return getPropertyReader((String) chain.removeFirst()).getPropertyChainReader(chain);
     }
 
