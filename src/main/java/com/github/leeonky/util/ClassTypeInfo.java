@@ -45,14 +45,14 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     @Override
     public PropertyReader<T> getReader(String property) {
         return readers.computeIfAbsent(property, k -> {
-            throw new IllegalArgumentException("No available property reader for " + type.getSimpleName() + "." + property);
+            throw new NoSuchAccessorException("No available property reader for " + type.getSimpleName() + "." + property);
         });
     }
 
     @Override
     public PropertyWriter<T> getWriter(String property) {
         return writers.computeIfAbsent(property, k -> {
-            throw new IllegalArgumentException("No available property writer for " + type.getSimpleName() + "." + property);
+            throw new NoSuchAccessorException("No available property writer for " + type.getSimpleName() + "." + property);
         });
     }
 
@@ -74,7 +74,7 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     @Override
     public Property<T> getProperty(String name) {
         return properties.computeIfAbsent(name, k -> {
-            throw new IllegalArgumentException("No available property for " + type.getSimpleName() + "." + name);
+            throw new NoSuchPropertyException(type.getSimpleName() + "." + name);
         });
     }
 }

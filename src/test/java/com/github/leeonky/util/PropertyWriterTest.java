@@ -57,7 +57,7 @@ class PropertyWriterTest {
 
         @Test
         void should_raise_error_when_no_reader() {
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(NoSuchAccessorException.class, () ->
                     beanWithPubFieldBeanClass.setPropertyValue(new BeanWithPubField(), "notExist", null));
         }
 

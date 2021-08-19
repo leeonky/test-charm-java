@@ -39,7 +39,8 @@ class BeanClassTest {
 
     @Test
     void new_instance_failed_when_no_candidate_constructor() {
-        assertThrows(IllegalArgumentException.class, () -> BeanClass.create(BeanClassTest.class).newInstance("hello"));
+        assertThrows(NoAppropriateConstructorException.class,
+                () -> BeanClass.create(BeanClassTest.class).newInstance("hello"));
     }
 
     @Test

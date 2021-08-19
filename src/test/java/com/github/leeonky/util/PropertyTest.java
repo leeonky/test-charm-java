@@ -51,7 +51,7 @@ class PropertyTest {
 
         @Test
         void should_raise_error_when_no_property_with_given_name() {
-            assertThrows(IllegalArgumentException.class, () -> beanClass.getProperty("notExistProperty"));
+            assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("notExistProperty"));
         }
     }
 

@@ -86,10 +86,10 @@ class PropertyReaderTest {
 
         @Test
         void should_raise_error_when_no_reader() {
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(NoSuchAccessorException.class, () ->
                     beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "boolean"));
 
-            assertThrows(IllegalArgumentException.class, () ->
+            assertThrows(NoSuchAccessorException.class, () ->
                     beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "privateField"));
         }
 

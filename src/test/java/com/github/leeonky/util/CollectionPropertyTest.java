@@ -69,7 +69,7 @@ class CollectionPropertyTest {
 
         @Test
         void support_null_input() {
-            assertThrows(IllegalArgumentException.class, () -> BeanClass.arrayCollectionToStream(null));
+            assertThrows(CannotToStreamException.class, () -> BeanClass.arrayCollectionToStream(null));
         }
 
         @Test
@@ -220,7 +220,7 @@ class CollectionPropertyTest {
 
             @Test
             void should_raise_error_when_collection_not_support_set() {
-                assertThrows(IllegalArgumentException.class, () ->
+                assertThrows(CannotSetElementByIndexException.class, () ->
                         BeanClass.create(Set.class).setPropertyValue(new HashSet(), "1", null));
             }
         }

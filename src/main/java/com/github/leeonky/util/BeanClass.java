@@ -35,25 +35,22 @@ public class BeanClass<T> {
 
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(Class<T> type, Object... args) {
+        return get(() -> (T) chooseConstructor(type, args).newInstance(args));
+    }
+
+    private static <T> Constructor<?> chooseConstructor(Class<T> type, Object[] args) {
         List<Constructor<?>> constructors = Stream.of(type.getConstructors())
                 .filter(c -> isProperConstructor(c, args))
                 .collect(Collectors.toList());
         if (constructors.size() != 1)
-            throw new IllegalArgumentException(String.format("No appropriate %s constructor for params [%s]",
-                    type.getName(), toString(args)));
-        return get(() -> (T) constructors.get(0).newInstance(args));
+            throw new NoAppropriateConstructorException(type, args);
+        return constructors.get(0);
     }
 
     private static boolean isProperConstructor(Constructor<?> constructor, Object[] parameters) {
         Class<?>[] parameterTypes = constructor.getParameterTypes();
         return parameterTypes.length == parameters.length && IntStream.range(0, parameterTypes.length)
                 .allMatch(i -> parameterTypes[i].isInstance(parameters[i]));
-    }
-
-    private static String toString(Object[] parameters) {
-        return Stream.of(parameters)
-                .map(o -> o == null ? "null" : o.getClass().getName() + ":" + o)
-                .collect(Collectors.joining(", "));
     }
 
     @SuppressWarnings("unchecked")
@@ -65,7 +62,7 @@ public class BeanClass<T> {
             else if (collection instanceof Iterable)
                 return StreamSupport.stream(((Iterable<E>) collection).spliterator(), false);
         }
-        throw new IllegalArgumentException("`" + collection + "` is not collection or array");
+        throw new CannotToStreamException(collection);
     }
 
     public static <T> Optional<T> cast(Object value, Class<T> type) {
