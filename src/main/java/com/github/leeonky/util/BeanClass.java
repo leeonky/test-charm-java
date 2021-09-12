@@ -87,6 +87,15 @@ public class BeanClass<T> {
         return GenericBeanClass.create(type);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getClass(T instance) {
+        return (Class<T>) Objects.requireNonNull(instance).getClass();
+    }
+
+    public static <T> BeanClass<T> createFrom(T instance) {
+        return create(getClass(instance));
+    }
+
     public Converter getConverter() {
         return converter;
     }

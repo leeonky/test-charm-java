@@ -73,6 +73,16 @@ class BeanClassTest {
         assertThat(new BeanClass<>(Integer.class)).isEqualTo(new BeanClass<>(Integer.class));
     }
 
+    @Test
+    void get_class_from_instance() {
+        assertThat(BeanClass.getClass(new BeanClassTest())).isEqualTo(BeanClassTest.class);
+    }
+
+    @Test
+    void create_from_instance() {
+        assertThat(BeanClass.createFrom(new BeanClassTest())).isEqualTo(BeanClass.create(BeanClassTest.class));
+    }
+
     static class StringList extends ArrayList<String> {
     }
 
