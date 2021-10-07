@@ -22,16 +22,6 @@ class ConverterTest {
     private Converter converter = new Converter();
 
     @Test
-    void box_class() {
-        assertThat(Converter.boxedClass(int.class)).isEqualTo(Integer.class);
-        assertThat(Converter.boxedClass(short.class)).isEqualTo(Short.class);
-        assertThat(Converter.boxedClass(long.class)).isEqualTo(Long.class);
-        assertThat(Converter.boxedClass(float.class)).isEqualTo(Float.class);
-        assertThat(Converter.boxedClass(double.class)).isEqualTo(Double.class);
-        assertThat(Converter.boxedClass(boolean.class)).isEqualTo(Boolean.class);
-    }
-
-    @Test
     void support_convert_null() {
         assertThat(converter.tryConvert(String.class, null)).isNull();
     }

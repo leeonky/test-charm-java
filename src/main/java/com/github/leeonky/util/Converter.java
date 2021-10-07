@@ -20,23 +20,6 @@ public class Converter {
     private TypeHandlerSet<Function> typeConverterSet = new TypeHandlerSet<>();
     private TypeHandlerSet<BiFunction> enumConverterSet = new TypeHandlerSet<>();
 
-    public static Class<?> boxedClass(Class<?> source) {
-        if (source.isPrimitive())
-            if (source == int.class)
-                return Integer.class;
-            else if (source == short.class)
-                return Short.class;
-            else if (source == long.class)
-                return Long.class;
-            else if (source == float.class)
-                return Float.class;
-            else if (source == double.class)
-                return Double.class;
-            else if (source == boolean.class)
-                return Boolean.class;
-        return source;
-    }
-
     public static Converter createDefault() {
         Converter converter = new Converter()
                 .addTypeConverter(Object.class, String.class, Object::toString)
@@ -97,7 +80,7 @@ public class Converter {
     }
 
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
-        typeConverterSet.add(boxedClass(source), target, converter);
+        typeConverterSet.add(NumberUtil.boxedClass(source), target, converter);
         return this;
     }
 
@@ -125,7 +108,7 @@ public class Converter {
     }
 
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
-        enumConverterSet.add(boxedClass(source), target, converter);
+        enumConverterSet.add(NumberUtil.boxedClass(source), target, converter);
         return this;
     }
 
