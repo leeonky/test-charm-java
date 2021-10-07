@@ -99,6 +99,7 @@ class NumberUtilTest {
 
         @Test
         void box_class() {
+            Java6Assertions.assertThat(NumberUtil.boxedClass(char.class)).isEqualTo(Character.class);
             Java6Assertions.assertThat(NumberUtil.boxedClass(int.class)).isEqualTo(Integer.class);
             Java6Assertions.assertThat(NumberUtil.boxedClass(short.class)).isEqualTo(Short.class);
             Java6Assertions.assertThat(NumberUtil.boxedClass(long.class)).isEqualTo(Long.class);
@@ -134,6 +135,111 @@ class NumberUtilTest {
             void different_type() {
                 assertPlus(1, 1L, 2L);
                 assertPlus(1.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0));
+            }
+        }
+
+        @Nested
+        class Sub {
+
+            void assertSub(Number left, Number right, Number result) {
+                assertThat(NumberUtil.subtract(left, right)).isEqualTo(result);
+            }
+
+            @Test
+            void same_type() {
+                assertSub((byte) 3, (byte) 1, 2);
+                assertSub((short) 3, (short) 1, 2);
+                assertSub(3, 1, 2);
+                assertSub(3L, 1L, 2L);
+                assertSub(3f, 1f, 2f);
+                assertSub(3d, 1d, 2d);
+                assertSub(BigInteger.valueOf(3), BigInteger.valueOf(1), BigInteger.valueOf(2));
+                assertSub(BigDecimal.valueOf(3), BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+            }
+
+            @Test
+            void different_type() {
+                assertSub(3, 1L, 2L);
+                assertSub(3.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0));
+            }
+        }
+
+        @Nested
+        class Div {
+
+            void assertDiv(Number left, Number right, Number result) {
+                assertThat(NumberUtil.divide(left, right)).isEqualTo(result);
+            }
+
+            @Test
+            void same_type() {
+                assertDiv((byte) 2, (byte) 1, 2);
+                assertDiv((short) 2, (short) 1, 2);
+                assertDiv(2, 1, 2);
+                assertDiv(2L, 1L, 2L);
+                assertDiv(2f, 1f, 2f);
+                assertDiv(2d, 1d, 2d);
+                assertDiv(BigInteger.valueOf(2), BigInteger.valueOf(1), BigInteger.valueOf(2));
+                assertDiv(BigDecimal.valueOf(2), BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+            }
+
+            @Test
+            void different_type() {
+                assertDiv(2, 1L, 2L);
+                assertDiv(2.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0));
+            }
+        }
+
+        @Nested
+        class Mul {
+
+            void assertMul(Number left, Number right, Number result) {
+                assertThat(NumberUtil.multiply(left, right)).isEqualTo(result);
+            }
+
+            @Test
+            void same_type() {
+                assertMul((byte) 2, (byte) 1, 2);
+                assertMul((short) 2, (short) 1, 2);
+                assertMul(2, 1, 2);
+                assertMul(2L, 1L, 2L);
+                assertMul(2f, 1f, 2f);
+                assertMul(2d, 1d, 2d);
+                assertMul(BigInteger.valueOf(2), BigInteger.valueOf(1), BigInteger.valueOf(2));
+                assertMul(BigDecimal.valueOf(2), BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+            }
+
+            @Test
+            void different_type() {
+                assertMul(2, 1L, 2L);
+                assertMul(2.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0));
+            }
+        }
+
+        @Nested
+        class Compare {
+            void assertEqual(Number left, Number right, int result) {
+                assertThat(NumberUtil.compare(left, right)).isEqualTo(result);
+            }
+
+            @Test
+            void same_type() {
+                assertEqual((byte) 2, (byte) 1, Byte.compare((byte) 2, (byte) 1));
+                assertEqual((short) 2, (short) 1, Short.compare((short) 2, (short) 1));
+                assertEqual(2, 1, Integer.compare(2, 1));
+                assertEqual(2L, 1L, Long.compare(2, 1));
+                assertEqual(2f, 1f, Float.compare(2f, 1f));
+                assertEqual(2d, 1d, Double.compare(2d, 1d));
+                assertEqual(BigInteger.valueOf(2), BigInteger.valueOf(1),
+                        BigInteger.valueOf(2).compareTo(BigInteger.valueOf(1)));
+                assertEqual(BigDecimal.valueOf(2), BigDecimal.valueOf(1),
+                        BigDecimal.valueOf(2).compareTo(BigDecimal.valueOf(1)));
+            }
+
+            @Test
+            void different_type() {
+                assertEqual(2, 1L, Long.compare(2, 1L));
+                assertEqual(2.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0).compareTo(BigDecimal.valueOf(1)));
             }
         }
     }
