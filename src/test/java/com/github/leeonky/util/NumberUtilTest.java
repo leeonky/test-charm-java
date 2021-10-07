@@ -14,28 +14,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NumberUtilTest {
 
     @Nested
-    class NumberType {
+    class CalculationType {
 
         void same_number_type(List<List<Class<?>>> types) {
             types.forEach(type -> {
-                assertThat(NumberUtil.numberType(type.get(0), type.get(1))).isEqualTo(type.get(0));
-                assertThat(NumberUtil.numberType(type.get(1), type.get(0))).isEqualTo(type.get(0));
-                assertThat(NumberUtil.numberType(type.get(0), type.get(1))).isEqualTo(type.get(1));
-                assertThat(NumberUtil.numberType(type.get(1), type.get(0))).isEqualTo(type.get(1));
+                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
+                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
+                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(1));
+                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(1));
             });
         }
 
         void use_left_type(List<List<Class<?>>> types) {
             types.forEach(type -> {
-                assertThat(NumberUtil.numberType(type.get(0), type.get(1))).isEqualTo(type.get(0));
-                assertThat(NumberUtil.numberType(type.get(1), type.get(0))).isEqualTo(type.get(0));
+                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
+                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
             });
         }
 
         void should_use_big_big_decimal(List<List<Class<?>>> types) {
             types.forEach(type -> {
-                assertThat(NumberUtil.numberType(type.get(0), type.get(1))).isEqualTo(BigDecimal.class);
-                assertThat(NumberUtil.numberType(type.get(1), type.get(0))).isEqualTo(BigDecimal.class);
+                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(BigDecimal.class);
+                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(BigDecimal.class);
             });
         }
 
@@ -90,7 +90,7 @@ class NumberUtilTest {
 
         @Test
         void should_box_first() {
-            assertThat(NumberUtil.numberType(int.class, long.class)).isEqualTo(Long.class);
+            assertThat(NumberUtil.calculationType(int.class, long.class)).isEqualTo(Long.class);
         }
     }
 
@@ -105,6 +105,36 @@ class NumberUtilTest {
             Java6Assertions.assertThat(NumberUtil.boxedClass(float.class)).isEqualTo(Float.class);
             Java6Assertions.assertThat(NumberUtil.boxedClass(double.class)).isEqualTo(Double.class);
             Java6Assertions.assertThat(NumberUtil.boxedClass(boolean.class)).isEqualTo(Boolean.class);
+        }
+    }
+
+    @Nested
+    class Calculate {
+
+        @Nested
+        class Plus {
+
+            void assertPlus(Number left, Number right, Number result) {
+                assertThat(NumberUtil.plus(left, right)).isEqualTo(result);
+            }
+
+            @Test
+            void same_type() {
+                assertPlus((byte) 1, (byte) 1, 2);
+                assertPlus((short) 1, (short) 1, 2);
+                assertPlus(1, 1, 2);
+                assertPlus(1L, 1L, 2L);
+                assertPlus(1f, 1f, 2f);
+                assertPlus(1d, 1d, 2d);
+                assertPlus(BigInteger.valueOf(1), BigInteger.valueOf(1), BigInteger.valueOf(2));
+                assertPlus(BigDecimal.valueOf(1), BigDecimal.valueOf(1), BigDecimal.valueOf(2));
+            }
+
+            @Test
+            void different_type() {
+                assertPlus(1, 1L, 2L);
+                assertPlus(1.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0));
+            }
         }
     }
 }
