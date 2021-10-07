@@ -40,22 +40,20 @@ public class Converter {
     public static Converter createDefault() {
         Converter converter = new Converter()
                 .addTypeConverter(Object.class, String.class, Object::toString)
-                .addTypeConverter(String.class, long.class, Long::valueOf)
-                .addTypeConverter(String.class, int.class, Integer::valueOf)
-                .addTypeConverter(String.class, short.class, Short::valueOf)
-                .addTypeConverter(String.class, byte.class, Byte::valueOf)
-                .addTypeConverter(String.class, double.class, Double::valueOf)
-                .addTypeConverter(String.class, float.class, Float::valueOf)
-                .addTypeConverter(String.class, boolean.class, Boolean::valueOf)
-
                 .addTypeConverter(String.class, Long.class, Long::valueOf)
+                .addTypeConverter(String.class, long.class, Long::valueOf)
                 .addTypeConverter(String.class, Integer.class, Integer::valueOf)
+                .addTypeConverter(String.class, int.class, Integer::valueOf)
                 .addTypeConverter(String.class, Short.class, Short::valueOf)
+                .addTypeConverter(String.class, short.class, Short::valueOf)
                 .addTypeConverter(String.class, Byte.class, Byte::valueOf)
+                .addTypeConverter(String.class, byte.class, Byte::valueOf)
                 .addTypeConverter(String.class, Double.class, Double::valueOf)
+                .addTypeConverter(String.class, double.class, Double::valueOf)
                 .addTypeConverter(String.class, Float.class, Float::valueOf)
+                .addTypeConverter(String.class, float.class, Float::valueOf)
                 .addTypeConverter(String.class, Boolean.class, Boolean::valueOf)
-
+                .addTypeConverter(String.class, boolean.class, Boolean::valueOf)
                 .addTypeConverter(String.class, BigInteger.class, BigInteger::new)
                 .addTypeConverter(String.class, BigDecimal.class, BigDecimal::new)
 
@@ -72,14 +70,24 @@ public class Converter {
                 .addTypeConverter(String.class, LocalTime.class, LocalTime::parse)
                 .addTypeConverter(String.class, LocalDate.class, LocalDate::parse)
                 .addTypeConverter(String.class, LocalDateTime.class, LocalDateTime::parse)
-                .addTypeConverter(Long.class, BigDecimal.class, BigDecimal::new)
-                .addTypeConverter(Integer.class, BigDecimal.class, BigDecimal::new)
-                .addTypeConverter(Short.class, BigDecimal.class, BigDecimal::new)
-                .addTypeConverter(Byte.class, BigDecimal.class, BigDecimal::new)
-                .addTypeConverter(Float.class, BigDecimal.class, BigDecimal::new)
-                .addTypeConverter(Double.class, BigDecimal.class, BigDecimal::new)
                 .addTypeConverter(String.class, OffsetDateTime.class, OffsetDateTime::parse)
-                .addTypeConverter(String.class, ZonedDateTime.class, ZonedDateTime::parse);
+                .addTypeConverter(String.class, ZonedDateTime.class, ZonedDateTime::parse)
+
+                .addTypeConverter(Number.class, Byte.class, Number::byteValue)
+                .addTypeConverter(Number.class, byte.class, Number::byteValue)
+                .addTypeConverter(Number.class, Short.class, Number::shortValue)
+                .addTypeConverter(Number.class, short.class, Number::shortValue)
+                .addTypeConverter(Number.class, Integer.class, Number::intValue)
+                .addTypeConverter(Number.class, int.class, Number::intValue)
+                .addTypeConverter(Number.class, Long.class, Number::longValue)
+                .addTypeConverter(Number.class, long.class, Number::longValue)
+                .addTypeConverter(Number.class, Double.class, Number::doubleValue)
+                .addTypeConverter(Number.class, double.class, Number::doubleValue)
+                .addTypeConverter(Number.class, Float.class, Number::floatValue)
+                .addTypeConverter(Number.class, float.class, Number::floatValue)
+                .addTypeConverter(Number.class, BigDecimal.class, number -> new BigDecimal(number.toString()))
+                .addTypeConverter(Number.class, BigInteger.class, number -> BigInteger.valueOf(number.longValue()));
+
         defaultConverterConfig.accept(converter);
         return converter;
     }

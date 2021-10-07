@@ -11,8 +11,10 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -209,8 +211,8 @@ class ConverterTest {
                 assertConvert(BigDecimal.class, 100, BigDecimal.valueOf(100));
                 assertConvert(BigDecimal.class, (short) 100, BigDecimal.valueOf(100));
                 assertConvert(BigDecimal.class, (byte) 100, BigDecimal.valueOf(100));
-                assertConvert(BigDecimal.class, (float) 100, BigDecimal.valueOf(100));
-                assertConvert(BigDecimal.class, (double) 100, BigDecimal.valueOf(100));
+                assertConvert(BigDecimal.class, (float) 100, BigDecimal.valueOf(100.0));
+                assertConvert(BigDecimal.class, (double) 100, BigDecimal.valueOf(100.0));
             }
         }
     }
@@ -231,6 +233,80 @@ class ConverterTest {
         @Test
         void should_raise_error_when_can_not_convert() {
             assertThrows(ConvertException.class, () -> converter.convert(Integer.class, "hello"));
+        }
+    }
+
+    @Nested
+    class NumberConvert {
+        private final List<Number> numbers = asList(new Number[]{
+                (byte) 0, (short) 0, 0, 0L, 0.0d, 0.0f, new BigDecimal("0"), new BigInteger("0")
+        });
+        private Converter converter = Converter.createDefault();
+
+        @Test
+        void convent_to_byte() {
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(Byte.class, number)).isEqualTo((byte) 0));
+
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(byte.class, number)).isEqualTo((byte) 0));
+        }
+
+        @Test
+        void convent_to_short() {
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(Short.class, number)).isEqualTo((short) 0));
+
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(short.class, number)).isEqualTo((short) 0));
+        }
+
+        @Test
+        void convent_to_int() {
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(Integer.class, number)).isEqualTo(0));
+
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(int.class, number)).isEqualTo(0));
+        }
+
+        @Test
+        void convent_to_long() {
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(Long.class, number)).isEqualTo(0L));
+
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(long.class, number)).isEqualTo(0L));
+        }
+
+        @Test
+        void convent_to_double() {
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(Double.class, number)).isEqualTo(0.0D));
+
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(double.class, number)).isEqualTo(0.0D));
+        }
+
+        @Test
+        void convent_to_float() {
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(Float.class, number)).isEqualTo(0.0F));
+
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(float.class, number)).isEqualTo(0.0F));
+        }
+
+        @Test
+        void convent_to_big_decimal() {
+            numbers.forEach(number -> assertThat(((BigDecimal) converter.tryConvert(BigDecimal.class, number))
+                    .compareTo(new BigDecimal("0"))).isEqualTo(0));
+        }
+
+        @Test
+        void convent_to_big_integer() {
+            numbers.forEach(number ->
+                    assertThat(converter.tryConvert(BigInteger.class, number)).isEqualTo(new BigInteger("0")));
         }
     }
 }
