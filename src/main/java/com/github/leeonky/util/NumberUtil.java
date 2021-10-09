@@ -53,17 +53,17 @@ public class NumberUtil {
 
     private static Number plus(Number leftInSameType, Number rightInSameType, Class<?> type) {
         if (type.equals(Byte.class))
-            return (Byte) leftInSameType + (Byte) rightInSameType;
+            return (byte) leftInSameType + (byte) rightInSameType;
         if (type.equals(Short.class))
-            return (Short) leftInSameType + (Short) rightInSameType;
+            return (short) leftInSameType + (short) rightInSameType;
         if (type.equals(Integer.class))
-            return (Integer) leftInSameType + (Integer) rightInSameType;
+            return (int) leftInSameType + (int) rightInSameType;
         if (type.equals(Long.class))
-            return (Long) leftInSameType + (Long) rightInSameType;
+            return (long) leftInSameType + (long) rightInSameType;
         if (type.equals(Float.class))
-            return (Float) leftInSameType + (Float) rightInSameType;
+            return (float) leftInSameType + (float) rightInSameType;
         if (type.equals(Double.class))
-            return (Double) leftInSameType + (Double) rightInSameType;
+            return (double) leftInSameType + (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).add((BigInteger) rightInSameType);
         if (type.equals(BigDecimal.class))
@@ -82,17 +82,17 @@ public class NumberUtil {
 
     private static Number subtract(Number leftInSameType, Number rightInSameType, Class<?> type) {
         if (type.equals(Byte.class))
-            return (Byte) leftInSameType - (Byte) rightInSameType;
+            return (byte) leftInSameType - (byte) rightInSameType;
         if (type.equals(Short.class))
-            return (Short) leftInSameType - (Short) rightInSameType;
+            return (short) leftInSameType - (short) rightInSameType;
         if (type.equals(Integer.class))
-            return (Integer) leftInSameType - (Integer) rightInSameType;
+            return (int) leftInSameType - (int) rightInSameType;
         if (type.equals(Long.class))
-            return (Long) leftInSameType - (Long) rightInSameType;
+            return (long) leftInSameType - (long) rightInSameType;
         if (type.equals(Float.class))
-            return (Float) leftInSameType - (Float) rightInSameType;
+            return (float) leftInSameType - (float) rightInSameType;
         if (type.equals(Double.class))
-            return (Double) leftInSameType - (Double) rightInSameType;
+            return (double) leftInSameType - (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).subtract((BigInteger) rightInSameType);
         if (type.equals(BigDecimal.class))
@@ -111,17 +111,17 @@ public class NumberUtil {
 
     private static Number divide(Number leftInSameType, Number rightInSameType, Class<?> type) {
         if (type.equals(Byte.class))
-            return (Byte) leftInSameType / (Byte) rightInSameType;
+            return (byte) leftInSameType / (byte) rightInSameType;
         if (type.equals(Short.class))
-            return (Short) leftInSameType / (Short) rightInSameType;
+            return (short) leftInSameType / (short) rightInSameType;
         if (type.equals(Integer.class))
-            return (Integer) leftInSameType / (Integer) rightInSameType;
+            return (int) leftInSameType / (int) rightInSameType;
         if (type.equals(Long.class))
-            return (Long) leftInSameType / (Long) rightInSameType;
+            return (long) leftInSameType / (long) rightInSameType;
         if (type.equals(Float.class))
-            return (Float) leftInSameType / (Float) rightInSameType;
+            return (float) leftInSameType / (float) rightInSameType;
         if (type.equals(Double.class))
-            return (Double) leftInSameType / (Double) rightInSameType;
+            return (double) leftInSameType / (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).divide((BigInteger) rightInSameType);
         if (type.equals(BigDecimal.class))
@@ -140,17 +140,17 @@ public class NumberUtil {
 
     private static Number multiply(Number leftInSameType, Number rightInSameType, Class<?> type) {
         if (type.equals(Byte.class))
-            return (Byte) leftInSameType * (Byte) rightInSameType;
+            return (byte) leftInSameType * (byte) rightInSameType;
         if (type.equals(Short.class))
-            return (Short) leftInSameType * (Short) rightInSameType;
+            return (short) leftInSameType * (short) rightInSameType;
         if (type.equals(Integer.class))
-            return (Integer) leftInSameType * (Integer) rightInSameType;
+            return (int) leftInSameType * (int) rightInSameType;
         if (type.equals(Long.class))
-            return (Long) leftInSameType * (Long) rightInSameType;
+            return (long) leftInSameType * (long) rightInSameType;
         if (type.equals(Float.class))
-            return (Float) leftInSameType * (Float) rightInSameType;
+            return (float) leftInSameType * (float) rightInSameType;
         if (type.equals(Double.class))
-            return (Double) leftInSameType * (Double) rightInSameType;
+            return (double) leftInSameType * (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).multiply((BigInteger) rightInSameType);
         if (type.equals(BigDecimal.class))
@@ -169,17 +169,17 @@ public class NumberUtil {
 
     private static int compare(Number leftInSameType, Number rightInSameType, Class<?> type) {
         if (type.equals(Byte.class))
-            return Byte.compare((Byte) leftInSameType, (Byte) rightInSameType);
+            return Byte.compare((byte) leftInSameType, (byte) rightInSameType);
         if (type.equals(Short.class))
-            return Short.compare((Short) leftInSameType, (Short) rightInSameType);
+            return Short.compare((short) leftInSameType, (short) rightInSameType);
         if (type.equals(Integer.class))
-            return Integer.compare((Integer) leftInSameType, (Integer) rightInSameType);
+            return Integer.compare((int) leftInSameType, (int) rightInSameType);
         if (type.equals(Long.class))
-            return Long.compare((Long) leftInSameType, (Long) rightInSameType);
+            return Long.compare((long) leftInSameType, (long) rightInSameType);
         if (type.equals(Float.class))
-            return Float.compare((Float) leftInSameType, (Float) rightInSameType);
+            return Float.compare((float) leftInSameType, (float) rightInSameType);
         if (type.equals(Double.class))
-            return Double.compare((Double) leftInSameType, (Double) rightInSameType);
+            return Double.compare((double) leftInSameType, (double) rightInSameType);
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).compareTo((BigInteger) rightInSameType);
         if (type.equals(BigDecimal.class))
@@ -193,5 +193,26 @@ public class NumberUtil {
 
     public static void setConverter(Converter converter) {
         NumberUtil.converter = converter;
+    }
+
+    public static Number negate(Number left) {
+        Class<?> type = boxedClass(left.getClass());
+        if (type.equals(Byte.class))
+            return (byte) -(byte) left;
+        if (type.equals(Short.class))
+            return (short) -(short) left;
+        if (type.equals(Integer.class))
+            return -(int) left;
+        if (type.equals(Long.class))
+            return -(long) left;
+        if (type.equals(Float.class))
+            return -(float) left;
+        if (type.equals(Double.class))
+            return -(double) left;
+        if (type.equals(BigInteger.class))
+            return ((BigInteger) left).negate();
+        if (type.equals(BigDecimal.class))
+            return ((BigDecimal) left).negate();
+        throw new IllegalArgumentException("unsupported type " + type);
     }
 }

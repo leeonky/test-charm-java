@@ -242,5 +242,25 @@ class NumberUtilTest {
                 assertEqual(2.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0).compareTo(BigDecimal.valueOf(1)));
             }
         }
+
+        @Nested
+        class Negate {
+            void assertNegate(Number left, Number result) {
+                assertThat(NumberUtil.negate(left)).isEqualTo(result);
+            }
+
+            @Test
+            void same_type() {
+                assertNegate((byte) 1, (byte) -1);
+                assertNegate((short) 1, (short) -1);
+                assertNegate(1, -1);
+                assertNegate(1L, -1L);
+                assertNegate(1f, -1f);
+                assertNegate(1d, -1d);
+                assertNegate(BigInteger.valueOf(1), BigInteger.valueOf(-1));
+                assertNegate(BigDecimal.valueOf(1), BigDecimal.valueOf(-1));
+            }
+
+        }
     }
 }
