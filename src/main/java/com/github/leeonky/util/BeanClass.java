@@ -15,9 +15,9 @@ import static java.util.Arrays.asList;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
+    private static Converter converter = Converter.createDefault();
     private final TypeInfo<T> typeInfo;
     private final Class<T> type;
-    private final Converter converter = Converter.createDefault();
 
     protected BeanClass(Class<T> type) {
         this.type = Objects.requireNonNull(type);
@@ -96,8 +96,12 @@ public class BeanClass<T> {
         return create(getClass(instance));
     }
 
-    public Converter getConverter() {
+    public static Converter getConverter() {
         return converter;
+    }
+
+    public static void setConverter(Converter converter) {
+        BeanClass.converter = converter;
     }
 
     public Class<T> getType() {

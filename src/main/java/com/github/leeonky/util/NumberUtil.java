@@ -9,7 +9,7 @@ import static java.util.Arrays.asList;
 public class NumberUtil {
     private static final List<Class<?>> NUMBER_TYPES = asList(Byte.class, Short.class, Integer.class, Long.class,
             Float.class, Double.class, BigInteger.class, BigDecimal.class);
-    private static final Converter converter = Converter.createDefault();
+    private static Converter converter = Converter.createDefault();
 
     public static Class<?> calculationType(Class<?> type1, Class<?> type2) {
         Class<?> boxedType1 = boxedClass(type1);
@@ -43,6 +43,10 @@ public class NumberUtil {
     }
 
     public static Number plus(Number left, Number right) {
+        return plus(left, right, converter);
+    }
+
+    public static Number plus(Number left, Number right, Converter converter) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
         return plus((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
     }
@@ -68,6 +72,10 @@ public class NumberUtil {
     }
 
     public static Number subtract(Number left, Number right) {
+        return subtract(left, right, converter);
+    }
+
+    public static Number subtract(Number left, Number right, Converter converter) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
         return subtract((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
     }
@@ -93,6 +101,10 @@ public class NumberUtil {
     }
 
     public static Number divide(Number left, Number right) {
+        return divide(left, right, converter);
+    }
+
+    public static Number divide(Number left, Number right, Converter converter) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
         return divide((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
     }
@@ -118,6 +130,10 @@ public class NumberUtil {
     }
 
     public static Number multiply(Number left, Number right) {
+        return multiply(left, right, converter);
+    }
+
+    public static Number multiply(Number left, Number right, Converter converter) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
         return multiply((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
     }
@@ -143,6 +159,10 @@ public class NumberUtil {
     }
 
     public static int compare(Number left, Number right) {
+        return compare(left, right, converter);
+    }
+
+    public static int compare(Number left, Number right, Converter converter) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
         return compare((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
     }
@@ -165,5 +185,13 @@ public class NumberUtil {
         if (type.equals(BigDecimal.class))
             return ((BigDecimal) leftInSameType).compareTo((BigDecimal) rightInSameType);
         throw new IllegalArgumentException("unsupported type " + type);
+    }
+
+    public static Converter getConverter() {
+        return converter;
+    }
+
+    public static void setConverter(Converter converter) {
+        NumberUtil.converter = converter;
     }
 }
