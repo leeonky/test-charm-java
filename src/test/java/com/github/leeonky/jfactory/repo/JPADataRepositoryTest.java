@@ -1,6 +1,10 @@
 package com.github.leeonky.jfactory.repo;
 
 import com.github.leeonky.jfactory.JFactory;
+import com.github.leeonky.jfactory.repo.beans.Bean;
+import com.github.leeonky.jfactory.repo.beans.CompositeId;
+import com.github.leeonky.jfactory.repo.beans.CompositeIdBean;
+import com.github.leeonky.jfactory.repo.beans.IgnoreSaving;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,9 +86,6 @@ class JPADataRepositoryTest {
         jpaDataRepository.clear();
 
         assertNotSame(entityManager.find(Bean.class, 1L), bean);
-    }
-
-    public static class IgnoreSaving {
     }
 
     @Nested

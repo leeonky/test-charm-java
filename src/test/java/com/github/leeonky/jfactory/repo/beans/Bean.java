@@ -1,4 +1,4 @@
-package com.github.leeonky.jfactory.repo;
+package com.github.leeonky.jfactory.repo.beans;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

@@ -68,6 +68,7 @@ test {
 
 pitest {
     targetClasses = ['com.github.leeonky.jfactory.repo*']
+    excludedClasses = ['com.github.leeonky.jfactory.repo.beans.*']
     outputFormats = ['HTML2']
     junit5PluginVersion = "0.12"
 }
