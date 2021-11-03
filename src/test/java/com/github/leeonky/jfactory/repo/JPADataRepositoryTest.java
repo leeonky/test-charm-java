@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -83,6 +84,9 @@ class JPADataRepositoryTest {
         assertNotSame(entityManager.find(Bean.class, 1L), bean);
     }
 
+    public static class IgnoreSaving {
+    }
+
     @Nested
     class CompositeId_ {
         JFactory jFactory = new JFactory(jpaDataRepository);
@@ -111,6 +115,20 @@ class JPADataRepositoryTest {
             assertThat(compositeId.getKey2()).isInstanceOf(String.class);
 
             assertThat(jFactory.type(CompositeId.class).queryAll()).isEmpty();
+        }
+    }
+
+    @Nested
+    class IgnoreSaveAndQuery {
+
+        @Test
+        void should_not_save_instance_when_ignore_saving() {
+            JFactory jFactory = new JFactory(new JPADataRepository(entityManager, singletonList(IgnoreSaving.class)));
+
+            IgnoreSaving ignoreSaving = jFactory.create(IgnoreSaving.class);
+
+            assertThat(ignoreSaving).isInstanceOf(IgnoreSaving.class);
+            assertThat(jFactory.type(IgnoreSaving.class).queryAll()).isEmpty();
         }
     }
 }
