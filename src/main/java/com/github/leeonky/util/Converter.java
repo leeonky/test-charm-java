@@ -5,9 +5,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
-import java.util.Collections;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -17,6 +15,7 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 public class Converter {
     private static Consumer<Converter> defaultConverterConfig = (c) -> {
     };
+    public static final Converter INSTANCE = create();
     private TypeHandlerSet<Function> typeConverterSet = new TypeHandlerSet<>();
     private TypeHandlerSet<BiFunction> enumConverterSet = new TypeHandlerSet<>();
 
@@ -79,8 +78,15 @@ public class Converter {
         defaultConverterConfig = config;
     }
 
+    public static Converter create() {
+        Iterator<ConverterFactory> iterator = ServiceLoader.load(ConverterFactory.class).iterator();
+        if (iterator.hasNext())
+            return iterator.next().create();
+        return createDefault();
+    }
+
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
-        typeConverterSet.add(NumberUtil.boxedClass(source), target, converter);
+        typeConverterSet.add(BeanClass.boxedClass(source), target, converter);
         return this;
     }
 
@@ -108,7 +114,7 @@ public class Converter {
     }
 
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
-        enumConverterSet.add(NumberUtil.boxedClass(source), target, converter);
+        enumConverterSet.add(BeanClass.boxedClass(source), target, converter);
         return this;
     }
 
