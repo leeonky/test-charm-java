@@ -22,7 +22,12 @@ class CollectionTypeInfo<T> extends ClassTypeInfo<T> {
 
     @Override
     public PropertyWriter<T> getWriter(String property) {
-        return new CollectionDataPropertyWriter<>(type, property, type.getElementType());
+        try {
+            Integer.valueOf(property);
+            return new CollectionDataPropertyWriter<>(type, property, type.getElementType());
+        } catch (NumberFormatException ignore) {
+            return super.getWriter(property);
+        }
     }
 
     @Override

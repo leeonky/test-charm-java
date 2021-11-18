@@ -201,7 +201,7 @@ class CollectionPropertyTest {
         class Write {
 
             @Test
-            void get_property_type_in_array_or_collection() {
+            void get_element_property_type_in_array_or_collection() {
                 BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
 
                 assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyWriter("0").getType().getType())
@@ -209,6 +209,14 @@ class CollectionPropertyTest {
 
                 assertThat(beanClass.getPropertyReader("array").getType().getPropertyWriter("0").getType().getType())
                         .isEqualTo(String.class);
+            }
+
+            @Test
+            void get_property_property_type_of_list() {
+                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
+
+                assertThat(beanClass.getPropertyWriter("listWithProperty").getType().getPropertyReader("property").getType().getType())
+                        .isEqualTo(int.class);
             }
 
             @Test
@@ -223,7 +231,7 @@ class CollectionPropertyTest {
             }
 
             @Test
-            void read_array_value_by_index() {
+            void write_array_value_by_index() {
                 int[] ints = new int[]{2, 3};
                 BeanClass<int[]> beanClass = BeanClass.create(int[].class);
 
@@ -238,6 +246,15 @@ class CollectionPropertyTest {
                 listBeanClass.setPropertyValue(stringList, "0", "hello");
 
                 assertThat(stringList).containsOnly("hello", "");
+            }
+
+            @Test
+            void write_list_property() {
+                Bean bean = new Bean();
+                bean.listWithProperty = new ListWithProperty();
+
+                BeanClass.createFrom(bean.listWithProperty).setPropertyValue(bean.listWithProperty, "property", 2000);
+                assertThat(bean.listWithProperty.property).isEqualTo(2000);
             }
 
             @Test
