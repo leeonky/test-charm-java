@@ -7,10 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 class ClassTypeInfo<T> implements TypeInfo<T> {
+    protected final BeanClass<T> type;
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Map<String, Property<T>> properties = new LinkedHashMap<>();
-    private final BeanClass<T> type;
 
     public ClassTypeInfo(BeanClass<T> type) {
         this.type = type;

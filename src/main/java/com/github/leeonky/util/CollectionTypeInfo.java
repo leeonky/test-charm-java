@@ -4,16 +4,20 @@ import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 
-class CollectionTypeInfo<T> implements TypeInfo<T> {
-    private final BeanClass<T> type;
+class CollectionTypeInfo<T> extends ClassTypeInfo<T> {
 
     public CollectionTypeInfo(BeanClass<T> type) {
-        this.type = type;
+        super(type);
     }
 
     @Override
     public PropertyReader<T> getReader(String property) {
-        return new CollectionDataPropertyReader<>(type, property, type.getElementType());
+        try {
+            Integer.valueOf(property);
+            return new CollectionDataPropertyReader<>(type, property, type.getElementType());
+        } catch (NumberFormatException ignore) {
+            return super.getReader(property);
+        }
     }
 
     @Override

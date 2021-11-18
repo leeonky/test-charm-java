@@ -19,6 +19,11 @@ class CollectionPropertyTest {
         public Iterable<String> iterable;
         public Iterable<?> uncheckedIterable;
         public Iterable rawIterable;
+        public ListWithProperty listWithProperty;
+    }
+
+    public static class ListWithProperty extends ArrayList<String> {
+        public int property;
     }
 
     @Nested
@@ -141,7 +146,7 @@ class CollectionPropertyTest {
         class Read {
 
             @Test
-            void get_property_type_in_array_or_collection() {
+            void get_element_property_type_of_array_or_collection() {
                 BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
 
                 assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyReader("0").getType().getType())
@@ -149,6 +154,14 @@ class CollectionPropertyTest {
 
                 assertThat(beanClass.getPropertyReader("array").getType().getPropertyReader("0").getType().getType())
                         .isEqualTo(String.class);
+            }
+
+            @Test
+            void get_property_property_type_of_list() {
+                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
+
+                assertThat(beanClass.getPropertyReader("listWithProperty").getType().getPropertyReader("property").getType().getType())
+                        .isEqualTo(int.class);
             }
 
             @Test
@@ -172,6 +185,15 @@ class CollectionPropertyTest {
                 BeanClass<List> listBeanClass = BeanClass.create(List.class);
 
                 assertThat(listBeanClass.getPropertyValue(asList("", "hello"), "1")).isEqualTo("hello");
+            }
+
+            @Test
+            void read_list_property() {
+                Bean bean = new Bean();
+                bean.listWithProperty = new ListWithProperty();
+                bean.listWithProperty.property = 1000;
+                assertThat(BeanClass.create(Bean.class).getPropertyChainValue(bean, "listWithProperty.property"))
+                        .isEqualTo(1000);
             }
         }
 
