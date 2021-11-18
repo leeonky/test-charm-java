@@ -165,17 +165,6 @@ class CollectionPropertyTest {
             }
 
             @Test
-            void property_readers_should_return_empty() {
-                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
-
-                assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyReaders())
-                        .isEmpty();
-
-                assertThat(beanClass.getPropertyReader("array").getType().getPropertyReaders())
-                        .isEmpty();
-            }
-
-            @Test
             void read_array_value_by_index() {
                 int[] ints = new int[]{2, 3};
                 BeanClass<int[]> beanClass = BeanClass.create(int[].class);
@@ -220,17 +209,6 @@ class CollectionPropertyTest {
             }
 
             @Test
-            void property_readers_should_return_empty() {
-                BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
-
-                assertThat(beanClass.getPropertyReader("iterable").getType().getPropertyWriters())
-                        .isEmpty();
-
-                assertThat(beanClass.getPropertyReader("array").getType().getPropertyWriters())
-                        .isEmpty();
-            }
-
-            @Test
             void write_array_value_by_index() {
                 int[] ints = new int[]{2, 3};
                 BeanClass<int[]> beanClass = BeanClass.create(int[].class);
@@ -268,7 +246,7 @@ class CollectionPropertyTest {
         class _Property {
 
             @Test
-            void get_collection_property() {
+            void get_collection_element_property() {
                 BeanClass<?> type = BeanClass.create(Bean.class).getPropertyReader("iterable").getType();
 
                 Property<?> property = type.getProperty("0");
@@ -276,6 +254,13 @@ class CollectionPropertyTest {
                 assertThat(property)
                         .hasFieldOrPropertyWithValue("name", "0")
                         .hasFieldOrPropertyWithValue("beanType", type);
+            }
+
+            @Test
+            void get_collection_property() {
+                BeanClass<?> type = BeanClass.create(Bean.class).getPropertyReader("listWithProperty").getType();
+
+                assertThat(type.getProperty("property")).isEqualTo(type.getProperty("property"));
             }
         }
     }
