@@ -54,6 +54,7 @@ public class Converter {
                 .addTypeConverter(String.class, LocalDateTime.class, LocalDateTime::parse)
                 .addTypeConverter(String.class, OffsetDateTime.class, OffsetDateTime::parse)
                 .addTypeConverter(String.class, ZonedDateTime.class, ZonedDateTime::parse)
+                .addTypeConverter(String.class, YearMonth.class, YearMonth::parse)
 
                 .addTypeConverter(Number.class, Byte.class, Number::byteValue)
                 .addTypeConverter(Number.class, byte.class, Number::byteValue)

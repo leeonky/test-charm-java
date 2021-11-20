@@ -174,6 +174,8 @@ class ConverterTest {
 
             assertConvert(ZonedDateTime.class, "1996-01-23T00:00:01+08:00",
                     LocalDateTime.parse("1996-01-23T00:00:01").atZone(ZoneOffset.of("+08:00")));
+
+            assertConvert(YearMonth.class, "2000-10", YearMonth.parse("2000-10"));
         }
 
         private void assertConvert(Class<?> type, Object value, Object toValue) {
