@@ -184,8 +184,8 @@ class ConverterTest {
 
         @Test
         void register_config() {
-            Converter.configDefaultConverter(converter -> converter.addTypeConverter(Type.class, String.class, t -> "customer converter"));
-            assertThat(Converter.createDefault().tryConvert(String.class, new Type())).isEqualTo("customer converter");
+            Converter converter = Converter.createDefault().addTypeConverter(Type.class, String.class, t -> "customer converter");
+            assertThat(converter.tryConvert(String.class, new Type())).isEqualTo("customer converter");
 
         }
 

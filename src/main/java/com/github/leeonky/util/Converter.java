@@ -5,22 +5,21 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 
 public class Converter {
-    private static Consumer<Converter> defaultConverterConfig = (c) -> {
-    };
-    public static final Converter INSTANCE = create();
-    private TypeHandlerSet<Function> typeConverterSet = new TypeHandlerSet<>();
-    private TypeHandlerSet<BiFunction> enumConverterSet = new TypeHandlerSet<>();
+    public static final Converter INSTANCE = ConverterFactory.create();
+    private final TypeHandlerSet<Function<Object, Object>> typeConverterSet = new TypeHandlerSet<>();
+    private final TypeHandlerSet<BiFunction<Class<? extends Enum<?>>, Object, Object>> enumConverterSet = new TypeHandlerSet<>();
 
     public static Converter createDefault() {
-        Converter converter = new Converter()
+        return new Converter()
                 .addTypeConverter(Object.class, String.class, Object::toString)
                 .addTypeConverter(String.class, Long.class, Long::valueOf)
                 .addTypeConverter(String.class, long.class, Long::valueOf)
@@ -70,24 +69,11 @@ public class Converter {
                 .addTypeConverter(Number.class, float.class, Number::floatValue)
                 .addTypeConverter(Number.class, BigDecimal.class, number -> new BigDecimal(number.toString()))
                 .addTypeConverter(Number.class, BigInteger.class, number -> BigInteger.valueOf(number.longValue()));
-
-        defaultConverterConfig.accept(converter);
-        return converter;
     }
 
-    public static void configDefaultConverter(Consumer<Converter> config) {
-        defaultConverterConfig = config;
-    }
-
-    public static Converter create() {
-        Iterator<ConverterFactory> iterator = ServiceLoader.load(ConverterFactory.class).iterator();
-        if (iterator.hasNext())
-            return iterator.next().create();
-        return createDefault();
-    }
-
+    @SuppressWarnings("unchecked")
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
-        typeConverterSet.add(BeanClass.boxedClass(source), target, converter);
+        typeConverterSet.add(BeanClass.boxedClass(source), target, (Function<Object, Object>) converter);
         return this;
     }
 
@@ -96,7 +82,7 @@ public class Converter {
     }
 
     @SuppressWarnings("unchecked")
-    private Object convert(Class<?> target, Object value, Function<Object, Object> defaultValue) {
+    private <T> Object convert(Class<T> target, Object value, Function<Object, Object> defaultValue) {
         if (value == null)
             return null;
         Class<?> source = value.getClass();
@@ -104,18 +90,20 @@ public class Converter {
             return value;
         return typeConverterSet.findHandler(source, target, Collections::emptyList)
                 .map(c -> c.getHandler().apply(value))
-                .orElseGet(() -> target.isEnum() ? convertEnum(source, target, value) : defaultValue.apply(value));
+                .orElseGet(() -> target.isEnum() ? convertEnum(source, (Class<? extends Enum>) target, value)
+                        : defaultValue.apply(value));
+    }
+
+    private <E extends Enum<E>> Object convertEnum(Class<?> source, Class<E> target, Object value) {
+        return enumConverterSet.findHandler(source, target)
+                .map(c -> c.getHandler().apply(target, value))
+                .orElseGet(() -> Enum.valueOf(target, value.toString()));
     }
 
     @SuppressWarnings("unchecked")
-    private Object convertEnum(Class<?> source, Class<?> target, Object value) {
-        return enumConverterSet.findHandler(source, target)
-                .map(c -> c.getHandler().apply(target, value))
-                .orElseGet(() -> Enum.valueOf((Class) target, value.toString()));
-    }
-
-    public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
-        enumConverterSet.add(BeanClass.boxedClass(source), target, converter);
+    public <E extends Enum<E>, V> Converter addEnumConverter(Class<V> source, Class<E> target,
+                                                             BiFunction<Class<E>, V, E> converter) {
+        enumConverterSet.add(BeanClass.boxedClass(source), target, (BiFunction) converter);
         return this;
     }
 

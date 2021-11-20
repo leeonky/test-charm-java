@@ -23,7 +23,7 @@ class ConverterFactoryTest {
             ServiceLoader mockServiceLoader = mock(ServiceLoader.class);
             when(mockServiceLoader.iterator()).thenReturn(singletonList(mockConverterFactory).iterator());
             utilities.when(() -> ServiceLoader.load(ConverterFactory.class)).thenReturn(mockServiceLoader);
-            actual = Converter.create();
+            actual = ConverterFactory.create();
         }
 
         assertThat(actual).isEqualTo(instance);
@@ -31,6 +31,6 @@ class ConverterFactoryTest {
 
     @Test
     void create_Converter_by_new_when_no_Converter_factory() {
-        assertThat(Converter.create()).isInstanceOf(Converter.class);
+        assertThat(ConverterFactory.create()).isInstanceOf(Converter.class);
     }
 }
