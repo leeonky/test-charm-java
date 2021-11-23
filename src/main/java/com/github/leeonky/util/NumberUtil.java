@@ -9,7 +9,7 @@ import static java.util.Arrays.asList;
 public class NumberUtil {
     private static final List<Class<?>> NUMBER_TYPES = asList(Byte.class, Short.class, Integer.class, Long.class,
             Float.class, Double.class, BigInteger.class, BigDecimal.class);
-    private static Converter converter = Converter.INSTANCE;
+    private static Converter converter = Converter.getInstance();
 
     public static Class<?> calculationType(Class<?> type1, Class<?> type2) {
         Class<?> boxedType1 = BeanClass.boxedClass(type1);

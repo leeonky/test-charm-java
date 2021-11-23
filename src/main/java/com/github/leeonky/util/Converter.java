@@ -14,9 +14,15 @@ import java.util.function.Function;
 import static com.github.leeonky.util.BeanClass.getClassName;
 
 public class Converter {
-    public static final Converter INSTANCE = ConverterFactory.create();
+    private static Converter instance;
     private final TypeHandlerSet<Function<Object, Object>> typeConverterSet = new TypeHandlerSet<>();
     private final TypeHandlerSet<BiFunction<Class<? extends Enum<?>>, Object, Object>> enumConverterSet = new TypeHandlerSet<>();
+
+    public static Converter getInstance() {
+        if (instance == null)
+            instance = ConverterFactory.create();
+        return instance;
+    }
 
     public static Converter createDefault() {
         return new Converter()

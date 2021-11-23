@@ -15,7 +15,7 @@ import static java.util.Arrays.asList;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
-    private static Converter converter = Converter.INSTANCE;
+    private static Converter converter = Converter.getInstance();
     private final TypeInfo<T> typeInfo;
     private final Class<T> type;
 
