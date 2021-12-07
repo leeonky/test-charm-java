@@ -24,6 +24,14 @@ class TablePropertyValueTest {
         private String value, value2;
     }
 
+    public static class AnItem extends Spec<Item> {
+
+        @Override
+        public void main() {
+            property("value").value("spec");
+        }
+    }
+
     @Getter
     @Setter
     public static class Bean {
@@ -68,6 +76,16 @@ class TablePropertyValueTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     builder.propertyValue("list", table("| value |\n" +
                             "| hello | world |")))).hasMessage("Invalid table at row: 0, different size of cells and headers.");
+        }
+
+        @Test
+        void table_with_spec() {
+            jFactory.register(AnItem.class);
+           
+            expectTable("   | value2 |\n" +
+                    "AnItem | Tom    |")
+                    .should("value: ['spec']")
+                    .should("value2: ['Tom']");
         }
 
         private DALAssert expectTable(String table) {

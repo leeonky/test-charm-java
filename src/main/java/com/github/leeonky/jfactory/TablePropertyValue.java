@@ -37,13 +37,20 @@ public class TablePropertyValue implements PropertyValue {
             String[] headers = getCells(lines[0]);
             return reduceWithIndex(Stream.of(lines).skip(1), builder, (rowIndex, rowReduceBuilder, row) -> {
                 String[] cells = getCells(row);
+                String traitAndSpec = getTraitAndSpec(row);
                 if (cells.length != headers.length)
                     throw new IllegalArgumentException("Invalid table at row: " + rowIndex + ", different size of cells and headers.");
                 return reduceWithIndex(Stream.of(headers), rowReduceBuilder, (columnIndex, columnReduceBuilder, cell) ->
-                        columnReduceBuilder.property(format("%s[%d].%s", property, rowIndex, headers[columnIndex]), cells[columnIndex]));
+                        columnReduceBuilder.property(format("%s[%d]%s.%s", property, rowIndex, traitAndSpec,
+                                headers[columnIndex]), cells[columnIndex]));
             });
         }
         return builder.property(property, Collections.emptyList());
+    }
+
+    private String getTraitAndSpec(String row) {
+        String traitAndSpec = row.split("\\|")[0].trim();
+        return traitAndSpec.isEmpty() ? "" : "(" + traitAndSpec + ")";
     }
 
     private String[] getCells(String line) {
