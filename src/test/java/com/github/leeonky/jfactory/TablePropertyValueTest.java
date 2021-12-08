@@ -21,7 +21,7 @@ class TablePropertyValueTest {
     @Setter
     @Accessors(chain = true)
     public static class Item {
-        private String value, value2;
+        private String value, value2, value3;
     }
 
     public static class AnItem extends Spec<Item> {
@@ -29,6 +29,11 @@ class TablePropertyValueTest {
         @Override
         public void main() {
             property("value").value("spec");
+        }
+
+        @Trait
+        public void value3Ok() {
+            property("value3").value("OK");
         }
     }
 
@@ -81,11 +86,21 @@ class TablePropertyValueTest {
         @Test
         void table_with_spec() {
             jFactory.register(AnItem.class);
-           
+
             expectTable("   | value2 |\n" +
                     "AnItem | Tom    |")
                     .should("value: ['spec']")
                     .should("value2: ['Tom']");
+        }
+
+        @Test
+        void table_with_trait_spec() {
+            jFactory.register(AnItem.class);
+
+            expectTable("            | value2 |\n" +
+                    "value3Ok AnItem | Tom    |")
+                    .should("value: ['spec']")
+                    .should("value3: ['OK']");
         }
 
         private DALAssert expectTable(String table) {
