@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
@@ -99,6 +100,17 @@ class TablePropertyValueTest {
 
             expectTable("            | value2 |\n" +
                     "value3Ok AnItem | Tom    |")
+                    .should("value: ['spec']")
+                    .should("value3: ['OK']");
+        }
+
+        @Test
+        void use_table_during_collection_creation() {
+            jFactory.register(AnItem.class);
+
+            expect(jFactory.type(new TypeReference<ArrayList<Bean>>() {
+            }).properties(table("    | value2 |\n" +
+                    "value3Ok AnItem | Tom    |")).create())
                     .should("value: ['spec']")
                     .should("value3: ['OK']");
         }
