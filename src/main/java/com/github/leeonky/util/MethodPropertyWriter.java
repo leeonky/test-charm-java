@@ -2,11 +2,14 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.function.BiConsumer;
 
 import static com.github.leeonky.util.StringUtil.unCapitalize;
+import static com.github.leeonky.util.Suppressor.run;
 
 class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWriter<T> {
     private static final int SETTER_PREFIX_LENGTH = 3;
+    private final BiConsumer<T, Object> SETTER = (bean, value) -> run(() -> method.invoke(bean, tryConvert(value)));
     private String name;
 
     MethodPropertyWriter(BeanClass<T> beanClass, Method method) {
@@ -18,8 +21,8 @@ class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWrite
     }
 
     @Override
-    public void setValue(T bean, Object value) {
-        Suppressor.run(() -> method.invoke(bean, tryConvert(value)));
+    public BiConsumer<T, Object> setter() {
+        return SETTER;
     }
 
     @Override

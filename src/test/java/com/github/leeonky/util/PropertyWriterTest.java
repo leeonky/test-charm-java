@@ -5,11 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.github.leeonky.util.BeanClass.create;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PropertyWriterTest {
-    private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.create(BeanWithPubField.class);
+    private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = create(BeanWithPubField.class);
 
     public static class BeanWithPubField {
         @Attr("v1")
@@ -37,6 +38,18 @@ class PropertyWriterTest {
 
     public static class SubBeanWithPubField extends BeanWithPubField {
         public int field;
+    }
+
+    public static class Bean {
+        public int i;
+    }
+
+    public static class Beans {
+        public Bean bean;
+        public Bean[] beans = new Bean[10];
+
+        public void setBeanSetter(Bean bean) {
+        }
     }
 
     @Nested
@@ -75,8 +88,45 @@ class PropertyWriterTest {
         @Test
         void should_override_fields_in_super_class() {
             SubBeanWithPubField bean = new SubBeanWithPubField();
-            BeanClass.create(SubBeanWithPubField.class).setPropertyValue(bean, "field", 200);
+            create(SubBeanWithPubField.class).setPropertyValue(bean, "field", 200);
             assertThat(bean.field).isEqualTo(200);
+        }
+
+        @Test
+        void raise_error_when_set_unexpected_type_value_to_field() {
+            Beans beans = new Beans();
+
+            assertThat(assertThrows(IllegalArgumentException.class, () ->
+                    create(Beans.class).setPropertyValue(beans, "bean", "unexpected value")))
+                    .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
+                            "property com.github.leeonky.util.PropertyWriterTest$Beans.bean<com.github.leeonky.util.PropertyWriterTest$Bean>");
+        }
+
+        @Test
+        void raise_error_when_set_unexpected_type_value_to_method() {
+            Beans beans = new Beans();
+
+            assertThat(assertThrows(IllegalArgumentException.class, () ->
+                    create(Beans.class).setPropertyValue(beans, "beanSetter", "unexpected value")))
+                    .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
+                            "property com.github.leeonky.util.PropertyWriterTest$Beans.beanSetter<com.github.leeonky.util.PropertyWriterTest$Bean>");
+        }
+
+        @Test
+        void raise_error_when_set_unexpected_type_value_to_collection() {
+            Bean[] beans = new Bean[1];
+            assertThat(assertThrows(IllegalArgumentException.class, () ->
+                    create(Bean[].class).setPropertyValue(beans, "0", "unexpected value")))
+                    .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
+                            "property [Lcom.github.leeonky.util.PropertyWriterTest$Bean;[0]<com.github.leeonky.util.PropertyWriterTest$Bean>");
+        }
+
+        @Test
+        void raise_error_when_set_null_value_to_primitive() {
+            Bean bean = new Bean();
+
+            assertThat(assertThrows(IllegalArgumentException.class, () ->
+                    create(Bean.class).setPropertyValue(bean, "i", null))).hasMessageContaining("Can not set null to ");
         }
     }
 
