@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 import static java.lang.Integer.parseInt;
 
 class CollectionDataPropertyWriter<T> extends DataPropertyAccessor<T> implements PropertyWriter<T> {
+    @SuppressWarnings("unchecked")
     private final BiConsumer<T, Object> SETTER = (bean, value) -> {
         Class<T> type = getBeanType().getType();
         int index = parseInt(getName());
