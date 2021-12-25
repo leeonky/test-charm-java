@@ -131,4 +131,10 @@ public class Converter {
             throw new ConvertException(String.format("Cannot convert from %s to %s", getClassName(value), target));
         });
     }
+
+    public Converter extend() {
+        BeanClass.subTypesOf(ConverterExtension.class, "com.github.leeonky.util.extensions")
+                .forEach(c -> ((ConverterExtension) BeanClass.newInstance(c)).extend(this));
+        return this;
+    }
 }

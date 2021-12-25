@@ -8,7 +8,7 @@ public interface ConverterFactory {
         Iterator<ConverterFactory> iterator = ServiceLoader.load(ConverterFactory.class).iterator();
         if (iterator.hasNext())
             return iterator.next().newInstance();
-        return Converter.createDefault();
+        return Converter.createDefault().extend();
     }
 
     Converter newInstance();
