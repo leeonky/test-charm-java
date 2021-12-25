@@ -172,11 +172,12 @@ public class BeanClass<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public Object createCollection(List<?> elements) {
+    public Object createCollection(Collection<?> elements) {
         if (getType().isArray()) {
             Object array = Array.newInstance(getType().getComponentType(), elements.size());
-            for (int i = 0; i < elements.size(); i++)
-                Array.set(array, i, elements.get(i));
+            int i = 0;
+            for (Object element : elements)
+                Array.set(array, i++, element);
             return array;
         }
         if (getType().isInterface()) {

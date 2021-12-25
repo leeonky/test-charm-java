@@ -9,12 +9,10 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -299,6 +297,28 @@ class ConverterTest {
         void convent_to_big_integer() {
             numbers.forEach(number ->
                     assertThat(converter.tryConvert(BigInteger.class, number)).isEqualTo(new BigInteger("0")));
+        }
+    }
+
+    @Nested
+    class Collection {
+
+        @Test
+        void convert_empty_to_empty_with_right_type() {
+            assertThat((String[]) converter.tryConvert(String[].class, emptyList())).isEmpty();
+            assertThat((Set<?>) converter.tryConvert(Set.class, emptyList())).isEmpty();
+        }
+
+        @Test
+        @SuppressWarnings("unchecked")
+        void support_convert_collection() {
+            assertThat((String[]) converter.tryConvert(String[].class, asList("A", "B"))).containsExactly("A", "B");
+            assertThat((Set<String>) converter.tryConvert(Set.class, asList("A", "B")))
+                    .isInstanceOf(Set.class)
+                    .containsExactly("A", "B");
+            assertThat((LinkedHashSet<String>) converter.tryConvert(LinkedHashSet.class, asList("A", "B")))
+                    .isInstanceOf(LinkedHashSet.class)
+                    .containsExactly("A", "B");
         }
     }
 }

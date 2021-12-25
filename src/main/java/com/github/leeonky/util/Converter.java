@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 
@@ -87,7 +88,6 @@ public class Converter {
         return convert(target, value, Function.identity());
     }
 
-    @SuppressWarnings("unchecked")
     private <T> Object convert(Class<T> target, Object value, Function<Object, Object> defaultValue) {
         if (value == null)
             return null;
@@ -96,8 +96,20 @@ public class Converter {
             return value;
         return typeConverterSet.findHandler(source, target, Collections::emptyList)
                 .map(c -> c.getHandler().apply(value))
-                .orElseGet(() -> target.isEnum() ? convertEnum(source, (Class<? extends Enum>) target, value)
-                        : defaultValue.apply(value));
+                .orElseGet(() -> defaultConvert(target, value, defaultValue, source));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Object defaultConvert(Class<T> target, Object value, Function<Object, Object> defaultValue, Class<?> source) {
+        if (target.isEnum())
+            return convertEnum(source, (Class<? extends Enum>) target, value);
+        if (value != null) {
+            BeanClass<T> targetBean = BeanClass.create(target);
+            if (targetBean.isCollection()) {
+                return targetBean.createCollection(BeanClass.arrayCollectionToStream(value).collect(Collectors.toList()));
+            }
+        }
+        return defaultValue.apply(value);
     }
 
     private <E extends Enum<E>> Object convertEnum(Class<?> source, Class<E> target, Object value) {
