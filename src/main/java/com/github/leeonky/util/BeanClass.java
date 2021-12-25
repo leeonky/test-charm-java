@@ -1,5 +1,8 @@
 package com.github.leeonky.util;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -12,6 +15,8 @@ import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.util.Suppressor.get;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
@@ -66,7 +71,7 @@ public class BeanClass<T> {
     }
 
     public static <T> Optional<T> cast(Object value, Class<T> type) {
-        return Optional.ofNullable(value)
+        return ofNullable(value)
                 .filter(type::isInstance)
                 .map(type::cast);
     }
@@ -121,6 +126,29 @@ public class BeanClass<T> {
         else if (source == boolean.class)
             return Boolean.class;
         return source;
+    }
+
+    public static List<Class<?>> allTypesIn(String packageName) {
+        InputStream stream = ClassLoader.getSystemClassLoader()
+                .getResourceAsStream(packageName.replaceAll("[.]", "/"));
+        return stream == null ? emptyList()
+                : new BufferedReader(new InputStreamReader(stream)).lines()
+                .filter(line -> line.endsWith(".class"))
+                .map(line -> toClass(line, packageName))
+                .collect(Collectors.toList());
+    }
+
+    private static Class<?> toClass(String className, String packageName) {
+        return get(() -> Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.'))));
+    }
+
+    public static List<Class<?>> subTypesOf(Class<?> superClass, String packageName) {
+        return assignableTypesOf(superClass, packageName).stream().filter(c -> !superClass.equals(c))
+                .collect(Collectors.toList());
+    }
+
+    public static List<Class<?>> assignableTypesOf(Class<?> superClass, String packageName) {
+        return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(Collectors.toList());
     }
 
     public Class<T> getType() {

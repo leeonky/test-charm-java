@@ -1,12 +1,20 @@
 package com.github.leeonky.util;
 
+import hastype.One;
+import hastype.Two;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import subtype.Base;
+import subtype.Sub1;
+import subtype.Sub2;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.util.BeanClass.allTypesIn;
+import static com.github.leeonky.util.BeanClass.subTypesOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -132,6 +140,32 @@ class BeanClassTest {
 
             assertThat(beanClass.getType()).isEqualTo(Supplier.class);
             assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
+        }
+    }
+
+    @Nested
+    class GetTypesInPackage {
+
+        @Test
+        void empty_when_no_type() {
+            assertThat(allTypesIn("empty")).isEmpty();
+        }
+
+        @Test
+        void types_in_package() {
+            assertThat(new HashSet<>(allTypesIn("hastype")))
+                    .containsOnly(One.class, Two.class, Two.Three.class, Two.Four.class);
+        }
+
+        @Test
+        void sub_types_in_package() {
+            assertThat(new HashSet<>(subTypesOf(Base.class, "subtype"))).containsOnly(Sub1.class, Sub2.class);
+        }
+
+        @Test
+        void sub_types_in_package_include_super() {
+            assertThat(new HashSet<>(BeanClass.assignableTypesOf(Base.class, "subtype")))
+                    .containsOnly(Base.class, Sub1.class, Sub2.class);
         }
     }
 }
