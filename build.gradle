@@ -3,6 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        classpath 'io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE'
         classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
     }
 }
@@ -19,6 +20,7 @@ jacoco {
 
 apply plugin: 'java'
 apply plugin: 'signing'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'info.solidsoft.pitest'
 
 task javadocJar(type: Jar) {
@@ -46,12 +48,20 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "com.github.leeonky:java-TD-tools-dependencies:0.0.2"
+    }
+}
+
 dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'io.cucumber:cucumber-java:6.10.4'
 
     testImplementation 'org.mock-server:mockserver:5.11.2'
     testImplementation 'org.mock-server:mockserver-netty:5.11.2'
+
+    testImplementation("com.github.leeonky:assertj-DAL")
 
     testImplementation "io.cucumber:cucumber-picocontainer:5.1.1"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.3'
