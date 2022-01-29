@@ -70,7 +70,7 @@ public class Steps {
     }
 
     @After
-    void stopMockServer() {
+    public void stopMockServer() {
         if (mockServer != null)
             mockServer.stop();
     }
