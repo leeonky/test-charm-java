@@ -29,5 +29,5 @@ Feature: RESTful api steps
     }]
     """
     And "http://www.a.com" got a GET request on "/index"
-  
-#  TODO reset RESTfulStep request and response
+
+#  TODO header for POST PUT DELETE

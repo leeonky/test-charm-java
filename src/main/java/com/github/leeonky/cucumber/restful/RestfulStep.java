@@ -1,5 +1,6 @@
 package com.github.leeonky.cucumber.restful;
 
+import io.cucumber.java.After;
 import io.cucumber.java.en.When;
 import okhttp3.OkHttpClient;
 
@@ -27,12 +28,18 @@ public class RestfulStep {
                 .build()).execute();
     }
 
+    @After
+    public void reset() {
+        request = new Request();
+    }
+
     public RestfulStep header(String key, String value) {
         request.headers.put(key, value);
         return this;
     }
 
     public RestfulStep header(String key, Collection<String> value) {
+
         request.headers.put(key, value);
         return this;
     }
