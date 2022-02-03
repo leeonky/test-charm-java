@@ -56,9 +56,15 @@ public class Steps {
 
     @SneakyThrows
     @Given("header by RESTful api:")
+    @SuppressWarnings("unchecked")
     public void header_by_res_tful_api(String headerJson) {
         new ObjectMapper().readValue(headerJson, new TypeReference<Map<String, Object>>() {
-        }).forEach((key, value) -> restfulStep.header(key, (String) value));
+        }).forEach((key, value) -> {
+            if (value instanceof String)
+                restfulStep.header(key, (String) value);
+            else
+                restfulStep.header(key, (List<String>) value);
+        });
     }
 
     @SneakyThrows

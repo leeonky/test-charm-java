@@ -12,7 +12,7 @@ Feature: RESTful api steps
     """
     {
       "key1": "value1",
-      "key2": "value2"
+      "key2": ["value2", "value3"]
     }
     """
 #      "list": ["value1", "value2"]
@@ -24,11 +24,10 @@ Feature: RESTful api steps
       path: '/index'
       headers: {
         key1: ['value1']
-        key2: ['value2']
+        key2: ['value2', 'value3']
       }
     }]
     """
     And "http://www.a.com" got a GET request on "/index"
-#  list: ['value1'  'value2']
-#  TODO multi header
+  
 #  TODO reset RESTfulStep request and response
