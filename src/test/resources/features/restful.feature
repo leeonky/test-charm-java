@@ -28,6 +28,7 @@ Feature: RESTful api steps
       }
     }]
     """
+    And "http://www.a.com" got a GET request on "/index"
 #  list: ['value1'  'value2']
 #  TODO multi header
 #  TODO reset RESTfulStep request and response

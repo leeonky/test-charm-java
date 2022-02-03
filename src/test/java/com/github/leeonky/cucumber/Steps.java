@@ -27,7 +27,7 @@ public class Steps {
 
     private String requestedBaseUrl;
 
-    private ClientAndServer mockServer;
+    private static final ClientAndServer mockServer = startClientAndServer(80);
 
     public Steps(RestfulStep restfulStep) {
         this.restfulStep = restfulStep;
@@ -35,15 +35,14 @@ public class Steps {
 
     @Given("base url {string}")
     public void base_url(String baseUrl) {
-        CustomPicoFactory.lookupAction = s -> startMockServer(s, baseUrl);
+        CustomPicoFactory.lookupAction = s -> lookupAction(s, baseUrl);
         restfulStep.setBaseUrl(baseUrl);
     }
 
     @SneakyThrows
-    private void startMockServer(@NotNull String s, String baseUrl) {
+    private void lookupAction(@NotNull String s, String baseUrl) {
         assertThat(new URL(baseUrl).getHost()).isEqualTo(s);
         requestedBaseUrl = baseUrl;
-        mockServer = startClientAndServer(80);
     }
 
     @Then("{string} got a GET request on {string}")
@@ -71,7 +70,6 @@ public class Steps {
 
     @After
     public void stopMockServer() {
-        if (mockServer != null)
-            mockServer.stop();
+        mockServer.reset();
     }
 }
