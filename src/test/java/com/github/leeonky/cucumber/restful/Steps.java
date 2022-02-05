@@ -1,9 +1,7 @@
-package com.github.leeonky.cucumber;
+package com.github.leeonky.cucumber.restful;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.leeonky.cucumber.restful.CustomPicoFactory;
-import com.github.leeonky.cucumber.restful.RestfulStep;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

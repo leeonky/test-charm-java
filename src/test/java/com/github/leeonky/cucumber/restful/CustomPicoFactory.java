@@ -1,7 +1,6 @@
 package com.github.leeonky.cucumber.restful;
 
 
-import com.github.leeonky.cucumber.Steps;
 import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.picocontainer.PicoFactory;
 import lombok.SneakyThrows;
