@@ -1,6 +1,7 @@
 package com.github.leeonky.cucumber.restful;
 
 import io.cucumber.java.After;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import okhttp3.OkHttpClient;
 
@@ -9,9 +10,13 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+
 public class RestfulStep {
-    private String baseUrl = null;
     private final OkHttpClient httpClient;
+    private String baseUrl = null;
+    private Request request = new Request();
+    private Response response;
 
     public RestfulStep(OkHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -23,9 +28,10 @@ public class RestfulStep {
 
     @When("GET {string}")
     public void get(String path) throws IOException {
-        httpClient.newCall(request.applyHeader(new okhttp3.Request.Builder()
-                .url(baseUrl + path))
+        okhttp3.Response rawResponse = httpClient.newCall(request.applyHeader(new okhttp3.Request.Builder()
+                        .url(baseUrl + path))
                 .build()).execute();
+        response = new Response(rawResponse);
     }
 
     @After
@@ -44,12 +50,14 @@ public class RestfulStep {
         return this;
     }
 
-    private Request request = new Request();
+    @Then("response should be:")
+    public void responseShouldBe(String expression) {
+        expect(response).should(expression);
+    }
 
     private static class Request {
         private final Map<String, Object> headers = new LinkedHashMap<>();
 
-        @SuppressWarnings("unchecked")
         private okhttp3.Request.Builder applyHeader(okhttp3.Request.Builder builder) {
             headers.forEach((key, value) -> {
                 if (value instanceof String)
@@ -60,4 +68,22 @@ public class RestfulStep {
             return builder;
         }
     }
+
+    public static class Response {
+
+        public final okhttp3.Response raw;
+
+        public Response(okhttp3.Response raw) {
+            this.raw = raw;
+        }
+
+        public int code() {
+            return raw.code();
+        }
+
+        public byte[] body() throws IOException {
+            return raw.body().bytes();
+        }
+    }
+
 }

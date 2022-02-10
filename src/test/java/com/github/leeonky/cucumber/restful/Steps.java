@@ -19,13 +19,12 @@ import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 public class Steps {
-    private final RestfulStep restfulStep;
-
-    private String requestedBaseUrl;
-
     private static final ClientAndServer mockServer = startClientAndServer(80);
+    private final RestfulStep restfulStep;
+    private String requestedBaseUrl;
 
     public Steps(RestfulStep restfulStep) {
         this.restfulStep = restfulStep;
@@ -37,10 +36,9 @@ public class Steps {
         restfulStep.setBaseUrl(baseUrl);
     }
 
-    @SneakyThrows
-    private void lookupAction(@NotNull String s, String baseUrl) {
-        assertThat(new URL(baseUrl).getHost()).isEqualTo(s);
-        requestedBaseUrl = baseUrl;
+    @Given("response {int} on GET {string}:")
+    public void responseOnGET(int code, String path, String body) {
+        mockServer.when(request().withMethod("GET").withPath(path)).respond(response(body).withStatusCode(code));
     }
 
     @Then("{string} got a GET request on {string}")
@@ -54,7 +52,6 @@ public class Steps {
 
     @SneakyThrows
     @Given("header by RESTful api:")
-    @SuppressWarnings("unchecked")
     public void header_by_res_tful_api(String headerJson) {
         new ObjectMapper().readValue(headerJson, new TypeReference<Map<String, Object>>() {
         }).forEach((key, value) -> {
@@ -75,5 +72,11 @@ public class Steps {
     @After
     public void stopMockServer() {
         mockServer.reset();
+    }
+
+    @SneakyThrows
+    private void lookupAction(@NotNull String s, String baseUrl) {
+        assertThat(new URL(baseUrl).getHost()).isEqualTo(s);
+        requestedBaseUrl = baseUrl;
     }
 }

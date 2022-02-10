@@ -15,7 +15,6 @@ Feature: RESTful api steps
       "key2": ["value2", "value3"]
     }
     """
-#      "list": ["value1", "value2"]
     When GET "/index"
     Then got request:
     """
@@ -29,5 +28,20 @@ Feature: RESTful api steps
     }]
     """
     And "http://www.a.com" got a GET request on "/index"
+
+  Scenario: get response
+    Given response 200 on GET "/index":
+    """
+    Hello world
+    """
+    When GET "/index"
+    Then response should be:
+    """
+    : {
+      code=200
+      body.string='Hello world'
+      raw.class.simpleName='Response'
+    }
+    """
 
 #  TODO header for POST PUT DELETE
