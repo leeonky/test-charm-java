@@ -37,6 +37,7 @@ public class RestfulStep {
     @After
     public void reset() {
         request = new Request();
+        response = null;
     }
 
     public RestfulStep header(String key, String value) {
