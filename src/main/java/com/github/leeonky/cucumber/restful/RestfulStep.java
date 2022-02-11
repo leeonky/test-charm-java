@@ -5,6 +5,7 @@ import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import okhttp3.OkHttpClient;
+import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +34,7 @@ public class RestfulStep {
 
     @When("GET {string}")
     public void get(String path) throws IOException {
-        requestAndResponse(path, okhttp3.Request.Builder::get);
+        requestAndResponse(path, Builder::get);
     }
 
     @When("POST {string}:")
@@ -48,7 +49,7 @@ public class RestfulStep {
 
     @When("DELETE {string}")
     public void delete(String path) throws IOException {
-        requestAndResponse(path, okhttp3.Request.Builder::delete);
+        requestAndResponse(path, Builder::delete);
     }
 
     @After
@@ -74,15 +75,14 @@ public class RestfulStep {
     }
 
     @NotNull
-    private RequestBody createRequestBody(DocString docString, okhttp3.Request.Builder builder) {
+    private RequestBody createRequestBody(DocString docString, Builder builder) {
         String contentType = docString.getContentType() == null ? "application/json" : docString.getContentType();
         builder.addHeader("Content-Type", contentType);
         return RequestBody.create(docString.getContent().getBytes(StandardCharsets.UTF_8));
     }
 
-    private void requestAndResponse(String path, UnaryOperator<okhttp3.Request.Builder> action) throws IOException {
-        okhttp3.Request.Builder builder = request.applyHeader(new okhttp3.Request.Builder()
-                .url(baseUrl + path));
+    private void requestAndResponse(String path, UnaryOperator<Builder> action) throws IOException {
+        Builder builder = request.applyHeader(new Builder().url(baseUrl + path));
         okhttp3.Response rawResponse = httpClient.newCall(action.apply(builder).build()).execute();
         response = new Response(rawResponse);
     }
@@ -90,7 +90,7 @@ public class RestfulStep {
     private static class Request {
         private final Map<String, Object> headers = new LinkedHashMap<>();
 
-        private okhttp3.Request.Builder applyHeader(okhttp3.Request.Builder builder) {
+        private Builder applyHeader(Builder builder) {
             headers.forEach((key, value) -> {
                 if (value instanceof String)
                     builder.header(key, (String) value);

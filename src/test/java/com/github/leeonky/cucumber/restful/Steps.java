@@ -12,6 +12,7 @@ import org.mockserver.model.Format;
 import org.mockserver.verify.VerificationTimes;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,12 @@ public class Steps {
     @Given("response {int} on {string} {string}:")
     public void responseOnGET(int code, String method, String path, String body) {
         mockServer.when(request().withMethod(method).withPath(path)).respond(response(body).withStatusCode(code));
+    }
+
+    @Given("binary response {int} on GET {string}:")
+    public void binary_response_on_get(Integer code, String path, String body) {
+        mockServer.when(request().withMethod("GET").withPath(path))
+                .respond(response().withBody(body.getBytes(StandardCharsets.UTF_8)).withStatusCode(code));
     }
 
     @Then("{string} got a {string} request on {string}")

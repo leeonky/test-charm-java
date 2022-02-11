@@ -137,3 +137,17 @@ Feature: RESTful api steps
       | method |
       | POST   |
       | PUT    |
+
+  Scenario: GET download response
+    Given binary response 200 on GET "/download":
+    """
+    Hello world
+    """
+    When GET "/download"
+    Then response should be:
+    """
+    : {
+      code=200
+      body.string='Hello world'
+    }
+    """
