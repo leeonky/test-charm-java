@@ -49,6 +49,32 @@ Feature: reset RESTful states
     }]
     """
 
+  Scenario: given header
+    Given header by RESTful api:
+    """
+    {
+      "key1": "value1",
+      "key2": ["value2", "value3"]
+    }
+    """
+
+  Scenario: should no header
+    When POST "/index"
+    """
+    {}
+    """
+    Then got request:
+    """
+    : [{
+      method: 'POST'
+      path: '/index'
+      headers: {
+        key1: null
+        key2: null
+      }
+    }]
+    """
+
   Scenario: given response
     Given response 200 on "GET" "/index":
     """
@@ -75,4 +101,19 @@ Feature: reset RESTful states
     : null
     """
 
-#  TODO reset RESTfulStep response
+  Scenario: given response
+    Given response 200 on "POST" "/index":
+    """
+    Hello world
+    """
+    When POST "/index"
+    """
+    {}
+    """
+
+  Scenario: should no response
+    Then response should be:
+    """
+    : null
+    """
+

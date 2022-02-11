@@ -3,7 +3,9 @@ package com.github.leeonky.cucumber.restful;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -30,6 +32,11 @@ public class RestfulStep {
     @When("GET {string}")
     public void get(String path) throws IOException {
         requestAndResponse(path, okhttp3.Request.Builder::get);
+    }
+
+    @When("POST {string}")
+    public void post(String path, String body) throws IOException {
+        requestAndResponse(path, builder -> builder.post(RequestBody.create(body, MediaType.parse("application/json"))));
     }
 
     @When("DELETE {string}")

@@ -50,6 +50,16 @@ public class Steps {
         assertThat(url).as(String.format("Expect %s to receive the request, but send to %s", url, requestedBaseUrl)).isEqualTo(requestedBaseUrl);
     }
 
+    @Then("{string} got a {string} request on {string} with body")
+    public void got_a_request_on_with_body(String url, String method, String path, String body) {
+        mockServer.verify(request()
+                        .withMethod(method)
+                        .withPath(path)
+                        .withBody(body),
+                VerificationTimes.once());
+        assertThat(url).as(String.format("Expect %s to receive the request, but send to %s", url, requestedBaseUrl)).isEqualTo(requestedBaseUrl);
+    }
+
     @SneakyThrows
     @Given("header by RESTful api:")
     public void header_by_res_tful_api(String headerJson) {
