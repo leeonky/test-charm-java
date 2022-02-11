@@ -23,6 +23,7 @@ Feature: RESTful api steps
     Examples:
       | method |
       | POST   |
+      | PUT    |
 
   Scenario Outline: <method> with header
     Given header by RESTful api:
@@ -78,6 +79,7 @@ Feature: RESTful api steps
     Examples:
       | method |
       | POST   |
+      | PUT    |
 
   Scenario Outline: <method> with content type
     When <method> "/index"
@@ -93,7 +95,7 @@ Feature: RESTful api steps
     Examples:
       | method |
       | POST   |
-
+      | PUT    |
 
   Scenario Outline: <method> response
     Given response 200 on "<method>" "/index":
@@ -134,3 +136,4 @@ Feature: RESTful api steps
     Examples:
       | method |
       | POST   |
+      | PUT    |

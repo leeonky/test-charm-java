@@ -41,6 +41,12 @@ public class RestfulStep {
         requestAndResponse(path, builder -> builder.post(RequestBody.create(body.getContent(), MediaType.parse(contentType))));
     }
 
+    @When("PUT {string}")
+    public void put(String path, DocString content) throws IOException {
+        String contentType = content.getContentType() == null ? "application/json" : content.getContentType();
+        requestAndResponse(path, builder -> builder.put(RequestBody.create(content.getContent(), MediaType.parse(contentType))));
+    }
+
     @When("DELETE {string}")
     public void delete(String path) throws IOException {
         requestAndResponse(path, okhttp3.Request.Builder::delete);
