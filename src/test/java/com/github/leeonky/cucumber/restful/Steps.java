@@ -36,15 +36,15 @@ public class Steps {
         restfulStep.setBaseUrl(baseUrl);
     }
 
-    @Given("response {int} on GET {string}:")
-    public void responseOnGET(int code, String path, String body) {
-        mockServer.when(request().withMethod("GET").withPath(path)).respond(response(body).withStatusCode(code));
+    @Given("response {int} on {string} {string}:")
+    public void responseOnGET(int code, String method, String path, String body) {
+        mockServer.when(request().withMethod(method).withPath(path)).respond(response(body).withStatusCode(code));
     }
 
-    @Then("{string} got a GET request on {string}")
-    public void got_a_get_request_on(String url, String path) {
+    @Then("{string} got a {string} request on {string}")
+    public void got_a_get_request_on(String url, String method, String path) {
         mockServer.verify(request()
-                        .withMethod("GET")
+                        .withMethod(method)
                         .withPath(path),
                 VerificationTimes.once());
         assertThat(url).as(String.format("Expect %s to receive the request, but send to %s", url, requestedBaseUrl)).isEqualTo(requestedBaseUrl);

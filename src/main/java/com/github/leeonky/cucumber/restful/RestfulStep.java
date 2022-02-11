@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 
@@ -28,10 +29,12 @@ public class RestfulStep {
 
     @When("GET {string}")
     public void get(String path) throws IOException {
-        okhttp3.Response rawResponse = httpClient.newCall(request.applyHeader(new okhttp3.Request.Builder()
-                        .url(baseUrl + path))
-                .build()).execute();
-        response = new Response(rawResponse);
+        requestAndResponse(path, okhttp3.Request.Builder::get);
+    }
+
+    @When("DELETE {string}")
+    public void delete(String path) throws IOException {
+        requestAndResponse(path, okhttp3.Request.Builder::delete);
     }
 
     @After
@@ -54,6 +57,13 @@ public class RestfulStep {
     @Then("response should be:")
     public void responseShouldBe(String expression) {
         expect(response).should(expression);
+    }
+
+    private void requestAndResponse(String path, UnaryOperator<okhttp3.Request.Builder> action) throws IOException {
+        okhttp3.Request.Builder builder = request.applyHeader(new okhttp3.Request.Builder()
+                .url(baseUrl + path));
+        okhttp3.Response rawResponse = httpClient.newCall(action.apply(builder).build()).execute();
+        response = new Response(rawResponse);
     }
 
     private static class Request {

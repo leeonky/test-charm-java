@@ -3,11 +3,15 @@ Feature: RESTful api steps
   Background:
     Given base url "http://www.a.com"
 
-  Scenario: get with no params
-    When GET "/index"
-    Then "http://www.a.com" got a GET request on "/index"
+  Scenario Outline: get with no params
+    When <method> "/index"
+    Then "http://www.a.com" got a "<method>" request on "/index"
+    Examples:
+      | method |
+      | GET    |
+      | DELETE |
 
-  Scenario: get with header
+  Scenario Outline: get with header
     Given header by RESTful api:
     """
     {
@@ -15,11 +19,11 @@ Feature: RESTful api steps
       "key2": ["value2", "value3"]
     }
     """
-    When GET "/index"
+    When <method> "/index"
     Then got request:
     """
     : [{
-      method: 'GET'
+      method: '<method>'
       path: '/index'
       headers: {
         key1: ['value1']
@@ -27,14 +31,18 @@ Feature: RESTful api steps
       }
     }]
     """
-    And "http://www.a.com" got a GET request on "/index"
+    And "http://www.a.com" got a "<method>" request on "/index"
+    Examples:
+      | method |
+      | GET    |
+      | DELETE |
 
-  Scenario: get response
-    Given response 200 on GET "/index":
+  Scenario Outline: get response
+    Given response 200 on "<method>" "/index":
     """
     Hello world
     """
-    When GET "/index"
+    When <method> "/index"
     Then response should be:
     """
     : {
@@ -43,5 +51,9 @@ Feature: RESTful api steps
       raw.class.simpleName='Response'
     }
     """
+    Examples:
+      | method |
+      | GET    |
+      | DELETE |
 
 #  TODO header for POST PUT DELETE
