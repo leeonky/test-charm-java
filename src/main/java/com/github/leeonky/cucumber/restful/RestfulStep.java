@@ -1,5 +1,6 @@
 package com.github.leeonky.cucumber.restful;
 
+import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -35,8 +36,9 @@ public class RestfulStep {
     }
 
     @When("POST {string}")
-    public void post(String path, String body) throws IOException {
-        requestAndResponse(path, builder -> builder.post(RequestBody.create(body, MediaType.parse("application/json"))));
+    public void post(String path, DocString body) throws IOException {
+        String contentType = body.getContentType() == null ? "application/json" : body.getContentType();
+        requestAndResponse(path, builder -> builder.post(RequestBody.create(body.getContent(), MediaType.parse(contentType))));
     }
 
     @When("DELETE {string}")

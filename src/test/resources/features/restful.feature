@@ -68,6 +68,7 @@ Feature: RESTful api steps
       method: '<method>'
       path: '/index'
       headers: {
+        ['Content-Type']: ['application/json; charset=utf-8']
         key1: ['value1']
         key2: ['value2', 'value3']
       }
@@ -77,6 +78,22 @@ Feature: RESTful api steps
     Examples:
       | method |
       | POST   |
+
+  Scenario Outline: <method> with content type
+    When <method> "/index"
+    """text/html
+    { "text": "Hello world" }
+    """
+    Then got request:
+    """
+    : [{
+      headers['Content-Type']: ['text/html; charset=utf-8']
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+
 
   Scenario Outline: <method> response
     Given response 200 on "<method>" "/index":
