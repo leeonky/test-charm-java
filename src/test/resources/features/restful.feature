@@ -69,7 +69,7 @@ Feature: RESTful api steps
       method: '<method>'
       path: '/index'
       headers: {
-        ['Content-Type']: ['application/json; charset=utf-8']
+        ['Content-Type']: ['application/json']
         key1: ['value1']
         key2: ['value2', 'value3']
       }
@@ -89,7 +89,7 @@ Feature: RESTful api steps
     Then got request:
     """
     : [{
-      headers['Content-Type']: ['text/html; charset=utf-8']
+      headers['Content-Type']: ['text/html']
     }]
     """
     Examples:

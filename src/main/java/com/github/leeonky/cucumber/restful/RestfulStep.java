@@ -4,12 +4,12 @@ import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,12 +38,12 @@ public class RestfulStep {
 
     @When("POST {string}:")
     public void post(String path, DocString content) throws IOException {
-        requestAndResponse(path, builder -> builder.post(createRequestBody(content)));
+        requestAndResponse(path, builder -> builder.post(createRequestBody(content, builder)));
     }
 
     @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException {
-        requestAndResponse(path, builder -> builder.put(createRequestBody(content)));
+        requestAndResponse(path, builder -> builder.put(createRequestBody(content, builder)));
     }
 
     @When("DELETE {string}")
@@ -74,9 +74,10 @@ public class RestfulStep {
     }
 
     @NotNull
-    private RequestBody createRequestBody(DocString docString) {
+    private RequestBody createRequestBody(DocString docString, okhttp3.Request.Builder builder) {
         String contentType = docString.getContentType() == null ? "application/json" : docString.getContentType();
-        return RequestBody.create(docString.getContent(), MediaType.parse(contentType));
+        builder.addHeader("Content-Type", contentType);
+        return RequestBody.create(docString.getContent().getBytes(StandardCharsets.UTF_8));
     }
 
     private void requestAndResponse(String path, UnaryOperator<okhttp3.Request.Builder> action) throws IOException {
