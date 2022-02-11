@@ -7,6 +7,7 @@ import io.cucumber.java.en.When;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -36,15 +37,13 @@ public class RestfulStep {
     }
 
     @When("POST {string}:")
-    public void post(String path, DocString body) throws IOException {
-        String contentType = body.getContentType() == null ? "application/json" : body.getContentType();
-        requestAndResponse(path, builder -> builder.post(RequestBody.create(body.getContent(), MediaType.parse(contentType))));
+    public void post(String path, DocString content) throws IOException {
+        requestAndResponse(path, builder -> builder.post(createRequestBody(content)));
     }
 
     @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException {
-        String contentType = content.getContentType() == null ? "application/json" : content.getContentType();
-        requestAndResponse(path, builder -> builder.put(RequestBody.create(content.getContent(), MediaType.parse(contentType))));
+        requestAndResponse(path, builder -> builder.put(createRequestBody(content)));
     }
 
     @When("DELETE {string}")
@@ -72,6 +71,12 @@ public class RestfulStep {
     @Then("response should be:")
     public void responseShouldBe(String expression) {
         expect(response).should(expression);
+    }
+
+    @NotNull
+    private RequestBody createRequestBody(DocString docString) {
+        String contentType = docString.getContentType() == null ? "application/json" : docString.getContentType();
+        return RequestBody.create(docString.getContent(), MediaType.parse(contentType));
     }
 
     private void requestAndResponse(String path, UnaryOperator<okhttp3.Request.Builder> action) throws IOException {
