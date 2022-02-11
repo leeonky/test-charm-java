@@ -35,13 +35,13 @@ public class RestfulStep {
         requestAndResponse(path, okhttp3.Request.Builder::get);
     }
 
-    @When("POST {string}")
+    @When("POST {string}:")
     public void post(String path, DocString body) throws IOException {
         String contentType = body.getContentType() == null ? "application/json" : body.getContentType();
         requestAndResponse(path, builder -> builder.post(RequestBody.create(body.getContent(), MediaType.parse(contentType))));
     }
 
-    @When("PUT {string}")
+    @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException {
         String contentType = content.getContentType() == null ? "application/json" : content.getContentType();
         requestAndResponse(path, builder -> builder.put(RequestBody.create(content.getContent(), MediaType.parse(contentType))));

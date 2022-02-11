@@ -59,7 +59,7 @@ Feature: reset RESTful states
     """
 
   Scenario: should no header
-    When POST "/index"
+    When POST "/index":
     """
     {}
     """
@@ -85,7 +85,7 @@ Feature: reset RESTful states
     """
 
   Scenario: should no header
-    When PUT "/index"
+    When PUT "/index":
     """
     {}
     """
@@ -132,7 +132,7 @@ Feature: reset RESTful states
     """
     Hello world
     """
-    When POST "/index"
+    When POST "/index":
     """
     {}
     """
@@ -148,7 +148,7 @@ Feature: reset RESTful states
     """
     Hello world
     """
-    When PUT "/index"
+    When PUT "/index":
     """
     {}
     """

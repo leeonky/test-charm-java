@@ -12,7 +12,7 @@ Feature: RESTful api steps
       | DELETE |
 
   Scenario Outline: <method> with body and no params
-    When <method> "/index"
+    When <method> "/index":
     """
     { "text": "Hello world" }
     """
@@ -59,7 +59,7 @@ Feature: RESTful api steps
       "key2": ["value2", "value3"]
     }
     """
-    When <method> "/index"
+    When <method> "/index":
     """
     { "text": "Hello world" }
     """
@@ -82,7 +82,7 @@ Feature: RESTful api steps
       | PUT    |
 
   Scenario Outline: <method> with content type
-    When <method> "/index"
+    When <method> "/index":
     """text/html
     { "text": "Hello world" }
     """
@@ -121,7 +121,7 @@ Feature: RESTful api steps
     """
     Hello world
     """
-    When <method> "/index"
+    When <method> "/index":
     """
     { "text": "Hello world" }
     """
