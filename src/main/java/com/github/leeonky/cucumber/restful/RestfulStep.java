@@ -164,5 +164,19 @@ public class RestfulStep {
         default String getName() {
             return Instant.now().toEpochMilli() + ".upload";
         }
+
+        default UploadFile name(String fileName) {
+            return new UploadFile() {
+                @Override
+                public byte[] getContent() {
+                    return UploadFile.this.getContent();
+                }
+
+                @Override
+                public String getName() {
+                    return fileName;
+                }
+            };
+        }
     }
 }

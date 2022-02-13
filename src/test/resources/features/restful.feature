@@ -185,3 +185,23 @@ Feature: RESTful api steps
       body: 'hello avatar'
     }]
     """
+
+  Scenario: upload file request with name
+    Given a file "an avatar" with name "image.png":
+    """
+    hello avatar
+    """
+    When POST form "/users":
+    """
+    {
+      "@avatar": "an avatar"
+    }
+    """
+    And got request form value:
+    """
+    : [{
+      headers: /.*name="avatar"(.|\r|\n)*/
+      headers: /.*filename="image\.png"(.|\r|\n)*/
+      body: 'hello avatar'
+    }]
+    """

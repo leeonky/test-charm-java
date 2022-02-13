@@ -110,6 +110,11 @@ public class Steps {
         restfulStep.file(fileKey, content(fileContent));
     }
 
+    @Given("a file {string} with name {string}:")
+    public void a_file_with_name(String fileKey, String fileName, String fileContent) {
+        restfulStep.file(fileKey, content(fileContent).name(fileName));
+    }
+
     @SneakyThrows
     @Then("got request form value:")
     public void got_request_form_value(String expression) {
