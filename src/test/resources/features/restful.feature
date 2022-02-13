@@ -139,7 +139,7 @@ Feature: RESTful api steps
       | PUT    |
 
   Scenario: GET download response
-    Given binary response 200 on GET "/download":
+    Given binary response 200 on GET "/download" with file name "download.txt":
     """
     Hello world
     """
@@ -149,6 +149,7 @@ Feature: RESTful api steps
     : {
       code=200
       body.string='Hello world'
+      fileName='download.txt'
     }
     """
 

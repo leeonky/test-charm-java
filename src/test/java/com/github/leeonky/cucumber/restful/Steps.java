@@ -146,6 +146,15 @@ public class Steps {
         PathVariableReplacement.reset();
     }
 
+    @Given("binary response {int} on GET {string} with file name {string}:")
+    public void binaryResponseOnGETWithFileName(int code, String path, String fileName, String body) {
+        mockServer.when(request().withMethod("GET").withPath(path))
+                .respond(response()
+                        .withHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", fileName))
+                        .withBody(body.getBytes(StandardCharsets.UTF_8))
+                        .withStatusCode(code));
+    }
+
     @SneakyThrows
     private void lookupAction(@NotNull String s, String baseUrl) {
         assertThat(new URL(baseUrl).getHost()).isEqualTo(s);

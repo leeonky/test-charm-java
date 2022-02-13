@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static okhttp3.MediaType.parse;
@@ -178,6 +180,12 @@ public class RestfulStep {
 
         public byte[] body() throws IOException {
             return raw.body().bytes();
+        }
+
+        public String fileName() {
+            String header = raw.header("Content-Disposition");
+            Matcher matcher = Pattern.compile(".*filename=\"(.*)\".*").matcher(header);
+            return matcher.matches() ? matcher.group(1) : header;
         }
     }
 }
