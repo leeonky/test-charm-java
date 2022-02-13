@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
 import com.github.leeonky.dal.DAL;
 import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.SneakyThrows;
@@ -102,10 +103,8 @@ public class Steps {
 
     @Given("var {string} value is {string}")
     public void varValueIs(String varName, String value) {
-        PathVariableReplacement.evaluator = s -> {
-            assertThat(s).isEqualTo(varName);
-            return value;
-        };
+        PathVariableReplacement.replacements.put(varName, value);
+        PathVariableReplacement.evaluator = s -> PathVariableReplacement.replacements.get(s);
     }
 
     @Given("a file {string}:")
@@ -142,7 +141,7 @@ public class Steps {
                 .should(expression);
     }
 
-    @Given("no replacement")
+    @Before
     public void noReplacement() {
         PathVariableReplacement.reset();
     }

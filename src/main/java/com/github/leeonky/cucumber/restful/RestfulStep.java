@@ -114,7 +114,7 @@ public class RestfulStep {
     private RequestBody createRequestBody(DocString docString, Builder builder) {
         String contentType = docString.getContentType() == null ? "application/json" : docString.getContentType();
         builder.addHeader("Content-Type", contentType);
-        return RequestBody.create(docString.getContent().getBytes(StandardCharsets.UTF_8));
+        return RequestBody.create(evaluator.eval(docString.getContent()).getBytes(StandardCharsets.UTF_8));
     }
 
     private void requestAndResponse(String path, UnaryOperator<Builder> action) throws IOException {
