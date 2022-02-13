@@ -1,7 +1,10 @@
 package com.github.leeonky.cucumber.restful;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class Evaluator {
     public String eval(String expression) {
@@ -10,11 +13,15 @@ public class Evaluator {
 
     private String evalValue(String expression) {
         try {
-            Class<?> extensionClass = Class.forName("com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement");
-            Method eval = extensionClass.getMethod("eval", String.class);
+            List<Class<?>> extensions = BeanClass.allTypesIn("com.github.leeonky.cucumber.restful.extensions");
+            if (extensions.isEmpty()) {
+                return expression;
+            }
+            Method eval = extensions.get(0).getMethod("eval", String.class);
             return (String) eval.invoke(null, expression.substring(2, expression.length() - 1));
-        } catch (ClassNotFoundException | InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) {
+        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) {
             return expression;
         }
     }
+
 }

@@ -58,10 +58,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'io.cucumber:cucumber-java:6.10.4'
     implementation "com.github.leeonky:assertj-DAL:0.0.10"
+    implementation "com.github.leeonky:DAL-java:0.1.14"
     implementation 'org.assertj:assertj-core:3.15.0'
     implementation "com.fasterxml.jackson.core:jackson-databind:2.11.0"
 
-    testImplementation "com.github.leeonky:DAL-java:0.1.14"
     testImplementation 'org.mock-server:mockserver:5.11.2'
     testImplementation 'org.mock-server:mockserver-netty:5.11.2'
     testImplementation "io.cucumber:cucumber-picocontainer:5.1.1"
