@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -68,8 +69,9 @@ public class RestfulStep {
     }
 
     private void appendFile(MultipartBody.Builder bodyBuilder, String key, String value) {
-        bodyBuilder.addFormDataPart(key.substring(1), "xxx",
-                RequestBody.create(request.files.get(value).getContent()));
+        UploadFile uploadFile = request.files.get(value);
+        bodyBuilder.addFormDataPart(key.substring(1), uploadFile.getName(),
+                RequestBody.create(uploadFile.getContent()));
     }
 
     @When("PUT {string}:")
@@ -158,5 +160,9 @@ public class RestfulStep {
         }
 
         byte[] getContent();
+
+        default String getName() {
+            return Instant.now().toEpochMilli() + ".upload";
+        }
     }
 }

@@ -181,6 +181,7 @@ Feature: RESTful api steps
       body: 'Tom'
     } {
       headers: /.*name="avatar"(.|\r|\n)*/
+      headers: /.*filename=".*\.upload"(.|\r|\n)*/
       body: 'hello avatar'
     }]
     """
