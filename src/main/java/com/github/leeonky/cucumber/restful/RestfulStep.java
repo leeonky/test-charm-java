@@ -1,9 +1,12 @@
 package com.github.leeonky.cucumber.restful;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
@@ -12,17 +15,20 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static okhttp3.MediaType.parse;
 
 public class RestfulStep {
     private final OkHttpClient httpClient;
     private String baseUrl = null;
     private Request request = new Request();
     private Response response;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public RestfulStep(OkHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -40,6 +46,30 @@ public class RestfulStep {
     @When("POST {string}:")
     public void post(String path, DocString content) throws IOException {
         requestAndResponse(path, builder -> builder.post(createRequestBody(content, builder)));
+    }
+
+    @When("POST form {string}:")
+    public void postForm(String path, String form) throws IOException {
+        requestAndResponse(path, builder -> {
+            MultipartBody.Builder bodyBuilder = new MultipartBody.Builder().setType(parse("multipart/form-data"));
+            try {
+                objectMapper.readValue(form, new TypeReference<Map<String, String>>() {
+                }).forEach((key, value) -> {
+                    if (key.startsWith("@"))
+                        appendFile(bodyBuilder, key, value);
+                    else
+                        bodyBuilder.addFormDataPart(key, value);
+                });
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+            return builder.post(bodyBuilder.build());
+        });
+    }
+
+    private void appendFile(MultipartBody.Builder bodyBuilder, String key, String value) {
+        bodyBuilder.addFormDataPart(key.substring(1), "xxx",
+                RequestBody.create(request.files.get(value).getContent()));
     }
 
     @When("PUT {string}:")
@@ -64,7 +94,6 @@ public class RestfulStep {
     }
 
     public RestfulStep header(String key, Collection<String> value) {
-
         request.headers.put(key, value);
         return this;
     }
@@ -87,8 +116,13 @@ public class RestfulStep {
         response = new Response(rawResponse);
     }
 
+    public void file(String fileKey, UploadFile file) {
+        request.files.put(fileKey, file);
+    }
+
     private static class Request {
         private final Map<String, Object> headers = new LinkedHashMap<>();
+        public final Map<String, UploadFile> files = new HashMap<>();
 
         private Builder applyHeader(Builder builder) {
             headers.forEach((key, value) -> {
@@ -118,4 +152,11 @@ public class RestfulStep {
         }
     }
 
+    public interface UploadFile {
+        static UploadFile content(String fileContent) {
+            return () -> fileContent.getBytes(StandardCharsets.UTF_8);
+        }
+
+        byte[] getContent();
+    }
 }

@@ -151,3 +151,36 @@ Feature: RESTful api steps
       body.string='Hello world'
     }
     """
+
+  Scenario: upload file request
+    Given a file "an avatar":
+    """
+    hello avatar
+    """
+    When POST form "/users":
+    """
+    {
+      "name": "Tom",
+      "@avatar": "an avatar"
+    }
+    """
+    Then got request:
+    """
+    : [{
+      method: 'POST'
+      path: '/users'
+      headers: {
+        ['Content-Type']: [/^multipart\/form-data.*/]
+      }
+    }]
+    """
+    And got request form value:
+    """
+    : [{
+      headers: /.*name="name"(.|\r|\n)*/
+      body: 'Tom'
+    } {
+      headers: /.*name="avatar"(.|\r|\n)*/
+      body: 'hello avatar'
+    }]
+    """
