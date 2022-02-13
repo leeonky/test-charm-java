@@ -26,10 +26,11 @@ import static okhttp3.MediaType.parse;
 
 public class RestfulStep {
     private final OkHttpClient httpClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Evaluator evaluator = new Evaluator();
     private String baseUrl = null;
     private Request request = new Request();
     private Response response;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public RestfulStep(OkHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -68,12 +69,6 @@ public class RestfulStep {
         });
     }
 
-    private void appendFile(MultipartBody.Builder bodyBuilder, String key, String value) {
-        UploadFile uploadFile = request.files.get(value);
-        bodyBuilder.addFormDataPart(key.substring(1), uploadFile.getName(),
-                RequestBody.create(uploadFile.getContent()));
-    }
-
     @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException {
         requestAndResponse(path, builder -> builder.put(createRequestBody(content, builder)));
@@ -105,6 +100,16 @@ public class RestfulStep {
         expect(response).should(expression);
     }
 
+    public void file(String fileKey, UploadFile file) {
+        request.files.put(fileKey, file);
+    }
+
+    private void appendFile(MultipartBody.Builder bodyBuilder, String key, String value) {
+        UploadFile uploadFile = request.files.get(value);
+        bodyBuilder.addFormDataPart(key.substring(1), uploadFile.getName(),
+                RequestBody.create(uploadFile.getContent()));
+    }
+
     @NotNull
     private RequestBody createRequestBody(DocString docString, Builder builder) {
         String contentType = docString.getContentType() == null ? "application/json" : docString.getContentType();
@@ -113,18 +118,40 @@ public class RestfulStep {
     }
 
     private void requestAndResponse(String path, UnaryOperator<Builder> action) throws IOException {
-        Builder builder = request.applyHeader(new Builder().url(baseUrl + path));
+        Builder builder = request.applyHeader(new Builder().url(baseUrl + evaluator.eval(path)));
         okhttp3.Response rawResponse = httpClient.newCall(action.apply(builder).build()).execute();
         response = new Response(rawResponse);
     }
 
-    public void file(String fileKey, UploadFile file) {
-        request.files.put(fileKey, file);
+    public interface UploadFile {
+        static UploadFile content(String fileContent) {
+            return () -> fileContent.getBytes(StandardCharsets.UTF_8);
+        }
+
+        byte[] getContent();
+
+        default String getName() {
+            return Instant.now().toEpochMilli() + ".upload";
+        }
+
+        default UploadFile name(String fileName) {
+            return new UploadFile() {
+                @Override
+                public byte[] getContent() {
+                    return UploadFile.this.getContent();
+                }
+
+                @Override
+                public String getName() {
+                    return fileName;
+                }
+            };
+        }
     }
 
     private static class Request {
-        private final Map<String, Object> headers = new LinkedHashMap<>();
         public final Map<String, UploadFile> files = new HashMap<>();
+        private final Map<String, Object> headers = new LinkedHashMap<>();
 
         private Builder applyHeader(Builder builder) {
             headers.forEach((key, value) -> {
@@ -151,32 +178,6 @@ public class RestfulStep {
 
         public byte[] body() throws IOException {
             return raw.body().bytes();
-        }
-    }
-
-    public interface UploadFile {
-        static UploadFile content(String fileContent) {
-            return () -> fileContent.getBytes(StandardCharsets.UTF_8);
-        }
-
-        byte[] getContent();
-
-        default String getName() {
-            return Instant.now().toEpochMilli() + ".upload";
-        }
-
-        default UploadFile name(String fileName) {
-            return new UploadFile() {
-                @Override
-                public byte[] getContent() {
-                    return UploadFile.this.getContent();
-                }
-
-                @Override
-                public String getName() {
-                    return fileName;
-                }
-            };
         }
     }
 }

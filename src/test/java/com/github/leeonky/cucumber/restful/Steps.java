@@ -2,6 +2,7 @@ package com.github.leeonky.cucumber.restful;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
 import com.github.leeonky.dal.DAL;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
@@ -99,10 +100,12 @@ public class Steps {
         mockServer.reset();
     }
 
-    @SneakyThrows
-    private void lookupAction(@NotNull String s, String baseUrl) {
-        assertThat(new URL(baseUrl).getHost()).isEqualTo(s);
-        requestedBaseUrl = baseUrl;
+    @Given("var {string} value is {string}")
+    public void varValueIs(String varName, String value) {
+        PathVariableReplacement.evaluator = s -> {
+            assertThat(s).isEqualTo(varName);
+            return value;
+        };
     }
 
     @Given("a file {string}:")
@@ -137,5 +140,16 @@ public class Steps {
         }
         expect(bodyHeaders)
                 .should(expression);
+    }
+
+    @Given("no replacement")
+    public void noReplacement() {
+        PathVariableReplacement.reset();
+    }
+
+    @SneakyThrows
+    private void lookupAction(@NotNull String s, String baseUrl) {
+        assertThat(new URL(baseUrl).getHost()).isEqualTo(s);
+        requestedBaseUrl = baseUrl;
     }
 }
