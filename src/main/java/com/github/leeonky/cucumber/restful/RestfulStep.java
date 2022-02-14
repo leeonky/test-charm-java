@@ -10,7 +10,6 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -116,7 +115,6 @@ public class RestfulStep {
                 RequestBody.create(uploadFile.getContent()));
     }
 
-    @NotNull
     private RequestBody createRequestBody(DocString docString, Builder builder) {
         String contentType = docString.getContentType() == null ? "application/json" : docString.getContentType();
         builder.addHeader("Content-Type", contentType);
