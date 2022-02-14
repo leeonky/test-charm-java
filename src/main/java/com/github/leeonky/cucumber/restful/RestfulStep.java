@@ -59,10 +59,7 @@ public class RestfulStep {
             try {
                 objectMapper.readValue(form, new TypeReference<Map<String, String>>() {
                 }).forEach((key, value) -> {
-                    if (key.startsWith("@"))
-                        appendFile(bodyBuilder, key, value);
-                    else
-                        bodyBuilder.addFormDataPart(key, value);
+                    addFormPart(bodyBuilder, evaluator.eval(key), evaluator.eval(value));
                 });
             } catch (IOException e) {
                 throw new IllegalStateException(e);
@@ -104,6 +101,13 @@ public class RestfulStep {
 
     public void file(String fileKey, UploadFile file) {
         request.files.put(fileKey, file);
+    }
+
+    private void addFormPart(MultipartBody.Builder bodyBuilder, String key, String value) {
+        if (key.startsWith("@"))
+            appendFile(bodyBuilder, key, value);
+        else
+            bodyBuilder.addFormDataPart(key, value);
     }
 
     private void appendFile(MultipartBody.Builder bodyBuilder, String key, String value) {

@@ -32,3 +32,29 @@ Feature: Replace
       | POST   |
       | PUT    |
 
+  Scenario: Replace in upload file request
+    Given var "fileKeyVar" value is "an avatar"
+    Given var "keyVar" value is "name"
+    Given var "pathVar" value is "users"
+    Given a file "an avatar":
+    """
+    hello avatar
+    """
+    When POST form "/${pathVar}":
+    """
+    {
+      "${keyVar}": "Tom",
+      "@avatar": "${fileKeyVar}"
+    }
+    """
+    And got request form value:
+    """
+    : [{
+      headers: /.*name="name"(.|\r|\n)*/
+      body: 'Tom'
+    } {
+      headers: /.*name="avatar"(.|\r|\n)*/
+      headers: /.*filename=".*\.upload"(.|\r|\n)*/
+      body: 'hello avatar'
+    }]
+    """
