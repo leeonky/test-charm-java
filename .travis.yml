@@ -30,7 +30,7 @@ jobs:
 
 stages:
   - name: test
-    if: branch = master
+    if: branch = main
   - name: snapshot
     if: branch = snapshot
   - name: release
