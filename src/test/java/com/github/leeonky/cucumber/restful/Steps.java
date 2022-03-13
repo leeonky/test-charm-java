@@ -32,7 +32,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 public class Steps {
-    private static final ClientAndServer mockServer = startClientAndServer(80);
+    private static final ClientAndServer mockServer = startClientAndServer(8080);
     private final RestfulStep restfulStep;
     private String requestedBaseUrl;
 
@@ -43,7 +43,7 @@ public class Steps {
     @Given("base url {string}")
     public void base_url(String baseUrl) {
         CustomPicoFactory.lookupAction = s -> lookupAction(s, baseUrl);
-        restfulStep.setBaseUrl(baseUrl);
+        restfulStep.setBaseUrl(baseUrl + ":8080");
     }
 
     @Given("response {int} on {string} {string}:")
