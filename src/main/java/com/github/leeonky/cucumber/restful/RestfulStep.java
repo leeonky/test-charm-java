@@ -95,7 +95,7 @@ public class RestfulStep {
 
     @Then("response should be:")
     public void responseShouldBe(String expression) {
-        expect(response).should(expression);
+        expect(response).should(System.lineSeparator() + expression);
     }
 
     public void file(String fileKey, UploadFile file) {
