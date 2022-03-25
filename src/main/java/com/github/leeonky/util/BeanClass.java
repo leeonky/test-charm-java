@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.util.Suppressor.get;
+import static java.lang.ClassLoader.getSystemClassLoader;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
@@ -128,25 +130,42 @@ public class BeanClass<T> {
         return source;
     }
 
+    @Deprecated
     public static List<Class<?>> allTypesIn(String packageName) {
-        InputStream stream = ClassLoader.getSystemClassLoader()
-                .getResourceAsStream(packageName.replaceAll("[.]", "/"));
-        return stream == null ? emptyList()
-                : new BufferedReader(new InputStreamReader(stream)).lines()
-                .filter(line -> line.endsWith(".class"))
-                .map(line -> toClass(line, packageName))
-                .collect(Collectors.toList());
+        return new ArrayList<Class<?>>() {{
+            try {
+                Enumeration<URL> resources = getSystemClassLoader().getResources(packageName.replaceAll("[.]", "/"));
+                while (resources.hasMoreElements())
+                    addAll(getClasses(packageName, resources.nextElement()));
+            } catch (Exception ignore) {
+            }
+        }};
+    }
+
+    private static List<Class<?>> getClasses(String packageName, URL resource) {
+        try {
+            InputStream stream = resource.openStream();
+            return stream == null ? emptyList()
+                    : new BufferedReader(new InputStreamReader(stream)).lines()
+                    .filter(line -> line.endsWith(".class"))
+                    .map(line -> toClass(line, packageName))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return emptyList();
+        }
     }
 
     private static Class<?> toClass(String className, String packageName) {
         return get(() -> Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.'))));
     }
 
+    @Deprecated
     public static List<Class<?>> subTypesOf(Class<?> superClass, String packageName) {
         return assignableTypesOf(superClass, packageName).stream().filter(c -> !superClass.equals(c))
                 .collect(Collectors.toList());
     }
 
+    @Deprecated
     public static List<Class<?>> assignableTypesOf(Class<?> superClass, String packageName) {
         return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(Collectors.toList());
     }
