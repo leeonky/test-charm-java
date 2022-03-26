@@ -14,26 +14,38 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
 
     public ClassTypeInfo(BeanClass<T> type) {
         this.type = type;
-        Map<String, Field> addedReaderFields = new HashMap<>();
-        Map<String, Field> addedWriterFields = new HashMap<>();
+        collectFields(type);
+        collectGetterSetters(type);
+    }
 
-        for (Field field : type.getType().getFields()) {
-            Field addedReaderField = addedReaderFields.get(field.getName());
-            if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
-                addAccessor(new FieldPropertyReader<>(type, field), readers);
-                addedReaderFields.put(field.getName(), field);
-            }
-            Field addedWriterField = addedWriterFields.get(field.getName());
-            if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
-                addAccessor(new FieldPropertyWriter<>(type, field), writers);
-                addedWriterFields.put(field.getName(), field);
-            }
-        }
+    private void collectGetterSetters(BeanClass<T> type) {
         for (Method method : type.getType().getMethods()) {
             if (MethodPropertyReader.isGetter(method))
                 addAccessor(new MethodPropertyReader<>(type, method), readers);
             if (MethodPropertyWriter.isSetter(method))
                 addAccessor(new MethodPropertyWriter<>(type, method), writers);
+        }
+    }
+
+    private void collectFields(BeanClass<T> type) {
+        Map<String, Field> addedReaderFields = new HashMap<>();
+        Map<String, Field> addedWriterFields = new HashMap<>();
+
+        for (Field field : type.getType().getFields()) {
+            if (FieldPropertyReader.isReadablePropertyField(field)) {
+                Field addedReaderField = addedReaderFields.get(field.getName());
+                if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
+                    addAccessor(new FieldPropertyReader<>(type, field), readers);
+                    addedReaderFields.put(field.getName(), field);
+                }
+            }
+            if (FieldPropertyWriter.isWriteablePropertyField(field)) {
+                Field addedWriterField = addedWriterFields.get(field.getName());
+                if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
+                    addAccessor(new FieldPropertyWriter<>(type, field), writers);
+                    addedWriterFields.put(field.getName(), field);
+                }
+            }
         }
     }
 
@@ -45,6 +57,7 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     @Override
     public PropertyReader<T> getReader(String property) {
         return readers.computeIfAbsent(property, k -> {
+//            TODO support static field and getter
             throw new NoSuchAccessorException("No available property reader for " + type.getSimpleName() + "." + property);
         });
     }
@@ -52,6 +65,7 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     @Override
     public PropertyWriter<T> getWriter(String property) {
         return writers.computeIfAbsent(property, k -> {
+//            TODO support static field and setter
             throw new NoSuchAccessorException("No available property writer for " + type.getSimpleName() + "." + property);
         });
     }

@@ -13,6 +13,7 @@ class PropertyWriterTest {
     private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = create(BeanWithPubField.class);
 
     public static class BeanWithPubField {
+        public static int staticField = 1;
         @Attr("v1")
         public int field;
         public int field2;
@@ -20,6 +21,9 @@ class PropertyWriterTest {
         @Attr("v1")
         private int field3;
         private int privateField;
+
+        public static void setStaticSetter(int i) {
+        }
 
         public void setGenericMethod(List<Long> list) {
         }
@@ -127,6 +131,16 @@ class PropertyWriterTest {
 
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Bean.class).setPropertyValue(bean, "i", null))).hasMessageContaining("Can not set null to ");
+        }
+
+        @Test
+        void should_not_contain_static_field() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyWriters().keySet()).doesNotContain("staticField");
+        }
+
+        @Test
+        void should_not_contain_static_setter() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyWriters().keySet()).doesNotContain("staticSetter");
         }
     }
 

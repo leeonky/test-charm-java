@@ -130,7 +130,6 @@ public class BeanClass<T> {
         return source;
     }
 
-    @Deprecated
     public static List<Class<?>> allTypesIn(String packageName) {
         return new ArrayList<Class<?>>() {{
             try {
@@ -159,13 +158,11 @@ public class BeanClass<T> {
         return get(() -> Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.'))));
     }
 
-    @Deprecated
     public static List<Class<?>> subTypesOf(Class<?> superClass, String packageName) {
         return assignableTypesOf(superClass, packageName).stream().filter(c -> !superClass.equals(c))
                 .collect(Collectors.toList());
     }
 
-    @Deprecated
     public static List<Class<?>> assignableTypesOf(Class<?> superClass, String packageName) {
         return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(Collectors.toList());
     }

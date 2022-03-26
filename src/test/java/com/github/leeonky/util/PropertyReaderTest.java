@@ -17,6 +17,7 @@ class PropertyReaderTest {
 
     public static class BeanWithPubField {
 
+        public static int staticField = 1;
         @Attr("v1")
         public final int field = 100;
         public final int field2 = 0;
@@ -26,6 +27,10 @@ class PropertyReaderTest {
         public List notGenericField;
         @Attr("v1")
         private int field3;
+
+        public static int getStaticGetter() {
+            return 0;
+        }
 
         public List<Long> getGenericMethod() {
             return null;
@@ -96,6 +101,16 @@ class PropertyReaderTest {
         @Test
         void should_not_contain_java_get_class_getter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("class");
+        }
+
+        @Test
+        void should_not_contain_static_field() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("staticField");
+        }
+
+        @Test
+        void should_not_contain_static_getter() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("staticGetter");
         }
 
         @Test

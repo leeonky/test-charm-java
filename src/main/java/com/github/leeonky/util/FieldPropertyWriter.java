@@ -1,6 +1,7 @@
 package com.github.leeonky.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 
 import static com.github.leeonky.util.Suppressor.run;
@@ -10,6 +11,10 @@ class FieldPropertyWriter<T> extends FieldPropertyAccessor<T> implements Propert
 
     FieldPropertyWriter(BeanClass<T> beanClass, Field field) {
         super(beanClass, field);
+    }
+
+    static boolean isWriteablePropertyField(Field field) {
+        return !Modifier.isStatic(field.getModifiers());
     }
 
     @Override

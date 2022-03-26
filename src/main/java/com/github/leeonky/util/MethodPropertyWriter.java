@@ -1,6 +1,7 @@
 package com.github.leeonky.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
 
@@ -16,8 +17,10 @@ class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWrite
         super(beanClass, method);
     }
 
+    //TODO use instance method
     static boolean isSetter(Method method) {
-        return method.getName().startsWith("set") && method.getParameterTypes().length == 1;
+        return method.getName().startsWith("set") && method.getParameterTypes().length == 1
+                && !Modifier.isStatic(method.getModifiers());
     }
 
     @Override
