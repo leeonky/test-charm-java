@@ -192,13 +192,6 @@ public class BeanClass<T> {
     }
 
     public PropertyReader<T> getPropertyReader(String property) {
-        if (property.equals("class")) {
-            try {
-                return new MethodPropertyReader<>(this, getType().getMethod("getClass"));
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
-            }
-        }
         return typeInfo.getReader(property);
     }
 

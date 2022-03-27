@@ -49,7 +49,8 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
         }
     }
 
-    private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap, Map<String, A> allAccessorMap) {
+    private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap,
+                                                             Map<String, A> allAccessorMap) {
         allAccessorMap.put(accessor.getName(), accessor);
         if (accessor.isBeanProperty()) {
             properties.put(accessor.getName(), new DefaultProperty<>(accessor.getName(), accessor.getBeanType()));
