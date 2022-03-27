@@ -60,7 +60,6 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
         }
     }
 
-    //            TODO support static field and getter
     @Override
     public PropertyReader<T> getReader(String property) {
         return allReaders.computeIfAbsent(property, k -> {
@@ -68,7 +67,6 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
         });
     }
 
-    //            TODO support static field and setter
     @Override
     public PropertyWriter<T> getWriter(String property) {
         return allWriters.computeIfAbsent(property, k -> {
