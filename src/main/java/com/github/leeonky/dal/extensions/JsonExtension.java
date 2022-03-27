@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
+
+import static com.github.leeonky.dal.extensions.BinaryExtension.StaticMethods.binary;
 
 public class JsonExtension implements Extension {
 
@@ -31,28 +34,15 @@ public class JsonExtension implements Extension {
         }
 
         public static Object json(InputStream stream) {
-            try {
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int size;
-                byte[] data = new byte[1024];
-                while ((size = stream.read(data, 0, data.length)) != -1)
-                    buffer.write(data, 0, size);
-                return json(buffer.toByteArray());
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
+            return json(binary(stream));
         }
 
         public static Object json(File file) {
-            try {
-                return json(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
-                throw new IllegalStateException(e);
-            }
+            return json(binary(file));
         }
 
         public static Object json(Path path) {
-            return json(path.toFile());
+            return json(binary(path));
         }
     }
 }

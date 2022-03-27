@@ -54,6 +54,7 @@ class JsonExtensionTest {
         assertThat((Map) dal.evaluate(file, "json")).isEqualTo(new HashMap<String, Object>() {{
             put("a", 1);
         }});
+        file.delete();
     }
 
     @SneakyThrows
@@ -66,5 +67,6 @@ class JsonExtensionTest {
         assertThat((Map) dal.evaluate(tempFile, "json")).isEqualTo(new HashMap<String, Object>() {{
             put("a", 1);
         }});
+        file.delete();
     }
 }
