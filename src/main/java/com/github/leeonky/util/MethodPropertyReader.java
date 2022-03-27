@@ -1,7 +1,6 @@
 package com.github.leeonky.util;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 
 import static com.github.leeonky.util.StringUtil.unCapitalize;
@@ -16,13 +15,11 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
         super(beanClass, method);
     }
 
-    //TODO use instance method
     static boolean isGetter(Method method) {
         String methodName = method.getName();
         return method.getParameters().length == 0 &&
                 (method.getReturnType().equals(boolean.class) ?
-                        methodName.startsWith("is") : (methodName.startsWith("get") && !methodName.equals("getClass")))
-                && !Modifier.isStatic(method.getModifiers());
+                        methodName.startsWith("is") : (methodName.startsWith("get")));
     }
 
     @Override
@@ -43,5 +40,10 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
                     methodName.substring(BOOLEAN_GETTER_PREFIX_LENGTH) : methodName.substring(GETTER_PREFIX_LENGTH));
         }
         return name;
+    }
+
+    @Override
+    public boolean isBeanProperty() {
+        return super.isBeanProperty() && !method.getName().equals("getClass");
     }
 }

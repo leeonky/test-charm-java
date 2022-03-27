@@ -13,10 +13,6 @@ class FieldPropertyWriter<T> extends FieldPropertyAccessor<T> implements Propert
         super(beanClass, field);
     }
 
-    static boolean isWriteablePropertyField(Field field) {
-        return !Modifier.isStatic(field.getModifiers());
-    }
-
     @Override
     public BiConsumer<T, Object> setter() {
         return SETTER;
@@ -31,5 +27,10 @@ class FieldPropertyWriter<T> extends FieldPropertyAccessor<T> implements Propert
                     value == null ? "null" : BeanClass.getClassName(value) + "[" + value + "]",
                     getBeanType().getName(), getName(), getType().getName()), e);
         }
+    }
+
+    @Override
+    public boolean isBeanProperty() {
+        return !Modifier.isStatic(field.getModifiers());
     }
 }

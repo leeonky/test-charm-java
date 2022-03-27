@@ -11,6 +11,8 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Map<String, Property<T>> properties = new LinkedHashMap<>();
+    private final Map<String, PropertyReader<T>> allReaders = new LinkedHashMap<>();
+    private final Map<String, PropertyWriter<T>> allWriters = new LinkedHashMap<>();
 
     public ClassTypeInfo(BeanClass<T> type) {
         this.type = type;
@@ -21,30 +23,26 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     private void collectGetterSetters(BeanClass<T> type) {
         for (Method method : type.getType().getMethods()) {
             if (MethodPropertyReader.isGetter(method))
-                addAccessor(new MethodPropertyReader<>(type, method), readers);
+                addAccessor(new MethodPropertyReader<>(type, method), readers, allReaders);
             if (MethodPropertyWriter.isSetter(method))
-                addAccessor(new MethodPropertyWriter<>(type, method), writers);
+                addAccessor(new MethodPropertyWriter<>(type, method), writers, allWriters);
         }
     }
 
     private void collectFields(BeanClass<T> type) {
         Map<String, Field> addedReaderFields = new HashMap<>();
         Map<String, Field> addedWriterFields = new HashMap<>();
-
         for (Field field : type.getType().getFields()) {
-            if (FieldPropertyReader.isReadablePropertyField(field)) {
-                Field addedReaderField = addedReaderFields.get(field.getName());
-                if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
-                    addAccessor(new FieldPropertyReader<>(type, field), readers);
-                    addedReaderFields.put(field.getName(), field);
-                }
+            Field addedReaderField = addedReaderFields.get(field.getName());
+            if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
+                addAccessor(new FieldPropertyReader<>(type, field), readers, allReaders);
+                addedReaderFields.put(field.getName(), field);
             }
-            if (FieldPropertyWriter.isWriteablePropertyField(field)) {
-                Field addedWriterField = addedWriterFields.get(field.getName());
-                if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
-                    addAccessor(new FieldPropertyWriter<>(type, field), writers);
-                    addedWriterFields.put(field.getName(), field);
-                }
+//            TODO remove const
+            Field addedWriterField = addedWriterFields.get(field.getName());
+            if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
+                addAccessor(new FieldPropertyWriter<>(type, field), writers, allWriters);
+                addedWriterFields.put(field.getName(), field);
             }
         }
     }
@@ -54,18 +52,26 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
         accessorMap.put(accessor.getName(), accessor);
     }
 
+    private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap, Map<String, A> allAccessorMap) {
+        allAccessorMap.put(accessor.getName(), accessor);
+        if (accessor.isBeanProperty()) {
+            properties.put(accessor.getName(), new DefaultProperty<>(accessor.getName(), accessor.getBeanType()));
+            accessorMap.put(accessor.getName(), accessor);
+        }
+    }
+
+    //            TODO support static field and getter
     @Override
     public PropertyReader<T> getReader(String property) {
-        return readers.computeIfAbsent(property, k -> {
-//            TODO support static field and getter
+        return allReaders.computeIfAbsent(property, k -> {
             throw new NoSuchAccessorException("No available property reader for " + type.getSimpleName() + "." + property);
         });
     }
 
+    //            TODO support static field and setter
     @Override
     public PropertyWriter<T> getWriter(String property) {
-        return writers.computeIfAbsent(property, k -> {
-//            TODO support static field and setter
+        return allWriters.computeIfAbsent(property, k -> {
             throw new NoSuchAccessorException("No available property writer for " + type.getSimpleName() + "." + property);
         });
     }

@@ -17,4 +17,6 @@ public interface PropertyAccessor<T> {
     }
 
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+
+    boolean isBeanProperty();
 }

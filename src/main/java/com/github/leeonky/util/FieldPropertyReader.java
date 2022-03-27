@@ -11,12 +11,13 @@ class FieldPropertyReader<T> extends FieldPropertyAccessor<T> implements Propert
         super(beanClass, field);
     }
 
-    static boolean isReadablePropertyField(Field field) {
-        return !Modifier.isStatic(field.getModifiers());
-    }
-
     @Override
     public Object getValue(T instance) {
         return get(() -> field.get(instance));
+    }
+
+    @Override
+    public boolean isBeanProperty() {
+        return !Modifier.isStatic(field.getModifiers());
     }
 }

@@ -32,4 +32,9 @@ class DataPropertyAccessor<T> extends AbstractPropertyAccessor<T> {
     public BeanClass<?> getType() {
         return type;
     }
+
+    @Override
+    public boolean isBeanProperty() {
+        return false;
+    }
 }

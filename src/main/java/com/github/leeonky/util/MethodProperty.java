@@ -2,6 +2,7 @@ package com.github.leeonky.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 abstract class MethodProperty<T> extends AbstractPropertyAccessor<T> {
     final Method method;
@@ -22,5 +23,10 @@ abstract class MethodProperty<T> extends AbstractPropertyAccessor<T> {
         } catch (NoSuchFieldException e) {
             return null;
         }
+    }
+
+    @Override
+    public boolean isBeanProperty() {
+        return !Modifier.isStatic(method.getModifiers());
     }
 }
