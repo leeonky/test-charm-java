@@ -2,6 +2,7 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,18 +39,14 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
                 addAccessor(new FieldPropertyReader<>(type, field), readers, allReaders);
                 addedReaderFields.put(field.getName(), field);
             }
-//            TODO remove const
-            Field addedWriterField = addedWriterFields.get(field.getName());
-            if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
-                addAccessor(new FieldPropertyWriter<>(type, field), writers, allWriters);
-                addedWriterFields.put(field.getName(), field);
+            if (!Modifier.isFinal(field.getModifiers())) {
+                Field addedWriterField = addedWriterFields.get(field.getName());
+                if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
+                    addAccessor(new FieldPropertyWriter<>(type, field), writers, allWriters);
+                    addedWriterFields.put(field.getName(), field);
+                }
             }
         }
-    }
-
-    private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap) {
-        properties.put(accessor.getName(), new DefaultProperty<>(accessor.getName(), accessor.getBeanType()));
-        accessorMap.put(accessor.getName(), accessor);
     }
 
     private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap, Map<String, A> allAccessorMap) {

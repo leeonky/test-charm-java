@@ -14,6 +14,8 @@ class PropertyWriterTest {
 
     public static class BeanWithPubField {
         public static int staticField = 1;
+        public final int constField = 2;
+
         @Attr("v1")
         public int field;
         public int field2;
@@ -141,6 +143,11 @@ class PropertyWriterTest {
         @Test
         void should_not_contain_static_setter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyWriters().keySet()).doesNotContain("staticSetter");
+        }
+
+        @Test
+        void should_not_contain_const_field() {
+            assertThat(beanWithPubFieldBeanClass.getPropertyWriters().keySet()).doesNotContain("constField");
         }
     }
 
