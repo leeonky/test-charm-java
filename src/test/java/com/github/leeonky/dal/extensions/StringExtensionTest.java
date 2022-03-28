@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import io.cucumber.messages.internal.com.google.common.io.Files;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static java.nio.file.Files.createTempFile;
@@ -34,7 +34,7 @@ class StringExtensionTest {
         DAL dal = DAL.getInstance();
         Path tempFile = createTempFile("", "");
         File file = tempFile.toFile();
-        Files.write("hello".getBytes(), file);
+        Files.write(tempFile, "hello".getBytes());
         assertThat((Object) dal.evaluate(file, "string")).isEqualTo("hello");
         file.delete();
     }
@@ -45,7 +45,7 @@ class StringExtensionTest {
         DAL dal = DAL.getInstance();
         Path tempFile = createTempFile("", "");
         File file = tempFile.toFile();
-        Files.write("hello".getBytes(), file);
+        Files.write(tempFile, "hello".getBytes());
         assertThat((Object) dal.evaluate(tempFile, "string")).isEqualTo("hello");
         file.delete();
     }
