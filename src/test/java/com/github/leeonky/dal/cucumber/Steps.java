@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.cucumber;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -19,11 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class Steps {
 
     private AssertionError assertionError;
-
-    @Before
-    public void cleanDir() {
-
-    }
 
     @SneakyThrows
     @Given("root folder {string}")

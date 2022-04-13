@@ -47,6 +47,26 @@ Feature: dir/file with java File
     }
     """
 
+  Scenario: two files
+    Given a file "/tmp/test/dir/file1.txt"
+    """
+    hello1
+    """
+    Given a file "/tmp/test/dir/file2.txt"
+    """
+    hello2
+    """
+    Then java.io.File "/tmp/test/dir/" should:
+    """
+    : [{
+      name: file1.txt
+      string: hello1
+    }{
+      name: file2.txt
+      string: hello2
+    }]
+    """
+
   Scenario: folder and file
     Given a folder "/tmp/test/dir/folder1"
     Given a file "/tmp/test/dir/folder1/file1.txt"
