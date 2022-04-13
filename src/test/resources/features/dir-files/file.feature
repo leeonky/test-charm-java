@@ -156,3 +156,17 @@ Feature: dir/file with java File
     }
     Unexpected fields `file2.txt` in test/dir
     """
+
+  Scenario: string to file
+    Given a file "/tmp/test/dir/file.txt"
+    """
+    hello-world
+    """
+    Then the following should pass:
+    """
+    '/tmp/'.file: {
+      test/dir= {
+        file.txt= hello-world
+      }
+    }
+    """

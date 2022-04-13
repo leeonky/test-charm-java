@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -19,6 +20,7 @@ public class FileExtension implements Extension {
     @Override
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
+        runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class);
         runtimeContextBuilder.registerListAccessor(File.class, this::listFile);
         runtimeContextBuilder.registerPropertyAccessor(File.class,
                 new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
@@ -54,5 +56,11 @@ public class FileExtension implements Extension {
     private LinkedHashSet<File> listFile(File file) {
         return stream(file.listFiles()).sorted(Comparator.comparing(File::getName))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public static class StaticMethods {
+        public static File file(String path) {
+            return Paths.get(path).toFile();
+        }
     }
 }

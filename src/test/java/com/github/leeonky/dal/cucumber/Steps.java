@@ -56,4 +56,9 @@ public class Steps {
     public void errorMessageShouldBe(String message) {
         assertThat(assertionError.getMessage()).isEqualTo(message);
     }
+
+    @Then("the following should pass:")
+    public void theFollowingShouldPass(String expression) {
+        expect(expression).should(expression);
+    }
 }
