@@ -99,3 +99,40 @@ Feature: dir/file with java File
       test/dir/file.txt= hello-world
     }
     """
+
+  Scenario: checking file count with extension
+    Given a file "/tmp/test/dir/file.txt"
+    """
+    hello-world
+    """
+    Then java.io.File "/tmp" should:
+    """
+    : {
+      test/dir= {
+        file.txt= hello-world
+      }
+    }
+    """
+    Given a file "/tmp/test/dir/file2.txt"
+    """
+    unexpected
+    """
+    Then java.io.File "/tmp" should failed:
+    """
+    : {
+      test/dir= {
+        file.txt= hello-world
+      }
+    }
+    """
+    And error message should be:
+    """
+
+    : {
+      test/dir= {
+              ^
+        file.txt= hello-world
+      }
+    }
+    Unexpected fields `file2.txt` in test/dir
+    """

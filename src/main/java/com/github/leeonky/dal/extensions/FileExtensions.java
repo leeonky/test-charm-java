@@ -14,8 +14,11 @@ public class FileExtensions implements Extension {
 
     public static class StaticMethods {
         public static String txt(FileGroup fileGroup) {
-            //        TODO ignore case
-            return string(fileGroup.getBinary("txt"));
+            return string(fileGroup.getStream("txt"));
+        }
+
+        public static String TXT(FileGroup fileGroup) {
+            return string(fileGroup.getStream("TXT"));
         }
     }
 }

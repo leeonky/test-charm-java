@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.cucumber;
 
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.SneakyThrows;
@@ -12,8 +13,12 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Steps {
+
+    private AssertionError assertionError;
 
     @Before
     public void cleanDir() {
@@ -46,5 +51,15 @@ public class Steps {
     @Given("a folder {string}")
     public void a_folder(String path) {
         Paths.get(path).toFile().mkdirs();
+    }
+
+    @Then("java.io.File {string} should failed:")
+    public void javaIoFileShouldFailed(String string, String expression) {
+        assertionError = assertThrows(AssertionError.class, () -> expect(Paths.get(string).toFile()).should(expression));
+    }
+
+    @And("error message should be:")
+    public void errorMessageShouldBe(String message) {
+        assertThat(assertionError.getMessage()).isEqualTo(message);
     }
 }
