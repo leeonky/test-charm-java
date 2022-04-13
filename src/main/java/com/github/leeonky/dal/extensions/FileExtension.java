@@ -30,8 +30,14 @@ public class FileExtension implements Extension {
 
                     @Override
                     public Object getValue(File file, String name) {
-                        if (file.isDirectory())
-                            return new File(file, name);
+                        if (file.isDirectory()) {
+                            File subFile = new File(file, name);
+                            if (subFile.exists())
+                                return subFile;
+
+//                            TODO checking FileWithOutExtension existing ?
+                            return new FileWithOutExtension(file, name);
+                        }
                         return super.getValue(file, name);
                     }
                 });

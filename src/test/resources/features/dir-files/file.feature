@@ -87,3 +87,15 @@ Feature: dir/file with java File
       }
     }
     """
+
+  Scenario: file extension
+    Given a file "/tmp/test/dir/file.txt"
+    """
+    hello-world
+    """
+    Then java.io.File "/tmp" should:
+    """
+    : {
+      test/dir/file.txt= hello-world
+    }
+    """
