@@ -35,17 +35,16 @@ public class Steps {
     @SneakyThrows
     @Given("a file {string}")
     public void a_file(String pathString, String docString) {
-        Path path = Paths.get(pathString);
-        if (path.toFile().exists())
-            Files.walk(path)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-        Files.write(path, docString.getBytes());
+        Files.write(Paths.get(pathString), docString.getBytes());
     }
 
     @Then("java.io.File {string} should:")
     public void java_io_file_should(String string, String expression) {
         expect(Paths.get(string).toFile()).should(expression);
+    }
+
+    @Given("a folder {string}")
+    public void a_folder(String path) {
+        Paths.get(path).toFile().mkdirs();
     }
 }
