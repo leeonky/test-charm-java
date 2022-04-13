@@ -9,11 +9,11 @@ import java.util.Set;
 
 import static com.github.leeonky.dal.extensions.BinaryExtension.StaticMethods.binary;
 
-public class FileWithOutExtension implements Flatten {
+public class FileGroup implements Flatten {
     private final File file;
     private final String name;
 
-    public FileWithOutExtension(File file, String name) {
+    public FileGroup(File file, String name) {
         this.file = file;
         this.name = name;
     }

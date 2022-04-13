@@ -13,9 +13,9 @@ public class FileExtensions implements Extension {
     }
 
     public static class StaticMethods {
-        public static String txt(FileWithOutExtension fileWithOutExtension) {
+        public static String txt(FileGroup fileGroup) {
             //        TODO ignore case
-            return string(fileWithOutExtension.getBinary("txt"));
+            return string(fileGroup.getBinary("txt"));
         }
     }
 }

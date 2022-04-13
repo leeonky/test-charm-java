@@ -21,6 +21,7 @@ public class FileExtension implements Extension {
         runtimeContextBuilder.registerListAccessor(File.class, this::listFileNames);
         runtimeContextBuilder.registerPropertyAccessor(File.class,
                 new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
+
                     @Override
                     public Set<String> getPropertyNames(File file) {
                         if (file.isDirectory())
@@ -35,13 +36,12 @@ public class FileExtension implements Extension {
                             if (subFile.exists())
                                 return subFile;
 
-//                            TODO checking FileWithOutExtension existing ?
-                            return new FileWithOutExtension(file, name);
+//                            TODO checking FileGroup existing ?
+                            return new FileGroup(file, name);
                         }
                         return super.getValue(file, name);
                     }
                 });
-
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
     }
 
