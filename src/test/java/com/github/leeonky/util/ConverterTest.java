@@ -1,6 +1,7 @@
 package com.github.leeonky.util;
 
 import lombok.Getter;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,14 @@ class ConverterTest {
         assertThat(converter.tryConvert(String.class, null)).isNull();
     }
 
+    @Test
+    void should_use_more_close_type_handler() {
+        converter.addTypeConverter(Object.class, String.class, value -> "object to string");
+        converter.addTypeConverter(BaseInterface.class, String.class, value -> "not object to string");
+
+        Assertions.assertThat(converter.tryConvert(String.class, new TargetClass())).isEqualTo("not object to string");
+    }
+
     enum NameEnums {
         E1, E2
     }
@@ -39,6 +48,9 @@ class ConverterTest {
         }
     }
 
+    public interface BaseInterface {
+    }
+
     interface ValueEnum<V extends Number> {
         static <E extends ValueEnum<V>, V extends Number> E fromValue(Class<E> type, V value) {
             return Arrays.stream(type.getEnumConstants()).filter((v) -> v.getValue().equals(value))
@@ -51,6 +63,9 @@ class ConverterTest {
         }
 
         V getValue();
+    }
+
+    public static class TargetClass implements BaseInterface {
     }
 
     public static class Type {

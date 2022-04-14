@@ -167,6 +167,10 @@ public class BeanClass<T> {
         return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(Collectors.toList());
     }
 
+    public static int compareByExtends(Class<?> type1, Class<?> type2) {
+        return type1.isAssignableFrom(type2) ? 1 : -1;
+    }
+
     public Class<T> getType() {
         return type;
     }

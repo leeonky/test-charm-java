@@ -10,6 +10,10 @@ public class TypeHandler<F> {
         this.handler = handler;
     }
 
+    static int sortClass(TypeHandler<?> c1, TypeHandler<?> c2) {
+        return BeanClass.compareByExtends(c1.type, c2.type);
+    }
+
     F getHandler() {
         return handler;
     }

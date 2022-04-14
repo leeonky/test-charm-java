@@ -7,11 +7,12 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Stream.concat;
 
 public class TypeHandlerSet<T> {
-    private Map<Class<?>, List<TypeHandler<T>>> handlers = new HashMap<>();
+    private final Map<Class<?>, List<TypeHandler<T>>> handlers = new HashMap<>();
 
     public void add(Class<?> source, Class<?> target, T converter) {
-        handlers.computeIfAbsent(target, k -> new ArrayList<>())
-                .add(new TypeHandler<>(source, converter));
+        List<TypeHandler<T>> typeHandlers = handlers.computeIfAbsent(target, k -> new ArrayList<>());
+        typeHandlers.add(new TypeHandler<>(source, converter));
+        typeHandlers.sort(TypeHandler::sortClass);
     }
 
     public Optional<TypeHandler<T>> findHandler(Class<?> source, Class<?> target, Supplier<List<TypeHandler<T>>> defaultValue) {
