@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.extensions;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
 import java.io.InputStream;
@@ -21,16 +21,11 @@ public class JsonExtension implements Extension {
 
     public static class StaticMethods {
         public static Object json(byte[] data) {
-            String str = new String(data);
-            return json(str);
+            return json(new String(data));
         }
 
         public static Object json(String data) {
-            try {
-                return new ObjectMapper().readValue("[" + data + "]", List.class).get(0);
-            } catch (JsonProcessingException e) {
-                throw new IllegalStateException(e);
-            }
+            return Suppressor.get(() -> new ObjectMapper().readValue("[" + data + "]", List.class).get(0));
         }
 
         public static Object json(InputStream stream) {

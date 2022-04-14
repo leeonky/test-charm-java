@@ -63,9 +63,9 @@ public class FileExtension implements Extension {
         File subFile = new File(file, name);
         if (subFile.exists())
             return subFile;
-//                            TODO checking FileGroup existing ?
-//                            TODO return default file when no extension static method
-        return new FileGroup(file, name);
+        if (stream(file.list()).anyMatch(f -> f.startsWith(name + ".")))
+            return new FileGroup(file, name);
+        throw new IllegalArgumentException(String.format("File or File Group `%s` not exist", name));
     }
 
     private LinkedHashSet<String> listFileNames(File file) {
