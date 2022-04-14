@@ -64,7 +64,14 @@ public class FileExtension implements Extension {
                     public Object getValue(FileGroup fileGroup, String name) {
                         return fileGroup.getFile(name);
                     }
+
 //                    TODO checking all files in group
+//                    TODO file group as list
+
+                    @Override
+                    public Set<String> getPropertyNames(FileGroup fileGroup) {
+                        return fileGroup.listNames();
+                    }
                 });
     }
 

@@ -241,3 +241,36 @@ Feature: dir/file with java File
       }
     }
     """
+
+  Scenario: checking all files with file group
+    Given a file "/tmp/test/dir/file.txt"
+    """
+    hello-world
+    """
+    Given a file "/tmp/test/dir/file.log"
+    """
+    any
+    """
+    Given a file "/tmp/test/dir/another.txt"
+    """
+    any
+    """
+    Then java.io.File "/tmp/test/dir" should failed:
+    """
+    : {
+      file= {
+        txt: hello-world
+      }
+    }
+    """
+    And error message should be:
+    """
+
+    : {
+      file= {
+          ^
+        txt: hello-world
+      }
+    }
+    Unexpected fields `log` in file
+    """

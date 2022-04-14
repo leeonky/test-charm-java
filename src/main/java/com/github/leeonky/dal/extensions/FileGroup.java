@@ -5,6 +5,7 @@ import com.github.leeonky.dal.runtime.Flatten;
 import java.io.File;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FileGroup implements Flatten {
     private final File folder;
@@ -32,7 +33,6 @@ public class FileGroup implements Flatten {
             fields.remove(fileName);
             return Collections.singletonList(fileName);
         }
-//                            TODO return default file when no extension static method
         return Collections.emptyList();
     }
 
@@ -45,5 +45,12 @@ public class FileGroup implements Flatten {
         if (!new File(folder, fileName).exists())
             throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
         return fileExtensions.getOrDefault(name, file -> file).apply(new File(folder, fileName));
+    }
+
+    public Set<String> listNames() {
+        return Arrays.stream(folder.list())
+                .filter(n -> n.startsWith(name + "."))
+                .map(s -> s.substring(name.length() + 1))
+                .collect(Collectors.toSet());
     }
 }
