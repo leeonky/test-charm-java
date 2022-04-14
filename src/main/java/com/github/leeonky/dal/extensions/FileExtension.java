@@ -28,15 +28,11 @@ public class FileExtension implements Extension {
 
                     @Override
                     public Set<String> getPropertyNames(File file) {
-                        if (file.isDirectory())
-                            return listFileNames(file);
-                        // TODO need test
-                        return super.getPropertyNames(file);
+                        return file.isDirectory() ? listFileNames(file) : super.getPropertyNames(file);
                     }
 
                     @Override
                     public Object getValue(File file, String name) {
-                        // TODO call super need test
                         return file.isDirectory() ? getSubFile(file, name) : super.getValue(file, name);
                     }
                 });
@@ -50,16 +46,12 @@ public class FileExtension implements Extension {
                     @Override
                     public Set<String> getPropertyNames(Path path) {
                         File file = path.toFile();
-                        if (file.isDirectory())
-                            return listFileNames(file);
-                        // TODO need test
-                        return super.getPropertyNames(path);
+                        return file.isDirectory() ? listFileNames(file) : super.getPropertyNames(path);
                     }
 
                     @Override
                     public Object getValue(Path path, String name) {
                         File file = path.toFile();
-                        // TODO call super need test
                         return file.isDirectory() ? getSubFile(file, name) : super.getValue(path, name);
                     }
                 });

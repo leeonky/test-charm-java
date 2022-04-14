@@ -3,51 +3,11 @@ Feature: dir/file with java File
   Background:
     Given root folder "/tmp/test/dir"
 
-  Scenario: empty folder
+  Scenario: file in list verification should list sub files
     Then java.io.File "/tmp/test/dir" should:
     """
     = []
     """
-    And java.io.File "/tmp/test/dir" should:
-    """
-    = {}
-    """
-
-  Scenario: single file
-    Given a file "/tmp/test/file.txt"
-    """
-    hello
-    """
-    Then java.io.File "/tmp/test/file.txt" should:
-    """
-    : {
-      name: file.txt
-      string: hello
-    }
-    """
-    Then java.io.File "/tmp/test/file.txt" should:
-    """
-    : 'file.txt'
-    """
-
-  Scenario: folder with sub-folders
-    Given a folder "/tmp/test/dir/folder1"
-    Given a folder "/tmp/test/dir/folder2"
-    Then java.io.File "/tmp/test/dir" should:
-    """
-    : ['folder1' 'folder2']
-    """
-    And java.io.File "/tmp" should:
-    """
-    : {
-      test/dir: {
-        folder1: []
-        folder2: []
-      }
-    }
-    """
-
-  Scenario: two files
     Given a file "/tmp/test/dir/file1.txt"
     """
     hello1
@@ -67,7 +27,49 @@ Feature: dir/file with java File
     }]
     """
 
-  Scenario: folder and file
+  Scenario: file in object verification should list sub files, key is file name, value is file
+    When java.io.File "/tmp/test/dir" should:
+    """
+    = {}
+    """
+    Given a file "/tmp/test/file.txt"
+    """
+    hello
+    """
+    Then java.io.File "/tmp/test/file.txt" should:
+    """
+    : {
+      name: file.txt
+      string: hello
+    }
+    """
+
+  Scenario: compare file with string should use file name
+    Given a folder "/tmp/test/dir/folder1"
+    And a folder "/tmp/test/dir/folder2"
+    And a file "/tmp/test/dir/file.txt"
+    """
+    any
+    """
+    Then java.io.File "/tmp/test/dir" should:
+    """
+    : ['file.txt' 'folder1' 'folder2']
+    """
+
+  Scenario: access folder by name as 'property' name
+    Given a folder "/tmp/test/dir/folder1"
+    Given a folder "/tmp/test/dir/folder2"
+    And java.io.File "/tmp" should:
+    """
+    : {
+      test/dir: {
+        folder1: []
+        folder2: []
+      }
+    }
+    """
+
+  Scenario: access file by name as 'property' name
     Given a folder "/tmp/test/dir/folder1"
     Given a file "/tmp/test/dir/folder1/file1.txt"
     """
@@ -108,7 +110,7 @@ Feature: dir/file with java File
     }
     """
 
-  Scenario: file extension
+  Scenario: get file content by extension
     Given a file "/tmp/test/dir/file.txt"
     """
     hello-world
@@ -120,7 +122,7 @@ Feature: dir/file with java File
     }
     """
 
-  Scenario: checking file count with extension
+  Scenario: checking folder with file group and extension
     Given a file "/tmp/test/dir/file.txt"
     """
     hello-world
