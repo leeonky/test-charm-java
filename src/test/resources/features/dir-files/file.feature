@@ -274,3 +274,26 @@ Feature: dir/file with java File
     }
     Unexpected fields `log` in file
     """
+
+  Scenario: list verification by file group
+    Given a file "/tmp/test/dir/file.txt"
+    """
+    hello-world
+    """
+    Given a file "/tmp/test/dir/file.log"
+    """
+    a-log
+    """
+    Then java.io.File "/tmp/test/dir" should:
+    """
+    : {
+      file: [{
+        name: file.txt
+        string: hello-world
+      }
+      {
+        name: file.log
+        string: a-log
+      }]
+    }
+    """

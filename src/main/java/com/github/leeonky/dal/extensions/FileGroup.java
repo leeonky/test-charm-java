@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileGroup implements Flatten {
     private final File folder;
@@ -48,9 +49,17 @@ public class FileGroup implements Flatten {
     }
 
     public Set<String> listNames() {
-        return Arrays.stream(folder.list())
-                .filter(n -> n.startsWith(name + "."))
+        return listFileNames()
                 .map(s -> s.substring(name.length() + 1))
                 .collect(Collectors.toSet());
+    }
+
+    private Stream<String> listFileNames() {
+        return Arrays.stream(folder.list())
+                .filter(n -> n.startsWith(name + "."));
+    }
+
+    public List<File> listFiles() {
+        return listFileNames().map(n -> new File(folder, n)).collect(Collectors.toList());
     }
 }
