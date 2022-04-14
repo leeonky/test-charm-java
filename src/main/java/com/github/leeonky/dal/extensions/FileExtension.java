@@ -62,9 +62,9 @@ public class FileExtension implements Extension {
 
                     @Override
                     public Object getValue(FileGroup fileGroup, String name) {
-                        fileGroup.isExist(name);
-                        return super.getValue(fileGroup, name);
+                        return fileGroup.getFile(name);
                     }
+//                    TODO checking all files in group
                 });
     }
 

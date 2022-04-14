@@ -225,3 +225,19 @@ Feature: dir/file with java File
       6. static method extension
     File `file.not-exist` not exist
     """
+
+  Scenario: return file object when extension not registered
+    Given a file "/tmp/test/dir/file.not-registered"
+    """
+    hello-world
+    """
+    Then java.io.File "/tmp/test/dir" should:
+    """
+    : {
+      file.not-registered: {
+        class.simpleName: 'File'
+        name: file.not-registered
+        string: hello-world
+      }
+    }
+    """

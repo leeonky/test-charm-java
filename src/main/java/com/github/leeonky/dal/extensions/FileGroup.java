@@ -1,18 +1,24 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.runtime.Flatten;
-import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 
 public class FileGroup implements Flatten {
     private final File folder;
     private final String name;
+    private static final Map<String, Function<File, Object>> fileExtensions = new HashMap<>();
+
+    static {
+        register("txt", StringExtension.StaticMethods::string);
+        register("TXT", StringExtension.StaticMethods::string);
+    }
+
+    public static void register(String txt, Function<File, Object> fileReader) {
+        fileExtensions.put(txt, fileReader);
+    }
 
     public FileGroup(File folder, String name) {
         this.folder = folder;
@@ -34,14 +40,10 @@ public class FileGroup implements Flatten {
         return String.format("%s.%s", name, property);
     }
 
-    public InputStream getStream(String extension) {
-        return Suppressor.get(() -> new FileInputStream(new File(folder, fileName(extension))));
-    }
-
-    public boolean isExist(String name) {
-        boolean exists = new File(folder, fileName(name)).exists();
-        if (!exists)
-            throw new IllegalArgumentException(String.format("File `%s` not exist", fileName(name)));
-        return exists;
+    public Object getFile(String name) {
+        String fileName = fileName(name);
+        if (!new File(folder, fileName).exists())
+            throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
+        return fileExtensions.getOrDefault(name, file -> file).apply(new File(folder, fileName));
     }
 }
