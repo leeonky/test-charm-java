@@ -41,8 +41,6 @@ public class FileExtension implements Extension {
                         return fileGroup.listNames();
                     }
                 });
-//        TODO move to FileGroup
-        runtimeContextBuilder.registerListAccessor(FileGroup.class, FileGroup::listFiles);
     }
 
     private void extendPath(RuntimeContextBuilder runtimeContextBuilder) {

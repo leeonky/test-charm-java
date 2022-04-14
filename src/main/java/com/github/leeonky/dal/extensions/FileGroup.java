@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FileGroup implements Flatten {
+public class FileGroup implements Flatten, Iterable<File> {
     private final File folder;
     private final String name;
     private static final Map<String, Function<File, Object>> fileExtensions = new HashMap<>();
@@ -56,7 +56,8 @@ public class FileGroup implements Flatten {
         return Arrays.stream(folder.list()).filter(n -> n.startsWith(name + "."));
     }
 
-    public List<File> listFiles() {
-        return listFileNames().map(n -> new File(folder, n)).collect(Collectors.toList());
+    @Override
+    public Iterator<File> iterator() {
+        return listFileNames().map(n -> new File(folder, n)).iterator();
     }
 }
