@@ -32,11 +32,11 @@ Feature: dir/file with java path
     """
     = {}
     """
-    Given a file "/tmp/test/file.txt"
+    Given a file "/tmp/test/dir/file.txt"
     """
     hello
     """
-    Then java.nio.Path "/tmp/test/file.txt" should:
+    Then java.nio.Path "/tmp/test/dir/file.txt" should:
     """
     : {
       name: file.txt

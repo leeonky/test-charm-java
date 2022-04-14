@@ -1,15 +1,20 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.util.Suppressor;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.SneakyThrows;
+import net.lingala.zip4j.ZipFile;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,5 +75,21 @@ public class Steps {
     @Then("java.nio.Path {string} should failed:")
     public void javaNioPathShouldFailed(String string, String expression) {
         assertionError = assertThrows(AssertionError.class, () -> expect(Paths.get(string)).should(expression));
+    }
+
+    @SneakyThrows
+    @Given("an empty zip file {string}")
+    public void anEmptyZipFile(String fileName) {
+        FileOutputStream fos = new FileOutputStream(fileName);
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        zipOut.close();
+        fos.close();
+    }
+
+    @And("a zip file {string}:")
+    public void zipFile(String fileName, DataTable files) {
+        ZipFile zipFile = new ZipFile(fileName);
+        files.asLists().stream().map(list -> list.get(0)).forEach(fileNameInZip -> Suppressor.run(() ->
+                zipFile.addFile(fileNameInZip)));
     }
 }

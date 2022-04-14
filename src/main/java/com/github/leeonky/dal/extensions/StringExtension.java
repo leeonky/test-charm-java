@@ -32,5 +32,9 @@ public class StringExtension implements Extension {
         public static String string(Path path) {
             return string(binary(path));
         }
+
+        public static String string(ZipFileTree.ZipNode zipNode) {
+            return string(zipNode.getBinary());
+        }
     }
 }

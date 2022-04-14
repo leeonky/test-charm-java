@@ -32,11 +32,11 @@ Feature: dir/file with java File
     """
     = {}
     """
-    Given a file "/tmp/test/file.txt"
+    Given a file "/tmp/test/dir/file.txt"
     """
     hello
     """
-    Then java.io.File "/tmp/test/file.txt" should:
+    Then java.io.File "/tmp/test/dir/file.txt" should:
     """
     : {
       name: file.txt
