@@ -22,6 +22,7 @@ public class FileExtension implements Extension {
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
         runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class);
+
         runtimeContextBuilder.registerListAccessor(File.class, this::listFile);
         runtimeContextBuilder.registerPropertyAccessor(File.class,
                 new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
@@ -39,7 +40,6 @@ public class FileExtension implements Extension {
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
 
         runtimeContextBuilder.registerListAccessor(Path.class, path -> listFile(path.toFile()));
-
         runtimeContextBuilder.registerPropertyAccessor(Path.class,
                 new JavaClassPropertyAccessor<Path>(runtimeContextBuilder, create(Path.class)) {
 
@@ -55,8 +55,17 @@ public class FileExtension implements Extension {
                         return file.isDirectory() ? getSubFile(file, name) : super.getValue(path, name);
                     }
                 });
-
         runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, StaticMethods::name);
+
+        runtimeContextBuilder.registerPropertyAccessor(FileGroup.class,
+                new JavaClassPropertyAccessor<FileGroup>(runtimeContextBuilder, create(FileGroup.class)) {
+
+                    @Override
+                    public Object getValue(FileGroup fileGroup, String name) {
+                        fileGroup.isExist(name);
+                        return super.getValue(fileGroup, name);
+                    }
+                });
     }
 
     private Object getSubFile(File file, String name) {

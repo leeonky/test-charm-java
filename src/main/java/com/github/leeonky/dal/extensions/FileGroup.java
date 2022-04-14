@@ -21,17 +21,27 @@ public class FileGroup implements Flatten {
 
     @Override
     public List<String> removeExpectedFields(Set<String> fields, Object symbol, Object property) {
-        String fileName = String.format("%s.%s", symbol, property);
+        String fileName = fileName(property);
         if (fields.contains(fileName)) {
             fields.remove(fileName);
             return Collections.singletonList(fileName);
         }
-//        TODO raiser error file not found
 //                            TODO return default file when no extension static method
         return Collections.emptyList();
     }
 
+    private String fileName(Object property) {
+        return String.format("%s.%s", name, property);
+    }
+
     public InputStream getStream(String extension) {
-        return Suppressor.get(() -> new FileInputStream(new File(folder, String.format("%s.%s", name, extension))));
+        return Suppressor.get(() -> new FileInputStream(new File(folder, fileName(extension))));
+    }
+
+    public boolean isExist(String name) {
+        boolean exists = new File(folder, fileName(name)).exists();
+        if (!exists)
+            throw new IllegalArgumentException(String.format("File `%s` not exist", fileName(name)));
+        return exists;
     }
 }

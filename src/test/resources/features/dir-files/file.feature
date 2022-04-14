@@ -197,3 +197,31 @@ Feature: dir/file with java File
     File or File Group `un-exist` not exist
     Implicit list mapping is not allowed in current version of DAL, use `un-exist[]` instead
     """
+
+  Scenario: raise error when file not exist with file group
+    Given a file "/tmp/test/dir/file.txt"
+    """
+    hello-world
+    """
+    Then java.io.File "/tmp/test/dir" should failed:
+    """
+    : {
+      file.not-exist: 'any'
+    }
+    """
+    And error message should be:
+    """
+
+    : {
+      file.not-exist: 'any'
+           ^
+    }
+    Get property `not-exist` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    File `file.not-exist` not exist
+    """
