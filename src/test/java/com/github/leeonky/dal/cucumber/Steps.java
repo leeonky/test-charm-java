@@ -61,4 +61,14 @@ public class Steps {
     public void theFollowingShouldPass(String expression) {
         expect(expression).should(expression);
     }
+
+    @Then("java.nio.Path {string} should:")
+    public void javaNioPathShould(String string, String expression) {
+        expect(Paths.get(string)).should(expression);
+    }
+
+    @Then("java.nio.Path {string} should failed:")
+    public void javaNioPathShouldFailed(String string, String expression) {
+        assertionError = assertThrows(AssertionError.class, () -> expect(Paths.get(string)).should(expression));
+    }
 }
