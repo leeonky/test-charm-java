@@ -22,23 +22,29 @@ public class FileExtension implements Extension {
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
         runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class);
+        extendFile(runtimeContextBuilder);
+        extendPath(runtimeContextBuilder);
+        extendFileGroup(runtimeContextBuilder);
+    }
 
-        runtimeContextBuilder.registerListAccessor(File.class, this::listFile);
-        runtimeContextBuilder.registerPropertyAccessor(File.class,
-                new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
+    private void extendFileGroup(RuntimeContextBuilder runtimeContextBuilder) {
+        runtimeContextBuilder.registerPropertyAccessor(FileGroup.class,
+                new JavaClassPropertyAccessor<FileGroup>(runtimeContextBuilder, create(FileGroup.class)) {
 
                     @Override
-                    public Set<String> getPropertyNames(File file) {
-                        return file.isDirectory() ? listFileNames(file) : super.getPropertyNames(file);
+                    public Object getValue(FileGroup fileGroup, String name) {
+                        return fileGroup.getFile(name);
                     }
 
                     @Override
-                    public Object getValue(File file, String name) {
-                        return file.isDirectory() ? getSubFile(file, name) : super.getValue(file, name);
+                    public Set<String> getPropertyNames(FileGroup fileGroup) {
+                        return fileGroup.listNames();
                     }
                 });
-        runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
+        runtimeContextBuilder.registerListAccessor(FileGroup.class, FileGroup::listFiles);
+    }
 
+    private void extendPath(RuntimeContextBuilder runtimeContextBuilder) {
         runtimeContextBuilder.registerListAccessor(Path.class, path -> listFile(path.toFile()));
         runtimeContextBuilder.registerPropertyAccessor(Path.class,
                 new JavaClassPropertyAccessor<Path>(runtimeContextBuilder, create(Path.class)) {
@@ -56,21 +62,24 @@ public class FileExtension implements Extension {
                     }
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, StaticMethods::name);
+    }
 
-        runtimeContextBuilder.registerPropertyAccessor(FileGroup.class,
-                new JavaClassPropertyAccessor<FileGroup>(runtimeContextBuilder, create(FileGroup.class)) {
+    private void extendFile(RuntimeContextBuilder runtimeContextBuilder) {
+        runtimeContextBuilder.registerListAccessor(File.class, this::listFile);
+        runtimeContextBuilder.registerPropertyAccessor(File.class,
+                new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
 
                     @Override
-                    public Object getValue(FileGroup fileGroup, String name) {
-                        return fileGroup.getFile(name);
+                    public Set<String> getPropertyNames(File file) {
+                        return file.isDirectory() ? listFileNames(file) : super.getPropertyNames(file);
                     }
 
                     @Override
-                    public Set<String> getPropertyNames(FileGroup fileGroup) {
-                        return fileGroup.listNames();
+                    public Object getValue(File file, String name) {
+                        return file.isDirectory() ? getSubFile(file, name) : super.getValue(file, name);
                     }
                 });
-        runtimeContextBuilder.registerListAccessor(FileGroup.class, FileGroup::listFiles);
+        runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
     }
 
     private Object getSubFile(File file, String name) {

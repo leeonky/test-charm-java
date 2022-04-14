@@ -18,8 +18,8 @@ public class FileGroup implements Flatten {
         register("TXT", StringExtension.StaticMethods::string);
     }
 
-    public static void register(String txt, Function<File, Object> fileReader) {
-        fileExtensions.put(txt, fileReader);
+    public static void register(String fileExtension, Function<File, Object> fileReader) {
+        fileExtensions.put(fileExtension, fileReader);
     }
 
     public FileGroup(File folder, String name) {
@@ -37,26 +37,23 @@ public class FileGroup implements Flatten {
         return Collections.emptyList();
     }
 
-    private String fileName(Object property) {
-        return String.format("%s.%s", name, property);
+    private String fileName(Object fileExtension) {
+        return String.format("%s.%s", name, fileExtension);
     }
 
-    public Object getFile(String name) {
-        String fileName = fileName(name);
+    public Object getFile(String fileExtension) {
+        String fileName = fileName(fileExtension);
         if (!new File(folder, fileName).exists())
             throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
-        return fileExtensions.getOrDefault(name, file -> file).apply(new File(folder, fileName));
+        return fileExtensions.getOrDefault(fileExtension, file -> file).apply(new File(folder, fileName));
     }
 
     public Set<String> listNames() {
-        return listFileNames()
-                .map(s -> s.substring(name.length() + 1))
-                .collect(Collectors.toSet());
+        return listFileNames().map(s -> s.substring(name.length() + 1)).collect(Collectors.toSet());
     }
 
     private Stream<String> listFileNames() {
-        return Arrays.stream(folder.list())
-                .filter(n -> n.startsWith(name + "."));
+        return Arrays.stream(folder.list()).filter(n -> n.startsWith(name + "."));
     }
 
     public List<File> listFiles() {
