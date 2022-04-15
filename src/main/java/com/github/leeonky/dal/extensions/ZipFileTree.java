@@ -4,6 +4,7 @@ import com.github.leeonky.util.Suppressor;
 
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -19,7 +20,11 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
 
     @Override
     public Iterator<ZipNode> iterator() {
-        return zipFile.stream().map(ZipNode::new).collect(Collectors.toList()).iterator();
+        return listNode().iterator();
+    }
+
+    public List<ZipNode> listNode() {
+        return zipFile.stream().map(ZipNode::new).collect(Collectors.toList());
     }
 
     public ZipNode getSub(String name) {

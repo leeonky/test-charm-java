@@ -7,9 +7,11 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
+import java.util.Set;
 import java.util.zip.ZipFile;
 
 import static com.github.leeonky.util.BeanClass.create;
+import static java.util.stream.Collectors.toSet;
 
 public class ZipExtension implements Extension {
 
@@ -25,6 +27,11 @@ public class ZipExtension implements Extension {
                             @Override
                             public Object getValue(ZipFileTree zipFileTree, String name) {
                                 return zipFileTree.getSub(name);
+                            }
+
+                            @Override
+                            public Set<String> getPropertyNames(ZipFileTree zipFileTree) {
+                                return zipFileTree.listNode().stream().map(ZipFileTree.ZipNode::name).collect(toSet());
                             }
                         })
         ;

@@ -49,7 +49,6 @@ Feature: zip file
 #    }
 #    """
 
-
   Scenario: file not exist in zip
     Given an empty zip file "/tmp/test/dir/empty.zip"
     Then java.io.File "/tmp/test/dir/empty.zip" should failed:
@@ -76,7 +75,25 @@ Feature: zip file
     Implicit list mapping is not allowed in current version of DAL, use `not-exist.txt[]` instead
     """
 
-#    TODO one file
+  Scenario: verify all files in zip
+    Given a file "/tmp/test/tmp/file.txt"
+    """
+    hello
+    """
+    And a zip file "/tmp/test/dir/file.zip":
+      | /tmp/test/tmp/file.txt |
+    Then java.io.File "/tmp/test/dir/file.zip" should failed:
+    """
+    unzip= {}
+    """
+    And error message should be:
+    """
+
+    unzip= {}
+         ^
+    Unexpected fields `file.txt` in unzip
+    """
+
 #    TODO two files
 #    TODO two files
 #    TODO one empty folder
