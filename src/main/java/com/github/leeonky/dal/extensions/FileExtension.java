@@ -4,8 +4,10 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -44,6 +46,7 @@ public class FileExtension implements Extension {
     }
 
     private void extendPath(RuntimeContextBuilder runtimeContextBuilder) {
+        runtimeContextBuilder.registerImplicitData(Path.class, file -> Suppressor.get(() -> new FileInputStream(file.toFile())));
         runtimeContextBuilder.registerListAccessor(Path.class, path -> listFile(path.toFile()));
         runtimeContextBuilder.registerPropertyAccessor(Path.class,
                 new JavaClassPropertyAccessor<Path>(runtimeContextBuilder, create(Path.class)) {
@@ -64,6 +67,7 @@ public class FileExtension implements Extension {
     }
 
     private void extendFile(RuntimeContextBuilder runtimeContextBuilder) {
+        runtimeContextBuilder.registerImplicitData(File.class, file -> Suppressor.get(() -> new FileInputStream(file)));
         runtimeContextBuilder.registerListAccessor(File.class, this::listFile);
         runtimeContextBuilder.registerPropertyAccessor(File.class,
                 new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {

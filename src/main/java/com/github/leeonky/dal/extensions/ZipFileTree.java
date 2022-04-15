@@ -36,7 +36,6 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
             return entry.getName();
         }
 
-        @Deprecated
         public InputStream getBinary() {
             return Suppressor.get(() -> zipFile.getInputStream(entry));
         }

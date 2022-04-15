@@ -11,7 +11,10 @@ public class ZipExtension implements Extension {
 
     @Override
     public void extend(DAL dal) {
-        dal.getRuntimeContextBuilder().registerStaticMethodExtension(StaticMethods.class);
+        dal.getRuntimeContextBuilder()
+                .registerStaticMethodExtension(StaticMethods.class)
+                .registerImplicitData(ZipFileTree.ZipNode.class, ZipFileTree.ZipNode::getBinary)
+        ;
     }
 
     public static class StaticMethods {

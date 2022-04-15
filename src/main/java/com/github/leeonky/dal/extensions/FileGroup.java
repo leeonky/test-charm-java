@@ -1,8 +1,11 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.runtime.Flatten;
+import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -11,14 +14,14 @@ import java.util.stream.Stream;
 public class FileGroup implements Flatten, Iterable<File> {
     private final File folder;
     private final String name;
-    private static final Map<String, Function<File, Object>> fileExtensions = new HashMap<>();
+    private static final Map<String, Function<InputStream, Object>> fileExtensions = new HashMap<>();
 
     static {
-        register("txt", StringExtension.StaticMethods::string);
-        register("TXT", StringExtension.StaticMethods::string);
+        register("txt", file -> StringExtension.StaticMethods.string(BinaryExtension.readAll(file)));
+        register("TXT", file -> StringExtension.StaticMethods.string(BinaryExtension.readAll(file)));
     }
 
-    public static void register(String fileExtension, Function<File, Object> fileReader) {
+    public static void register(String fileExtension, Function<InputStream, Object> fileReader) {
         fileExtensions.put(fileExtension, fileReader);
     }
 
@@ -45,7 +48,10 @@ public class FileGroup implements Flatten, Iterable<File> {
         String fileName = fileName(fileExtension);
         if (!new File(folder, fileName).exists())
             throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
-        return fileExtensions.getOrDefault(fileExtension, file -> file).apply(new File(folder, fileName));
+        Function<InputStream, Object> handler = fileExtensions.get(fileExtension);
+        if (handler != null)
+            return handler.apply(Suppressor.get(() -> new FileInputStream(new File(folder, fileName))));
+        return new File(folder, fileName);
     }
 
     public Set<String> listNames() {
