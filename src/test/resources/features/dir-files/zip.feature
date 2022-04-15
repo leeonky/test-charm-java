@@ -15,37 +15,50 @@ Feature: zip file
     unzip= {}
     """
 
-  Scenario: unzip one file
-    Given a file "/tmp/test/tmp/file.txt"
+  Scenario: unzip files
+    Given a file "/tmp/test/tmp/file1.txt"
     """
     hello
     """
+    And a file "/tmp/test/tmp/file2.txt"
+    """
+    world
+    """
     And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/file.txt |
+      | /tmp/test/tmp/file1.txt |
+      | /tmp/test/tmp/file2.txt |
     Then java.io.File "/tmp/test/dir/file.zip" should:
     """
-    unzip: [ file.txt ]
+    unzip: [ file1.txt  file2.txt ]
     """
     Then java.io.File "/tmp/test/dir/file.zip" should:
     """
     unzip: [{
-      name: file.txt
+      name: file1.txt
       string: hello
+    }{
+      name: file2.txt
+      string: world
     }]
     """
     Then java.io.File "/tmp/test/dir/file.zip" should:
     """
     unzip= {
-      'file.txt': {
-        name: file.txt
+      'file1.txt': {
+        name: file1.txt
         string: hello
+      }
+      'file2.txt': {
+        name: file2.txt
+        string: world
       }
     }
     """
     Then java.io.File "/tmp/test/dir/file.zip" should:
     """
     unzip: {
-      file.txt: hello
+      file1.txt: hello
+      file2.txt: world
     }
     """
 
@@ -94,8 +107,6 @@ Feature: zip file
     Unexpected fields `file.txt` in unzip
     """
 
-#    TODO two files
-#    TODO two files
 #    TODO one empty folder
 #    TODO one empty folder
 #    TODO one folder with one file

@@ -60,6 +60,7 @@ dependencies {
     testCompile('org.projectlombok:lombok:1.18.4')
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'
     testImplementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.10.0'
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: '3.0.0'
 
     pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }

@@ -3,7 +3,10 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.dal.runtime.Flatten;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,13 +25,8 @@ public abstract class FileGroup<T> implements Flatten, Iterable<T> {
     }
 
     @Override
-    public List<String> removeExpectedFields(Set<String> fields, Object symbol, Object property) {
-        String fileName = fileName(property);
-        if (fields.contains(fileName)) {
-            fields.remove(fileName);
-            return Collections.singletonList(fileName);
-        }
-        return Collections.emptyList();
+    public String buildField(Object prefix, Object postfix) {
+        return fileName(postfix);
     }
 
     protected String fileName(Object fileExtension) {

@@ -19,11 +19,16 @@ public class BinaryExtension implements Extension {
     public static byte[] readAll(InputStream stream) {
         return Suppressor.get(() -> {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            int size;
-            byte[] data = new byte[1024];
-            while ((size = stream.read(data, 0, data.length)) != -1)
-                buffer.write(data, 0, size);
-            return buffer.toByteArray();
+            try {
+                int size;
+                byte[] data = new byte[1024];
+                while ((size = stream.read(data, 0, data.length)) != -1)
+                    buffer.write(data, 0, size);
+                return buffer.toByteArray();
+            } finally {
+                buffer.close();
+                stream.close();
+            }
         });
     }
 

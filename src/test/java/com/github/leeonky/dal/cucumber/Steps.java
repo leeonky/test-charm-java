@@ -18,6 +18,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Steps {
@@ -34,6 +35,7 @@ public class Steps {
                     .map(Path::toFile)
                     .forEach(File::delete);
         path.toFile().mkdirs();
+        await().ignoreExceptions().until(() -> path.toFile().list().length == 0);
     }
 
     @SneakyThrows

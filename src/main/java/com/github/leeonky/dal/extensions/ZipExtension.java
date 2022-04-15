@@ -31,13 +31,14 @@ public class ZipExtension implements Extension {
 
                             @Override
                             public Set<String> getPropertyNames(ZipFileTree zipFileTree) {
-                                return zipFileTree.listNode().stream().map(ZipFileTree.ZipNode::name).collect(toSet());
+                                return zipFileTree.list().collect(toSet());
                             }
                         })
         ;
     }
 
     public static class StaticMethods {
+
         public static ZipFileTree unzip(File file) {
             return Suppressor.get(() -> new ZipFileTree(new ZipFile(file)));
         }
