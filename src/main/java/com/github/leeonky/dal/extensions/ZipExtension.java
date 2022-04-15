@@ -2,18 +2,31 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
 import java.util.zip.ZipFile;
 
+import static com.github.leeonky.util.BeanClass.create;
+
 public class ZipExtension implements Extension {
 
     @Override
     public void extend(DAL dal) {
-        dal.getRuntimeContextBuilder()
-                .registerStaticMethodExtension(StaticMethods.class)
+        RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
+        runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class)
                 .registerImplicitData(ZipFileTree.ZipNode.class, ZipFileTree.ZipNode::getBinary)
+                .registerPropertyAccessor(ZipFileTree.class,
+                        new JavaClassPropertyAccessor<ZipFileTree>(runtimeContextBuilder,
+                                create(ZipFileTree.class)) {
+
+                            @Override
+                            public Object getValue(ZipFileTree zipFileTree, String name) {
+                                return zipFileTree.getSub(name);
+                            }
+                        })
         ;
     }
 

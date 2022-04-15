@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static java.lang.String.format;
+
 public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
     private final ZipFile zipFile;
 
@@ -18,6 +20,11 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
     @Override
     public Iterator<ZipNode> iterator() {
         return zipFile.stream().map(ZipNode::new).collect(Collectors.toList()).iterator();
+    }
+
+    public ZipNode getSub(String name) {
+        return zipFile.stream().filter(zipEntry -> zipEntry.getName().equals(name)).findFirst().map(ZipNode::new)
+                .orElseThrow(() -> new IllegalArgumentException(format("File <%s> not found in: `%s`", name, zipFile.getName())));
     }
 
     public class ZipNode {
