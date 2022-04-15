@@ -5,11 +5,11 @@ import com.github.leeonky.util.Suppressor;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import static java.lang.String.format;
 
 public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
     private final ZipFile zipFile;
@@ -27,9 +27,21 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
         return zipFile.stream().map(ZipNode::new).collect(Collectors.toList());
     }
 
-    public ZipNode getSub(String name) {
-        return zipFile.stream().filter(zipEntry -> zipEntry.getName().equals(name)).findFirst().map(ZipNode::new)
-                .orElseThrow(() -> new IllegalArgumentException(format("File <%s> not found in: `%s`", name, zipFile.getName())));
+    public Object getSub(String name) {
+        Optional<ZipNode> zipNode = findSub(name);
+        if (zipNode.isPresent())
+            return zipNode.get();
+        if (list().anyMatch(f -> f.startsWith(name + ".")))
+            return new ZipFileTreeFileGroup(this, name);
+        throw new IllegalArgumentException(String.format("File or File Group <%s> not found", name));
+    }
+
+    public Optional<ZipNode> findSub(String name) {
+        return zipFile.stream().filter(zipEntry -> zipEntry.getName().equals(name)).findFirst().map(ZipNode::new);
+    }
+
+    public Stream<String> list() {
+        return listNode().stream().map(ZipNode::name);
     }
 
     public class ZipNode {
@@ -48,7 +60,7 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
             return entry.getName();
         }
 
-        public InputStream getBinary() {
+        public InputStream open() {
             return Suppressor.get(() -> zipFile.getInputStream(entry));
         }
     }

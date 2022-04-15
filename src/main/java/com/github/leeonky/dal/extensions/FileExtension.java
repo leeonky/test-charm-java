@@ -40,7 +40,7 @@ public class FileExtension implements Extension {
 
                     @Override
                     public Set<String> getPropertyNames(FileGroup fileGroup) {
-                        return fileGroup.listNames();
+                        return fileGroup.list();
                     }
                 });
     }
@@ -90,8 +90,8 @@ public class FileExtension implements Extension {
         if (subFile.exists())
             return subFile;
         if (stream(file.list()).anyMatch(f -> f.startsWith(name + ".")))
-            return new FileGroup(file, name);
-        throw new IllegalArgumentException(String.format("File or File Group `%s` not exist", name));
+            return new IOFileFileGroup(file, name);
+        throw new IllegalArgumentException(String.format("File or File Group <%s> not found", name));
     }
 
     private LinkedHashSet<String> listFileNames(File file) {

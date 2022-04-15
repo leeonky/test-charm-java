@@ -42,12 +42,12 @@ Feature: zip file
       }
     }
     """
-#    Then java.io.File "/tmp/test/dir/file.zip" should:
-#    """
-#    unzip: {
-#      file.txt: hello
-#    }
-#    """
+    Then java.io.File "/tmp/test/dir/file.zip" should:
+    """
+    unzip: {
+      file.txt: hello
+    }
+    """
 
   Scenario: file not exist in zip
     Given an empty zip file "/tmp/test/dir/empty.zip"
@@ -71,7 +71,7 @@ Feature: zip file
       4. Map key value
       5. customized type getter
       6. static method extension
-    File <not-exist.txt> not found in: `/tmp/test/dir/empty.zip`
+    File or File Group <not-exist.txt> not found
     Implicit list mapping is not allowed in current version of DAL, use `not-exist.txt[]` instead
     """
 

@@ -1,32 +1,23 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.runtime.Flatten;
-import com.github.leeonky.util.Suppressor;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FileGroup implements Flatten, Iterable<File> {
-    private final File folder;
-    private final String name;
-    private static final Map<String, Function<InputStream, Object>> fileExtensions = new HashMap<>();
+public abstract class FileGroup<T> implements Flatten, Iterable<T> {
+    protected static final Map<String, Function<InputStream, Object>> fileExtensions = new HashMap<>();
+    protected final String name;
 
     static {
-        register("txt", file -> StringExtension.StaticMethods.string(BinaryExtension.readAll(file)));
-        register("TXT", file -> StringExtension.StaticMethods.string(BinaryExtension.readAll(file)));
+        register("txt", inputStream -> StringExtension.StaticMethods.string(BinaryExtension.readAll(inputStream)));
+        register("TXT", inputStream -> StringExtension.StaticMethods.string(BinaryExtension.readAll(inputStream)));
     }
 
-    public static void register(String fileExtension, Function<InputStream, Object> fileReader) {
-        fileExtensions.put(fileExtension, fileReader);
-    }
-
-    public FileGroup(File folder, String name) {
-        this.folder = folder;
+    public FileGroup(String name) {
         this.name = name;
     }
 
@@ -40,30 +31,34 @@ public class FileGroup implements Flatten, Iterable<File> {
         return Collections.emptyList();
     }
 
-    private String fileName(Object fileExtension) {
+    protected String fileName(Object fileExtension) {
         return String.format("%s.%s", name, fileExtension);
     }
 
-    public Object getFile(String fileExtension) {
-        String fileName = fileName(fileExtension);
-        if (!new File(folder, fileName).exists())
-            throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
-        Function<InputStream, Object> handler = fileExtensions.get(fileExtension);
+    public static void register(String fileExtension, Function<InputStream, Object> fileReader) {
+        fileExtensions.put(fileExtension, fileReader);
+    }
+
+    public Object getFile(String extensionName) {
+        T subFile = createSubFile(fileName(extensionName));
+        Function<InputStream, Object> handler = fileExtensions.get(extensionName);
         if (handler != null)
-            return handler.apply(Suppressor.get(() -> new FileInputStream(new File(folder, fileName))));
-        return new File(folder, fileName);
+            return handler.apply(open(subFile));
+        return subFile;
     }
 
-    public Set<String> listNames() {
-        return listFileNames().map(s -> s.substring(name.length() + 1)).collect(Collectors.toSet());
+    protected abstract InputStream open(T subFile);
+
+    protected abstract T createSubFile(String fileName);
+
+    public Set<String> list() {
+        return listFileName().map(s -> s.substring(name.length() + 1)).collect(Collectors.toSet());
     }
 
-    private Stream<String> listFileNames() {
-        return Arrays.stream(folder.list()).filter(n -> n.startsWith(name + "."));
-    }
+    protected abstract Stream<String> listFileName();
 
     @Override
-    public Iterator<File> iterator() {
-        return listFileNames().map(n -> new File(folder, n)).iterator();
+    public Iterator<T> iterator() {
+        return listFileName().map(this::createSubFile).iterator();
     }
 }

@@ -19,7 +19,7 @@ public class ZipExtension implements Extension {
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
         runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class)
-                .registerImplicitData(ZipFileTree.ZipNode.class, ZipFileTree.ZipNode::getBinary)
+                .registerImplicitData(ZipFileTree.ZipNode.class, ZipFileTree.ZipNode::open)
                 .registerPropertyAccessor(ZipFileTree.class,
                         new JavaClassPropertyAccessor<ZipFileTree>(runtimeContextBuilder,
                                 create(ZipFileTree.class)) {
