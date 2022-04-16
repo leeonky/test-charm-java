@@ -3,7 +3,7 @@ package com.github.leeonky.dal.extensions;
 import java.io.InputStream;
 import java.util.stream.Stream;
 
-public class ZipFileFileGroup extends FileGroup<ZipFileTree.ZipNode> {
+public class ZipFileFileGroup extends FileGroup<ZipBinary.ZipNode> {
     private final ZipNodeCollection zipNodeCollection;
 
     public ZipFileFileGroup(ZipNodeCollection zipNode, String name) {
@@ -12,12 +12,12 @@ public class ZipFileFileGroup extends FileGroup<ZipFileTree.ZipNode> {
     }
 
     @Override
-    protected InputStream open(ZipFileTree.ZipNode subFile) {
+    protected InputStream open(ZipBinary.ZipNode subFile) {
         return subFile.open();
     }
 
     @Override
-    protected ZipFileTree.ZipNode createSubFile(String fileName) {
+    protected ZipBinary.ZipNode createSubFile(String fileName) {
         return zipNodeCollection.createSub(fileName);
     }
 

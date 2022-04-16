@@ -17,34 +17,34 @@ public class ZipExtension implements Extension {
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
         runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class)
-                .registerImplicitData(ZipFileTree.ZipNode.class, ZipFileTree.ZipNode::open)
-                .registerPropertyAccessor(ZipFileTree.class,
-                        new JavaClassPropertyAccessor<ZipFileTree>(runtimeContextBuilder,
-                                create(ZipFileTree.class)) {
+                .registerImplicitData(ZipBinary.ZipNode.class, ZipBinary.ZipNode::open)
+                .registerPropertyAccessor(ZipBinary.class,
+                        new JavaClassPropertyAccessor<ZipBinary>(runtimeContextBuilder,
+                                create(ZipBinary.class)) {
 
                             @Override
-                            public Object getValue(ZipFileTree zipFileTree, String name) {
-                                return zipFileTree.getSub(name);
+                            public Object getValue(ZipBinary zipBinaryTree, String name) {
+                                return zipBinaryTree.getSub(name);
                             }
 
                             @Override
-                            public Set<String> getPropertyNames(ZipFileTree zipFileTree) {
-                                return zipFileTree.list();
+                            public Set<String> getPropertyNames(ZipBinary zipBinaryTree) {
+                                return zipBinaryTree.list();
                             }
                         })
-                .registerPropertyAccessor(ZipFileTree.ZipNode.class,
-                        new JavaClassPropertyAccessor<ZipFileTree.ZipNode>(runtimeContextBuilder,
-                                create(ZipFileTree.ZipNode.class)) {
+                .registerPropertyAccessor(ZipBinary.ZipNode.class,
+                        new JavaClassPropertyAccessor<ZipBinary.ZipNode>(runtimeContextBuilder,
+                                create(ZipBinary.ZipNode.class)) {
 
                             @Override
-                            public Object getValue(ZipFileTree.ZipNode zipNode, String name) {
+                            public Object getValue(ZipBinary.ZipNode zipNode, String name) {
                                 if (zipNode.isDirectory())
                                     return zipNode.getSub(name);
                                 return super.getValue(zipNode, name);
                             }
 
                             @Override
-                            public Set<String> getPropertyNames(ZipFileTree.ZipNode zipNode) {
+                            public Set<String> getPropertyNames(ZipBinary.ZipNode zipNode) {
                                 if (zipNode.isDirectory())
                                     return zipNode.list();
                                 return super.getPropertyNames(zipNode);
@@ -52,14 +52,14 @@ public class ZipExtension implements Extension {
                         })
         ;
 
-        register("zip", inputStream -> new ZipFileTree(readAll(inputStream)));
-        register("ZIP", inputStream -> new ZipFileTree(readAll(inputStream)));
+        register("zip", inputStream -> new ZipBinary(readAll(inputStream)));
+        register("ZIP", inputStream -> new ZipBinary(readAll(inputStream)));
     }
 
     public static class StaticMethods {
 
-        public static ZipFileTree unzip(byte[] data) {
-            return new ZipFileTree(data);
+        public static ZipBinary unzip(byte[] data) {
+            return new ZipBinary(data);
         }
     }
 }

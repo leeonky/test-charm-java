@@ -15,9 +15,9 @@ import java.util.zip.ZipInputStream;
 import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
 import static java.util.Arrays.stream;
 
-public class ZipFileTree extends ZipNodeCollection {
+public class ZipBinary extends ZipNodeCollection {
 
-    public ZipFileTree(byte[] data) {
+    public ZipBinary(byte[] data) {
         Suppressor.run(() -> unzipToMemory(data).forEach((entry, bytes) ->
                 addNode(stream(entry.getName().split("/")).filter(s -> !s.isEmpty())
                         .collect(Collectors.toCollection(LinkedList::new)), entry, bytes)));
