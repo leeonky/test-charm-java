@@ -44,11 +44,10 @@ jacocoTestReport {
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
-    implementation 'com.github.leeonky:DAL-java:0.2.0null'
+    implementation 'com.github.leeonky:DAL-java:0.2.0-beta'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
 
     testImplementation 'org.assertj:assertj-core:3.21.0'

@@ -49,7 +49,8 @@ public class ZipExtension implements Extension {
                                     return zipNode.list();
                                 return super.getPropertyNames(zipNode);
                             }
-                        });
+                        })
+        ;
 
         register("zip", inputStream -> new ZipFileTree(readAll(inputStream)));
         register("ZIP", inputStream -> new ZipFileTree(readAll(inputStream)));
