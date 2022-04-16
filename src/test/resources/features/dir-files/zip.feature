@@ -242,3 +242,64 @@ Feature: zip file
     File `file.json` not exist
     Implicit list mapping is not allowed in current version of DAL, use `json[]` instead
     """
+
+  Scenario: nested zip files
+    Given a folder "/tmp/test/tmp/folder"
+    Given a folder "/tmp/test/tmp/zip1"
+    Given a file "/tmp/test/tmp/zip1/file1.txt"
+    """
+    hello
+    """
+    Given a file "/tmp/test/tmp/zip1/file2.txt"
+    """
+    world
+    """
+    And a zip file "/tmp/test/tmp/folder/zip1.zip":
+      | /tmp/test/tmp/zip1 |
+    Given a file "/tmp/test/tmp/folder/foo.txt"
+    """
+    foo
+    """
+    Given a file "/tmp/test/tmp/bar.txt"
+    """
+    bar
+    """
+    And a zip file "/tmp/test/dir/zip.zip":
+      | /tmp/test/tmp/folder  |
+      | /tmp/test/tmp/bar.txt |
+
+    Then java.io.File "/tmp/test/dir" should:
+    """
+    : {
+      zip.zip: [
+        bar.txt
+        folder
+      ]
+    }
+    """
+    Then java.io.File "/tmp/test/dir" should:
+    """
+    = {
+      zip.zip: {
+        bar.txt: bar
+        folder= {
+          foo.txt= foo
+          zip1.zip: {
+            zip1: {
+            file1.txt: hello
+            file2.txt: world
+            }
+          }
+        }
+      }
+    }
+    """
+    Then java.io.File "/tmp/test/dir" should:
+    """
+    zip.zip= {
+        bar.txt= bar
+        folder/foo.txt= foo
+        folder/zip1.zip/zip1/file1.txt= hello
+        folder/zip1.zip/zip1/file2.txt= world
+    }
+    """

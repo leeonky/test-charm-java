@@ -5,9 +5,10 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-import java.io.File;
 import java.util.Set;
 
+import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
+import static com.github.leeonky.dal.extensions.FileGroup.register;
 import static com.github.leeonky.util.BeanClass.create;
 
 public class ZipExtension implements Extension {
@@ -49,12 +50,15 @@ public class ZipExtension implements Extension {
                                 return super.getPropertyNames(zipNode);
                             }
                         });
+
+        register("zip", inputStream -> new ZipFileTree(readAll(inputStream)));
+        register("ZIP", inputStream -> new ZipFileTree(readAll(inputStream)));
     }
 
     public static class StaticMethods {
 
-        public static ZipFileTree unzip(File file) {
-            return new ZipFileTree(file);
+        public static ZipFileTree unzip(byte[] data) {
+            return new ZipFileTree(data);
         }
     }
 }

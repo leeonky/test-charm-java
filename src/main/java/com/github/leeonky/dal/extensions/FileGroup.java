@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.runtime.Flatten;
+import com.github.leeonky.util.Suppressor;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -14,11 +15,6 @@ import java.util.stream.Stream;
 public abstract class FileGroup<T> implements Flatten, Iterable<T> {
     protected static final Map<String, Function<InputStream, Object>> fileExtensions = new HashMap<>();
     protected final String name;
-
-    static {
-        register("txt", inputStream -> StringExtension.StaticMethods.string(BinaryExtension.readAll(inputStream)));
-        register("TXT", inputStream -> StringExtension.StaticMethods.string(BinaryExtension.readAll(inputStream)));
-    }
 
     public FileGroup(String name) {
         this.name = name;
@@ -41,7 +37,11 @@ public abstract class FileGroup<T> implements Flatten, Iterable<T> {
         T subFile = createSubFile(fileName(extensionName));
         Function<InputStream, Object> handler = fileExtensions.get(extensionName);
         if (handler != null)
-            return handler.apply(open(subFile));
+            return Suppressor.get(() -> {
+                try (InputStream open = open(subFile)) {
+                    return handler.apply(open);
+                }
+            });
         return subFile;
     }
 

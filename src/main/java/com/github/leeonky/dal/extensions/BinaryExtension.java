@@ -13,21 +13,25 @@ public class BinaryExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerStaticMethodExtension(StaticMethods.class)
-                .registerImplicitData(InputStream.class, BinaryExtension::readAll);
+                .registerImplicitData(InputStream.class, BinaryExtension::readAllAndClose);
+    }
+
+    public static byte[] readAllAndClose(InputStream stream) {
+        try {
+            return readAll(stream);
+        } finally {
+            Suppressor.run(stream::close);
+        }
     }
 
     public static byte[] readAll(InputStream stream) {
         return Suppressor.get(() -> {
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            try {
+            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
                 int size;
                 byte[] data = new byte[1024];
                 while ((size = stream.read(data, 0, data.length)) != -1)
                     buffer.write(data, 0, size);
                 return buffer.toByteArray();
-            } finally {
-                buffer.close();
-                stream.close();
             }
         });
     }

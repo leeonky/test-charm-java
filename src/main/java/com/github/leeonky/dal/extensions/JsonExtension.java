@@ -7,11 +7,18 @@ import com.github.leeonky.util.Suppressor;
 
 import java.util.List;
 
+import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
+import static com.github.leeonky.dal.extensions.FileGroup.register;
+import static com.github.leeonky.dal.extensions.JsonExtension.StaticMethods.json;
+
 public class JsonExtension implements Extension {
 
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder().registerStaticMethodExtension(StaticMethods.class);
+
+        register("json", inputStream -> json(readAll(inputStream)));
+        register("JSON", inputStream -> json(readAll(inputStream)));
     }
 
     public static class StaticMethods {
