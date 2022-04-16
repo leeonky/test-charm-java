@@ -4,11 +4,9 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
 import java.util.Set;
-import java.util.zip.ZipFile;
 
 import static com.github.leeonky.util.BeanClass.create;
 
@@ -50,14 +48,13 @@ public class ZipExtension implements Extension {
                                     return zipNode.list();
                                 return super.getPropertyNames(zipNode);
                             }
-                        })
-        ;
+                        });
     }
 
     public static class StaticMethods {
 
         public static ZipFileTree unzip(File file) {
-            return Suppressor.get(() -> new ZipFileTree(new ZipFile(file)));
+            return new ZipFileTree(file);
         }
     }
 }

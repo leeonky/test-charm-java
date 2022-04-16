@@ -2,26 +2,39 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.util.Suppressor;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
 import static java.util.Arrays.stream;
 
 //TODO merge zip tree and node zip node group and zip tree group
 public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
-    private final ZipFile zipFile;
-    private final Map<String, ZipNode> children = new LinkedHashMap<>();
+    private final File file;
+    private final Map<String, ZipNode> children;
 
-    public ZipFileTree(ZipFile zipFile) {
-        this.zipFile = zipFile;
-        zipFile.stream().sorted(Comparator.comparing(ZipEntry::getName))
-                .forEach(zipEntry -> addNode(stream(zipEntry.getName().split("/")).filter(s -> !s.isEmpty())
-                        .collect(Collectors.toCollection(LinkedList::new)), zipEntry, children));
+    public ZipFileTree(File file) {
+        this.file = file;
+        children = fetchInZip(zipFile -> new LinkedHashMap<String, ZipNode>() {{
+            zipFile.stream().sorted(Comparator.comparing(ZipEntry::getName)).forEach(zipEntry ->
+                    addNode(stream(zipEntry.getName().split("/")).filter(s -> !s.isEmpty())
+                            .collect(Collectors.toCollection(LinkedList::new)), zipEntry, this));
+        }});
+    }
 
-        return;
+    private <T> T fetchInZip(Function<ZipFile, T> action) {
+        ZipFile zipFile = Suppressor.get(() -> new ZipFile(file));
+        try {
+            return action.apply(zipFile);
+        } finally {
+            Suppressor.run(zipFile::close);
+        }
     }
 
     private void addNode(LinkedList<String> path, ZipEntry zipEntry, Map<String, ZipNode> children) {
@@ -59,13 +72,15 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
     }
 
     public class ZipNode implements Iterable<ZipNode> {
-        private final ZipEntry entry;
         private final String name;
+        private final String fullName;
         private final Map<String, ZipNode> children = new LinkedHashMap<>();
+        private final boolean directory;
 
         public ZipNode(ZipEntry entry, String name) {
-            this.entry = entry;
             this.name = name;
+            fullName = entry.getName();
+            directory = entry.isDirectory();
         }
 
         @Override
@@ -78,7 +93,9 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
         }
 
         public InputStream open() {
-            return Suppressor.get(() -> zipFile.getInputStream(entry));
+            return fetchInZip(zipFile -> zipFile.stream().filter(zipEntry -> zipEntry.getName().equals(fullName))
+                    .map(entry -> Suppressor.get(() -> new ByteArrayInputStream(readAll(zipFile.getInputStream(entry)))))
+                    .findFirst().orElse(null));
         }
 
         @Override
@@ -108,7 +125,7 @@ public class ZipFileTree implements Iterable<ZipFileTree.ZipNode> {
         }
 
         public boolean isDirectory() {
-            return entry.isDirectory();
+            return directory;
         }
     }
 }

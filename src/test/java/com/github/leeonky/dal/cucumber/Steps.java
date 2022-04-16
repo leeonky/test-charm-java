@@ -34,7 +34,6 @@ public class Steps {
                     .map(Path::toFile)
                     .forEach(File::delete);
         path.toFile().mkdirs();
-        Thread.sleep(500);
     }
 
     @SneakyThrows
