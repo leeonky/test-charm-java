@@ -3,12 +3,12 @@ package com.github.leeonky.dal.extensions;
 import java.io.InputStream;
 import java.util.stream.Stream;
 
-public class ZipFileTreeFileGroup extends FileGroup<ZipFileTree.ZipNode> {
-    private final ZipFileTree zipFileTree;
+public class ZipNodeFileGroup extends FileGroup<ZipFileTree.ZipNode> {
+    private final ZipFileTree.ZipNode zipNode;
 
-    public ZipFileTreeFileGroup(ZipFileTree zipFileTree, String name) {
+    public ZipNodeFileGroup(ZipFileTree.ZipNode zipNode, String name) {
         super(name);
-        this.zipFileTree = zipFileTree;
+        this.zipNode = zipNode;
     }
 
     @Override
@@ -18,7 +18,7 @@ public class ZipFileTreeFileGroup extends FileGroup<ZipFileTree.ZipNode> {
 
     @Override
     protected ZipFileTree.ZipNode createSubFile(String fileName) {
-        ZipFileTree.ZipNode zipNode = zipFileTree.findSub(fileName);
+        ZipFileTree.ZipNode zipNode = this.zipNode.findSub(fileName);
         if (zipNode == null)
             throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
         return zipNode;
@@ -26,7 +26,6 @@ public class ZipFileTreeFileGroup extends FileGroup<ZipFileTree.ZipNode> {
 
     @Override
     protected Stream<String> listFileName() {
-        return zipFileTree.list().stream();
+        return zipNode.list().stream();
     }
-
 }

@@ -107,10 +107,138 @@ Feature: zip file
     Unexpected fields `file.txt` in unzip
     """
 
-#    TODO one empty folder
-#    TODO one empty folder
-#    TODO one folder with one file
-#    TODO one folder with one folder with file
-#    TODO one folder with one file and one file
+  Scenario: zip has a empty folder
+    Given a folder "/tmp/test/tmp/empty"
+    And a zip file "/tmp/test/dir/file.zip":
+      | /tmp/test/tmp/empty |
+    Then java.io.File "/tmp/test/dir/file.zip" should:
+    """
+    unzip: [empty]
+    """
+    And java.io.File "/tmp/test/dir/file.zip" should:
+    """
+    unzip= {
+      empty= []
+      empty= {}
+    }
+    """
 
-#    TODO list path and files
+  Scenario: one folder with one file
+    Given a file "/tmp/test/tmp/file.txt"
+    """
+    hello
+    """
+    Given a folder "/tmp/test/tmp/empty"
+    And a zip file "/tmp/test/dir/file.zip":
+      | /tmp/test/tmp/file.txt |
+      | /tmp/test/tmp/empty    |
+    Then java.io.File "/tmp/test/dir/file.zip" should:
+    """
+    unzip: [empty file.txt]
+    """
+    And java.io.File "/tmp/test/dir/file.zip" should:
+    """
+    unzip= {
+      empty= []
+      empty= {}
+      file.txt: hello
+    }
+    """
+
+  Scenario: folder with file
+    Given a folder "/tmp/test/tmp/folder"
+    Given a file "/tmp/test/tmp/folder/file.txt"
+    """
+    hello
+    """
+    And a zip file "/tmp/test/dir/file.zip":
+      | /tmp/test/tmp/folder |
+    Then java.io.File "/tmp/test/dir/file.zip" should:
+    """
+    unzip: [folder],
+    unzip: {
+      folder: [file.txt]
+      folder: {
+        file.txt: hello
+      }
+    }
+    """
+
+  Scenario: folder with folder has a file
+    Given a folder "/tmp/test/tmp/folder"
+    Given a folder "/tmp/test/tmp/folder/child"
+    Given a file "/tmp/test/tmp/folder/child/file.txt"
+    """
+    hello
+    """
+    And a zip file "/tmp/test/dir/file.zip":
+      | /tmp/test/tmp/folder |
+    Then java.io.File "/tmp/test/dir/file.zip" should:
+    """
+    unzip: [folder],
+    unzip: {
+      folder/child= {
+        file.txt: hello
+      }
+    }
+    """
+
+  Scenario: raise error when extension not exist in group
+    Given a folder "/tmp/test/tmp/folder"
+    Given a file "/tmp/test/tmp/folder/file.txt"
+    """
+    hello
+    """
+    Given a file "/tmp/test/tmp/file.txt"
+    """
+    hello
+    """
+    And a zip file "/tmp/test/dir/file.zip":
+      | /tmp/test/tmp/file.txt |
+      | /tmp/test/tmp/folder   |
+    Then java.io.File "/tmp/test/dir/file.zip" should failed:
+    """
+    unzip: {
+      file.json: txt
+    }
+    """
+    And error message should be:
+    """
+
+    unzip: {
+      file.json: txt
+           ^
+    }
+    Get property `json` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    File `file.json` not exist
+    Implicit list mapping is not allowed in current version of DAL, use `json[]` instead
+    """
+    Then java.io.File "/tmp/test/dir/file.zip" should failed:
+    """
+    unzip: {
+      folder/file.json: txt
+    }
+    """
+    And error message should be:
+    """
+
+    unzip: {
+      folder/file.json: txt
+                  ^
+    }
+    Get property `json` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    File `file.json` not exist
+    Implicit list mapping is not allowed in current version of DAL, use `json[]` instead
+    """

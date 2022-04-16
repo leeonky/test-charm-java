@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.zip.ZipFile;
 
 import static com.github.leeonky.util.BeanClass.create;
-import static java.util.stream.Collectors.toSet;
 
 public class ZipExtension implements Extension {
 
@@ -31,7 +30,25 @@ public class ZipExtension implements Extension {
 
                             @Override
                             public Set<String> getPropertyNames(ZipFileTree zipFileTree) {
-                                return zipFileTree.list().collect(toSet());
+                                return zipFileTree.list();
+                            }
+                        })
+                .registerPropertyAccessor(ZipFileTree.ZipNode.class,
+                        new JavaClassPropertyAccessor<ZipFileTree.ZipNode>(runtimeContextBuilder,
+                                create(ZipFileTree.ZipNode.class)) {
+
+                            @Override
+                            public Object getValue(ZipFileTree.ZipNode zipNode, String name) {
+                                if (zipNode.isDirectory())
+                                    return zipNode.getSub(name);
+                                return super.getValue(zipNode, name);
+                            }
+
+                            @Override
+                            public Set<String> getPropertyNames(ZipFileTree.ZipNode zipNode) {
+                                if (zipNode.isDirectory())
+                                    return zipNode.list();
+                                return super.getPropertyNames(zipNode);
                             }
                         })
         ;

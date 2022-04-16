@@ -18,7 +18,6 @@ import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Steps {
@@ -35,7 +34,7 @@ public class Steps {
                     .map(Path::toFile)
                     .forEach(File::delete);
         path.toFile().mkdirs();
-        await().ignoreExceptions().until(() -> path.toFile().list().length == 0);
+        Thread.sleep(500);
     }
 
     @SneakyThrows
@@ -91,7 +90,12 @@ public class Steps {
     @And("a zip file {string}:")
     public void zipFile(String fileName, DataTable files) {
         ZipFile zipFile = new ZipFile(fileName);
-        files.asLists().stream().map(list -> list.get(0)).forEach(fileNameInZip -> Suppressor.run(() ->
-                zipFile.addFile(fileNameInZip)));
+        files.asLists().stream().map(list -> list.get(0)).forEach(fileNameInZip -> Suppressor.run(() -> {
+            File file = new File(fileNameInZip);
+            if (file.isDirectory())
+                zipFile.addFolder(file);
+            else
+                zipFile.addFile(file);
+        }));
     }
 }
