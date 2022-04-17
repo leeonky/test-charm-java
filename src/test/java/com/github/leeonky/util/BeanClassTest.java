@@ -1,5 +1,6 @@
 package com.github.leeonky.util;
 
+import com.github.leeonky.dal.extensions.StringExtension;
 import hastype.One;
 import hastype.Two;
 import org.junit.jupiter.api.Nested;
@@ -10,6 +11,7 @@ import subtype.Sub2;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -166,6 +168,16 @@ class BeanClassTest {
         void sub_types_in_package_include_super() {
             assertThat(new HashSet<>(BeanClass.assignableTypesOf(Base.class, "subtype")))
                     .containsOnly(Base.class, Sub1.class, Sub2.class);
+        }
+    }
+
+    @Nested
+    class AllClassesInJar {
+
+        @Test
+        void empty_when_no_type() {
+            List<Class<?>> classes = allTypesIn("com.github.leeonky.dal.extensions");
+            assertThat(classes).contains(StringExtension.class);
         }
     }
 }

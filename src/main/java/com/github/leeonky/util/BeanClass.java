@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -143,13 +144,20 @@ public class BeanClass<T> {
 
     private static List<Class<?>> getClasses(String packageName, URL resource) {
         try {
-            InputStream stream = resource.openStream();
-            return stream == null ? emptyList()
-                    : new BufferedReader(new InputStreamReader(stream)).lines()
-                    .filter(line -> line.endsWith(".class"))
-                    .map(line -> toClass(line, packageName))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
+            if ("jar".equals(resource.getProtocol()))
+                return ((JarURLConnection) resource.openConnection()).getJarFile().stream().map(jarEntry -> jarEntry.getName().replace('/', '.'))
+                        .filter(name -> name.endsWith(".class") && name.startsWith(packageName))
+                        .map(name -> Suppressor.get(() -> Class.forName(name.substring(0, name.length() - 6))))
+                        .collect(Collectors.toList());
+            else {
+                InputStream stream = resource.openStream();
+                return stream == null ? emptyList()
+                        : new BufferedReader(new InputStreamReader(stream)).lines()
+                        .filter(line -> line.endsWith(".class"))
+                        .map(line -> toClass(line, packageName))
+                        .collect(Collectors.toList());
+            }
+        } catch (Exception ignore) {
             return emptyList();
         }
     }
