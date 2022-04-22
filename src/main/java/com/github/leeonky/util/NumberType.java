@@ -6,14 +6,16 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
-public class NumberUtil {
+public class NumberType {
     private static final List<Class<?>> NUMBER_TYPES = asList(Byte.class, Short.class, Integer.class, Long.class,
             Float.class, Double.class, BigInteger.class, BigDecimal.class);
-    private static Converter converter = Converter.getInstance();
+    private Converter converter = Converter.getInstance();
+    private double doubleEpsilon = 0.0000001d;
+    private float floatEpsilon = 0.000001f;
 
-    public static Class<?> calculationType(Class<?> type1, Class<?> type2) {
-        Class<?> boxedType1 = BeanClass.boxedClass(type1);
-        Class<?> boxedType2 = BeanClass.boxedClass(type2);
+    public static Class<?> calculationType(Class<?> number1, Class<?> number2) {
+        Class<?> boxedType1 = BeanClass.boxedClass(number1);
+        Class<?> boxedType2 = BeanClass.boxedClass(number2);
         if (isFloatAndBigInteger(boxedType1, boxedType2) || isFloatAndBigInteger(boxedType2, boxedType1))
             return BigDecimal.class;
         return NUMBER_TYPES.indexOf(boxedType1) > NUMBER_TYPES.indexOf(boxedType2) ? boxedType1 : boxedType2;
@@ -23,16 +25,18 @@ public class NumberUtil {
         return boxedType1.equals(BigInteger.class) && (boxedType2.equals(Float.class) || boxedType2.equals(Double.class));
     }
 
-    public static Number plus(Number left, Number right) {
-        return plus(left, right, converter);
+    public Converter getConverter() {
+        return converter;
     }
 
-    public static Number plus(Number left, Number right, Converter converter) {
+    public void setConverter(Converter converter) {
+        this.converter = converter;
+    }
+
+    public Number plus(Number left, Number right) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
-        return plus((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
-    }
-
-    private static Number plus(Number leftInSameType, Number rightInSameType, Class<?> type) {
+        Number leftInSameType = (Number) converter.tryConvert(type, left);
+        Number rightInSameType = (Number) converter.tryConvert(type, right);
         if (type.equals(Byte.class))
             return (byte) leftInSameType + (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -52,16 +56,10 @@ public class NumberUtil {
         throw new IllegalArgumentException("unsupported type " + type);
     }
 
-    public static Number subtract(Number left, Number right) {
-        return subtract(left, right, converter);
-    }
-
-    public static Number subtract(Number left, Number right, Converter converter) {
+    public Number subtract(Number left, Number right) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
-        return subtract((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
-    }
-
-    private static Number subtract(Number leftInSameType, Number rightInSameType, Class<?> type) {
+        Number leftInSameType = (Number) converter.tryConvert(type, left);
+        Number rightInSameType = (Number) converter.tryConvert(type, right);
         if (type.equals(Byte.class))
             return (byte) leftInSameType - (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -81,16 +79,10 @@ public class NumberUtil {
         throw new IllegalArgumentException("unsupported type " + type);
     }
 
-    public static Number divide(Number left, Number right) {
-        return divide(left, right, converter);
-    }
-
-    public static Number divide(Number left, Number right, Converter converter) {
+    public Number divide(Number left, Number right) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
-        return divide((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
-    }
-
-    private static Number divide(Number leftInSameType, Number rightInSameType, Class<?> type) {
+        Number leftInSameType = (Number) converter.tryConvert(type, left);
+        Number rightInSameType = (Number) converter.tryConvert(type, right);
         if (type.equals(Byte.class))
             return (byte) leftInSameType / (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -110,16 +102,10 @@ public class NumberUtil {
         throw new IllegalArgumentException("unsupported type " + type);
     }
 
-    public static Number multiply(Number left, Number right) {
-        return multiply(left, right, converter);
-    }
-
-    public static Number multiply(Number left, Number right, Converter converter) {
+    public Number multiply(Number left, Number right) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
-        return multiply((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
-    }
-
-    private static Number multiply(Number leftInSameType, Number rightInSameType, Class<?> type) {
+        Number leftInSameType = (Number) converter.tryConvert(type, left);
+        Number rightInSameType = (Number) converter.tryConvert(type, right);
         if (type.equals(Byte.class))
             return (byte) leftInSameType * (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -139,16 +125,10 @@ public class NumberUtil {
         throw new IllegalArgumentException("unsupported type " + type);
     }
 
-    public static int compare(Number left, Number right) {
-        return compare(left, right, converter);
-    }
-
-    public static int compare(Number left, Number right, Converter converter) {
+    public int compare(Number left, Number right) {
         Class<?> type = calculationType(left.getClass(), right.getClass());
-        return compare((Number) converter.tryConvert(type, left), (Number) converter.tryConvert(type, right), type);
-    }
-
-    private static int compare(Number leftInSameType, Number rightInSameType, Class<?> type) {
+        Number leftInSameType = (Number) converter.tryConvert(type, left);
+        Number rightInSameType = (Number) converter.tryConvert(type, right);
         if (type.equals(Byte.class))
             return Byte.compare((byte) leftInSameType, (byte) rightInSameType);
         if (type.equals(Short.class))
@@ -157,10 +137,22 @@ public class NumberUtil {
             return Integer.compare((int) leftInSameType, (int) rightInSameType);
         if (type.equals(Long.class))
             return Long.compare((long) leftInSameType, (long) rightInSameType);
-        if (type.equals(Float.class))
-            return Float.compare((float) leftInSameType, (float) rightInSameType);
-        if (type.equals(Double.class))
-            return Double.compare((double) leftInSameType, (double) rightInSameType);
+        if (type.equals(Float.class)) {
+            float sub = (float) leftInSameType - (float) rightInSameType;
+            if (sub > floatEpsilon)
+                return 1;
+            if (sub < -floatEpsilon)
+                return -1;
+            return 0;
+        }
+        if (type.equals(Double.class)) {
+            double sub = (double) leftInSameType - (double) rightInSameType;
+            if (sub > doubleEpsilon)
+                return 1;
+            if (sub < -doubleEpsilon)
+                return -1;
+            return 0;
+        }
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).compareTo((BigInteger) rightInSameType);
         if (type.equals(BigDecimal.class))
@@ -168,15 +160,7 @@ public class NumberUtil {
         throw new IllegalArgumentException("unsupported type " + type);
     }
 
-    public static Converter getConverter() {
-        return converter;
-    }
-
-    public static void setConverter(Converter converter) {
-        NumberUtil.converter = converter;
-    }
-
-    public static Number negate(Number left) {
+    public Number negate(Number left) {
         Class<?> type = BeanClass.boxedClass(left.getClass());
         if (type.equals(Byte.class))
             return (byte) -(byte) left;
@@ -195,5 +179,21 @@ public class NumberUtil {
         if (type.equals(BigDecimal.class))
             return ((BigDecimal) left).negate();
         throw new IllegalArgumentException("unsupported type " + type);
+    }
+
+    public double getDoubleEpsilon() {
+        return doubleEpsilon;
+    }
+
+    public void setDoubleEpsilon(double doubleEpsilon) {
+        this.doubleEpsilon = doubleEpsilon;
+    }
+
+    public float getFloatEpsilon() {
+        return floatEpsilon;
+    }
+
+    public void setFloatEpsilon(float floatEpsilon) {
+        this.floatEpsilon = floatEpsilon;
     }
 }

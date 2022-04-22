@@ -11,31 +11,31 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NumberUtilTest {
+class NumberTypeTest {
 
     @Nested
     class CalculationType {
 
         void same_number_type(List<List<Class<?>>> types) {
             types.forEach(type -> {
-                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
-                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
-                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(1));
-                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(1));
+                assertThat(NumberType.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
+                assertThat(NumberType.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
+                assertThat(NumberType.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(1));
+                assertThat(NumberType.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(1));
             });
         }
 
         void use_left_type(List<List<Class<?>>> types) {
             types.forEach(type -> {
-                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
-                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
+                assertThat(NumberType.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
+                assertThat(NumberType.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
             });
         }
 
         void should_use_big_big_decimal(List<List<Class<?>>> types) {
             types.forEach(type -> {
-                assertThat(NumberUtil.calculationType(type.get(0), type.get(1))).isEqualTo(BigDecimal.class);
-                assertThat(NumberUtil.calculationType(type.get(1), type.get(0))).isEqualTo(BigDecimal.class);
+                assertThat(NumberType.calculationType(type.get(0), type.get(1))).isEqualTo(BigDecimal.class);
+                assertThat(NumberType.calculationType(type.get(1), type.get(0))).isEqualTo(BigDecimal.class);
             });
         }
 
@@ -90,7 +90,7 @@ class NumberUtilTest {
 
         @Test
         void should_box_first() {
-            assertThat(NumberUtil.calculationType(int.class, long.class)).isEqualTo(Long.class);
+            assertThat(NumberType.calculationType(int.class, long.class)).isEqualTo(Long.class);
         }
     }
 
@@ -116,7 +116,7 @@ class NumberUtilTest {
         class Plus {
 
             void assertPlus(Number left, Number right, Number result) {
-                assertThat(NumberUtil.plus(left, right)).isEqualTo(result);
+                assertThat(new NumberType().plus(left, right)).isEqualTo(result);
             }
 
             @Test
@@ -142,7 +142,7 @@ class NumberUtilTest {
         class Sub {
 
             void assertSub(Number left, Number right, Number result) {
-                assertThat(NumberUtil.subtract(left, right)).isEqualTo(result);
+                assertThat(new NumberType().subtract(left, right)).isEqualTo(result);
             }
 
             @Test
@@ -168,7 +168,7 @@ class NumberUtilTest {
         class Div {
 
             void assertDiv(Number left, Number right, Number result) {
-                assertThat(NumberUtil.divide(left, right)).isEqualTo(result);
+                assertThat(new NumberType().divide(left, right)).isEqualTo(result);
             }
 
             @Test
@@ -194,7 +194,7 @@ class NumberUtilTest {
         class Mul {
 
             void assertMul(Number left, Number right, Number result) {
-                assertThat(NumberUtil.multiply(left, right)).isEqualTo(result);
+                assertThat(new NumberType().multiply(left, right)).isEqualTo(result);
             }
 
             @Test
@@ -219,7 +219,7 @@ class NumberUtilTest {
         @Nested
         class Compare {
             void assertEqual(Number left, Number right, int result) {
-                assertThat(NumberUtil.compare(left, right)).isEqualTo(result);
+                assertCompare(new NumberType(), left, right, result);
             }
 
             @Test
@@ -241,12 +241,36 @@ class NumberUtilTest {
                 assertEqual(2, 1L, Long.compare(2, 1L));
                 assertEqual(2.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0).compareTo(BigDecimal.valueOf(1)));
             }
+
+            @Test
+            void compare_double_with_epsilon() {
+                NumberType numberType = new NumberType();
+                assertCompare(numberType, 1.0, 1.0, 0);
+                assertCompare(numberType, 1.0, 1.0 + numberType.getDoubleEpsilon() / 10, 0);
+                assertCompare(numberType, 1.0, 1.0 - numberType.getDoubleEpsilon() / 10, 0);
+                assertCompare(numberType, 1.0, 1.0 + numberType.getDoubleEpsilon() + numberType.getDoubleEpsilon(), -1);
+                assertCompare(numberType, 1.0, 1.0 - numberType.getDoubleEpsilon() - numberType.getDoubleEpsilon(), 1);
+            }
+
+            @Test
+            void compare_float_with_epsilon() {
+                NumberType numberType = new NumberType();
+                assertCompare(numberType, 1.0f, 1.0f, 0);
+                assertCompare(numberType, 1.0f, 1.0f + numberType.getFloatEpsilon() / 10, 0);
+                assertCompare(numberType, 1.0f, 1.0f - numberType.getFloatEpsilon() / 10, 0);
+                assertCompare(numberType, 1.0f, 1.0f + numberType.getFloatEpsilon() + numberType.getFloatEpsilon(), -1);
+                assertCompare(numberType, 1.0f, 1.0f - numberType.getFloatEpsilon() - numberType.getFloatEpsilon(), 1);
+            }
+
+            private void assertCompare(NumberType numberType, Number left, Number right, int expected) {
+                assertThat(numberType.compare(left, right)).isEqualTo(expected);
+            }
         }
 
         @Nested
         class Negate {
             void assertNegate(Number left, Number result) {
-                assertThat(NumberUtil.negate(left)).isEqualTo(result);
+                assertThat(new NumberType().negate(left)).isEqualTo(result);
             }
 
             @Test
