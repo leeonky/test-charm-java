@@ -1,6 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
@@ -33,19 +32,16 @@ public class TablePropertyValue implements PropertyValue {
     @Override
     public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
         String[] lines = table.split(System.lineSeparator());
-        if (lines.length > 1) {
-            String[] headers = getCells(lines[0]);
-            return reduceWithIndex(Stream.of(lines).skip(1), builder, (rowIndex, rowReduceBuilder, row) -> {
-                String[] cells = getCells(row);
-                String traitAndSpec = getTraitAndSpec(row);
-                if (cells.length != headers.length)
-                    throw new IllegalArgumentException("Invalid table at row: " + rowIndex + ", different size of cells and headers.");
-                return reduceWithIndex(Stream.of(headers), rowReduceBuilder, (columnIndex, columnReduceBuilder, cell) ->
-                        columnReduceBuilder.property(format("%s[%d]%s.%s", property, rowIndex, traitAndSpec,
-                                headers[columnIndex]), cells[columnIndex]));
-            });
-        }
-        return builder.property(property, Collections.emptyList());
+        String[] headers = getCells(lines[0]);
+        return reduceWithIndex(Stream.of(lines).skip(1), builder, (rowIndex, rowReduceBuilder, row) -> {
+            String[] cells = getCells(row);
+            String traitAndSpec = getTraitAndSpec(row);
+            if (cells.length != headers.length)
+                throw new IllegalArgumentException("Invalid table at row: " + rowIndex + ", different size of cells and headers.");
+            return reduceWithIndex(Stream.of(headers), rowReduceBuilder, (columnIndex, columnReduceBuilder, cell) ->
+                    columnReduceBuilder.property(format("%s[%d]%s.%s", property, rowIndex, traitAndSpec,
+                            headers[columnIndex]), cells[columnIndex]));
+        });
     }
 
     private String getTraitAndSpec(String row) {

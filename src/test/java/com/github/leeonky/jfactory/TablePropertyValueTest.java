@@ -115,8 +115,15 @@ class TablePropertyValueTest {
                     .should("value3: ['OK']");
         }
 
+        @Test
+        void raise_error_when_empty_string() {
+            expectTable("").match("[]");
+        }
+
+
         private DALAssert expectTable(String table) {
-            return expect(builder.propertyValue("list", table(table)).create().getList());
+            return expect(jFactory.type(new TypeReference<List<Item>>() {
+            }).properties(table(table)).create());
         }
     }
 }
