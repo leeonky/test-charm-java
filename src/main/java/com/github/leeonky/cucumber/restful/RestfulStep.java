@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,19 +49,13 @@ public class RestfulStep {
 
     @When("GET {string}")
     public void get(String path) throws IOException {
-        requestAndResponse("GET", path);
+        requestAndResponse("GET", path, connection -> {
+        });
     }
 
     @When("POST {string}:")
     public void post(String path, DocString content) throws IOException {
-        connection = request.applyHeader((HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection());
-
-        connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json" : content.getContentType());
-        connection.setRequestMethod("POST");
-        connection.setDoOutput(true);
-        connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(StandardCharsets.UTF_8));
-
-        response = new UrlConnectionResponse(connection);
+        requestAndResponse("POST", path, connection -> buildRequestBody(content, connection));
     }
 
     @When("POST form {string}:")
@@ -81,18 +76,29 @@ public class RestfulStep {
 
     @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException {
-        requestAndResponse(path, builder -> builder.put(createRequestBody(content, builder)));
+        requestAndResponse("PUT", path, connection -> buildRequestBody(content, connection));
+    }
+
+    private void buildRequestBody(DocString content, HttpURLConnection connection) {
+        Suppressor.run(() -> {
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json"
+                    : content.getContentType());
+            connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(StandardCharsets.UTF_8));
+        });
+    }
+
+    private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) throws IOException {
+        connection = request.applyHeader((HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection());
+        connection.setRequestMethod(method);
+        body.accept(connection);
+        response = new UrlConnectionResponse(connection);
     }
 
     @When("DELETE {string}")
     public void delete(String path) throws IOException {
-        requestAndResponse("DELETE", path);
-    }
-
-    private void requestAndResponse(String method, String path) throws IOException {
-        connection = (HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection();
-        connection.setRequestMethod(method);
-        response = new UrlConnectionResponse(request.applyHeader(connection));
+        requestAndResponse("DELETE", path, connection -> {
+        });
     }
 
     @After
@@ -132,12 +138,6 @@ public class RestfulStep {
         UploadFile uploadFile = request.files.get(value);
         bodyBuilder.addFormDataPart(key.substring(1), uploadFile.getName(),
                 RequestBody.create(uploadFile.getContent()));
-    }
-
-    private RequestBody createRequestBody(DocString docString, Builder builder) {
-        String contentType = docString.getContentType() == null ? "application/json" : docString.getContentType();
-        builder.addHeader("Content-Type", contentType);
-        return RequestBody.create(evaluator.eval(docString.getContent()).getBytes(StandardCharsets.UTF_8));
     }
 
     private void requestAndResponse(String path, UnaryOperator<Builder> action) throws IOException {

@@ -130,7 +130,7 @@ Feature: RESTful api steps
     : {
       code=200
       body.string='Hello world'
-      raw.class.simpleName='Response'
+      raw.class.simpleName='HttpURLConnection'
     }
     """
     Examples:
