@@ -52,6 +52,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'io.cucumber:cucumber-java:6.10.4'
     implementation "com.github.leeonky:DAL-java:0.2.1"
+    implementation "com.github.leeonky:DAL-extension-basic:0.0.3"
     implementation 'org.assertj:assertj-core:3.15.0'
     implementation "com.fasterxml.jackson.core:jackson-databind:2.11.0"
 

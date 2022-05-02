@@ -2,6 +2,7 @@ package com.github.leeonky.cucumber.restful;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.leeonky.util.Suppressor;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
@@ -12,6 +13,9 @@ import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collection;
@@ -32,6 +36,7 @@ public class RestfulStep {
     private String baseUrl = null;
     private Request request = new Request();
     private Response response;
+    private HttpURLConnection connection;
 
     public RestfulStep(OkHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -43,7 +48,9 @@ public class RestfulStep {
 
     @When("GET {string}")
     public void get(String path) throws IOException {
-        requestAndResponse(path, Builder::get);
+        connection = (HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection();
+        connection.setRequestMethod("GET");
+        response = new UrlConnectionResponse(request.applyHeader(connection));
     }
 
     @When("POST {string}:")
@@ -81,6 +88,7 @@ public class RestfulStep {
     public void reset() {
         request = new Request();
         response = null;
+        connection = null;
     }
 
     public RestfulStep header(String key, String value) {
@@ -154,7 +162,6 @@ public class RestfulStep {
     }
 
     private static class Request {
-        // TODO should clean
         private final Map<String, UploadFile> files = new HashMap<>();
         private final Map<String, Object> headers = new LinkedHashMap<>();
 
@@ -166,6 +173,16 @@ public class RestfulStep {
                     ((Collection<String>) value).forEach(header -> builder.addHeader(key, header));
             });
             return builder;
+        }
+
+        private HttpURLConnection applyHeader(HttpURLConnection connection) {
+            headers.forEach((key, value) -> {
+                if (value instanceof String)
+                    connection.setRequestProperty(key, (String) value);
+                else
+                    ((Collection<String>) value).forEach(header -> connection.addRequestProperty(key, header));
+            });
+            return connection;
         }
     }
 
@@ -181,12 +198,40 @@ public class RestfulStep {
             return raw.code();
         }
 
-        public byte[] body() throws IOException {
+        public Object body() throws IOException {
             return raw.body().bytes();
         }
 
         public String fileName() {
             String header = raw.header("Content-Disposition");
+            Matcher matcher = Pattern.compile(".*filename=\"(.*)\".*").matcher(header);
+            return matcher.matches() ? matcher.group(1) : header;
+        }
+    }
+
+    public static class UrlConnectionResponse extends Response {
+        public final HttpURLConnection raw;
+        private final int code;
+
+        public UrlConnectionResponse(HttpURLConnection connection) {
+            super(null);
+            raw = connection;
+            code = Suppressor.get(connection::getResponseCode);
+        }
+
+        @Override
+        public int code() {
+            return code;
+        }
+
+        @Override
+        public InputStream body() {
+            return Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
+        }
+
+        @Override
+        public String fileName() {
+            String header = raw.getHeaderField("Content-Disposition");
             Matcher matcher = Pattern.compile(".*filename=\"(.*)\".*").matcher(header);
             return matcher.matches() ? matcher.group(1) : header;
         }
