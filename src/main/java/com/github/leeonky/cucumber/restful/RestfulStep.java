@@ -53,7 +53,14 @@ public class RestfulStep {
 
     @When("POST {string}:")
     public void post(String path, DocString content) throws IOException {
-        requestAndResponse(path, builder -> builder.post(createRequestBody(content, builder)));
+        connection = request.applyHeader((HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection());
+
+        connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json" : content.getContentType());
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(StandardCharsets.UTF_8));
+
+        response = new UrlConnectionResponse(connection);
     }
 
     @When("POST form {string}:")
