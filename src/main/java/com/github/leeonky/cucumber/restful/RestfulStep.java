@@ -12,25 +12,22 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request.Builder;
 import okhttp3.RequestBody;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static okhttp3.MediaType.parse;
 
 public class RestfulStep {
+    public static final String CHARSET = "utf-8";
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Evaluator evaluator = new Evaluator();
@@ -60,18 +57,37 @@ public class RestfulStep {
 
     @When("POST form {string}:")
     public void postForm(String path, String form) throws IOException {
-        requestAndResponse(path, builder -> {
-            MultipartBody.Builder bodyBuilder = new MultipartBody.Builder().setType(parse("multipart/form-data"));
-            try {
-                objectMapper.readValue(form, new TypeReference<Map<String, String>>() {
-                }).forEach((key, value) -> {
-                    addFormPart(bodyBuilder, evaluator.eval(key), evaluator.eval(value));
-                });
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-            return builder.post(bodyBuilder.build());
-        });
+        requestAndResponse("POST", path, connection -> Suppressor.run(() -> {
+            connection.setDoOutput(true);
+            String boundary = UUID.randomUUID().toString();
+            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            OutputStream outputStream = connection.getOutputStream();
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, CHARSET), true);
+            String LINE_FEED = "\r\n";
+            objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
+            }).forEach((key, value) -> {
+                if (key.startsWith("@")) {
+                    UploadFile uploadFile = request.files.get(value);
+                    String fileName = uploadFile.getName();
+                    writer.append("--" + boundary).append(LINE_FEED);
+                    writer.append("Content-Disposition: form-data; name=\"" + key.substring(1) + "\"; filename=\"" + fileName + "\"").append(LINE_FEED);
+                    writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE_FEED);
+                    writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
+                    writer.append(LINE_FEED).flush();
+                    Suppressor.run(() -> outputStream.write(uploadFile.getContent()));
+                    Suppressor.run(outputStream::flush);
+                    writer.append(LINE_FEED);
+                } else {
+                    writer.append("--" + boundary).append(LINE_FEED);
+                    writer.append("Content-Disposition: form-data; name=\"" + key + "\"").append(LINE_FEED);
+                    writer.append("Content-Type: text/plain; charset=" + CHARSET).append(LINE_FEED);
+                    writer.append(LINE_FEED);
+                    writer.append(value).append(LINE_FEED);
+                }
+            });
+            writer.append("--" + boundary + "--").append(LINE_FEED);
+            writer.close();
+        }));
     }
 
     @When("PUT {string}:")
@@ -85,6 +101,7 @@ public class RestfulStep {
             connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json"
                     : content.getContentType());
             connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(StandardCharsets.UTF_8));
+            connection.getOutputStream().close();
         });
     }
 
@@ -128,9 +145,11 @@ public class RestfulStep {
     }
 
     private void addFormPart(MultipartBody.Builder bodyBuilder, String key, String value) {
-        if (key.startsWith("@"))
-            appendFile(bodyBuilder, key, value);
-        else
+        if (key.startsWith("@")) {
+            UploadFile uploadFile = request.files.get(value);
+            bodyBuilder.addFormDataPart(key.substring(1), uploadFile.getName(),
+                    RequestBody.create(uploadFile.getContent()));
+        } else
             bodyBuilder.addFormDataPart(key, value);
     }
 
