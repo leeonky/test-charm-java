@@ -14,14 +14,12 @@ public class Evaluator {
     private String evalValue(String expression) {
         try {
             List<Class<?>> extensions = BeanClass.allTypesIn("com.github.leeonky.cucumber.restful.extensions");
-            if (extensions.isEmpty()) {
+            if (extensions.isEmpty())
                 return expression;
-            }
             Method eval = extensions.get(0).getMethod("eval", String.class);
             return (String) eval.invoke(null, expression.substring(2, expression.length() - 1));
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) {
             return expression;
         }
     }
-
 }

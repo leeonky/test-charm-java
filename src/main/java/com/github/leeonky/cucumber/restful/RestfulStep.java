@@ -22,7 +22,7 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.dal.Assertions.expect;
 import static okhttp3.MediaType.parse;
 
 public class RestfulStep {
@@ -154,7 +154,8 @@ public class RestfulStep {
     }
 
     private static class Request {
-        public final Map<String, UploadFile> files = new HashMap<>();
+        // TODO should clean
+        private final Map<String, UploadFile> files = new HashMap<>();
         private final Map<String, Object> headers = new LinkedHashMap<>();
 
         private Builder applyHeader(Builder builder) {

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.leeonky.cucumber.restful.RestfulStep.UploadFile.content;
-import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
