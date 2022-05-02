@@ -7,10 +7,6 @@ import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request.Builder;
-import okhttp3.RequestBody;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -20,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,17 +23,12 @@ import static com.github.leeonky.dal.Assertions.expect;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
-    private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Evaluator evaluator = new Evaluator();
     private String baseUrl = null;
     private Request request = new Request();
     private Response response;
     private HttpURLConnection connection;
-
-    public RestfulStep(OkHttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -109,7 +99,7 @@ public class RestfulStep {
         connection = request.applyHeader((HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection());
         connection.setRequestMethod(method);
         body.accept(connection);
-        response = new UrlConnectionResponse(connection);
+        response = new Response(connection);
     }
 
     @When("DELETE {string}")
@@ -144,27 +134,6 @@ public class RestfulStep {
         request.files.put(fileKey, file);
     }
 
-    private void addFormPart(MultipartBody.Builder bodyBuilder, String key, String value) {
-        if (key.startsWith("@")) {
-            UploadFile uploadFile = request.files.get(value);
-            bodyBuilder.addFormDataPart(key.substring(1), uploadFile.getName(),
-                    RequestBody.create(uploadFile.getContent()));
-        } else
-            bodyBuilder.addFormDataPart(key, value);
-    }
-
-    private void appendFile(MultipartBody.Builder bodyBuilder, String key, String value) {
-        UploadFile uploadFile = request.files.get(value);
-        bodyBuilder.addFormDataPart(key.substring(1), uploadFile.getName(),
-                RequestBody.create(uploadFile.getContent()));
-    }
-
-    private void requestAndResponse(String path, UnaryOperator<Builder> action) throws IOException {
-        Builder builder = request.applyHeader(new Builder().url(baseUrl + evaluator.eval(path)));
-        okhttp3.Response rawResponse = httpClient.newCall(action.apply(builder).build()).execute();
-        response = new Response(rawResponse);
-    }
-
     public interface UploadFile {
         static UploadFile content(String fileContent) {
             return () -> fileContent.getBytes(StandardCharsets.UTF_8);
@@ -195,16 +164,6 @@ public class RestfulStep {
         private final Map<String, UploadFile> files = new HashMap<>();
         private final Map<String, Object> headers = new LinkedHashMap<>();
 
-        private Builder applyHeader(Builder builder) {
-            headers.forEach((key, value) -> {
-                if (value instanceof String)
-                    builder.header(key, (String) value);
-                else
-                    ((Collection<String>) value).forEach(header -> builder.addHeader(key, header));
-            });
-            return builder;
-        }
-
         private HttpURLConnection applyHeader(HttpURLConnection connection) {
             headers.forEach((key, value) -> {
                 if (value instanceof String)
@@ -217,49 +176,22 @@ public class RestfulStep {
     }
 
     public static class Response {
-
-        public final okhttp3.Response raw;
-
-        public Response(okhttp3.Response raw) {
-            this.raw = raw;
-        }
-
-        public int code() {
-            return raw.code();
-        }
-
-        public Object body() throws IOException {
-            return raw.body().bytes();
-        }
-
-        public String fileName() {
-            String header = raw.header("Content-Disposition");
-            Matcher matcher = Pattern.compile(".*filename=\"(.*)\".*").matcher(header);
-            return matcher.matches() ? matcher.group(1) : header;
-        }
-    }
-
-    public static class UrlConnectionResponse extends Response {
         public final HttpURLConnection raw;
         private final int code;
 
-        public UrlConnectionResponse(HttpURLConnection connection) {
-            super(null);
+        public Response(HttpURLConnection connection) {
             raw = connection;
             code = Suppressor.get(connection::getResponseCode);
         }
 
-        @Override
         public int code() {
             return code;
         }
 
-        @Override
         public InputStream body() {
             return Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
         }
 
-        @Override
         public String fileName() {
             String header = raw.getHeaderField("Content-Disposition");
             Matcher matcher = Pattern.compile(".*filename=\"(.*)\".*").matcher(header);

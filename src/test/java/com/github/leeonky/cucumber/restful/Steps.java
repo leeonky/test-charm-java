@@ -10,7 +10,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.SneakyThrows;
 import org.apache.commons.fileupload.MultipartStream;
-import org.jetbrains.annotations.NotNull;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Format;
 import org.mockserver.verify.VerificationTimes;
@@ -156,7 +155,7 @@ public class Steps {
     }
 
     @SneakyThrows
-    private void lookupAction(@NotNull String s, String baseUrl) {
+    private void lookupAction(String s, String baseUrl) {
         assertThat(new URL(baseUrl).getHost()).isEqualTo(s);
         requestedBaseUrl = baseUrl;
     }
