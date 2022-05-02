@@ -48,9 +48,7 @@ public class RestfulStep {
 
     @When("GET {string}")
     public void get(String path) throws IOException {
-        connection = (HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection();
-        connection.setRequestMethod("GET");
-        response = new UrlConnectionResponse(request.applyHeader(connection));
+        requestAndResponse("GET", path);
     }
 
     @When("POST {string}:")
@@ -81,7 +79,13 @@ public class RestfulStep {
 
     @When("DELETE {string}")
     public void delete(String path) throws IOException {
-        requestAndResponse(path, Builder::delete);
+        requestAndResponse("DELETE", path);
+    }
+
+    private void requestAndResponse(String method, String path) throws IOException {
+        connection = (HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection();
+        connection.setRequestMethod(method);
+        response = new UrlConnectionResponse(request.applyHeader(connection));
     }
 
     @After
