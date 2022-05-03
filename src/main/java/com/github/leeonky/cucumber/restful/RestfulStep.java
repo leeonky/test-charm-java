@@ -8,10 +8,9 @@ import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
@@ -19,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static java.net.URLEncoder.encode;
+import static com.github.leeonky.dal.extensions.BinaryExtension.readAllAndClose;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
@@ -51,36 +50,16 @@ public class RestfulStep {
             connection.setDoOutput(true);
             String boundary = UUID.randomUUID().toString();
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-            OutputStream outputStream = connection.getOutputStream();
-            PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, CHARSET), true);
-            String LINE_FEED = "\r\n";
+            HttpStream httpStream = new HttpStream(connection.getOutputStream(), StandardCharsets.UTF_8);
             objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
-            }).forEach((key, value) -> {
-                Suppressor.run(() -> {
-//                TODO refactor
-                    if (key.startsWith("@")) {
-                        UploadFile uploadFile = request.files.get(value);
-                        String fileName = uploadFile.getName();
-                        writer.append("--" + boundary).append(LINE_FEED);
-                        writer.append("Content-Disposition: form-data; name=\"" + encode(key.substring(1), CHARSET) + "\"; filename=\"" + encode(fileName, CHARSET) + "\"").append(LINE_FEED);
-                        writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE_FEED);
-                        writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
-                        writer.append(LINE_FEED).flush();
-                        Suppressor.run(() -> outputStream.write(uploadFile.getContent()));
-                        Suppressor.run(outputStream::flush);
-                        writer.append(LINE_FEED);
-                    } else {
-                        writer.append("--" + boundary).append(LINE_FEED);
-                        writer.append("Content-Disposition: form-data; name=\"" + encode(key, CHARSET) + "\"").append(LINE_FEED);
-                        writer.append("Content-Type: text/plain; charset=" + CHARSET).append(LINE_FEED);
-                        writer.append(LINE_FEED);
-                        writer.append(encode(value, CHARSET)).append(LINE_FEED);
-                    }
-                });
-            });
-            writer.append("--" + boundary + "--").append(LINE_FEED);
-            writer.close();
+            }).forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+            httpStream.close(boundary);
         }));
+    }
+
+    private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {
+        httpStream.bound(boundary, () -> Suppressor.get(() -> key.startsWith("@") ?
+                httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
     }
 
     @When("PUT {string}:")
@@ -191,8 +170,8 @@ public class RestfulStep {
             return code;
         }
 
-        public InputStream body() {
-            return Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
+        public byte[] body() {
+            return readAllAndClose(Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream()));
         }
 
         public String fileName() {
