@@ -176,7 +176,7 @@ public class BeanClass<T> {
     }
 
     public static int compareByExtends(Class<?> type1, Class<?> type2) {
-        return type1.isAssignableFrom(type2) ? 1 : -1;
+        return type1.equals(type2) ? 0 : type1.isAssignableFrom(type2) ? 1 : -1;
     }
 
     public Class<T> getType() {
