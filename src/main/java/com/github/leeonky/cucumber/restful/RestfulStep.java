@@ -13,13 +13,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static java.net.URLEncoder.encode;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
@@ -56,24 +56,27 @@ public class RestfulStep {
             String LINE_FEED = "\r\n";
             objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
             }).forEach((key, value) -> {
-                if (key.startsWith("@")) {
-                    UploadFile uploadFile = request.files.get(value);
-                    String fileName = uploadFile.getName();
-                    writer.append("--" + boundary).append(LINE_FEED);
-                    writer.append("Content-Disposition: form-data; name=\"" + key.substring(1) + "\"; filename=\"" + fileName + "\"").append(LINE_FEED);
-                    writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE_FEED);
-                    writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
-                    writer.append(LINE_FEED).flush();
-                    Suppressor.run(() -> outputStream.write(uploadFile.getContent()));
-                    Suppressor.run(outputStream::flush);
-                    writer.append(LINE_FEED);
-                } else {
-                    writer.append("--" + boundary).append(LINE_FEED);
-                    writer.append("Content-Disposition: form-data; name=\"" + key + "\"").append(LINE_FEED);
-                    writer.append("Content-Type: text/plain; charset=" + CHARSET).append(LINE_FEED);
-                    writer.append(LINE_FEED);
-                    writer.append(value).append(LINE_FEED);
-                }
+                Suppressor.run(() -> {
+//                TODO refactor
+                    if (key.startsWith("@")) {
+                        UploadFile uploadFile = request.files.get(value);
+                        String fileName = uploadFile.getName();
+                        writer.append("--" + boundary).append(LINE_FEED);
+                        writer.append("Content-Disposition: form-data; name=\"" + encode(key.substring(1), CHARSET) + "\"; filename=\"" + encode(fileName, CHARSET) + "\"").append(LINE_FEED);
+                        writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(fileName)).append(LINE_FEED);
+                        writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
+                        writer.append(LINE_FEED).flush();
+                        Suppressor.run(() -> outputStream.write(uploadFile.getContent()));
+                        Suppressor.run(outputStream::flush);
+                        writer.append(LINE_FEED);
+                    } else {
+                        writer.append("--" + boundary).append(LINE_FEED);
+                        writer.append("Content-Disposition: form-data; name=\"" + encode(key, CHARSET) + "\"").append(LINE_FEED);
+                        writer.append("Content-Type: text/plain; charset=" + CHARSET).append(LINE_FEED);
+                        writer.append(LINE_FEED);
+                        writer.append(encode(value, CHARSET)).append(LINE_FEED);
+                    }
+                });
             });
             writer.append("--" + boundary + "--").append(LINE_FEED);
             writer.close();
@@ -142,7 +145,7 @@ public class RestfulStep {
         byte[] getContent();
 
         default String getName() {
-            return Instant.now().toEpochMilli() + ".upload";
+            return UUID.randomUUID() + ".upload";
         }
 
         default UploadFile name(String fileName) {

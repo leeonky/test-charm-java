@@ -16,16 +16,11 @@ import org.mockserver.verify.VerificationTimes;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.github.leeonky.cucumber.restful.RestfulStep.UploadFile.content;
 import static com.github.leeonky.dal.Assertions.expect;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -33,7 +28,6 @@ import static org.mockserver.model.HttpResponse.response;
 public class Steps {
     private static final ClientAndServer mockServer = startClientAndServer(8080);
     private final RestfulStep restfulStep;
-    private String requestedBaseUrl;
 
     public Steps(RestfulStep restfulStep) {
         this.restfulStep = restfulStep;
@@ -41,7 +35,6 @@ public class Steps {
 
     @Given("base url {string}")
     public void base_url(String baseUrl) {
-        CustomPicoFactory.lookupAction = s -> lookupAction(s, baseUrl);
         restfulStep.setBaseUrl(baseUrl + ":8080");
     }
 
@@ -62,7 +55,6 @@ public class Steps {
                         .withMethod(method)
                         .withPath(path),
                 VerificationTimes.once());
-//        assertThat(url).as(String.format("Expect %s to receive the request, but send to %s", url, requestedBaseUrl)).isEqualTo(requestedBaseUrl);
     }
 
     @Then("{string} got a {string} request on {string} with body")
@@ -72,7 +64,6 @@ public class Steps {
                         .withPath(path)
                         .withBody(body),
                 VerificationTimes.once());
-//        assertThat(url).as(String.format("Expect %s to receive the request, but send to %s", url, requestedBaseUrl)).isEqualTo(requestedBaseUrl);
     }
 
     @SneakyThrows
@@ -121,18 +112,19 @@ public class Steps {
     public void got_request_form_value(String expression) {
         List actual = new ObjectMapper().readValue(mockServer.retrieveRecordedRequests(request(), Format.JSON), List.class);
         String string = new DAL().evaluate(actual, "[0].body.string").toString();
+        byte[] bytes = Base64.getDecoder().decode(new DAL().evaluate(actual, "[0].body.rawBytes").toString());
         String substring = string.substring(2, string.indexOf('\r'));
-        MultipartStream multipartStream = new MultipartStream(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)),
+        MultipartStream multipartStream = new MultipartStream(new ByteArrayInputStream(bytes),
                 substring.getBytes(StandardCharsets.UTF_8));
 
-        List<Map<String, String>> bodyHeaders = new ArrayList<>();
+        List<Map<String, Object>> bodyHeaders = new ArrayList<>();
         boolean nextPart = multipartStream.skipPreamble();
         while (nextPart) {
-            bodyHeaders.add(new HashMap<String, String>() {{
+            bodyHeaders.add(new HashMap<String, Object>() {{
                 put("headers", multipartStream.readHeaders().trim());
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 multipartStream.readBodyData(stream);
-                put("body", stream.toString().trim());
+                put("body", stream.toByteArray());
             }});
             nextPart = multipartStream.readBoundary();
         }
@@ -152,11 +144,5 @@ public class Steps {
                         .withHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", fileName))
                         .withBody(body.getBytes(StandardCharsets.UTF_8))
                         .withStatusCode(code));
-    }
-
-    @SneakyThrows
-    private void lookupAction(String s, String baseUrl) {
-        assertThat(new URL(baseUrl).getHost()).isEqualTo(s);
-        requestedBaseUrl = baseUrl;
     }
 }

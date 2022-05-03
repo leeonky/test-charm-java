@@ -3,8 +3,6 @@ package com.github.leeonky.cucumber.restful;
 import io.cucumber.core.backend.ObjectFactory;
 import io.cucumber.picocontainer.PicoFactory;
 
-import java.util.function.Consumer;
-
 public class CustomPicoFactory implements ObjectFactory {
     private final PicoFactory delegate = new PicoFactory();
     private RestfulStep restfulStep;
@@ -48,7 +46,4 @@ public class CustomPicoFactory implements ObjectFactory {
             restfulStep = new RestfulStep();
         return restfulStep;
     }
-
-    public static Consumer<String> lookupAction = s -> {
-    };
 }

@@ -51,10 +51,10 @@ Feature: Replace
     """
     : [{
       headers: /.*name="name"(.|\r|\n)*/
-      body: 'Tom'
+      body.string: 'Tom'
     } {
       headers: /.*name="avatar"(.|\r|\n)*/
       headers: /.*filename=".*\.upload"(.|\r|\n)*/
-      body: 'hello avatar'
+      body.string: 'hello avatar'
     }]
     """

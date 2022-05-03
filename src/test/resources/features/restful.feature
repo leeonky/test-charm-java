@@ -179,11 +179,11 @@ Feature: RESTful api steps
     """
     : [{
       headers: /.*name="name"(.|\r|\n)*/
-      body: 'Tom'
+      body.string: 'Tom'
     } {
       headers: /.*name="avatar"(.|\r|\n)*/
       headers: /.*filename=".*\.upload"(.|\r|\n)*/
-      body: 'hello avatar'
+      body.string: 'hello avatar'
     }]
     """
 
@@ -203,6 +203,40 @@ Feature: RESTful api steps
     : [{
       headers: /.*name="avatar"(.|\r|\n)*/
       headers: /.*filename="image\.png"(.|\r|\n)*/
-      body: 'hello avatar'
+      body.string: 'hello avatar'
+    }]
+    """
+
+  Scenario: post form with unicode
+    Given a file "图片1" with name "图片.png":
+    """
+    hello 头像
+    """
+    When POST form "/users":
+    """
+    {
+      "姓名": "张三",
+      "@附件": "图片1"
+    }
+    """
+    Then got request:
+    """
+    : [{
+      method: 'POST'
+      path: '/users'
+      headers: {
+        ['Content-Type']: [/^multipart\/form-data.*/]
+      }
+    }]
+    """
+    And got request form value:
+    """
+    : [{
+      headers: /.*name="%E5%A7%93%E5%90%8D"(.|\r|\n)*/
+      body.string: '%E5%BC%A0%E4%B8%89'
+    } {
+      headers: /.*name="%E9%99%84%E4%BB%B6"(.|\r|\n)*/
+      headers: /.*filename="%E5%9B%BE%E7%89%87.png"(.|\r|\n)*/
+      body.string: 'hello 头像'
     }]
     """
