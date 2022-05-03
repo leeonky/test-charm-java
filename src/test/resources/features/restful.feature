@@ -240,3 +240,41 @@ Feature: RESTful api steps
       body.string: 'hello 头像'
     }]
     """
+
+  Scenario: get and verify response in one step
+    Given response 200 on "GET" "/index":
+    """
+    Hello world
+    """
+    Then "/index" should response:
+    """
+    : {
+      code=200
+      body.string='Hello world'
+    }
+    """
+
+  Scenario Outline: verify <method> and get response
+    Given response 200 on "<method>" "/index":
+    """
+    Hello world
+    """
+    Given response 200 on "GET" "/index":
+    """
+    Hello world
+    """
+    Then <method> "/index":
+    """
+    any body
+    """
+    Then data should be saved to "/index" with response:
+    """
+    : {
+      code=200
+      body.string='Hello world'
+    }
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |

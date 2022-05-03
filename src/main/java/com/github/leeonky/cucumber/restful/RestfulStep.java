@@ -112,8 +112,20 @@ public class RestfulStep {
         expect(response).should(System.lineSeparator() + expression);
     }
 
+    @Then("data should be saved to {string} with response:")
+    public void resourceShouldBe(String path, String expression) throws IOException {
+        responseShouldBe(expression);
+        getAndResponseShouldBe(path, expression);
+    }
+
     public void file(String fileKey, UploadFile file) {
         request.files.put(fileKey, file);
+    }
+
+    @Then("{string} should response:")
+    public void getAndResponseShouldBe(String path, String expression) throws IOException {
+        get(path);
+        responseShouldBe(expression);
     }
 
     public interface UploadFile {
