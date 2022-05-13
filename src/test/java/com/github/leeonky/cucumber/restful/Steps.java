@@ -16,6 +16,7 @@ import org.mockserver.verify.VerificationTimes;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -138,10 +139,12 @@ public class Steps {
     }
 
     @Given("binary response {int} on GET {string} with file name {string}:")
+    @SneakyThrows
     public void binaryResponseOnGETWithFileName(int code, String path, String fileName, String body) {
         mockServer.when(request().withMethod("GET").withPath(path))
                 .respond(response()
-                        .withHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", fileName))
+                        .withHeader("Content-Disposition", String.format("attachment; filename=\"%s\"",
+                                URLEncoder.encode(fileName, StandardCharsets.UTF_8.name())))
                         .withBody(body.getBytes(StandardCharsets.UTF_8))
                         .withStatusCode(code));
     }

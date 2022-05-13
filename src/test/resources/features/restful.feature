@@ -153,6 +153,21 @@ Feature: RESTful api steps
     }
     """
 
+  Scenario: GET download response chinese file name
+    Given binary response 200 on GET "/download" with file name "下载.txt":
+    """
+    Hello world
+    """
+    When GET "/download"
+    Then response should be:
+    """
+    : {
+      code=200
+      body.string='Hello world'
+      fileName='下载.txt'
+    }
+    """
+
   Scenario: upload file request
     Given a file "an avatar":
     """

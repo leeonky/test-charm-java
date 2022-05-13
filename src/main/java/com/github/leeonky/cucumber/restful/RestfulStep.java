@@ -11,7 +11,7 @@ import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.BinaryExtension.readAllAndClose;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
@@ -50,7 +51,7 @@ public class RestfulStep {
             connection.setDoOutput(true);
             String boundary = UUID.randomUUID().toString();
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-            HttpStream httpStream = new HttpStream(connection.getOutputStream(), StandardCharsets.UTF_8);
+            HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
             objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
             }).forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
             httpStream.close(boundary);
@@ -72,7 +73,7 @@ public class RestfulStep {
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json"
                     : content.getContentType());
-            connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(StandardCharsets.UTF_8));
+            connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(UTF_8));
             connection.getOutputStream().close();
         });
     }
@@ -130,7 +131,7 @@ public class RestfulStep {
 
     public interface UploadFile {
         static UploadFile content(String fileContent) {
-            return () -> fileContent.getBytes(StandardCharsets.UTF_8);
+            return () -> fileContent.getBytes(UTF_8);
         }
 
         byte[] getContent();
@@ -189,7 +190,7 @@ public class RestfulStep {
         public String fileName() {
             String header = raw.getHeaderField("Content-Disposition");
             Matcher matcher = Pattern.compile(".*filename=\"(.*)\".*").matcher(header);
-            return matcher.matches() ? matcher.group(1) : header;
+            return Suppressor.get(() -> URLDecoder.decode(matcher.matches() ? matcher.group(1) : header, UTF_8.name()));
         }
     }
 }
