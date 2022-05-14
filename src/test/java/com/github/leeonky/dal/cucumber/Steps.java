@@ -59,7 +59,7 @@ public class Steps {
 
     @And("error message should be:")
     public void errorMessageShouldBe(String message) {
-        assertThat(assertionError.getMessage()).isEqualTo(message);
+        assertThat(assertionError.getMessage()).contains(message);
     }
 
     @Then("the following should pass:")

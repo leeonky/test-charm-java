@@ -3,6 +3,7 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
+import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.Suppressor;
 
@@ -47,7 +48,17 @@ public class FileExtension implements Extension {
 
     private void extendPath(RuntimeContextBuilder runtimeContextBuilder) {
         runtimeContextBuilder.registerImplicitData(Path.class, file -> Suppressor.get(() -> new FileInputStream(file.toFile())));
-        runtimeContextBuilder.registerListAccessor(Path.class, path -> listFile(path.toFile()));
+        runtimeContextBuilder.registerListAccessor(Path.class, new ListAccessor<Path>() {
+            @Override
+            public Iterable<?> toIterable(Path path) {
+                return listFile(path.toFile());
+            }
+
+            @Override
+            public boolean isList(Path path) {
+                return path.toFile().isDirectory();
+            }
+        });
         runtimeContextBuilder.registerPropertyAccessor(Path.class,
                 new JavaClassPropertyAccessor<Path>(runtimeContextBuilder, create(Path.class)) {
 
@@ -68,7 +79,17 @@ public class FileExtension implements Extension {
 
     private void extendFile(RuntimeContextBuilder runtimeContextBuilder) {
         runtimeContextBuilder.registerImplicitData(File.class, file -> Suppressor.get(() -> new FileInputStream(file)));
-        runtimeContextBuilder.registerListAccessor(File.class, this::listFile);
+        runtimeContextBuilder.registerListAccessor(File.class, new ListAccessor<File>() {
+            @Override
+            public Iterable<?> toIterable(File file) {
+                return listFile(file);
+            }
+
+            @Override
+            public boolean isList(File file) {
+                return file.isDirectory();
+            }
+        });
         runtimeContextBuilder.registerPropertyAccessor(File.class,
                 new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
 

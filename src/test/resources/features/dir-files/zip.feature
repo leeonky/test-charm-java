@@ -77,6 +77,7 @@ Feature: zip file
     ^
       'not-exist.txt': {...}
     }
+
     Get property `not-exist.txt` failed, property can be:
       1. public field
       2. public getter
@@ -104,6 +105,7 @@ Feature: zip file
 
     unzip= {}
          ^
+
     Unexpected fields `file.txt` in unzip
     """
 
@@ -209,6 +211,7 @@ Feature: zip file
       file.json: txt
            ^
     }
+
     Get property `json` failed, property can be:
       1. public field
       2. public getter
@@ -232,6 +235,7 @@ Feature: zip file
       folder/file.json: txt
                   ^
     }
+
     Get property `json` failed, property can be:
       1. public field
       2. public getter

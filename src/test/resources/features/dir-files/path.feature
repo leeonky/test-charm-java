@@ -156,6 +156,7 @@ Feature: dir/file with java path
         file.txt= hello-world
       }
     }
+
     Unexpected fields `file2.txt` in test/dir
     """
 

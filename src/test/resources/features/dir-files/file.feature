@@ -156,6 +156,7 @@ Feature: dir/file with java File
         file.txt= hello-world
       }
     }
+
     Unexpected fields `file2.txt` in test/dir
     """
 
@@ -187,6 +188,7 @@ Feature: dir/file with java File
       un-exist.txt: 'any'
       ^
     }
+
     Get property `un-exist` failed, property can be:
       1. public field
       2. public getter
@@ -216,6 +218,7 @@ Feature: dir/file with java File
       file.not-exist: 'any'
            ^
     }
+
     Get property `not-exist` failed, property can be:
       1. public field
       2. public getter
@@ -273,6 +276,7 @@ Feature: dir/file with java File
         txt: hello-world
       }
     }
+
     Unexpected fields `log` in file
     """
 
