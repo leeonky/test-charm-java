@@ -109,14 +109,14 @@ public class RestfulStep {
     }
 
     @Then("response should be:")
-    public void responseShouldBe(String expression) {
-        expect(response).should(System.lineSeparator() + expression);
+    public <T> T responseShouldBe(String expression) {
+        return expect(response).should(System.lineSeparator() + expression);
     }
 
     @Then("data should be saved to {string} with response:")
-    public void resourceShouldBe(String path, String expression) throws IOException {
+    public <T> T resourceShouldBe(String path, String expression) throws IOException {
         responseShouldBe(expression);
-        getAndResponseShouldBe(path, expression);
+        return getAndResponseShouldBe(path, expression);
     }
 
     public void file(String fileKey, UploadFile file) {
@@ -124,9 +124,9 @@ public class RestfulStep {
     }
 
     @Then("{string} should response:")
-    public void getAndResponseShouldBe(String path, String expression) throws IOException {
+    public <T> T getAndResponseShouldBe(String path, String expression) throws IOException {
         get(path);
-        responseShouldBe(expression);
+        return responseShouldBe(expression);
     }
 
     public interface UploadFile {

@@ -34,7 +34,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.5' + System.env.VERSION_SCOPE
+version = '0.0.6' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -50,8 +50,8 @@ repositories {
 
 dependencies {
     implementation 'io.cucumber:cucumber-java:6.10.4'
-    implementation "com.github.leeonky:DAL-java:0.2.4"
-    implementation "com.github.leeonky:DAL-extension-basic:0.0.3"
+    implementation "com.github.leeonky:DAL-java:0.2.7"
+    implementation "com.github.leeonky:DAL-extension-basic:0.0.4"
     implementation "com.fasterxml.jackson.core:jackson-databind:2.11.0"
 
     testImplementation 'org.mock-server:mockserver:5.11.2'
