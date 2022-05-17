@@ -29,7 +29,7 @@ class AvoidUseDeclaringClassSuperClassDefaultVoidScope {
     public static class Entity {
     }
 
-    @Mapping(from = Entity.class, view = View.Simple.class, scope = Frontend.class)
+    @Mapping(from = Entity.class, view = View.Summary.class, scope = Frontend.class)
     public static class FrontendSimpleEntity {
     }
 

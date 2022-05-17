@@ -14,10 +14,10 @@ import static com.github.leeonky.map.Mapper.guessValueInSequence;
 
 public class PermitMapper {
     private static final Class<?>[] VOID_SCOPES = {void.class};
-    private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
+    private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+    private final Converter converter = Converter.createDefault();
+    private final PermitRegisterConfig permitRegisterConfig = new PermitRegisterConfig();
     private Class<?> scope = void.class;
-    private Converter converter = Converter.createDefault();
-    private PermitRegisterConfig permitRegisterConfig = new PermitRegisterConfig();
 
     public PermitMapper(String... packages) {
         Set<Class<?>> classes = new HashSet<>();
@@ -158,7 +158,7 @@ public class PermitMapper {
     private Map<String, ?> permitMap(Map<String, ?> map, Class<?> permit) {
         return collectPermittedProperties(map, permit)
                 .reduce(new LinkedHashMap<>(), (result, property) -> assignToResult(result, property,
-                        permitPropertyObjectValue(property.getType(), map.get(property.getName()), permit, property)),
+                                permitPropertyObjectValue(property.getType(), map.get(property.getName()), permit, property)),
                         Mapper::NotSupportParallelStreamReduce);
     }
 
@@ -241,7 +241,7 @@ public class PermitMapper {
                 throw new IllegalStateException("Should specify property name via @PolymorphicPermitIdentity in '"
                         + permit.getName() + "'");
             return permitMap(value, permitRegisterConfig.findPolymorphicPermit(permit, action.value(), scope,
-                    value.get(polymorphicPermitIdentity.value()))
+                            value.get(polymorphicPermitIdentity.value()))
                     .orElseThrow(() -> new IllegalStateException(String.format("Cannot find permit for %s[%s] in '%s::%s'",
                             polymorphicPermitIdentity.value(), value.get(polymorphicPermitIdentity.value()),
                             containingPermit.getName(), property.getName()))));

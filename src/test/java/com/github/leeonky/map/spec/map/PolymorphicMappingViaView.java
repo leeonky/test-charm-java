@@ -82,7 +82,7 @@ class PolymorphicMappingViaView {
 
     @Test
     void should_return_all_candidate_class_for_super_class_and_view() {
-        assertThat(mapper.findSubMappings(SimpleTransactionDTO.class, View.Simple.class))
+        assertThat(mapper.findSubMappings(SimpleTransactionDTO.class, View.Summary.class))
                 .containsOnly(SimplePaypalTransactionDTO.class, SimpleCreditCardTransactionDTO.class);
     }
 
@@ -132,12 +132,12 @@ class PolymorphicMappingViaView {
         public String id;
     }
 
-    @Mapping(from = PaypalTransaction.class, view = View.Simple.class)
+    @Mapping(from = PaypalTransaction.class, view = View.Summary.class)
     static class SimplePaypalTransactionDTO extends SimpleTransactionDTO {
         public String paypalId;
     }
 
-    @Mapping(from = CreditCardTransaction.class, view = View.Simple.class)
+    @Mapping(from = CreditCardTransaction.class, view = View.Summary.class)
     static class SimpleCreditCardTransactionDTO extends SimpleTransactionDTO {
         public String cardNumber;
     }
@@ -145,28 +145,28 @@ class PolymorphicMappingViaView {
     @Mapping(from = TransactionLog.class, view = View.Detail.class)
     static class DetailTransactionLogDTO {
 
-        @MappingView(View.Simple.class)
+        @MappingView(View.Summary.class)
         public SimpleTransactionDTO transaction;
     }
 
     @MappingFrom(TransactionLogs.class)
     static class TransactionLogListDTO {
 
-        @MappingView(View.Simple.class)
+        @MappingView(View.Summary.class)
         public List<SimpleTransactionDTO> transactions;
     }
 
     @MappingFrom(TransactionLogs.class)
     static class TransactionLogArrayDTO {
 
-        @MappingView(View.Simple.class)
+        @MappingView(View.Summary.class)
         public SimpleTransactionDTO[] transactions;
     }
 
     @MappingFrom(TransactionLogMap.class)
     static class TransactionLogMapDTO {
 
-        @MappingView(View.Simple.class)
+        @MappingView(View.Summary.class)
         public Map<String, SimpleTransactionDTO> transactionMap;
     }
 }

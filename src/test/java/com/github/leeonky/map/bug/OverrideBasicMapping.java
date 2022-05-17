@@ -10,9 +10,9 @@ class OverrideBasicMapping {
     void sub_class_could_use_mapping_from_override_super_class_mapping_annotation() {
         Mapper mapper = new Mapper("com.github.leeonky.map.bug");
 
-        assertThat((Object) mapper.map(new Base(), View.Simple.class)).isInstanceOf(BaseVO.class);
+        assertThat((Object) mapper.map(new Base(), View.Summary.class)).isInstanceOf(BaseVO.class);
 
-        assertThat((Object) mapper.map(new Sub(), View.Simple.class)).isInstanceOf(SubVO.class);
+        assertThat((Object) mapper.map(new Sub(), View.Summary.class)).isInstanceOf(SubVO.class);
     }
 
     public static class Base {
@@ -23,13 +23,13 @@ class OverrideBasicMapping {
 
     }
 
-    @Mapping(from = Base.class, view = View.Simple.class)
+    @Mapping(from = Base.class, view = View.Summary.class)
     public static class BaseVO {
 
     }
 
     @MappingFrom(Sub.class)
-    @MappingView(View.Simple.class)
+    @MappingView(View.Summary.class)
     public static class SubVO extends BaseVO {
 
     }

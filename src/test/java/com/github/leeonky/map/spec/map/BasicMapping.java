@@ -16,7 +16,7 @@ class BasicMapping {
 
     @Test
     void map_object_via_view() {
-        assertThat(mapper.<Object>map(javaProgrammingBook, View.Simple.class))
+        assertThat(mapper.<Object>map(javaProgrammingBook, View.Summary.class))
                 .isInstanceOf(SimpleBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming");
 
@@ -30,7 +30,7 @@ class BasicMapping {
     void map_object_via_view_and_scope() {
         mapper.setScope(FrontEnd.class);
 
-        assertThat(mapper.<Object>map(javaProgrammingBook, View.Simple.class))
+        assertThat(mapper.<Object>map(javaProgrammingBook, View.Summary.class))
                 .isInstanceOf(FrontEndSimpleBookDTO.class)
                 .hasFieldOrPropertyWithValue("name", "Java Programming")
                 .hasFieldOrPropertyWithValue("price", new BigDecimal(100));
@@ -67,7 +67,7 @@ class BasicMapping {
     @Test
     void should_return_null_when_source_class_not_register() {
         String notRegisterClassInstance = "";
-        assertThat((Object) mapper.map(notRegisterClassInstance, View.Simple.class)).isNull();
+        assertThat((Object) mapper.map(notRegisterClassInstance, View.Summary.class)).isNull();
     }
 
     @Test
@@ -91,7 +91,7 @@ class BasicMapping {
 
     @Getter
     @Setter
-    @Mapping(from = Book.class, view = View.Simple.class)
+    @Mapping(from = Book.class, view = View.Summary.class)
     static class SimpleBookDTO {
         private String name;
     }
@@ -111,7 +111,7 @@ class BasicMapping {
 
     @Getter
     @Setter
-    @Mapping(from = Book.class, view = View.Simple.class, scope = FrontEnd.class)
+    @Mapping(from = Book.class, view = View.Summary.class, scope = FrontEnd.class)
     static class FrontEndSimpleBookDTO {
         private String name;
         private BigDecimal price;

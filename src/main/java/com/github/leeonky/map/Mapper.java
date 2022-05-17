@@ -21,8 +21,8 @@ public class Mapper {
     private static final Class[] EMPTY_CLASS_ARRAY = new Class[0];
     private static final Class<?>[] VOID_SCOPES = {void.class};
     private final Class[] annotations = new Class[]{Mapping.class, MappingFrom.class, MappingView.class, MappingScope.class};
-    private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
-    private MappingRegisterData mappingRegisterData = new MappingRegisterData();
+    private final MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+    private final MappingRegisterData mappingRegisterData = new MappingRegisterData();
     private Class<?> scope = void.class;
 
     public Mapper(String... packages) {
@@ -33,7 +33,7 @@ public class Mapper {
         throw new IllegalStateException("Not support parallel stream");
     }
 
-    static Class<?>[] guessValueInSequence(Class<?> mapTo, Class[] defaultReturn, Function<Class<?>, Class<?>[]>... functions) {
+    static Class<?>[] guessValueInSequence(Class<?> mapTo, Class<?>[] defaultReturn, Function<Class<?>, Class<?>[]>... functions) {
         return Stream.<Function<Class<?>, Class<?>[]>>of(functions)
                 .map(f -> f.apply(mapTo))
                 .filter(froms -> froms.length != 0)

@@ -62,17 +62,17 @@ class MappingAnnotation {
         public int f2;
     }
 
-    @Mapping(from = Entity.class, view = View.Simple.class, scope = Scope1.class)
+    @Mapping(from = Entity.class, view = View.Summary.class, scope = Scope1.class)
     public static class EntityScopeDto1 {
         public int f1;
     }
 
-    @Mapping(from = Entity.class, view = View.Simple.class)
+    @Mapping(from = Entity.class, view = View.Summary.class)
     public static class EntityScopeDto2 {
         public int f2;
     }
 
-    @Mapping(from = Entity.class, view = View.Simple.class, scope = Scope1.class)
+    @Mapping(from = Entity.class, view = View.Summary.class, scope = Scope1.class)
     @MappingScope(Scope2.class)
     public static class EntityScopeDto3 {
         public int f3;
@@ -80,7 +80,7 @@ class MappingAnnotation {
 
     @MappingScope(Scope3.class)
     public static class EntityScopeDto4 {
-        @Mapping(from = Entity.class, view = View.Simple.class)
+        @Mapping(from = Entity.class, view = View.Summary.class)
         public static class EntityScopeDto5 {
             public int f4;
         }
@@ -169,7 +169,7 @@ class MappingAnnotation {
         void should_get_mapping_scope_class_from_current_class_mapping_annotation() {
             mapper.setScope(Scope1.class);
 
-            Object o = mapper.map(new Entity(), View.Simple.class);
+            Object o = mapper.map(new Entity(), View.Summary.class);
 
             assertThat(o)
                     .isInstanceOf(EntityScopeDto1.class)
@@ -180,7 +180,7 @@ class MappingAnnotation {
         void should_get_mapping_scope_class_from_current_class_mapping_scope_annotation() {
             mapper.setScope(Scope2.class);
 
-            Object dto = mapper.map(new Entity(), View.Simple.class);
+            Object dto = mapper.map(new Entity(), View.Summary.class);
 
             assertThat(dto)
                     .isInstanceOf(EntityScopeDto3.class)
@@ -191,7 +191,7 @@ class MappingAnnotation {
         void should_get_mapping_scope_class_from_declaring_class() {
             mapper.setScope(Scope3.class);
 
-            Object o = mapper.map(new Entity(), View.Simple.class);
+            Object o = mapper.map(new Entity(), View.Summary.class);
 
             assertThat(o)
                     .isInstanceOf(EntityScopeDto4.EntityScopeDto5.class)

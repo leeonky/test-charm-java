@@ -51,7 +51,7 @@ public class UnexpectedPolymorphicMap {
         public Action action;
     }
 
-    @Mapping(from = Action.class, view = View.Simple.class)
+    @Mapping(from = Action.class, view = View.Summary.class)
     public static class SimpleAction {
         public String action;
     }
@@ -62,7 +62,7 @@ public class UnexpectedPolymorphicMap {
         public DetailOrderLine orderLine;
     }
 
-    @Mapping(from = OrderLine.class, view = View.Simple.class)
+    @Mapping(from = OrderLine.class, view = View.Summary.class)
     public static class SimpleOrderLine {
         public long id;
     }
