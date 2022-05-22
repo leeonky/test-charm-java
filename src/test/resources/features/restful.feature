@@ -307,11 +307,11 @@ Feature: RESTful api steps
     And got request form value:
     """
     : [{
-      headers: /.*name="%E5%A7%93%E5%90%8D"(.|\r|\n)*/
-      body.string: '%E5%BC%A0%E4%B8%89'
+      headers: /.*name="姓名"(.|\r|\n)*/
+      body.string: 张三
     } {
-      headers: /.*name="%E9%99%84%E4%BB%B6"(.|\r|\n)*/
-      headers: /.*filename="%E5%9B%BE%E7%89%87.png"(.|\r|\n)*/
+      headers: /.*name="附件"(.|\r|\n)*/
+      headers: /.*filename="图片.png"(.|\r|\n)*/
       body.string: 'hello 头像'
     }]
     """
