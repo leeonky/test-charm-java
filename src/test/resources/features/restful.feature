@@ -116,6 +116,21 @@ Feature: RESTful api steps
       | GET    |
       | DELETE |
 
+  Scenario: GET and then use response twice
+    Given response 200 on "GET" "/index":
+    """
+    Hello world
+    """
+    When GET "/index"
+    Then response should be:
+    """
+    body.string='Hello world'
+    """
+    Then response should be:
+    """
+    body.string='Hello world'
+    """
+
   Scenario Outline: <method> with body and response
     Given response 200 on "<method>" "/index":
     """

@@ -9,6 +9,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -58,31 +59,9 @@ public class RestfulStep {
         }));
     }
 
-    private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {
-        httpStream.bound(boundary, () -> Suppressor.get(() -> key.startsWith("@") ?
-                httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
-    }
-
     @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException {
         requestAndResponse("PUT", path, connection -> buildRequestBody(content, connection));
-    }
-
-    private void buildRequestBody(DocString content, HttpURLConnection connection) {
-        Suppressor.run(() -> {
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json"
-                    : content.getContentType());
-            connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(UTF_8));
-            connection.getOutputStream().close();
-        });
-    }
-
-    private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) throws IOException {
-        connection = request.applyHeader((HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection());
-        connection.setRequestMethod(method);
-        body.accept(connection);
-        response = new Response(connection);
     }
 
     @When("DELETE {string}")
@@ -129,6 +108,28 @@ public class RestfulStep {
         return responseShouldBe(expression);
     }
 
+    private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {
+        httpStream.bound(boundary, () -> Suppressor.get(() -> key.startsWith("@") ?
+                httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
+    }
+
+    private void buildRequestBody(DocString content, HttpURLConnection connection) {
+        Suppressor.run(() -> {
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json"
+                    : content.getContentType());
+            connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(UTF_8));
+            connection.getOutputStream().close();
+        });
+    }
+
+    private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) throws IOException {
+        connection = request.applyHeader((HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection());
+        connection.setRequestMethod(method);
+        body.accept(connection);
+        response = new Response(connection);
+    }
+
     public interface UploadFile {
         static UploadFile content(String fileContent) {
             return () -> fileContent.getBytes(UTF_8);
@@ -172,19 +173,14 @@ public class RestfulStep {
 
     public static class Response {
         public final HttpURLConnection raw;
-        private final int code;
+        public final int code;
+        public final byte[] body;
 
         public Response(HttpURLConnection connection) {
             raw = connection;
             code = Suppressor.get(connection::getResponseCode);
-        }
-
-        public int code() {
-            return code;
-        }
-
-        public byte[] body() {
-            return readAllAndClose(Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream()));
+            InputStream stream = Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
+            body = stream == null ? null : readAllAndClose(stream);
         }
 
         public String fileName() {
