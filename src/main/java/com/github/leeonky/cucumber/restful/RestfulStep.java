@@ -44,25 +44,61 @@ public class RestfulStep {
 
     @When("POST {string}:")
     public void post(String path, DocString content) throws IOException {
-        requestAndResponse("POST", path, connection -> buildRequestBody(content, connection));
+        post(path, evaluator.eval(content.getContent()), content.getContentType());
+    }
+
+    public void post(String path, String body, String contentType) throws IOException {
+        requestAndResponse("POST", path, connection -> buildRequestBody(connection, contentType, body));
+    }
+
+    public void post(String path, String body) throws IOException {
+        requestAndResponse("POST", path, connection -> buildRequestBody(connection, null, body));
+    }
+
+    public void post(String path, Object body, String contentType) throws IOException {
+        post(path, objectMapper.writeValueAsString(body), contentType);
+    }
+
+    public void post(String path, Object body) throws IOException {
+        post(path, objectMapper.writeValueAsString(body), null);
     }
 
     @When("POST form {string}:")
     public void postForm(String path, String form) throws IOException {
+        postForm(path, objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
+        }));
+    }
+
+    public void postForm(String path, Map<String, String> params) throws IOException {
         requestAndResponse("POST", path, connection -> Suppressor.run(() -> {
             connection.setDoOutput(true);
             String boundary = UUID.randomUUID().toString();
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
             HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
-            objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
-            }).forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+            params.forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
             httpStream.close(boundary);
         }));
     }
 
     @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException {
-        requestAndResponse("PUT", path, connection -> buildRequestBody(content, connection));
+        put(path, evaluator.eval(content.getContent()), content.getContentType());
+    }
+
+    public void put(String path, String body, String contentType) throws IOException {
+        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, contentType, body));
+    }
+
+    public void put(String path, String body) throws IOException {
+        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, null, body));
+    }
+
+    public void put(String path, Object body, String contentType) throws IOException {
+        put(path, objectMapper.writeValueAsString(body), contentType);
+    }
+
+    public void put(String path, Object body) throws IOException {
+        put(path, objectMapper.writeValueAsString(body), null);
     }
 
     @When("DELETE {string}")
@@ -114,12 +150,11 @@ public class RestfulStep {
                 httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
     }
 
-    private void buildRequestBody(DocString content, HttpURLConnection connection) {
+    private void buildRequestBody(HttpURLConnection connection, String contentType, String body) {
         Suppressor.run(() -> {
             connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", content.getContentType() == null ? "application/json"
-                    : content.getContentType());
-            connection.getOutputStream().write(evaluator.eval(content.getContent()).getBytes(UTF_8));
+            connection.setRequestProperty("Content-Type", contentType == null ? "application/json" : contentType);
+            connection.getOutputStream().write(body.getBytes(UTF_8));
             connection.getOutputStream().close();
         });
     }
@@ -133,7 +168,11 @@ public class RestfulStep {
 
     public interface UploadFile {
         static UploadFile content(String fileContent) {
-            return () -> fileContent.getBytes(UTF_8);
+            return content(fileContent.getBytes(UTF_8));
+        }
+
+        static UploadFile content(byte[] bytes) {
+            return () -> bytes;
         }
 
         byte[] getContent();
