@@ -131,6 +131,51 @@ Feature: RESTful api steps
     body.string='Hello world'
     """
 
+  Scenario: GET response with header
+    Given response 200 on "GET" "/index" with body "Hello world" and headers:
+    """
+    {
+      "key1": "value1",
+      "key2": ["value2", "value3"]
+    }
+    """
+    When GET "/index"
+    Then response should be:
+    """
+    : {
+      code=200
+      body.string='Hello world'
+      headers: {
+        key1= value1
+        key2= [value3, value2]
+      }
+    }
+    """
+
+  Scenario: GET and then use response header twice
+    Given response 200 on "GET" "/index" with body "Hello world" and headers:
+    """
+    {
+      "key1": "value1",
+      "key2": ["value2", "value3"]
+    }
+    """
+    When GET "/index"
+    Then response should be:
+    """
+    headers: {
+      key1= value1
+      key2= [value3, value2]
+    }
+    """
+    Then response should be:
+    """
+    headers: {
+      key1= value1
+      key2= [value3, value2]
+    }
+    """
+
   Scenario Outline: <method> with body and response
     Given response 200 on "<method>" "/index":
     """

@@ -12,6 +12,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.fileupload.MultipartStream;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Format;
+import org.mockserver.model.Header;
 import org.mockserver.verify.VerificationTimes;
 
 import java.io.ByteArrayInputStream;
@@ -19,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.cucumber.restful.RestfulStep.UploadFile.content;
 import static com.github.leeonky.dal.Assertions.expect;
@@ -146,6 +148,19 @@ public class Steps {
                         .withHeader("Content-Disposition", String.format("attachment; filename=\"%s\"",
                                 URLEncoder.encode(fileName, StandardCharsets.UTF_8.name())))
                         .withBody(body.getBytes(StandardCharsets.UTF_8))
+                        .withStatusCode(code));
+    }
+
+    @SneakyThrows
+    @Given("response {int} on {string} {string} with body {string} and headers:")
+    public void responseOnWithBodyAndHeaders(int code, String method, String path, String body, String headers) {
+        Map<String, Object> headerMap = new ObjectMapper().readValue(headers, Map.class);
+        mockServer.when(request().withMethod(method).withPath(path))
+                .respond(response()
+                        .withBody(body)
+                        .withHeaders(headerMap.entrySet().stream().map(entry -> entry.getValue() instanceof List ?
+                                        Header.header(entry.getKey(), (List) entry.getValue()) : Header.header(entry.getKey(), (String) entry.getValue()))
+                                .collect(Collectors.toList()))
                         .withStatusCode(code));
     }
 }

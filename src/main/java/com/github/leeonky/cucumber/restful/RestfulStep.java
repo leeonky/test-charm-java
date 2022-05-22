@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.BinaryExtension.readAllAndClose;
@@ -181,6 +182,12 @@ public class RestfulStep {
             code = Suppressor.get(connection::getResponseCode);
             InputStream stream = Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
             body = stream == null ? null : readAllAndClose(stream);
+        }
+
+        public Map<String, Object> headers() {
+            return raw.getHeaderFields().entrySet().stream()
+                    .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue() != null && entry.getValue().size() == 1 ? entry.getValue().get(0) : entry.getValue()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
 
         public String fileName() {
