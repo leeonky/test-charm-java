@@ -10,9 +10,7 @@ import io.cucumber.java.en.When;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -37,39 +35,39 @@ public class RestfulStep {
     }
 
     @When("GET {string}")
-    public void get(String path) throws IOException {
+    public void get(String path) throws IOException, URISyntaxException {
         requestAndResponse("GET", path, connection -> {
         });
     }
 
     @When("POST {string}:")
-    public void post(String path, DocString content) throws IOException {
+    public void post(String path, DocString content) throws IOException, URISyntaxException {
         post(path, evaluator.eval(content.getContent()), content.getContentType());
     }
 
-    public void post(String path, String body, String contentType) throws IOException {
+    public void post(String path, String body, String contentType) throws IOException, URISyntaxException {
         requestAndResponse("POST", path, connection -> buildRequestBody(connection, contentType, body));
     }
 
-    public void post(String path, String body) throws IOException {
+    public void post(String path, String body) throws IOException, URISyntaxException {
         requestAndResponse("POST", path, connection -> buildRequestBody(connection, null, body));
     }
 
-    public void post(String path, Object body, String contentType) throws IOException {
+    public void post(String path, Object body, String contentType) throws IOException, URISyntaxException {
         post(path, objectMapper.writeValueAsString(body), contentType);
     }
 
-    public void post(String path, Object body) throws IOException {
+    public void post(String path, Object body) throws IOException, URISyntaxException {
         post(path, objectMapper.writeValueAsString(body), null);
     }
 
     @When("POST form {string}:")
-    public void postForm(String path, String form) throws IOException {
+    public void postForm(String path, String form) throws IOException, URISyntaxException {
         postForm(path, objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
         }));
     }
 
-    public void postForm(String path, Map<String, String> params) throws IOException {
+    public void postForm(String path, Map<String, String> params) throws IOException, URISyntaxException {
         requestAndResponse("POST", path, connection -> Suppressor.run(() -> {
             connection.setDoOutput(true);
             String boundary = UUID.randomUUID().toString();
@@ -81,28 +79,28 @@ public class RestfulStep {
     }
 
     @When("PUT {string}:")
-    public void put(String path, DocString content) throws IOException {
+    public void put(String path, DocString content) throws IOException, URISyntaxException {
         put(path, evaluator.eval(content.getContent()), content.getContentType());
     }
 
-    public void put(String path, String body, String contentType) throws IOException {
+    public void put(String path, String body, String contentType) throws IOException, URISyntaxException {
         requestAndResponse("PUT", path, connection -> buildRequestBody(connection, contentType, body));
     }
 
-    public void put(String path, String body) throws IOException {
+    public void put(String path, String body) throws IOException, URISyntaxException {
         requestAndResponse("PUT", path, connection -> buildRequestBody(connection, null, body));
     }
 
-    public void put(String path, Object body, String contentType) throws IOException {
+    public void put(String path, Object body, String contentType) throws IOException, URISyntaxException {
         put(path, objectMapper.writeValueAsString(body), contentType);
     }
 
-    public void put(String path, Object body) throws IOException {
+    public void put(String path, Object body) throws IOException, URISyntaxException {
         put(path, objectMapper.writeValueAsString(body), null);
     }
 
     @When("DELETE {string}")
-    public void delete(String path) throws IOException {
+    public void delete(String path) throws IOException, URISyntaxException {
         requestAndResponse("DELETE", path, connection -> {
         });
     }
@@ -130,7 +128,7 @@ public class RestfulStep {
     }
 
     @Then("data should be saved to {string} with response:")
-    public <T> T resourceShouldBe(String path, String expression) throws IOException {
+    public <T> T resourceShouldBe(String path, String expression) throws IOException, URISyntaxException {
         responseShouldBe(expression);
         return getAndResponseShouldBe(path, expression);
     }
@@ -140,7 +138,7 @@ public class RestfulStep {
     }
 
     @Then("{string} should response:")
-    public <T> T getAndResponseShouldBe(String path, String expression) throws IOException {
+    public <T> T getAndResponseShouldBe(String path, String expression) throws IOException, URISyntaxException {
         get(path);
         return responseShouldBe(expression);
     }
@@ -159,8 +157,10 @@ public class RestfulStep {
         });
     }
 
-    private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) throws IOException {
-        connection = request.applyHeader((HttpURLConnection) new URL(baseUrl + evaluator.eval(path)).openConnection());
+    private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) throws IOException, URISyntaxException {
+        URL url = new URL(baseUrl + evaluator.eval(path));
+        URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+        connection = request.applyHeader((HttpURLConnection) new URL(uri.toASCIIString()).openConnection());
         connection.setRequestMethod(method);
         body.accept(connection);
         response = new Response(connection);

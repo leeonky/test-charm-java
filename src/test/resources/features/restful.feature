@@ -11,12 +11,36 @@ Feature: RESTful api steps
       | GET    |
       | DELETE |
 
+  Scenario Outline: <method> with params
+    When <method> "/index?中文参数=中文值&second=value2"
+    Then "http://www.a.com" got a "<method>" request on "/index" with params
+      | 中文参数 | second |
+      | 中文值  | value2 |
+    Examples:
+      | method |
+      | GET    |
+      | DELETE |
+
   Scenario Outline: <method> with body and no params
     When <method> "/index":
     """
     { "text": "Hello world" }
     """
     Then "http://www.a.com" got a "<method>" request on "/index" with body
+    """
+    { "text": "Hello world" }
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |
+
+  Scenario Outline: <method> with body and params
+    When <method> "/index?中文参数=中文值&second=value2":
+    """
+    { "text": "Hello world" }
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with params "中文参数=中文值&second=value2" and body
     """
     { "text": "Hello world" }
     """

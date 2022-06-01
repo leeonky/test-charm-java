@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
 import com.github.leeonky.dal.DAL;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -13,6 +14,7 @@ import org.apache.commons.fileupload.MultipartStream;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Format;
 import org.mockserver.model.Header;
+import org.mockserver.model.Parameter;
 import org.mockserver.verify.VerificationTimes;
 
 import java.io.ByteArrayInputStream;
@@ -162,5 +164,30 @@ public class Steps {
                                         Header.header(entry.getKey(), (List) entry.getValue()) : Header.header(entry.getKey(), (String) entry.getValue()))
                                 .collect(Collectors.toList()))
                         .withStatusCode(code));
+    }
+
+    @Then("{string} got a {string} request on {string} with params")
+    public void gotARequestOnWithParams(String url, String method, String path, DataTable dataTable) {
+        mockServer.verify(request()
+                        .withMethod(method)
+                        .withPath(path)
+                        .withQueryStringParameters(dataTable.asMaps().stream()
+                                .flatMap(map -> map.entrySet().stream())
+                                .map(entry -> Parameter.param(entry.getKey(), entry.getValue())).toArray(Parameter[]::new)),
+                VerificationTimes.once());
+    }
+
+    @Then("{string} got a {string} request on {string} with params {string} and body")
+    public void gotARequestOnWithParamsAndBody(String url, String method, String path, String params, String body) {
+        mockServer.verify(request()
+                        .withMethod(method)
+                        .withPath(path)
+                        .withQueryStringParameters(Arrays.stream(params.split("&"))
+                                .map(param -> {
+                                    String[] nameAndValue = param.split("=");
+                                    return Parameter.param(nameAndValue[0], nameAndValue[1]);
+                                }).toArray(Parameter[]::new))
+                        .withBody(body),
+                VerificationTimes.once());
     }
 }

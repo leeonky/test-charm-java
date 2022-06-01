@@ -5,7 +5,7 @@ Feature: Replace
 
   Scenario: Not replace
     When GET "/${NotExist}"
-    Then "http://www.a.com" got a "GET" request on "/${NotExist}"
+    Then "http://www.a.com" got a "GET" request on "/$%7BNotExist%7D"
 
   Scenario Outline: Replace in path for <method>
     Given var "pathVariable" value is "replacedPath"
