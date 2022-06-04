@@ -40,6 +40,10 @@ public class Mapper {
                 .findFirst().orElse(defaultReturn);
     }
 
+    public MapperFactory rawMapper() {
+        return mapperFactory;
+    }
+
     private void register(Class<?> mapTo) {
         for (Class<?> view : getViews(mapTo))
             for (Class<?> from : getFroms(mapTo)) {
