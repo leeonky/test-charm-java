@@ -2,6 +2,7 @@ package com.github.leeonky.map;
 
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.ConverterFactory;
 import com.github.leeonky.util.PropertyWriter;
 import org.reflections.Reflections;
 
@@ -15,7 +16,7 @@ import static com.github.leeonky.map.Mapper.guessValueInSequence;
 public class PermitMapper {
     private static final Class<?>[] VOID_SCOPES = {void.class};
     private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
-    private final Converter converter = Converter.createDefault();
+    private final Converter converter = ConverterFactory.create();
     private final PermitRegisterConfig permitRegisterConfig = new PermitRegisterConfig();
     private Class<?> scope = void.class;
 
