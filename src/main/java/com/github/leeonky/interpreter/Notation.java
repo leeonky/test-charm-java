@@ -70,7 +70,6 @@ public class Notation {
         return operator(factory, procedure -> true);
     }
 
-    //    TODO test
     @SuppressWarnings("unchecked")
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> keywordOperator(
