@@ -142,18 +142,20 @@ configurations {
     }
 }
 
-task cucumber() {
-    dependsOn assemble, testClasses
-    doLast {
-        javaexec {
-            environment('CUCUMBER_PUBLISH_QUIET', true)
-            main = "io.cucumber.core.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.dal.cucumber', 'src/test/resources/features']
+if (file('src/test/resources/features').exists()) {
+    task cucumber() {
+        dependsOn assemble, testClasses
+        doLast {
+            javaexec {
+                environment('CUCUMBER_PUBLISH_QUIET', true)
+                main = "io.cucumber.core.cli.Main"
+                classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+                args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.dal.cucumber', 'src/test/resources/features']
+            }
         }
-    }
 
-    build {
-        dependsOn cucumber
+        build {
+            dependsOn cucumber
+        }
     }
 }
