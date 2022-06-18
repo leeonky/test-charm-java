@@ -10,6 +10,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NumberTypeTest {
 
@@ -286,5 +287,105 @@ class NumberTypeTest {
             }
 
         }
+    }
+
+    @Nested
+    class ConvertNumber {
+        NumberType numberType = new NumberType();
+
+        @Test
+        void raise_error_when_unexpected_number_type() {
+            assertThatThrownBy(() -> numberType.convert(1, UnexpectedNumber.class))
+                    .hasMessageContaining("Cannot convert 1 to com.github.leeonky.util.NumberTypeTest$UnexpectedNumber");
+        }
+
+        @Nested
+        class ConvertToByte {
+
+            @Test
+            void convert_to_byte_with_out_error() {
+                assertThat(numberType.convert((byte) 1, byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert((short) 1, byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Short.valueOf("1"), byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1, byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Integer.valueOf("1"), byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1L, byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Long.valueOf("1"), byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1.0F, byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Float.valueOf("1.0"), byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1.0D, byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Double.valueOf("1.0"), byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), byte.class)).isEqualTo((byte) 1);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert((short) 128, byte.class))
+                        .hasMessageContaining("Cannot convert 128 to byte");
+
+                assertThatThrownBy(() -> numberType.convert((short) -129, byte.class))
+                        .hasMessageContaining("Cannot convert -129 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(128, byte.class))
+                        .hasMessageContaining("Cannot convert 128 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129, byte.class))
+                        .hasMessageContaining("Cannot convert -129 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(128L, byte.class))
+                        .hasMessageContaining("Cannot convert 128 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129L, byte.class))
+                        .hasMessageContaining("Cannot convert -129 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(128F, byte.class))
+                        .hasMessageContaining("Cannot convert 128.0 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129F, byte.class))
+                        .hasMessageContaining("Cannot convert -129.0 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(128D, byte.class))
+                        .hasMessageContaining("Cannot convert 128.0 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129D, byte.class))
+                        .hasMessageContaining("Cannot convert -129.0 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(128), byte.class))
+                        .hasMessageContaining("Cannot convert 128 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-129), byte.class))
+                        .hasMessageContaining("Cannot convert -129 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(128), byte.class))
+                        .hasMessageContaining("Cannot convert 128 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-129), byte.class))
+                        .hasMessageContaining("Cannot convert -129 to byte");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, byte.class))
+                        .hasMessageContaining("Cannot convert 1.1 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, byte.class))
+                        .hasMessageContaining("Cannot convert 1.1 to byte");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), byte.class))
+                        .hasMessageContaining("Cannot convert 1.1 to byte");
+            }
+        }
+    }
+
+    public abstract class UnexpectedNumber extends Number {
     }
 }

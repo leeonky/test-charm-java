@@ -196,4 +196,36 @@ public class NumberType {
     public void setFloatEpsilon(float floatEpsilon) {
         this.floatEpsilon = floatEpsilon;
     }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Number> T convert(Number number, Class<T> type) {
+        if (type.isInstance(number))
+            return (T) number;
+        if (type.equals(byte.class) && checkForByte(number))
+            return (T) (Byte) number.byteValue();
+        throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
+    }
+
+    private boolean checkForByte(Number number) {
+        if (number instanceof Short)
+            return (Short) number >= Byte.MIN_VALUE && (Short) number <= Byte.MAX_VALUE;
+        if (number instanceof Integer)
+            return (Integer) number >= Byte.MIN_VALUE && (Integer) number <= Byte.MAX_VALUE;
+        if (number instanceof Long)
+            return (Long) number >= Byte.MIN_VALUE && (Long) number <= Byte.MAX_VALUE;
+        if (number instanceof Float)
+            return (Float) number >= Byte.MIN_VALUE && (Float) number <= Byte.MAX_VALUE
+                    && Math.round((Float) number) == (Float) number;
+        if (number instanceof Double)
+            return (Double) number >= Byte.MIN_VALUE && (Double) number <= Byte.MAX_VALUE
+                    && Math.round((Double) number) == (Double) number;
+        if (number instanceof BigInteger)
+            return ((BigInteger) number).compareTo(BigInteger.valueOf(Byte.MAX_VALUE)) <= 0 &&
+                    ((BigInteger) number).compareTo(BigInteger.valueOf(Byte.MIN_VALUE)) >= 0;
+        if (number instanceof BigDecimal)
+            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(Byte.MAX_VALUE)) <= 0 &&
+                    ((BigDecimal) number).compareTo(BigDecimal.valueOf(Byte.MIN_VALUE)) >= 0 &&
+                    ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
+        return true;
+    }
 }
