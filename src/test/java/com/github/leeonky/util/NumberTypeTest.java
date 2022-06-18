@@ -384,6 +384,252 @@ class NumberTypeTest {
                         .hasMessageContaining("Cannot convert 1.1 to byte");
             }
         }
+
+        @Nested
+        class ConvertToBoxedByte {
+
+            @Test
+            void convert_to_byte_with_out_error() {
+                assertThat(numberType.convert((byte) 1, Byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), Byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert((short) 1, Byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Short.valueOf("1"), Byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1, Byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Integer.valueOf("1"), Byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1L, Byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Long.valueOf("1"), Byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1.0F, Byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Float.valueOf("1.0"), Byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1.0D, Byte.class)).isEqualTo((byte) 1);
+                assertThat(numberType.convert(Double.valueOf("1.0"), Byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), Byte.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), Byte.class)).isEqualTo((byte) 1);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert((short) 128, Byte.class))
+                        .hasMessageContaining("Cannot convert 128 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert((short) -129, Byte.class))
+                        .hasMessageContaining("Cannot convert -129 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(128, Byte.class))
+                        .hasMessageContaining("Cannot convert 128 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129, Byte.class))
+                        .hasMessageContaining("Cannot convert -129 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(128L, Byte.class))
+                        .hasMessageContaining("Cannot convert 128 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129L, Byte.class))
+                        .hasMessageContaining("Cannot convert -129 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(128F, Byte.class))
+                        .hasMessageContaining("Cannot convert 128.0 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129F, Byte.class))
+                        .hasMessageContaining("Cannot convert -129.0 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(128D, Byte.class))
+                        .hasMessageContaining("Cannot convert 128.0 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(-129D, Byte.class))
+                        .hasMessageContaining("Cannot convert -129.0 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(128), Byte.class))
+                        .hasMessageContaining("Cannot convert 128 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-129), Byte.class))
+                        .hasMessageContaining("Cannot convert -129 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(128), Byte.class))
+                        .hasMessageContaining("Cannot convert 128 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-129), Byte.class))
+                        .hasMessageContaining("Cannot convert -129 to java.lang.Byte");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, Byte.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, Byte.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Byte");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), Byte.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Byte");
+            }
+        }
+
+        @Nested
+        class ConvertToShort {
+
+            @Test
+            void convert_to_short_with_out_error() {
+                assertThat(numberType.convert((byte) 1, short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert((short) 1, short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Short.valueOf("1"), short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(1, short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Integer.valueOf("1"), short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(1L, short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Long.valueOf("1"), short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(1.0F, short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Float.valueOf("1.0"), short.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1.0D, short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Double.valueOf("1.0"), short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), short.class)).isEqualTo((short) 1);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(32768, short.class))
+                        .hasMessageContaining("Cannot convert 32768 to short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769, short.class))
+                        .hasMessageContaining("Cannot convert -32769 to short");
+
+                assertThatThrownBy(() -> numberType.convert(32768L, short.class))
+                        .hasMessageContaining("Cannot convert 32768 to short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769L, short.class))
+                        .hasMessageContaining("Cannot convert -32769 to short");
+
+                assertThatThrownBy(() -> numberType.convert(32768.0F, short.class))
+                        .hasMessageContaining("Cannot convert 32768.0 to short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769.0F, short.class))
+                        .hasMessageContaining("Cannot convert -32769.0 to short");
+
+                assertThatThrownBy(() -> numberType.convert(32768.0D, short.class))
+                        .hasMessageContaining("Cannot convert 32768.0 to short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769.0D, short.class))
+                        .hasMessageContaining("Cannot convert -32769.0 to short");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(32768), short.class))
+                        .hasMessageContaining("Cannot convert 32768 to short");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-32769), short.class))
+                        .hasMessageContaining("Cannot convert -32769 to short");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(32768), short.class))
+                        .hasMessageContaining("Cannot convert 32768 to short");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-32769), short.class))
+                        .hasMessageContaining("Cannot convert -32769 to short");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, short.class))
+                        .hasMessageContaining("Cannot convert 1.1 to short");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, short.class))
+                        .hasMessageContaining("Cannot convert 1.1 to short");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), short.class))
+                        .hasMessageContaining("Cannot convert 1.1 to short");
+            }
+        }
+
+        @Nested
+        class ConvertToBoxedShort {
+
+            @Test
+            void convert_to_short_with_out_error() {
+                assertThat(numberType.convert((byte) 1, Short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), Short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert((short) 1, Short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Short.valueOf("1"), Short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(1, Short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Integer.valueOf("1"), Short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(1L, Short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Long.valueOf("1"), Short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(1.0F, Short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Float.valueOf("1.0"), Short.class)).isEqualTo((byte) 1);
+
+                assertThat(numberType.convert(1.0D, Short.class)).isEqualTo((short) 1);
+                assertThat(numberType.convert(Double.valueOf("1.0"), Short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), Short.class)).isEqualTo((short) 1);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), Short.class)).isEqualTo((short) 1);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(32768, Short.class))
+                        .hasMessageContaining("Cannot convert 32768 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769, Short.class))
+                        .hasMessageContaining("Cannot convert -32769 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(32768L, Short.class))
+                        .hasMessageContaining("Cannot convert 32768 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769L, Short.class))
+                        .hasMessageContaining("Cannot convert -32769 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(32768.0F, Short.class))
+                        .hasMessageContaining("Cannot convert 32768.0 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769.0F, Short.class))
+                        .hasMessageContaining("Cannot convert -32769.0 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(32768.0D, Short.class))
+                        .hasMessageContaining("Cannot convert 32768.0 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(-32769.0D, Short.class))
+                        .hasMessageContaining("Cannot convert -32769.0 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(32768), Short.class))
+                        .hasMessageContaining("Cannot convert 32768 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-32769), Short.class))
+                        .hasMessageContaining("Cannot convert -32769 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(32768), Short.class))
+                        .hasMessageContaining("Cannot convert 32768 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-32769), Short.class))
+                        .hasMessageContaining("Cannot convert -32769 to java.lang.Short");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, Short.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, Short.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Short");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), Short.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Short");
+            }
+        }
     }
 
     public abstract class UnexpectedNumber extends Number {

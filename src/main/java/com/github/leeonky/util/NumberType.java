@@ -201,30 +201,57 @@ public class NumberType {
     public <T extends Number> T convert(Number number, Class<T> type) {
         if (type.isInstance(number))
             return (T) number;
-        if (type.equals(byte.class) && checkForByte(number))
+        if ((type.equals(byte.class) || type.equals(Byte.class)) && checkForByte(number))
             return (T) (Byte) number.byteValue();
+        if ((type.equals(short.class) || type.equals(Short.class)) && checkForShort(number))
+            return (T) (Short) number.shortValue();
         throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
     }
 
     private boolean checkForByte(Number number) {
+        byte minValue = Byte.MIN_VALUE;
+        byte maxValue = Byte.MAX_VALUE;
         if (number instanceof Short)
-            return (Short) number >= Byte.MIN_VALUE && (Short) number <= Byte.MAX_VALUE;
+            return (Short) number >= minValue && (Short) number <= maxValue;
         if (number instanceof Integer)
-            return (Integer) number >= Byte.MIN_VALUE && (Integer) number <= Byte.MAX_VALUE;
+            return (Integer) number >= minValue && (Integer) number <= maxValue;
         if (number instanceof Long)
-            return (Long) number >= Byte.MIN_VALUE && (Long) number <= Byte.MAX_VALUE;
+            return (Long) number >= minValue && (Long) number <= maxValue;
         if (number instanceof Float)
-            return (Float) number >= Byte.MIN_VALUE && (Float) number <= Byte.MAX_VALUE
+            return (Float) number >= minValue && (Float) number <= maxValue
                     && Math.round((Float) number) == (Float) number;
         if (number instanceof Double)
-            return (Double) number >= Byte.MIN_VALUE && (Double) number <= Byte.MAX_VALUE
+            return (Double) number >= minValue && (Double) number <= maxValue
                     && Math.round((Double) number) == (Double) number;
         if (number instanceof BigInteger)
-            return ((BigInteger) number).compareTo(BigInteger.valueOf(Byte.MAX_VALUE)) <= 0 &&
-                    ((BigInteger) number).compareTo(BigInteger.valueOf(Byte.MIN_VALUE)) >= 0;
+            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0 &&
+                    ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
         if (number instanceof BigDecimal)
-            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(Byte.MAX_VALUE)) <= 0 &&
-                    ((BigDecimal) number).compareTo(BigDecimal.valueOf(Byte.MIN_VALUE)) >= 0 &&
+            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0 &&
+                    ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0 &&
+                    ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
+        return true;
+    }
+
+    private boolean checkForShort(Number number) {
+        short minValue = Short.MIN_VALUE;
+        short maxValue = Short.MAX_VALUE;
+        if (number instanceof Integer)
+            return (Integer) number >= minValue && (Integer) number <= maxValue;
+        if (number instanceof Long)
+            return (Long) number >= minValue && (Long) number <= maxValue;
+        if (number instanceof Float)
+            return (Float) number >= minValue && (Float) number <= maxValue
+                    && Math.round((Float) number) == (Float) number;
+        if (number instanceof Double)
+            return (Double) number >= minValue && (Double) number <= maxValue
+                    && Math.round((Double) number) == (Double) number;
+        if (number instanceof BigInteger)
+            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0 &&
+                    ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
+        if (number instanceof BigDecimal)
+            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0 &&
+                    ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0 &&
                     ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
         return true;
     }
