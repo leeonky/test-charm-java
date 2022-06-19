@@ -199,83 +199,83 @@ public class NumberType {
 
     @SuppressWarnings("unchecked")
     public <T extends Number> T convert(Number number, Class<T> type) {
+        Number result = null;
         if (type.isInstance(number))
             return (T) number;
-        if ((type.equals(byte.class) || type.equals(Byte.class)) && checkForByte(number))
-            return (T) (Byte) number.byteValue();
-        if ((type.equals(short.class) || type.equals(Short.class)) && checkForShort(number))
-            return (T) (Short) number.shortValue();
-        if ((type.equals(int.class) || type.equals(Integer.class)) && checkForInt(number))
-            return (T) (Integer) number.intValue();
-        throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
+        if (type.equals(byte.class) || type.equals(Byte.class))
+            result = convertToByte(number, number.byteValue());
+        if (type.equals(short.class) || type.equals(Short.class))
+            result = convertToShort(number, number.shortValue());
+        if (type.equals(int.class) || type.equals(Integer.class))
+            result = convertToInt(number, number.intValue());
+        if (type.equals(long.class) || type.equals(Long.class))
+            result = convertToLong(number, number.longValue());
+        if (type.equals(float.class) || type.equals(Float.class))
+            result = convertToFloat(number, number.floatValue());
+        if (result == null)
+            throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
+        return (T) result;
     }
 
-    private boolean checkForByte(Number number) {
-        byte minValue = Byte.MIN_VALUE;
-        byte maxValue = Byte.MAX_VALUE;
-        if (number instanceof Short)
-            return (Short) number >= minValue && (Short) number <= maxValue;
-        if (number instanceof Integer)
-            return (Integer) number >= minValue && (Integer) number <= maxValue;
-        if (number instanceof Long)
-            return (Long) number >= minValue && (Long) number <= maxValue;
-        if (number instanceof Float)
-            return (Float) number >= minValue && (Float) number <= maxValue
-                    && Math.round((Float) number) == (Float) number;
-        if (number instanceof Double)
-            return (Double) number >= minValue && (Double) number <= maxValue
-                    && Math.round((Double) number) == (Double) number;
-        if (number instanceof BigInteger)
-            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0
-                    && ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
-        if (number instanceof BigDecimal)
-            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0
-                    && ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0
-                    && ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
-        return true;
+    private Float convertToFloat(Number number, float converted) {
+        return (number instanceof Byte
+                || number instanceof Short
+                || (number instanceof Integer && number.intValue() == (int) converted)
+                || (number instanceof Long && number.longValue() == (long) converted)
+                || number instanceof Float
+                || (number instanceof Double && number.doubleValue() == (double) converted)
+                || (number instanceof BigInteger && !Float.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
+                || (number instanceof BigDecimal && !Double.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+        ) ? converted :
+                null;
     }
 
-    private boolean checkForShort(Number number) {
-        short minValue = Short.MIN_VALUE;
-        short maxValue = Short.MAX_VALUE;
-        if (number instanceof Integer)
-            return (Integer) number >= minValue && (Integer) number <= maxValue;
-        if (number instanceof Long)
-            return (Long) number >= minValue && (Long) number <= maxValue;
-        if (number instanceof Float)
-            return (Float) number >= minValue && (Float) number <= maxValue
-                    && Math.round((Float) number) == (Float) number;
-        if (number instanceof Double)
-            return (Double) number >= minValue && (Double) number <= maxValue
-                    && Math.round((Double) number) == (Double) number;
-        if (number instanceof BigInteger)
-            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0
-                    && ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
-        if (number instanceof BigDecimal)
-            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0
-                    && ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0
-                    && ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
-        return true;
+    private Long convertToLong(Number number, long converted) {
+        return (number instanceof Byte
+                || number instanceof Short
+                || number instanceof Integer
+                || number instanceof Long
+                || (number instanceof Float && number.floatValue() == (float) converted)
+                || (number instanceof Double && number.doubleValue() == (double) converted)
+                || (number instanceof BigInteger && BigInteger.valueOf(converted).compareTo((BigInteger) number) == 0)
+                || (number instanceof BigDecimal && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0))
+                ? converted : null;
     }
 
-    private boolean checkForInt(Number number) {
-        int minValue = Integer.MIN_VALUE;
-        int maxValue = Integer.MAX_VALUE;
-        if (number instanceof Long)
-            return (Long) number >= minValue && (Long) number <= maxValue;
-        if (number instanceof Float)
-            return (Float) number >= minValue && (Float) number <= maxValue
-                    && Math.round((Float) number) == (Float) number;
-        if (number instanceof Double)
-            return (Double) number >= minValue && (Double) number <= maxValue
-                    && Math.round((Double) number) == (Double) number;
-        if (number instanceof BigInteger)
-            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0
-                    && ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
-        if (number instanceof BigDecimal)
-            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0
-                    && ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0
-                    && ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
-        return true;
+    private Integer convertToInt(Number number, int converted) {
+        return (number instanceof Byte
+                || number instanceof Short
+                || number instanceof Integer
+                || (number instanceof Long && number.longValue() == (long) converted)
+                || (number instanceof Float && number.floatValue() == (float) converted)
+                || (number instanceof Double && number.doubleValue() == (double) converted)
+                || (number instanceof BigInteger && BigInteger.valueOf(converted).compareTo((BigInteger) number) == 0)
+                || (number instanceof BigDecimal && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0))
+                ? converted : null;
     }
+
+    private Short convertToShort(Number number, short converted) {
+        return (number instanceof Byte
+                || number instanceof Short
+                || number instanceof Integer && number.intValue() == (int) converted
+                || number instanceof Long && number.longValue() == (long) converted
+                || number instanceof Float && number.floatValue() == (float) converted
+                || number instanceof Double && number.doubleValue() == (double) converted
+                || number instanceof BigInteger && BigInteger.valueOf(converted).compareTo((BigInteger) number) == 0
+                || number instanceof BigDecimal && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+                ? converted : null;
+    }
+
+    private Byte convertToByte(Number number, byte converted) {
+        return (number instanceof Byte
+                || number instanceof Short && number.shortValue() == (short) converted
+                || number instanceof Integer && number.intValue() == (int) converted
+                || number instanceof Long && number.longValue() == (long) converted
+                || number instanceof Float && number.floatValue() == (float) converted
+                || number instanceof Double && number.doubleValue() == (double) converted
+                || number instanceof BigInteger && BigInteger.valueOf(converted).compareTo((BigInteger) number) == 0
+                || number instanceof BigDecimal && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+                ? converted : null;
+    }
+
 }

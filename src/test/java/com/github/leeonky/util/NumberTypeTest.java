@@ -667,10 +667,10 @@ class NumberTypeTest {
                 assertThatThrownBy(() -> numberType.convert(-2147483649L, int.class))
                         .hasMessageContaining("Cannot convert -2147483649 to int");
 
-                assertThatThrownBy(() -> numberType.convert(2.14748365E10, int.class))
+                assertThatThrownBy(() -> numberType.convert(2.14748365E10F, int.class))
                         .hasMessageContaining("Cannot convert 2.14748365E10 to int");
 
-                assertThatThrownBy(() -> numberType.convert(-2.14748365E10, int.class))
+                assertThatThrownBy(() -> numberType.convert(-2.14748365E10F, int.class))
                         .hasMessageContaining("Cannot convert -2.14748365E10 to int");
 
                 assertThatThrownBy(() -> numberType.convert(2.147483648E9, int.class))
@@ -741,10 +741,10 @@ class NumberTypeTest {
                 assertThatThrownBy(() -> numberType.convert(-2147483649L, Integer.class))
                         .hasMessageContaining("Cannot convert -2147483649 to java.lang.Integer");
 
-                assertThatThrownBy(() -> numberType.convert(2.14748365E10, Integer.class))
+                assertThatThrownBy(() -> numberType.convert(2.14748365E10F, Integer.class))
                         .hasMessageContaining("Cannot convert 2.14748365E10 to java.lang.Integer");
 
-                assertThatThrownBy(() -> numberType.convert(-2.14748365E10, Integer.class))
+                assertThatThrownBy(() -> numberType.convert(-2.14748365E10F, Integer.class))
                         .hasMessageContaining("Cannot convert -2.14748365E10 to java.lang.Integer");
 
                 assertThatThrownBy(() -> numberType.convert(2.147483648E9, Integer.class))
@@ -776,6 +776,312 @@ class NumberTypeTest {
 
                 assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), Integer.class))
                         .hasMessageContaining("Cannot convert 1.1 to java.lang.Integer");
+            }
+        }
+
+        @Nested
+        class ConvertToLong {
+
+            @Test
+            void convert_to_long_with_out_error() {
+                assertThat(numberType.convert((byte) 1, long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert((short) 1, long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Short.valueOf("1"), long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1, long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Integer.valueOf("1"), long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1L, long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Long.valueOf("1"), long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1.0F, long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Float.valueOf("1.0"), long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1.0D, long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Double.valueOf("1.0"), long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), long.class)).isEqualTo(1L);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(9E19F, long.class))
+                        .hasMessageContaining("Cannot convert 9.0E19 to long");
+
+                assertThatThrownBy(() -> numberType.convert(-9E19F, long.class))
+                        .hasMessageContaining("Cannot convert -9.0E19 to long");
+
+                assertThatThrownBy(() -> numberType.convert(9E19F, long.class))
+                        .hasMessageContaining("Cannot convert 9.0E19 to long");
+
+                assertThatThrownBy(() -> numberType.convert(-9E19, long.class))
+                        .hasMessageContaining("Cannot convert -9.0E19 to long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("9223372036854775808"), long.class))
+                        .hasMessageContaining("Cannot convert 9223372036854775808 to long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("-9223372036854775809"), long.class))
+                        .hasMessageContaining("Cannot convert -9223372036854775809 to long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("9223372036854775808.0"), long.class))
+                        .hasMessageContaining("Cannot convert 9223372036854775808.0 to long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("-9223372036854775809.0"), long.class))
+                        .hasMessageContaining("Cannot convert -9223372036854775809.0 to long");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, long.class))
+                        .hasMessageContaining("Cannot convert 1.1 to long");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, long.class))
+                        .hasMessageContaining("Cannot convert 1.1 to long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), long.class))
+                        .hasMessageContaining("Cannot convert 1.1 to long");
+            }
+        }
+
+        @Nested
+        class ConvertToBoxedLong {
+
+            @Test
+            void convert_to_long_with_out_error() {
+                assertThat(numberType.convert((byte) 1, Long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), Long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert((short) 1, Long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Short.valueOf("1"), Long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1, Long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Integer.valueOf("1"), Long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1L, Long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Long.valueOf("1"), Long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1.0F, Long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Float.valueOf("1.0"), Long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(1.0D, Long.class)).isEqualTo(1L);
+                assertThat(numberType.convert(Double.valueOf("1.0"), Long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), Long.class)).isEqualTo(1L);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), Long.class)).isEqualTo(1L);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(9E19F, Long.class))
+                        .hasMessageContaining("Cannot convert 9.0E19 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(-9E19F, Long.class))
+                        .hasMessageContaining("Cannot convert -9.0E19 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(9E19F, Long.class))
+                        .hasMessageContaining("Cannot convert 9.0E19 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(-9E19, Long.class))
+                        .hasMessageContaining("Cannot convert -9.0E19 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("9223372036854775808"), Long.class))
+                        .hasMessageContaining("Cannot convert 9223372036854775808 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("-9223372036854775809"), Long.class))
+                        .hasMessageContaining("Cannot convert -9223372036854775809 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("9223372036854775808.0"), Long.class))
+                        .hasMessageContaining("Cannot convert 9223372036854775808.0 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("-9223372036854775809.0"), Long.class))
+                        .hasMessageContaining("Cannot convert -9223372036854775809.0 to java.lang.Long");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, Long.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, Long.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Long");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), Long.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Long");
+            }
+        }
+
+        @Nested
+        class ConvertToFloat {
+
+            @Test
+            void convert_to_float_with_out_error() {
+                float expected = 1.0F;
+
+                assertThat(numberType.convert((byte) 1, float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert((short) 1, float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Short.valueOf("1"), float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1, float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Integer.valueOf("1"), float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1L, float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Long.valueOf("1"), float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1.0F, float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Float.valueOf("1.0"), float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1.0D, float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Double.valueOf("1.0"), float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), float.class)).isEqualTo(expected);
+            }
+
+            @Test
+            void should_raise_error_when_precision_miss_match() {
+                assertThatThrownBy(() -> numberType.convert(2147483645, float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to float");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483645, float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to float");
+
+                assertThatThrownBy(() -> numberType.convert(2147483645L, float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to float");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483645L, float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to float");
+
+                assertThatThrownBy(() -> numberType.convert(2147483645D, float.class))
+                        .hasMessageContaining("Cannot convert 2.147483645E9 to float");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483645D, float.class))
+                        .hasMessageContaining("Cannot convert -2.147483645E9 to float");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(2147483645), float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to float");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-2147483645), float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(2147483645), float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-2147483645), float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to float");
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(1E128, float.class))
+                        .hasMessageContaining("Cannot convert 1.0E128 to float");
+
+                assertThatThrownBy(() -> numberType.convert(-1E129, float.class))
+                        .hasMessageContaining("Cannot convert -1.0E129 to float");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("10").pow(128), float.class))
+                        .hasMessageContaining("Cannot convert 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to float");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("10").pow(128).negate(), float.class))
+                        .hasMessageContaining("Cannot convert -100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(10).pow(1025), float.class))
+                        .hasMessageContaining("Cannot convert 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(10).pow(1025).negate(), float.class))
+                        .hasMessageContaining("Cannot convert -100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to float");
+            }
+        }
+
+        @Nested
+        class ConvertToBoxedFloat {
+
+            @Test
+            void convert_to_float_with_out_error() {
+                float expected = 1.0F;
+
+                assertThat(numberType.convert((byte) 1, Float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), Float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert((short) 1, Float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Short.valueOf("1"), Float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1, Float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Integer.valueOf("1"), Float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1L, Float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Long.valueOf("1"), Float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1.0F, Float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Float.valueOf("1.0"), Float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1.0D, Float.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Double.valueOf("1.0"), Float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), Float.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), Float.class)).isEqualTo(expected);
+            }
+
+            @Test
+            void should_raise_error_when_precision_miss_match() {
+                assertThatThrownBy(() -> numberType.convert(2147483645, Float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483645, Float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(2147483645L, Float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483645L, Float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(2147483645D, Float.class))
+                        .hasMessageContaining("Cannot convert 2.147483645E9 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483645D, Float.class))
+                        .hasMessageContaining("Cannot convert -2.147483645E9 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(2147483645), Float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-2147483645), Float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(2147483645), Float.class))
+                        .hasMessageContaining("Cannot convert 2147483645 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-2147483645), Float.class))
+                        .hasMessageContaining("Cannot convert -2147483645 to java.lang.Float");
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(1E128, Float.class))
+                        .hasMessageContaining("Cannot convert 1.0E128 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(-1E129, Float.class))
+                        .hasMessageContaining("Cannot convert -1.0E129 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("10").pow(128), Float.class))
+                        .hasMessageContaining("Cannot convert 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(new BigInteger("10").pow(128).negate(), Float.class))
+                        .hasMessageContaining("Cannot convert -100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(10).pow(1025), Float.class))
+                        .hasMessageContaining("Cannot convert 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to java.lang.Float");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(10).pow(1025).negate(), Float.class))
+                        .hasMessageContaining("Cannot convert -100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 to java.lang.Float");
             }
         }
     }
