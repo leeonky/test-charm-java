@@ -212,9 +212,23 @@ public class NumberType {
             result = convertToLong(number, number.longValue());
         if (type.equals(float.class) || type.equals(Float.class))
             result = convertToFloat(number, number.floatValue());
+        if (type.equals(double.class) || type.equals(Double.class))
+            result = convertToDouble(number, number.doubleValue());
         if (result == null)
             throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
         return (T) result;
+    }
+
+    private Double convertToDouble(Number number, double converted) {
+        return (number instanceof Byte
+                || number instanceof Short
+                || number instanceof Integer
+                || (number instanceof Long && number.longValue() == (long) converted)
+                || number instanceof Float
+                || number instanceof Double
+                || (number instanceof BigInteger && !Double.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
+                || (number instanceof BigDecimal && !Double.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+        ) ? converted : null;
     }
 
     private Float convertToFloat(Number number, float converted) {
@@ -225,9 +239,8 @@ public class NumberType {
                 || number instanceof Float
                 || (number instanceof Double && number.doubleValue() == (double) converted)
                 || (number instanceof BigInteger && !Float.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
-                || (number instanceof BigDecimal && !Double.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
-        ) ? converted :
-                null;
+                || (number instanceof BigDecimal && !Float.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+        ) ? converted : null;
     }
 
     private Long convertToLong(Number number, long converted) {
@@ -277,5 +290,4 @@ public class NumberType {
                 || number instanceof BigDecimal && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
                 ? converted : null;
     }
-
 }
