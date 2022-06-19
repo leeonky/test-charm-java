@@ -205,6 +205,8 @@ public class NumberType {
             return (T) (Byte) number.byteValue();
         if ((type.equals(short.class) || type.equals(Short.class)) && checkForShort(number))
             return (T) (Short) number.shortValue();
+        if ((type.equals(int.class) || type.equals(Integer.class)) && checkForInt(number))
+            return (T) (Integer) number.intValue();
         throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
     }
 
@@ -224,12 +226,12 @@ public class NumberType {
             return (Double) number >= minValue && (Double) number <= maxValue
                     && Math.round((Double) number) == (Double) number;
         if (number instanceof BigInteger)
-            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0 &&
-                    ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
+            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0
+                    && ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
         if (number instanceof BigDecimal)
-            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0 &&
-                    ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0 &&
-                    ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
+            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0
+                    && ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0
+                    && ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
         return true;
     }
 
@@ -247,12 +249,33 @@ public class NumberType {
             return (Double) number >= minValue && (Double) number <= maxValue
                     && Math.round((Double) number) == (Double) number;
         if (number instanceof BigInteger)
-            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0 &&
-                    ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
+            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0
+                    && ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
         if (number instanceof BigDecimal)
-            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0 &&
-                    ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0 &&
-                    ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
+            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0
+                    && ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0
+                    && ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
+        return true;
+    }
+
+    private boolean checkForInt(Number number) {
+        int minValue = Integer.MIN_VALUE;
+        int maxValue = Integer.MAX_VALUE;
+        if (number instanceof Long)
+            return (Long) number >= minValue && (Long) number <= maxValue;
+        if (number instanceof Float)
+            return (Float) number >= minValue && (Float) number <= maxValue
+                    && Math.round((Float) number) == (Float) number;
+        if (number instanceof Double)
+            return (Double) number >= minValue && (Double) number <= maxValue
+                    && Math.round((Double) number) == (Double) number;
+        if (number instanceof BigInteger)
+            return ((BigInteger) number).compareTo(BigInteger.valueOf(maxValue)) <= 0
+                    && ((BigInteger) number).compareTo(BigInteger.valueOf(minValue)) >= 0;
+        if (number instanceof BigDecimal)
+            return ((BigDecimal) number).compareTo(BigDecimal.valueOf(maxValue)) <= 0
+                    && ((BigDecimal) number).compareTo(BigDecimal.valueOf(minValue)) >= 0
+                    && ((BigDecimal) number).stripTrailingZeros().scale() <= 0;
         return true;
     }
 }

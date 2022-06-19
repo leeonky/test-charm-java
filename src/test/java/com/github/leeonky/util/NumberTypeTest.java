@@ -630,6 +630,154 @@ class NumberTypeTest {
                         .hasMessageContaining("Cannot convert 1.1 to java.lang.Short");
             }
         }
+
+        @Nested
+        class ConvertToInt {
+
+            @Test
+            void convert_to_int_with_out_error() {
+                assertThat(numberType.convert((byte) 1, int.class)).isEqualTo(1);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), int.class)).isEqualTo(1);
+
+                assertThat(numberType.convert((short) 1, int.class)).isEqualTo(1);
+                assertThat(numberType.convert(Short.valueOf("1"), int.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1, int.class)).isEqualTo(1);
+                assertThat(numberType.convert(Integer.valueOf("1"), int.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1L, int.class)).isEqualTo(1);
+                assertThat(numberType.convert(Long.valueOf("1"), int.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1.0F, int.class)).isEqualTo(1);
+                assertThat(numberType.convert(Float.valueOf("1.0"), int.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1.0D, int.class)).isEqualTo(1);
+                assertThat(numberType.convert(Double.valueOf("1.0"), int.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), int.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), int.class)).isEqualTo(1);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(2147483648L, int.class))
+                        .hasMessageContaining("Cannot convert 2147483648 to int");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483649L, int.class))
+                        .hasMessageContaining("Cannot convert -2147483649 to int");
+
+                assertThatThrownBy(() -> numberType.convert(2.14748365E10, int.class))
+                        .hasMessageContaining("Cannot convert 2.14748365E10 to int");
+
+                assertThatThrownBy(() -> numberType.convert(-2.14748365E10, int.class))
+                        .hasMessageContaining("Cannot convert -2.14748365E10 to int");
+
+                assertThatThrownBy(() -> numberType.convert(2.147483648E9, int.class))
+                        .hasMessageContaining("Cannot convert 2.147483648E9 to int");
+
+                assertThatThrownBy(() -> numberType.convert(-2.147483649E9, int.class))
+                        .hasMessageContaining("Cannot convert -2.147483649E9 to int");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(2147483648L), int.class))
+                        .hasMessageContaining("Cannot convert 2147483648 to int");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-2147483649L), int.class))
+                        .hasMessageContaining("Cannot convert -2147483649 to int");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(2147483648L), int.class))
+                        .hasMessageContaining("Cannot convert 2147483648 to int");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-2147483649L), int.class))
+                        .hasMessageContaining("Cannot convert -2147483649 to int");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, int.class))
+                        .hasMessageContaining("Cannot convert 1.1 to int");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, int.class))
+                        .hasMessageContaining("Cannot convert 1.1 to int");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), int.class))
+                        .hasMessageContaining("Cannot convert 1.1 to int");
+            }
+        }
+
+        @Nested
+        class ConvertToBoxedInt {
+
+            @Test
+            void convert_to_int_with_out_error() {
+                assertThat(numberType.convert((byte) 1, Integer.class)).isEqualTo(1);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), Integer.class)).isEqualTo(1);
+
+                assertThat(numberType.convert((short) 1, Integer.class)).isEqualTo(1);
+                assertThat(numberType.convert(Short.valueOf("1"), Integer.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1, Integer.class)).isEqualTo(1);
+                assertThat(numberType.convert(Integer.valueOf("1"), Integer.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1L, Integer.class)).isEqualTo(1);
+                assertThat(numberType.convert(Long.valueOf("1"), Integer.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1.0F, Integer.class)).isEqualTo(1);
+                assertThat(numberType.convert(Float.valueOf("1.0"), Integer.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(1.0D, Integer.class)).isEqualTo(1);
+                assertThat(numberType.convert(Double.valueOf("1.0"), Integer.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), Integer.class)).isEqualTo(1);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), Integer.class)).isEqualTo(1);
+            }
+
+            @Test
+            void should_raise_error_when_value_over_flow() {
+                assertThatThrownBy(() -> numberType.convert(2147483648L, Integer.class))
+                        .hasMessageContaining("Cannot convert 2147483648 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(-2147483649L, Integer.class))
+                        .hasMessageContaining("Cannot convert -2147483649 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(2.14748365E10, Integer.class))
+                        .hasMessageContaining("Cannot convert 2.14748365E10 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(-2.14748365E10, Integer.class))
+                        .hasMessageContaining("Cannot convert -2.14748365E10 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(2.147483648E9, Integer.class))
+                        .hasMessageContaining("Cannot convert 2.147483648E9 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(-2.147483649E9, Integer.class))
+                        .hasMessageContaining("Cannot convert -2.147483649E9 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(2147483648L), Integer.class))
+                        .hasMessageContaining("Cannot convert 2147483648 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(BigInteger.valueOf(-2147483649L), Integer.class))
+                        .hasMessageContaining("Cannot convert -2147483649 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(2147483648L), Integer.class))
+                        .hasMessageContaining("Cannot convert 2147483648 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(BigDecimal.valueOf(-2147483649L), Integer.class))
+                        .hasMessageContaining("Cannot convert -2147483649 to java.lang.Integer");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, Integer.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, Integer.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Integer");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), Integer.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.lang.Integer");
+            }
+        }
     }
 
     public abstract class UnexpectedNumber extends Number {
