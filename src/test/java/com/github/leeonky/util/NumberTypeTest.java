@@ -1219,6 +1219,57 @@ class NumberTypeTest {
             }
         }
 
+        @Nested
+        class ConvertToBigInteger {
+
+            @Test
+            void convert_to_long_with_out_error() {
+                BigInteger expected = BigInteger.ONE;
+                assertThat(numberType.convert((byte) 1, BigInteger.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), BigInteger.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert((short) 1, BigInteger.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Short.valueOf("1"), BigInteger.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1, BigInteger.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Integer.valueOf("1"), BigInteger.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1L, BigInteger.class)).isEqualTo(expected);
+                assertThat(numberType.convert(Long.valueOf("1"), BigInteger.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(1E10F, BigInteger.class)).isEqualTo(new BigInteger("10000000000"));
+                assertThat(numberType.convert(Float.valueOf("1E10F"), BigInteger.class)).isEqualTo(new BigInteger("10000000000"));
+
+                assertThat(numberType.convert(1E10D, BigInteger.class)).isEqualTo(new BigInteger("10000000000"));
+                assertThat(numberType.convert(Double.valueOf("1E10D"), BigInteger.class)).isEqualTo(new BigInteger("10000000000"));
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), BigInteger.class)).isEqualTo(expected);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), BigInteger.class)).isEqualTo(expected);
+            }
+
+            @Test
+            void should_raise_error_when_invalid_float() {
+                assertThatThrownBy(() -> numberType.convert((float) 1.0 / 0, BigInteger.class))
+                        .hasMessageContaining("Cannot convert Infinity to java.math.BigInteger");
+
+                assertThatThrownBy(() -> numberType.convert(1.0 / 0, BigInteger.class))
+                        .hasMessageContaining("Cannot convert Infinity to java.math.BigInteger");
+            }
+
+            @Test
+            void should_raise_error_when_value_has_decimal() {
+                assertThatThrownBy(() -> numberType.convert(1.1F, BigInteger.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.math.BigInteger");
+
+                assertThatThrownBy(() -> numberType.convert(1.1D, BigInteger.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.math.BigInteger");
+
+                assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), BigInteger.class))
+                        .hasMessageContaining("Cannot convert 1.1 to java.math.BigInteger");
+            }
+        }
+
         public abstract class UnexpectedNumber extends Number {
         }
     }

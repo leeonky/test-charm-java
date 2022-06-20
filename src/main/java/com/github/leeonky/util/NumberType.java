@@ -214,9 +214,37 @@ public class NumberType {
             result = convertToFloat(number, number.floatValue());
         if (type.equals(double.class) || type.equals(Double.class))
             result = convertToDouble(number, number.doubleValue());
+        if (type.equals(BigInteger.class))
+            result = convertToBigInteger(number);
         if (result == null)
             throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
         return (T) result;
+    }
+
+    private BigInteger convertToBigInteger(Number number) {
+        if (number instanceof BigInteger)
+            return (BigInteger) number;
+        if (number instanceof Byte
+                || number instanceof Short
+                || number instanceof Integer
+                || number instanceof Long)
+            return BigInteger.valueOf(number.longValue());
+        if (number instanceof Float && Float.isFinite(number.floatValue())) {
+            BigInteger bigInteger = BigDecimal.valueOf(number.floatValue()).toBigInteger();
+            if (bigInteger.floatValue() == number.floatValue())
+                return bigInteger;
+        }
+        if (number instanceof Double && Double.isFinite(number.doubleValue())) {
+            BigInteger bigInteger = BigDecimal.valueOf(number.doubleValue()).toBigInteger();
+            if (bigInteger.doubleValue() == number.doubleValue())
+                return bigInteger;
+        }
+        if (number instanceof BigDecimal) {
+            BigInteger bigInteger = ((BigDecimal) number).toBigInteger();
+            if (new BigDecimal(bigInteger).compareTo((BigDecimal) number) == 0)
+                return bigInteger;
+        }
+        return null;
     }
 
     private Double convertToDouble(Number number, double converted) {
@@ -226,8 +254,8 @@ public class NumberType {
                 || (number instanceof Long && number.longValue() == (long) converted)
                 || number instanceof Float
                 || number instanceof Double
-                || (number instanceof BigInteger && !Double.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
-                || (number instanceof BigDecimal && !Double.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+                || (number instanceof BigInteger && Double.isFinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
+                || (number instanceof BigDecimal && Double.isFinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
         ) ? converted : null;
     }
 
@@ -238,8 +266,8 @@ public class NumberType {
                 || (number instanceof Long && number.longValue() == (long) converted)
                 || number instanceof Float
                 || (number instanceof Double && number.doubleValue() == (double) converted)
-                || (number instanceof BigInteger && !Float.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
-                || (number instanceof BigDecimal && !Float.isInfinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+                || (number instanceof BigInteger && Float.isFinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
+                || (number instanceof BigDecimal && Float.isFinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
         ) ? converted : null;
     }
 
