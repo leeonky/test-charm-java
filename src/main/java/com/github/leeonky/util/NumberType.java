@@ -216,9 +216,28 @@ public class NumberType {
             result = convertToDouble(number, number.doubleValue());
         if (type.equals(BigInteger.class))
             result = convertToBigInteger(number);
+        if (type.equals(BigDecimal.class))
+            result = convertToBigDecimal(number);
         if (result == null)
             throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
         return (T) result;
+    }
+
+    private BigDecimal convertToBigDecimal(Number number) {
+        if (number instanceof Byte
+                || number instanceof Short
+                || number instanceof Integer
+                || number instanceof Long)
+            return BigDecimal.valueOf(number.longValue());
+        if (number instanceof BigDecimal)
+            return (BigDecimal) number;
+        if (number instanceof BigInteger)
+            return new BigDecimal((BigInteger) number);
+        if (number instanceof Float && Float.isFinite(number.floatValue()))
+            return BigDecimal.valueOf(number.floatValue());
+        if (number instanceof Double && Double.isFinite(number.doubleValue()))
+            return BigDecimal.valueOf(number.doubleValue());
+        return null;
     }
 
     private BigInteger convertToBigInteger(Number number) {

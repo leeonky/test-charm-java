@@ -1223,7 +1223,7 @@ class NumberTypeTest {
         class ConvertToBigInteger {
 
             @Test
-            void convert_to_long_with_out_error() {
+            void convert_to_big_integer_with_out_error() {
                 BigInteger expected = BigInteger.ONE;
                 assertThat(numberType.convert((byte) 1, BigInteger.class)).isEqualTo(expected);
                 assertThat(numberType.convert(Byte.valueOf((byte) 1), BigInteger.class)).isEqualTo(expected);
@@ -1267,6 +1267,46 @@ class NumberTypeTest {
 
                 assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), BigInteger.class))
                         .hasMessageContaining("Cannot convert 1.1 to java.math.BigInteger");
+            }
+        }
+
+        @Nested
+        class ConvertToBigDecimal {
+
+            @Test
+            void convert_to_big_decimal_with_out_error() {
+                BigDecimal one = BigDecimal.valueOf(1);
+                BigDecimal float_one = BigDecimal.valueOf(1.0);
+                assertThat(numberType.convert((byte) 1, BigDecimal.class)).isEqualTo(one);
+                assertThat(numberType.convert(Byte.valueOf((byte) 1), BigDecimal.class)).isEqualTo(one);
+
+                assertThat(numberType.convert((short) 1, BigDecimal.class)).isEqualTo(one);
+                assertThat(numberType.convert(Short.valueOf("1"), BigDecimal.class)).isEqualTo(one);
+
+                assertThat(numberType.convert(1, BigDecimal.class)).isEqualTo(one);
+                assertThat(numberType.convert(Integer.valueOf("1"), BigDecimal.class)).isEqualTo(one);
+
+                assertThat(numberType.convert(1L, BigDecimal.class)).isEqualTo(one);
+                assertThat(numberType.convert(Long.valueOf("1"), BigDecimal.class)).isEqualTo(one);
+
+                assertThat(numberType.convert(1.0F, BigDecimal.class)).isEqualTo(float_one);
+                assertThat(numberType.convert(Float.valueOf("1.0"), BigDecimal.class)).isEqualTo(float_one);
+
+                assertThat(numberType.convert(1.0, BigDecimal.class)).isEqualTo(float_one);
+                assertThat(numberType.convert(Double.valueOf("1.0"), BigDecimal.class)).isEqualTo(float_one);
+
+                assertThat(numberType.convert(BigInteger.valueOf(1), BigDecimal.class)).isEqualTo(one);
+
+                assertThat(numberType.convert(BigDecimal.valueOf(1), BigDecimal.class)).isEqualTo(one);
+            }
+
+            @Test
+            void should_raise_error_when_invalid_float() {
+                assertThatThrownBy(() -> numberType.convert((float) 1.0 / 0, BigDecimal.class))
+                        .hasMessageContaining("Cannot convert Infinity to java.math.BigDecimal");
+
+                assertThatThrownBy(() -> numberType.convert(1.0 / 0, BigDecimal.class))
+                        .hasMessageContaining("Cannot convert Infinity to java.math.BigDecimal");
             }
         }
 
