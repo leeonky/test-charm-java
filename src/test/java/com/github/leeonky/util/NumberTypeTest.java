@@ -17,7 +17,7 @@ class NumberTypeTest {
     @Nested
     class CalculationType {
 
-        void same_number_type(List<List<Class<?>>> types) {
+        void same_number_type(List<List<Class<? extends Number>>> types) {
             types.forEach(type -> {
                 assertThat(NumberType.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
                 assertThat(NumberType.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
@@ -26,14 +26,14 @@ class NumberTypeTest {
             });
         }
 
-        void use_left_type(List<List<Class<?>>> types) {
+        void use_left_type(List<List<Class<? extends Number>>> types) {
             types.forEach(type -> {
                 assertThat(NumberType.calculationType(type.get(0), type.get(1))).isEqualTo(type.get(0));
                 assertThat(NumberType.calculationType(type.get(1), type.get(0))).isEqualTo(type.get(0));
             });
         }
 
-        void should_use_big_big_decimal(List<List<Class<?>>> types) {
+        void should_use_big_big_decimal(List<List<Class<? extends Number>>> types) {
             types.forEach(type -> {
                 assertThat(NumberType.calculationType(type.get(0), type.get(1))).isEqualTo(BigDecimal.class);
                 assertThat(NumberType.calculationType(type.get(1), type.get(0))).isEqualTo(BigDecimal.class);

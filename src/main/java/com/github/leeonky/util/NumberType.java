@@ -9,13 +9,13 @@ import static java.util.Arrays.asList;
 public class NumberType {
     private static final List<Class<?>> NUMBER_TYPES = asList(Byte.class, Short.class, Integer.class, Long.class,
             Float.class, Double.class, BigInteger.class, BigDecimal.class);
-    private Converter converter = Converter.getInstance();
     private double doubleEpsilon = 0.0000001d;
     private float floatEpsilon = 0.000001f;
 
-    public static Class<?> calculationType(Class<?> number1, Class<?> number2) {
-        Class<?> boxedType1 = BeanClass.boxedClass(number1);
-        Class<?> boxedType2 = BeanClass.boxedClass(number2);
+    @SuppressWarnings("unchecked")
+    public static Class<? extends Number> calculationType(Class<? extends Number> number1, Class<? extends Number> number2) {
+        Class boxedType1 = BeanClass.boxedClass(number1);
+        Class boxedType2 = BeanClass.boxedClass(number2);
         if (isFloatAndBigInteger(boxedType1, boxedType2) || isFloatAndBigInteger(boxedType2, boxedType1))
             return BigDecimal.class;
         return NUMBER_TYPES.indexOf(boxedType1) > NUMBER_TYPES.indexOf(boxedType2) ? boxedType1 : boxedType2;
@@ -25,18 +25,10 @@ public class NumberType {
         return boxedType1.equals(BigInteger.class) && (boxedType2.equals(Float.class) || boxedType2.equals(Double.class));
     }
 
-    public Converter getConverter() {
-        return converter;
-    }
-
-    public void setConverter(Converter converter) {
-        this.converter = converter;
-    }
-
     public Number plus(Number left, Number right) {
-        Class<?> type = calculationType(left.getClass(), right.getClass());
-        Number leftInSameType = (Number) converter.tryConvert(type, left);
-        Number rightInSameType = (Number) converter.tryConvert(type, right);
+        Class<? extends Number> type = calculationType(left.getClass(), right.getClass());
+        Number leftInSameType = convert(left, type);
+        Number rightInSameType = convert(right, type);
         if (type.equals(Byte.class))
             return (byte) leftInSameType + (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -57,9 +49,9 @@ public class NumberType {
     }
 
     public Number subtract(Number left, Number right) {
-        Class<?> type = calculationType(left.getClass(), right.getClass());
-        Number leftInSameType = (Number) converter.tryConvert(type, left);
-        Number rightInSameType = (Number) converter.tryConvert(type, right);
+        Class<? extends Number> type = calculationType(left.getClass(), right.getClass());
+        Number leftInSameType = convert(left, type);
+        Number rightInSameType = convert(right, type);
         if (type.equals(Byte.class))
             return (byte) leftInSameType - (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -80,9 +72,9 @@ public class NumberType {
     }
 
     public Number divide(Number left, Number right) {
-        Class<?> type = calculationType(left.getClass(), right.getClass());
-        Number leftInSameType = (Number) converter.tryConvert(type, left);
-        Number rightInSameType = (Number) converter.tryConvert(type, right);
+        Class<? extends Number> type = calculationType(left.getClass(), right.getClass());
+        Number leftInSameType = convert(left, type);
+        Number rightInSameType = convert(right, type);
         if (type.equals(Byte.class))
             return (byte) leftInSameType / (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -103,9 +95,9 @@ public class NumberType {
     }
 
     public Number multiply(Number left, Number right) {
-        Class<?> type = calculationType(left.getClass(), right.getClass());
-        Number leftInSameType = (Number) converter.tryConvert(type, left);
-        Number rightInSameType = (Number) converter.tryConvert(type, right);
+        Class<? extends Number> type = calculationType(left.getClass(), right.getClass());
+        Number leftInSameType = convert(left, type);
+        Number rightInSameType = convert(right, type);
         if (type.equals(Byte.class))
             return (byte) leftInSameType * (byte) rightInSameType;
         if (type.equals(Short.class))
@@ -126,9 +118,9 @@ public class NumberType {
     }
 
     public int compare(Number left, Number right) {
-        Class<?> type = calculationType(left.getClass(), right.getClass());
-        Number leftInSameType = (Number) converter.tryConvert(type, left);
-        Number rightInSameType = (Number) converter.tryConvert(type, right);
+        Class<? extends Number> type = calculationType(left.getClass(), right.getClass());
+        Number leftInSameType = convert(left, type);
+        Number rightInSameType = convert(right, type);
         if (type.equals(Byte.class))
             return Byte.compare((byte) leftInSameType, (byte) rightInSameType);
         if (type.equals(Short.class))
@@ -203,27 +195,27 @@ public class NumberType {
         if (type.isInstance(number))
             return (T) number;
         if (type.equals(byte.class) || type.equals(Byte.class))
-            result = convertToByte(number, number.byteValue());
+            result = byteValue(number);
         if (type.equals(short.class) || type.equals(Short.class))
-            result = convertToShort(number, number.shortValue());
+            result = shortValue(number);
         if (type.equals(int.class) || type.equals(Integer.class))
-            result = convertToInt(number, number.intValue());
+            result = intValue(number);
         if (type.equals(long.class) || type.equals(Long.class))
-            result = convertToLong(number, number.longValue());
+            result = longValue(number);
         if (type.equals(float.class) || type.equals(Float.class))
-            result = convertToFloat(number, number.floatValue());
+            result = floatValue(number);
         if (type.equals(double.class) || type.equals(Double.class))
-            result = convertToDouble(number, number.doubleValue());
+            result = doubleValue(number);
         if (type.equals(BigInteger.class))
-            result = convertToBigInteger(number);
+            result = bigIntegerValue(number);
         if (type.equals(BigDecimal.class))
-            result = convertToBigDecimal(number);
+            result = bigDecimalValue(number);
         if (result == null)
             throw new IllegalArgumentException(String.format("Cannot convert %s to %s", number, type.getName()));
         return (T) result;
     }
 
-    private BigDecimal convertToBigDecimal(Number number) {
+    public BigDecimal bigDecimalValue(Number number) {
         if (number instanceof Byte
                 || number instanceof Short
                 || number instanceof Integer
@@ -240,7 +232,7 @@ public class NumberType {
         return null;
     }
 
-    private BigInteger convertToBigInteger(Number number) {
+    public BigInteger bigIntegerValue(Number number) {
         if (number instanceof BigInteger)
             return (BigInteger) number;
         if (number instanceof Byte
@@ -266,31 +258,38 @@ public class NumberType {
         return null;
     }
 
-    private Double convertToDouble(Number number, double converted) {
+    public Double doubleValue(Number number) {
+        double converted = number.doubleValue();
         return (number instanceof Byte
                 || number instanceof Short
                 || number instanceof Integer
                 || (number instanceof Long && number.longValue() == (long) converted)
                 || number instanceof Float
                 || number instanceof Double
-                || (number instanceof BigInteger && Double.isFinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
-                || (number instanceof BigDecimal && Double.isFinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+                || (number instanceof BigInteger && Double.isFinite(converted)
+                && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
+                || (number instanceof BigDecimal && Double.isFinite(converted)
+                && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
         ) ? converted : null;
     }
 
-    private Float convertToFloat(Number number, float converted) {
+    public Float floatValue(Number number) {
+        float converted = number.floatValue();
         return (number instanceof Byte
                 || number instanceof Short
                 || (number instanceof Integer && number.intValue() == (int) converted)
                 || (number instanceof Long && number.longValue() == (long) converted)
                 || number instanceof Float
                 || (number instanceof Double && number.doubleValue() == (double) converted)
-                || (number instanceof BigInteger && Float.isFinite(converted) && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
-                || (number instanceof BigDecimal && Float.isFinite(converted) && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
+                || (number instanceof BigInteger && Float.isFinite(converted)
+                && BigDecimal.valueOf(converted).compareTo(new BigDecimal(number.toString())) == 0)
+                || (number instanceof BigDecimal && Float.isFinite(converted)
+                && BigDecimal.valueOf(converted).compareTo((BigDecimal) number) == 0)
         ) ? converted : null;
     }
 
-    private Long convertToLong(Number number, long converted) {
+    public Long longValue(Number number) {
+        long converted = number.longValue();
         return (number instanceof Byte
                 || number instanceof Short
                 || number instanceof Integer
@@ -302,7 +301,8 @@ public class NumberType {
                 ? converted : null;
     }
 
-    private Integer convertToInt(Number number, int converted) {
+    public Integer intValue(Number number) {
+        int converted = number.intValue();
         return (number instanceof Byte
                 || number instanceof Short
                 || number instanceof Integer
@@ -314,7 +314,8 @@ public class NumberType {
                 ? converted : null;
     }
 
-    private Short convertToShort(Number number, short converted) {
+    public Short shortValue(Number number) {
+        short converted = number.shortValue();
         return (number instanceof Byte
                 || number instanceof Short
                 || number instanceof Integer && number.intValue() == (int) converted
@@ -326,7 +327,8 @@ public class NumberType {
                 ? converted : null;
     }
 
-    private Byte convertToByte(Number number, byte converted) {
+    public Byte byteValue(Number number) {
+        byte converted = number.byteValue();
         return (number instanceof Byte
                 || number instanceof Short && number.shortValue() == (short) converted
                 || number instanceof Integer && number.intValue() == (int) converted

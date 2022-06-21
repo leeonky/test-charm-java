@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.BeanClass.getClassName;
 
 public class Converter {
+    private static final NumberType numberType = new NumberType();
     private static Converter instance;
     private final TypeHandlerSet<Function<Object, Object>> typeConverterSet = new TypeHandlerSet<>();
     private final TypeHandlerSet<BiFunction<Class<? extends Enum<?>>, Object, Object>> enumConverterSet = new TypeHandlerSet<>();
@@ -44,9 +45,7 @@ public class Converter {
                 .addTypeConverter(String.class, boolean.class, Boolean::valueOf)
                 .addTypeConverter(String.class, BigInteger.class, BigInteger::new)
                 .addTypeConverter(String.class, BigDecimal.class, BigDecimal::new)
-
                 .addTypeConverter(String.class, UUID.class, UUID::fromString)
-
                 .addTypeConverter(String.class, Instant.class, Instant::parse)
                 .addTypeConverter(String.class, Date.class, source -> {
                     try {
@@ -61,21 +60,20 @@ public class Converter {
                 .addTypeConverter(String.class, OffsetDateTime.class, OffsetDateTime::parse)
                 .addTypeConverter(String.class, ZonedDateTime.class, ZonedDateTime::parse)
                 .addTypeConverter(String.class, YearMonth.class, YearMonth::parse)
-
-                .addTypeConverter(Number.class, Byte.class, Number::byteValue)
-                .addTypeConverter(Number.class, byte.class, Number::byteValue)
-                .addTypeConverter(Number.class, Short.class, Number::shortValue)
-                .addTypeConverter(Number.class, short.class, Number::shortValue)
-                .addTypeConverter(Number.class, Integer.class, Number::intValue)
-                .addTypeConverter(Number.class, int.class, Number::intValue)
-                .addTypeConverter(Number.class, Long.class, Number::longValue)
-                .addTypeConverter(Number.class, long.class, Number::longValue)
-                .addTypeConverter(Number.class, Double.class, Number::doubleValue)
-                .addTypeConverter(Number.class, double.class, Number::doubleValue)
-                .addTypeConverter(Number.class, Float.class, Number::floatValue)
-                .addTypeConverter(Number.class, float.class, Number::floatValue)
-                .addTypeConverter(Number.class, BigDecimal.class, number -> new BigDecimal(number.toString()))
-                .addTypeConverter(Number.class, BigInteger.class, number -> BigInteger.valueOf(number.longValue()));
+                .addTypeConverter(Number.class, Byte.class, numberType::byteValue)
+                .addTypeConverter(Number.class, byte.class, numberType::byteValue)
+                .addTypeConverter(Number.class, Short.class, numberType::shortValue)
+                .addTypeConverter(Number.class, short.class, numberType::shortValue)
+                .addTypeConverter(Number.class, Integer.class, numberType::intValue)
+                .addTypeConverter(Number.class, int.class, numberType::intValue)
+                .addTypeConverter(Number.class, Long.class, numberType::longValue)
+                .addTypeConverter(Number.class, long.class, numberType::longValue)
+                .addTypeConverter(Number.class, Double.class, numberType::doubleValue)
+                .addTypeConverter(Number.class, double.class, numberType::doubleValue)
+                .addTypeConverter(Number.class, Float.class, numberType::floatValue)
+                .addTypeConverter(Number.class, float.class, numberType::floatValue)
+                .addTypeConverter(Number.class, BigDecimal.class, numberType::bigDecimalValue)
+                .addTypeConverter(Number.class, BigInteger.class, numberType::bigIntegerValue);
     }
 
     @SuppressWarnings("unchecked")
