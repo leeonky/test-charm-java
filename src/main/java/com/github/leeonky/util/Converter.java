@@ -133,6 +133,8 @@ public class Converter {
     public Converter extend() {
         BeanClass.subTypesOf(ConverterExtension.class, "com.github.leeonky.util.extensions")
                 .forEach(c -> ((ConverterExtension) BeanClass.newInstance(c)).extend(this));
+        BeanClass.subTypesOf(ConverterExtension.class, "com.github.leeonky.extensions.util")
+                .forEach(c -> ((ConverterExtension) BeanClass.newInstance(c)).extend(this));
         return this;
     }
 }
