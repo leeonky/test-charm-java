@@ -142,10 +142,10 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
             NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(MA mandatory) {
-        return new DefaultSyntax<>((procedure, syntax) -> procedure.withIndex(() -> new ArrayList<T>() {{
+        return new DefaultSyntax<>((procedure, syntax) -> procedure.withColumn(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
                 add(mandatory.parse(procedure));
-                procedure.incrementIndex();
+                procedure.incrementColumn();
                 if (!syntax.isSplitter(procedure))
                     break;
             }
@@ -157,13 +157,13 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
             NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(PA parser) {
-        return new DefaultSyntax<>((procedure, syntax) -> procedure.withIndex(() -> new ArrayList<T>() {{
+        return new DefaultSyntax<>((procedure, syntax) -> procedure.withColumn(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
                 Optional<T> optional = parser.parse(procedure);
                 if (!optional.isPresent())
                     break;
                 add(optional.get());
-                procedure.incrementIndex();
+                procedure.incrementColumn();
                 if (!syntax.isSplitter(procedure))
                     break;
             }

@@ -8,6 +8,34 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         extends Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
         ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
 
+    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> positionClause(
+            ClauseParser<C, N, E, O, P> clauseParser) {
+        return procedure -> procedure.positionOf(position -> clauseParser.parse(procedure)
+                .map(clause -> node -> clause.expression(node).setPositionBegin(position)));
+    }
+
+    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> positionClause(
+            ClauseParser.Mandatory<C, N, E, O, P> clauseMandatory) {
+        return procedure -> procedure.positionOf(position -> {
+            Clause<C, N> parse = clauseMandatory.parse(procedure);
+            return node -> parse.expression(node).setPositionBegin(position);
+        });
+    }
+
+    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> columnMandatory(
+            Function<Integer, ClauseParser.Mandatory<C, N, E, O, P>> mandatoryFactory) {
+        return procedure -> mandatoryFactory.apply(procedure.getColumn()).parse(procedure);
+    }
+
+    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> columnParser(
+            Function<Integer, ClauseParser<C, N, E, O, P>> parserFactory) {
+        return procedure -> parserFactory.apply(procedure.getColumn()).parse(procedure);
+    }
+
     @Override
     default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
             Mandatory<C, N, E, O, P>, Clause<C, N>> parser) {

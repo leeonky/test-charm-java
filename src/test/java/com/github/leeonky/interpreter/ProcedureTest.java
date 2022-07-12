@@ -79,21 +79,21 @@ class ProcedureTest {
             TestNode testNode = new TestNode();
             TestNode testNode2 = new TestNode();
 
-            assertThat(procedure.withIndex(() -> {
-                assertThat(procedure.getIndex()).isEqualTo(0);
-                procedure.incrementIndex();
-                assertThat(procedure.getIndex()).isEqualTo(1);
+            assertThat(procedure.withColumn(() -> {
+                assertThat(procedure.getColumn()).isEqualTo(0);
+                procedure.incrementColumn();
+                assertThat(procedure.getColumn()).isEqualTo(1);
 
-                assertThat(procedure.withIndex(() -> {
-                    assertThat(procedure.getIndex()).isEqualTo(0);
-                    procedure.incrementIndex();
-                    assertThat(procedure.getIndex()).isEqualTo(1);
-                    procedure.incrementIndex();
-                    assertThat(procedure.getIndex()).isEqualTo(2);
+                assertThat(procedure.withColumn(() -> {
+                    assertThat(procedure.getColumn()).isEqualTo(0);
+                    procedure.incrementColumn();
+                    assertThat(procedure.getColumn()).isEqualTo(1);
+                    procedure.incrementColumn();
+                    assertThat(procedure.getColumn()).isEqualTo(2);
                     return testNode2;
                 })).isEqualTo(testNode2);
 
-                assertThat(procedure.getIndex()).isEqualTo(1);
+                assertThat(procedure.getColumn()).isEqualTo(1);
                 return testNode;
             })).isEqualTo(testNode);
         }
@@ -103,16 +103,16 @@ class ProcedureTest {
             TestProcedure procedure = givenProcedureWithCode("");
             TestNode testNode = new TestNode();
 
-            assertThat(procedure.withIndex(() -> {
-                assertThat(procedure.getIndex()).isEqualTo(0);
-                procedure.incrementIndex();
-                assertThat(procedure.getIndex()).isEqualTo(1);
+            assertThat(procedure.withColumn(() -> {
+                assertThat(procedure.getColumn()).isEqualTo(0);
+                procedure.incrementColumn();
+                assertThat(procedure.getColumn()).isEqualTo(1);
 
-                assertThrows(RuntimeException.class, () -> procedure.withIndex(() -> {
+                assertThrows(RuntimeException.class, () -> procedure.withColumn(() -> {
                     throw new RuntimeException();
                 }));
 
-                assertThat(procedure.getIndex()).isEqualTo(1);
+                assertThat(procedure.getColumn()).isEqualTo(1);
                 return testNode;
             })).isEqualTo(testNode);
         }

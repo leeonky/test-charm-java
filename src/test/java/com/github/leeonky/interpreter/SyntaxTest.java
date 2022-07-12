@@ -171,7 +171,7 @@ class SyntaxTest extends BaseTest {
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
                 assertThat(procedure).isSameAs(testProcedure);
                 if (nodeCode-- > 0)
-                    return ofNullable(new TestNode(procedure.getIndex()));
+                    return ofNullable(new TestNode(procedure.getColumn()));
                 else
                     return empty();
             };
@@ -253,7 +253,7 @@ class SyntaxTest extends BaseTest {
             NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory = procedure -> {
                 assertThat(procedure).isSameAs(testProcedure);
                 if (nodeCode-- > 0)
-                    return new TestNode(procedure.getIndex());
+                    return new TestNode(procedure.getColumn());
                 return null;
             };
 

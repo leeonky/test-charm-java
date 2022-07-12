@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
@@ -19,6 +20,18 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             NodeParser<C, N, E, O, P> mandatory) {
         return procedure -> procedure.positionOf(position -> mandatory.parse(procedure)
                 .map(node -> node.setPositionBegin(position)));
+    }
+
+    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser.Mandatory<C, N, E, O, P> columnMandatory(
+            Function<Integer, NodeParser.Mandatory<C, N, E, O, P>> mandatoryFactory) {
+        return procedure -> mandatoryFactory.apply(procedure.getColumn()).parse(procedure);
+    }
+
+    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> columnParser(
+            Function<Integer, NodeParser<C, N, E, O, P>> parserFactory) {
+        return procedure -> parserFactory.apply(procedure.getColumn()).parse(procedure);
     }
 
     @Override

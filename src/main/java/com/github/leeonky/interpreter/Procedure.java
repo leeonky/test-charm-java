@@ -38,7 +38,7 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         return action.apply(getSourceCode().nextPosition());
     }
 
-    public <T> T withIndex(Supplier<T> action) {
+    public <T> T withColumn(Supplier<T> action) {
         columns.push(new AtomicInteger());
         try {
             return action.get();
@@ -47,11 +47,11 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         }
     }
 
-    public int getIndex() {
+    public int getColumn() {
         return columns.getFirst().get();
     }
 
-    public void incrementIndex() {
+    public void incrementColumn() {
         columns.getFirst().incrementAndGet();
     }
 
