@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
@@ -46,7 +47,7 @@ public class Converter {
                 .addTypeConverter(String.class, BigInteger.class, BigInteger::new)
                 .addTypeConverter(String.class, BigDecimal.class, BigDecimal::new)
                 .addTypeConverter(String.class, UUID.class, UUID::fromString)
-                .addTypeConverter(String.class, Instant.class, Instant::parse)
+                .addTypeConverter(String.class, Instant.class, Converter::parseToInstant)
                 .addTypeConverter(String.class, Date.class, source -> {
                     try {
                         return new SimpleDateFormat("yyyy-MM-dd").parse(source);
@@ -74,6 +75,14 @@ public class Converter {
                 .addTypeConverter(Number.class, float.class, numberType::floatValue)
                 .addTypeConverter(Number.class, BigDecimal.class, numberType::bigDecimalValue)
                 .addTypeConverter(Number.class, BigInteger.class, numberType::bigIntegerValue);
+    }
+
+    private static Instant parseToInstant(String charSequence) {
+        try {
+            return Instant.parse(charSequence);
+        } catch (DateTimeParseException ignore) {
+            return OffsetDateTime.parse(charSequence).toInstant();
+        }
     }
 
     @SuppressWarnings("unchecked")

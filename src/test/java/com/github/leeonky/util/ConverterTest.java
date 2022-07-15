@@ -196,6 +196,11 @@ class ConverterTest {
         }
 
         @Test
+        void support_convert_string_in_offset_date_time_to_instant() {
+            assertConvert(Instant.class, "1996-01-23T08:00:01+08:00", Instant.parse("1996-01-23T00:00:01Z"));
+        }
+
+        @Test
         void register_config() {
             Converter converter = Converter.createDefault().addTypeConverter(Type.class, String.class, t -> "customer converter");
             assertThat(converter.tryConvert(String.class, new Type())).isEqualTo("customer converter");
