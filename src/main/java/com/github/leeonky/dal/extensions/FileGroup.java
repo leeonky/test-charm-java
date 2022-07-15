@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions;
 
-import com.github.leeonky.dal.runtime.Flatten;
+import com.github.leeonky.dal.runtime.PartialObject;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.InputStream;
@@ -12,12 +12,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class FileGroup<T> implements Flatten, Iterable<T> {
+public abstract class FileGroup<T> implements PartialObject, Iterable<T> {
     protected static final Map<String, Function<InputStream, Object>> fileExtensions = new HashMap<>();
     protected final String name;
 
     public FileGroup(String name) {
         this.name = name;
+    }
+
+    public static void register(String fileExtension, Function<InputStream, Object> fileReader) {
+        fileExtensions.put(fileExtension, fileReader);
     }
 
     @Override
@@ -29,11 +33,7 @@ public abstract class FileGroup<T> implements Flatten, Iterable<T> {
         return String.format("%s.%s", name, fileExtension);
     }
 
-    public static void register(String fileExtension, Function<InputStream, Object> fileReader) {
-        fileExtensions.put(fileExtension, fileReader);
-    }
-
-    public Object getFile(String extensionName) {
+    public Object getFile(Object extensionName) {
         T subFile = createSubFile(fileName(extensionName));
         Function<InputStream, Object> handler = fileExtensions.get(extensionName);
         if (handler != null)
@@ -57,6 +57,6 @@ public abstract class FileGroup<T> implements Flatten, Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return listFileName().map(this::createSubFile).iterator();
+        return listFileName().map((fileName) -> createSubFile(fileName)).iterator();
     }
 }

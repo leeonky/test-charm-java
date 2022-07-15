@@ -35,12 +35,12 @@ public class FileExtension implements Extension {
                 new JavaClassPropertyAccessor<FileGroup>(runtimeContextBuilder, create(FileGroup.class)) {
 
                     @Override
-                    public Object getValue(FileGroup fileGroup, String name) {
-                        return fileGroup.getFile(name);
+                    public Object getValue(FileGroup fileGroup, Object name) {
+                        return fileGroup.getFile((String) name);
                     }
 
                     @Override
-                    public Set<String> getPropertyNames(FileGroup fileGroup) {
+                    public Set<Object> getPropertyNames(FileGroup fileGroup) {
                         return fileGroup.list();
                     }
                 });
@@ -63,15 +63,15 @@ public class FileExtension implements Extension {
                 new JavaClassPropertyAccessor<Path>(runtimeContextBuilder, create(Path.class)) {
 
                     @Override
-                    public Set<String> getPropertyNames(Path path) {
+                    public Set<Object> getPropertyNames(Path path) {
                         File file = path.toFile();
                         return file.isDirectory() ? listFileNames(file) : super.getPropertyNames(path);
                     }
 
                     @Override
-                    public Object getValue(Path path, String name) {
+                    public Object getValue(Path path, Object name) {
                         File file = path.toFile();
-                        return file.isDirectory() ? getSubFile(file, name) : super.getValue(path, name);
+                        return file.isDirectory() ? getSubFile(file, (String) name) : super.getValue(path, name);
                     }
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, StaticMethods::name);
@@ -94,13 +94,13 @@ public class FileExtension implements Extension {
                 new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
 
                     @Override
-                    public Set<String> getPropertyNames(File file) {
+                    public Set<Object> getPropertyNames(File file) {
                         return file.isDirectory() ? listFileNames(file) : super.getPropertyNames(file);
                     }
 
                     @Override
-                    public Object getValue(File file, String name) {
-                        return file.isDirectory() ? getSubFile(file, name) : super.getValue(file, name);
+                    public Object getValue(File file, Object name) {
+                        return file.isDirectory() ? getSubFile(file, (String) name) : super.getValue(file, name);
                     }
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
@@ -115,11 +115,11 @@ public class FileExtension implements Extension {
         throw new IllegalArgumentException(String.format("File or File Group <%s> not found", name));
     }
 
-    private LinkedHashSet<String> listFileNames(File file) {
+    private Set<Object> listFileNames(File file) {
         return listFile(file).stream().map(File::getName).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private LinkedHashSet<File> listFile(File file) {
+    private Set<File> listFile(File file) {
         return stream(file.listFiles()).sorted(Comparator.comparing(File::getName))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }

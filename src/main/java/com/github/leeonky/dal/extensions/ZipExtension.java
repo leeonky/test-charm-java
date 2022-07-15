@@ -5,6 +5,7 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
@@ -23,13 +24,13 @@ public class ZipExtension implements Extension {
                                 create(ZipBinary.class)) {
 
                             @Override
-                            public Object getValue(ZipBinary zipBinaryTree, String name) {
-                                return zipBinaryTree.getSub(name);
+                            public Object getValue(ZipBinary zipBinaryTree, Object name) {
+                                return zipBinaryTree.getSub((String) name);
                             }
 
                             @Override
-                            public Set<String> getPropertyNames(ZipBinary zipBinaryTree) {
-                                return zipBinaryTree.list();
+                            public Set<Object> getPropertyNames(ZipBinary zipBinaryTree) {
+                                return new LinkedHashSet<>(zipBinaryTree.list());
                             }
                         })
                 .registerPropertyAccessor(ZipBinary.ZipNode.class,
@@ -37,16 +38,16 @@ public class ZipExtension implements Extension {
                                 create(ZipBinary.ZipNode.class)) {
 
                             @Override
-                            public Object getValue(ZipBinary.ZipNode zipNode, String name) {
+                            public Object getValue(ZipBinary.ZipNode zipNode, Object name) {
                                 if (zipNode.isDirectory())
-                                    return zipNode.getSub(name);
+                                    return zipNode.getSub((String) name);
                                 return super.getValue(zipNode, name);
                             }
 
                             @Override
-                            public Set<String> getPropertyNames(ZipBinary.ZipNode zipNode) {
+                            public Set<Object> getPropertyNames(ZipBinary.ZipNode zipNode) {
                                 if (zipNode.isDirectory())
-                                    return zipNode.list();
+                                    return new LinkedHashSet<>(zipNode.list());
                                 return super.getPropertyNames(zipNode);
                             }
                         })

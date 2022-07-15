@@ -26,7 +26,7 @@ public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode> {
         ZipBinary.ZipNode zipNode = children.get(name);
         if (zipNode != null)
             return zipNode;
-        if (list().stream().anyMatch(f -> f.startsWith(name + ".")))
+        if (list().stream().anyMatch(f -> ((String) f).startsWith(name + ".")))
             return new ZipFileFileGroup(this, name);
         throw new IllegalArgumentException(String.format("File or File Group <%s> not found", name));
     }
