@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.util.Suppressor.get;
-import static java.lang.ClassLoader.getSystemClassLoader;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
@@ -134,12 +133,30 @@ public class BeanClass<T> {
     public static List<Class<?>> allTypesIn(String packageName) {
         return new ArrayList<Class<?>>() {{
             try {
-                Enumeration<URL> resources = getSystemClassLoader().getResources(packageName.replaceAll("[.]", "/"));
+                Enumeration<URL> resources = getClassLoader().getResources(packageName.replaceAll("[.]", "/"));
                 while (resources.hasMoreElements())
                     addAll(getClasses(packageName, resources.nextElement()));
             } catch (Exception ignore) {
             }
         }};
+    }
+
+    private static ClassLoader getClassLoader() {
+        ClassLoader classLoader = null;
+        try {
+            classLoader = Thread.currentThread().getContextClassLoader();
+        } catch (Throwable ignore) {
+        }
+        if (classLoader == null) {
+            classLoader = BeanClass.class.getClassLoader();
+            if (classLoader == null) {
+                try {
+                    classLoader = ClassLoader.getSystemClassLoader();
+                } catch (Throwable ignore) {
+                }
+            }
+        }
+        return classLoader;
     }
 
     private static List<Class<?>> getClasses(String packageName, URL resource) {
