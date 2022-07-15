@@ -207,6 +207,14 @@ class ConverterTest {
             assertThrows(IllegalArgumentException.class, () -> Converter.createDefault().tryConvert(Date.class, "invalid date"));
         }
 
+        @Test
+        void support_replace_default_converter() {
+            int fixInt = 1000;
+            converter.addTypeConverter(String.class, Integer.class, str -> fixInt);
+
+            Assertions.assertThat(converter.convert(Integer.class, "2000")).isEqualTo(1000);
+        }
+
         @Nested
         class NumberConvert {
 

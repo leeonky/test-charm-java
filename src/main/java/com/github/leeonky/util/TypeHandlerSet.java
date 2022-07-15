@@ -11,6 +11,7 @@ public class TypeHandlerSet<T> {
 
     public void add(Class<?> source, Class<?> target, T converter) {
         List<TypeHandler<T>> typeHandlers = handlers.computeIfAbsent(target, k -> new ArrayList<>());
+        typeHandlers.removeIf(handler -> handler.isPreciseType(source));
         typeHandlers.add(new TypeHandler<>(source, converter));
         typeHandlers.sort(TypeHandler::sortClass);
     }
