@@ -26,7 +26,7 @@ public class JsonExtension implements Extension {
             return json(new String(data));
         }
 
-        public static Object json(String data) {
+        public static Object json(CharSequence data) {
             return Suppressor.get(() -> new ObjectMapper().readValue("[" + data + "]", List.class).get(0));
         }
     }
