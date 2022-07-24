@@ -9,7 +9,7 @@ public class Suppressor {
         } catch (RuntimeException e) {
             throw e;
         } catch (InvocationTargetException e) {
-            throw new IllegalStateException(e.getTargetException());
+            throw new InvocationException(e.getTargetException());
         } catch (Throwable e) {
             throw new IllegalStateException(e);
         }
