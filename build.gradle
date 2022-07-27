@@ -47,7 +47,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.leeonky:DAL-java:0.3.1'
+    implementation 'com.github.leeonky:DAL-java:0.3.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
 
     testImplementation 'org.assertj:assertj-core:3.21.0'
