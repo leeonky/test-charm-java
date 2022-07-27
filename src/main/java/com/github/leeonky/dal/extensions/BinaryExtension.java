@@ -9,13 +9,6 @@ import java.io.InputStream;
 
 public class BinaryExtension implements Extension {
 
-    @Override
-    public void extend(DAL dal) {
-        dal.getRuntimeContextBuilder()
-                .registerStaticMethodExtension(StaticMethods.class)
-                .registerImplicitData(InputStream.class, BinaryExtension::readAllAndClose);
-    }
-
     public static byte[] readAllAndClose(InputStream stream) {
         try {
             return readAll(stream);
@@ -36,8 +29,14 @@ public class BinaryExtension implements Extension {
         });
     }
 
-    public static class StaticMethods {
+    @Override
+    public void extend(DAL dal) {
+        dal.getRuntimeContextBuilder()
+                .registerStaticMethodExtension(StaticMethods.class)
+                .registerImplicitData(InputStream.class, BinaryExtension::readAllAndClose);
+    }
 
+    public static class StaticMethods {
         public static byte[] binary(byte[] bytes) {
             return bytes;
         }
