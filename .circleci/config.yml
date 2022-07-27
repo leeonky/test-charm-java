@@ -6,19 +6,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: test
+          name: build
           command: |
             ./gradlew check build coveralls
-      - run:
-          name: check version
-          command: |
             export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
-            bash -c 'git tag | grep -q "^${PUB_VERSION}$"' && echo "Still version ${PUB_VERSION}, CI done"
-      - run:
-          name: publish
-          when: on_fail
-          command: |
-            export PUB_VERSION=$(VERSION_SCOPE='' ./gradlew currentVersion -q)
+            ( bash -c "! git tag | grep -q \"^${PUB_VERSION}$\"" ) || echo "Still version ${PUB_VERSION}, CI done" && exit 0
             echo "Release and tag new version $PUB_VERSION"
             echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
             ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
