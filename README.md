@@ -1,5 +1,6 @@
 # view-mapper
-[![travis-ci](https://travis-ci.org/leeonky/view-mapper.svg?branch=master)](https://travis-ci.org/leeonky/view-mapper)
+
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/leeonky/view-mapper/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/leeonky/view-mapper/tree/master)
 [![coveralls](https://img.shields.io/coveralls/github/leeonky/view-mapper.svg)](https://coveralls.io/github/leeonky/view-mapper)
 [![Lost commit](https://img.shields.io/github/last-commit/leeonky/view-mapper.svg)](https://github.com/leeonky/view-mapper)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.leeonky/view-mapper.svg)](https://search.maven.org/artifact/com.github.leeonky/view-mapper)
