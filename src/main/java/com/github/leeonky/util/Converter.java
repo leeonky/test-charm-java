@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
+import static com.github.leeonky.util.CollectionHelper.toStream;
 
 public class Converter {
     private static final NumberType numberType = new NumberType();
@@ -113,7 +114,7 @@ public class Converter {
         if (value != null) {
             BeanClass<T> targetBean = BeanClass.create(target);
             if (targetBean.isCollection()) {
-                return targetBean.createCollection(BeanClass.arrayCollectionToStream(value).collect(Collectors.toList()));
+                return targetBean.createCollection(toStream(value).collect(Collectors.toList()));
             }
         }
         return defaultValue.apply(value);

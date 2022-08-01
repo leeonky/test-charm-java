@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,11 +72,6 @@ class CollectionPropertyTest {
     class CreateReadWrite {
 
         @Test
-        void support_null_input() {
-            assertThrows(CannotToStreamException.class, () -> BeanClass.arrayCollectionToStream(null));
-        }
-
-        @Test
         void should_raise_error_when_type_is_not_collection() {
             assertThrows(IllegalStateException.class, () -> BeanClass.create(Integer.class).createCollection(emptyList()));
         }
@@ -92,12 +86,6 @@ class CollectionPropertyTest {
                 Object collection = beanClass.createCollection(asList("a", "b"));
 
                 assertThat(collection).isEqualTo(new String[]{"a", "b"});
-            }
-
-            @Test
-            void support_get_elements() {
-                assertThat(BeanClass.arrayCollectionToStream(new String[]{"hello", "world"}).collect(Collectors.toList()))
-                        .isEqualTo(asList("hello", "world"));
             }
         }
 
@@ -129,12 +117,6 @@ class CollectionPropertyTest {
                 Object collection = beanClass.createCollection(asList("a", "b"));
 
                 assertThat(collection).isEqualTo(new LinkedList<>(asList("a", "b")));
-            }
-
-            @Test
-            void support_get_elements() {
-                assertThat(BeanClass.arrayCollectionToStream(asList("hello", "world")).collect(Collectors.toList()))
-                        .isEqualTo(asList("hello", "world"));
             }
         }
     }

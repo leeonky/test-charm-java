@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.util.Suppressor.get;
 import static java.util.Arrays.asList;
@@ -60,16 +59,16 @@ public class BeanClass<T> {
                 .allMatch(i -> parameterTypes[i].isInstance(parameters[i]));
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Use CollectionHelper.toStream
+     *
+     * @param collection
+     * @param <E>
+     * @return
+     */
+    @Deprecated
     public static <E> Stream<E> arrayCollectionToStream(Object collection) {
-        if (collection != null) {
-            Class<?> collectionType = collection.getClass();
-            if (collectionType.isArray())
-                return IntStream.range(0, Array.getLength(collection)).mapToObj(i -> (E) Array.get(collection, i));
-            else if (collection instanceof Iterable)
-                return StreamSupport.stream(((Iterable<E>) collection).spliterator(), false);
-        }
-        throw new CannotToStreamException(collection);
+        return CollectionHelper.toStream(collection);
     }
 
     public static <T> Optional<T> cast(Object value, Class<T> type) {
@@ -277,7 +276,7 @@ public class BeanClass<T> {
             throw new NullPointerInChainException(originalChain, level);
         Object p = chain.removeFirst();
         if (p instanceof Integer) {
-            Object[] array = BeanClass.arrayCollectionToStream(object).toArray();
+            Object[] array = CollectionHelper.toStream(object).toArray();
             if ((int) p >= array.length)
                 throw new NullPointerInChainException(originalChain, level);
             Object element = array[(int) p];
