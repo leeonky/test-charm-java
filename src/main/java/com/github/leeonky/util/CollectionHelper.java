@@ -7,6 +7,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.github.leeonky.util.BeanClass.create;
+
 public class CollectionHelper {
 
     @SuppressWarnings("unchecked")
@@ -66,5 +68,11 @@ public class CollectionHelper {
         for (Object element : elements)
             Array.set(array, i++, element);
         return array;
+    }
+
+    public static boolean equals(Object obj1, Object obj2) {
+        if (obj1 == null || obj2 == null)
+            return Objects.equals(obj1, obj2);
+        return convert(obj1, create(List.class)).equals(convert(obj2, create(List.class)));
     }
 }

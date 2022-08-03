@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.CollectionHelper.convert;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -97,5 +98,27 @@ public class CollectionHelperTest {
                     .containsExactly("1", "2");
         }
     }
-//    TODO equal collection
+
+    @Nested
+    class CompareCollection {
+
+        @Test
+        void null_and_null_is_equal() {
+            assertThat(CollectionHelper.equals(null, null)).isTrue();
+            assertThat(CollectionHelper.equals(emptyList(), null)).isFalse();
+        }
+
+        @Test
+        void array_and_array() {
+            assertThat(CollectionHelper.equals(new int[]{1, 2}, new int[]{1, 2})).isTrue();
+            assertThat(CollectionHelper.equals(new int[]{1, 2}, new int[]{1, 3})).isFalse();
+            assertThat(CollectionHelper.equals(new int[]{1, 2}, new Integer[]{1, 2})).isTrue();
+        }
+
+        @Test
+        void array_and_list() {
+            assertThat(CollectionHelper.equals(new int[]{1, 2}, asList(1, 2))).isTrue();
+            assertThat(CollectionHelper.equals(new int[]{1, 2}, asList(1, 3))).isFalse();
+        }
+    }
 }
