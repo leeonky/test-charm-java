@@ -88,7 +88,7 @@ public class Converter {
 
     @SuppressWarnings("unchecked")
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
-        typeConverterSet.add(BeanClass.boxedClass(source), target, (Function<Object, Object>) converter);
+        typeConverterSet.add(NumberType.boxedClass(source), target, (Function<Object, Object>) converter);
         return this;
     }
 
@@ -129,7 +129,7 @@ public class Converter {
     @SuppressWarnings("unchecked")
     public <E extends Enum<E>, V> Converter addEnumConverter(Class<V> source, Class<E> target,
                                                              BiFunction<Class<E>, V, E> converter) {
-        enumConverterSet.add(BeanClass.boxedClass(source), target, (BiFunction) converter);
+        enumConverterSet.add(NumberType.boxedClass(source), target, (BiFunction) converter);
         return this;
     }
 

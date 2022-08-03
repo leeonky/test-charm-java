@@ -14,8 +14,8 @@ public class NumberType {
 
     @SuppressWarnings("unchecked")
     public static Class<? extends Number> calculationType(Class<? extends Number> number1, Class<? extends Number> number2) {
-        Class boxedType1 = BeanClass.boxedClass(number1);
-        Class boxedType2 = BeanClass.boxedClass(number2);
+        Class boxedType1 = boxedClass(number1);
+        Class boxedType2 = boxedClass(number2);
         if (isFloatAndBigInteger(boxedType1, boxedType2) || isFloatAndBigInteger(boxedType2, boxedType1))
             return BigDecimal.class;
         return NUMBER_TYPES.indexOf(boxedType1) > NUMBER_TYPES.indexOf(boxedType2) ? boxedType1 : boxedType2;
@@ -23,6 +23,25 @@ public class NumberType {
 
     private static boolean isFloatAndBigInteger(Class<?> boxedType1, Class<?> boxedType2) {
         return boxedType1.equals(BigInteger.class) && (boxedType2.equals(Float.class) || boxedType2.equals(Double.class));
+    }
+
+    public static Class<?> boxedClass(Class<?> source) {
+        if (source.isPrimitive())
+            if (source == char.class)
+                return Character.class;
+        if (source == int.class)
+            return Integer.class;
+        else if (source == short.class)
+            return Short.class;
+        else if (source == long.class)
+            return Long.class;
+        else if (source == float.class)
+            return Float.class;
+        else if (source == double.class)
+            return Double.class;
+        else if (source == boolean.class)
+            return Boolean.class;
+        return source;
     }
 
     public Number plus(Number left, Number right) {
@@ -153,7 +172,7 @@ public class NumberType {
     }
 
     public Number negate(Number left) {
-        Class<?> type = BeanClass.boxedClass(left.getClass());
+        Class<?> type = boxedClass(left.getClass());
         if (type.equals(Byte.class))
             return (byte) -(byte) left;
         if (type.equals(Short.class))

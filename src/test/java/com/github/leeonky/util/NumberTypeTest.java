@@ -100,13 +100,13 @@ class NumberTypeTest {
 
         @Test
         void box_class() {
-            Java6Assertions.assertThat(BeanClass.boxedClass(char.class)).isEqualTo(Character.class);
-            Java6Assertions.assertThat(BeanClass.boxedClass(int.class)).isEqualTo(Integer.class);
-            Java6Assertions.assertThat(BeanClass.boxedClass(short.class)).isEqualTo(Short.class);
-            Java6Assertions.assertThat(BeanClass.boxedClass(long.class)).isEqualTo(Long.class);
-            Java6Assertions.assertThat(BeanClass.boxedClass(float.class)).isEqualTo(Float.class);
-            Java6Assertions.assertThat(BeanClass.boxedClass(double.class)).isEqualTo(Double.class);
-            Java6Assertions.assertThat(BeanClass.boxedClass(boolean.class)).isEqualTo(Boolean.class);
+            Java6Assertions.assertThat(NumberType.boxedClass(char.class)).isEqualTo(Character.class);
+            Java6Assertions.assertThat(NumberType.boxedClass(int.class)).isEqualTo(Integer.class);
+            Java6Assertions.assertThat(NumberType.boxedClass(short.class)).isEqualTo(Short.class);
+            Java6Assertions.assertThat(NumberType.boxedClass(long.class)).isEqualTo(Long.class);
+            Java6Assertions.assertThat(NumberType.boxedClass(float.class)).isEqualTo(Float.class);
+            Java6Assertions.assertThat(NumberType.boxedClass(double.class)).isEqualTo(Double.class);
+            Java6Assertions.assertThat(NumberType.boxedClass(boolean.class)).isEqualTo(Boolean.class);
         }
     }
 
