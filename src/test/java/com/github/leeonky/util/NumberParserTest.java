@@ -1,7 +1,5 @@
 package com.github.leeonky.util;
 
-import com.github.leeonky.interpreter.NumberOverflowException;
-import com.github.leeonky.interpreter.NumberParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -25,13 +23,13 @@ class NumberParserTest {
     }
 
     private void assertParseOverflow(String code) {
-        assertThat(assertThrows(NumberOverflowException.class, () -> new com.github.leeonky.interpreter.NumberParser().parse(code)))
+        assertThat(assertThrows(NumberOverflowException.class, () -> new NumberParser().parse(code)))
                 .hasMessageContaining(String.format("Cannon save [%s] with the given postfix type", code));
     }
 
     private void assertParse(String inputCode, Number expected) {
         if (expected instanceof BigDecimal) {
-            assertThat(((BigDecimal) new com.github.leeonky.interpreter.NumberParser().parse(inputCode)).subtract((BigDecimal) expected)).isZero();
+            assertThat(((BigDecimal) new NumberParser().parse(inputCode)).subtract((BigDecimal) expected)).isZero();
         } else
             assertThat(new NumberParser().parse(inputCode)).isEqualTo(expected);
     }
