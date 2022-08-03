@@ -20,13 +20,15 @@ public class CollectionHelper {
         throw new CannotToStreamException(collection);
     }
 
-    public static <T> T convert(Object collection, BeanClass<T> type) {
+    public static <T> T convert(Object collection, BeanClass<T> toType) {
+        return convert(collection, toType, Converter.getInstance());
+    }
+
+    public static <T> T convert(Object collection, BeanClass<T> toType, Converter elementConverter) {
         if (collection != null) {
-            Stream stream = toStream(collection);
-            if (type.getType().isArray()) {
-                return (T) stream.toArray(s -> Array.newInstance(type.getElementType().getType(), s));
-            }
-            return (T) stream.collect(Collectors.toList());
+            Class<?> elementType = toType.getElementType().getType();
+            return (T) toType.createCollection((toStream(collection).map(o ->
+                    elementConverter.convert(elementType, o))).collect(Collectors.toList()));
         }
         return null;
     }

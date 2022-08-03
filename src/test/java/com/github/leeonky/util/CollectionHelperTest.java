@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.CollectionHelper.convert;
@@ -14,6 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CollectionHelperTest {
+
+    public ArrayList<String> stringList;
 
     @Nested
     class CollectionToStream {
@@ -68,8 +72,30 @@ public class CollectionHelperTest {
         void list_to_array_with_out_convert_element_type() {
             assertThat(convert(asList("1", "2"), BeanClass.create(String[].class))).containsExactly("1", "2");
         }
-    }
 
-//    TODO convert collection
+        @Test
+        void to_array_and_convert_element_type() {
+            assertThat(convert(asList("1", "2"), BeanClass.create(Integer[].class))).containsExactly(1, 2);
+        }
+
+        @Test
+        void to_list_and_convert_element_type() {
+            assertThat((List) convert(asList(1, 2), BeanClass.create(CollectionHelperTest.class).getProperty("stringList").getWriterType())).containsExactly("1", "2");
+        }
+
+        @Test
+        void to_primitive_element_array() {
+            assertThat(convert(asList("1", "2"), BeanClass.create(int[].class)))
+                    .isInstanceOf(int[].class)
+                    .containsExactly(1, 2);
+        }
+
+        @Test
+        void create_collection_from_interface() {
+            assertThat(convert(asList("1", "2"), BeanClass.create(Set.class)))
+                    .isInstanceOf(LinkedHashSet.class)
+                    .containsExactly("1", "2");
+        }
+    }
 //    TODO equal collection
 }
