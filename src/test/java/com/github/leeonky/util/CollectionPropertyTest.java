@@ -83,7 +83,7 @@ class CollectionPropertyTest {
             void support_create_with_elements() {
                 BeanClass<String[]> beanClass = BeanClass.create(String[].class);
 
-                Object collection = beanClass.createCollection(asList("a", "b"));
+                Object collection = CollectionHelper.createCollection(asList("a", "b"), beanClass);
 
                 assertThat(collection).isEqualTo(new String[]{"a", "b"});
             }
@@ -96,7 +96,7 @@ class CollectionPropertyTest {
             void support_create_list_with_elements() {
                 BeanClass<Iterable> beanClass = BeanClass.create(Iterable.class);
 
-                Object collection = beanClass.createCollection(asList("a", "b"));
+                Object collection = CollectionHelper.createCollection(asList("a", "b"), beanClass);
 
                 assertThat(collection).isEqualTo(asList("a", "b"));
             }
@@ -105,7 +105,7 @@ class CollectionPropertyTest {
             void support_create_set_with_elements() {
                 BeanClass<Set> beanClass = BeanClass.create(Set.class);
 
-                Object collection = beanClass.createCollection(asList("a", "b"));
+                Object collection = CollectionHelper.createCollection(asList("a", "b"), beanClass);
 
                 assertThat(collection).isEqualTo(new LinkedHashSet<>(asList("a", "b")));
             }
@@ -114,7 +114,7 @@ class CollectionPropertyTest {
             void support_create_class_instance() {
                 BeanClass<LinkedList> beanClass = BeanClass.create(LinkedList.class);
 
-                Object collection = beanClass.createCollection(asList("a", "b"));
+                Object collection = CollectionHelper.createCollection(asList("a", "b"), beanClass);
 
                 assertThat(collection).isEqualTo(new LinkedList<>(asList("a", "b")));
             }

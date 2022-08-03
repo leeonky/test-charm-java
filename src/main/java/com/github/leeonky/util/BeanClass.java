@@ -205,28 +205,8 @@ public class BeanClass<T> {
         return newInstance(type, args);
     }
 
-    @SuppressWarnings("unchecked")
     public Object createCollection(Collection<?> elements) {
-        if (getType().isArray()) {
-            Object array = Array.newInstance(getType().getComponentType(), elements.size());
-            int i = 0;
-            for (Object element : elements)
-                Array.set(array, i++, element);
-            return array;
-        }
-        if (getType().isInterface()) {
-            if (Set.class.isAssignableFrom(getType()))
-                return new LinkedHashSet<>(elements);
-            if (Iterable.class.isAssignableFrom(getType()))
-                return new ArrayList<>(elements);
-        } else {
-            if (Collection.class.isAssignableFrom(getType())) {
-                Collection<Object> collection = (Collection<Object>) newInstance();
-                collection.addAll(elements);
-                return collection;
-            }
-        }
-        throw new IllegalStateException(String.format("Cannot create instance of collection type %s", getName()));
+        return CollectionHelper.createCollection(elements, this);
     }
 
     public Object getPropertyChainValue(T object, String chain) {
