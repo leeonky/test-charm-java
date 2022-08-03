@@ -59,18 +59,6 @@ public class BeanClass<T> {
                 .allMatch(i -> parameterTypes[i].isInstance(parameters[i]));
     }
 
-    /**
-     * Use CollectionHelper.toStream
-     *
-     * @param collection
-     * @param <E>
-     * @return
-     */
-    @Deprecated
-    public static <E> Stream<E> arrayCollectionToStream(Object collection) {
-        return CollectionHelper.toStream(collection);
-    }
-
     public static <T> Optional<T> cast(Object value, Class<T> type) {
         return ofNullable(value)
                 .filter(type::isInstance)
@@ -108,11 +96,6 @@ public class BeanClass<T> {
 
     public static void setConverter(Converter converter) {
         BeanClass.converter = converter;
-    }
-
-    @Deprecated
-    public static Class<?> boxedClass(Class<?> source) {
-        return NumberType.boxedClass(source);
     }
 
     public static List<Class<?>> allTypesIn(String packageName) {

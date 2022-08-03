@@ -3,8 +3,11 @@ package com.github.leeonky.util;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.CollectionHelper.convert;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +36,40 @@ public class CollectionHelperTest {
         }
     }
 
-//    TODO get access size collection
+    @Nested
+    class ConvertTo {
+
+        @Test
+        void null_convert_to_array_is_null() {
+            assertThat(convert(null, BeanClass.create(Object[].class))).isNull();
+        }
+
+        @Test
+        void null_convert_to_collection_type_is_null() {
+            assertThat(convert(null, BeanClass.create(List.class))).isNull();
+        }
+
+        @Test
+        void array_to_list_with_out_convert_element_type() {
+            assertThat(convert(new int[]{1, 2, 3}, BeanClass.create(List.class))).isEqualTo(asList(1, 2, 3));
+        }
+
+        @Test
+        void array_to_array_with_out_convert_element_type() {
+            assertThat(convert(new String[]{"1", "2"}, BeanClass.create(String[].class))).containsExactly("1", "2");
+        }
+
+        @Test
+        void list_to_list_with_out_convert_element_type() {
+            assertThat(convert(asList("1", "2"), BeanClass.create(ArrayList.class))).containsExactly("1", "2");
+        }
+
+        @Test
+        void list_to_array_with_out_convert_element_type() {
+            assertThat(convert(asList("1", "2"), BeanClass.create(String[].class))).containsExactly("1", "2");
+        }
+    }
+
 //    TODO convert collection
 //    TODO equal collection
 }

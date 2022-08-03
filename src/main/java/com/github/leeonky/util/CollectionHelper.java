@@ -1,6 +1,7 @@
 package com.github.leeonky.util;
 
 import java.lang.reflect.Array;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -17,5 +18,16 @@ public class CollectionHelper {
                 return StreamSupport.stream(((Iterable<E>) collection).spliterator(), false);
         }
         throw new CannotToStreamException(collection);
+    }
+
+    public static <T> T convert(Object collection, BeanClass<T> type) {
+        if (collection != null) {
+            Stream stream = toStream(collection);
+            if (type.getType().isArray()) {
+                return (T) stream.toArray(s -> Array.newInstance(type.getElementType().getType(), s));
+            }
+            return (T) stream.collect(Collectors.toList());
+        }
+        return null;
     }
 }
