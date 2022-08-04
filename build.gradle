@@ -4,6 +4,10 @@ buildscript {
     }
     dependencies {
     }
+    ext {
+        repoName = "git config --get remote.origin.url".execute().getText()
+        projectName = "basename -s .git ${repoName}".execute().getText()
+    }
 }
 
 plugins {
@@ -56,7 +60,6 @@ dependencies {
 }
 
 test {
-    print project
     useJUnitPlatform()
     testLogging {
         events "failed"
@@ -71,9 +74,9 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             pom {
-                name = project.name
-                description = project.name
-                url = 'https://github.com/leeonky/' + project.name
+                name = projectName
+                description = projectName
+                url = 'https://github.com/leeonky/' + projectName
 
                 licenses {
                     license {
@@ -91,9 +94,9 @@ publishing {
                 }
 
                 scm {
-                    connection = 'scm:git:https://github.com/leeonky/' + project.name + '.git'
-                    developerConnection = 'scm:git:git@github.com:leeonky' + project.name + '.git'
-                    url = 'https://github.com/leeonky/' + project.name + '.git'
+                    connection = 'scm:git:https://github.com/leeonky/' + projectName + '.git'
+                    developerConnection = 'scm:git:git@github.com:leeonky' + projectName + '.git'
+                    url = 'https://github.com/leeonky/' + projectName + '.git'
                 }
             }
         }
