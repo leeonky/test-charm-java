@@ -56,7 +56,7 @@ dependencies {
 }
 
 test {
-    print project.name
+    print project
     useJUnitPlatform()
     testLogging {
         events "failed"
@@ -71,7 +71,6 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             pom {
-                print project.name
                 name = project.name
                 description = project.name
                 url = 'https://github.com/leeonky/' + project.name
