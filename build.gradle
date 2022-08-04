@@ -6,7 +6,7 @@ buildscript {
     }
     ext {
         repoName = "git config --get remote.origin.url".execute().getText()
-        projectName = "basename -s .git ${repoName}".execute().getText()
+        projectName = "basename -s .git ${repoName}".execute().getText().trim()
     }
 }
 
@@ -60,8 +60,6 @@ dependencies {
 }
 
 test {
-    print repoName
-    print projectName
     useJUnitPlatform()
     testLogging {
         events "failed"
@@ -72,6 +70,7 @@ test {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifactId = projectName
             from(components.java)
             artifact sourcesJar
             artifact javadocJar
