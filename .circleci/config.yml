@@ -4,9 +4,9 @@ jobs:
     docker:
       - image: openjdk:8u342
     steps:
-      #      - add_ssh_keys:
-      #          fingerprints:
-      #            - ''
+      - add_ssh_keys:
+          fingerprints:
+            - 'aa:db:bf:9e:35:59:4a:39:9d:e8:4e:80:b1:89:e4:16'
       - checkout
       - run:
           name: build
