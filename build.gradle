@@ -6,6 +6,10 @@ buildscript {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE'
         classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
     }
+    ext {
+        repoName = "git config --get remote.origin.url".execute().getText()
+        projectName = "basename -s .git ${repoName}".execute().getText().trim()
+    }
 }
 
 plugins {
@@ -50,8 +54,8 @@ repositories {
 
 dependencies {
     implementation 'io.cucumber:cucumber-java:6.10.4'
-    implementation "com.github.leeonky:DAL-java:0.2.7"
-    implementation "com.github.leeonky:DAL-extension-basic:0.0.4"
+    implementation "com.github.leeonky:DAL-java:0.3.3"
+    implementation "com.github.leeonky:DAL-extension-basic:0.0.5"
     implementation "com.fasterxml.jackson.core:jackson-databind:2.11.0"
 
     testImplementation 'org.mock-server:mockserver:5.11.2'
@@ -80,13 +84,14 @@ pitest {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            artifactId = projectName
             from(components.java)
             artifact sourcesJar
             artifact javadocJar
             pom {
-                name = project.name
-                description = project.name
-                url = 'https://github.com/leeonky/' + project.name
+                name = projectName
+                description = projectName
+                url = 'https://github.com/leeonky/' + projectName
 
                 licenses {
                     license {
@@ -104,9 +109,9 @@ publishing {
                 }
 
                 scm {
-                    connection = 'scm:git:https://github.com/leeonky/' + project.name + '.git'
-                    developerConnection = 'scm:git:git@github.com:leeonky' + project.name + '.git'
-                    url = 'https://github.com/leeonky/' + project.name + '.git'
+                    connection = 'scm:git:https://github.com/leeonky/' + projectName + '.git'
+                    developerConnection = 'scm:git:git@github.com:leeonky' + projectName + '.git'
+                    url = 'https://github.com/leeonky/' + projectName + '.git'
                 }
             }
         }
