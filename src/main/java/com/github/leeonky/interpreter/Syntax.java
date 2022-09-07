@@ -10,6 +10,8 @@ import java.util.function.Function;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 
 public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
@@ -18,86 +20,6 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
 
     protected Syntax(BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser) {
         this.parser = parser;
-    }
-
-    protected abstract boolean isClose(P procedure);
-
-    protected abstract void close(P procedure);
-
-    protected abstract boolean isSplitter(P procedure);
-
-    @SuppressWarnings("unchecked")
-    protected R parse(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
-        return (R) (NodeParser.Mandatory<C, N, E, O, P>) procedure -> factory.apply(parser.apply(procedure, syntax));
-    }
-
-    public static class DefaultSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
-
-        public DefaultSyntax(BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser) {
-            super(parser);
-        }
-
-        @Override
-        protected boolean isClose(P procedure) {
-            return false;
-        }
-
-        @Override
-        protected void close(P procedure) {
-        }
-
-        @Override
-        protected boolean isSplitter(P procedure) {
-            return true;
-        }
-    }
-
-    public static class CompositeSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
-
-        private final Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax;
-
-        public CompositeSyntax(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax) {
-            super(syntax.parser);
-            this.syntax = syntax;
-        }
-
-        @Override
-        protected boolean isClose(P procedure) {
-            return syntax.isClose(procedure);
-        }
-
-        @Override
-        protected void close(P procedure) {
-            syntax.close(procedure);
-        }
-
-        @Override
-        protected boolean isSplitter(P procedure) {
-            return syntax.isSplitter(procedure);
-        }
-
-        @Override
-        protected R parse(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
-            return this.syntax.parse(syntax, factory);
-        }
-    }
-
-    public <NR, NA> Syntax<C, N, E, O, P, PA, MA, T, NR, NA> and(Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
-            Syntax<C, N, E, O, P, PA, MA, T, NR, NA>> rule) {
-        return rule.apply(this);
-    }
-
-    public R as(Function<A, N> factory) {
-        return parse(this, factory);
-    }
-
-    @SuppressWarnings("unchecked")
-    public R as() {
-        return parse(this, a -> (N) a);
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -171,6 +93,86 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         }}));
     }
 
+    protected abstract boolean isClose(P procedure);
+
+    protected abstract void close(P procedure);
+
+    protected abstract boolean isSplitter(P procedure);
+
+    @SuppressWarnings("unchecked")
+    protected R parse(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
+        return (R) (NodeParser.Mandatory<C, N, E, O, P>) procedure -> factory.apply(parser.apply(procedure, syntax));
+    }
+
+    public <NR, NA> Syntax<C, N, E, O, P, PA, MA, T, NR, NA> and(Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
+            Syntax<C, N, E, O, P, PA, MA, T, NR, NA>> rule) {
+        return rule.apply(this);
+    }
+
+    public R as(Function<A, N> factory) {
+        return parse(this, factory);
+    }
+
+    @SuppressWarnings("unchecked")
+    public R as() {
+        return parse(this, a -> (N) a);
+    }
+
+    public static class DefaultSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
+
+        public DefaultSyntax(BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser) {
+            super(parser);
+        }
+
+        @Override
+        protected boolean isClose(P procedure) {
+            return false;
+        }
+
+        @Override
+        protected void close(P procedure) {
+        }
+
+        @Override
+        protected boolean isSplitter(P procedure) {
+            return true;
+        }
+    }
+
+    public static class CompositeSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
+
+        private final Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax;
+
+        public CompositeSyntax(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax) {
+            super(syntax.parser);
+            this.syntax = syntax;
+        }
+
+        @Override
+        protected boolean isClose(P procedure) {
+            return syntax.isClose(procedure);
+        }
+
+        @Override
+        protected void close(P procedure) {
+            syntax.close(procedure);
+        }
+
+        @Override
+        protected boolean isSplitter(P procedure) {
+            return syntax.isSplitter(procedure);
+        }
+
+        @Override
+        protected R parse(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
+            return this.syntax.parse(syntax, factory);
+        }
+    }
+
     public static class Rules {
         public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
                 O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
@@ -186,6 +188,27 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                 @Override
                 public boolean isClose(P procedure) {
                     return procedure.getSourceCode().startsWith(notation) || !procedure.getSourceCode().hasCode();
+                }
+            };
+        }
+
+        public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+                O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+                MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
+                Syntax<C, N, E, O, P, PA, MA, T, R, A>> endBefore(Notation... notations) {
+            return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+                private boolean closed = false;
+
+                @Override
+                public void close(P procedure) {
+                    if (!closed)
+                        throw procedure.getSourceCode().syntaxError("Should end with " +
+                                stream(notations).map(Notation::getLabel).collect(joining("`", "`", "` or `")), 0);
+                }
+
+                @Override
+                public boolean isClose(P procedure) {
+                    return closed = stream(notations).anyMatch(procedure.getSourceCode()::startsWith);
                 }
             };
         }

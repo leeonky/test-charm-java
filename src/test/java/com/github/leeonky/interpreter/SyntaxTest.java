@@ -91,6 +91,8 @@ class SyntaxTest extends BaseTest {
     @Nested
     class ManyOP {
 
+        int nodeCode;
+
         @Test
         void return_empty_when_op_is_empty() {
             TestProcedure testProcedure = givenProcedureWithCode("");
@@ -160,8 +162,6 @@ class SyntaxTest extends BaseTest {
             }).parse(testProcedure)).isSameAs(result);
         }
 
-        int nodeCode;
-
         @Test
         void return_with_list_with_procedure_index() {
             nodeCode = 2;
@@ -194,6 +194,8 @@ class SyntaxTest extends BaseTest {
 
     @Nested
     class ManyMA {
+
+        int nodeCode;
 
         @Test
         void return_empty_when_start_with_close() {
@@ -242,8 +244,6 @@ class SyntaxTest extends BaseTest {
             }).parse(testProcedure)).isSameAs(result);
         }
 
-        int nodeCode;
-
         @Test
         void return_with_list_with_procedure_index() {
             nodeCode = 2;
@@ -288,7 +288,7 @@ class SyntaxTest extends BaseTest {
                     TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
 
             assertThat(assertThrows(SyntaxException.class, () -> syntax.close(givenProcedureWithCode(""))))
-                    .hasMessageContaining("");
+                    .hasMessageContaining("Should end with `a`");
         }
 
         @Test
@@ -307,7 +307,7 @@ class SyntaxTest extends BaseTest {
         }
 
         @Test
-        void return_false_when_no_code() {
+        void return_close_when_no_code() {
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
 
             Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
@@ -319,7 +319,7 @@ class SyntaxTest extends BaseTest {
         }
 
         @Test
-        void return_false_when_not_close() {
+        void return_not_close_when_not_close() {
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
 
             Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
@@ -331,7 +331,7 @@ class SyntaxTest extends BaseTest {
         }
 
         @Test
-        void return_true_when_close() {
+        void return_be_closed_when_close() {
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
 
             Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
@@ -340,6 +340,88 @@ class SyntaxTest extends BaseTest {
                     TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
 
             assertThat(syntax.isClose(givenProcedureWithCode(" a"))).isTrue();
+        }
+    }
+
+    @Nested
+    class EndBeforeNotation {
+
+
+        @Test
+        void raise_error_when_not_end_with() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+
+            assertThat(assertThrows(SyntaxException.class, () -> syntax.close(givenProcedureWithCode(""))))
+                    .hasMessageContaining("Should end with `a`");
+        }
+
+        @Test
+        void should_not_move_position_when_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+
+            TestProcedure testProcedure = givenProcedureWithCode("a");
+            syntax.isClose(testProcedure);
+            syntax.close(testProcedure);
+
+            assertThat(testProcedure.getSourceCode().startsWith("a")).isTrue();
+        }
+
+        @Test
+        void return_not_close_when_no_code() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation(" a")));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(" "))).isFalse();
+        }
+
+        @Test
+        void return_not_close_when_not_before_notation() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+
+            assertThat(syntax.isClose(givenProcedureWithCode("b"))).isFalse();
+        }
+
+        @Test
+        void return_be_closed_when_before_notation() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(" a"))).isTrue();
+        }
+
+        @Test
+        void return_be_closed_when_before_one_of_notations() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a"), notation("b")));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(" b"))).isTrue();
         }
     }
 
