@@ -49,4 +49,8 @@ public class CharStream {
     public boolean startsWith(String label) {
         return code.startsWith(label, position);
     }
+
+    public boolean matches(TriplePredicate<String, Integer, Integer> endsWith, int length) {
+        return endsWith.test(code, position, length);
+    }
 }

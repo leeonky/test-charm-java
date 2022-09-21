@@ -1,16 +1,12 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.interpreter.TokenScanner.Mandatory;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static com.github.leeonky.interpreter.TokenSpec.tokenSpec;
 
 public class SourceCode {
     private final List<Notation> lineComments;
@@ -22,50 +18,6 @@ public class SourceCode {
         this.lineComments = lineComments;
         trimBlankAndComment();
         startPosition = charStream.position();
-    }
-
-    @Deprecated
-    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
-            Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters) {
-        return tokenSpec(startsWith, excluded, delimiters).trimStart(trimStart).scanner();
-    }
-
-    @Deprecated
-    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
-            Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters,
-            Predicate<Token> validator) {
-        return tokenSpec(startsWith, excluded, delimiters).trimStart(trimStart).predicate(validator).scanner();
-    }
-
-    @Deprecated
-    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
-            Predicate<Character> startsWith, Set<String> excluded, boolean trimStart,
-            TriplePredicate<String, Integer, Integer> endsWith, Predicate<Token> predicate) {
-        return tokenSpec(startsWith, excluded, endsWith).trimStart(trimStart).predicate(predicate).scanner();
-    }
-
-    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> Mandatory<C, N, E, O, S> tokenScanner(
-            boolean trimStart, TriplePredicate<String, Integer, Integer> endsWith) {
-        return sourceCode -> {
-            Token token = new Token(sourceCode.charStream.position);
-            if (trimStart) {
-                sourceCode.charStream.popChar();
-                sourceCode.trimBlankAndComment();
-            }
-            int size = 0;
-            while (sourceCode.charStream.hasContent() && !endsWith.test(sourceCode.charStream.code, sourceCode.charStream.position, size++))
-                token.append(sourceCode.charStream.popChar());
-            return token;
-        };
-    }
-
-    @Deprecated
-    public static SourceCode createSourceCode(String code, List<Notation> lineComments) {
-        return new SourceCode(code, lineComments);
     }
 
     private SourceCode trimBlankAndComment() {
@@ -98,11 +50,11 @@ public class SourceCode {
     }
 
     public boolean isBeginning() {
-        return charStream.code.chars().skip(startPosition).limit(charStream.position - startPosition).allMatch(Character::isWhitespace);
+        return charStream.position() == startPosition;
     }
 
     public SyntaxException syntaxError(String message, int positionOffset) {
-        return new SyntaxException(message, charStream.position + positionOffset);
+        return new SyntaxException(message, charStream.position() + positionOffset);
     }
 
     public Optional<Token> popWord(Notation notation) {
@@ -137,5 +89,17 @@ public class SourceCode {
 
     public int nextPosition() {
         return trimBlankAndComment().charStream.position;
+    }
+
+    public Token fetchToken(boolean trimStart, TriplePredicate<String, Integer, Integer> endsWith) {
+        Token token = new Token(charStream.position());
+        if (trimStart) {
+            charStream.popChar();
+            trimBlankAndComment();
+        }
+        int size = 0;
+        while (charStream.hasContent() && !charStream.matches(endsWith, size++))
+            token.append(charStream.popChar());
+        return token;
     }
 }
