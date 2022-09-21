@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static com.github.leeonky.interpreter.Notation.notation;
-import static com.github.leeonky.interpreter.Syntax.Rules.*;
+import static com.github.leeonky.interpreter.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static java.util.Collections.emptyMap;
@@ -770,7 +770,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
                     TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
                     TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser<TestContext,
-                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(Syntax.Rules.atLeast(2));
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(Rules.atLeast(2));
 
             TestProcedure testProcedure = givenProcedureWithCode("a a");
             Optional<TestNode> parse = syntax.as(TestNode::new).parse(testProcedure);
@@ -784,7 +784,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
                     TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
                     TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser<TestContext,
-                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(Syntax.Rules.atLeast(2));
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(Rules.atLeast(2));
 
             TestProcedure testProcedure = givenProcedureWithCode("a");
             assertThat(syntax.as(TestNode::new).parse(testProcedure)).isEmpty();

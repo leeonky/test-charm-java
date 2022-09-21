@@ -1,5 +1,7 @@
 package com.github.leeonky.interpreter;
 
+import com.github.leeonky.interpreter.TokenScanner.Mandatory;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,38 +10,46 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.interpreter.TokenSpec.tokenSpec;
 
 public class SourceCode {
     private final String code;
+    private final List<Notation> lineComments;
     private int position = 0;
     private int startPosition = 0;
-    private final List<Notation> lineComments;
 
+    private SourceCode(String code, List<Notation> lineComments) {
+        this.code = code;
+        this.lineComments = lineComments;
+        trimBlankAndComment();
+        startPosition = position;
+    }
+
+    @Deprecated
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters) {
-        return tokenScanner(startsWith, excluded, trimStart, delimiters, token -> true);
+        return tokenSpec(startsWith, excluded, delimiters).trimStart(trimStart).scanner();
     }
 
+    @Deprecated
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters,
             Predicate<Token> validator) {
-        return tokenScanner(startsWith, excluded, trimStart, (code, position, size) -> delimiters.contains(code.charAt(position)), validator);
+        return tokenSpec(startsWith, excluded, delimiters).trimStart(trimStart).predicate(validator).scanner();
     }
 
+    @Deprecated
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart,
             TriplePredicate<String, Integer, Integer> endsWith, Predicate<Token> predicate) {
-        return sourceCode -> sourceCode.tryFetch(() -> when(sourceCode.whenFirstChar(startsWith)).optional(() -> {
-            Token token = tokenScanner(trimStart, endsWith).scan(sourceCode);
-            return !excluded.contains(token.getContent()) && predicate.test(token) ? token : null;
-        }));
+        return tokenSpec(startsWith, excluded, endsWith).trimStart(trimStart).predicate(predicate).scanner();
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner.Mandatory<C, N, E, O, S> tokenScanner(
+            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> Mandatory<C, N, E, O, S> tokenScanner(
             boolean trimStart, TriplePredicate<String, Integer, Integer> endsWith) {
         return sourceCode -> {
             Token token = new Token(sourceCode.position);
@@ -52,13 +62,6 @@ public class SourceCode {
                 token.append(sourceCode.popChar());
             return token;
         };
-    }
-
-    private SourceCode(String code, List<Notation> lineComments) {
-        this.code = code;
-        this.lineComments = lineComments;
-        trimBlankAndComment();
-        startPosition = position;
     }
 
     public static SourceCode createSourceCode(String code, List<Notation> lineComments) {
@@ -93,7 +96,7 @@ public class SourceCode {
         return code.charAt(position++);
     }
 
-    private boolean whenFirstChar(Predicate<Character> predicate) {
+    public boolean startsWith(Predicate<Character> predicate) {
         return trimBlankAndComment().hasCode() && predicate.test(currentChar());
     }
 
@@ -158,4 +161,5 @@ public class SourceCode {
     public int nextPosition() {
         return trimBlankAndComment().position;
     }
+
 }
