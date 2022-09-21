@@ -13,16 +13,15 @@ import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.TokenSpec.tokenSpec;
 
 public class SourceCode {
-    private final String code;
     private final List<Notation> lineComments;
-    private int position = 0;
-    private int startPosition = 0;
+    private final CharStream charStream;
+    private final int startPosition;
 
-    private SourceCode(String code, List<Notation> lineComments) {
-        this.code = code;
+    public SourceCode(String code, List<Notation> lineComments) {
+        charStream = new CharStream(code);
         this.lineComments = lineComments;
         trimBlankAndComment();
-        startPosition = position;
+        startPosition = charStream.position();
     }
 
     @Deprecated
@@ -52,80 +51,58 @@ public class SourceCode {
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> Mandatory<C, N, E, O, S> tokenScanner(
             boolean trimStart, TriplePredicate<String, Integer, Integer> endsWith) {
         return sourceCode -> {
-            Token token = new Token(sourceCode.position);
+            Token token = new Token(sourceCode.charStream.position);
             if (trimStart) {
-                sourceCode.popChar();
+                sourceCode.charStream.popChar();
                 sourceCode.trimBlankAndComment();
             }
             int size = 0;
-            while (sourceCode.hasCode() && !endsWith.test(sourceCode.code, sourceCode.position, size++))
-                token.append(sourceCode.popChar());
+            while (sourceCode.charStream.hasContent() && !endsWith.test(sourceCode.charStream.code, sourceCode.charStream.position, size++))
+                token.append(sourceCode.charStream.popChar());
             return token;
         };
     }
 
+    @Deprecated
     public static SourceCode createSourceCode(String code, List<Notation> lineComments) {
         return new SourceCode(code, lineComments);
     }
 
-    private boolean codeStartWith(Notation notation) {
-        while (hasCode() && Character.isWhitespace(currentChar()))
-            position++;
-        return code.startsWith(notation.getLabel(), position);
-    }
-
     private SourceCode trimBlankAndComment() {
-        while (lineComments.stream().anyMatch(this::codeStartWith)) {
-            int newLinePosition = code.indexOf("\n", position);
-            position = newLinePosition == -1 ? code.length() : newLinePosition + 1;
-        }
+        charStream.trimBlackAndComment(lineComments);
         return this;
     }
 
-    private int seek(int seek) {
-        int position = this.position;
-        this.position += seek;
-        return position;
-    }
-
-    private char currentChar() {
-        return code.charAt(position);
-    }
-
-    private char popChar() {
-        return code.charAt(position++);
-    }
-
     public boolean startsWith(Predicate<Character> predicate) {
-        return trimBlankAndComment().hasCode() && predicate.test(currentChar());
+        return trimBlankAndComment().charStream.hasContent() && predicate.test(charStream.current());
     }
 
     public boolean hasCode() {
-        return position < code.length();
+        return charStream.hasContent();
     }
 
     public boolean startsWith(Notation notation) {
         trimBlankAndComment();
-        return code.startsWith(notation.getLabel(), position);
+        return charStream.startsWith(notation.getLabel());
     }
 
     public boolean startsWith(String word) {
-        return code.startsWith(word, position);
+        return charStream.startsWith(word);
     }
 
     public char popChar(Map<String, Character> escapeChars) {
-        return escapeChars.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position)).map(e -> {
-            seek(e.getKey().length());
+        return escapeChars.entrySet().stream().filter(e -> charStream.startsWith(e.getKey())).map(e -> {
+            charStream.seek(e.getKey().length());
             return e.getValue();
-        }).findFirst().orElseGet(this::popChar);
+        }).findFirst().orElseGet(charStream::popChar);
     }
 
     public boolean isBeginning() {
-        return code.chars().skip(startPosition).limit(position - startPosition).allMatch(Character::isWhitespace);
+        return charStream.code.chars().skip(startPosition).limit(charStream.position - startPosition).allMatch(Character::isWhitespace);
     }
 
     public SyntaxException syntaxError(String message, int positionOffset) {
-        return new SyntaxException(message, position + positionOffset);
+        return new SyntaxException(message, charStream.position + positionOffset);
     }
 
     public Optional<Token> popWord(Notation notation) {
@@ -133,33 +110,32 @@ public class SourceCode {
     }
 
     public Optional<Token> popWord(Notation notation, Supplier<Boolean> predicate) {
-        return when(startsWith(notation) && predicate.get()).optional(() -> new Token(seek(notation.length()))
+        return when(startsWith(notation) && predicate.get()).optional(() -> new Token(charStream.seek(notation.length()))
                 .append(notation.getLabel()));
     }
 
     public <N> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
-        int position = this.position;
+        int position = charStream.position;
         Optional<N> optionalNode = supplier.get();
         if (!optionalNode.isPresent())
-            this.position = position;
+            charStream.position = position;
         return optionalNode;
     }
 
     public boolean isEndOfLine() {
-        if (!hasCode())
+        if (!charStream.hasContent())
             return true;
-        while (Character.isWhitespace(currentChar()) && currentChar() != '\n')
-            popChar();
-        return currentChar() == '\n';
+        while (Character.isWhitespace(charStream.current()) && charStream.current() != '\n')
+            charStream.popChar();
+        return charStream.current() == '\n';
     }
 
     public String codeBefore(Notation notation) {
-        int index = code.indexOf(notation.getLabel(), position);
-        return index >= 0 ? code.substring(position, index) : code.substring(position);
+        int index = charStream.code.indexOf(notation.getLabel(), charStream.position);
+        return index >= 0 ? charStream.code.substring(charStream.position, index) : charStream.code.substring(charStream.position);
     }
 
     public int nextPosition() {
-        return trimBlankAndComment().position;
+        return trimBlankAndComment().charStream.position;
     }
-
 }

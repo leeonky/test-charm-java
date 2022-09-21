@@ -392,7 +392,14 @@ class SourceCodeTest extends BaseTest {
 
         @Test
         void should_trim_start_comments() {
-            SourceCode sourceCode = SourceCode.createSourceCode("//comments\nx", asList(notation("//")));
+            SourceCode sourceCode = new SourceCode("//comments\nx", asList(notation("//")));
+
+            assertThat(sourceCode.popChar(new HashMap<>())).isEqualTo('x');
+        }
+
+        @Test
+        void should_trim_multi_line_start_comments() {
+            SourceCode sourceCode = new SourceCode("//comments\n  //comments2\nx", asList(notation("//")));
 
             assertThat(sourceCode.popChar(new HashMap<>())).isEqualTo('x');
         }

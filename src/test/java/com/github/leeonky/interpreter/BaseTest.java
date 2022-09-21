@@ -5,7 +5,7 @@ import static java.util.Arrays.asList;
 
 public class BaseTest {
     public static SourceCode createSourceCode(String code) {
-        return SourceCode.createSourceCode(code, asList(notation("#"), notation("//")));
+        return new SourceCode(code, asList(notation("#"), notation("//")));
     }
 
     protected TestProcedure givenProcedureWithCode(String s) {
