@@ -152,22 +152,22 @@ public class Rules {
 
         @Override
         public boolean isClose(P procedure) {
-            SourceCode sourceCode = procedure.getSourceCode();
-            isClose = endOfLine(sourceCode);
-            if (isClose) {
-                if (sourceCode.hasCode())
-                    sourceCode.popChar(Collections.emptyMap());
-            } else
-                isClose = containsChangeLine(sourceCode.codeBefore(splitter));
-            return isClose;
+            return isClose = endOfLineOrNoCode(procedure.getSourceCode())
+                    || hasNewLineBeforeSplitter(procedure.getSourceCode());
         }
 
-        private boolean containsChangeLine(String code) {
+        private boolean hasNewLineBeforeSplitter(SourceCode sourceCode) {
+            String code = sourceCode.codeBefore(splitter);
             return code.contains("\r") || code.contains("\n");
         }
 
-        private boolean endOfLine(SourceCode sourceCode) {
-            return sourceCode.isEndOfLine() || !sourceCode.hasCode();
+        private boolean endOfLineOrNoCode(SourceCode sourceCode) {
+            if (sourceCode.isEndOfLine() || !sourceCode.hasCode()) {
+                if (sourceCode.hasCode())
+                    sourceCode.popChar(Collections.emptyMap());
+                return true;
+            }
+            return false;
         }
 
         @Override
