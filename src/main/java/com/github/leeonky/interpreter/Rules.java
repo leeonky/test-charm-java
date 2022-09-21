@@ -17,39 +17,14 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endWith(Notation notation) {
-        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
-            @Override
-            public void close(P procedure) {
-                if (!procedure.getSourceCode().popWord(notation).isPresent())
-                    throw procedure.getSourceCode().syntaxError(format("Should end with `%s`", notation.getLabel()), 0);
-            }
-
-            @Override
-            public boolean isClose(P procedure) {
-                return procedure.getSourceCode().startsWith(notation) || !procedure.getSourceCode().hasCode();
-            }
-        };
+        return syntax -> new EndWith<>(syntax, notation);
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endBefore(Notation... notations) {
-        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
-            private boolean closed = false;
-
-            @Override
-            public void close(P procedure) {
-                if (!closed)
-                    throw procedure.getSourceCode().syntaxError("Should end with " +
-                            stream(notations).map(Notation::getLabel).collect(joining("`", "`", "` or `")), 0);
-            }
-
-            @Override
-            public boolean isClose(P procedure) {
-                return closed = stream(notations).anyMatch(procedure.getSourceCode()::startsWith);
-            }
-        };
+        return syntax -> new EndBefore<>(syntax, notations);
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -177,12 +152,13 @@ public class Rules {
 
         @Override
         public boolean isClose(P procedure) {
-            isClose = procedure.getSourceCode().isEndOfLine() || !procedure.getSourceCode().hasCode();
+            SourceCode sourceCode = procedure.getSourceCode();
+            isClose = sourceCode.isEndOfLine() || !sourceCode.hasCode();
             if (isClose) {
-                if (procedure.getSourceCode().hasCode())
-                    procedure.getSourceCode().popChar(Collections.emptyMap());
+                if (sourceCode.hasCode())
+                    sourceCode.popChar(Collections.emptyMap());
             } else {
-                String code = procedure.getSourceCode().codeBefore(splitter);
+                String code = sourceCode.codeBefore(splitter);
                 isClose = code.contains("\r") || code.contains("\n");
             }
             return isClose;
@@ -217,6 +193,53 @@ public class Rules {
         public void close(P procedure) {
             if (!isClose)
                 throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+        }
+    }
+
+    private static class EndWith<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A> {
+        private final Notation notation;
+
+        public EndWith(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Notation notation) {
+            super(syntax);
+            this.notation = notation;
+        }
+
+        @Override
+        public void close(P procedure) {
+            if (!procedure.getSourceCode().popWord(notation).isPresent())
+                throw procedure.getSourceCode().syntaxError(format("Should end with `%s`", notation.getLabel()), 0);
+        }
+
+        @Override
+        public boolean isClose(P procedure) {
+            return procedure.getSourceCode().startsWith(notation) || !procedure.getSourceCode().hasCode();
+        }
+    }
+
+    private static class EndBefore<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A> {
+        private final Notation[] notations;
+        private boolean closed;
+
+        public EndBefore(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Notation... notations) {
+            super(syntax);
+            this.notations = notations;
+            closed = false;
+        }
+
+        @Override
+        public void close(P procedure) {
+            if (!closed)
+                throw procedure.getSourceCode().syntaxError("Should end with " +
+                        stream(notations).map(Notation::getLabel).collect(joining("`", "`", "` or `")), 0);
+        }
+
+        @Override
+        public boolean isClose(P procedure) {
+            return closed = stream(notations).anyMatch(procedure.getSourceCode()::startsWith);
         }
     }
 }
