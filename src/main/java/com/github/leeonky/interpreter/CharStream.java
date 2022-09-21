@@ -1,10 +1,11 @@
 package com.github.leeonky.interpreter;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class CharStream {
-    String code;
-    int startPosition;
+    private final String code;
     int position = 0;
 
     public CharStream(String code) {
@@ -52,5 +53,18 @@ public class CharStream {
 
     public boolean matches(TriplePredicate<String, Integer, Integer> endsWith, int length) {
         return endsWith.test(code, position, length);
+    }
+
+    public String contentUntil(String label) {
+        int index = code.indexOf(label, position);
+        return index >= 0 ? code.substring(position, index) : code.substring(position);
+    }
+
+    public <N> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
+        int position = this.position;
+        Optional<N> optionalNode = supplier.get();
+        if (!optionalNode.isPresent())
+            this.position = position;
+        return optionalNode;
     }
 }

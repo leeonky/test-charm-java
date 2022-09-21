@@ -28,8 +28,8 @@ public class TokenSpec {
         return tokenSpec(startsWith, excluded, (code, position, size) -> delimiters.contains(code.charAt(position)));
     }
 
-    public TokenSpec trimStart(boolean f) {
-        trimStart = f;
+    public TokenSpec trimStart() {
+        trimStart = true;
         return this;
     }
 

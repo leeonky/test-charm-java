@@ -250,7 +250,7 @@ class SourceCodeTest extends BaseTest {
         @Test
         void return_empty_when_not_match_opening_char() {
             SourceCode sourceCode = BaseTest.createSourceCode(" notStartsWithA");
-            Optional<Token> optionalToken = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart(false).predicate(token -> true).scanner().scan(sourceCode);
+            Optional<Token> optionalToken = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).predicate(token -> true).scanner().scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('n');
@@ -260,7 +260,7 @@ class SourceCodeTest extends BaseTest {
         void return_token_with_content_and_position() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
-            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart(false).predicate(token1 -> true).scanner().scan(sourceCode).get();
+            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).predicate(token1 -> true).scanner().scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("a");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -271,7 +271,7 @@ class SourceCodeTest extends BaseTest {
         void should_append_a_char_when_no_matter_end_with_when_trim() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
-            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart(true).predicate(token1 -> true).scanner().scan(sourceCode).get();
+            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart().predicate(token1 -> true).scanner().scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -282,7 +282,7 @@ class SourceCodeTest extends BaseTest {
         void trim_start_blank() {
             SourceCode sourceCode = BaseTest.createSourceCode(" a bc");
 
-            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart(true).predicate(token1 -> true).scanner().scan(sourceCode).get();
+            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart().predicate(token1 -> true).scanner().scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -293,7 +293,7 @@ class SourceCodeTest extends BaseTest {
         void should_return_empty_content_token_when_start_char_is_at_the_end_of_code() {
             SourceCode sourceCode = BaseTest.createSourceCode(" a ");
 
-            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart(true).predicate(token1 -> true).scanner().scan(sourceCode).get();
+            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart().predicate(token1 -> true).scanner().scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -304,7 +304,7 @@ class SourceCodeTest extends BaseTest {
         void should_return_all_content_when_got_the_end_of_code() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
-            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), UNLIMITED_ENDING).trimStart(false).predicate(token1 -> true).scanner().scan(sourceCode).get();
+            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), UNLIMITED_ENDING).predicate(token1 -> true).scanner().scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("abc");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -314,7 +314,7 @@ class SourceCodeTest extends BaseTest {
         @Test
         void should_return_content_when_before_closing_char() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
-            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), (code, position, size) -> code.charAt(position) == 'c').trimStart(false).predicate(token1 -> true).scanner().scan(sourceCode).get();
+            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), (code, position, size) -> code.charAt(position) == 'c').predicate(token1 -> true).scanner().scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -324,7 +324,7 @@ class SourceCodeTest extends BaseTest {
         @Test
         void return_empty_when_excluded() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
-            Optional<Token> optionalToken = tokenSpec(c -> c.equals('a'), new HashSet<>(asList("a")), ONE_CHAR_TOKEN).trimStart(false).predicate(token -> true).scanner().scan(sourceCode);
+            Optional<Token> optionalToken = tokenSpec(c -> c.equals('a'), new HashSet<>(asList("a")), ONE_CHAR_TOKEN).predicate(token -> true).scanner().scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
@@ -334,7 +334,7 @@ class SourceCodeTest extends BaseTest {
         void return_empty_when_predicate_false() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
-            Optional<Token> optionalToken = tokenSpec(c -> c.equals('a'), new HashSet<>(), (code, position, size) -> code.charAt(position) == 'c').trimStart(false).predicate(token -> {
+            Optional<Token> optionalToken = tokenSpec(c -> c.equals('a'), new HashSet<>(), (code, position, size) -> code.charAt(position) == 'c').predicate(token -> {
                 assertThat(token.getContent()).isEqualTo("ab");
                 assertThat(token.getPosition()).isEqualTo(1);
                 return false;
@@ -348,7 +348,7 @@ class SourceCodeTest extends BaseTest {
         void return_by_delimiters() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
-            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), new HashSet<>(asList('c'))).trimStart(false).scanner().scan(sourceCode).get();
+            Token token = tokenSpec(c -> c.equals('a'), new HashSet<>(), new HashSet<>(asList('c'))).scanner().scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -404,7 +404,7 @@ class SourceCodeTest extends BaseTest {
             TestProcedure procedure = givenProcedureWithCode("not match");
 
             TokenScanner<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> scanner =
-                    tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart(false).predicate(token -> true).scanner();
+                    tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).predicate(token -> true).scanner();
 
             assertThat(scanner.nodeParser(t -> new TestNode(t.getContent())).parse(procedure)).isEmpty();
         }
@@ -414,7 +414,7 @@ class SourceCodeTest extends BaseTest {
             TestProcedure procedure = givenProcedureWithCode(" a");
 
             TokenScanner<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> scanner =
-                    tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).trimStart(false).predicate(token -> true).scanner();
+                    tokenSpec(c -> c.equals('a'), new HashSet<>(), ONE_CHAR_TOKEN).predicate(token -> true).scanner();
 
             TestNode testNode = scanner.nodeParser(t -> new TestNode(t.getContent())).parse(procedure).get();
             assertThat(testNode.getContent()).isEqualTo("a");

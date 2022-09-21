@@ -62,16 +62,12 @@ public class SourceCode {
     }
 
     public Optional<Token> popWord(Notation notation, Supplier<Boolean> predicate) {
-        return when(startsWith(notation) && predicate.get()).optional(() -> new Token(charStream.seek(notation.length()))
-                .append(notation.getLabel()));
+        return when(startsWith(notation) && predicate.get())
+                .optional(() -> new Token(charStream.seek(notation.length())).append(notation.getLabel()));
     }
 
     public <N> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
-        int position = charStream.position;
-        Optional<N> optionalNode = supplier.get();
-        if (!optionalNode.isPresent())
-            charStream.position = position;
-        return optionalNode;
+        return charStream.tryFetch(supplier);
     }
 
     public boolean isEndOfLine() {
@@ -83,12 +79,11 @@ public class SourceCode {
     }
 
     public String codeBefore(Notation notation) {
-        int index = charStream.code.indexOf(notation.getLabel(), charStream.position);
-        return index >= 0 ? charStream.code.substring(charStream.position, index) : charStream.code.substring(charStream.position);
+        return charStream.contentUntil(notation.getLabel());
     }
 
     public int nextPosition() {
-        return trimBlankAndComment().charStream.position;
+        return trimBlankAndComment().charStream.position();
     }
 
     public Token fetchToken(boolean trimStart, TriplePredicate<String, Integer, Integer> endsWith) {
