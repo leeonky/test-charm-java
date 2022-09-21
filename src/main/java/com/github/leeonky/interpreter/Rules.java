@@ -153,15 +153,21 @@ public class Rules {
         @Override
         public boolean isClose(P procedure) {
             SourceCode sourceCode = procedure.getSourceCode();
-            isClose = sourceCode.isEndOfLine() || !sourceCode.hasCode();
+            isClose = endOfLine(sourceCode);
             if (isClose) {
                 if (sourceCode.hasCode())
                     sourceCode.popChar(Collections.emptyMap());
-            } else {
-                String code = sourceCode.codeBefore(splitter);
-                isClose = code.contains("\r") || code.contains("\n");
-            }
+            } else
+                isClose = containsChangeLine(sourceCode.codeBefore(splitter));
             return isClose;
+        }
+
+        private boolean containsChangeLine(String code) {
+            return code.contains("\r") || code.contains("\n");
+        }
+
+        private boolean endOfLine(SourceCode sourceCode) {
+            return sourceCode.isEndOfLine() || !sourceCode.hasCode();
         }
 
         @Override
