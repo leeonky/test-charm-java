@@ -1,5 +1,7 @@
 package com.github.leeonky.interpreter;
 
+import com.github.leeonky.interpreter.Syntax.CompositeSyntax;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -15,7 +17,7 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endWith(Notation notation) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
             @Override
             public void close(P procedure) {
                 if (!procedure.getSourceCode().popWord(notation).isPresent())
@@ -33,7 +35,7 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endBefore(Notation... notations) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
             private boolean closed = false;
 
             @Override
@@ -54,7 +56,7 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endWith(String closing) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax.and(Rules.endWith(notation(closing)))) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax.and(Rules.endWith(notation(closing)))) {
             @Override
             public boolean isClose(P procedure) {
                 return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(closing);
@@ -66,30 +68,14 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endWithLine() {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
-            private boolean isClose = false;
-
-            @Override
-            public boolean isClose(P procedure) {
-                isClose = procedure.getSourceCode().isEndOfLine();
-                if (isClose && procedure.getSourceCode().hasCode())
-                    procedure.getSourceCode().popChar(Collections.emptyMap());
-                return isClose;
-            }
-
-            @Override
-            public void close(P procedure) {
-                if (!isClose)
-                    throw procedure.getSourceCode().syntaxError("unexpected token", 0);
-            }
-        };
+        return EndWithLine::new;
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> splitBy(Notation notation) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
             @Override
             public boolean isSplitter(P procedure) {
                 return procedure.getSourceCode().popWord(notation).isPresent();
@@ -101,7 +87,7 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endWithOptionalLine() {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax.and(Rules.endWithLine())) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax.and(Rules.endWithLine())) {
             @Override
             public void close(P procedure) {
             }
@@ -112,7 +98,7 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> optionalSplitBy(Notation splitter) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
             @Override
             public boolean isSplitter(P procedure) {
                 procedure.getSourceCode().popWord(splitter);
@@ -125,7 +111,7 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> mandatorySplitBy(Notation splitter) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
             @Override
             public boolean isSplitter(P procedure) {
                 if (procedure.getSourceCode().popWord(splitter).isPresent())
@@ -140,7 +126,7 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>>> atLeast(int size) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>>(
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>>(
                 (Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>>) syntax) {
             @Override
             protected NodeParser<C, N, E, O, P> parse(Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>> syntax,
@@ -156,8 +142,9 @@ public class Rules {
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, A> Function<Syntax<C, N, E, O, P, PA, MA, T,
-            NodeParser<C, N, E, O, P>, A>, Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A>> enabledBefore(Notation notation) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A>(syntax) {
+            NodeParser<C, N, E, O, P>, A>, Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A>> enabledBefore(
+            Notation notation) {
+        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A>(syntax) {
 
             @Override
             protected NodeParser<C, N, E, O, P> parse(Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A> syntax,
@@ -173,27 +160,63 @@ public class Rules {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endOfRow(Notation splitter) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
-            private boolean isClose = false;
+        return syntax -> new EndOrRow<>(syntax, splitter);
+    }
 
-            @Override
-            public boolean isClose(P procedure) {
-                isClose = procedure.getSourceCode().isEndOfLine() || !procedure.getSourceCode().hasCode();
-                if (isClose) {
-                    if (procedure.getSourceCode().hasCode())
-                        procedure.getSourceCode().popChar(Collections.emptyMap());
-                } else {
-                    String code = procedure.getSourceCode().codeBefore(splitter);
-                    isClose = code.contains("\r") || code.contains("\n");
-                }
-                return isClose;
-            }
+    private static class EndOrRow<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A> {
+        private final Notation splitter;
+        private boolean isClose;
 
-            @Override
-            public void close(P procedure) {
-                if (!isClose)
-                    throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+        public EndOrRow(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Notation splitter) {
+            super(syntax);
+            this.splitter = splitter;
+            isClose = false;
+        }
+
+        @Override
+        public boolean isClose(P procedure) {
+            isClose = procedure.getSourceCode().isEndOfLine() || !procedure.getSourceCode().hasCode();
+            if (isClose) {
+                if (procedure.getSourceCode().hasCode())
+                    procedure.getSourceCode().popChar(Collections.emptyMap());
+            } else {
+                String code = procedure.getSourceCode().codeBefore(splitter);
+                isClose = code.contains("\r") || code.contains("\n");
             }
-        };
+            return isClose;
+        }
+
+        @Override
+        public void close(P procedure) {
+            if (!isClose)
+                throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+        }
+    }
+
+    private static class EndWithLine<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A> {
+        private boolean isClose;
+
+        public EndWithLine(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax) {
+            super(syntax);
+            isClose = false;
+        }
+
+        @Override
+        public boolean isClose(P procedure) {
+            isClose = procedure.getSourceCode().isEndOfLine();
+            if (isClose && procedure.getSourceCode().hasCode())
+                procedure.getSourceCode().popChar(Collections.emptyMap());
+            return isClose;
+        }
+
+        @Override
+        public void close(P procedure) {
+            if (!isClose)
+                throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+        }
     }
 }
