@@ -26,14 +26,14 @@ public class IfFactoryTest {
 
             @Test
             void if_true() {
-                assertThat(IfFactory.when(predicate).then("return").get("input")).hasValue("return");
+                assertThat(When.when(predicate).then("return").get("input")).hasValue("return");
 
                 verify(predicate).test("input");
             }
 
             @Test
             void if_true_else() {
-                assertThat(IfFactory.when(predicate).then("return").orElse("else").get("input")).isEqualTo("return");
+                assertThat(When.when(predicate).then("return").orElse("else").get("input")).isEqualTo("return");
                 verify(predicate).test("input");
             }
 
@@ -41,7 +41,7 @@ public class IfFactoryTest {
             void if_true_else_if() {
                 Predicate<String> predicate2 = mock(Predicate.class);
 
-                assertThat(IfFactory.when(predicate).then("return").when(predicate2).then("elseIf").get("input")).hasValue("return");
+                assertThat(When.when(predicate).then("return").when(predicate2).then("elseIf").get("input")).hasValue("return");
                 verify(predicate).test("input");
                 verify(predicate2, never()).test(any());
             }
@@ -57,13 +57,13 @@ public class IfFactoryTest {
 
             @Test
             void if_false() {
-                assertThat(IfFactory.when(predicate).then("return").get("input")).isEmpty();
+                assertThat(When.when(predicate).then("return").get("input")).isEmpty();
                 verify(predicate).test("input");
             }
 
             @Test
             void if_false_else() {
-                assertThat(IfFactory.when(predicate).then("return").orElse("else").get("input")).isEqualTo("else");
+                assertThat(When.when(predicate).then("return").orElse("else").get("input")).isEqualTo("else");
                 verify(predicate).test("input");
             }
 
@@ -75,7 +75,7 @@ public class IfFactoryTest {
                 void if_false_else_if() {
                     when(predicate2.test(any())).thenReturn(true);
 
-                    assertThat(IfFactory.when(predicate).then("return").when(predicate2).then("elseIf").get("input")).hasValue("elseIf");
+                    assertThat(When.when(predicate).then("return").when(predicate2).then("elseIf").get("input")).hasValue("elseIf");
                     verify(predicate).test("input");
                     verify(predicate2).test("input");
                 }
@@ -84,7 +84,7 @@ public class IfFactoryTest {
                 void if_false_else_if_true_else() {
                     when(predicate2.test(any())).thenReturn(true);
 
-                    assertThat(IfFactory.when(predicate).then("return").when(predicate2).then("elseIf").orElse("else").get("input")).isEqualTo("elseIf");
+                    assertThat(When.when(predicate).then("return").when(predicate2).then("elseIf").orElse("else").get("input")).isEqualTo("elseIf");
                     verify(predicate).test("input");
                     verify(predicate2).test("input");
                 }
@@ -93,7 +93,7 @@ public class IfFactoryTest {
                 void if_false_else_if_false_else() {
                     when(predicate2.test(any())).thenReturn(false);
 
-                    assertThat(IfFactory.when(predicate).then("return").when(predicate2).then("elseIf").orElse("else").get("input")).isEqualTo("else");
+                    assertThat(When.when(predicate).then("return").when(predicate2).then("elseIf").orElse("else").get("input")).isEqualTo("else");
                     verify(predicate).test("input");
                     verify(predicate2).test("input");
                 }

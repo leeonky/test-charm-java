@@ -7,9 +7,6 @@ import java.util.function.Predicate;
 import static java.util.Optional.of;
 
 public interface IfFactory<CONDITION> {
-    static <CONDITION> IfFactory<CONDITION> when(Predicate<CONDITION> predicate) {
-        return predicate::test;
-    }
 
     boolean matches(CONDITION condition);
 
