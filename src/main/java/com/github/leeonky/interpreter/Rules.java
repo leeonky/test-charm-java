@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.Notation.notation;
+import static com.github.leeonky.util.function.When.when;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;

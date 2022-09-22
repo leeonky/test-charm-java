@@ -3,7 +3,7 @@ package com.github.leeonky.interpreter;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.util.function.When.when;
 
 public class TokenSpec {
     private final Predicate<Character> startsWith;

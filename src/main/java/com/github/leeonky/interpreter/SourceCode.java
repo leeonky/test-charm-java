@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.util.function.When.when;
 
 public class SourceCode {
     private final List<Notation> lineComments;
