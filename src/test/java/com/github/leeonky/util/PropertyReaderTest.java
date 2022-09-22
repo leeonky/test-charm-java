@@ -139,8 +139,8 @@ class PropertyReaderTest {
 
         @Test
         void should_support_get_annotation_from_method() {
-            Attr annotation = beanWithPubFieldBeanClass.getPropertyReader("field2").getAnnotation(Attr.class);
-            assertThat(annotation.value()).isEqualTo("v1");
+            assertThat(beanWithPubFieldBeanClass.getPropertyReader("field2").getAnnotation(Attr.class).value()).isEqualTo("v1");
+            assertThat(beanWithPubFieldBeanClass.getPropertyReader("field2").annotation(Attr.class).get().value()).isEqualTo("v1");
         }
 
         @Test
@@ -159,6 +159,7 @@ class PropertyReaderTest {
             });
 
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("field3").getAnnotation(Attr.class)).isNull();
+            assertThat(beanWithPubFieldBeanClass.getPropertyReader("field3").annotation(Attr.class)).isEmpty();
             AnnotationGetter.setAnnotationGetter(new AnnotationGetter());
         }
     }

@@ -3,6 +3,7 @@ package com.github.leeonky.util;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -314,5 +315,21 @@ public class BeanClass<T> {
 
     public Property<T> getProperty(String name) {
         return typeInfo.getProperty(name);
+    }
+
+    public boolean isInstance(Object instance) {
+        return type.isInstance(instance);
+    }
+
+    public boolean isInheritedFrom(Class<?> type) {
+        return type.isAssignableFrom(this.type);
+    }
+
+    public <A extends Annotation> Optional<A> annotation(Class<A> annotationClass) {
+        return ofNullable(getAnnotation(annotationClass));
+    }
+
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+        return type.getAnnotation(annotationClass);
     }
 }

@@ -11,7 +11,6 @@ class CollectionTypeInfo<T> extends ClassTypeInfo<T> {
         try {
             Integer.valueOf(property);
             return new CollectionDataPropertyReader<>(type, property, type.getElementType());
-//            TODO use number parser
         } catch (NumberFormatException ignore) {
             return super.getReader(property);
         }
@@ -22,7 +21,6 @@ class CollectionTypeInfo<T> extends ClassTypeInfo<T> {
         try {
             Integer.valueOf(property);
             return new CollectionDataPropertyWriter<>(type, property, type.getElementType());
-//            TODO use number parser
         } catch (NumberFormatException ignore) {
             return super.getWriter(property);
         }
@@ -33,7 +31,6 @@ class CollectionTypeInfo<T> extends ClassTypeInfo<T> {
         try {
             Integer.valueOf(name);
             return new DefaultProperty<>(name, type);
-//            TODO use number parser
         } catch (NumberFormatException ignore) {
             return super.getProperty(name);
         }

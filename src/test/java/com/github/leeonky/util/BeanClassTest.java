@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.util.BeanClass.allTypesIn;
-import static com.github.leeonky.util.BeanClass.subTypesOf;
+import static com.github.leeonky.util.BeanClass.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -24,33 +23,33 @@ class BeanClassTest {
 
     @Test
     void get_type() {
-        assertThat(BeanClass.create(String.class).getType()).isEqualTo(String.class);
+        assertThat(create(String.class).getType()).isEqualTo(String.class);
     }
 
     @Test
     void get_name() {
-        assertThat(BeanClass.create(String.class).getName()).isEqualTo(String.class.getName());
+        assertThat(create(String.class).getName()).isEqualTo(String.class.getName());
     }
 
     @Test
     void get_simple_name() {
-        assertThat(BeanClass.create(String.class).getSimpleName()).isEqualTo(String.class.getSimpleName());
+        assertThat(create(String.class).getSimpleName()).isEqualTo(String.class.getSimpleName());
     }
 
     @Test
     void new_instance() {
-        assertThat(BeanClass.create(String.class).newInstance()).isEqualTo("");
+        assertThat(create(String.class).newInstance()).isEqualTo("");
     }
 
     @Test
     void new_instance_with_arg() {
-        assertThat(BeanClass.create(String.class).newInstance("hello")).isEqualTo("hello");
+        assertThat(create(String.class).newInstance("hello")).isEqualTo("hello");
     }
 
     @Test
     void new_instance_failed_when_no_candidate_constructor() {
         assertThrows(NoAppropriateConstructorException.class,
-                () -> BeanClass.create(BeanClassTest.class).newInstance("hello"));
+                () -> create(BeanClassTest.class).newInstance("hello"));
     }
 
     @Test
@@ -62,19 +61,19 @@ class BeanClassTest {
 
     @Test
     void create_default_value() {
-        assertThat(BeanClass.create(int.class).createDefault()).isEqualTo(0);
-        assertThat(BeanClass.create(Integer.class).createDefault()).isNull();
+        assertThat(create(int.class).createDefault()).isEqualTo(0);
+        assertThat(create(Integer.class).createDefault()).isNull();
     }
 
     @Test
     void get_generic_params() {
-        assertThat(BeanClass.create(Integer.class).hasTypeArguments()).isFalse();
-        assertThat(BeanClass.create(Integer.class).getTypeArguments(0)).isEmpty();
+        assertThat(create(Integer.class).hasTypeArguments()).isFalse();
+        assertThat(create(Integer.class).getTypeArguments(0)).isEmpty();
     }
 
     @Test
     void hash_code() {
-        assertThat(BeanClass.create(Integer.class).hashCode())
+        assertThat(create(Integer.class).hashCode())
                 .isEqualTo(Objects.hash(BeanClass.class, Integer.class));
     }
 
@@ -90,7 +89,7 @@ class BeanClassTest {
 
     @Test
     void create_from_instance() {
-        assertThat(BeanClass.createFrom(new BeanClassTest())).isEqualTo(BeanClass.create(BeanClassTest.class));
+        assertThat(BeanClass.createFrom(new BeanClassTest())).isEqualTo(create(BeanClassTest.class));
     }
 
     static class StringList extends ArrayList<String> {
@@ -110,11 +109,24 @@ class BeanClassTest {
     }
 
     @Nested
+    class Annotation {
+
+        @Test
+        void get_annotation() {
+            assertThat(create(Annotation.class).getAnnotation(Nested.class)).isInstanceOf(Nested.class);
+            assertThat(create(Annotation.class).annotation(Nested.class).get()).isInstanceOf(Nested.class);
+
+            assertThat(create(Annotation.class).getAnnotation(Deprecated.class)).isNull();
+            assertThat(create(Annotation.class).annotation(Deprecated.class)).isEmpty();
+        }
+    }
+
+    @Nested
     class GetSuper {
 
         @Test
         void should_return_bean_class_by_given_class() {
-            BeanClass<ArrayList> beanClass = BeanClass.create(StringList.class).getSuper(ArrayList.class);
+            BeanClass<ArrayList> beanClass = create(StringList.class).getSuper(ArrayList.class);
 
             assertThat(beanClass.getType()).isEqualTo(ArrayList.class);
             assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
@@ -122,7 +134,7 @@ class BeanClassTest {
 
         @Test
         void should_return_bean_class_bygiven__grand_farther_class() {
-            BeanClass<ArrayList> beanClass = BeanClass.create(SubStringList.class).getSuper(ArrayList.class);
+            BeanClass<ArrayList> beanClass = create(SubStringList.class).getSuper(ArrayList.class);
 
             assertThat(beanClass.getType()).isEqualTo(ArrayList.class);
             assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
@@ -130,7 +142,7 @@ class BeanClassTest {
 
         @Test
         void should_return_bean_class_by_given_interface() {
-            BeanClass<Supplier> beanClass = BeanClass.create(StringSupplier.class).getSuper(Supplier.class);
+            BeanClass<Supplier> beanClass = create(StringSupplier.class).getSuper(Supplier.class);
 
             assertThat(beanClass.getType()).isEqualTo(Supplier.class);
             assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
@@ -138,7 +150,7 @@ class BeanClassTest {
 
         @Test
         void should_return_bean_class_by_given_grand_farther_interface() {
-            BeanClass<Supplier> beanClass = BeanClass.create(SubStringSupplier.class).getSuper(Supplier.class);
+            BeanClass<Supplier> beanClass = create(SubStringSupplier.class).getSuper(Supplier.class);
 
             assertThat(beanClass.getType()).isEqualTo(Supplier.class);
             assertThat(beanClass.getTypeArguments(0).get().getType()).isEqualTo(String.class);
@@ -178,6 +190,22 @@ class BeanClassTest {
         void empty_when_no_type() {
             List<Class<?>> classes = allTypesIn("com.github.leeonky.dal.extensions");
             assertThat(classes).contains(StringExtension.class);
+        }
+    }
+
+    @Nested
+    class RuntimeType {
+
+        @Test
+        void is_instance() {
+            assertThat(create(String.class).isInstance("string")).isTrue();
+            assertThat(create(String.class).isInstance(100)).isFalse();
+        }
+
+        @Test
+        void is_inherited_from() {
+            assertThat(create(String.class).isInheritedFrom(CharSequence.class)).isTrue();
+            assertThat(create(String.class).isInheritedFrom(Integer.class)).isFalse();
         }
     }
 }
