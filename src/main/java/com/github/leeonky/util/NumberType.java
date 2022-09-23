@@ -26,21 +26,22 @@ public class NumberType {
     }
 
     public static Class<?> boxedClass(Class<?> source) {
-        if (source.isPrimitive())
+        if (source.isPrimitive()) {
             if (source == char.class)
                 return Character.class;
-        if (source == int.class)
-            return Integer.class;
-        else if (source == short.class)
-            return Short.class;
-        else if (source == long.class)
-            return Long.class;
-        else if (source == float.class)
-            return Float.class;
-        else if (source == double.class)
-            return Double.class;
-        else if (source == boolean.class)
-            return Boolean.class;
+            if (source == int.class)
+                return Integer.class;
+            if (source == short.class)
+                return Short.class;
+            if (source == long.class)
+                return Long.class;
+            if (source == float.class)
+                return Float.class;
+            if (source == double.class)
+                return Double.class;
+            if (source == boolean.class)
+                return Boolean.class;
+        }
         return source;
     }
 

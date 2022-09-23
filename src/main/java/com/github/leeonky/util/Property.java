@@ -1,6 +1,21 @@
 package com.github.leeonky.util;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+
 public interface Property<T> {
+    static List<Object> toChainNodes(String chain) {
+        return Arrays.stream(chain.split("[\\[\\].]")).filter(s -> !s.isEmpty()).map(s -> {
+            try {
+                return Integer.valueOf(s);
+            } catch (Exception ignore) {
+                return s;
+            }
+        }).collect(toList());
+    }
+
     String getName();
 
     BeanClass<T> getBeanType();

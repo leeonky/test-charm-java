@@ -24,7 +24,7 @@ class FieldPropertyWriter<T> extends FieldPropertyAccessor<T> implements Propert
             setter().accept(bean, value);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(String.format("Can not set %s to property %s.%s<%s>",
-                    value == null ? "null" : BeanClass.getClassName(value) + "[" + value + "]",
+                    value == null ? "null" : Classes.getClassName(value) + "[" + value + "]",
                     getBeanType().getName(), getName(), getType().getName()), e);
         }
     }

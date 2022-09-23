@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.util.BeanClass.*;
+import static com.github.leeonky.util.BeanClass.create;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -56,9 +56,9 @@ class BeanClassTest {
 
     @Test
     void get_class_name() {
-        assertThat(BeanClass.getClassName("")).isEqualTo(String.class.getName());
+        assertThat(Classes.getClassName("")).isEqualTo(String.class.getName());
 
-        assertThat(BeanClass.getClassName(null)).isEqualTo(null);
+        assertThat(Classes.getClassName(null)).isEqualTo(null);
     }
 
     @Test
@@ -164,23 +164,23 @@ class BeanClassTest {
 
         @Test
         void empty_when_no_type() {
-            assertThat(allTypesIn("empty")).isEmpty();
+            assertThat(Classes.allTypesIn("empty")).isEmpty();
         }
 
         @Test
         void types_in_package_and_sub_package() {
-            assertThat(new HashSet<>(allTypesIn("hastype")))
+            assertThat(new HashSet<>(Classes.allTypesIn("hastype")))
                     .containsOnly(One.class, Two.class, Two.Three.class, Two.Four.class, Five.class);
         }
 
         @Test
         void sub_types_in_package() {
-            assertThat(new HashSet<>(subTypesOf(Base.class, "subtype"))).containsOnly(Sub1.class, Sub2.class);
+            assertThat(new HashSet<>(Classes.subTypesOf(Base.class, "subtype"))).containsOnly(Sub1.class, Sub2.class);
         }
 
         @Test
         void sub_types_in_package_include_super() {
-            assertThat(new HashSet<>(BeanClass.assignableTypesOf(Base.class, "subtype")))
+            assertThat(new HashSet<>(Classes.assignableTypesOf(Base.class, "subtype")))
                     .containsOnly(Base.class, Sub1.class, Sub2.class);
         }
     }
@@ -190,7 +190,7 @@ class BeanClassTest {
 
         @Test
         void empty_when_no_type() {
-            List<Class<?>> classes = allTypesIn("com.github.leeonky.dal.extensions");
+            List<Class<?>> classes = Classes.allTypesIn("com.github.leeonky.dal.extensions");
             assertThat(classes).contains(StringExtension.class, ExtensionInSrcFolder.class);
         }
     }

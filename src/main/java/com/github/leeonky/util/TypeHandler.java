@@ -11,7 +11,7 @@ public class TypeHandler<F> {
     }
 
     static int sortClass(TypeHandler<?> c1, TypeHandler<?> c2) {
-        return BeanClass.compareByExtends(c1.type, c2.type);
+        return Classes.compareByExtends(c1.type, c2.type);
     }
 
     F getHandler() {

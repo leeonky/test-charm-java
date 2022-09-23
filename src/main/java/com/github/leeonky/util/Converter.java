@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.github.leeonky.util.BeanClass.getClassName;
+import static com.github.leeonky.util.Classes.getClassName;
 
 public class Converter {
     private static final NumberType numberType = new NumberType();
@@ -138,10 +138,10 @@ public class Converter {
     }
 
     public Converter extend() {
-        BeanClass.subTypesOf(ConverterExtension.class, "com.github.leeonky.util.extensions")
-                .forEach(c -> ((ConverterExtension) BeanClass.newInstance(c)).extend(this));
-        BeanClass.subTypesOf(ConverterExtension.class, "com.github.leeonky.extensions.util")
-                .forEach(c -> ((ConverterExtension) BeanClass.newInstance(c)).extend(this));
+        Classes.subTypesOf(ConverterExtension.class, "com.github.leeonky.util.extensions")
+                .forEach(c -> ((ConverterExtension) Classes.newInstance(c)).extend(this));
+        Classes.subTypesOf(ConverterExtension.class, "com.github.leeonky.extensions.util")
+                .forEach(c -> ((ConverterExtension) Classes.newInstance(c)).extend(this));
         return this;
     }
 }

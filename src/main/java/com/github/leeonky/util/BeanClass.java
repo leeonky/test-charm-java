@@ -1,22 +1,12 @@
 package com.github.leeonky.util;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.net.JarURLConnection;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import static com.github.leeonky.util.Suppressor.get;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
@@ -31,49 +21,15 @@ public class BeanClass<T> {
         typeInfo = TypeInfo.create(this);
     }
 
-    public static String getClassName(Object object) {
-        return object == null ? null : object.getClass().getName();
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> BeanClass<T> create(Class<T> type) {
         return (BeanClass<T>) instanceCache.computeIfAbsent(type, BeanClass::new);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T newInstance(Class<T> type, Object... args) {
-        return get(() -> (T) chooseConstructor(type, args).newInstance(args));
-    }
-
-    private static <T> Constructor<?> chooseConstructor(Class<T> type, Object[] args) {
-        List<Constructor<?>> constructors = Stream.of(type.getConstructors())
-                .filter(c -> isProperConstructor(c, args))
-                .collect(toList());
-        if (constructors.size() != 1)
-            throw new NoAppropriateConstructorException(type, args);
-        return constructors.get(0);
-    }
-
-    private static boolean isProperConstructor(Constructor<?> constructor, Object[] parameters) {
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
-        return parameterTypes.length == parameters.length && IntStream.range(0, parameterTypes.length)
-                .allMatch(i -> parameterTypes[i].isInstance(parameters[i]));
     }
 
     public static <T> Optional<T> cast(Object value, Class<T> type) {
         return ofNullable(value)
                 .filter(type::isInstance)
                 .map(type::cast);
-    }
-
-    public static List<Object> toChainNodes(String chain) {
-        return Arrays.stream(chain.split("[\\[\\].]")).filter(s -> !s.isEmpty()).map(s -> {
-            try {
-                return Integer.valueOf(s);
-            } catch (Exception ignore) {
-                return s;
-            }
-        }).collect(toList());
     }
 
     public static BeanClass<?> create(GenericType type) {
@@ -97,74 +53,6 @@ public class BeanClass<T> {
 
     public static void setConverter(Converter converter) {
         BeanClass.converter = converter;
-    }
-
-    public static List<Class<?>> allTypesIn(String packageName) {
-        return new ArrayList<Class<?>>() {{
-            try {
-                Enumeration<URL> resources = getClassLoader().getResources(packageName.replaceAll("[.]", "/"));
-                while (resources.hasMoreElements())
-                    addAll(getClasses(packageName, resources.nextElement()));
-            } catch (Exception ignore) {
-            }
-        }};
-    }
-
-    private static ClassLoader getClassLoader() {
-        ClassLoader classLoader = null;
-        try {
-            classLoader = Thread.currentThread().getContextClassLoader();
-        } catch (Throwable ignore) {
-        }
-        if (classLoader == null) {
-            classLoader = BeanClass.class.getClassLoader();
-            if (classLoader == null) {
-                try {
-                    classLoader = ClassLoader.getSystemClassLoader();
-                } catch (Throwable ignore) {
-                }
-            }
-        }
-        return classLoader;
-    }
-
-    private static List<Class<?>> getClasses(String packageName, URL resource) {
-        try {
-            if ("jar".equals(resource.getProtocol()))
-                return ((JarURLConnection) resource.openConnection()).getJarFile().stream()
-                        .map(jarEntry -> jarEntry.getName().replace('/', '.'))
-                        .filter(name -> name.endsWith(".class") && name.startsWith(packageName))
-                        .map(name -> Suppressor.get(() -> Class.forName(name.substring(0, name.length() - 6))))
-                        .collect(toList());
-            else {
-                InputStream stream = resource.openStream();
-                List<String> lines = stream == null ? emptyList()
-                        : new BufferedReader(new InputStreamReader(stream)).lines().collect(toList());
-                return Stream.concat(lines.stream().filter(line -> !line.endsWith(".class"))
-                        .map(subPackage -> allTypesIn(packageName + "." + subPackage))
-                        .flatMap(List::stream), lines.stream().filter(line -> line.endsWith(".class"))
-                        .map(line -> toClass(line, packageName))).collect(toList());
-            }
-        } catch (Exception ignore) {
-            return emptyList();
-        }
-    }
-
-    private static Class<?> toClass(String className, String packageName) {
-        return get(() -> Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.'))));
-    }
-
-    public static List<Class<?>> subTypesOf(Class<?> superClass, String packageName) {
-        return assignableTypesOf(superClass, packageName).stream().filter(c -> !superClass.equals(c))
-                .collect(toList());
-    }
-
-    public static List<Class<?>> assignableTypesOf(Class<?> superClass, String packageName) {
-        return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(toList());
-    }
-
-    public static int compareByExtends(Class<?> type1, Class<?> type2) {
-        return type1.equals(type2) ? 0 : type1.isAssignableFrom(type2) ? 1 : -1;
     }
 
     public Class<T> getType() {
@@ -205,7 +93,7 @@ public class BeanClass<T> {
     }
 
     public T newInstance(Object... args) {
-        return newInstance(type, args);
+        return Classes.newInstance(type, args);
     }
 
     public Object createCollection(Collection<?> elements) {
@@ -213,7 +101,7 @@ public class BeanClass<T> {
     }
 
     public Object getPropertyChainValue(T object, String chain) {
-        return getPropertyChainValue(object, toChainNodes(chain));
+        return getPropertyChainValue(object, Property.toChainNodes(chain));
     }
 
     public Object getPropertyChainValue(T object, List<Object> chain) {
@@ -227,23 +115,13 @@ public class BeanClass<T> {
         if (object == null)
             throw new NullPointerInChainException(originalChain, level);
         Object p = chain.removeFirst();
-        if (p instanceof Integer) {
-            Object[] array = CollectionHelper.toStream(object).toArray();
-            if ((int) p >= array.length)
-                throw new NullPointerInChainException(originalChain, level);
-            Object element = array[(int) p];
-            if (chain.isEmpty())
-                return element;
-            if (element == null)
-                throw new NullPointerInChainException(originalChain, level + 1);
-            return ((BeanClass) BeanClass.create(element.getClass())).getPropertyChainValueInner(originalChain, level + 1, element, chain);
-        }
-        PropertyReader propertyReader = getPropertyReader((String) p);
-        return propertyReader.getType().getPropertyChainValueInner(originalChain, level + 1, propertyReader.getValue(object), chain);
+        PropertyReader propertyReader = getPropertyReader(p.toString());
+        return propertyReader.getType().getPropertyChainValueInner(originalChain, level + 1,
+                propertyReader.getValue(object), chain);
     }
 
     public PropertyReader<?> getPropertyChainReader(String chain) {
-        return getPropertyChainReader(toChainNodes(chain));
+        return getPropertyChainReader(Property.toChainNodes(chain));
     }
 
     public PropertyReader<?> getPropertyChainReader(List<Object> chain) {

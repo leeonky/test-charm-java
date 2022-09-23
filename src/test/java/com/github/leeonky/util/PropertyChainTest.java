@@ -16,19 +16,19 @@ class PropertyChainTest {
 
         @Test
         void one_node() {
-            assertThat(BeanClass.toChainNodes("a"))
+            assertThat(Property.toChainNodes("a"))
                     .containsOnly("a");
         }
 
         @Test
         void two_node() {
-            assertThat(BeanClass.toChainNodes("a.b"))
+            assertThat(Property.toChainNodes("a.b"))
                     .containsOnly("a", "b");
         }
 
         @Test
         void with_array_index() {
-            assertThat(BeanClass.toChainNodes("a[0].b"))
+            assertThat(Property.toChainNodes("a[0].b"))
                     .containsOnly("a", 0, "b");
         }
     }
@@ -73,14 +73,6 @@ class PropertyChainTest {
                         () -> BeanClass.create(Bean.class).getPropertyChainValue(null, "bean.intValue"));
 
                 assertThat(exception).hasMessageContaining("Failed to read value at property chain: <.bean>.intValue");
-            }
-
-            @Test
-            void raise_error_when_array_index_out_of_range() {
-                NullPointerInChainException exception = assertThrows(NullPointerInChainException.class,
-                        () -> BeanClass.create(Bean.class).getPropertyChainValue(new Bean().setIntValues(new int[0]), "intValues[1]"));
-
-                assertThat(exception).hasMessageContaining("Failed to read value at property chain: .intValues<[1]>");
             }
 
             @Test
