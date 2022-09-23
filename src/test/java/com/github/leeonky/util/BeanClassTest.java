@@ -1,8 +1,10 @@
 package com.github.leeonky.util;
 
+import com.github.leeonky.dal.extensions.ExtensionInSrcFolder;
 import com.github.leeonky.dal.extensions.StringExtension;
 import hastype.One;
 import hastype.Two;
+import hastype.pkg.Five;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import subtype.Base;
@@ -166,9 +168,9 @@ class BeanClassTest {
         }
 
         @Test
-        void types_in_package() {
+        void types_in_package_and_sub_package() {
             assertThat(new HashSet<>(allTypesIn("hastype")))
-                    .containsOnly(One.class, Two.class, Two.Three.class, Two.Four.class);
+                    .containsOnly(One.class, Two.class, Two.Three.class, Two.Four.class, Five.class);
         }
 
         @Test
@@ -189,7 +191,7 @@ class BeanClassTest {
         @Test
         void empty_when_no_type() {
             List<Class<?>> classes = allTypesIn("com.github.leeonky.dal.extensions");
-            assertThat(classes).contains(StringExtension.class);
+            assertThat(classes).contains(StringExtension.class, ExtensionInSrcFolder.class);
         }
     }
 

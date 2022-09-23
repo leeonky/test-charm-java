@@ -11,7 +11,6 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,6 +18,7 @@ import static com.github.leeonky.util.Suppressor.get;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
@@ -48,7 +48,7 @@ public class BeanClass<T> {
     private static <T> Constructor<?> chooseConstructor(Class<T> type, Object[] args) {
         List<Constructor<?>> constructors = Stream.of(type.getConstructors())
                 .filter(c -> isProperConstructor(c, args))
-                .collect(Collectors.toList());
+                .collect(toList());
         if (constructors.size() != 1)
             throw new NoAppropriateConstructorException(type, args);
         return constructors.get(0);
@@ -73,7 +73,7 @@ public class BeanClass<T> {
             } catch (Exception ignore) {
                 return s;
             }
-        }).collect(Collectors.toList());
+        }).collect(toList());
     }
 
     public static BeanClass<?> create(GenericType type) {
@@ -131,17 +131,19 @@ public class BeanClass<T> {
     private static List<Class<?>> getClasses(String packageName, URL resource) {
         try {
             if ("jar".equals(resource.getProtocol()))
-                return ((JarURLConnection) resource.openConnection()).getJarFile().stream().map(jarEntry -> jarEntry.getName().replace('/', '.'))
+                return ((JarURLConnection) resource.openConnection()).getJarFile().stream()
+                        .map(jarEntry -> jarEntry.getName().replace('/', '.'))
                         .filter(name -> name.endsWith(".class") && name.startsWith(packageName))
                         .map(name -> Suppressor.get(() -> Class.forName(name.substring(0, name.length() - 6))))
-                        .collect(Collectors.toList());
+                        .collect(toList());
             else {
                 InputStream stream = resource.openStream();
-                return stream == null ? emptyList()
-                        : new BufferedReader(new InputStreamReader(stream)).lines()
-                        .filter(line -> line.endsWith(".class"))
-                        .map(line -> toClass(line, packageName))
-                        .collect(Collectors.toList());
+                List<String> lines = stream == null ? emptyList()
+                        : new BufferedReader(new InputStreamReader(stream)).lines().collect(toList());
+                return Stream.concat(lines.stream().filter(line -> !line.endsWith(".class"))
+                        .map(subPackage -> allTypesIn(packageName + "." + subPackage))
+                        .flatMap(List::stream), lines.stream().filter(line -> line.endsWith(".class"))
+                        .map(line -> toClass(line, packageName))).collect(toList());
             }
         } catch (Exception ignore) {
             return emptyList();
@@ -154,11 +156,11 @@ public class BeanClass<T> {
 
     public static List<Class<?>> subTypesOf(Class<?> superClass, String packageName) {
         return assignableTypesOf(superClass, packageName).stream().filter(c -> !superClass.equals(c))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public static List<Class<?>> assignableTypesOf(Class<?> superClass, String packageName) {
-        return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(Collectors.toList());
+        return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(toList());
     }
 
     public static int compareByExtends(Class<?> type1, Class<?> type2) {
@@ -302,7 +304,7 @@ public class BeanClass<T> {
         suppers.add(type.getGenericSuperclass());
         return suppers.stream().filter(Objects::nonNull)
                 .map(t -> BeanClass.create(GenericType.createGenericType(t)))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public boolean isCollection() {
