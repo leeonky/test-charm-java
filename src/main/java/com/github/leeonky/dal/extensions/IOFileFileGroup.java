@@ -1,9 +1,11 @@
 package com.github.leeonky.dal.extensions;
 
+import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -24,7 +26,7 @@ public class IOFileFileGroup extends FileGroup<File> {
     protected File createSubFile(String fileName) {
         File subFile = new File(folder, fileName);
         if (!subFile.exists())
-            throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
+            throw new InvocationException(new FileNotFoundException(String.format("File `%s` not exist", fileName)));
         return subFile;
     }
 

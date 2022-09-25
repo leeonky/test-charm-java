@@ -1,5 +1,8 @@
 package com.github.leeonky.dal.extensions;
 
+import com.github.leeonky.util.InvocationException;
+
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 
@@ -18,7 +21,7 @@ public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode> {
     public ZipBinary.ZipNode createSub(String fileName) {
         ZipBinary.ZipNode zipNode = children.get(fileName);
         if (zipNode == null)
-            throw new IllegalArgumentException(String.format("File `%s` not exist", fileName));
+            throw new InvocationException(new FileNotFoundException(String.format("File `%s` not exist", fileName)));
         return zipNode;
     }
 
@@ -26,9 +29,9 @@ public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode> {
         ZipBinary.ZipNode zipNode = children.get(name);
         if (zipNode != null)
             return zipNode;
-        if (list().stream().anyMatch(f -> ((String) f).startsWith(name + ".")))
+        if (list().stream().anyMatch(f -> f.startsWith(name + ".")))
             return new ZipFileFileGroup(this, name);
-        throw new IllegalArgumentException(String.format("File or File Group <%s> not found", name));
+        throw new InvocationException(new FileNotFoundException(String.format("File or File Group <%s> not found", name)));
     }
 
     public void addNode(LinkedList<String> path, ZipEntry zipEntry, byte[] bytes) {

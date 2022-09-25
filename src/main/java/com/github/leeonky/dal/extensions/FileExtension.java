@@ -5,10 +5,12 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -112,7 +114,7 @@ public class FileExtension implements Extension {
             return subFile;
         if (stream(file.list()).anyMatch(f -> f.startsWith(name + ".")))
             return new IOFileFileGroup(file, name);
-        throw new IllegalArgumentException(String.format("File or File Group <%s> not found", name));
+        throw new InvocationException(new FileNotFoundException(String.format("File or File Group <%s> not found", name)));
     }
 
     private Set<Object> listFileNames(File file) {

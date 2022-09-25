@@ -196,7 +196,7 @@ Feature: dir/file with java File
       4. Map key value
       5. customized type getter
       6. static method extension
-    File or File Group <un-exist> not found
+    java.io.FileNotFoundException: File or File Group <un-exist> not found
     Implicit list mapping is not allowed in current version of DAL, use `un-exist[]` instead
     """
 
@@ -226,7 +226,7 @@ Feature: dir/file with java File
       4. Map key value
       5. customized type getter
       6. static method extension
-    File `file.not-exist` not exist
+    java.io.FileNotFoundException: File `file.not-exist` not exist
     Implicit list mapping is not allowed in current version of DAL, use `not-exist[]` instead
     """
 
