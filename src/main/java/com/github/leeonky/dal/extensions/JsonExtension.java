@@ -1,11 +1,8 @@
 package com.github.leeonky.dal.extensions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.util.Suppressor;
-
-import java.util.List;
+import org.json.JSONArray;
 
 import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
 import static com.github.leeonky.dal.extensions.FileGroup.register;
@@ -27,7 +24,7 @@ public class JsonExtension implements Extension {
         }
 
         public static Object json(CharSequence data) {
-            return Suppressor.get(() -> new ObjectMapper().readValue("[" + data + "]", List.class).get(0));
+            return new JSONArray("[" + data + "]").toList().get(0);
         }
     }
 }
