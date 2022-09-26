@@ -9,6 +9,10 @@ public class TextExtension {
     private static final List<String> SPLITTERS = asList("\r\n", "\n\r", "\n", "\r");
 
     public static class StaticMethods {
+        public static List<String> lines(byte[] content) {
+            return lines(new String(content));
+        }
+
         public static List<String> lines(String content) {
             return TextExtension.lines(content, new ArrayList<>());
         }
@@ -18,7 +22,7 @@ public class TextExtension {
         for (String str : SPLITTERS) {
             int index = content.indexOf(str);
             if (index != -1) {
-                list.add(content.substring(0, index));
+                lines(content.substring(0, index), list);
                 return lines(content.substring(index + str.length()), list);
             }
         }

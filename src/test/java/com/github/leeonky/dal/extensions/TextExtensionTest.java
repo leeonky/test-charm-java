@@ -31,4 +31,9 @@ public class TextExtensionTest {
     void _r_to_lines() {
         assertThat(lines("a\rb\rc")).containsExactly("a", "b", "c");
     }
+
+    @Test
+    void string_lines() {
+        assertThat(lines("a\rb\r\nc\n\rd\ne")).containsExactly("a", "b", "c", "d", "e");
+    }
 }
