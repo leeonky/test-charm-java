@@ -38,7 +38,7 @@ public class FileExtension implements Extension {
 
                     @Override
                     public Object getValue(FileGroup fileGroup, Object name) {
-                        return fileGroup.getFile((String) name);
+                        return fileGroup.getFile(name);
                     }
 
                     @Override
