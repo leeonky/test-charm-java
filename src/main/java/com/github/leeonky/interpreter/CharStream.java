@@ -67,4 +67,8 @@ public class CharStream {
             this.position = position;
         return optionalNode;
     }
+
+    String getCode() {
+        return code;
+    }
 }
