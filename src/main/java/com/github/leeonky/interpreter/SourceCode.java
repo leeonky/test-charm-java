@@ -97,4 +97,8 @@ public class SourceCode {
             token.append(charStream.popChar());
         return token;
     }
+
+    CharStream charStream() {
+        return charStream;
+    }
 }
