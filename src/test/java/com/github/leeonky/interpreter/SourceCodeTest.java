@@ -3,6 +3,7 @@ package com.github.leeonky.interpreter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
@@ -87,6 +88,13 @@ class SourceCodeTest extends BaseTest {
             SourceCode sourceCode = BaseTest.createSourceCode("prefix \n\r\tab");
             sourceCode.popWord(notation("prefix"));
             assertThat(sourceCode.startsWith("a")).isFalse();
+        }
+
+        @Test
+        void return_false_when_no_code() {
+            SourceCode sourceCode = BaseTest.createSourceCode("b");
+            sourceCode.popChar(Collections.emptyMap());
+            assertThat(sourceCode.startsWith("b")).isFalse();
         }
     }
 
@@ -431,6 +439,20 @@ class SourceCodeTest extends BaseTest {
             TestNode testNode = scanner.nodeParser(t -> new TestNode(t.getContent())).parse(procedure);
             assertThat(testNode.getContent()).isEqualTo("a");
             assertThat(testNode.getPositionBegin()).isEqualTo(1);
+        }
+    }
+
+    @Nested
+    class Indent {
+
+        @Test
+        void indent_of_first_line() {
+            assertThat(createSourceCode("12345").indent(3, "\n")).isEqualTo(3);
+        }
+
+        @Test
+        void indent_of_second_line_with_lf_as_new_line() {
+            assertThat(createSourceCode("12345\n12345").indent(7, "\n")).isEqualTo(1);
         }
     }
 }

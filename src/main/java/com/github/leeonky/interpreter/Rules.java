@@ -42,6 +42,13 @@ public class Rules {
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
+            Syntax<C, N, E, O, P, PA, MA, T, R, A>> endBefore(String label) {
+        return syntax -> new EndBeforeString<>(syntax, label);
+    }
+
+    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
             Syntax<C, N, E, O, P, PA, MA, T, R, A>> endWithLine() {
         return EndWithLine::new;
     }
@@ -153,7 +160,7 @@ public class Rules {
         @Override
         public boolean isClose(P procedure) {
             return isClose = endOfLineOrNoCode(procedure.getSourceCode())
-                    || hasNewLineBeforeSplitter(procedure.getSourceCode());
+                             || hasNewLineBeforeSplitter(procedure.getSourceCode());
         }
 
         private boolean hasNewLineBeforeSplitter(SourceCode sourceCode) {
@@ -239,13 +246,42 @@ public class Rules {
         @Override
         public void close(P procedure) {
             if (!closed)
-                throw procedure.getSourceCode().syntaxError("Should end with " +
-                        stream(notations).map(Notation::getLabel).collect(joining("`", "`", "` or `")), 0);
+                throw procedure.getSourceCode().syntaxError(
+                        "Should end with " + stream(notations).map(Notation::getLabel).collect(joining("`", "`", "` or `")), 0);
         }
 
         @Override
         public boolean isClose(P procedure) {
             return closed = stream(notations).anyMatch(procedure.getSourceCode()::startsWith);
+        }
+    }
+
+    private static class EndBeforeString<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A> {
+        private final String label;
+        private boolean closed;
+
+        public EndBeforeString(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, String label) {
+            super(syntax);
+            this.label = label;
+        }
+
+        @Override
+        public void close(P procedure) {
+            if (!closed) {
+                String s = quote();
+                throw procedure.getSourceCode().syntaxError("Should end with " + s, 0);
+            }
+        }
+
+        private String quote() {
+            return label.contains("`") ? "'" + label + "'" : "`" + label + "`";
+        }
+
+        @Override
+        public boolean isClose(P procedure) {
+            return !procedure.getSourceCode().hasCode() || (closed = procedure.getSourceCode().startsWith(label));
         }
     }
 }

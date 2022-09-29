@@ -101,4 +101,9 @@ public class SourceCode {
     CharStream charStream() {
         return charStream;
     }
+
+    public int indent(int position, String newLine) {
+        int linePosition = charStream.lastIndexOf(newLine, position);
+        return linePosition == -1 ? position : position - linePosition - 1;
+    }
 }

@@ -71,4 +71,8 @@ public class CharStream {
     String getCode() {
         return code;
     }
+
+    public int lastIndexOf(String str, int position) {
+        return code.lastIndexOf(str, position);
+    }
 }
