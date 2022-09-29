@@ -1,17 +1,17 @@
 package com.github.leeonky.interpreter;
 
 public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser<C, N, E, O, P,
+        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser<P,
         OperatorParser<C, N, E, O, P>, OperatorParser.Mandatory<C, N, E, O, P>, O> {
 
     @Override
-    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
+    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<P, OperatorParser<C, N, E, O, P>,
             Mandatory<C, N, E, O, P>, O> mandatory) {
         return mandatory::parse;
     }
 
     @Override
-    default OperatorParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
+    default OperatorParser<C, N, E, O, P> castParser(Parser<P, OperatorParser<C, N, E, O, P>,
             Mandatory<C, N, E, O, P>, O> parser) {
         return parser::parse;
     }
@@ -35,11 +35,11 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<C, N, E, O, P,
-            OperatorParser<C, N, E, O, P>, OperatorParser.Mandatory<C, N, E, O, P>, O> {
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<P,
+            OperatorParser<C, N, E, O, P>, Mandatory<C, N, E, O, P>, O> {
 
         @Override
-        default OperatorParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
+        default OperatorParser<C, N, E, O, P> castParser(Parser<P, OperatorParser<C, N, E, O, P>,
                 Mandatory<C, N, E, O, P>, O> parser) {
             return parser::parse;
         }

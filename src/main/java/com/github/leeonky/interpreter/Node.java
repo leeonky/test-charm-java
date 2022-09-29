@@ -11,5 +11,4 @@ public interface Node<C extends RuntimeContext<C>, N extends Node<C, N>> {
     N setPositionBegin(int positionBegin);
 
     int getOperandPosition();
-
 }

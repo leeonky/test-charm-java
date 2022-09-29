@@ -7,8 +7,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-        MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> {
+        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+        MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> {
     protected final BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser;
 
     protected Syntax(BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser) {
@@ -16,8 +16,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
             NodeParser<C, N, E, O, P>, T> single(PA parser) {
         return new DefaultSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, T>((procedure, syntax) -> {
             Optional<T> optional = parser.parse(procedure);
@@ -36,8 +36,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
             NodeParser.Mandatory<C, N, E, O, P>, T> single(MA parser) {
         return new DefaultSyntax<C, N, E, O, P, PA, MA, T, NodeParser.Mandatory<C, N, E, O, P>, T>((procedure, syntax) -> {
             T t = parser.parse(procedure);
@@ -54,8 +54,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
             NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(MA mandatory) {
         return new DefaultSyntax<>((procedure, syntax) -> procedure.withColumn(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
@@ -69,8 +69,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
             NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(PA parser) {
         return new DefaultSyntax<>((procedure, syntax) -> procedure.withColumn(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
@@ -112,8 +112,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     public static class DefaultSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
 
         public DefaultSyntax(BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser) {
             super(parser);
@@ -135,8 +135,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     public static class CompositeSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
 
         private final Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax;
 

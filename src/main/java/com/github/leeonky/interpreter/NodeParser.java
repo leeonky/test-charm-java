@@ -7,7 +7,7 @@ import static java.util.Optional.ofNullable;
 
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-        extends Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
+        extends Parser<P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
 
     static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
             Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser.Mandatory<C, N, E, O, P> positionNode(
@@ -35,14 +35,14 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     @Override
-    default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+    default NodeParser<C, N, E, O, P> castParser(Parser<P, NodeParser<C, N, E, O, P>,
             Mandatory<C, N, E, O, P>, N> parser) {
         return parser::parse;
     }
 
     @Override
-    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
-            NodeParser.Mandatory<C, N, E, O, P>, N> mandatory) {
+    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<P, NodeParser<C, N, E, O, P>,
+            Mandatory<C, N, E, O, P>, N> mandatory) {
         return mandatory::parse;
     }
 
@@ -74,10 +74,10 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends
-            Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
+            Parser.Mandatory<P, NodeParser<C, N, E, O, P>, Mandatory<C, N, E, O, P>, N> {
 
         @Override
-        default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+        default NodeParser<C, N, E, O, P> castParser(Parser<P, NodeParser<C, N, E, O, P>,
                 Mandatory<C, N, E, O, P>, N> parser) {
             return parser::parse;
         }
