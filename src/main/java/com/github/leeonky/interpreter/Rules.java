@@ -37,6 +37,18 @@ public class Rules {
     }
 
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T, R extends MapAble<R, N>, A> Function<Syntax<N, P, PA, MA, T, R, A>,
+            Syntax<N, P, PA, MA, T, R, A>> endWithPosition(String closing) {
+        return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(syntax.and(Rules.endWith(closing))) {
+
+            @Override
+            protected R parse(Syntax<N, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
+                return super.parse(syntax, factory).map(n -> n.setPositionBegin(getToken().getPosition()));
+            }
+        };
+    }
+
+    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
             Syntax<N, P, PA, MA, T, R, A>> endBefore(String label) {
         return syntax -> new EndBeforeString<>(syntax, label);

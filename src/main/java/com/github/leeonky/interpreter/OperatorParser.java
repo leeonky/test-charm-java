@@ -43,6 +43,12 @@ public interface OperatorParser<N extends Node<?, N>,
             return parser::parse;
         }
 
+        @Override
+        default Mandatory<N, O, P> castMandatory(Parser.Mandatory<P, OperatorParser<N, O, P>,
+                Mandatory<N, O, P>, O> mandatory) {
+            return mandatory::parse;
+        }
+
         default ClauseParser.Mandatory<N, P> clause(NodeParser.Mandatory<N, P> nodeFactory) {
             return procedure -> {
                 O operator = parse(procedure);

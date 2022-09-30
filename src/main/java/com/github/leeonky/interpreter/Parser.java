@@ -2,12 +2,18 @@ package com.github.leeonky.interpreter;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static java.util.Optional.empty;
 
 public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
-        MA extends Parser.Mandatory<P, PA, MA, T>, T> {
+        MA extends Parser.Mandatory<P, PA, MA, T>, T> extends MapAble<PA, T> {
+
+    @Override
+    default PA map(UnaryOperator<T> mapper) {
+        return castParser(procedure -> parse(procedure).map(mapper));
+    }
 
     @SuppressWarnings("unchecked")
     static <P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
@@ -46,12 +52,21 @@ public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA
     }
 
     interface Mandatory<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
-            MA extends Mandatory<P, PA, MA, T>, T> {
+            MA extends Mandatory<P, PA, MA, T>, T> extends MapAble<MA, T> {
 
         default PA castParser(Parser<P, PA, MA, T> parser) {
             throw new IllegalStateException();
         }
 
+        default MA castMandatory(Parser.Mandatory<P, PA, MA, T> mandatory) {
+            throw new IllegalStateException();
+        }
+
         T parse(P procedure);
+
+        @Override
+        default MA map(UnaryOperator<T> mapper) {
+            return castMandatory(procedure -> mapper.apply(parse(procedure)));
+        }
     }
 }

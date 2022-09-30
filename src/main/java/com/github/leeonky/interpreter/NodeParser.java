@@ -77,6 +77,11 @@ public interface NodeParser<N extends Node<?, N>, P extends Procedure<?, N, ?, ?
             return parser::parse;
         }
 
+        @Override
+        default Mandatory<N, P> castMandatory(Parser.Mandatory<P, NodeParser<N, P>, Mandatory<N, P>, N> mandatory) {
+            return mandatory::parse;
+        }
+
         default Mandatory<N, P> concat(ClauseParser.Mandatory<N, P> clauseMandatory) {
             return procedure -> {
                 N node = parse(procedure);
