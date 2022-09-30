@@ -24,13 +24,13 @@ public class CharStream {
         return position < code.length();
     }
 
-    private boolean codeStartWith(Notation notation) {
+    private boolean codeStartWith(Notation<?, ?, ?> notation) {
         while (hasContent() && Character.isWhitespace(current()))
             position++;
         return code.startsWith(notation.getLabel(), position);
     }
 
-    public void trimBlackAndComment(List<Notation> comments) {
+    public void trimBlackAndComment(List<Notation<?, ?, ?>> comments) {
         while (comments.stream().anyMatch(this::codeStartWith)) {
             int newLinePosition = code.indexOf("\n", position);
             position = newLinePosition == -1 ? code.length() : newLinePosition + 1;

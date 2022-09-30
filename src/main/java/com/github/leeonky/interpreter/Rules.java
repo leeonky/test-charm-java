@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.util.function.When.when;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
@@ -15,20 +14,22 @@ import static java.util.stream.Collectors.joining;
 public class Rules {
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
-            Syntax<N, P, PA, MA, T, R, A>> endWith(Notation notation) {
+            Syntax<N, P, PA, MA, T, R, A>> endWith(Notation<N, ?, P> notation) {
         return syntax -> new EndWith<>(syntax, notation);
     }
 
+    @SafeVarargs
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
-            Syntax<N, P, PA, MA, T, R, A>> endBefore(Notation... notations) {
+            Syntax<N, P, PA, MA, T, R, A>> endBefore(Notation<N, ?, P>... notations) {
         return syntax -> new EndBefore<>(syntax, notations);
     }
 
-    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
-            Syntax<N, P, PA, MA, T, R, A>> endWith(String closing) {
-        return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(syntax.and(Rules.endWith(notation(closing)))) {
+    public static <N extends Node<?, N>, O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>,
+            PA extends Parser<P, PA, MA, T>, MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A>
+    Function<Syntax<N, P, PA, MA, T, R, A>, Syntax<N, P, PA, MA, T, R, A>> endWith(String closing) {
+        return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(
+                syntax.and(Rules.endWith(Notation.<N, O, P>notation(closing)))) {
             @Override
             public boolean isClose(P procedure) {
                 return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(closing);
@@ -36,8 +37,9 @@ public class Rules {
         };
     }
 
-    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T, R extends MapAble<R, N>, A> Function<Syntax<N, P, PA, MA, T, R, A>,
+    public static <N extends Node<?, N>, O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>,
+            PA extends Parser<P, PA, MA, T>, MA extends Parser.Mandatory<P, PA, MA, T>, T, R
+            extends MapAble<R, N>, A> Function<Syntax<N, P, PA, MA, T, R, A>,
             Syntax<N, P, PA, MA, T, R, A>> endWithPosition(String closing) {
         return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(syntax.and(Rules.endWith(closing))) {
 
@@ -62,7 +64,7 @@ public class Rules {
 
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
-            Syntax<N, P, PA, MA, T, R, A>> splitBy(Notation notation) {
+            Syntax<N, P, PA, MA, T, R, A>> splitBy(Notation<N, ?, P> notation) {
         return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(syntax) {
             @Override
             public boolean isSplitter(P procedure) {
@@ -83,7 +85,7 @@ public class Rules {
 
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
-            Syntax<N, P, PA, MA, T, R, A>> optionalSplitBy(Notation splitter) {
+            Syntax<N, P, PA, MA, T, R, A>> optionalSplitBy(Notation<N, ?, P> splitter) {
         return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(syntax) {
             @Override
             public boolean isSplitter(P procedure) {
@@ -95,7 +97,7 @@ public class Rules {
 
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
-            Syntax<N, P, PA, MA, T, R, A>> mandatorySplitBy(Notation splitter) {
+            Syntax<N, P, PA, MA, T, R, A>> mandatorySplitBy(Notation<N, ?, P> splitter) {
         return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(syntax) {
             @Override
             public boolean isSplitter(P procedure) {
@@ -125,8 +127,7 @@ public class Rules {
 
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, A> Function<Syntax<N, P, PA, MA, T,
-            NodeParser<N, P>, A>, Syntax<N, P, PA, MA, T, NodeParser<N, P>, A>> enabledBefore(
-            Notation notation) {
+            NodeParser<N, P>, A>, Syntax<N, P, PA, MA, T, NodeParser<N, P>, A>> enabledBefore(Notation<N, ?, P> notation) {
         return syntax -> new CompositeSyntax<N, P, PA, MA, T, NodeParser<N, P>, A>(syntax) {
 
             @Override
@@ -141,16 +142,16 @@ public class Rules {
 
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
-            Syntax<N, P, PA, MA, T, R, A>> endOfRow(Notation splitter) {
+            Syntax<N, P, PA, MA, T, R, A>> endOfRow(Notation<N, ?, P> splitter) {
         return syntax -> new EndOrRow<>(syntax, splitter);
     }
 
     private static class EndOrRow<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends CompositeSyntax<N, P, PA, MA, T, R, A> {
-        private final Notation splitter;
+        private final Notation<N, ?, P> splitter;
         private boolean isClose;
 
-        public EndOrRow(Syntax<N, P, PA, MA, T, R, A> syntax, Notation splitter) {
+        public EndOrRow(Syntax<N, P, PA, MA, T, R, A> syntax, Notation<N, ?, P> splitter) {
             super(syntax);
             this.splitter = splitter;
             isClose = false;
@@ -209,9 +210,9 @@ public class Rules {
 
     private static class EndWith<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends CompositeSyntax<N, P, PA, MA, T, R, A> {
-        private final Notation notation;
+        private final Notation<N, ?, P> notation;
 
-        public EndWith(Syntax<N, P, PA, MA, T, R, A> syntax, Notation notation) {
+        public EndWith(Syntax<N, P, PA, MA, T, R, A> syntax, Notation<N, ?, P> notation) {
             super(syntax);
             this.notation = notation;
         }
@@ -230,10 +231,10 @@ public class Rules {
 
     private static class EndBefore<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends CompositeSyntax<N, P, PA, MA, T, R, A> {
-        private final Notation[] notations;
+        private final Notation<N, ?, P>[] notations;
         private boolean closed;
 
-        public EndBefore(Syntax<N, P, PA, MA, T, R, A> syntax, Notation... notations) {
+        public EndBefore(Syntax<N, P, PA, MA, T, R, A> syntax, Notation<N, ?, P>... notations) {
             super(syntax);
             this.notations = notations;
             closed = false;

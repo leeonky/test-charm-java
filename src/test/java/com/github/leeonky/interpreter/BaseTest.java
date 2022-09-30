@@ -22,4 +22,8 @@ public class BaseTest {
         sourceCode.popWord(Notation.notation("blabla"));
         return sourceCode;
     }
+
+    protected Notation<TestNode, TestOperator, TestProcedure> nt(String label) {
+        return notation(label);
+    }
 }

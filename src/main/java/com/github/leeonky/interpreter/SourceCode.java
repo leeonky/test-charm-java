@@ -9,11 +9,11 @@ import java.util.function.Supplier;
 import static com.github.leeonky.util.function.When.when;
 
 public class SourceCode {
-    private final List<Notation> lineComments;
+    private final List<Notation<?, ?, ?>> lineComments;
     private final CharStream charStream;
     private final int startPosition;
 
-    public SourceCode(String code, List<Notation> lineComments) {
+    public SourceCode(String code, List<Notation<?, ?, ?>> lineComments) {
         charStream = new CharStream(code);
         this.lineComments = lineComments;
         trimBlankAndComment();
@@ -33,7 +33,7 @@ public class SourceCode {
         return charStream.hasContent();
     }
 
-    public boolean startsWith(Notation notation) {
+    public boolean startsWith(Notation<?, ?, ?> notation) {
         trimBlankAndComment();
         return charStream.startsWith(notation.getLabel());
     }
@@ -57,11 +57,18 @@ public class SourceCode {
         return new SyntaxException(message, charStream.position() + positionOffset);
     }
 
-    public Optional<Token> popWord(Notation notation) {
+    public Optional<String> popString(String label) {
+        return when(startsWith(label)).optional(() -> {
+            charStream.seek(label.length());
+            return label;
+        });
+    }
+
+    public Optional<Token> popWord(Notation<?, ?, ?> notation) {
         return popWord(notation, () -> true);
     }
 
-    public Optional<Token> popWord(Notation notation, Supplier<Boolean> predicate) {
+    public Optional<Token> popWord(Notation<?, ?, ?> notation, Supplier<Boolean> predicate) {
         return when(startsWith(notation) && predicate.get())
                 .optional(() -> new Token(charStream.seek(notation.length())).append(notation.getLabel()));
     }
@@ -78,7 +85,7 @@ public class SourceCode {
         return charStream.current() == '\n';
     }
 
-    public String codeBefore(Notation notation) {
+    public String codeBefore(Notation<?, ?, ?> notation) {
         return charStream.contentUntil(notation.getLabel());
     }
 

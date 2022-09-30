@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.oneOf;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
@@ -164,8 +163,7 @@ class OperatorParserTest extends BaseTest {
 
                 @Test
                 void return_empty_when_node_parser_return_empty() {
-                    OperatorParser<TestNode, TestOperator, TestProcedure>
-                            operatorParser = notation("=").operator(TestOperator::new);
+                    OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser = nt("=").operator(TestOperator::new);
 
                     NodeParser<TestNode, TestProcedure>
                             emptyParser = procedure -> empty();

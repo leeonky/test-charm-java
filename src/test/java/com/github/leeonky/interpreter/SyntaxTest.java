@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
@@ -285,7 +284,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(nt("a")));
 
             assertThat(assertThrows(SyntaxException.class, () -> syntax.close(givenProcedureWithCode(""))))
                     .hasMessageContaining("Should end with `a`");
@@ -298,7 +297,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(nt("a")));
 
             TestProcedure testProcedure = givenProcedureWithCode("a");
             syntax.close(testProcedure);
@@ -313,7 +312,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation(" a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(nt(" a")));
 
             assertThat(syntax.isClose(givenProcedureWithCode(" "))).isTrue();
         }
@@ -325,7 +324,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(nt("a")));
 
             assertThat(syntax.isClose(givenProcedureWithCode("b"))).isFalse();
         }
@@ -337,7 +336,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(nt("a")));
 
             assertThat(syntax.isClose(givenProcedureWithCode(" a"))).isTrue();
         }
@@ -353,7 +352,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(nt("a")));
 
             assertThat(assertThrows(SyntaxException.class, () -> syntax.close(givenProcedureWithCode(""))))
                     .hasMessageContaining("Should end with `a`");
@@ -366,7 +365,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(nt("a")));
 
             TestProcedure testProcedure = givenProcedureWithCode("a");
             syntax.isClose(testProcedure);
@@ -382,7 +381,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation(" a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(nt(" a")));
 
             assertThat(syntax.isClose(givenProcedureWithCode(" "))).isFalse();
         }
@@ -394,7 +393,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(nt("a")));
 
             assertThat(syntax.isClose(givenProcedureWithCode("b"))).isFalse();
         }
@@ -406,7 +405,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(nt("a")));
 
             assertThat(syntax.isClose(givenProcedureWithCode(" a"))).isTrue();
         }
@@ -418,7 +417,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(notation("a"), notation("b")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endBefore(nt("a"), nt("b")));
 
             assertThat(syntax.isClose(givenProcedureWithCode(" b"))).isTrue();
         }
@@ -668,7 +667,7 @@ class SyntaxTest extends BaseTest {
         Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                 TestProcedure>, NodeParser.Mandatory<TestNode,
                 TestProcedure>, TestNode, NodeParser.Mandatory<
-                TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endOfRow(notation("|")));
+                TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endOfRow(nt("|")));
 
         @Test
         void should_raise_error_when_not_really_close() {
@@ -772,7 +771,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(splitBy(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(splitBy(nt("a")));
 
             TestProcedure testProcedure = givenProcedureWithCode("x");
             assertThat(syntax.isSplitter(testProcedure)).isFalse();
@@ -785,7 +784,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(splitBy(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(splitBy(nt("a")));
             TestProcedure testProcedure = givenProcedureWithCode(" a");
 
             assertThat(syntax.isSplitter(testProcedure)).isTrue();
@@ -803,7 +802,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(optionalSplitBy(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(optionalSplitBy(nt("a")));
 
             TestProcedure testProcedure = givenProcedureWithCode("x");
 
@@ -818,7 +817,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(optionalSplitBy(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(optionalSplitBy(nt("a")));
 
             TestProcedure testProcedure = givenProcedureWithCode(" a");
             assertThat(syntax.isSplitter(testProcedure)).isTrue();
@@ -836,7 +835,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(mandatorySplitBy(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(mandatorySplitBy(nt("a")));
 
             TestProcedure testProcedure = givenProcedureWithCode(" a");
             assertThat(syntax.isSplitter(testProcedure)).isTrue();
@@ -850,7 +849,7 @@ class SyntaxTest extends BaseTest {
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser.Mandatory<
-                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(mandatorySplitBy(notation("a")));
+                    TestNode, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(mandatorySplitBy(nt("a")));
 
             assertThat(assertThrows(SyntaxException.class, () -> syntax.isSplitter(givenProcedureWithCode("x"))))
                     .hasMessageContaining("");
@@ -862,7 +861,7 @@ class SyntaxTest extends BaseTest {
 
         @Test
         void return_when_enough() {
-            NodeParser<TestNode, TestProcedure> nodeParser = notation("a").node(TestNode::new);
+            NodeParser<TestNode, TestProcedure> nodeParser = nt("a").node(TestNode::new);
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser<
@@ -876,7 +875,7 @@ class SyntaxTest extends BaseTest {
 
         @Test
         void return_empty_when_not_enough() {
-            NodeParser<TestNode, TestProcedure> nodeParser = notation("a").node(TestNode::new);
+            NodeParser<TestNode, TestProcedure> nodeParser = nt("a").node(TestNode::new);
             Syntax<TestNode, TestProcedure, NodeParser<TestNode,
                     TestProcedure>, NodeParser.Mandatory<TestNode,
                     TestProcedure>, TestNode, NodeParser<
@@ -893,10 +892,10 @@ class SyntaxTest extends BaseTest {
 
         @Test
         void return_node_when_end_with_target_notation() {
-            NodeParser<TestNode, TestProcedure> nodeParser = notation("a").node(TestNode::new);
+            NodeParser<TestNode, TestProcedure> nodeParser = nt("a").node(TestNode::new);
             TestProcedure procedure = givenProcedureWithCode("a|");
 
-            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(notation("|"))).as(Function.identity()).parse(procedure);
+            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(nt("|"))).as(Function.identity()).parse(procedure);
 
             assertThat(testNode.get().getContent()).isEqualTo("a");
 
@@ -905,10 +904,10 @@ class SyntaxTest extends BaseTest {
 
         @Test
         void return_empty_when_not_end_with_target_notation_and_source_move_back() {
-            NodeParser<TestNode, TestProcedure> nodeParser = notation("a").node(TestNode::new);
+            NodeParser<TestNode, TestProcedure> nodeParser = nt("a").node(TestNode::new);
             TestProcedure procedure = givenProcedureWithCode("a+");
 
-            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(notation("|"))).as(Function.identity()).parse(procedure);
+            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(nt("|"))).as(Function.identity()).parse(procedure);
 
             assertThat(testNode).isEmpty();
 
@@ -923,7 +922,7 @@ class SyntaxTest extends BaseTest {
                 return empty();
             };
 
-            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(notation("|"))).as(Function.identity()).parse(testProcedure);
+            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(nt("|"))).as(Function.identity()).parse(testProcedure);
 
             assertThat(testNode).isEmpty();
         }
