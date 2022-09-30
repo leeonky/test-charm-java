@@ -6,25 +6,23 @@ import java.util.stream.Stream;
 
 import static java.util.Optional.empty;
 
-public interface Parser<P extends Procedure<?, ?, ?, ?, P>, PA extends Parser<P, PA, MA, T>,
+public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
         MA extends Parser.Mandatory<P, PA, MA, T>, T> {
 
     @SuppressWarnings("unchecked")
-    static <P extends Procedure<?, ?, ?, ?, P>, PA extends Parser<P, PA, MA, T>,
+    static <P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T> PA oneOf(PA... parsers) {
         return parsers[0].castParser(procedure -> Stream.of(parsers).map(parser -> parser.parse(procedure)).
                 filter(Optional::isPresent).findFirst().orElse(empty()));
     }
 
-    static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> lazyClause(
-            Supplier<ClauseParser<C, N, E, O, P>> parser) {
+    static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> ClauseParser<N, P> lazyClause(
+            Supplier<ClauseParser<N, P>> parser) {
         return procedure -> parser.get().parse(procedure);
     }
 
-    static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> lazyNode(
-            Supplier<NodeParser<C, N, E, O, P>> parser) {
+    static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> NodeParser<N, P> lazyNode(
+            Supplier<NodeParser<N, P>> parser) {
         return procedure -> parser.get().parse(procedure);
     }
 
@@ -43,10 +41,11 @@ public interface Parser<P extends Procedure<?, ?, ?, ?, P>, PA extends Parser<P,
     }
 
     default MA mandatory(String message) {
-        return castMandatory(procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
+        return castMandatory(procedure -> parse(procedure)
+                .orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
     }
 
-    interface Mandatory<P extends Procedure<?, ?, ?, ?, P>, PA extends Parser<P, PA, MA, T>,
+    interface Mandatory<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Mandatory<P, PA, MA, T>, T> {
 
         default PA castParser(Parser<P, PA, MA, T> parser) {

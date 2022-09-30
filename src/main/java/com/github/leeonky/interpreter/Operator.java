@@ -1,6 +1,6 @@
 package com.github.leeonky.interpreter;
 
-public abstract class Operator<C extends RuntimeContext<C>, N extends Node<C, N>, O extends Operator<C, N, O>> {
+public abstract class Operator<C extends RuntimeContext, N extends Node<C, N>, O extends Operator<C, N, O>> {
     protected final int precedence;
     protected final String label;
     private int position;

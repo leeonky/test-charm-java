@@ -3,53 +3,47 @@ package com.github.leeonky.interpreter;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
-        E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-        extends Parser<P, ClauseParser<C, N, E, O, P>,
-        ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
+public interface ClauseParser<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>>
+        extends Parser<P, ClauseParser<N, P>, ClauseParser.Mandatory<N, P>, Clause<N>> {
 
-    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
-            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> positionClause(
-            ClauseParser<C, N, E, O, P> clauseParser) {
+    static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> ClauseParser<N, P> positionClause(
+            ClauseParser<N, P> clauseParser) {
         return procedure -> procedure.positionOf(position -> clauseParser.parse(procedure)
                 .map(clause -> node -> clause.expression(node).setPositionBegin(position)));
     }
 
-    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
-            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> positionClause(
-            ClauseParser.Mandatory<C, N, E, O, P> clauseMandatory) {
+    static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> ClauseParser.Mandatory<N, P> positionClause(
+            ClauseParser.Mandatory<N, P> clauseMandatory) {
         return procedure -> procedure.positionOf(position -> {
-            Clause<C, N> parse = clauseMandatory.parse(procedure);
+            Clause<N> parse = clauseMandatory.parse(procedure);
             return node -> parse.expression(node).setPositionBegin(position);
         });
     }
 
-    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
-            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> columnMandatory(
-            Function<Integer, ClauseParser.Mandatory<C, N, E, O, P>> mandatoryFactory) {
+    static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> ClauseParser.Mandatory<N, P> columnMandatory(
+            Function<Integer, ClauseParser.Mandatory<N, P>> mandatoryFactory) {
         return procedure -> mandatoryFactory.apply(procedure.getColumn()).parse(procedure);
     }
 
-    static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
-            Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> columnParser(
-            Function<Integer, ClauseParser<C, N, E, O, P>> parserFactory) {
+    static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> ClauseParser<N, P> columnParser(
+            Function<Integer, ClauseParser<N, P>> parserFactory) {
         return procedure -> parserFactory.apply(procedure.getColumn()).parse(procedure);
     }
 
     @Override
-    default ClauseParser<C, N, E, O, P> castParser(Parser<P, ClauseParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, Clause<C, N>> parser) {
+    default ClauseParser<N, P> castParser(Parser<P, ClauseParser<N, P>,
+            Mandatory<N, P>, Clause<N>> parser) {
         return parser::parse;
     }
 
     @Override
-    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<P, ClauseParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, Clause<C, N>> mandatory) {
+    default Mandatory<N, P> castMandatory(Parser.Mandatory<P, ClauseParser<N, P>, Mandatory<N, P>,
+            Clause<N>> mandatory) {
         return mandatory::parse;
     }
 
-    default ClauseParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clause) {
-        return procedure -> parse(procedure).map(c1 -> clause.parse(procedure).<Clause<C, N>>map(c2 -> previous ->
+    default ClauseParser<N, P> concat(ClauseParser<N, P> clause) {
+        return procedure -> parse(procedure).map(c1 -> clause.parse(procedure).<Clause<N>>map(c2 -> previous ->
                 c2.expression(c1.expression(previous))).orElse(c1));
     }
 
@@ -68,19 +62,17 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return parseAndMakeExpressionOrInputContinuously(procedure, expression);
     }
 
-    interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<P,
-            ClauseParser<C, N, E, O, P>, Mandatory<C, N, E, O, P>, Clause<C, N>> {
+    interface Mandatory<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> extends
+            Parser.Mandatory<P, ClauseParser<N, P>, Mandatory<N, P>, Clause<N>> {
 
-        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
-                Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> Mandatory<C, N, E, O, P> clause(
-                Function<N, NodeParser.Mandatory<C, N, E, O, P>> mandatoryFactory) {
+        static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> Mandatory<N, P> clause(
+                Function<N, NodeParser.Mandatory<N, P>> mandatoryFactory) {
             return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
         }
 
         @Override
-        default ClauseParser<C, N, E, O, P> castParser(Parser<P, ClauseParser<C, N, E, O, P>,
-                Mandatory<C, N, E, O, P>, Clause<C, N>> parser) {
+        default ClauseParser<N, P> castParser(Parser<P, ClauseParser<N, P>,
+                Mandatory<N, P>, Clause<N>> parser) {
             return parser::parse;
         }
     }

@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
+public class Procedure<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+        O extends Operator<C, N, O>> {
 
     private final SourceCode sourceCode;
     private final C runtimeContext;

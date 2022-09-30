@@ -1,50 +1,49 @@
 package com.github.leeonky.interpreter;
 
-public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser<P,
-        OperatorParser<C, N, E, O, P>, OperatorParser.Mandatory<C, N, E, O, P>, O> {
+public interface OperatorParser<N extends Node<?, N>,
+        O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>>
+        extends Parser<P, OperatorParser<N, O, P>, OperatorParser.Mandatory<N, O, P>, O> {
 
     @Override
-    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<P, OperatorParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, O> mandatory) {
+    default Mandatory<N, O, P> castMandatory(Parser.Mandatory<P, OperatorParser<N, O, P>,
+            Mandatory<N, O, P>, O> mandatory) {
         return mandatory::parse;
     }
 
     @Override
-    default OperatorParser<C, N, E, O, P> castParser(Parser<P, OperatorParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, O> parser) {
+    default OperatorParser<N, O, P> castParser(Parser<P, OperatorParser<N, O, P>,
+            Mandatory<N, O, P>, O> parser) {
         return parser::parse;
     }
 
-    default ClauseParser<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
+    default ClauseParser<N, P> clause(NodeParser.Mandatory<N, P> nodeFactory) {
         return procedure -> parse(procedure).map(operator -> procedure.underOperator(operator, () -> {
             N right = nodeFactory.parse(procedure);
             return left -> procedure.createExpression(left, operator, right);
         }));
     }
 
-    default ClauseParser<C, N, E, O, P> clause(NodeParser<C, N, E, O, P> nodeParser) {
+    default ClauseParser<N, P> clause(NodeParser<N, P> nodeParser) {
         return procedure -> procedure.getSourceCode().tryFetch(() -> parse(procedure).map(operator ->
-                procedure.underOperator(operator, () -> nodeParser.parse(procedure).<Clause<C, N>>map(n ->
+                procedure.underOperator(operator, () -> nodeParser.parse(procedure).<Clause<N>>map(n ->
                         left -> procedure.createExpression(left, operator, n)).orElse(null))));
     }
 
-    default NodeParser<C, N, E, O, P> unary(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
+    default NodeParser<N, P> unary(NodeParser.Mandatory<N, P> nodeFactory) {
         return procedure -> parse(procedure).map(operator -> procedure.underOperator(operator, () ->
                 procedure.createExpression(null, operator, nodeFactory.parse(procedure))));
     }
 
-    interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<P,
-            OperatorParser<C, N, E, O, P>, Mandatory<C, N, E, O, P>, O> {
+    interface Mandatory<N extends Node<?, N>, O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>>
+            extends Parser.Mandatory<P, OperatorParser<N, O, P>, Mandatory<N, O, P>, O> {
 
         @Override
-        default OperatorParser<C, N, E, O, P> castParser(Parser<P, OperatorParser<C, N, E, O, P>,
-                Mandatory<C, N, E, O, P>, O> parser) {
+        default OperatorParser<N, O, P> castParser(Parser<P, OperatorParser<N, O, P>,
+                Mandatory<N, O, P>, O> parser) {
             return parser::parse;
         }
 
-        default ClauseParser.Mandatory<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
+        default ClauseParser.Mandatory<N, P> clause(NodeParser.Mandatory<N, P> nodeFactory) {
             return procedure -> {
                 O operator = parse(procedure);
                 return procedure.underOperator(operator, () -> {

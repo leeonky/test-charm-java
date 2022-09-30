@@ -24,7 +24,7 @@ class OperatorParserTest extends BaseTest {
 
             @Test
             void return_empty_when_all_parse_empty() {
-                OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser<TestNode, TestOperator, TestProcedure>
                         emptyParser1 = procedure -> empty(),
                         emptyParser2 = procedure -> empty();
 
@@ -36,7 +36,7 @@ class OperatorParserTest extends BaseTest {
             @Test
             void return_operator_when_matches() {
                 TestOperator testOperator = new TestOperator();
-                OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser<TestNode, TestOperator, TestProcedure>
                         operatorParser = procedure -> of(testOperator),
                         emptyParser = procedure -> empty();
 
@@ -57,10 +57,10 @@ class OperatorParserTest extends BaseTest {
             @Test
             void should_parser_result_when_present() {
                 TestOperator testOperator = new TestOperator();
-                OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser<TestNode, TestOperator, TestProcedure>
                         operatorParser = procedure -> of(testOperator);
 
-                OperatorParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser.Mandatory<TestNode, TestOperator, TestProcedure>
                         operatorParserMandatory = procedure -> {
                     fail("");
                     return null;
@@ -72,9 +72,9 @@ class OperatorParserTest extends BaseTest {
             @Test
             void should_return_mandatory_result_when_parser_is_empty() {
                 TestOperator testOperator = new TestOperator();
-                OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser<TestNode, TestOperator, TestProcedure>
                         emptyParser = procedure -> empty();
-                OperatorParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser.Mandatory<TestNode, TestOperator, TestProcedure>
                         operatorParserMandatory = procedure -> testOperator;
 
                 assertThat(emptyParser.or(operatorParserMandatory).parse(givenProcedureWithCode(""))).isSameAs(testOperator);
@@ -86,7 +86,7 @@ class OperatorParserTest extends BaseTest {
 
             @Test
             void raise_error_when_not_match() {
-                OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser<TestNode, TestOperator, TestProcedure>
                         operatorParser = procedure -> empty();
 
                 SyntaxException syntaxException = assertThrows(SyntaxException.class, () ->
@@ -98,7 +98,7 @@ class OperatorParserTest extends BaseTest {
             @Test
             void return_when_matches() {
                 TestOperator testOperator = new TestOperator();
-                OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                OperatorParser<TestNode, TestOperator, TestProcedure>
                         operatorParser = procedure -> of(testOperator);
 
                 assertThat(operatorParser.mandatory("").parse(givenProcedureWithCode(""))).isSameAs(testOperator);
@@ -113,10 +113,10 @@ class OperatorParserTest extends BaseTest {
 
                 @Test
                 void return_empty_when_no_matches_operator() {
-                    OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser<TestNode, TestOperator, TestProcedure>
                             operatorParser = procedure -> empty();
 
-                    NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser.Mandatory<TestNode, TestProcedure>
                             nodeMandatory = procedure -> null;
 
                     assertThat(operatorParser.clause(nodeMandatory).parse(givenProcedureWithCode(""))).isEmpty();
@@ -126,19 +126,19 @@ class OperatorParserTest extends BaseTest {
                 void return_clause_with_operator_and_node() {
                     TestOperator testOperator = new TestOperator();
 
-                    OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser<TestNode, TestOperator, TestProcedure>
                             operatorParser = procedure -> of(testOperator);
 
                     TestNode testNode = new TestNode();
 
-                    NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser.Mandatory<TestNode, TestProcedure>
                             nodeMandatory = procedure -> {
                         assertThat(procedure.currentOperator()).hasValue(testOperator);
                         return testNode;
                     };
 
                     TestProcedure procedure = new TestProcedure(BaseTest.createSourceCode(""), TestExpression::new);
-                    Optional<Clause<TestContext, TestNode>> clause =
+                    Optional<Clause<TestNode>> clause =
                             operatorParser.clause(nodeMandatory).parse(procedure);
 
                     TestExpression expression = (TestExpression) clause.get().expression(new TestNode());
@@ -153,10 +153,10 @@ class OperatorParserTest extends BaseTest {
 
                 @Test
                 void return_empty_when_no_matches_operator() {
-                    OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser<TestNode, TestOperator, TestProcedure>
                             operatorParser = procedure -> empty();
 
-                    NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser<TestNode, TestProcedure>
                             nodeParser = procedure -> of(new TestNode());
 
                     assertThat(operatorParser.clause(nodeParser).parse(givenProcedureWithCode(""))).isEmpty();
@@ -164,10 +164,10 @@ class OperatorParserTest extends BaseTest {
 
                 @Test
                 void return_empty_when_node_parser_return_empty() {
-                    OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser<TestNode, TestOperator, TestProcedure>
                             operatorParser = notation("=").operator(TestOperator::new);
 
-                    NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser<TestNode, TestProcedure>
                             emptyParser = procedure -> empty();
 
                     TestProcedure procedure = givenProcedureWithCode("=");
@@ -180,19 +180,19 @@ class OperatorParserTest extends BaseTest {
                 void return_clause_with_operator_and_node() {
                     TestOperator testOperator = new TestOperator();
 
-                    OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser<TestNode, TestOperator, TestProcedure>
                             operatorParser = procedure -> of(testOperator);
 
                     TestNode testNode = new TestNode();
 
-                    NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser<TestNode, TestProcedure>
                             nodeParser = procedure -> {
                         assertThat(procedure.currentOperator()).hasValue(testOperator);
                         return of(testNode);
                     };
 
                     TestProcedure procedure = new TestProcedure(BaseTest.createSourceCode(""), TestExpression::new);
-                    Optional<Clause<TestContext, TestNode>> clause =
+                    Optional<Clause<TestNode>> clause =
                             operatorParser.clause(nodeParser).parse(procedure);
 
                     TestExpression expression = (TestExpression) clause.get().expression(new TestNode());
@@ -211,10 +211,10 @@ class OperatorParserTest extends BaseTest {
 
                 @Test
                 void return_empty_when_no_matches_operator() {
-                    OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser<TestNode, TestOperator, TestProcedure>
                             operatorParser = procedure -> empty();
 
-                    NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser.Mandatory<TestNode, TestProcedure>
                             nodeMandatory = procedure -> null;
 
                     assertThat(operatorParser.unary(nodeMandatory).parse(givenProcedureWithCode(""))).isEmpty();
@@ -224,12 +224,12 @@ class OperatorParserTest extends BaseTest {
                 void return_clause_with_operator_and_node() {
                     TestOperator testOperator = new TestOperator();
 
-                    OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser<TestNode, TestOperator, TestProcedure>
                             operatorParser = procedure -> of(testOperator);
 
                     TestNode testNode = new TestNode();
 
-                    NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser.Mandatory<TestNode, TestProcedure>
                             nodeMandatory = procedure -> {
                         assertThat(procedure.currentOperator()).hasValue(testOperator);
                         return testNode;
@@ -259,19 +259,19 @@ class OperatorParserTest extends BaseTest {
                 void return_clause_with_operator_and_node() {
                     TestOperator testOperator = new TestOperator();
 
-                    OperatorParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    OperatorParser.Mandatory<TestNode, TestOperator, TestProcedure>
                             operatorMandatory = procedure -> testOperator;
 
                     TestNode testNode = new TestNode();
 
-                    NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>
+                    NodeParser.Mandatory<TestNode, TestProcedure>
                             nodeMandatory = procedure -> {
                         assertThat(procedure.currentOperator()).hasValue(testOperator);
                         return testNode;
                     };
 
                     TestProcedure procedure = new TestProcedure(BaseTest.createSourceCode(""), TestExpression::new);
-                    Clause<TestContext, TestNode> clause =
+                    Clause<TestNode> clause =
                             operatorMandatory.clause(nodeMandatory).parse(procedure);
 
                     TestExpression expression = (TestExpression) clause.expression(new TestNode());

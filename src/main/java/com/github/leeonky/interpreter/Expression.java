@@ -1,6 +1,6 @@
 package com.github.leeonky.interpreter;
 
-public interface Expression<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+public interface Expression<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>> extends Node<C, N> {
 
     N getLeftOperand();

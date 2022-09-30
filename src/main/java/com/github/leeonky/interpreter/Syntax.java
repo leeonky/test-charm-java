@@ -6,20 +6,19 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
+public abstract class Syntax<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
         MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> {
-    protected final BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser;
+    protected final BiFunction<P, Syntax<N, P, PA, MA, ?, ?, A>, A> parser;
 
-    protected Syntax(BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser) {
+    private Token token;
+
+    protected Syntax(BiFunction<P, Syntax<N, P, PA, MA, ?, ?, A>, A> parser) {
         this.parser = parser;
     }
 
-    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
-            NodeParser<C, N, E, O, P>, T> single(PA parser) {
-        return new DefaultSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, T>((procedure, syntax) -> {
+    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<N, P, PA, MA, T, NodeParser<N, P>, T> single(PA parser) {
+        return new DefaultSyntax<N, P, PA, MA, T, NodeParser<N, P>, T>((procedure, syntax) -> {
             Optional<T> optional = parser.parse(procedure);
             if (optional.isPresent()) {
                 syntax.isClose(procedure);
@@ -28,35 +27,33 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             return optional.orElse(null);
         }) {
             @Override
-            protected NodeParser<C, N, E, O, P> parse(Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>,
+            protected NodeParser<N, P> parse(Syntax<N, P, PA, MA, T, NodeParser<N, P>,
                     T> syntax, Function<T, N> factory) {
                 return (P procedure) -> Optional.ofNullable(parser.apply(procedure, syntax)).map(factory);
             }
         };
     }
 
-    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
-            NodeParser.Mandatory<C, N, E, O, P>, T> single(MA parser) {
-        return new DefaultSyntax<C, N, E, O, P, PA, MA, T, NodeParser.Mandatory<C, N, E, O, P>, T>((procedure, syntax) -> {
+    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<N, P, PA, MA, T,
+            NodeParser.Mandatory<N, P>, T> single(MA parser) {
+        return new DefaultSyntax<N, P, PA, MA, T, NodeParser.Mandatory<N, P>, T>((procedure, syntax) -> {
             T t = parser.parse(procedure);
             syntax.isClose(procedure);
             syntax.close(procedure);
             return t;
         }) {
             @Override
-            protected NodeParser.Mandatory<C, N, E, O, P> parse(Syntax<C, N, E, O, P, PA, MA, T,
-                    NodeParser.Mandatory<C, N, E, O, P>, T> syntax, Function<T, N> factory) {
+            protected NodeParser.Mandatory<N, P> parse(Syntax<N, P, PA, MA, T,
+                    NodeParser.Mandatory<N, P>, T> syntax, Function<T, N> factory) {
                 return (P procedure) -> factory.apply(parser.apply(procedure, syntax));
             }
         };
     }
 
-    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
-            NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(MA mandatory) {
+    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<N, P, PA, MA, T,
+            NodeParser.Mandatory<N, P>, List<T>> many(MA mandatory) {
         return new DefaultSyntax<>((procedure, syntax) -> procedure.withColumn(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
                 add(mandatory.parse(procedure));
@@ -68,10 +65,9 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         }}));
     }
 
-    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<C, N, E, O, P, PA, MA, T,
-            NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(PA parser) {
+    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T> Syntax<N, P, PA, MA, T,
+            NodeParser.Mandatory<N, P>, List<T>> many(PA parser) {
         return new DefaultSyntax<>((procedure, syntax) -> procedure.withColumn(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
                 Optional<T> optional = parser.parse(procedure);
@@ -93,12 +89,12 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     protected abstract boolean isSplitter(P procedure);
 
     @SuppressWarnings("unchecked")
-    protected R parse(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
-        return (R) (NodeParser.Mandatory<C, N, E, O, P>) procedure -> factory.apply(parser.apply(procedure, syntax));
+    protected R parse(Syntax<N, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
+        return (R) (NodeParser.Mandatory<N, P>) procedure -> factory.apply(parser.apply(procedure, syntax));
     }
 
-    public <NR, NA> Syntax<C, N, E, O, P, PA, MA, T, NR, NA> and(Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
-            Syntax<C, N, E, O, P, PA, MA, T, NR, NA>> rule) {
+    public <NR, NA> Syntax<N, P, PA, MA, T, NR, NA> and(Function<Syntax<N, P, PA, MA, T, R, A>,
+            Syntax<N, P, PA, MA, T, NR, NA>> rule) {
         return rule.apply(this);
     }
 
@@ -111,11 +107,19 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         return parse(this, a -> (N) a);
     }
 
-    public static class DefaultSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
+    protected Token getToken() {
+        return token;
+    }
 
-        public DefaultSyntax(BiFunction<P, Syntax<C, N, E, O, P, PA, MA, ?, ?, A>, A> parser) {
+    protected void setToken(Token token) {
+        this.token = token;
+    }
+
+    public static class DefaultSyntax<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>,
+            PA extends Parser<P, PA, MA, T>, MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A>
+            extends Syntax<N, P, PA, MA, T, R, A> {
+
+        public DefaultSyntax(BiFunction<P, Syntax<N, P, PA, MA, ?, ?, A>, A> parser) {
             super(parser);
         }
 
@@ -134,15 +138,19 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         }
     }
 
-    public static class CompositeSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends Syntax<C, N, E, O, P, PA, MA, T, R, A> {
+    public static class CompositeSyntax<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>,
+            PA extends Parser<P, PA, MA, T>, MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A>
+            extends Syntax<N, P, PA, MA, T, R, A> {
 
-        private final Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax;
+        private final Syntax<N, P, PA, MA, T, R, A> syntax;
 
-        public CompositeSyntax(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax) {
+        public CompositeSyntax(Syntax<N, P, PA, MA, T, R, A> syntax) {
             super(syntax.parser);
             this.syntax = syntax;
+        }
+
+        protected String quote(String label) {
+            return label.contains("`") ? "'" + label + "'" : "`" + label + "`";
         }
 
         @Override
@@ -161,8 +169,18 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         }
 
         @Override
-        protected R parse(Syntax<C, N, E, O, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
+        protected R parse(Syntax<N, P, PA, MA, T, R, A> syntax, Function<A, N> factory) {
             return this.syntax.parse(syntax, factory);
+        }
+
+        @Override
+        protected Token getToken() {
+            return syntax.getToken();
+        }
+
+        @Override
+        protected void setToken(Token token) {
+            syntax.setToken(token);
         }
     }
 }

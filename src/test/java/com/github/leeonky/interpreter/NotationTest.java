@@ -24,7 +24,7 @@ class NotationTest extends BaseTest {
 
     @Nested
     class Node {
-        NodeParser<TestContext, TestNode, ?, ?, TestProcedure> nodeParser = notation("true").node(TestNode::new);
+        NodeParser<TestNode, TestProcedure> nodeParser = notation("true").node(TestNode::new);
 
         @Test
         void return_empty_when_not_match() {
@@ -69,7 +69,7 @@ class NotationTest extends BaseTest {
 
     @Nested
     class WordToken {
-        NodeParser<TestContext, TestNode, ?, ?, TestProcedure> nodeParser = notation("true")
+        NodeParser<TestNode, TestProcedure> nodeParser = notation("true")
                 .wordNode(TestNode::new, new HashSet<>(Arrays.asList("delimiter")));
 
         @Test
@@ -104,7 +104,7 @@ class NotationTest extends BaseTest {
 
     @Nested
     class KeywordOperator {
-        OperatorParser<TestContext, TestNode, ?, TestOperator, TestProcedure> operatorParser = notation("and")
+        OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser = notation("and")
                 .keywordOperator(TestOperator::new, new HashSet<>(Arrays.asList("delimiter")));
 
         @Test
@@ -143,7 +143,7 @@ class NotationTest extends BaseTest {
         void return_empty_when_not_match() {
             SourceCode sourceCode = givenSourceCode("not match");
 
-            ClauseParser<TestContext, TestNode, ?, ?, TestProcedure> clauseParser = notation("[]")
+            ClauseParser<TestNode, TestProcedure> clauseParser = notation("[]")
                     .clause((token, testNode) -> new TestNode());
 
             assertThat(clauseParser.parse(new TestProcedure(sourceCode))).isEmpty();
@@ -158,7 +158,7 @@ class NotationTest extends BaseTest {
             TestNode inputNode = new TestNode();
             TestNode testNode = new TestNode();
 
-            ClauseParser<TestContext, TestNode, ?, ?, TestProcedure> clauseParser = notation("[]")
+            ClauseParser<TestNode, TestProcedure> clauseParser = notation("[]")
                     .clause((token, input) -> {
                         assertThat(input).isSameAs(inputNode);
                         assertThat(token.getContent()).isEqualTo("[]");
@@ -179,7 +179,7 @@ class NotationTest extends BaseTest {
         void return_when_match_symbol() {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = givenSourceCode(" +=");
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
+            OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser =
                     notation("+=").operator(() -> testOperator);
 
             TestOperator testOperator2 = operatorParser.parse(new TestProcedure(sourceCode)).get();
@@ -191,7 +191,7 @@ class NotationTest extends BaseTest {
         @Test
         void return_empty_when_not_match() {
             SourceCode sourceCode = givenSourceCode(" +=");
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
+            OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser =
                     notation("++").operator(TestOperator::new);
 
             assertThat(operatorParser.parse(new TestProcedure(sourceCode))).isEmpty();
@@ -204,7 +204,7 @@ class NotationTest extends BaseTest {
             SourceCode sourceCode = givenSourceCode(" +=");
             TestProcedure testProcedure = new TestProcedure(sourceCode);
 
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
+            OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser =
                     notation("+=").operator(() -> testOperator, scanner1 -> {
                         assertThat(scanner1).isSameAs(testProcedure);
                         return false;
@@ -217,8 +217,8 @@ class NotationTest extends BaseTest {
 
     @Nested
     class NotationWithMandatory {
-        NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory =
-                notation("a").<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>node(TestNode::new).mandatory("");
+        NodeParser.Mandatory<TestNode, TestProcedure> mandatory =
+                notation("a").<TestNode, TestProcedure>node(TestNode::new).mandatory("");
 
         @Test
         void return_empty_when_not_start_with() {
@@ -261,8 +261,8 @@ class NotationTest extends BaseTest {
 
     @Nested
     class BeforeMandatory {
-        NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory =
-                notation("a").<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>node(TestNode::new).mandatory("");
+        NodeParser.Mandatory<TestNode, TestProcedure> mandatory =
+                notation("a").<TestNode, TestProcedure>node(TestNode::new).mandatory("");
 
 
         @Test
@@ -306,7 +306,7 @@ class NotationTest extends BaseTest {
 
     @Nested
     class BeforeParser {
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> parser =
+        NodeParser<TestNode, TestProcedure> parser =
                 notation("a").node(TestNode::new);
 
 

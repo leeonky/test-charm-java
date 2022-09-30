@@ -38,8 +38,8 @@ public class TokenSpec {
         return this;
     }
 
-    public <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> scanner() {
+    public <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext,
+            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O>> TokenScanner<C, N, E, O, S> scanner() {
         return sourceCode -> sourceCode.tryFetch(() -> when(sourceCode.startsWith(startsWith)).optional(() -> {
             Token token = TokenScanner.tokenScanner(trimStart, endsWith).scan(sourceCode);
             return !excluded.contains(token.getContent()) && predicate.test(token) ? token : null;
