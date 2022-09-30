@@ -1,7 +1,7 @@
 package com.github.leeonky.interpreter;
 
 public abstract class NodeBase<C extends RuntimeContext, N extends NodeBase<C, N>> implements Node<C, N> {
-    protected int positionBegin;
+    protected int positionBegin, indent;
 
     @Override
     public int getPositionBegin() {
@@ -18,5 +18,16 @@ public abstract class NodeBase<C extends RuntimeContext, N extends NodeBase<C, N
     @Override
     public int getOperandPosition() {
         return positionBegin;
+    }
+
+    @Override
+    public N setIndent(int indent) {
+        this.indent = indent;
+        return (N) this;
+    }
+
+    @Override
+    public int getIndent() {
+        return indent;
     }
 }

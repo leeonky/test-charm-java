@@ -10,13 +10,14 @@ public interface NodeParser<N extends Node<?, N>, P extends Procedure<?, N, ?, ?
 
     static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> NodeParser.Mandatory<N, P> positionNode(
             NodeParser.Mandatory<N, P> mandatory) {
-        return procedure -> procedure.positionOf(position -> mandatory.parse(procedure).setPositionBegin(position));
+        return procedure -> procedure.positionOf((position, indent) ->
+                mandatory.parse(procedure).setPositionBegin(position).setIndent(indent));
     }
 
     static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> NodeParser<N, P> positionNode(
             NodeParser<N, P> mandatory) {
-        return procedure -> procedure.positionOf(position -> mandatory.parse(procedure)
-                .map(node -> node.setPositionBegin(position)));
+        return procedure -> procedure.positionOf((position, indent) -> mandatory.parse(procedure)
+                .map(node -> node.setPositionBegin(position).setIndent(indent)));
     }
 
     static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> NodeParser.Mandatory<N, P> columnMandatory(

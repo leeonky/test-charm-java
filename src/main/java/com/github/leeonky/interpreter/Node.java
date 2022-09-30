@@ -10,5 +10,9 @@ public interface Node<C extends RuntimeContext, N extends Node<C, N>> {
 
     N setPositionBegin(int positionBegin);
 
+    N setIndent(int indent);
+
+    int getIndent();
+
     int getOperandPosition();
 }

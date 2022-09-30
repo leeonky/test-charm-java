@@ -3,7 +3,7 @@ package com.github.leeonky.interpreter;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class Procedure<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -34,8 +34,8 @@ public class Procedure<C extends RuntimeContext, N extends Node<C, N>, E extends
         }
     }
 
-    public <T> T positionOf(Function<Integer, T> action) {
-        return action.apply(getSourceCode().nextPosition());
+    public <T> T positionOf(BiFunction<Integer, Integer, T> action) {
+        return action.apply(sourceCode.nextPosition(), sourceCode.indent("\n"));
     }
 
     public <T> T withColumn(Supplier<T> action) {

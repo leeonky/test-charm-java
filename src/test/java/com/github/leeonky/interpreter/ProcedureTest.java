@@ -59,14 +59,14 @@ class ProcedureTest {
         void position_of_source_code() {
             TestProcedure procedure = givenProcedureWithCode("a");
 
-            assertThat((int) procedure.positionOf(i -> i)).isEqualTo(0);
+            assertThat((int) procedure.positionOf((i, j) -> i)).isEqualTo(0);
         }
 
         @Test
         void left_trim_when_get_position_of_source_code() {
             TestProcedure procedure = givenProcedureWithCode(" a");
 
-            assertThat((int) procedure.positionOf(i -> i)).isEqualTo(1);
+            assertThat((int) procedure.positionOf((i, j) -> i)).isEqualTo(1);
         }
     }
 

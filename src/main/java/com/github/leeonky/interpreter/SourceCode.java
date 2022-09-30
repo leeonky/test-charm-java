@@ -102,8 +102,14 @@ public class SourceCode {
         return charStream;
     }
 
+    @Deprecated
     public int indent(int position, String newLine) {
         int linePosition = charStream.lastIndexOf(newLine, position);
         return linePosition == -1 ? position : position - linePosition - 1;
+    }
+
+    public int indent(String newLine) {
+        int linePosition = charStream.lastIndexOf(newLine, charStream.position);
+        return linePosition == -1 ? charStream.position : charStream.position - linePosition - 1;
     }
 }

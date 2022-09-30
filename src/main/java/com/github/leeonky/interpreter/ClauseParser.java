@@ -8,15 +8,15 @@ public interface ClauseParser<N extends Node<?, N>, P extends Procedure<?, N, ?,
 
     static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> ClauseParser<N, P> positionClause(
             ClauseParser<N, P> clauseParser) {
-        return procedure -> procedure.positionOf(position -> clauseParser.parse(procedure)
-                .map(clause -> node -> clause.expression(node).setPositionBegin(position)));
+        return procedure -> procedure.positionOf((position, indent) -> clauseParser.parse(procedure)
+                .map(clause -> node -> clause.expression(node).setPositionBegin(position).setIndent(indent)));
     }
 
     static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> ClauseParser.Mandatory<N, P> positionClause(
             ClauseParser.Mandatory<N, P> clauseMandatory) {
-        return procedure -> procedure.positionOf(position -> {
+        return procedure -> procedure.positionOf((position, indent) -> {
             Clause<N> parse = clauseMandatory.parse(procedure);
-            return node -> parse.expression(node).setPositionBegin(position);
+            return node -> parse.expression(node).setPositionBegin(position).setIndent(indent);
         });
     }
 
