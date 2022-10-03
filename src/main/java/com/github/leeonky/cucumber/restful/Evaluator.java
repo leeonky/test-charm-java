@@ -1,6 +1,6 @@
 package com.github.leeonky.cucumber.restful;
 
-import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Classes;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,7 +13,7 @@ public class Evaluator {
 
     private String evalValue(String expression) {
         try {
-            List<Class<?>> extensions = BeanClass.allTypesIn("com.github.leeonky.cucumber.restful.extensions");
+            List<Class<?>> extensions = Classes.allTypesIn("com.github.leeonky.cucumber.restful.extensions");
             if (extensions.isEmpty())
                 return expression;
             Method eval = extensions.get(0).getMethod("eval", String.class);

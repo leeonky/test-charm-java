@@ -3,7 +3,6 @@ package com.github.leeonky.cucumber.restful;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
-import com.github.leeonky.dal.DAL;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -115,9 +114,11 @@ public class Steps {
     @SneakyThrows
     @Then("got request form value:")
     public void got_request_form_value(String expression) {
-        List actual = new ObjectMapper().readValue(mockServer.retrieveRecordedRequests(request(), Format.JSON), List.class);
-        String string = new DAL().evaluate(actual, "[0].body.string").toString();
-        byte[] bytes = Base64.getDecoder().decode(new DAL().evaluate(actual, "[0].body.rawBytes").toString());
+        List<?> actual = new ObjectMapper().readValue(mockServer.retrieveRecordedRequests(request(), Format.JSON), List.class);
+        String string = expect(actual).get("[0].body.string");
+
+        Object evaluate = expect(actual).get("[0].body.rawBytes");
+        byte[] bytes = Base64.getDecoder().decode(evaluate.toString());
         String substring = string.substring(2, string.indexOf('\r'));
         MultipartStream multipartStream = new MultipartStream(new ByteArrayInputStream(bytes),
                 substring.getBytes(StandardCharsets.UTF_8));
