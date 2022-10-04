@@ -7,6 +7,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.util.stream.Collectors.toSet;
+
 public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>>
         implements ObjectParser<P, String> {
     private final String label;
@@ -49,7 +51,7 @@ public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P exten
 
     private boolean notAWord(Set<String> delimiter, P procedure) {
         return procedure.getSourceCode().hasCode()
-               && delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
+                && delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
     }
 
     public OperatorParser<N, O, P> operator(Supplier<O> factory, Predicate<P> predicate) {
@@ -86,5 +88,10 @@ public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P exten
     @Override
     public Optional<String> parse(P procedure) {
         return procedure.getSourceCode().popString(getLabel());
+    }
+
+    public Set<Notation<N, O, P>> postfix(Set<?> postfixes) {
+        return postfixes.stream().map(c -> getLabel() + c)
+                .map(label -> Notation.<N, O, P>notation(label)).collect(toSet());
     }
 }
