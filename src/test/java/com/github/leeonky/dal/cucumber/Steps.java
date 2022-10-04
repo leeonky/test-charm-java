@@ -97,4 +97,9 @@ public class Steps {
                 zipFile.addFile(file);
         }));
     }
+
+    @Given("string {string} should:")
+    public void string_should(String input, String verification) {
+        expect(input).should(verification);
+    }
 }
