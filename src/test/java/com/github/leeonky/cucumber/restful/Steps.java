@@ -1,5 +1,6 @@
 package com.github.leeonky.cucumber.restful;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
@@ -85,6 +86,10 @@ public class Steps {
     @SneakyThrows
     @Then("got request:")
     public void got_request(String expression) {
+        verifyRequest(expression);
+    }
+
+    public void verifyRequest(String expression) throws JsonProcessingException {
         String content = mockServer.retrieveRecordedRequests(request(), Format.JSON);
         System.out.println("content = " + content);
         expect(new ObjectMapper().readValue(content, List.class)).should(expression);
@@ -134,8 +139,7 @@ public class Steps {
             }});
             nextPart = multipartStream.readBoundary();
         }
-        expect(bodyHeaders)
-                .should(expression);
+        expect(bodyHeaders).should(expression);
     }
 
     @Before

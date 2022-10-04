@@ -1,12 +1,12 @@
 package com.github.leeonky.cucumber.restful;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +23,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final Evaluator evaluator = new Evaluator();
     private String baseUrl = null;
     private Request request = new Request();
@@ -50,30 +49,34 @@ public class RestfulStep {
     }
 
     public void post(String path, String body) throws IOException, URISyntaxException {
-        requestAndResponse("POST", path, connection -> buildRequestBody(connection, null, body));
+        post(path, body, null);
     }
 
     public void post(String path, Object body, String contentType) throws IOException, URISyntaxException {
-        post(path, objectMapper.writeValueAsString(body), contentType);
+        post(path, toJson(body), contentType);
+    }
+
+    public static String toJson(Object body) {
+        String json = new JSONArray(Collections.singleton(body)).toString();
+        return json.substring(1, json.length() - 1);
     }
 
     public void post(String path, Object body) throws IOException, URISyntaxException {
-        post(path, objectMapper.writeValueAsString(body), null);
+        post(path, body, null);
     }
 
     @When("POST form {string}:")
     public void postForm(String path, String form) throws IOException, URISyntaxException {
-        postForm(path, objectMapper.readValue(evaluator.eval(form), new TypeReference<Map<String, String>>() {
-        }));
+        postForm(path, new JSONObject(evaluator.eval(form)).toMap());
     }
 
-    public void postForm(String path, Map<String, String> params) throws IOException, URISyntaxException {
+    public void postForm(String path, Map<String, ?> params) throws IOException, URISyntaxException {
         requestAndResponse("POST", path, connection -> Suppressor.run(() -> {
             connection.setDoOutput(true);
             String boundary = UUID.randomUUID().toString();
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
             HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
-            params.forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+            params.forEach((key, value) -> appendEntry(httpStream, key, value == null ? null : value.toString(), boundary));
             httpStream.close(boundary);
         }));
     }
@@ -88,15 +91,15 @@ public class RestfulStep {
     }
 
     public void put(String path, String body) throws IOException, URISyntaxException {
-        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, null, body));
+        put(path, body, null);
     }
 
     public void put(String path, Object body, String contentType) throws IOException, URISyntaxException {
-        put(path, objectMapper.writeValueAsString(body), contentType);
+        put(path, toJson(body), contentType);
     }
 
     public void put(String path, Object body) throws IOException, URISyntaxException {
-        put(path, objectMapper.writeValueAsString(body), null);
+        put(path, body, null);
     }
 
     @When("DELETE {string}")
