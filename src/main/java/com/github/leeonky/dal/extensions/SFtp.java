@@ -14,14 +14,16 @@ import java.util.stream.Collectors;
 public class SFtp extends SFtpFile {
     //    TODO refactor
     public final String host, port, user, password;
+    private final String path;
     //    TODO refactor
     public ChannelSftp channel;
 
-    public SFtp(String host, String port, String user, String password) {
+    public SFtp(String host, String port, String user, String password, String path) {
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
+        this.path = path;
         channel = Suppressor.get(this::getChannelSftp);
     }
 
@@ -37,24 +39,19 @@ public class SFtp extends SFtpFile {
     }
 
     @Override
-    public List<SFtpFile> ls() {
-        return list("/", this);
-    }
-
-    @Override
-    protected List<SFtpFile> list(String path, SFtpFile parent) {
+    protected List<ChannelSftp.LsEntry> list(String path) {
         return Suppressor.get(() -> (Vector<ChannelSftp.LsEntry>) channel.ls(path)).stream()
                 .filter(entry -> !entry.getFilename().equals("."))
                 .filter(entry -> !entry.getFilename().equals(".."))
-                .map(entry1 -> new SubSFtpFile(parent, entry1)).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Override
     public String name() {
-        return "";
+        return path;
     }
 
-    public class SubSFtpFile extends SFtpFile {
+    public static class SubSFtpFile extends SFtpFile {
         private final SFtpFile parent;
         private final ChannelSftp.LsEntry entry;
 
@@ -69,18 +66,13 @@ public class SFtp extends SFtpFile {
         }
 
         @Override
-        protected List<SFtpFile> list(String path, SFtpFile parent) {
-            return this.parent.list(this.parent.name() + "/" + path, parent);
-        }
-
-        @Override
         public String name() {
             return entry.getFilename();
         }
 
         @Override
-        public List<SFtpFile> ls() {
-            return parent.list(parent.name() + "/" + name(), this);
+        protected List<ChannelSftp.LsEntry> list(String path) {
+            return parent.list(parent.name() + "/" + path);
         }
     }
 }

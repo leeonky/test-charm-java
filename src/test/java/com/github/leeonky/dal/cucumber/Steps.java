@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.Assertions;
 import com.github.leeonky.dal.extensions.SFtp;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
@@ -27,10 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class Steps {
 
     private AssertionError assertionError;
-
-    static {
-        Assertions.dumpInput(false);
-    }
 
     @SneakyThrows
     @Given("root folder {string}")
@@ -115,11 +110,11 @@ public class Steps {
 
     private static SFtp sFtp;
 
-    @Given("ssh server:")
-    public void ssh_server(io.cucumber.datatable.DataTable dataTable) {
+    @Given("ssh server on path {string}:")
+    public void ssh_server(String path, io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> map = dataTable.asMaps().get(0);
         if (sFtp == null)
-            sFtp = new SFtp(map.get("host"), map.get("port"), map.get("user"), map.get("password"));
+            sFtp = new SFtp(map.get("host"), map.get("port"), map.get("user"), map.get("password"), path);
     }
 
     @Then("got sftp:")
