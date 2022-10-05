@@ -1,10 +1,13 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.Assertions;
+import com.github.leeonky.dal.extensions.SFtp;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
 import net.lingala.zip4j.ZipFile;
 
@@ -14,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
@@ -23,6 +27,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class Steps {
 
     private AssertionError assertionError;
+
+    static {
+        Assertions.dumpInput(false);
+    }
 
     @SneakyThrows
     @Given("root folder {string}")
@@ -87,19 +95,48 @@ public class Steps {
     }
 
     @And("a zip file {string}:")
+    @SneakyThrows
     public void zipFile(String fileName, DataTable files) {
-        ZipFile zipFile = new ZipFile(fileName);
-        files.asLists().stream().map(list -> list.get(0)).forEach(fileNameInZip -> Suppressor.run(() -> {
-            File file = new File(fileNameInZip);
-            if (file.isDirectory())
-                zipFile.addFolder(file);
-            else
-                zipFile.addFile(file);
-        }));
+        try (ZipFile zipFile = new ZipFile(fileName)) {
+            files.asLists().stream().map(list -> list.get(0)).forEach(fileNameInZip -> Suppressor.run(() -> {
+                File file = new File(fileNameInZip);
+                if (file.isDirectory())
+                    zipFile.addFolder(file);
+                else
+                    zipFile.addFile(file);
+            }));
+        }
     }
 
     @Given("string {string} should:")
     public void string_should(String input, String verification) {
         expect(input).should(verification);
+    }
+
+    private static SFtp sFtp;
+
+    @Given("ssh server:")
+    public void ssh_server(io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> map = dataTable.asMaps().get(0);
+        if (sFtp == null)
+            sFtp = new SFtp(map.get("host"), map.get("port"), map.get("user"), map.get("password"));
+    }
+
+    @Then("got sftp:")
+    public void gotSftp(String expression) {
+        expect(sFtp).should(expression);
+    }
+
+    @When("evaluate sftp:")
+    public void evaluateSftp(String expression) {
+        try {
+            gotSftp(expression);
+        } catch (AssertionError e) {
+            assertionError = e;
+        }
+    }
+
+    @Then("got failed message:")
+    public void gotFailedMessage() {
     }
 }

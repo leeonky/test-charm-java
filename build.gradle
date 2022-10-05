@@ -52,7 +52,8 @@ repositories {
 
 dependencies {
     implementation 'com.github.leeonky:DAL-java:0.3.8'
-    implementation group: 'org.json', name: 'json', version: '20220924'
+    implementation 'org.json:json:20220924'
+    implementation 'com.jcraft:jsch:0.1.55'
     testImplementation 'org.assertj:assertj-core:3.21.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.3.1")
