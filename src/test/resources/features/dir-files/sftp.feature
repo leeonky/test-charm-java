@@ -13,7 +13,7 @@ Feature: sftp
   Scenario: root folder as a list
     Then got sftp:
     """
-    : [dir1 dir2]
+    : [... dir1 dir2 ...]
     """
 
   Scenario: root folder as a map
@@ -37,7 +37,7 @@ Feature: sftp
   Scenario: sub folder as a list
     Then got sftp:
     """
-    dir1: [sub1 sub2]
+    dir1: [... sub1 sub2 ...]
     """
 
   Scenario: sub folder as a map
@@ -63,5 +63,38 @@ Feature: sftp
     """
     dir1.sub1= {
       subSub: *
+    }
+    """
+
+  Scenario: file content on root
+    Given a file "/tmp/test/sftp/file.txt"
+    """
+    hello-world
+    """
+    Then got sftp:
+    """
+    ['file.txt'].string: 'hello-world'
+    """
+
+  Scenario: file content in folder
+    Given a file "/tmp/test/sftp/dir1/file.txt"
+    """
+    hello-world
+    """
+    Then got sftp:
+    """
+    dir1['file.txt'].string: 'hello-world'
+    """
+
+  Scenario: file content in folder
+    Given a file "/tmp/test/sftp/dir1/file.txt"
+    """
+    hello-world
+    """
+    Then got sftp:
+    """
+    : {
+      dir1['file.txt'].string: 'hello-world'
+      dir1/file.txt: 'hello-world'
     }
     """

@@ -6,17 +6,14 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import java.util.List;
-import java.util.Vector;
-import java.util.stream.Collectors;
+import java.io.InputStream;
 
 //TODO close
 public class SFtp extends SFtpFile {
     //    TODO refactor
     public final String host, port, user, password;
     private final String path;
-    //    TODO refactor
-    public ChannelSftp channel;
+    private final ChannelSftp channel;
 
     public SFtp(String host, String port, String user, String password, String path) {
         this.host = host;
@@ -39,25 +36,29 @@ public class SFtp extends SFtpFile {
     }
 
     @Override
-    protected List<ChannelSftp.LsEntry> list(String path) {
-        return Suppressor.get(() -> (Vector<ChannelSftp.LsEntry>) channel.ls(path)).stream()
-                .filter(entry -> !entry.getFilename().equals("."))
-                .filter(entry -> !entry.getFilename().equals(".."))
-                .collect(Collectors.toList());
+    public String name() {
+        return path;
     }
 
     @Override
-    public String name() {
-        return path;
+    protected ChannelSftp channel() {
+        return channel;
+    }
+
+    @Override
+    protected String fullName() {
+        return name();
     }
 
     public static class SubSFtpFile extends SFtpFile {
         private final SFtpFile parent;
         private final ChannelSftp.LsEntry entry;
+        private final ChannelSftp channel;
 
-        public SubSFtpFile(SFtpFile parent, ChannelSftp.LsEntry entry) {
+        public SubSFtpFile(SFtpFile parent, ChannelSftp.LsEntry entry, ChannelSftp channel) {
             this.parent = parent;
             this.entry = entry;
+            this.channel = channel;
         }
 
         @Override
@@ -71,8 +72,22 @@ public class SFtp extends SFtpFile {
         }
 
         @Override
-        protected List<ChannelSftp.LsEntry> list(String path) {
-            return parent.list(parent.name() + "/" + path);
+        protected ChannelSftp channel() {
+            return channel;
+        }
+
+        @Override
+        protected String fullName() {
+            return parent.fullName() + "/" + name();
+        }
+
+        public InputStream download() {
+            return Suppressor.get(() -> channel.get(fullName()));
+        }
+
+        @Override
+        public boolean isDir() {
+            return entry.getAttrs().isDir();
         }
     }
 }
