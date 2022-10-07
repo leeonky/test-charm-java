@@ -75,7 +75,7 @@ Feature: RESTful api steps
       | GET    |
       | DELETE |
 
-  Scenario Outline: <method> with body and header
+  Scenario Outline: <method> with body and header and default content type is application/json
     Given header by RESTful api:
     """
     {
@@ -105,7 +105,7 @@ Feature: RESTful api steps
       | POST   |
       | PUT    |
 
-  Scenario Outline: <method> with content type
+  Scenario Outline: <method> with content type and not set in header
     When <method> "/index":
     """text/html
     { "text": "Hello world" }
@@ -114,6 +114,72 @@ Feature: RESTful api steps
     """
     : [{
       headers['Content-Type']: ['text/html']
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |
+
+  Scenario Outline: <method> without content type but set in header already
+    Given header by RESTful api:
+    """
+    {
+      "<header>": "text/html"
+    }
+    """
+    When <method> "/index":
+    """
+    { "text": "Hello world" }
+    """
+    Then got request:
+    """
+    : [{
+      headers['<header>']: ['text/html']
+    }]
+    """
+    Examples:
+      | method | header       |
+      | POST   | Content-Type |
+      | PUT    | content-type |
+
+  Scenario Outline: <method> with content type and set in header
+    Given header by RESTful api:
+    """
+    {
+      "Content-Type": "anyContentType"
+    }
+    """
+    When <method> "/index":
+    """text/html
+    { "text": "Hello world" }
+    """
+    Then got request:
+    """
+    : [{
+      headers['Content-Type']: ['text/html']
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |
+
+  Scenario Outline: <method> without content type and set in header
+    Given header by RESTful api:
+    """
+    {
+      "anyHeader": null
+    }
+    """
+    When <method> "/index":
+    """
+    {}
+    """
+    Then got request:
+    """
+    : [{
+      headers['anyHeader']: null
     }]
     """
     Examples:

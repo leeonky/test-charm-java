@@ -154,7 +154,7 @@ public class RestfulStep {
     private void buildRequestBody(HttpURLConnection connection, String contentType, String body) {
         Suppressor.run(() -> {
             connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", contentType == null ? "application/json" : contentType);
+            connection.setRequestProperty("Content-Type", contentType == null ? String.valueOf(request.headers.getOrDefault("Content-Type", "application/json")) : contentType);
             connection.getOutputStream().write(body.getBytes(UTF_8));
             connection.getOutputStream().close();
         });
@@ -201,13 +201,13 @@ public class RestfulStep {
 
     private static class Request {
         private final Map<String, UploadFile> files = new HashMap<>();
-        private final Map<String, Object> headers = new LinkedHashMap<>();
+        private final Map<String, Object> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         private HttpURLConnection applyHeader(HttpURLConnection connection) {
             headers.forEach((key, value) -> {
                 if (value instanceof String)
                     connection.setRequestProperty(key, (String) value);
-                else
+                else if (value instanceof Collection)
                     ((Collection<String>) value).forEach(header -> connection.addRequestProperty(key, header));
             });
             return connection;
