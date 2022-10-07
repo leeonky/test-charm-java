@@ -91,7 +91,6 @@ public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P exten
     }
 
     public Set<Notation<N, O, P>> postfix(Set<?> postfixes) {
-        return postfixes.stream().map(c -> getLabel() + c)
-                .map(label -> Notation.<N, O, P>notation(label)).collect(toSet());
+        return postfixes.stream().map(c -> getLabel() + c).map(label -> Notation.<N, O, P>notation(label)).collect(toSet());
     }
 }

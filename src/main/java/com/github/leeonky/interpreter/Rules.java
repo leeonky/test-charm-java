@@ -5,6 +5,8 @@ import com.github.leeonky.interpreter.Syntax.CompositeSyntax;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.leeonky.util.function.When.when;
 import static java.lang.String.format;
@@ -12,6 +14,26 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
 public class Rules {
+    public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
+            MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
+            Syntax<N, P, PA, MA, T, R, A>> endWith(Predicate<P> isClose, Supplier<String> message) {
+        return syntax -> new CompositeSyntax<N, P, PA, MA, T, R, A>(syntax) {
+
+            private boolean closed;
+
+            @Override
+            protected void close(P procedure) {
+                if (!closed)
+                    throw procedure.getSourceCode().syntaxError(message.get(), 0);
+            }
+
+            @Override
+            protected boolean isClose(P procedure) {
+                return closed = isClose.test(procedure);
+            }
+        };
+    }
+
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
             Syntax<N, P, PA, MA, T, R, A>> endWith(Notation<N, ?, P> notation) {
@@ -160,7 +182,7 @@ public class Rules {
         @Override
         public boolean isClose(P procedure) {
             return isClose = endOfLineOrNoCode(procedure.getSourceCode())
-                             || hasNewLineBeforeSplitter(procedure.getSourceCode());
+                    || hasNewLineBeforeSplitter(procedure.getSourceCode());
         }
 
         private boolean hasNewLineBeforeSplitter(SourceCode sourceCode) {

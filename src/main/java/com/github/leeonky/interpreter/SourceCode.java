@@ -1,5 +1,6 @@
 package com.github.leeonky.interpreter;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,9 +34,9 @@ public class SourceCode {
         return charStream.hasContent();
     }
 
-    public boolean startsWith(Notation<?, ?, ?> notation) {
+    public boolean startsWith(Notation<?, ?, ?> notation, String... excepts) {
         trimBlankAndComment();
-        return charStream.startsWith(notation.getLabel());
+        return charStream.startsWith(notation.getLabel()) && Arrays.stream(excepts).noneMatch(this::startsWith);
     }
 
     public boolean startsWith(String word) {

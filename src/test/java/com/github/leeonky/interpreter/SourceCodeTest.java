@@ -68,6 +68,13 @@ class SourceCodeTest extends BaseTest {
             sourceCode.popChar(NO_ESCAPE);
             assertThat(sourceCode.startsWith(notation("a"))).isTrue();
         }
+
+        @Test
+        void not_start_when_matches_any_except_strings() {
+            assertThat(BaseTest.createSourceCode("ab").startsWith(notation("a"), "aa")).isTrue();
+            assertThat(BaseTest.createSourceCode("ab").startsWith(notation("a"), "ab")).isFalse();
+            assertThat(BaseTest.createSourceCode("ab").startsWith(notation("a"), "aa", "ab")).isFalse();
+        }
     }
 
     @Nested
