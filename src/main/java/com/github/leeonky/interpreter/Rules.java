@@ -165,15 +165,15 @@ public class Rules {
     public static <N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> Function<Syntax<N, P, PA, MA, T, R, A>,
             Syntax<N, P, PA, MA, T, R, A>> endOfRow(Notation<N, ?, P> splitter) {
-        return syntax -> new EndOrRow<>(syntax, splitter);
+        return syntax -> new EndOFRow<>(syntax, splitter);
     }
 
-    private static class EndOrRow<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
+    private static class EndOFRow<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Parser.Mandatory<P, PA, MA, T>, T, R, A> extends CompositeSyntax<N, P, PA, MA, T, R, A> {
         private final Notation<N, ?, P> splitter;
         private boolean isClose;
 
-        public EndOrRow(Syntax<N, P, PA, MA, T, R, A> syntax, Notation<N, ?, P> splitter) {
+        public EndOFRow(Syntax<N, P, PA, MA, T, R, A> syntax, Notation<N, ?, P> splitter) {
             super(syntax);
             this.splitter = splitter;
             isClose = false;
