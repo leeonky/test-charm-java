@@ -269,7 +269,7 @@ class SyntaxTest extends BaseTest {
                 return node;
             }).parse(testProcedure)).isSameAs(node);
 
-            verify(many, times(2)).isClose(testProcedure);
+            verify(many, times(3)).isClose(testProcedure);
             verify(many).close(testProcedure);
         }
     }

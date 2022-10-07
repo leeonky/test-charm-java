@@ -58,8 +58,10 @@ public abstract class Syntax<N extends Node<?, N>, P extends Procedure<?, N, ?, 
             while (!syntax.isClose(procedure)) {
                 add(mandatory.parse(procedure));
                 procedure.incrementColumn();
-                if (!syntax.isSplitter(procedure))
+                if (!syntax.isSplitter(procedure)) {
+                    syntax.isClose(procedure);
                     break;
+                }
             }
             syntax.close(procedure);
         }}));
@@ -75,8 +77,10 @@ public abstract class Syntax<N extends Node<?, N>, P extends Procedure<?, N, ?, 
                     break;
                 add(optional.get());
                 procedure.incrementColumn();
-                if (!syntax.isSplitter(procedure))
+                if (!syntax.isSplitter(procedure)) {
+                    syntax.isClose(procedure);
                     break;
+                }
             }
             syntax.close(procedure);
         }}));
