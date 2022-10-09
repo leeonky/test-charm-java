@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
-import com.github.leeonky.dal.runtime.ListAccessor;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorBuilder;
+import com.github.leeonky.dal.runtime.inspector.InspectorCache;
 import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.Suppressor;
 
@@ -34,7 +34,7 @@ public class FileExtension implements Extension {
 
     private void extendFileGroup(RuntimeContextBuilder runtimeContextBuilder) {
         runtimeContextBuilder.registerPropertyAccessor(FileGroup.class,
-                new JavaClassPropertyAccessor<FileGroup>(runtimeContextBuilder, create(FileGroup.class)) {
+                new JavaClassPropertyAccessor<FileGroup>(create(FileGroup.class)) {
 
                     @Override
                     public Object getValue(FileGroup fileGroup, Object name) {
@@ -62,7 +62,7 @@ public class FileExtension implements Extension {
             }
         });
         runtimeContextBuilder.registerPropertyAccessor(Path.class,
-                new JavaClassPropertyAccessor<Path>(runtimeContextBuilder, create(Path.class)) {
+                new JavaClassPropertyAccessor<Path>(create(Path.class)) {
 
                     @Override
                     public Set<Object> getPropertyNames(Path path) {
@@ -77,6 +77,19 @@ public class FileExtension implements Extension {
                     }
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, StaticMethods::name);
+
+//        TODO test inspector
+        runtimeContextBuilder.registerInspector(Path.class, new InspectorBuilder() {
+            @Override
+            public Inspector apply(Data data) {
+                return new Inspector() {
+                    @Override
+                    public String inspect(String path, InspectorCache inspectorCache) {
+                        return null;
+                    }
+                };
+            }
+        });
     }
 
     private void extendFile(RuntimeContextBuilder runtimeContextBuilder) {
@@ -93,7 +106,7 @@ public class FileExtension implements Extension {
             }
         });
         runtimeContextBuilder.registerPropertyAccessor(File.class,
-                new JavaClassPropertyAccessor<File>(runtimeContextBuilder, create(File.class)) {
+                new JavaClassPropertyAccessor<File>(create(File.class)) {
 
                     @Override
                     public Set<Object> getPropertyNames(File file) {
@@ -106,6 +119,18 @@ public class FileExtension implements Extension {
                     }
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
+//        TODO test inspector
+        runtimeContextBuilder.registerInspector(File.class, new InspectorBuilder() {
+            @Override
+            public Inspector apply(Data data) {
+                return new Inspector() {
+                    @Override
+                    public String inspect(String path, InspectorCache inspectorCache) {
+                        return null;
+                    }
+                };
+            }
+        });
     }
 
     private Object getSubFile(File file, String name) {

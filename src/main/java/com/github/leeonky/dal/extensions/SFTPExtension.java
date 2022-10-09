@@ -22,7 +22,7 @@ public class SFTPExtension implements Extension {
         builder.registerImplicitData(SFtp.SubSFtpFile.class, SFtp.SubSFtpFile::download)
                 .registerListAccessor(SFtpFile.class, SFtpFile::ls)
                 .registerPropertyAccessor(SFtpFile.class,
-                        new JavaClassPropertyAccessor<SFtpFile>(builder, BeanClass.create(SFtpFile.class)) {
+                        new JavaClassPropertyAccessor<SFtpFile>(BeanClass.create(SFtpFile.class)) {
                             @Override
                             public Object getValue(SFtpFile sFtpFile, Object property) {
                                 return sFtpFile.isDir() ? getSubFile(sFtpFile, property) : super.getValue(sFtpFile, property);
@@ -39,8 +39,9 @@ public class SFTPExtension implements Extension {
                                 return instance == null;
                             }
                         })
-                .registerObjectDumper(SFtpFile.class, SFtpFile::name)
-        ;
+//        TODO test inspector
+                .registerInspector(SFtpFile.class, data -> (path, inspectorCache) ->
+                        ((SFtpFile) data.getInstance()).name());
     }
 
     private Object getSubFile(SFtpFile sFtpFile, Object property) {

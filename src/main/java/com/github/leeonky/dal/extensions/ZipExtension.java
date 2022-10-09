@@ -20,8 +20,7 @@ public class ZipExtension implements Extension {
         runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class)
                 .registerImplicitData(ZipBinary.ZipNode.class, ZipBinary.ZipNode::open)
                 .registerPropertyAccessor(ZipBinary.class,
-                        new JavaClassPropertyAccessor<ZipBinary>(runtimeContextBuilder,
-                                create(ZipBinary.class)) {
+                        new JavaClassPropertyAccessor<ZipBinary>(create(ZipBinary.class)) {
 
                             @Override
                             public Object getValue(ZipBinary zipBinaryTree, Object name) {
@@ -34,8 +33,7 @@ public class ZipExtension implements Extension {
                             }
                         })
                 .registerPropertyAccessor(ZipBinary.ZipNode.class,
-                        new JavaClassPropertyAccessor<ZipBinary.ZipNode>(runtimeContextBuilder,
-                                create(ZipBinary.ZipNode.class)) {
+                        new JavaClassPropertyAccessor<ZipBinary.ZipNode>(create(ZipBinary.ZipNode.class)) {
 
                             @Override
                             public Object getValue(ZipBinary.ZipNode zipNode, Object name) {
