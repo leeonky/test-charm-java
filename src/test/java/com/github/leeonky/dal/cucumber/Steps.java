@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.SFtp;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
@@ -15,6 +17,9 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
@@ -133,5 +138,21 @@ public class Steps {
 
     @Then("got failed message:")
     public void gotFailedMessage() {
+    }
+
+    @Then("java.io.File {string} should dump:")
+    public void javaIoFileShouldDump(String path, String content) {
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+
+        assertThat(runtimeContext.wrap(new File(path)).dump()).isEqualTo(content);
+    }
+
+    @SneakyThrows
+    @And("set file attribute {string}")
+    public void setFileAttribute(String pathStr, String attribute) {
+        String[] attributes = attribute.split(" ");
+        Path path = Paths.get(pathStr);
+        Files.setLastModifiedTime(path, FileTime.from(Instant.parse(attributes[3])));
+        Files.setPosixFilePermissions(path, PosixFilePermissions.fromString(attributes[0]));
     }
 }

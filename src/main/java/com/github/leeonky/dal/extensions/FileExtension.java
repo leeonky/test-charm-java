@@ -2,23 +2,24 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.inspector.Inspector;
-import com.github.leeonky.dal.runtime.inspector.InspectorBuilder;
-import com.github.leeonky.dal.runtime.inspector.InspectorCache;
+import com.github.leeonky.dal.runtime.inspector.*;
 import com.github.leeonky.util.InvocationException;
-import com.github.leeonky.util.Suppressor;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.create;
+import static com.github.leeonky.util.Suppressor.get;
 import static java.util.Arrays.stream;
 
 public class FileExtension implements Extension {
@@ -49,7 +50,7 @@ public class FileExtension implements Extension {
     }
 
     private void extendPath(RuntimeContextBuilder runtimeContextBuilder) {
-        runtimeContextBuilder.registerImplicitData(Path.class, file -> Suppressor.get(() -> new FileInputStream(file.toFile())));
+        runtimeContextBuilder.registerImplicitData(Path.class, file -> get(() -> new FileInputStream(file.toFile())));
         runtimeContextBuilder.registerListAccessor(Path.class, new ListAccessor<Path>() {
             @Override
             public Iterable<?> toIterable(Path path) {
@@ -93,7 +94,7 @@ public class FileExtension implements Extension {
     }
 
     private void extendFile(RuntimeContextBuilder runtimeContextBuilder) {
-        runtimeContextBuilder.registerImplicitData(File.class, file -> Suppressor.get(() -> new FileInputStream(file)));
+        runtimeContextBuilder.registerImplicitData(File.class, file -> get(() -> new FileInputStream(file)));
         runtimeContextBuilder.registerListAccessor(File.class, new ListAccessor<File>() {
             @Override
             public Iterable<?> toIterable(File file) {
@@ -119,18 +120,32 @@ public class FileExtension implements Extension {
                     }
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
-//        TODO test inspector
-        runtimeContextBuilder.registerInspector(File.class, new InspectorBuilder() {
-            @Override
-            public Inspector apply(Data data) {
-                return new Inspector() {
+        runtimeContextBuilder.registerInspector(File.class, data -> {
+            File file = (File) data.getInstance();
+            if (file.isDirectory()) {
+                return (path, inspectorCache) -> "java.io.File "
+                        + new MapInspector(data).inspect(path, inspectorCache).replaceFirst("^java.io.File ", "");
+            } else {
+                return new TypeValueInspector() {
                     @Override
-                    public String inspect(String path, InspectorCache inspectorCache) {
-                        return null;
+                    public String inspectType() {
+                        return "java.io.File";
+                    }
+
+                    @Override
+                    public String inspectValue() {
+                        return attribute(file.toPath());
                     }
                 };
             }
         });
+    }
+
+    private String attribute(Path path) {
+        PosixFileAttributes posixFileAttributes = get(() -> Files.readAttributes(path, PosixFileAttributes.class));
+        return String.format("%s %s %s %s %d", PosixFilePermissions.toString(posixFileAttributes.permissions()),
+                posixFileAttributes.group(), posixFileAttributes.owner(), posixFileAttributes.lastModifiedTime(),
+                path.toFile().length());
     }
 
     private Object getSubFile(File file, String name) {
