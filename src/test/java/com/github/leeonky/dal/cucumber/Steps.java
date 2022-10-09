@@ -155,4 +155,11 @@ public class Steps {
         Files.setLastModifiedTime(path, FileTime.from(Instant.parse(attributes[3])));
         Files.setPosixFilePermissions(path, PosixFilePermissions.fromString(attributes[0]));
     }
+
+    @Then("java.io.path {string} should dump:")
+    public void javaIoPathShouldDump(String path, String content) {
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+
+        assertThat(runtimeContext.wrap(Paths.get(path)).dump()).isEqualTo(content);
+    }
 }

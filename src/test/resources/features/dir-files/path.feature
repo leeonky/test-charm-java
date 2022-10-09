@@ -173,3 +173,28 @@ Feature: dir/file with java path
       }
     }
     """
+
+  Rule: dump
+    Scenario: dump dir
+      And set file attribute "/tmp/test/dir"
+      """
+      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+      """
+      Then java.io.path "/tmp/test/dir" should dump:
+      """
+      java.nio.Path {}
+      """
+
+    Scenario: dump file
+      Given a file "/tmp/test/dir/file1.txt"
+      """
+      hello1
+      """
+      And set file attribute "/tmp/test/dir/file1.txt"
+      """
+      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+      """
+      Then java.io.path "/tmp/test/dir/file1.txt" should dump:
+      """
+      java.nio.Path rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z 6
+      """

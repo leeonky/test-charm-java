@@ -1,8 +1,12 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.inspector.*;
+import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
+import com.github.leeonky.dal.runtime.ListAccessor;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.inspector.MapInspector;
+import com.github.leeonky.dal.runtime.inspector.TypeValueInspector;
 import com.github.leeonky.util.InvocationException;
 
 import java.io.File;
@@ -79,17 +83,24 @@ public class FileExtension implements Extension {
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, StaticMethods::name);
 
-//        TODO test inspector
-        runtimeContextBuilder.registerInspector(Path.class, new InspectorBuilder() {
-            @Override
-            public Inspector apply(Data data) {
-                return new Inspector() {
-                    @Override
-                    public String inspect(String path, InspectorCache inspectorCache) {
-                        return null;
-                    }
-                };
+        runtimeContextBuilder.registerInspector(Path.class, data -> {
+            Path filePath = (Path) data.getInstance();
+            if (filePath.toFile().isDirectory()) {
+                return (path, inspectorCache) -> "java.nio.Path "
+                        + new MapInspector(data).inspect(path, inspectorCache).replaceFirst("^sun.nio.fs.UnixPath ", "");
             }
+
+            return new TypeValueInspector() {
+                @Override
+                public String inspectType() {
+                    return "java.nio.Path";
+                }
+
+                @Override
+                public String inspectValue() {
+                    return attribute(filePath);
+                }
+            };
         });
     }
 
