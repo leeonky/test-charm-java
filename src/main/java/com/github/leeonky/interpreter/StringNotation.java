@@ -27,12 +27,7 @@ public class StringNotation {
     }
 
     public String result() {
-        StringBuilder result = new StringBuilder();
-        SeparatedString separatedString = new SeparatedString(content, 0, 0);
-        while (separatedString.printLine(result).hasNextLine()) {
-            separatedString = separatedString.separatedNext().newLine(result);
-        }
-        return result.toString();
+        return result(0);
     }
 
     public String result(int offset) {
@@ -49,10 +44,6 @@ public class StringNotation {
             columns.add(position);
         return this;
     }
-   
-//    private static boolean isFullWidth(int c) {
-//        return !('\u0000' <= c && c <= '\u00FF' || '\uFF61' <= c && c <= '\uFFDC' || '\uFFE8' <= c && c <= '\uFFEE');
-//    }
 
     public class SeparatedString {
         private final int startPosition;
@@ -87,21 +78,33 @@ public class StringNotation {
             List<Integer> linePositions = linePosition(rows);
             if (!linePositions.isEmpty()) {
                 builder.append(newLine);
-                for (int i = 0; i <= lines[0].length(); i++)
+                for (int i = lengthWithFullWidthChar(lines[0]); i > -1; i--)
                     builder.append('^');
             }
+        }
+
+        private int lengthWithFullWidthChar(String line) {
+            return line.length() + (int) line.chars().filter(this::isFullWidth).count();
         }
 
         private void printPositions(StringBuilder builder, List<Integer> positions) {
             List<Integer> linePositions = linePosition(positions);
             if (!linePositions.isEmpty()) {
-                int startEndIndex = startPosition - 1;
+                int lastPosition = startPosition;
                 builder.append(newLine);
-                for (int position : linePositions) {
-                    builder.append(String.format("%" + (position - startEndIndex) + "c", '^'));
-                    startEndIndex = position;
+                for (int eachPosition : linePositions) {
+                    builder.append(NotationMark(lengthWithFullWidthChar(content.substring(lastPosition, eachPosition))));
+                    if (eachPosition < content.length() && isFullWidth(content.charAt(eachPosition)))
+                        builder.append(' ');
+                    lastPosition = eachPosition + newLine.length();
                 }
+                if (builder.charAt(builder.length() - 1) == ' ')
+                    builder.deleteCharAt(builder.length() - 1);
             }
+        }
+
+        private String NotationMark(int count) {
+            return String.format("%" + (count + 1) + "c", '^');
         }
 
         private List<Integer> linePosition(List<Integer> positions) {
@@ -116,6 +119,10 @@ public class StringNotation {
         private SeparatedString newLine(StringBuilder result) {
             result.append(newLine);
             return this;
+        }
+
+        private boolean isFullWidth(int c) {
+            return !('\u0000' <= c && c <= '\u00FF' || '\uFF61' <= c && c <= '\uFFDC' || '\uFFE8' <= c && c <= '\uFFEE');
         }
     }
 }
