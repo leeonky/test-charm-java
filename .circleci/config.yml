@@ -9,8 +9,16 @@ jobs:
             - '46:be:cc:ef:71:f3:f1:eb:c5:96:c4:15:a0:b5:96:7d'
       - checkout
       - run:
+          name: env
+          command: |
+            sudo apt-get update
+            sudo apt-get install openjdk-8-jdk
+            sudo update-java-alternatives --set java-1.8.0-openjdk-amd64
+            sudo docker-compose up -d
+      - run:
           name: build
           command: |
+            java -version
             export VERSION_SCOPE=''
             ./gradlew check build coveralls
             export PUB_VERSION=$(./gradlew currentVersion -q)
