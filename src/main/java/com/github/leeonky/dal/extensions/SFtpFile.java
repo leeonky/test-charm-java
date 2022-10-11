@@ -3,6 +3,7 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.util.Suppressor;
 import com.jcraft.jsch.ChannelSftp;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
@@ -23,6 +24,7 @@ public abstract class SFtpFile {
         return Suppressor.get(() -> (Vector<ChannelSftp.LsEntry>) channel().ls(fullName())).stream()
                 .filter(entry -> !entry.getFilename().equals("."))
                 .filter(entry -> !entry.getFilename().equals(".."))
+                .sorted(Comparator.comparing(ChannelSftp.LsEntry::getFilename))
                 .map(entry -> new SFtp.SubSFtpFile(this, entry, channel())).collect(Collectors.toList());
     }
 
