@@ -7,6 +7,6 @@ services:
     volumes:
       - /tmp:/tmp
     environment:
-      PASSWORD_ACCESS: true
-      USER_NAME: user
-      USER_PASSWORD: password
+      PASSWORD_ACCESS: 'true'
+      USER_NAME: 'user'
+      USER_PASSWORD: 'password'
