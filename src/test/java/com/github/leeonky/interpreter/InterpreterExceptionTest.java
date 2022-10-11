@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.ROW;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InterpreterExceptionTest {
@@ -34,13 +34,13 @@ class InterpreterExceptionTest {
 
         @Test
         void position_for_chinese_chars_in_line_mode() {
-            assertShowCode(new InterpreterException("", 3, LINE), new StringBuilder()
+            assertShowCode(new InterpreterException("", 3, ROW), new StringBuilder()
                             .append("a你").append("\n")
                             .append("d你")
                     , new StringBuilder()
                             .append("a你").append("\n")
                             .append("d你").append("\n")
-                            .append("^^^")
+                            .append("^^^^")
             );
         }
 
@@ -122,17 +122,17 @@ class InterpreterExceptionTest {
 
         @Test
         void support_line_mark_for_one_line() {
-            assertShowCode(new InterpreterException("", 0, LINE), new StringBuilder()
+            assertShowCode(new InterpreterException("", 0, ROW), new StringBuilder()
                             .append("a")
                     , new StringBuilder()
                             .append("a").append("\n")
-                            .append("^")
+                            .append("^^")
             );
         }
 
         @Test
         void support_line_mark() {
-            assertShowCode(new InterpreterException("", 0).multiPosition(3, LINE), new StringBuilder()
+            assertShowCode(new InterpreterException("", 0).multiPosition(3, ROW), new StringBuilder()
                             .append("a").append("\n")
                             .append("bcde").append("\n")
                             .append("c")
@@ -140,7 +140,7 @@ class InterpreterExceptionTest {
                             .append("a").append("\n")
                             .append("^").append("\n")
                             .append("bcde").append("\n")
-                            .append("^^^^").append("\n")
+                            .append("^^^^^").append("\n")
                             .append("c")
             );
         }
@@ -226,7 +226,7 @@ class InterpreterExceptionTest {
 
             @Test
             void support_line_mark() {
-                assertShowCode(new InterpreterException("", 3).multiPosition(6, LINE), new StringBuilder()
+                assertShowCode(new InterpreterException("", 3).multiPosition(6, ROW), new StringBuilder()
                                 .append("***a").append("\n")
                                 .append("bcde").append("\n")
                                 .append("c")
@@ -234,7 +234,7 @@ class InterpreterExceptionTest {
                                 .append("a").append("\n")
                                 .append("^").append("\n")
                                 .append("bcde").append("\n")
-                                .append("^^^^").append("\n")
+                                .append("^^^^^").append("\n")
                                 .append("c")
                         , 3);
             }
@@ -264,7 +264,7 @@ class InterpreterExceptionTest {
             void change_position_when_no_type_should_not_raise_any_error() {
                 InterpreterException interpreterException = new InterpreterException("", 7, CHAR);
                 interpreterException.clearPosition();
-                interpreterException.setType(LINE);
+                interpreterException.setType(ROW);
                 assertShowCode(interpreterException, new StringBuilder()
                                 .append("a你c").append("\n")
                                 .append("d你你好")
@@ -275,16 +275,16 @@ class InterpreterExceptionTest {
             }
 
             @Test
-            void should_change_first_postion_line() {
+            void should_change_first_position_line() {
                 InterpreterException interpreterException = new InterpreterException("", 1, CHAR);
                 interpreterException.multiPosition(4, CHAR);
-                interpreterException.setType(LINE);
+                interpreterException.setType(ROW);
                 assertShowCode(interpreterException, new StringBuilder()
                                 .append("a你c").append("\n")
                                 .append("d你你好")
                         , new StringBuilder()
                                 .append("a你c").append("\n")
-                                .append("^^^^").append("\n")
+                                .append("^^^^^").append("\n")
                                 .append("d你你好").append("\n")
                                 .append("^")
                 );

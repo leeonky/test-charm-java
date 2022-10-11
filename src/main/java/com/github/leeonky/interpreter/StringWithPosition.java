@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class StringNotation {
+public class StringWithPosition {
     private final String content;
     private final List<Integer> positions = new ArrayList<>();
     private final List<Integer> rows = new ArrayList<>();
     private final List<Integer> columns = new ArrayList<>();
 
-    public StringNotation(String content) {
+    public StringWithPosition(String content) {
         this.content = content;
     }
 
-    public StringNotation position(int position) {
+    public StringWithPosition position(int position) {
         if (position >= 0 && position <= content.length())
             positions.add(position);
         return this;
     }
 
-    public StringNotation row(int position) {
+    public StringWithPosition row(int position) {
         if (position >= 0 && position <= content.length())
             rows.add(position);
         return this;
@@ -39,7 +39,7 @@ public class StringNotation {
         return result.toString();
     }
 
-    public StringNotation column(int position) {
+    public StringWithPosition column(int position) {
         if (position >= 0 && position <= content.length())
             columns.add(position);
         return this;

@@ -1,11 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-
-import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
-import static java.util.Collections.nCopies;
 
 public class InterpreterException extends RuntimeException {
     private final List<Position> positions = new ArrayList<>();
@@ -30,10 +26,9 @@ public class InterpreterException extends RuntimeException {
     }
 
     public String show(String code, int offset) {
-        positions.sort(Comparator.<Position>comparingInt(o -> o.position).reversed()
-                .thenComparing(Comparator.<Position, Position.Type>comparing(o -> o.type).reversed()));
-        return positions.stream().map(position -> position.offset(offset))
-                .reduce(code.substring(offset), (r, p) -> p.process(r), notAllowParallelReduce());
+        StringWithPosition stringWithPosition = new StringWithPosition(code);
+        positions.forEach(position -> position.mark(stringWithPosition));
+        return stringWithPosition.result(offset);
     }
 
     public void setType(Position.Type type) {
@@ -46,7 +41,7 @@ public class InterpreterException extends RuntimeException {
     }
 
     public static class Position {
-        private final Type type;
+        protected final Type type;
         private final int position;
 
         public Position(Type type, int position) {
@@ -54,43 +49,31 @@ public class InterpreterException extends RuntimeException {
             this.position = position;
         }
 
-        public String process(String code) {
-            int endLineIndex = code.indexOf('\n', position);
-            endLineIndex = endLineIndex == -1 ? code.length() : endLineIndex;
-            return code.substring(0, endLineIndex) + "\n"
-                    + type.markLine(code, position, code.lastIndexOf('\n', position), endLineIndex)
-                    + code.substring(endLineIndex);
-        }
-
-        public Position offset(int offset) {
-            return offset == 0 ? this : new Position(type, position - offset);
+        private void mark(StringWithPosition stringWithPosition) {
+            type.mark(stringWithPosition, position);
         }
 
         public enum Type {
             CHAR {
                 @Override
-                protected String markLine(String code, int position, int startLineIndex, int endLineIndex) {
-                    return String.join("", nCopies(charCountBeforeMark(code, position, startLineIndex), " ")) + "^";
+                public void mark(StringWithPosition stringWithPosition, int position) {
+                    stringWithPosition.position(position);
                 }
             },
-            LINE {
+            ROW {
                 @Override
-                protected String markLine(String code, int position, int startLineIndex, int endLineIndex) {
-                    return String.join("", nCopies(charCountBeforeMark(code, endLineIndex, startLineIndex), "^"));
+                public void mark(StringWithPosition stringWithPosition, int position) {
+                    stringWithPosition.row(position);
+                }
+            },
+            COLUMN {
+                @Override
+                public void mark(StringWithPosition stringWithPosition, int position) {
+                    stringWithPosition.column(position);
                 }
             };
 
-            private static int charCountBeforeMark(String code, int position, int startLineIndex) {
-                int fullWidthCharCount = (int) code.chars().limit(position)
-                        .skip(startLineIndex == -1 ? 0 : startLineIndex).filter(Type::isFullWidth).count();
-                return position - startLineIndex + fullWidthCharCount - 1;
-            }
-
-            private static boolean isFullWidth(int c) {
-                return !('\u0000' <= c && c <= '\u00FF' || '\uFF61' <= c && c <= '\uFFDC' || '\uFFE8' <= c && c <= '\uFFEE');
-            }
-
-            protected abstract String markLine(String code, int position, int startOfCurrentLine, int endLineIndex);
+            public abstract void mark(StringWithPosition stringWithPosition, int position);
         }
     }
 }
