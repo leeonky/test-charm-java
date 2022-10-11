@@ -1,22 +1,22 @@
 Feature: dir/file with java File
 
   Background:
-    Given root folder "/tmp/test/dir"
+    Given root folder "/tmp/work/test/dir"
 
   Scenario: file in list verification should list sub files
-    Then java.io.File "/tmp/test/dir" should:
+    Then java.io.File "/tmp/work/test/dir" should:
     """
     = []
     """
-    Given a file "/tmp/test/dir/file1.txt"
+    Given a file "/tmp/work/test/dir/file1.txt"
     """
     hello1
     """
-    Given a file "/tmp/test/dir/file2.txt"
+    Given a file "/tmp/work/test/dir/file2.txt"
     """
     hello2
     """
-    Then java.io.File "/tmp/test/dir/" should:
+    Then java.io.File "/tmp/work/test/dir/" should:
     """
     : [{
       name: file1.txt
@@ -28,15 +28,15 @@ Feature: dir/file with java File
     """
 
   Scenario: file in object verification should list sub files, key is file name, value is file
-    When java.io.File "/tmp/test/dir" should:
+    When java.io.File "/tmp/work/test/dir" should:
     """
     = {}
     """
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello
     """
-    Then java.io.File "/tmp/test/dir/file.txt" should:
+    Then java.io.File "/tmp/work/test/dir/file.txt" should:
     """
     : {
       name: file.txt
@@ -45,21 +45,21 @@ Feature: dir/file with java File
     """
 
   Scenario: compare file with string should use file name
-    Given a folder "/tmp/test/dir/folder1"
-    And a folder "/tmp/test/dir/folder2"
-    And a file "/tmp/test/dir/file.txt"
+    Given a folder "/tmp/work/test/dir/folder1"
+    And a folder "/tmp/work/test/dir/folder2"
+    And a file "/tmp/work/test/dir/file.txt"
     """
     any
     """
-    Then java.io.File "/tmp/test/dir" should:
+    Then java.io.File "/tmp/work/test/dir" should:
     """
     : ['file.txt' 'folder1' 'folder2']
     """
 
   Scenario: access folder by name as 'property' name
-    Given a folder "/tmp/test/dir/folder1"
-    Given a folder "/tmp/test/dir/folder2"
-    And java.io.File "/tmp" should:
+    Given a folder "/tmp/work/test/dir/folder1"
+    Given a folder "/tmp/work/test/dir/folder2"
+    And java.io.File "/tmp/work" should:
     """
     : {
       test/dir: {
@@ -70,17 +70,17 @@ Feature: dir/file with java File
     """
 
   Scenario: access file by name as 'property' name
-    Given a folder "/tmp/test/dir/folder1"
-    Given a file "/tmp/test/dir/folder1/file1.txt"
+    Given a folder "/tmp/work/test/dir/folder1"
+    Given a file "/tmp/work/test/dir/folder1/file1.txt"
     """
     file1
     """
-    Given a folder "/tmp/test/dir/folder2"
-    Given a file "/tmp/test/dir/folder2/file2.txt"
+    Given a folder "/tmp/work/test/dir/folder2"
+    Given a file "/tmp/work/test/dir/folder2/file2.txt"
     """
     file2
     """
-    Then java.io.File "/tmp" should:
+    Then java.io.File "/tmp/work" should:
     """
     : {
       test/dir= {
@@ -93,14 +93,14 @@ Feature: dir/file with java File
       }
     }
     """
-    Then java.io.File "/tmp" should:
+    Then java.io.File "/tmp/work" should:
     """
     : {
       test/dir/folder1/'file1.txt'.string: file1
       test/dir/folder2/'file2.txt'.string: file2
     }
     """
-    Then java.io.File "/tmp" should:
+    Then java.io.File "/tmp/work" should:
     """
     : {
       test/dir: {
@@ -111,11 +111,11 @@ Feature: dir/file with java File
     """
 
   Scenario: get file content by extension
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
-    Then java.io.File "/tmp" should:
+    Then java.io.File "/tmp/work" should:
     """
     : {
       test/dir/file.txt= hello-world
@@ -123,11 +123,11 @@ Feature: dir/file with java File
     """
 
   Scenario: checking folder with file group and extension
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
-    Then java.io.File "/tmp" should:
+    Then java.io.File "/tmp/work" should:
     """
     : {
       test/dir= {
@@ -135,11 +135,11 @@ Feature: dir/file with java File
       }
     }
     """
-    Given a file "/tmp/test/dir/file2.txt"
+    Given a file "/tmp/work/test/dir/file2.txt"
     """
     unexpected
     """
-    Then java.io.File "/tmp" should failed:
+    Then java.io.File "/tmp/work" should failed:
     """
     : {
       test/dir= {
@@ -161,13 +161,13 @@ Feature: dir/file with java File
     """
 
   Scenario: string to file
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
     Then the following should pass:
     """
-    '/tmp/'.file: {
+    '/tmp/work'.file: {
       test/dir= {
         file.txt= hello-world
       }
@@ -175,7 +175,7 @@ Feature: dir/file with java File
     """
 
   Scenario: raise error when file-group not exist
-    Then java.io.File "/tmp/test/dir" should failed:
+    Then java.io.File "/tmp/work/test/dir" should failed:
     """
     : {
       un-exist.txt: 'any'
@@ -201,11 +201,11 @@ Feature: dir/file with java File
     """
 
   Scenario: raise error when file not exist with file group
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
-    Then java.io.File "/tmp/test/dir" should failed:
+    Then java.io.File "/tmp/work/test/dir" should failed:
     """
     : {
       file.not-exist: 'any'
@@ -231,11 +231,11 @@ Feature: dir/file with java File
     """
 
   Scenario: return file object when extension not registered
-    Given a file "/tmp/test/dir/file.not-registered"
+    Given a file "/tmp/work/test/dir/file.not-registered"
     """
     hello-world
     """
-    Then java.io.File "/tmp/test/dir" should:
+    Then java.io.File "/tmp/work/test/dir" should:
     """
     : {
       file.not-registered: {
@@ -247,19 +247,19 @@ Feature: dir/file with java File
     """
 
   Scenario: checking all files with file group
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
-    Given a file "/tmp/test/dir/file.log"
+    Given a file "/tmp/work/test/dir/file.log"
     """
     any
     """
-    Given a file "/tmp/test/dir/another.txt"
+    Given a file "/tmp/work/test/dir/another.txt"
     """
     any
     """
-    Then java.io.File "/tmp/test/dir" should failed:
+    Then java.io.File "/tmp/work/test/dir" should failed:
     """
     : {
       file= {
@@ -281,15 +281,15 @@ Feature: dir/file with java File
     """
 
   Scenario: list verification by file group
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
-    Given a file "/tmp/test/dir/file.log"
+    Given a file "/tmp/work/test/dir/file.log"
     """
     a-log
     """
-    Then java.io.File "/tmp/test/dir" should:
+    Then java.io.File "/tmp/work/test/dir" should:
     """
     : {
       file: [{
@@ -305,25 +305,25 @@ Feature: dir/file with java File
 
   Rule: dump
     Scenario: dump dir
-      And set file attribute "/tmp/test/dir"
+      And set file attribute "/tmp/work/test/dir"
       """
       rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
       """
-      Then java.io.File "/tmp/test/dir" should dump:
+      Then java.io.File "/tmp/work/test/dir" should dump:
       """
       java.io.File {}
       """
 
     Scenario: dump file
-      Given a file "/tmp/test/dir/file1.txt"
+      Given a file "/tmp/work/test/dir/file1.txt"
       """
       hello1
       """
-      And set file attribute "/tmp/test/dir/file1.txt"
+      And set file attribute "/tmp/work/test/dir/file1.txt"
       """
       rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
       """
-      Then java.io.File "/tmp/test/dir/file1.txt" should dump:
+      Then java.io.File "/tmp/work/test/dir/file1.txt" should dump:
       """
       java.io.File rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z 6
       """
