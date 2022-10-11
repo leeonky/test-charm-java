@@ -42,4 +42,3 @@ Feature: string
     """
     ascii.ascii= 'hello' and iso8859_1.iso8859_1= 'hello'
     """
-

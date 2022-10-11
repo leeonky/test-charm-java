@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.leeonky:DAL-java:0.3.10'
+    implementation 'com.github.leeonky:DAL-java:0.3.11'
     implementation 'org.json:json:20220924'
     implementation 'com.jcraft:jsch:0.1.55'
     testImplementation 'org.assertj:assertj-core:3.21.0'
