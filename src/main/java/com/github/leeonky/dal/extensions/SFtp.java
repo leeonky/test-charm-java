@@ -3,12 +3,21 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.util.Suppressor;
 import com.jcraft.jsch.*;
 
-import java.io.InputStream;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Vector;
+import java.util.stream.Collectors;
+
+import static com.github.leeonky.util.function.Extension.not;
 
 public class SFtp extends SFtpFile {
     private final String host, port, user, password;
     private final String path;
     private final ChannelSftp channel;
+    private final SftpATTRS sftpATTRS;
+    private ChannelSftp.LsEntry entry;
 
     public SFtp(String host, String port, String user, String password, String path) {
         this.host = host;
@@ -17,6 +26,13 @@ public class SFtp extends SFtpFile {
         this.password = password;
         this.path = path;
         channel = Suppressor.get(this::getChannelSftp);
+        sftpATTRS = Suppressor.get(() -> channel.lstat(path));
+        String name = Paths.get(path).getFileName().toString();
+
+        if (!sftpATTRS.isDir()) {
+            entry = Suppressor.get(() -> ((Vector<ChannelSftp.LsEntry>) channel.ls(Paths.get(path).getParent().toString()))).stream()
+                    .filter(e -> e.getFilename().equals(name)).findFirst().get();
+        }
     }
 
     private ChannelSftp getChannelSftp() throws JSchException {
@@ -32,7 +48,7 @@ public class SFtp extends SFtpFile {
 
     @Override
     public String name() {
-        return path;
+        return Paths.get(path).getFileName().toString();
     }
 
     @Override
@@ -42,7 +58,29 @@ public class SFtp extends SFtpFile {
 
     @Override
     protected String fullName() {
-        return name();
+        return path;
+    }
+
+    @Override
+    public boolean isDir() {
+        return sftpATTRS.isDir();
+    }
+
+    @Override
+    public String attribute() {
+        SftpATTRS attrs = entry.getAttrs();
+        List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
+        return String.format("%s %s %s %4s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
+                fileSize(attrs), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
+    }
+
+    private static String fileSize(SftpATTRS attrs) {
+        return String.valueOf(attrs.getSize());
+    }
+
+    public void close() {
+        channel.exit();
+        Suppressor.run(() -> channel.getSession().disconnect());
     }
 
     public static class SubSFtpFile extends SFtpFile {
@@ -76,20 +114,17 @@ public class SFtp extends SFtpFile {
             return parent.fullName() + "/" + name();
         }
 
-        public InputStream download() {
-            return Suppressor.get(() -> channel.get(fullName()));
-        }
-
         @Override
         public boolean isDir() {
             return entry.getAttrs().isDir();
         }
 
+        @Override
         public String attribute() {
             SftpATTRS attrs = entry.getAttrs();
-            String[] items = entry.getLongname().split(" ");
-            return String.format("%s %s %s %s %d", attrs.getPermissionsString(),
-                    items[2], items[3], attrs.getMtimeString(), attrs.getSize());
+            List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
+            return String.format("%s %s %s %4s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
+                    fileSize(attrs), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
         }
     }
 }

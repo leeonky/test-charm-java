@@ -1,28 +1,29 @@
 Feature: sftp
 
   Background:
-    Given root folder "/tmp/work/test/sftp/dir1"
-    Given root folder "/tmp/work/test/sftp/dir2"
-    Given root folder "/tmp/work/test/sftp/dir1/sub1"
-    Given root folder "/tmp/work/test/sftp/dir1/sub2"
-    Given root folder "/tmp/work/test/sftp/dir1/sub1/subSub"
+    Given root folder "/tmp/work/test/sftp"
     Given ssh server on path "/tmp/work/test/sftp/":
       | host      | port | user | password |
       | 127.0.0.1 | 2222 | user | password |
 
   Scenario: root folder as a list
+    Given root folder "/tmp/work/test/sftp/dir1"
+    Given root folder "/tmp/work/test/sftp/dir2"
     Then got sftp:
     """
     : [... dir1 dir2 ...]
     """
 
   Scenario: root folder as a map
+    Given root folder "/tmp/work/test/sftp/dir1"
     Then got sftp:
     """
     dir1: dir1
     """
 
   Scenario: checking all files in root folder
+    Given root folder "/tmp/work/test/sftp/dir1"
+    Given root folder "/tmp/work/test/sftp/dir2"
     When evaluate sftp:
     """
     = {
@@ -35,18 +36,23 @@ Feature: sftp
     """
 
   Scenario: sub folder as a list
+    Given root folder "/tmp/work/test/sftp/dir1/sub1"
+    Given root folder "/tmp/work/test/sftp/dir1/sub2"
     Then got sftp:
     """
     dir1: [... sub1 sub2 ...]
     """
 
   Scenario: sub folder as a map
+    Given root folder "/tmp/work/test/sftp/dir1/sub1"
     Then got sftp:
     """
     dir1.sub1: sub1
     """
 
   Scenario: checking all files in sub folder
+    Given root folder "/tmp/work/test/sftp/dir1/sub1"
+    Given root folder "/tmp/work/test/sftp/dir1/sub2"
     When evaluate sftp:
     """
     dir1= {
@@ -59,6 +65,7 @@ Feature: sftp
     """
 
   Scenario: checking all files in sub sub folder
+    Given root folder "/tmp/work/test/sftp/dir1/sub1/subSub"
     Then got sftp:
     """
     dir1.sub1= {
@@ -71,12 +78,16 @@ Feature: sftp
     """
     hello-world
     """
+    And ssh server on path "/tmp/work/test/sftp/file.txt":
+      | host      | port | user | password |
+      | 127.0.0.1 | 2222 | user | password |
     Then got sftp:
     """
-    ['file.txt'].string: 'hello-world'
+    string: 'hello-world'
     """
 
   Scenario: file content in folder
+    Given root folder "/tmp/work/test/sftp/dir1"
     Given a file "/tmp/work/test/sftp/dir1/file.txt"
     """
     hello-world
@@ -87,6 +98,7 @@ Feature: sftp
     """
 
   Scenario: file content in folder
+    Given root folder "/tmp/work/test/sftp/dir1"
     Given a file "/tmp/work/test/sftp/dir1/file.txt"
     """
     hello-world
@@ -102,28 +114,42 @@ Feature: sftp
   Rule: dump
 
     @ci-skip
-    Scenario: dump dir
-      And set file attribute "/tmp/work/test/dir"
+    Scenario: dump root empty dir
+      Then sftp "/tmp/work/test/sftp" should dump:
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
-      """
-      Then sftp "/tmp/work/" should dump:
-      """
-      sftp {}
+      sftp/
       """
 
     @ci-skip
-    Scenario: dump file
-      Given a file "/tmp/work/test/dir/file1.txt"
+    Scenario: dump root file
+      Given a file "/tmp/work/test/sftp/file1.txt"
       """
-      hello1
+      1
       """
-      And set file attribute "/tmp/work/test/dir/file1.txt"
+      And set file attribute "/tmp/work/test/sftp/file1.txt"
       """
       rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
       """
-#      TODO root is a file
       Then sftp "/tmp/work/test/dir/file1.txt" should dump:
       """
-      java.io.File rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z 6
+      -rwxr-xr-x user user   11 2022-10-09T06:47:01Z file1.txt
       """
+
+    @ci-skip
+    Scenario: dump folder
+      Given root folder "/tmp/work/test/sftp/dir"
+      Given a file "/tmp/work/test/sftp/dir/file1.txt"
+      """
+      1
+      """
+      And set file attribute "/tmp/work/test/sftp/dir/file1.txt"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      """
+      Then sftp "/tmp/work/test/sftp/" should dump:
+      """
+      sftp/
+          dir/
+              -rwxr-xr-x root root    1 2022-10-09T06:47:01Z file1.txt
+      """
+#     incorrect group and user

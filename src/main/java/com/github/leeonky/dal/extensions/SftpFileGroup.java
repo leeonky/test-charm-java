@@ -13,7 +13,7 @@ public class SftpFileGroup extends FileGroup<SFtpFile> {
 
     @Override
     protected InputStream open(SFtpFile subFile) {
-        return ((SFtp.SubSFtpFile) subFile).download();
+        return subFile.download();
     }
 
     @Override

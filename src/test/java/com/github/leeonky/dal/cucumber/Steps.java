@@ -5,6 +5,7 @@ import com.github.leeonky.dal.extensions.SFtp;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -119,8 +120,7 @@ public class Steps {
     @Given("ssh server on path {string}:")
     public void ssh_server(String path, io.cucumber.datatable.DataTable dataTable) {
         sshConfig = dataTable.asMaps().get(0);
-        if (sFtp == null)
-            sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
+        sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
     }
 
     @Then("got sftp:")
@@ -167,7 +167,15 @@ public class Steps {
     @Then("sftp {string} should dump:")
     public void sftpShouldDump(String path, String content) {
         DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+        if (sFtp != null)
+            sFtp.close();
         sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
         assertThat(runtimeContext.wrap(sFtp).dump()).isEqualTo(content);
+    }
+
+    @After
+    void closeFtp() {
+        if (sFtp != null)
+            sFtp.close();
     }
 }

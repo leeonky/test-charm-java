@@ -3,6 +3,7 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.util.Suppressor;
 import com.jcraft.jsch.ChannelSftp;
 
+import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +17,11 @@ public abstract class SFtpFile {
 
     protected abstract String fullName();
 
-    public boolean isDir() {
-        return true;
+    public InputStream download() {
+        return Suppressor.get(() -> channel().get(fullName()));
     }
+
+    public abstract boolean isDir();
 
     public List<SFtpFile> ls() {
         return Suppressor.get(() -> (Vector<ChannelSftp.LsEntry>) channel().ls(fullName())).stream()
@@ -31,4 +34,6 @@ public abstract class SFtpFile {
     public Optional<SFtpFile> access(Object property) {
         return ls().stream().filter(file -> file.name().equals(property)).findFirst();
     }
+
+    public abstract String attribute();
 }

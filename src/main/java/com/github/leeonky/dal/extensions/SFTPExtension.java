@@ -1,18 +1,20 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.inspector.ListInspector;
-import com.github.leeonky.dal.runtime.inspector.TypeValueInspector;
+import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.InvocationException;
 
 import java.io.FileNotFoundException;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toCollection;
 
@@ -21,7 +23,7 @@ public class SFTPExtension implements Extension {
     @Override
     public void extend(DAL dal) {
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
-        builder.registerImplicitData(SFtp.SubSFtpFile.class, SFtp.SubSFtpFile::download)
+        builder.registerImplicitData(SFtpFile.class, SFtpFile::download)
                 .registerListAccessor(SFtpFile.class, SFtpFile::ls)
                 .registerPropertyAccessor(SFtpFile.class,
                         new JavaClassPropertyAccessor<SFtpFile>(BeanClass.create(SFtpFile.class)) {
@@ -44,24 +46,15 @@ public class SFTPExtension implements Extension {
                 .registerInspector(SFtpFile.class, data -> {
                     SFtpFile sFtpFile = (SFtpFile) data.getInstance();
                     if (sFtpFile.isDir()) {
-                        return (path, inspectorCache) -> sFtpFile.name() + "/: " + new ListInspector(data) {
-                            @Override
-                            protected String type() {
-                                return "";
-                            }
-                        }.inspect(path, inspectorCache);
-                    } else {
-                        return new TypeValueInspector() {
-                            @Override
-                            public String inspectType() {
-                                return sFtpFile.name();
-                            }
-
-                            @Override
-                            public String inspectValue() {
-                                return ((SFtp.SubSFtpFile) sFtpFile).attribute();
-                            }
+                        return (path, inspectorCache) -> {
+                            String name = sFtpFile.name() + "/";
+                            List<Data> dataList = data.getDataList();
+                            if (dataList.isEmpty())
+                                return name;
+                            return name + "\n" + dataList.stream().map(Data::dump).map(TextUtil::indent).collect(Collectors.joining("\n"));
                         };
+                    } else {
+                        return (path, inspectorCache) -> sFtpFile.attribute() + " " + sFtpFile.name();
                     }
                 });
     }
