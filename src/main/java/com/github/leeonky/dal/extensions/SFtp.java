@@ -1,17 +1,12 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.util.Suppressor;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
+import com.jcraft.jsch.*;
 
 import java.io.InputStream;
 
-//TODO close
 public class SFtp extends SFtpFile {
-    //    TODO refactor
-    public final String host, port, user, password;
+    private final String host, port, user, password;
     private final String path;
     private final ChannelSftp channel;
 
@@ -88,6 +83,13 @@ public class SFtp extends SFtpFile {
         @Override
         public boolean isDir() {
             return entry.getAttrs().isDir();
+        }
+
+        public String attribute() {
+            SftpATTRS attrs = entry.getAttrs();
+            String[] items = entry.getLongname().split(" ");
+            return String.format("%s %s %s %s %d", attrs.getPermissionsString(),
+                    items[2], items[3], attrs.getMtimeString(), attrs.getSize());
         }
     }
 }

@@ -180,7 +180,7 @@ Feature: dir/file with java path
     Scenario: dump dir
       And set file attribute "/tmp/work/test/dir"
       """
-      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
       """
       Then java.io.path "/tmp/work/test/dir" should dump:
       """
@@ -195,9 +195,9 @@ Feature: dir/file with java path
       """
       And set file attribute "/tmp/work/test/dir/file1.txt"
       """
-      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
       """
       Then java.io.path "/tmp/work/test/dir/file1.txt" should dump:
       """
-      java.nio.Path rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z 6
+      java.nio.Path rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z 6
       """

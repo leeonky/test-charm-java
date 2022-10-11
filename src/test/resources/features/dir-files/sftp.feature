@@ -98,3 +98,32 @@ Feature: sftp
       dir1/file.txt: 'hello-world'
     }
     """
+
+  Rule: dump
+
+    @ci-skip
+    Scenario: dump dir
+      And set file attribute "/tmp/work/test/dir"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      """
+      Then sftp "/tmp/work/" should dump:
+      """
+      sftp {}
+      """
+
+    @ci-skip
+    Scenario: dump file
+      Given a file "/tmp/work/test/dir/file1.txt"
+      """
+      hello1
+      """
+      And set file attribute "/tmp/work/test/dir/file1.txt"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      """
+#      TODO root is a file
+      Then sftp "/tmp/work/test/dir/file1.txt" should dump:
+      """
+      java.io.File rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z 6
+      """

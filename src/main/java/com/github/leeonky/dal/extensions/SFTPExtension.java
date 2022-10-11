@@ -4,6 +4,8 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.inspector.ListInspector;
+import com.github.leeonky.dal.runtime.inspector.TypeValueInspector;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.InvocationException;
 
@@ -39,9 +41,29 @@ public class SFTPExtension implements Extension {
                                 return instance == null;
                             }
                         })
-//        TODO test inspector
-                .registerInspector(SFtpFile.class, data -> (path, inspectorCache) ->
-                        ((SFtpFile) data.getInstance()).name());
+                .registerInspector(SFtpFile.class, data -> {
+                    SFtpFile sFtpFile = (SFtpFile) data.getInstance();
+                    if (sFtpFile.isDir()) {
+                        return (path, inspectorCache) -> sFtpFile.name() + "/: " + new ListInspector(data) {
+                            @Override
+                            protected String type() {
+                                return "";
+                            }
+                        }.inspect(path, inspectorCache);
+                    } else {
+                        return new TypeValueInspector() {
+                            @Override
+                            public String inspectType() {
+                                return sFtpFile.name();
+                            }
+
+                            @Override
+                            public String inspectValue() {
+                                return ((SFtp.SubSFtpFile) sFtpFile).attribute();
+                            }
+                        };
+                    }
+                });
     }
 
     private Object getSubFile(SFtpFile sFtpFile, Object property) {

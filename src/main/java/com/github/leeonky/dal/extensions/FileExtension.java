@@ -86,6 +86,7 @@ public class FileExtension implements Extension {
         runtimeContextBuilder.registerInspector(Path.class, data -> {
             Path filePath = (Path) data.getInstance();
             if (filePath.toFile().isDirectory()) {
+//            TODO refactor
                 return (path, inspectorCache) -> "java.nio.Path "
                         + new MapInspector(data).inspect(path, inspectorCache).replaceFirst("^sun.nio.fs.UnixPath ", "");
             }
@@ -135,6 +136,7 @@ public class FileExtension implements Extension {
             File file = (File) data.getInstance();
             if (file.isDirectory()) {
                 return (path, inspectorCache) -> "java.io.File "
+//            TODO refactor
                         + new MapInspector(data).inspect(path, inspectorCache).replaceFirst("^java.io.File ", "");
             } else {
                 return new TypeValueInspector() {

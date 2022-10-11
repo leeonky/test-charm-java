@@ -2,7 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.SFtp;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class Steps {
 
     private AssertionError assertionError;
+    private Map<String, String> sshConfig;
 
     @SneakyThrows
     @Given("root folder {string}")
@@ -117,9 +118,9 @@ public class Steps {
 
     @Given("ssh server on path {string}:")
     public void ssh_server(String path, io.cucumber.datatable.DataTable dataTable) {
-        Map<String, String> map = dataTable.asMaps().get(0);
+        sshConfig = dataTable.asMaps().get(0);
         if (sFtp == null)
-            sFtp = new SFtp(map.get("host"), map.get("port"), map.get("user"), map.get("password"), path);
+            sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
     }
 
     @Then("got sftp:")
@@ -142,7 +143,7 @@ public class Steps {
 
     @Then("java.io.File {string} should dump:")
     public void javaIoFileShouldDump(String path, String content) {
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
 
         assertThat(runtimeContext.wrap(new File(path)).dump()).isEqualTo(content);
     }
@@ -158,8 +159,15 @@ public class Steps {
 
     @Then("java.io.path {string} should dump:")
     public void javaIoPathShouldDump(String path, String content) {
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
 
         assertThat(runtimeContext.wrap(Paths.get(path)).dump()).isEqualTo(content);
+    }
+
+    @Then("sftp {string} should dump:")
+    public void sftpShouldDump(String path, String content) {
+        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+        sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
+        assertThat(runtimeContext.wrap(sFtp).dump()).isEqualTo(content);
     }
 }
