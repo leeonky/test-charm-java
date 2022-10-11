@@ -151,7 +151,7 @@ if (file('src/test/resources/features').exists()) {
                 environment('CUCUMBER_PUBLISH_QUIET', true)
                 main = "io.cucumber.core.cli.Main"
                 classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-                args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.dal.cucumber', 'src/test/resources/features']
+                args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.interpreter', 'src/test/resources/features']
             }
         }
 
