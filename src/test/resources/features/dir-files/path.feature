@@ -1,22 +1,22 @@
 Feature: dir/file with java path
 
   Background:
-    Given root folder "/tmp/test/dir"
+    Given root folder "/tmp/work/test/dir"
 
   Scenario: file in list verification should list sub files
-    Then java.nio.Path "/tmp/test/dir" should:
+    Then java.nio.Path "/tmp/work/test/dir" should:
     """
     = []
     """
-    Given a file "/tmp/test/dir/file1.txt"
+    Given a file "/tmp/work/test/dir/file1.txt"
     """
     hello1
     """
-    Given a file "/tmp/test/dir/file2.txt"
+    Given a file "/tmp/work/test/dir/file2.txt"
     """
     hello2
     """
-    Then java.nio.Path "/tmp/test/dir/" should:
+    Then java.nio.Path "/tmp/work/test/dir/" should:
     """
     : [{
       name: file1.txt
@@ -28,15 +28,15 @@ Feature: dir/file with java path
     """
 
   Scenario: file in object verification should list sub files, key is file name, value is file
-    When java.nio.Path "/tmp/test/dir" should:
+    When java.nio.Path "/tmp/work/test/dir" should:
     """
     = {}
     """
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello
     """
-    Then java.nio.Path "/tmp/test/dir/file.txt" should:
+    Then java.nio.Path "/tmp/work/test/dir/file.txt" should:
     """
     : {
       name: file.txt
@@ -45,21 +45,21 @@ Feature: dir/file with java path
     """
 
   Scenario: compare file with string should use file name
-    Given a folder "/tmp/test/dir/folder1"
-    And a folder "/tmp/test/dir/folder2"
-    And a file "/tmp/test/dir/file.txt"
+    Given a folder "/tmp/work/test/dir/folder1"
+    And a folder "/tmp/work/test/dir/folder2"
+    And a file "/tmp/work/test/dir/file.txt"
     """
     any
     """
-    Then java.nio.Path "/tmp/test/dir" should:
+    Then java.nio.Path "/tmp/work/test/dir" should:
     """
     : ['file.txt' 'folder1' 'folder2']
     """
 
   Scenario: access folder by name as 'property' name
-    Given a folder "/tmp/test/dir/folder1"
-    Given a folder "/tmp/test/dir/folder2"
-    And java.nio.Path "/tmp" should:
+    Given a folder "/tmp/work/test/dir/folder1"
+    Given a folder "/tmp/work/test/dir/folder2"
+    And java.nio.Path "/tmp/work" should:
     """
     : {
       test/dir: {
@@ -70,17 +70,17 @@ Feature: dir/file with java path
     """
 
   Scenario: access file by name as 'property' name
-    Given a folder "/tmp/test/dir/folder1"
-    Given a file "/tmp/test/dir/folder1/file1.txt"
+    Given a folder "/tmp/work/test/dir/folder1"
+    Given a file "/tmp/work/test/dir/folder1/file1.txt"
     """
     file1
     """
-    Given a folder "/tmp/test/dir/folder2"
-    Given a file "/tmp/test/dir/folder2/file2.txt"
+    Given a folder "/tmp/work/test/dir/folder2"
+    Given a file "/tmp/work/test/dir/folder2/file2.txt"
     """
     file2
     """
-    Then java.nio.Path "/tmp" should:
+    Then java.nio.Path "/tmp/work" should:
     """
     : {
       test/dir= {
@@ -93,14 +93,14 @@ Feature: dir/file with java path
       }
     }
     """
-    Then java.nio.Path "/tmp" should:
+    Then java.nio.Path "/tmp/work" should:
     """
     : {
       test/dir/folder1/'file1.txt'.string: file1
       test/dir/folder2/'file2.txt'.string: file2
     }
     """
-    Then java.nio.Path "/tmp" should:
+    Then java.nio.Path "/tmp/work" should:
     """
     : {
       test/dir: {
@@ -111,11 +111,11 @@ Feature: dir/file with java path
     """
 
   Scenario: get file content by extension
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
-    Then java.nio.Path "/tmp" should:
+    Then java.nio.Path "/tmp/work" should:
     """
     : {
       test/dir/file.txt= hello-world
@@ -123,11 +123,11 @@ Feature: dir/file with java path
     """
 
   Scenario: checking folder with file group and extension
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
-    Then java.nio.Path "/tmp" should:
+    Then java.nio.Path "/tmp/work" should:
     """
     : {
       test/dir= {
@@ -135,11 +135,11 @@ Feature: dir/file with java path
       }
     }
     """
-    Given a file "/tmp/test/dir/file2.txt"
+    Given a file "/tmp/work/test/dir/file2.txt"
     """
     unexpected
     """
-    Then java.nio.Path "/tmp" should failed:
+    Then java.nio.Path "/tmp/work" should failed:
     """
     : {
       test/dir= {
@@ -161,40 +161,41 @@ Feature: dir/file with java path
     """
 
   Scenario: string to file
-    Given a file "/tmp/test/dir/file.txt"
+    Given a file "/tmp/work/test/dir/file.txt"
     """
     hello-world
     """
     Then the following should pass:
     """
-    '/tmp/'.path: {
+    '/tmp/work/'.path: {
       test/dir= {
         file.txt= hello-world
       }
     }
     """
 
-  Rule: dump
-    Scenario: dump dir
-      And set file attribute "/tmp/test/dir"
-      """
-      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
-      """
-      Then java.io.path "/tmp/test/dir" should dump:
-      """
-      java.nio.Path {}
-      """
-
-    Scenario: dump file
-      Given a file "/tmp/test/dir/file1.txt"
-      """
-      hello1
-      """
-      And set file attribute "/tmp/test/dir/file1.txt"
-      """
-      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
-      """
-      Then java.io.path "/tmp/test/dir/file1.txt" should dump:
-      """
-      java.nio.Path rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z 6
-      """
+#  Rule: dump
+#
+#    Scenario: dump dir
+#      And set file attribute "/tmp/work/test/dir"
+#      """
+#      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+#      """
+#      Then java.io.path "/tmp/work/test/dir" should dump:
+#      """
+#      java.nio.Path {}
+#      """
+#
+#    Scenario: dump file
+#      Given a file "/tmp/work/test/dir/file1.txt"
+#      """
+#      hello1
+#      """
+#      And set file attribute "/tmp/work/test/dir/file1.txt"
+#      """
+#      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+#      """
+#      Then java.io.path "/tmp/work/test/dir/file1.txt" should dump:
+#      """
+#      java.nio.Path rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z 6
+#      """

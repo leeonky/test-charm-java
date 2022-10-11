@@ -1,12 +1,12 @@
 Feature: sftp
 
   Background:
-    Given root folder "/tmp/test/sftp/dir1"
-    Given root folder "/tmp/test/sftp/dir2"
-    Given root folder "/tmp/test/sftp/dir1/sub1"
-    Given root folder "/tmp/test/sftp/dir1/sub2"
-    Given root folder "/tmp/test/sftp/dir1/sub1/subSub"
-    Given ssh server on path "/tmp/test/sftp/":
+    Given root folder "/tmp/work/test/sftp/dir1"
+    Given root folder "/tmp/work/test/sftp/dir2"
+    Given root folder "/tmp/work/test/sftp/dir1/sub1"
+    Given root folder "/tmp/work/test/sftp/dir1/sub2"
+    Given root folder "/tmp/work/test/sftp/dir1/sub1/subSub"
+    Given ssh server on path "/tmp/work/test/sftp/":
       | host      | port | user | password |
       | 127.0.0.1 | 2222 | user | password |
 
@@ -67,7 +67,7 @@ Feature: sftp
     """
 
   Scenario: file content on root
-    Given a file "/tmp/test/sftp/file.txt"
+    Given a file "/tmp/work/test/sftp/file.txt"
     """
     hello-world
     """
@@ -77,7 +77,7 @@ Feature: sftp
     """
 
   Scenario: file content in folder
-    Given a file "/tmp/test/sftp/dir1/file.txt"
+    Given a file "/tmp/work/test/sftp/dir1/file.txt"
     """
     hello-world
     """
@@ -87,7 +87,7 @@ Feature: sftp
     """
 
   Scenario: file content in folder
-    Given a file "/tmp/test/sftp/dir1/file.txt"
+    Given a file "/tmp/work/test/sftp/dir1/file.txt"
     """
     hello-world
     """

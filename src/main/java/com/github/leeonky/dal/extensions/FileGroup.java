@@ -4,13 +4,11 @@ import com.github.leeonky.dal.runtime.PartialObject;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toCollection;
 
 public abstract class FileGroup<T> implements PartialObject, Iterable<T> {
     protected static final Map<String, Function<InputStream, Object>> fileExtensions = new HashMap<>();
@@ -50,13 +48,17 @@ public abstract class FileGroup<T> implements PartialObject, Iterable<T> {
     protected abstract T createSubFile(String fileName);
 
     public Set<String> list() {
-        return listFileName().map(s -> s.substring(name.length() + 1)).collect(Collectors.toSet());
+        return listFileNameWithOrder().map(s -> s.substring(name.length() + 1)).collect(toCollection(LinkedHashSet::new));
     }
 
     protected abstract Stream<String> listFileName();
 
     @Override
     public Iterator<T> iterator() {
-        return listFileName().map((fileName) -> createSubFile(fileName)).iterator();
+        return listFileNameWithOrder().map(this::createSubFile).iterator();
+    }
+
+    private Stream<String> listFileNameWithOrder() {
+        return listFileName().sorted();
     }
 }

@@ -1,37 +1,37 @@
 Feature: zip file
 
   Background:
-    Given root folder "/tmp/test/dir"
-    Given root folder "/tmp/test/tmp"
+    Given root folder "/tmp/work/test/dir"
+    Given root folder "/tmp/work/test/tmp"
 
   Scenario: unzip empty zip is empty folder
-    Given an empty zip file "/tmp/test/dir/empty.zip"
-    Then java.io.File "/tmp/test/dir/empty.zip" should:
+    Given an empty zip file "/tmp/work/test/dir/empty.zip"
+    Then java.io.File "/tmp/work/test/dir/empty.zip" should:
     """
     unzip: []
     """
-    And java.io.File "/tmp/test/dir/empty.zip" should:
+    And java.io.File "/tmp/work/test/dir/empty.zip" should:
     """
     unzip= {}
     """
 
   Scenario: unzip files
-    Given a file "/tmp/test/tmp/file1.txt"
+    Given a file "/tmp/work/test/tmp/file1.txt"
     """
     hello
     """
-    And a file "/tmp/test/tmp/file2.txt"
+    And a file "/tmp/work/test/tmp/file2.txt"
     """
     world
     """
-    And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/file1.txt |
-      | /tmp/test/tmp/file2.txt |
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    And a zip file "/tmp/work/test/dir/file.zip":
+      | /tmp/work/test/tmp/file1.txt |
+      | /tmp/work/test/tmp/file2.txt |
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip: [ file1.txt  file2.txt ]
     """
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip: [{
       name: file1.txt
@@ -41,7 +41,7 @@ Feature: zip file
       string: world
     }]
     """
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip= {
       'file1.txt': {
@@ -54,7 +54,7 @@ Feature: zip file
       }
     }
     """
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip: {
       file1.txt: hello
@@ -63,8 +63,8 @@ Feature: zip file
     """
 
   Scenario: file not exist in zip
-    Given an empty zip file "/tmp/test/dir/empty.zip"
-    Then java.io.File "/tmp/test/dir/empty.zip" should failed:
+    Given an empty zip file "/tmp/work/test/dir/empty.zip"
+    Then java.io.File "/tmp/work/test/dir/empty.zip" should failed:
     """
     unzip= {
       'not-exist.txt': {...}
@@ -90,13 +90,13 @@ Feature: zip file
     """
 
   Scenario: verify all files in zip
-    Given a file "/tmp/test/tmp/file.txt"
+    Given a file "/tmp/work/test/tmp/file.txt"
     """
     hello
     """
-    And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/file.txt |
-    Then java.io.File "/tmp/test/dir/file.zip" should failed:
+    And a zip file "/tmp/work/test/dir/file.zip":
+      | /tmp/work/test/tmp/file.txt |
+    Then java.io.File "/tmp/work/test/dir/file.zip" should failed:
     """
     unzip= {}
     """
@@ -110,14 +110,14 @@ Feature: zip file
     """
 
   Scenario: zip has a empty folder
-    Given a folder "/tmp/test/tmp/empty"
-    And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/empty |
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    Given a folder "/tmp/work/test/tmp/empty"
+    And a zip file "/tmp/work/test/dir/file.zip":
+      | /tmp/work/test/tmp/empty |
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip: [empty]
     """
-    And java.io.File "/tmp/test/dir/file.zip" should:
+    And java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip= {
       empty= []
@@ -126,19 +126,19 @@ Feature: zip file
     """
 
   Scenario: one folder with one file
-    Given a file "/tmp/test/tmp/file.txt"
+    Given a file "/tmp/work/test/tmp/file.txt"
     """
     hello
     """
-    Given a folder "/tmp/test/tmp/empty"
-    And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/file.txt |
-      | /tmp/test/tmp/empty    |
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    Given a folder "/tmp/work/test/tmp/empty"
+    And a zip file "/tmp/work/test/dir/file.zip":
+      | /tmp/work/test/tmp/file.txt |
+      | /tmp/work/test/tmp/empty    |
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip: [empty file.txt]
     """
-    And java.io.File "/tmp/test/dir/file.zip" should:
+    And java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip= {
       empty= []
@@ -148,14 +148,14 @@ Feature: zip file
     """
 
   Scenario: folder with file
-    Given a folder "/tmp/test/tmp/folder"
-    Given a file "/tmp/test/tmp/folder/file.txt"
+    Given a folder "/tmp/work/test/tmp/folder"
+    Given a file "/tmp/work/test/tmp/folder/file.txt"
     """
     hello
     """
-    And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/folder |
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    And a zip file "/tmp/work/test/dir/file.zip":
+      | /tmp/work/test/tmp/folder |
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip: [folder],
     unzip: {
@@ -167,15 +167,15 @@ Feature: zip file
     """
 
   Scenario: folder with folder has a file
-    Given a folder "/tmp/test/tmp/folder"
-    Given a folder "/tmp/test/tmp/folder/child"
-    Given a file "/tmp/test/tmp/folder/child/file.txt"
+    Given a folder "/tmp/work/test/tmp/folder"
+    Given a folder "/tmp/work/test/tmp/folder/child"
+    Given a file "/tmp/work/test/tmp/folder/child/file.txt"
     """
     hello
     """
-    And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/folder |
-    Then java.io.File "/tmp/test/dir/file.zip" should:
+    And a zip file "/tmp/work/test/dir/file.zip":
+      | /tmp/work/test/tmp/folder |
+    Then java.io.File "/tmp/work/test/dir/file.zip" should:
     """
     unzip: [folder],
     unzip: {
@@ -186,19 +186,19 @@ Feature: zip file
     """
 
   Scenario: raise error when extension not exist in group
-    Given a folder "/tmp/test/tmp/folder"
-    Given a file "/tmp/test/tmp/folder/file.txt"
+    Given a folder "/tmp/work/test/tmp/folder"
+    Given a file "/tmp/work/test/tmp/folder/file.txt"
     """
     hello
     """
-    Given a file "/tmp/test/tmp/file.txt"
+    Given a file "/tmp/work/test/tmp/file.txt"
     """
     hello
     """
-    And a zip file "/tmp/test/dir/file.zip":
-      | /tmp/test/tmp/file.txt |
-      | /tmp/test/tmp/folder   |
-    Then java.io.File "/tmp/test/dir/file.zip" should failed:
+    And a zip file "/tmp/work/test/dir/file.zip":
+      | /tmp/work/test/tmp/file.txt |
+      | /tmp/work/test/tmp/folder   |
+    Then java.io.File "/tmp/work/test/dir/file.zip" should failed:
     """
     unzip: {
       file.json: txt
@@ -222,7 +222,7 @@ Feature: zip file
     java.io.FileNotFoundException: File `file.json` not exist
     Implicit list mapping is not allowed in current version of DAL, use `json[]` instead
     """
-    Then java.io.File "/tmp/test/dir/file.zip" should failed:
+    Then java.io.File "/tmp/work/test/dir/file.zip" should failed:
     """
     unzip: {
       folder/file.json: txt
@@ -248,31 +248,31 @@ Feature: zip file
     """
 
   Scenario: nested zip files
-    Given a folder "/tmp/test/tmp/folder"
-    Given a folder "/tmp/test/tmp/zip1"
-    Given a file "/tmp/test/tmp/zip1/file1.txt"
+    Given a folder "/tmp/work/test/tmp/folder"
+    Given a folder "/tmp/work/test/tmp/zip1"
+    Given a file "/tmp/work/test/tmp/zip1/file1.txt"
     """
     hello
     """
-    Given a file "/tmp/test/tmp/zip1/file2.txt"
+    Given a file "/tmp/work/test/tmp/zip1/file2.txt"
     """
     world
     """
-    And a zip file "/tmp/test/tmp/folder/zip1.zip":
-      | /tmp/test/tmp/zip1 |
-    Given a file "/tmp/test/tmp/folder/foo.txt"
+    And a zip file "/tmp/work/test/tmp/folder/zip1.zip":
+      | /tmp/work/test/tmp/zip1 |
+    Given a file "/tmp/work/test/tmp/folder/foo.txt"
     """
     foo
     """
-    Given a file "/tmp/test/tmp/bar.txt"
+    Given a file "/tmp/work/test/tmp/bar.txt"
     """
     bar
     """
-    And a zip file "/tmp/test/dir/zip.zip":
-      | /tmp/test/tmp/folder  |
-      | /tmp/test/tmp/bar.txt |
+    And a zip file "/tmp/work/test/dir/zip.zip":
+      | /tmp/work/test/tmp/folder  |
+      | /tmp/work/test/tmp/bar.txt |
 
-    Then java.io.File "/tmp/test/dir" should:
+    Then java.io.File "/tmp/work/test/dir" should:
     """
     : {
       zip.zip: [
@@ -281,7 +281,7 @@ Feature: zip file
       ]
     }
     """
-    Then java.io.File "/tmp/test/dir" should:
+    Then java.io.File "/tmp/work/test/dir" should:
     """
     = {
       zip.zip: {
@@ -298,7 +298,7 @@ Feature: zip file
       }
     }
     """
-    Then java.io.File "/tmp/test/dir" should:
+    Then java.io.File "/tmp/work/test/dir" should:
     """
     zip.zip= {
         bar.txt= bar

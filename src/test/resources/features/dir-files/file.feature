@@ -293,37 +293,38 @@ Feature: dir/file with java File
     """
     : {
       file: [{
-        name: file.txt
-        string: hello-world
-      }
-      {
         name: file.log
         string: a-log
+      }
+      {
+        name: file.txt
+        string: hello-world
       }]
     }
     """
 
-  Rule: dump
-    Scenario: dump dir
-      And set file attribute "/tmp/work/test/dir"
-      """
-      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
-      """
-      Then java.io.File "/tmp/work/test/dir" should dump:
-      """
-      java.io.File {}
-      """
-
-    Scenario: dump file
-      Given a file "/tmp/work/test/dir/file1.txt"
-      """
-      hello1
-      """
-      And set file attribute "/tmp/work/test/dir/file1.txt"
-      """
-      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
-      """
-      Then java.io.File "/tmp/work/test/dir/file1.txt" should dump:
-      """
-      java.io.File rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z 6
-      """
+#  Rule: dump
+#
+#    Scenario: dump dir
+#      And set file attribute "/tmp/work/test/dir"
+#      """
+#      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+#      """
+#      Then java.io.File "/tmp/work/test/dir" should dump:
+#      """
+#      java.io.File {}
+#      """
+#
+#    Scenario: dump file
+#      Given a file "/tmp/work/test/dir/file1.txt"
+#      """
+#      hello1
+#      """
+#      And set file attribute "/tmp/work/test/dir/file1.txt"
+#      """
+#      rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z
+#      """
+#      Then java.io.File "/tmp/work/test/dir/file1.txt" should dump:
+#      """
+#      java.io.File rw-r--r-- wheel leeonky 2022-10-09T06:47:01Z 6
+#      """
