@@ -387,7 +387,7 @@ Feature: mark-position
       abc
       """
       When mark an char position on 1
-      Then got marked string content with prefix length 1:
+      Then got marked string content with offset 1:
       """
       bc
       ^
@@ -399,7 +399,7 @@ Feature: mark-position
       abc
       """
       When mark an char position on 1
-      Then got marked string content with prefix length 2:
+      Then got marked string content with offset 2:
       """
       c
       """
@@ -410,7 +410,7 @@ Feature: mark-position
       abc
       """
       When mark line position on 1
-      Then got marked string content with prefix length 1:
+      Then got marked string content with offset 1:
       """
       bc
       ^^^
@@ -422,7 +422,7 @@ Feature: mark-position
       abc
       """
       When mark line position on 0
-      Then got marked string content with prefix length 1:
+      Then got marked string content with offset 1:
       """
       bc
       """
@@ -441,7 +441,7 @@ Feature: mark-position
       When mark line position on 10
       When mark column on 2
       When mark column on 8
-      Then got marked string content with prefix length 3:
+      Then got marked string content with offset 3:
       """
       lo
        ^
@@ -566,4 +566,31 @@ Feature: mark-position
       好2拉
       ^  ^
       !
+      """
+
+    Scenario: cjk-r with offset
+      Given the string content:
+      """
+      bc你拉好
+      """
+      When mark an char position on 4
+      When mark an char position on 5
+      Then got marked string content with offset 3:
+      """
+      拉好
+        ^ ^
+      """
+
+  Rule: prefix
+
+    Scenario: add prefix before result
+      Given the string content:
+      """
+      abc
+      """
+      When mark an char position on 1
+      Then got marked string content with prefix "value= ":
+      """
+      value= abc
+              ^
       """

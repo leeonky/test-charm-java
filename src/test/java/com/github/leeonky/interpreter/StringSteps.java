@@ -34,8 +34,13 @@ public class StringSteps {
         stringWithPosition.column(position);
     }
 
-    @Then("got marked string content with prefix length {int}:")
-    public void gotMarkedStringContentWithPrefixLength(int length, String mark) {
-        assertThat("\n" + stringWithPosition.result(length)).isEqualTo("\n" + mark);
+    @Then("got marked string content with offset {int}:")
+    public void gotMarkedStringContentWithPrefixLength(int offset, String mark) {
+        assertThat("\n" + stringWithPosition.result(offset)).isEqualTo("\n" + mark);
+    }
+
+    @Then("got marked string content with prefix {string}:")
+    public void gotMarkedStringContentWithPrefix(String prefix, String mark) {
+        assertThat("\n" + stringWithPosition.result(prefix)).isEqualTo("\n" + mark);
     }
 }
