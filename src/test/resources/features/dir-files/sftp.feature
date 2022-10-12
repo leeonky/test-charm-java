@@ -115,24 +115,40 @@ Feature: sftp
 
     @ci-skip
     Scenario: dump root empty dir
-      Then sftp "/tmp/work/test/sftp" should dump:
+      Then sftp "/tmp/work/test/sftp/" should dump:
       """
-      sftp/
+      sftp dir /tmp/work/test/sftp/
+      """
+
+    @ci-skip
+    Scenario: dump root dir with one file
+      Given a file "/tmp/work/test/sftp/file1.txt"
+      """
+      helloWorld
+      """
+      And set file attribute "/tmp/work/test/sftp/file1.txt"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      """
+      Then sftp "/tmp/work/test/sftp/" should dump:
+      """
+      sftp dir /tmp/work/test/sftp/
+      -rwxr-xr-x root root   10 2022-10-09T06:47:01Z file1.txt
       """
 
     @ci-skip
     Scenario: dump root file
       Given a file "/tmp/work/test/sftp/file1.txt"
       """
-      1
+      helloWorld
       """
       And set file attribute "/tmp/work/test/sftp/file1.txt"
       """
       rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
       """
-      Then sftp "/tmp/work/test/dir/file1.txt" should dump:
+      Then sftp "/tmp/work/test/sftp/file1.txt" should dump:
       """
-      -rwxr-xr-x user user   11 2022-10-09T06:47:01Z file1.txt
+      -rwxr-xr-x user user   10 2022-10-09T06:47:01Z file1.txt
       """
 
     @ci-skip
@@ -148,8 +164,8 @@ Feature: sftp
       """
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
-      sftp/
-          dir/
-              -rwxr-xr-x root root    1 2022-10-09T06:47:01Z file1.txt
+      sftp dir /tmp/work/test/sftp/
+      dir/
+          -rwxr-xr-x root root    1 2022-10-09T06:47:01Z file1.txt
       """
 #     incorrect group and user

@@ -170,7 +170,7 @@ public class Steps {
         if (sFtp != null)
             sFtp.close();
         sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
-        assertThat(runtimeContext.wrap(sFtp).dump()).isEqualTo(content);
+        assertThat(runtimeContext.wrap(sFtp).inspect()).isEqualTo(content);
     }
 
     @After
