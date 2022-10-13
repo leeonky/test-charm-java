@@ -73,13 +73,17 @@ public class Classes {
         return get(() -> Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.'))));
     }
 
-    public static List<Class<?>> subTypesOf(Class<?> superClass, String packageName) {
+    public static <T> List<Class<? extends T>> subTypesOf(Class<T> superClass, String packageName) {
         return assignableTypesOf(superClass, packageName).stream().filter(c -> !superClass.equals(c))
+                .map(c -> (Class<? extends T>) c)
                 .collect(toList());
     }
 
-    public static List<Class<?>> assignableTypesOf(Class<?> superClass, String packageName) {
-        return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom).collect(toList());
+    @SuppressWarnings("unchecked")
+    public static <T> List<Class<? extends T>> assignableTypesOf(Class<T> superClass, String packageName) {
+        return allTypesIn(packageName).stream().filter(superClass::isAssignableFrom)
+                .map(c -> (Class<? extends T>) c)
+                .collect(toList());
     }
 
     public static int compareByExtends(Class<?> type1, Class<?> type2) {
