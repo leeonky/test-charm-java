@@ -161,7 +161,7 @@ public class Steps {
     public void javaIoPathShouldDump(String path, String content) {
         DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
 
-        assertThat(runtimeContext.wrap(Paths.get(path)).dump()).isEqualTo(content);
+        assertThat(runtimeContext.wrap(Paths.get(path)).inspect()).isEqualTo(content);
     }
 
     @Then("sftp {string} should dump:")

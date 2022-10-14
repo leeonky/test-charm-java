@@ -324,7 +324,7 @@ Feature: dir/file with java File
       """
       Then java.io.File "/tmp/work/test/dir/file1.txt" should dump:
       """
-      rwxr-xr-x wheel leeonky    6 2022-10-09T06:47:01Z file1.txt
+      rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """
 
     @ci-skip
@@ -342,5 +342,5 @@ Feature: dir/file with java File
       """
       java.io.File dir /tmp/work/test/dir/
       sub/
-          rwxr-xr-x wheel leeonky    6 2022-10-09T06:47:01Z file1.txt
+          rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """

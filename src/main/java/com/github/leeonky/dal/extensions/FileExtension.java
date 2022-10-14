@@ -4,8 +4,6 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.inspector.Inspector;
 import com.github.leeonky.dal.runtime.inspector.InspectorCache;
-import com.github.leeonky.dal.runtime.inspector.MapInspector;
-import com.github.leeonky.dal.runtime.inspector.TypeValueInspector;
 import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.util.InvocationException;
 
@@ -18,17 +16,34 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.extensions.SFtp.formatFileSize;
 import static com.github.leeonky.util.BeanClass.create;
 import static com.github.leeonky.util.Suppressor.get;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.Comparator.comparing;
 
 public class FileExtension implements Extension {
+
+    public static String formatFileSize(long size) {
+        if (size < 10000)
+            return String.valueOf(size);
+        double sizeInUnit = size / 1024.0;
+        if (sizeInUnit < 1000)
+            return format("%.1fK", sizeInUnit);
+        sizeInUnit /= 1024;
+        if (sizeInUnit < 1000)
+            return format("%.1fM", sizeInUnit);
+        sizeInUnit /= 1024;
+        if (sizeInUnit < 1000)
+            return format("%.1fG", sizeInUnit);
+        sizeInUnit /= 1024;
+        return format("%.1fT", sizeInUnit);
+    }
 
     @Override
     public void extend(DAL dal) {
@@ -87,23 +102,8 @@ public class FileExtension implements Extension {
 
         runtimeContextBuilder.registerInspector(Path.class, data -> {
             Path filePath = (Path) data.getInstance();
-            if (filePath.toFile().isDirectory()) {
-//            TODO refactor
-                return (path, inspectorCache) -> "java.nio.Path "
-                        + new MapInspector(data).inspect(path, inspectorCache).replaceFirst("^sun.nio.fs.UnixPath ", "");
-            }
-
-            return new TypeValueInspector() {
-                @Override
-                public String inspectType() {
-                    return "java.nio.Path";
-                }
-
-                @Override
-                public String inspectValue() {
-                    return attribute(filePath);
-                }
-            };
+            return filePath.toFile().isDirectory() ? new PathDirInspector(filePath, data)
+                    : (path, cache) -> attribute(filePath);
         });
     }
 
@@ -136,13 +136,13 @@ public class FileExtension implements Extension {
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
         runtimeContextBuilder.registerInspector(File.class, data -> {
             File file = (File) data.getInstance();
-            return file.isDirectory() ? new DirInspector(data, file) : (path, cache) -> attribute(file.toPath());
+            return file.isDirectory() ? new FileDirInspector(data, file) : (path, cache) -> attribute(file.toPath());
         });
     }
 
     private String attribute(Path path) {
         PosixFileAttributes posixFileAttributes = get(() -> Files.readAttributes(path, PosixFileAttributes.class));
-        return String.format("%s %s %s %4s %s %s", PosixFilePermissions.toString(posixFileAttributes.permissions()),
+        return format("%s %s %s %6s %s %s", PosixFilePermissions.toString(posixFileAttributes.permissions()),
                 posixFileAttributes.group(), posixFileAttributes.owner(), formatFileSize(path.toFile().length()),
                 posixFileAttributes.lastModifiedTime(), path.getFileName().toString());
     }
@@ -151,9 +151,10 @@ public class FileExtension implements Extension {
         File subFile = new File(file, name);
         if (subFile.exists())
             return subFile;
-        if (stream(file.list()).anyMatch(f -> f.startsWith(name + ".")))
+        String[] list = file.list();
+        if (list != null && stream(list).anyMatch(f -> f.startsWith(name + ".")))
             return new IOFileFileGroup(file, name);
-        throw new InvocationException(new FileNotFoundException(String.format("File or File Group <%s> not found", name)));
+        throw new InvocationException(new FileNotFoundException(format("File or File Group <%s> not found", name)));
     }
 
     private Set<Object> listFileNames(File file) {
@@ -161,7 +162,9 @@ public class FileExtension implements Extension {
     }
 
     private Set<File> listFile(File file) {
-        return stream(file.listFiles()).sorted(Comparator.comparing(File::getName))
+        File[] files = file.listFiles();
+        return files == null ? Collections.emptySet() : stream(files)
+                .sorted(comparing(File::isDirectory).thenComparing(File::getName))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -179,11 +182,11 @@ public class FileExtension implements Extension {
         }
     }
 
-    private static class DirInspector implements Inspector {
+    private static class FileDirInspector implements Inspector {
         private final Data data;
         private final File file;
 
-        public DirInspector(Data data, File file) {
+        public FileDirInspector(Data data, File file) {
             this.data = data;
             this.file = file;
         }
@@ -200,6 +203,32 @@ public class FileExtension implements Extension {
         public String dump(String path, InspectorCache caches) {
             return String.join("\n", new ArrayList<String>() {{
                 add(file.getName() + "/");
+                data.getDataList().stream().map(Data::dump).map(TextUtil::indent).forEach(this::add);
+            }});
+        }
+    }
+
+    private static class PathDirInspector implements Inspector {
+        private final Path filePath;
+        private final Data data;
+
+        public PathDirInspector(Path filePath, Data data) {
+            this.filePath = filePath;
+            this.data = data;
+        }
+
+        @Override
+        public String inspect(String path, InspectorCache inspectorCache) {
+            return String.join("\n", new ArrayList<String>() {{
+                add("java.nio.Path dir " + filePath + "/");
+                data.getDataList().stream().map(Data::dump).forEach(this::add);
+            }});
+        }
+
+        @Override
+        public String dump(String path, InspectorCache caches) {
+            return String.join("\n", new ArrayList<String>() {{
+                add(filePath.getFileName() + "/");
                 data.getDataList().stream().map(Data::dump).map(TextUtil::indent).forEach(this::add);
             }});
         }

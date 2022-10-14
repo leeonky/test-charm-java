@@ -71,13 +71,8 @@ public class SFtp extends SFtpFile {
     public String attribute() {
         SftpATTRS attrs = entry.getAttrs();
         List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
-        return String.format("%s %s %s %4s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
-                formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
-    }
-
-    //    TODO unit
-    static String formatFileSize(long size) {
-        return String.valueOf(size);
+        return String.format("%s %s %s %6s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
+                FileExtension.formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
     }
 
     public void close() {
@@ -125,8 +120,8 @@ public class SFtp extends SFtpFile {
         public String attribute() {
             SftpATTRS attrs = entry.getAttrs();
             List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
-            return String.format("%s %s %s %4s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
-                    formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
+            return String.format("%s %s %s %6s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
+                    FileExtension.formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
         }
     }
 }

@@ -177,14 +177,10 @@ Feature: dir/file with java path
   Rule: dump
 
     @ci-skip
-    Scenario: dump dir
-      And set file attribute "/tmp/work/test/dir"
-      """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
-      """
+    Scenario: dump empty dir
       Then java.io.path "/tmp/work/test/dir" should dump:
       """
-      java.nio.Path {}
+      java.nio.Path dir /tmp/work/test/dir/
       """
 
     @ci-skip
@@ -199,5 +195,23 @@ Feature: dir/file with java path
       """
       Then java.io.path "/tmp/work/test/dir/file1.txt" should dump:
       """
-      java.nio.Path rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z 6
+      rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
+      """
+
+    @ci-skip
+    Scenario: dump folder with file
+      Given root folder "/tmp/work/test/dir/sub"
+      Given a file "/tmp/work/test/dir/sub/file1.txt"
+      """
+      hello1
+      """
+      And set file attribute "/tmp/work/test/dir/sub/file1.txt"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      """
+      Then java.io.path "/tmp/work/test/dir" should dump:
+      """
+      java.nio.Path dir /tmp/work/test/dir/
+      sub/
+          rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """
