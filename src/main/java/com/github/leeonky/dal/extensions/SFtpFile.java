@@ -27,7 +27,8 @@ public abstract class SFtpFile {
         return Suppressor.get(() -> (Vector<ChannelSftp.LsEntry>) channel().ls(fullName())).stream()
                 .filter(entry -> !entry.getFilename().equals("."))
                 .filter(entry -> !entry.getFilename().equals(".."))
-                .sorted(Comparator.comparing(ChannelSftp.LsEntry::getFilename))
+                .sorted(Comparator.<ChannelSftp.LsEntry, Boolean>comparing(e -> e.getAttrs().isDir())
+                        .thenComparing(ChannelSftp.LsEntry::getFilename))
                 .map(entry -> new SFtp.SubSFtpFile(this, entry, channel())).collect(Collectors.toList());
     }
 

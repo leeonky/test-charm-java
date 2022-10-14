@@ -10,3 +10,5 @@ services:
       PASSWORD_ACCESS: 'true'
       USER_NAME: 'user'
       USER_PASSWORD: 'password'
+      UID: $UID
+      GID: $GID
