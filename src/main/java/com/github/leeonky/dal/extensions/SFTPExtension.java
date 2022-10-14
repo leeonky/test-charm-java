@@ -30,7 +30,7 @@ public class SFTPExtension implements Extension {
 
     private Inspector sftpInspector(Data data) {
         SFtpFile sFtpFile = (SFtpFile) data.getInstance();
-        return sFtpFile.isDir() ? new DirInspector(sFtpFile, data) : new FileInspector(sFtpFile, data);
+        return sFtpFile.isDir() ? new DirInspector(sFtpFile, data) : (path, cache) -> sFtpFile.attribute() + " " + sFtpFile.name();
     }
 
     private Object getSubFile(SFtpFile sFtpFile, Object property) {
@@ -72,22 +72,6 @@ public class SFTPExtension implements Extension {
             if (dataList.isEmpty())
                 return name;
             return name + "\n" + dataList.stream().map(Data::dump).map(TextUtil::indent).collect(Collectors.joining("\n"));
-        }
-    }
-
-    private static class FileInspector extends SFtpInspector {
-        public FileInspector(SFtpFile sFtpFile, Data data) {
-            super(sFtpFile, data);
-        }
-
-        @Override
-        public String inspect(String path, InspectorCache inspectorCache) {
-            return dump(path, inspectorCache);
-        }
-
-        @Override
-        public String dump(String path, InspectorCache caches) {
-            return sFtpFile.attribute() + " " + sFtpFile.name();
         }
     }
 

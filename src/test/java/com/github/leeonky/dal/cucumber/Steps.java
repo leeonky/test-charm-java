@@ -145,7 +145,7 @@ public class Steps {
     public void javaIoFileShouldDump(String path, String content) {
         DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
 
-        assertThat(runtimeContext.wrap(new File(path)).dump()).isEqualTo(content);
+        assertThat(runtimeContext.wrap(new File(path)).inspect()).isEqualTo(content);
     }
 
     @SneakyThrows

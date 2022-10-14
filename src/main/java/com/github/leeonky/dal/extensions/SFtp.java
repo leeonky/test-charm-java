@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.not;
 
+//TODO refactor
 public class SFtp extends SFtpFile {
     private final String host, port, user, password;
     private final String path;
@@ -71,11 +72,12 @@ public class SFtp extends SFtpFile {
         SftpATTRS attrs = entry.getAttrs();
         List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
         return String.format("%s %s %s %4s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
-                fileSize(attrs), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
+                formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
     }
 
-    private static String fileSize(SftpATTRS attrs) {
-        return String.valueOf(attrs.getSize());
+    //    TODO unit
+    static String formatFileSize(long size) {
+        return String.valueOf(size);
     }
 
     public void close() {
@@ -124,7 +126,7 @@ public class SFtp extends SFtpFile {
             SftpATTRS attrs = entry.getAttrs();
             List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
             return String.format("%s %s %s %4s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
-                    fileSize(attrs), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
+                    formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
         }
     }
 }

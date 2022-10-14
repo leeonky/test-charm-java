@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
-import com.github.leeonky.dal.runtime.ListAccessor;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorCache;
 import com.github.leeonky.dal.runtime.inspector.MapInspector;
 import com.github.leeonky.dal.runtime.inspector.TypeValueInspector;
+import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.util.InvocationException;
 
 import java.io.File;
@@ -17,11 +17,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.extensions.SFtp.formatFileSize;
 import static com.github.leeonky.util.BeanClass.create;
 import static com.github.leeonky.util.Suppressor.get;
 import static java.util.Arrays.stream;
@@ -134,31 +136,15 @@ public class FileExtension implements Extension {
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
         runtimeContextBuilder.registerInspector(File.class, data -> {
             File file = (File) data.getInstance();
-            if (file.isDirectory()) {
-                return (path, inspectorCache) -> "java.io.File "
-//            TODO refactor
-                        + new MapInspector(data).inspect(path, inspectorCache).replaceFirst("^java.io.File ", "");
-            } else {
-                return new TypeValueInspector() {
-                    @Override
-                    public String inspectType() {
-                        return "java.io.File";
-                    }
-
-                    @Override
-                    public String inspectValue() {
-                        return attribute(file.toPath());
-                    }
-                };
-            }
+            return file.isDirectory() ? new DirInspector(data, file) : (path, cache) -> attribute(file.toPath());
         });
     }
 
     private String attribute(Path path) {
         PosixFileAttributes posixFileAttributes = get(() -> Files.readAttributes(path, PosixFileAttributes.class));
-        return String.format("%s %s %s %s %d", PosixFilePermissions.toString(posixFileAttributes.permissions()),
-                posixFileAttributes.group(), posixFileAttributes.owner(), posixFileAttributes.lastModifiedTime(),
-                path.toFile().length());
+        return String.format("%s %s %s %4s %s %s", PosixFilePermissions.toString(posixFileAttributes.permissions()),
+                posixFileAttributes.group(), posixFileAttributes.owner(), formatFileSize(path.toFile().length()),
+                posixFileAttributes.lastModifiedTime(), path.getFileName().toString());
     }
 
     private Object getSubFile(File file, String name) {
@@ -190,6 +176,32 @@ public class FileExtension implements Extension {
 
         public static String name(Path path) {
             return path.toFile().getName();
+        }
+    }
+
+    private static class DirInspector implements Inspector {
+        private final Data data;
+        private final File file;
+
+        public DirInspector(Data data, File file) {
+            this.data = data;
+            this.file = file;
+        }
+
+        @Override
+        public String inspect(String path, InspectorCache inspectorCache) {
+            return String.join("\n", new ArrayList<String>() {{
+                add("java.io.File dir " + file.getPath() + "/");
+                data.getDataList().stream().map(Data::dump).forEach(this::add);
+            }});
+        }
+
+        @Override
+        public String dump(String path, InspectorCache caches) {
+            return String.join("\n", new ArrayList<String>() {{
+                add(file.getName() + "/");
+                data.getDataList().stream().map(Data::dump).map(TextUtil::indent).forEach(this::add);
+            }});
         }
     }
 }
