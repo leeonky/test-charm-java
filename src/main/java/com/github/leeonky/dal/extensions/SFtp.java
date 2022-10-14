@@ -12,13 +12,10 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.not;
 
-//TODO refactor
 public class SFtp extends SFtpFile {
     private final String host, port, user, password;
     private final String path;
     private final ChannelSftp channel;
-    private final SftpATTRS sftpATTRS;
-    private ChannelSftp.LsEntry entry;
 
     public SFtp(String host, String port, String user, String password, String path) {
         this.host = host;
@@ -27,13 +24,6 @@ public class SFtp extends SFtpFile {
         this.password = password;
         this.path = path;
         channel = Suppressor.get(this::getChannelSftp);
-        sftpATTRS = Suppressor.get(() -> channel.lstat(path));
-        String name = Paths.get(path).getFileName().toString();
-
-        if (!sftpATTRS.isDir()) {
-            entry = Suppressor.get(() -> ((Vector<ChannelSftp.LsEntry>) channel.ls(Paths.get(path).getParent().toString()))).stream()
-                    .filter(e -> e.getFilename().equals(name)).findFirst().get();
-        }
     }
 
     private ChannelSftp getChannelSftp() throws JSchException {
@@ -64,13 +54,21 @@ public class SFtp extends SFtpFile {
 
     @Override
     public boolean isDir() {
-        return sftpATTRS.isDir();
+        return Suppressor.get(() -> channel.lstat(path)).isDir();
     }
 
     @Override
     public String attribute() {
+        String name = Paths.get(path).getFileName().toString();
+        return attribute(Suppressor.get(() ->
+                        ((Vector<ChannelSftp.LsEntry>) channel.ls(Paths.get(path).getParent().toString()))).stream()
+                .filter(e -> e.getFilename().equals(name)).findFirst().orElseThrow(IllegalStateException::new));
+    }
+
+    private static String attribute(ChannelSftp.LsEntry entry) {
         SftpATTRS attrs = entry.getAttrs();
-        List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
+        List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty))
+                .collect(Collectors.toList());
         return String.format("%s %s %s %6s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
                 FileExtension.formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
     }
@@ -118,10 +116,7 @@ public class SFtp extends SFtpFile {
 
         @Override
         public String attribute() {
-            SftpATTRS attrs = entry.getAttrs();
-            List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty)).collect(Collectors.toList());
-            return String.format("%s %s %s %6s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
-                    FileExtension.formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
+            return SFtp.attribute(entry);
         }
     }
 }
