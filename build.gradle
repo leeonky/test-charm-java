@@ -54,8 +54,8 @@ repositories {
 
 dependencies {
     implementation 'io.cucumber:cucumber-java:6.10.4'
-    implementation "com.github.leeonky:DAL-java:0.3.8"
-    implementation "com.github.leeonky:DAL-extension-basic:0.0.7"
+    implementation "com.github.leeonky:DAL-java:0.3.11"
+    implementation "com.github.leeonky:DAL-extension-basic:0.0.8"
     implementation 'org.json:json:20220924'
 
     testImplementation 'org.mock-server:mockserver:5.11.2'
