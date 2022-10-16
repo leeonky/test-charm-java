@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.extensions.Diff;
 import com.github.leeonky.dal.extensions.SFtp;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Suppressor;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static com.github.leeonky.dal.extensions.JsonExtension.StaticMethods.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -177,5 +179,43 @@ public class Steps {
     void closeFtp() {
         if (sFtp != null)
             sFtp.close();
+    }
+
+    private Object input;
+
+    @Given("the following json:")
+    public void theFollowingJson(String json) {
+        input = json(json);
+    }
+
+    @When("evaluate by:")
+    public void evaluateBy(String expression) {
+        try {
+            expect(input).should(expression);
+        } catch (AssertionError e) {
+            assertionError = e;
+        }
+    }
+
+    @Then("failed with the message:")
+    public void failedWithTheMessage(String message) {
+        assertThat(assertionError.getMessage()).isEqualTo(message);
+    }
+
+    private String left, right;
+
+    @Given("the left side:")
+    public void theLeftSide(String content) {
+        left = content;
+    }
+
+    @Given("the right side:")
+    public void theRightSide(String content) {
+        right = content;
+    }
+
+    @Then("the diff should be:")
+    public void theDiffShouldBe(String result) {
+        assertThat(new Diff(left, right).detail()).isEqualTo(result);
     }
 }

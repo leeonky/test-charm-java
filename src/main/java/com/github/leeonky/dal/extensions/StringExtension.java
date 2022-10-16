@@ -1,7 +1,11 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.ConditionalChecker;
+import com.github.leeonky.dal.runtime.ExpectActual;
 import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.dal.util.TextUtil;
+import com.github.leeonky.interpreter.StringWithPosition;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +23,9 @@ public class StringExtension implements Extension {
 
     @Override
     public void extend(DAL dal) {
-        dal.getRuntimeContextBuilder().registerStaticMethodExtension(StaticMethods.class);
+        dal.getRuntimeContextBuilder()
+                .registerStaticMethodExtension(StaticMethods.class)
+                .registerEqualsChecker(CharSequence.class, new CharSequenceChecker());
 
         register("txt", inputStream -> string(readAll(inputStream)));
         register("TXT", inputStream -> string(readAll(inputStream)));
@@ -72,6 +78,36 @@ public class StringExtension implements Extension {
 
         public static byte[] gbk(String content) throws UnsupportedEncodingException {
             return encode(content, "gbk");
+        }
+    }
+
+    private static class CharSequenceChecker implements ConditionalChecker {
+
+        @Override
+        public boolean failed(ExpectActual expectActual) {
+            return !toString(expectActual.getExpected().getInstance())
+                    .equals(toString(expectActual.getActual().getInstance()));
+        }
+
+        @Deprecated
+//        TODO need remove
+        private String buildMessage(String prefix, String expected, String actual) {
+            int position = TextUtil.differentPosition(expected, actual);
+            String firstPart = new StringWithPosition(expected).position(position).result(prefix);
+            return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
+        }
+
+        @Override
+        public String message(ExpectActual expectActual) {
+            String message = buildMessage("Expected to be equal to: ",
+                    expectActual.getExpected().inspect(), expectActual.getActual().inspect());
+            String detail = new Diff(toString(expectActual.getExpected().getInstance()),
+                    toString(expectActual.getActual().getInstance())).detail();
+            return detail.isEmpty() ? message : message + "\n\n" + detail;
+        }
+
+        public String toString(Object object) {
+            return object == null ? null : object.toString();
         }
     }
 }
