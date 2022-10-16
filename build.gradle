@@ -155,11 +155,7 @@ task cucumber() {
             environment('CUCUMBER_PUBLISH_QUIET', true)
             main = "io.cucumber.core.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.dal.cucumber', 'src/test/resources/features']
+            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.dal.cucumber', '--tags', 'not @ci-skip', 'src/test/resources/features']
         }
-    }
-
-    build {
-        dependsOn cucumber
     }
 }
