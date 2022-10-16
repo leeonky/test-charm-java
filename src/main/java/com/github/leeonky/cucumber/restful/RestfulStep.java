@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,6 +29,12 @@ public class RestfulStep {
     private Request request = new Request();
     private Response response;
     private HttpURLConnection connection;
+
+    public void setSerializer(Function<Object, String> serializer) {
+        this.serializer = serializer;
+    }
+
+    private Function<Object, String> serializer = RestfulStep::toJson;
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -53,7 +60,7 @@ public class RestfulStep {
     }
 
     public void post(String path, Object body, String contentType) throws IOException, URISyntaxException {
-        post(path, toJson(body), contentType);
+        post(path, serializer.apply(body), contentType);
     }
 
     public static String toJson(Object body) {
@@ -95,7 +102,7 @@ public class RestfulStep {
     }
 
     public void put(String path, Object body, String contentType) throws IOException, URISyntaxException {
-        put(path, toJson(body), contentType);
+        put(path, serializer.apply(body), contentType);
     }
 
     public void put(String path, Object body) throws IOException, URISyntaxException {
