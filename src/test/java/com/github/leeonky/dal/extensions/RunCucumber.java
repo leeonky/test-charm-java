@@ -17,7 +17,7 @@ public class RunCucumber {
         List<String> args = new ArrayList<>(asList("--plugin", "pretty"));
 
         String value = System.getenv("CI");
-        if (StringUtils.isBlank(value)) {
+        if (!StringUtils.isBlank(value)) {
             args.add("--tags");
             args.add("not @ci-skip");
         }
