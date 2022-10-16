@@ -19,6 +19,7 @@ jobs:
           name: build
           command: |
             java -version
+            export CI=true
             export VERSION_SCOPE=''
             ./gradlew check build coveralls
             export PUB_VERSION=$(./gradlew currentVersion -q)
