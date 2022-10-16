@@ -86,3 +86,23 @@ Feature: diff
     87654321 | *7654321
     ^        | ^
     """
+
+  Scenario: different lines on both side
+    Given the left side:
+    """
+    12345678
+    """
+    Given the right side:
+    """
+    12345678
+    87654321
+    """
+    Then the diff should be:
+    """
+    Diff:
+    Expect:   | Actual:
+    ----------|----------
+    12345678  | 12345678
+            ^ |         ^
+              | 87654321
+    """

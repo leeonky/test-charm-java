@@ -101,6 +101,8 @@ public class StringExtension implements Extension {
         public String message(ExpectActual expectActual) {
             String message = buildMessage("Expected to be equal to: ",
                     expectActual.getExpected().inspect(), expectActual.getActual().inspect());
+            if (expectActual.getActual().isNull())
+                return message;
             String detail = new Diff(toString(expectActual.getExpected().getInstance()),
                     toString(expectActual.getActual().getInstance())).detail();
             return detail.isEmpty() ? message : message + "\n\n" + detail;
