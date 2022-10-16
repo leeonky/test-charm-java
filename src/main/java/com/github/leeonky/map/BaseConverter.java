@@ -6,10 +6,12 @@ import ma.glasnost.orika.CustomConverter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.Classes.newInstance;
+
 abstract class BaseConverter extends CustomConverter<Object, Object> {
 
     static Map createMap(Class<?> rawType) {
-        return rawType.isInterface() ? new LinkedHashMap() : (Map) BeanClass.newInstance(rawType);
+        return rawType.isInterface() ? new LinkedHashMap() : (Map) newInstance(rawType);
     }
 
     static Collection createCollection(Class<?> rawType) {
@@ -17,7 +19,7 @@ abstract class BaseConverter extends CustomConverter<Object, Object> {
         if (rawType.isInterface()) {
             result = Set.class.isAssignableFrom(rawType) ? new LinkedHashSet() : new ArrayList<>();
         } else
-            result = (Collection) BeanClass.newInstance(rawType);
+            result = (Collection) newInstance(rawType);
         return result;
     }
 

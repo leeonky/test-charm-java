@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.map.Mapper.guessValueInSequence;
+import static com.github.leeonky.util.Classes.newInstance;
 
 public class PermitMapper {
     private static final Class<?>[] VOID_SCOPES = {void.class};
@@ -218,7 +219,7 @@ public class PermitMapper {
         } else {
             Transform transform = property.getAnnotation(Transform.class);
             if (transform != null)
-                value = BeanClass.newInstance(transform.value()).transform(value);
+                value = newInstance(transform.value()).transform(value);
             return converter.tryConvert(permit, value);
         }
     }
