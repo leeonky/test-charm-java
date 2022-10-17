@@ -25,7 +25,9 @@ public class StringExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerStaticMethodExtension(StaticMethods.class)
-                .registerEqualsChecker(CharSequence.class, new CharSequenceChecker());
+                .registerEqualsChecker(CharSequence.class, new CharSequenceChecker())
+                .registerMatchesChecker(CharSequence.class, new CharSequenceCheckerMatches())
+        ;
 
         register("txt", inputStream -> string(readAll(inputStream)));
         register("TXT", inputStream -> string(readAll(inputStream)));
@@ -85,8 +87,8 @@ public class StringExtension implements Extension {
 
         @Override
         public boolean failed(ExpectActual expectActual) {
-            return !toString(expectActual.getExpected().getInstance())
-                    .equals(toString(expectActual.getActual().getInstance()));
+            return !convertToString(expectActual.getExpected().getInstance())
+                    .equals(convertToString(expectActual.getActual().getInstance()));
         }
 
         @Deprecated
@@ -103,12 +105,45 @@ public class StringExtension implements Extension {
                     expectActual.getExpected().inspect(), expectActual.getActual().inspect());
             if (expectActual.getActual().isNull())
                 return message;
-            String detail = new Diff(toString(expectActual.getExpected().getInstance()),
-                    toString(expectActual.getActual().getInstance())).detail();
+            String detail = new Diff(convertToString(expectActual.getExpected().getInstance()),
+                    convertToString(expectActual.getActual().getInstance())).detail();
             return detail.isEmpty() ? message : message + "\n\n" + detail;
         }
 
-        public String toString(Object object) {
+        private String convertToString(Object object) {
+            return object == null ? null : ((CharSequence) object).toString();
+        }
+    }
+
+    //    TODO refactor duplicated
+    private class CharSequenceCheckerMatches implements ConditionalChecker {
+
+        @Override
+        public boolean failed(ExpectActual expectActual) {
+            return !convertToString(expectActual.getExpected().getInstance())
+                    .equals(convertToString(expectActual.getActual().convert(String.class).getInstance()));
+        }
+
+        @Deprecated
+//        TODO need remove
+        private String buildMessage(String prefix, String expected, String actual) {
+            int position = TextUtil.differentPosition(expected, actual);
+            String firstPart = new StringWithPosition(expected).position(position).result(prefix);
+            return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
+        }
+
+        @Override
+        public String message(ExpectActual expectActual) {
+            String message = buildMessage("Expected to match: ",
+                    expectActual.getExpected().inspect(), expectActual.getActual().inspect());
+            if (expectActual.getActual().isNull())
+                return message;
+            String detail = new Diff(convertToString(expectActual.getExpected().getInstance()),
+                    convertToString(expectActual.getActual().getInstance())).detail();
+            return detail.isEmpty() ? message : message + "\n\n" + detail;
+        }
+
+        private String convertToString(Object object) {
             return object == null ? null : object.toString();
         }
     }
