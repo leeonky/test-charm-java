@@ -16,6 +16,7 @@ import java.util.List;
 import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
 import static com.github.leeonky.dal.extensions.FileGroup.register;
 import static com.github.leeonky.dal.extensions.StringExtension.StaticMethods.string;
+import static com.github.leeonky.dal.runtime.ConditionalChecker.matchTypeChecker;
 import static java.util.Arrays.asList;
 
 public class StringExtension implements Extension {
@@ -26,7 +27,9 @@ public class StringExtension implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerStaticMethodExtension(StaticMethods.class)
                 .registerEqualsChecker(CharSequence.class, new CharSequenceChecker())
-                .registerMatchesChecker(CharSequence.class, new CharSequenceCheckerMatches())
+                .registerMatchesChecker(CharSequence.class, matchTypeChecker(Number.class, String.class)
+                        .and(matchTypeChecker(Boolean.class, String.class))
+                        .and(new CharSequenceCheckerMatches()))
         ;
 
         register("txt", inputStream -> string(readAll(inputStream)));
@@ -91,18 +94,9 @@ public class StringExtension implements Extension {
                     .equals(convertToString(expectActual.getActual().getInstance()));
         }
 
-        @Deprecated
-//        TODO need remove
-        private String buildMessage(String prefix, String expected, String actual) {
-            int position = TextUtil.differentPosition(expected, actual);
-            String firstPart = new StringWithPosition(expected).position(position).result(prefix);
-            return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
-        }
-
         @Override
         public String message(ExpectActual expectActual) {
-            String message = buildMessage("Expected to be equal to: ",
-                    expectActual.getExpected().inspect(), expectActual.getActual().inspect());
+            String message = expectActual.verificationMessage("Expected to be equal to: ");
             if (expectActual.getActual().isNull())
                 return message;
             String detail = new Diff(convertToString(expectActual.getExpected().getInstance()),

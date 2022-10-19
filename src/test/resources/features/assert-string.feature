@@ -26,8 +26,7 @@ Feature: assert string
       <hello\t>
             ^
 
-      The root value was:
-      {
+      The root value was: {
           value: java.lang.String <hello\t>
       }
       """
@@ -63,8 +62,7 @@ Feature: assert string
       World   | world
       ^       | ^
 
-      The root value was:
-      {
+      The root value was: {
           value: java.lang.String <hello\nworld>
       }
       """
@@ -92,8 +90,7 @@ Feature: assert string
       Actual: null
               ^
 
-      The root value was:
-      {
+      The root value was: {
           value: null
       }
       """
@@ -124,8 +121,7 @@ Feature: assert string
       <hello\t>
             ^
 
-      The root value was:
-      {
+      The root value was: {
           value: java.lang.String <hello\t>
       }
       """
@@ -161,8 +157,7 @@ Feature: assert string
       World   | world
       ^       | ^
 
-      The root value was:
-      {
+      The root value was: {
           value: java.lang.String <hello\nworld>
       }
       """
@@ -190,8 +185,45 @@ Feature: assert string
       Actual: null
               ^
 
-      The root value was:
-      {
+      The root value was: {
           value: null
       }
+      """
+
+    Scenario: not allow convert number to string implicitly
+      When evaluate by:
+      """
+      5: '5'
+      """
+      Then failed with the message:
+      """
+
+      5: '5'
+         ^
+
+      Cannot compare between java.lang.Integer
+      <5>
+      and java.lang.String
+      <5>
+
+      The root value was: null
+      """
+
+    Scenario: not allow convert boolean to string implicitly
+      When evaluate by:
+      """
+      true: 'true'
+      """
+      Then failed with the message:
+      """
+
+      true: 'true'
+            ^
+
+      Cannot compare between java.lang.Boolean
+      <true>
+      and java.lang.String
+      <true>
+
+      The root value was: null
       """
