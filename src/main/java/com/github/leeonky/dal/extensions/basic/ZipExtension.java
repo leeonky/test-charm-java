@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
@@ -8,8 +8,8 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
-import static com.github.leeonky.dal.extensions.FileGroup.register;
+import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAll;
+import static com.github.leeonky.dal.extensions.basic.FileGroup.register;
 import static com.github.leeonky.util.BeanClass.create;
 
 public class ZipExtension implements Extension {

@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.interpreter.StringWithPosition;

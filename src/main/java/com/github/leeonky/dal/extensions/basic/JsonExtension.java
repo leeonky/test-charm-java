@@ -1,12 +1,12 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 import org.json.JSONArray;
 
-import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
-import static com.github.leeonky.dal.extensions.FileGroup.register;
-import static com.github.leeonky.dal.extensions.JsonExtension.StaticMethods.json;
+import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAll;
+import static com.github.leeonky.dal.extensions.basic.FileGroup.register;
+import static com.github.leeonky.dal.extensions.basic.JsonExtension.StaticMethods.json;
 
 public class JsonExtension implements Extension {
 

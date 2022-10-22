@@ -1,9 +1,9 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.extensions.FileExtension.formatFileSize;
+import static com.github.leeonky.dal.extensions.basic.FileExtension.formatFileSize;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FileExtensionTest {

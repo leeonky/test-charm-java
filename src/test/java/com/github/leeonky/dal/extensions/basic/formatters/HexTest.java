@@ -1,9 +1,9 @@
-package com.github.leeonky.dal.extensions.formatters;
+package com.github.leeonky.dal.extensions.basic.formatters;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.extensions.formatters.Hex.hex;
+import static com.github.leeonky.dal.extensions.basic.formatters.Hex.hex;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

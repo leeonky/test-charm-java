@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.dal.DAL;
 import io.cucumber.messages.internal.com.google.common.io.Files;

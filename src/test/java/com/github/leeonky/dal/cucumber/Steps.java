@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.Diff;
-import com.github.leeonky.dal.extensions.SFtp;
+import com.github.leeonky.dal.extensions.basic.Diff;
+import com.github.leeonky.dal.extensions.basic.SFtp;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.dal.extensions.JsonExtension.StaticMethods.json;
+import static com.github.leeonky.dal.extensions.basic.JsonExtension.StaticMethods.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

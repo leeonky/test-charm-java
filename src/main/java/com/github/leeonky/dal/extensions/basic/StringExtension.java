@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.ConditionalChecker;
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
-import static com.github.leeonky.dal.extensions.FileGroup.register;
-import static com.github.leeonky.dal.extensions.StringExtension.StaticMethods.string;
+import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAll;
+import static com.github.leeonky.dal.extensions.basic.FileGroup.register;
+import static com.github.leeonky.dal.extensions.basic.StringExtension.StaticMethods.string;
 import static com.github.leeonky.dal.runtime.ConditionalChecker.matchTypeChecker;
 import static java.util.Arrays.asList;
 

@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.dal.DAL;
 import lombok.SneakyThrows;
@@ -10,7 +10,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.github.leeonky.dal.extensions.StringExtension.StaticMethods.lines;
+import static com.github.leeonky.dal.extensions.basic.StringExtension.StaticMethods.lines;
 import static java.nio.file.Files.createTempFile;
 import static org.assertj.core.api.Assertions.assertThat;
 

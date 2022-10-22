@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.util.Suppressor;
 
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.github.leeonky.dal.extensions.BinaryExtension.readAll;
+import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAll;
 import static java.util.Arrays.stream;
 
 public class ZipBinary extends ZipNodeCollection {

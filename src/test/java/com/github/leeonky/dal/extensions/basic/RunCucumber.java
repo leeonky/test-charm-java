@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;

@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions;
+package com.github.leeonky.dal.extensions.basic;
 
 import com.github.leeonky.dal.DAL;
 import io.cucumber.messages.internal.com.google.common.io.Files;
@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.leeonky.dal.extensions.JsonExtension.StaticMethods.json;
+import static com.github.leeonky.dal.extensions.basic.JsonExtension.StaticMethods.json;
 import static java.nio.file.Files.createTempFile;
 import static org.assertj.core.api.Assertions.assertThat;
 
