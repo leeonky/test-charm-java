@@ -49,4 +49,47 @@ public class Hex {
     public int hashCode() {
         return Arrays.hashCode(data);
     }
+
+    @Override
+    public String toString() {
+        if (data.length == 0)
+            return "Empty";
+        StringBuilder builder = new StringBuilder().append("Size ").append(data.length);
+        int lineCount = 16;
+        for (int i = 0; i < data.length; i += lineCount) {
+            builder.append("\n");
+            append16Bytes(i, lineCount, builder);
+        }
+        return builder.toString();
+    }
+
+    private void append16Bytes(int index, int lineCount, StringBuilder builder) {
+        builder.append(format("%08X:", index));
+        int length = Math.min(data.length - index, lineCount);
+        appendBytes(index, builder, length);
+        appendPlaceholders(lineCount, builder, length);
+        builder.append(' ');
+        for (int i = 0; i < length; i++)
+            builder.append(toChar(data[index + i]));
+    }
+
+    private String toChar(byte c) {
+        return format("%c", Character.isValidCodePoint(c) ? c : '.');
+    }
+
+    private void appendPlaceholders(int lineCount, StringBuilder builder, int length) {
+        for (int i = length; i < lineCount; i++) {
+            if ((i & 3) == 0)
+                builder.append(' ');
+            builder.append("   ");
+        }
+    }
+
+    private void appendBytes(int index, StringBuilder builder, int length) {
+        for (int i = 0; i < length; i++) {
+            if ((i & 3) == 0 && i > 0)
+                builder.append(' ');
+            builder.append(format(" %02X", data[index + i]));
+        }
+    }
 }
