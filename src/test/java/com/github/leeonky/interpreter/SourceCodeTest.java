@@ -11,6 +11,7 @@ import java.util.Optional;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.TokenSpec.tokenSpec;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SourceCodeTest extends BaseTest {
@@ -74,6 +75,11 @@ class SourceCodeTest extends BaseTest {
             assertThat(BaseTest.createSourceCode("ab").startsWith(notation("a"), "aa")).isTrue();
             assertThat(BaseTest.createSourceCode("ab").startsWith(notation("a"), "ab")).isFalse();
             assertThat(BaseTest.createSourceCode("ab").startsWith(notation("a"), "aa", "ab")).isFalse();
+        }
+
+        @Test
+        void bug_not_trim_start_when_candidate_comments_is_empty() {
+            assertThat(new SourceCode(" hello", emptyList()).startsWith(notation("hello"))).isTrue();
         }
     }
 

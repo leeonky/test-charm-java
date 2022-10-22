@@ -25,16 +25,22 @@ public class CharStream {
     }
 
     private boolean codeStartWith(Notation<?, ?, ?> notation) {
-        while (hasContent() && Character.isWhitespace(current()))
-            position++;
+        trimBlank();
         return code.startsWith(notation.getLabel(), position);
     }
 
-    public void trimBlackAndComment(List<Notation<?, ?, ?>> comments) {
+    public CharStream trimBlank() {
+        while (hasContent() && Character.isWhitespace(current()))
+            position++;
+        return this;
+    }
+
+    public CharStream trimBlackAndComment(List<Notation<?, ?, ?>> comments) {
         while (comments.stream().anyMatch(this::codeStartWith)) {
             int newLinePosition = code.indexOf("\n", position);
             position = newLinePosition == -1 ? code.length() : newLinePosition + 1;
         }
+        return trimBlank();
     }
 
     public int seek(int seek) {
