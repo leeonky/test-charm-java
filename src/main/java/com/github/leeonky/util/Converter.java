@@ -139,9 +139,9 @@ public class Converter {
 
     public Converter extend() {
         Classes.subTypesOf(ConverterExtension.class, "com.github.leeonky.util.extensions")
-                .forEach(c -> ((ConverterExtension) Classes.newInstance(c)).extend(this));
+                .forEach(c -> Classes.newInstance(c).extend(this));
         Classes.subTypesOf(ConverterExtension.class, "com.github.leeonky.extensions.util")
-                .forEach(c -> ((ConverterExtension) Classes.newInstance(c)).extend(this));
+                .forEach(c -> Classes.newInstance(c).extend(this));
         return this;
     }
 }
