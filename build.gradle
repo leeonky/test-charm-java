@@ -53,6 +53,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.3.1'
     testImplementation 'org.assertj:assertj-core:3.10.0'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'
+    testImplementation("com.github.leeonky:DAL-java:0.2.0-beta")
     testImplementation("com.github.leeonky:DAL-extension-basic:0.0.2")
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
     testAnnotationProcessor('org.projectlombok:lombok:1.18.4')
