@@ -133,7 +133,7 @@ Feature: sftp
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
       sftp dir /tmp/work/test/sftp/
-      -rwxr-xr-x user user     10 2022-10-09T06:47:01Z file1.txt
+      -rwxr-xr-x root root     10 2022-10-09T06:47:01Z file1.txt
       """
 
     @ci-skip
