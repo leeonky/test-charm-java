@@ -1,6 +1,6 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.dal.extension.assertj.DALAssert;
+import com.github.leeonky.dal.Assertions;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.jfactory.TablePropertyValue.table;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,7 +57,7 @@ class TablePropertyValueTest {
         void table_1_x_1() {
             expectTable("| value |\n" +
                     "| hello |")
-                    .should("value: ['hello']");
+                    .should("value[]: ['hello']");
         }
 
         @Test
@@ -65,7 +65,7 @@ class TablePropertyValueTest {
             expectTable("| value |\n" +
                     "| hello |\n" +
                     "| world |")
-                    .should("value: ['hello' 'world']");
+                    .should("value[]: ['hello' 'world']");
         }
 
         @Test
@@ -73,8 +73,8 @@ class TablePropertyValueTest {
             expectTable("| value | value2 |\n" +
                     "| hello | Tom |\n" +
                     "| world | Jerry |")
-                    .should("value: ['hello' 'world']")
-                    .should("value2: ['Tom' 'Jerry']");
+                    .should("value[]: ['hello' 'world']")
+                    .should("value2[]: ['Tom' 'Jerry']");
         }
 
         @Test
@@ -90,8 +90,8 @@ class TablePropertyValueTest {
 
             expectTable("   | value2 |\n" +
                     "AnItem | Tom    |")
-                    .should("value: ['spec']")
-                    .should("value2: ['Tom']");
+                    .should("value[]: ['spec']")
+                    .should("value2[]: ['Tom']");
         }
 
         @Test
@@ -100,8 +100,8 @@ class TablePropertyValueTest {
 
             expectTable("            | value2 |\n" +
                     "value3Ok AnItem | Tom    |")
-                    .should("value: ['spec']")
-                    .should("value3: ['OK']");
+                    .should("value[]: ['spec']")
+                    .should("value3[]: ['OK']");
         }
 
         @Test
@@ -111,8 +111,8 @@ class TablePropertyValueTest {
             expect(jFactory.type(new TypeReference<ArrayList<Bean>>() {
             }).properties(table("    | value2 |\n" +
                     "value3Ok AnItem | Tom    |")).create())
-                    .should("value: ['spec']")
-                    .should("value3: ['OK']");
+                    .should("value[]: ['spec']")
+                    .should("value3[]: ['OK']");
         }
 
         @Test
@@ -121,7 +121,7 @@ class TablePropertyValueTest {
         }
 
 
-        private DALAssert expectTable(String table) {
+        private Assertions expectTable(String table) {
             return expect(jFactory.type(new TypeReference<List<Item>>() {
             }).properties(table(table)).create());
         }
