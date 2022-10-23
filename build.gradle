@@ -11,7 +11,7 @@ buildscript {
 }
 
 def dep(p, version) {
-    return gradle.projects.contains(p) ? project(p) : "com.github.leeonky${p}:${version}"
+    return (gradle.ext.has(p) && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
 }
 
 plugins {
