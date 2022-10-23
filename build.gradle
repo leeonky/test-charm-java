@@ -13,7 +13,7 @@ buildscript {
 }
 
 def dep(p, version) {
-    return (gradle.ext.has(p) && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
+    return (gradle.ext.has('projects') && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
 }
 
 plugins {
@@ -59,7 +59,7 @@ repositories {
 dependencies {
     implementation 'io.cucumber:cucumber-java:6.10.4'
     implementation dep(':DAL-java', '0.3.17')
-    implementation dep(':DAL-extension-basic', '0.0.8')
+    implementation dep(':DAL-extension-basic', '0.0.9')
     implementation 'org.json:json:20220924'
 
     testImplementation 'org.mock-server:mockserver:5.11.2'
