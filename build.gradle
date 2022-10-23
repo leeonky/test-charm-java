@@ -11,6 +11,10 @@ buildscript {
     }
 }
 
+def dep(p, version) {
+    return (gradle.ext.has(p) && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
+}
+
 plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
@@ -36,7 +40,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.1.11' + System.env.VERSION_SCOPE
+version = '0.1.12' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -51,7 +55,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.leeonky:jfactory:0.3.18'
+    implementation dep(':jfactory', '0.3.19')
     implementation 'javax.persistence:javax.persistence-api:2.2'
 
     testImplementation 'org.hibernate:hibernate-core:5.4.0.Final'
