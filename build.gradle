@@ -12,6 +12,10 @@ buildscript {
     }
 }
 
+def dep(p, version) {
+    return (gradle.ext.has(p) && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
+}
+
 plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
@@ -38,7 +42,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.12' + System.env.VERSION_SCOPE
+version = '0.0.13' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -54,8 +58,8 @@ repositories {
 
 dependencies {
     implementation 'io.cucumber:cucumber-java:6.10.4'
-    implementation "com.github.leeonky:DAL-java:0.3.11"
-    implementation "com.github.leeonky:DAL-extension-basic:0.0.8"
+    implementation dep(':DAL-java', '0.3.17')
+    implementation dep(':DAL-extension-basic', '0.0.8')
     implementation 'org.json:json:20220924'
 
     testImplementation 'org.mock-server:mockserver:5.11.2'

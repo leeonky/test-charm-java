@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.dal.extensions.BinaryExtension.readAllAndClose;
+import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAllAndClose;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class RestfulStep {
@@ -134,7 +134,7 @@ public class RestfulStep {
 
     @Then("response should be:")
     public <T> T responseShouldBe(String expression) {
-        return expect(response).should(System.lineSeparator() + expression);
+        return expect(response).get(System.lineSeparator() + expression);
     }
 
     @Then("data should be saved to {string} with response:")
