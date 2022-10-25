@@ -24,10 +24,7 @@ public class Hex {
     private static byte[] parseBinary(String hexInText) {
         CharStream charStream = new CharStream(hexInText);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        for (; ; ) {
-//            TODO need return charStream
-            charStream.trimBlackAndComment(asList(Notation.notation("#")));
-            if (!charStream.hasContent()) break;
+        while (charStream.trimBlackAndComment(asList(Notation.notation("#"))).hasContent()) {
 //            TODO need return charStream
             char c = charStream.popChar();
             if (c == ',')
