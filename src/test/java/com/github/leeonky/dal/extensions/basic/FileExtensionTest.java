@@ -3,7 +3,7 @@ package com.github.leeonky.dal.extensions.basic;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.extensions.basic.file.Util.formatFileSize;
+import static com.github.leeonky.dal.extensions.basic.file.util.Util.formatFileSize;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FileExtensionTest {

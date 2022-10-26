@@ -1,0 +1,71 @@
+package com.github.leeonky.dal.extensions.basic.file.util;
+
+import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.util.InvocationException;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.github.leeonky.util.Suppressor.get;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.Comparator.comparing;
+
+public class Util {
+    public static final Inspector FILE_DIR_INSPECTOR = new FileDirInspector(),
+            FILE_FILE_INSPECTOR = new FileFileInspector(),
+            PATH_DIR_INSPECTOR = new PathDirInspector(),
+            PATH_FILE_INSPECTOR = new PathFileInspector();
+
+    public static String formatFileSize(long size) {
+        if (size < 10000)
+            return String.valueOf(size);
+        double sizeInUnit = size / 1024.0;
+        if (sizeInUnit < 1000)
+            return format("%.1fK", sizeInUnit);
+        sizeInUnit /= 1024;
+        if (sizeInUnit < 1000)
+            return format("%.1fM", sizeInUnit);
+        sizeInUnit /= 1024;
+        if (sizeInUnit < 1000)
+            return format("%.1fG", sizeInUnit);
+        sizeInUnit /= 1024;
+        return format("%.1fT", sizeInUnit);
+    }
+
+    public static String attribute(Path path) {
+        PosixFileAttributes posixFileAttributes = get(() -> Files.readAttributes(path, PosixFileAttributes.class));
+        return format("%s %s %s %6s %s %s", PosixFilePermissions.toString(posixFileAttributes.permissions()),
+                posixFileAttributes.group(), posixFileAttributes.owner(), formatFileSize(path.toFile().length()),
+                posixFileAttributes.lastModifiedTime(), path.getFileName().toString());
+    }
+
+    public static Object getSubFile(File file, String name) {
+        File subFile = new File(file, name);
+        if (subFile.exists())
+            return subFile;
+        String[] list = file.list();
+        if (list != null && stream(list).anyMatch(f -> f.startsWith(name + ".")))
+            return new IOFileFileGroup(file, name);
+        throw new InvocationException(new FileNotFoundException(format("File or File Group <%s> not found", name)));
+    }
+
+    public static Set<Object> listFileNames(File file) {
+        return listFile(file).stream().map(File::getName).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public static Set<File> listFile(File file) {
+        File[] files = file.listFiles();
+        return files == null ? Collections.emptySet() : stream(files)
+                .sorted(comparing(File::isDirectory).thenComparing(File::getName))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+}

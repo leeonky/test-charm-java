@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic;
 
-import com.github.leeonky.dal.extensions.basic.file.Util;
+import com.github.leeonky.dal.extensions.basic.file.util.Util;
 import com.github.leeonky.util.Suppressor;
 import com.jcraft.jsch.*;
 
