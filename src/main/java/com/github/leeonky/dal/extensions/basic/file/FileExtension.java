@@ -1,8 +1,9 @@
-package com.github.leeonky.dal.extensions.basic;
+package com.github.leeonky.dal.extensions.basic.file;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.extensions.basic.FileGroup;
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
 import com.github.leeonky.dal.runtime.inspector.InspectorCache;
 import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.util.InvocationException;
@@ -10,11 +11,8 @@ import com.github.leeonky.util.InvocationException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFileAttributes;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -28,22 +26,8 @@ import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 
 public class FileExtension implements Extension {
-
-    public static String formatFileSize(long size) {
-        if (size < 10000)
-            return String.valueOf(size);
-        double sizeInUnit = size / 1024.0;
-        if (sizeInUnit < 1000)
-            return format("%.1fK", sizeInUnit);
-        sizeInUnit /= 1024;
-        if (sizeInUnit < 1000)
-            return format("%.1fM", sizeInUnit);
-        sizeInUnit /= 1024;
-        if (sizeInUnit < 1000)
-            return format("%.1fG", sizeInUnit);
-        sizeInUnit /= 1024;
-        return format("%.1fT", sizeInUnit);
-    }
+    public static final FileDirInspector FILE_DIR_INSPECTOR = new FileDirInspector();
+    public static final FileFileInspector FILE_FILE_INSPECTOR = new FileFileInspector();
 
     @Override
     public void extend(DAL dal) {
@@ -100,10 +84,10 @@ public class FileExtension implements Extension {
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, StaticMethods::name);
 
-        runtimeContextBuilder.registerInspector(Path.class, data -> {
+        runtimeContextBuilder.registerInspectorBk(Path.class, data -> {
             Path filePath = (Path) data.getInstance();
-            return filePath.toFile().isDirectory() ? new PathDirInspector(filePath, data)
-                    : (path, cache) -> attribute(filePath);
+            return filePath.toFile().isDirectory() ? new PathDirInspectorBk(filePath, data)
+                    : (path, cache) -> Util.attribute(filePath);
         });
     }
 
@@ -134,17 +118,8 @@ public class FileExtension implements Extension {
                     }
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(File.class, String.class, File::getName);
-        runtimeContextBuilder.registerInspector(File.class, data -> {
-            File file = (File) data.getInstance();
-            return file.isDirectory() ? new FileDirInspector(data, file) : (path, cache) -> attribute(file.toPath());
-        });
-    }
-
-    private String attribute(Path path) {
-        PosixFileAttributes posixFileAttributes = get(() -> Files.readAttributes(path, PosixFileAttributes.class));
-        return format("%s %s %s %6s %s %s", PosixFilePermissions.toString(posixFileAttributes.permissions()),
-                posixFileAttributes.group(), posixFileAttributes.owner(), formatFileSize(path.toFile().length()),
-                posixFileAttributes.lastModifiedTime(), path.getFileName().toString());
+        runtimeContextBuilder.registerInspector(File.class, data -> ((File) data.getInstance()).isDirectory()
+                ? FILE_DIR_INSPECTOR : FILE_FILE_INSPECTOR);
     }
 
     private Object getSubFile(File file, String name) {
@@ -182,11 +157,12 @@ public class FileExtension implements Extension {
         }
     }
 
-    private static class FileDirInspector implements Inspector {
+    @Deprecated
+    private static class FileDirInspectorBk implements InspectorBk {
         private final Data data;
         private final File file;
 
-        public FileDirInspector(Data data, File file) {
+        public FileDirInspectorBk(Data data, File file) {
             this.data = data;
             this.file = file;
         }
@@ -208,11 +184,11 @@ public class FileExtension implements Extension {
         }
     }
 
-    private static class PathDirInspector implements Inspector {
+    private static class PathDirInspectorBk implements InspectorBk {
         private final Path filePath;
         private final Data data;
 
-        public PathDirInspector(Path filePath, Data data) {
+        public PathDirInspectorBk(Path filePath, Data data) {
             this.filePath = filePath;
             this.data = data;
         }
@@ -233,4 +209,5 @@ public class FileExtension implements Extension {
             }});
         }
     }
+
 }

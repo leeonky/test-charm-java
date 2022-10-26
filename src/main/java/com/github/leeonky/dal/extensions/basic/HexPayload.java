@@ -27,7 +27,7 @@ public class HexPayload implements Extension {
                     }
                 })
                 .registerEqualsChecker(Hex.class, new HexEqualsChecker())
-                .registerInspector(Hex.class, data -> (path, inspectorCache) -> inspect((Hex) data.getInstance()));
+                .registerInspectorBk(Hex.class, data -> (path, inspectorCache) -> inspect((Hex) data.getInstance()));
     }
 
     private static String inspect(Hex hex) {

@@ -25,7 +25,6 @@ public class Hex {
         CharStream charStream = new CharStream(hexInText);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         while (charStream.trimBlackAndComment(asList(Notation.notation("#"))).hasContent()) {
-//            TODO need return charStream
             char c = charStream.popChar();
             if (c == ',')
                 continue;

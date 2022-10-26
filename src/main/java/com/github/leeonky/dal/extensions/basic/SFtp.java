@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.extensions.basic;
 
+import com.github.leeonky.dal.extensions.basic.file.Util;
 import com.github.leeonky.util.Suppressor;
 import com.jcraft.jsch.*;
 
@@ -70,7 +71,7 @@ public class SFtp extends SFtpFile {
         List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty))
                 .collect(Collectors.toList());
         return String.format("%s %s %s %6s %s", attrs.getPermissionsString(), items.get(2), items.get(3),
-                FileExtension.formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
+                Util.formatFileSize(attrs.getSize()), Instant.ofEpochMilli(attrs.getMTime() * 1000L));
     }
 
     public void close() {
