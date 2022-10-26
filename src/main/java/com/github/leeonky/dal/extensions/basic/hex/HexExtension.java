@@ -1,33 +1,25 @@
-package com.github.leeonky.dal.extensions.basic;
+package com.github.leeonky.dal.extensions.basic.hex;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.basic.formatters.Hex;
+import com.github.leeonky.dal.extensions.basic.hex.util.Hex;
+import com.github.leeonky.dal.extensions.basic.hex.util.HexFormatter;
+import com.github.leeonky.dal.extensions.basic.hex.util.HexInspector;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.interpreter.StringWithPosition;
 
 import java.io.ByteArrayOutputStream;
 
-import static com.github.leeonky.dal.extensions.basic.formatters.Hex.hex;
-
-public class HexPayload implements Extension {
+public class HexExtension implements Extension {
+    private static final HexInspector HEX_INSPECTOR = new HexInspector();
+    private static final HexFormatter HEX_FORMATTER = new HexFormatter();
 
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
-                .registerTextFormatter("HEX", new TextFormatter() {
-                    @Override
-                    public String description() {
-                        return "use hex numbers as binary data, like 'FF EF 08...'";
-                    }
-
-                    @Override
-                    public Object format(Object content, TextAttribute attribute) {
-                        return hex((String) content);
-                    }
-                })
+                .registerTextFormatter("HEX", HEX_FORMATTER)
                 .registerEqualsChecker(Hex.class, new HexEqualsChecker())
-                .registerInspectorBk(Hex.class, data -> (path, inspectorCache) -> inspect((Hex) data.getInstance()));
+                .registerInspector(Hex.class, data -> HEX_INSPECTOR);
     }
 
     private static String inspect(Hex hex) {

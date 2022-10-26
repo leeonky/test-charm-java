@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.basic;
+package com.github.leeonky.dal.extensions.basic.zip;
 
 import com.github.leeonky.util.Suppressor;
 
