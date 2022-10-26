@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.basic.file;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.extensions.basic.file.util.ToString;
 import com.github.leeonky.dal.extensions.basic.file.util.Util;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
@@ -52,7 +53,7 @@ public class PathExtension implements Extension {
                         return file.isDirectory() ? Util.getSubFile(file, (String) name) : super.getValue(path, name);
                     }
                 });
-        runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, FileExtension.StaticMethods::name);
+        runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, ToString::name);
 
         runtimeContextBuilder.registerInspector(Path.class, data -> ((Path) data.getInstance()).toFile().isDirectory()
                 ? Util.PATH_DIR_INSPECTOR : Util.PATH_FILE_INSPECTOR);

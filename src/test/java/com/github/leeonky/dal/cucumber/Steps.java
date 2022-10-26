@@ -2,7 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.basic.Diff;
-import com.github.leeonky.dal.extensions.basic.SFtp;
+import com.github.leeonky.dal.extensions.basic.sftp.util.SFtp;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;

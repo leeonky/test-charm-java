@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.basic;
+package com.github.leeonky.dal.extensions.basic.sftp.util;
 
 import com.github.leeonky.util.Suppressor;
 import com.jcraft.jsch.ChannelSftp;
