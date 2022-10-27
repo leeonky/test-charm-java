@@ -28,6 +28,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.JsonExtension.StaticMethods.json;
+import static com.github.leeonky.dal.extensions.basic.zip.ZipExtension.StaticMethods.unzip;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -173,6 +174,14 @@ public class Steps {
             sFtp.close();
         sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
         assertThat(runtimeContext.wrap(sFtp).inspect()).isEqualTo(content);
+    }
+
+    @SneakyThrows
+    @Then("zip file {string} should dump:")
+    public void zipFileShouldDump(String path, String content) {
+        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+
+        assertThat(runtimeContext.wrap(unzip(Files.readAllBytes(Paths.get(path)))).inspect()).isEqualTo(content);
     }
 
     @After

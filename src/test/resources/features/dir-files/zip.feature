@@ -307,3 +307,64 @@ Feature: zip file
         folder/zip1.zip/zip1/file2.txt= world
     }
     """
+
+  Rule: dump
+
+    @ci-skip
+    Scenario: dump empty dir
+      Given an empty zip file "/tmp/work/test/dir/empty.zip"
+      Then zip file "/tmp/work/test/dir/empty.zip" should dump:
+      """
+      zip file
+      """
+
+    @ci-skip
+    Scenario: dump file
+      Given a file "/tmp/work/test/tmp/file1.txt"
+      """
+      hello
+      """
+      And set file attribute "/tmp/work/test/tmp/file1.txt"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      """
+      And a zip file "/tmp/work/test/dir/file.zip":
+        | /tmp/work/test/tmp/file1.txt |
+      Then zip file "/tmp/work/test/dir/file.zip" should dump:
+      """
+      zip file
+      2022-10-09T06:47:00Z      5 file1.txt
+      """
+
+#    @ci-skip
+#    Scenario: dump file
+#      Given a file "/tmp/work/test/dir/file1.txt"
+#      """
+#      hello1
+#      """
+#      And set file attribute "/tmp/work/test/dir/file1.txt"
+#      """
+#      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+#      """
+#      Then java.io.File "/tmp/work/test/dir/file1.txt" should dump:
+#      """
+#      rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
+#      """
+#
+#    @ci-skip
+#    Scenario: dump folder with file
+#      Given root folder "/tmp/work/test/dir/sub"
+#      Given a file "/tmp/work/test/dir/sub/file1.txt"
+#      """
+#      hello1
+#      """
+#      And set file attribute "/tmp/work/test/dir/sub/file1.txt"
+#      """
+#      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+#      """
+#      Then java.io.File "/tmp/work/test/dir" should dump:
+#      """
+#      java.io.File dir /tmp/work/test/dir/
+#      sub/
+#          rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
+#      """

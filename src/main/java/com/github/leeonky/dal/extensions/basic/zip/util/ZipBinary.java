@@ -5,6 +5,7 @@ import com.github.leeonky.util.Suppressor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.TreeMap;
@@ -36,11 +37,13 @@ public class ZipBinary extends ZipNodeCollection {
     }
 
     public static class ZipNode extends ZipNodeCollection {
+        private final ZipEntry entry;
         private final String name;
         private final boolean directory;
         private final byte[] bytes;
 
         public ZipNode(ZipEntry entry, String name, byte[] bytes) {
+            this.entry = entry;
             this.name = name;
             directory = entry.isDirectory();
             this.bytes = bytes;
@@ -61,6 +64,18 @@ public class ZipBinary extends ZipNodeCollection {
 
         public boolean isDirectory() {
             return directory;
+        }
+
+        public long getSize() {
+            return entry.getSize();
+        }
+
+        public long getCompressedSize() {
+            return entry.getCompressedSize();
+        }
+
+        public Instant lastModifiedTime() {
+            return entry.getLastModifiedTime().toInstant();
         }
     }
 }
