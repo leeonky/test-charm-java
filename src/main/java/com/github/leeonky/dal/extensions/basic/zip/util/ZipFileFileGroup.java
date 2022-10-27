@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.basic.zip;
+package com.github.leeonky.dal.extensions.basic.zip.util;
 
 import com.github.leeonky.dal.extensions.basic.FileGroup;
 
