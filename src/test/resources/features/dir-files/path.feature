@@ -197,6 +197,7 @@ Feature: dir/file with java path
       """
       rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """
+#      TODO dump file should give a type info
 
     @ci-skip
     Scenario: dump folder with file

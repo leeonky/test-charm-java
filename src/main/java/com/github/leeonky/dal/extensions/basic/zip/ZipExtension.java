@@ -9,11 +9,11 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.inspector.Inspector;
 import com.github.leeonky.dal.runtime.inspector.InspectorContext;
-
-import java.util.stream.Collectors;
+import com.github.leeonky.dal.util.TextUtil;
 
 import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAll;
 import static com.github.leeonky.dal.extensions.basic.FileGroup.register;
+import static java.util.stream.Collectors.joining;
 
 public class ZipExtension implements Extension {
     private static final Inspector ZIP_BINARY_INSPECTOR = new ZipBinaryInspector();
@@ -43,7 +43,12 @@ public class ZipExtension implements Extension {
 
         @Override
         public String inspect(Data data, InspectorContext context) {
-            return ("zip file\n" + data.getDataList().stream().map(Data::dump).collect(Collectors.joining("\n"))).trim();
+            return ("zip archive\n" + data.getDataList().stream().map(Data::dump).collect(joining("\n"))).trim();
+        }
+
+        @Override
+        public String dump(Data data, InspectorContext context) {
+            return (data.getDataList().stream().map(Data::dump).collect(joining("\n"))).trim();
         }
     }
 
@@ -52,6 +57,12 @@ public class ZipExtension implements Extension {
         @Override
         public String inspect(Data data, InspectorContext context) {
             ZipBinary.ZipNode node = (ZipBinary.ZipNode) data.getInstance();
+            if (node.isDirectory())
+                return (node.name() + "/\n" + data.getDataList().stream().map(Data::dump).map(TextUtil::indent)
+                        .collect(joining("\n"))).trim();
+            if (node.name().toLowerCase().endsWith(".zip")) {
+                return node.name() + " " + context.getDalRuntimeContext().wrap(new ZipBinary(readAll(node.open()))).dump();
+            }
             return String.format("%s %6s %s", node.lastModifiedTime(), node.getSize(), node.name());
         }
     }

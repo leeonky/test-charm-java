@@ -70,10 +70,6 @@ public class ZipBinary extends ZipNodeCollection {
             return entry.getSize();
         }
 
-        public long getCompressedSize() {
-            return entry.getCompressedSize();
-        }
-
         public Instant lastModifiedTime() {
             return entry.getLastModifiedTime().toInstant();
         }
