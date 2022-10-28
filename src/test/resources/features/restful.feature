@@ -443,3 +443,18 @@ Feature: RESTful api steps
       | method |
       | POST   |
       | PUT    |
+
+  Scenario: put with binary body
+    When PUT "/index":
+    """application/octet-stream
+    'hello world'.bytes
+    """
+    Then "http://www.a.com" got a "PUT" request on "/index" with body matching
+    """
+    : [{
+      headers: {
+        ['Content-Type']: ['application/octet-stream']
+      }
+      body.base64Bytes.decodeToStr= 'hello world'
+    }]
+    """

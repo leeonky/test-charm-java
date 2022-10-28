@@ -29,12 +29,11 @@ public class RestfulStep {
     private Request request = new Request();
     private Response response;
     private HttpURLConnection connection;
+    private Function<Object, String> serializer = RestfulStep::toJson;
 
     public void setSerializer(Function<Object, String> serializer) {
         this.serializer = serializer;
     }
-
-    private Function<Object, String> serializer = RestfulStep::toJson;
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -52,7 +51,7 @@ public class RestfulStep {
     }
 
     public void post(String path, String body, String contentType) throws IOException, URISyntaxException {
-        requestAndResponse("POST", path, connection -> buildRequestBody(connection, contentType, body));
+        requestAndResponse("POST", path, connection -> buildRequestBody(connection, contentType, body.getBytes(UTF_8)));
     }
 
     public void post(String path, String body) throws IOException, URISyntaxException {
@@ -90,11 +89,20 @@ public class RestfulStep {
 
     @When("PUT {string}:")
     public void put(String path, DocString content) throws IOException, URISyntaxException {
-        put(path, evaluator.eval(content.getContent()), content.getContentType());
+        String contentType = content.getContentType();
+        if (Objects.equals(contentType, "application/octet-stream")) {
+            put(path, (byte[]) expect(null).get(content.getContent()), contentType);
+        } else {
+            put(path, evaluator.eval(content.getContent()), contentType);
+        }
+    }
+
+    public void put(String path, byte[] bytes, String contentType) throws IOException, URISyntaxException {
+        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, contentType, bytes));
     }
 
     public void put(String path, String body, String contentType) throws IOException, URISyntaxException {
-        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, contentType, body));
+        put(path, body.getBytes(UTF_8), contentType);
     }
 
     public void put(String path, String body) throws IOException, URISyntaxException {
@@ -158,11 +166,11 @@ public class RestfulStep {
                 httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
     }
 
-    private void buildRequestBody(HttpURLConnection connection, String contentType, String body) {
+    private void buildRequestBody(HttpURLConnection connection, String contentType, byte[] bytes) {
         Suppressor.run(() -> {
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", contentType == null ? String.valueOf(request.headers.getOrDefault("Content-Type", "application/json")) : contentType);
-            connection.getOutputStream().write(body.getBytes(UTF_8));
+            connection.getOutputStream().write(bytes);
             connection.getOutputStream().close();
         });
     }

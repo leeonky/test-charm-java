@@ -195,4 +195,11 @@ public class Steps {
                         .withBody(body),
                 VerificationTimes.once());
     }
+
+    @SneakyThrows
+    @Then("{string} got a {string} request on {string} with body matching")
+    public void gotARequestOnWithBodyMatching(String url, String method, String path, String bodyExpression) {
+        String receivedRequest = mockServer.retrieveRecordedRequests(request().withMethod(method).withPath(path), Format.JSON);
+        expect(new ObjectMapper().readValue(receivedRequest, List.class)).should(bodyExpression);
+    }
 }
