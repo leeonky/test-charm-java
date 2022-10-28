@@ -49,7 +49,8 @@ public class RestfulStep {
     public void post(String path, DocString content) throws IOException, URISyntaxException {
         String contentType = content.getContentType();
         if (Objects.equals(contentType, "application/octet-stream")) {
-            post(path, (byte[]) expect(null).get(content.getContent()), contentType);
+            byte[] bytes = getBytesOf(content.getContent());
+            post(path, bytes, contentType);
         } else {
             post(path, evaluator.eval(content.getContent()), content.getContentType());
         }
@@ -100,7 +101,7 @@ public class RestfulStep {
     public void put(String path, DocString content) throws IOException, URISyntaxException {
         String contentType = content.getContentType();
         if (Objects.equals(contentType, "application/octet-stream")) {
-            put(path, (byte[]) expect(null).get(content.getContent()), contentType);
+            put(path, getBytesOf(content.getContent()), contentType);
         } else {
             put(path, evaluator.eval(content.getContent()), contentType);
         }
@@ -182,6 +183,15 @@ public class RestfulStep {
             connection.getOutputStream().write(bytes);
             connection.getOutputStream().close();
         });
+    }
+
+    private byte[] getBytesOf(String expression) {
+        Object obj = expect(null).get(expression);
+        if (obj instanceof String) {
+            return ((String) obj).getBytes(UTF_8);
+        } else {
+            return (byte[]) obj;
+        }
     }
 
     private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) throws IOException, URISyntaxException {

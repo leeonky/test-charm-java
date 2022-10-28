@@ -464,3 +464,19 @@ Feature: RESTful api steps
       | method |
       | POST   |
       | PUT    |
+
+  Scenario Outline: <method> with binary body of string
+    When <method> "/index":
+    """application/octet-stream
+    'hello world'
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
+    """
+    : [{
+      body.base64Bytes.decodeToStr= 'hello world'
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |
