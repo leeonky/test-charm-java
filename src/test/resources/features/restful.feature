@@ -444,17 +444,23 @@ Feature: RESTful api steps
       | POST   |
       | PUT    |
 
-  Scenario: put with binary body
-    When PUT "/index":
+  Scenario Outline: <method> with binary body
+    When <method> "/index":
     """application/octet-stream
     'hello world'.bytes
     """
-    Then "http://www.a.com" got a "PUT" request on "/index" with body matching
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
     """
     : [{
+      method: '<method>'
+      path: '/index'
       headers: {
         ['Content-Type']: ['application/octet-stream']
       }
       body.base64Bytes.decodeToStr= 'hello world'
     }]
     """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |

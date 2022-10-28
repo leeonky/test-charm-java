@@ -47,11 +47,20 @@ public class RestfulStep {
 
     @When("POST {string}:")
     public void post(String path, DocString content) throws IOException, URISyntaxException {
-        post(path, evaluator.eval(content.getContent()), content.getContentType());
+        String contentType = content.getContentType();
+        if (Objects.equals(contentType, "application/octet-stream")) {
+            post(path, (byte[]) expect(null).get(content.getContent()), contentType);
+        } else {
+            post(path, evaluator.eval(content.getContent()), content.getContentType());
+        }
+    }
+
+    public void post(String path, byte[] bytes, String contentType) throws IOException, URISyntaxException {
+        requestAndResponse("POST", path, connection -> buildRequestBody(connection, contentType, bytes));
     }
 
     public void post(String path, String body, String contentType) throws IOException, URISyntaxException {
-        requestAndResponse("POST", path, connection -> buildRequestBody(connection, contentType, body.getBytes(UTF_8)));
+        post(path, body.getBytes(UTF_8), contentType);
     }
 
     public void post(String path, String body) throws IOException, URISyntaxException {
