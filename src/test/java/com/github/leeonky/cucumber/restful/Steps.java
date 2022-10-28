@@ -21,6 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -201,5 +203,11 @@ public class Steps {
     public void gotARequestOnWithBodyMatching(String url, String method, String path, String bodyExpression) {
         String receivedRequest = mockServer.retrieveRecordedRequests(request().withMethod(method).withPath(path), Format.JSON);
         expect(new ObjectMapper().readValue(receivedRequest, List.class)).should(bodyExpression);
+    }
+
+    @SneakyThrows
+    @Given("an external file {string}:")
+    public void anExternalFile(String path, String docString) {
+        Files.write(Paths.get(path), docString.getBytes());
     }
 }

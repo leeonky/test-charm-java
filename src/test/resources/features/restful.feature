@@ -500,3 +500,43 @@ Feature: RESTful api steps
       | method |
       | POST   |
       | PUT    |
+
+  Scenario Outline: <method> with binary body of external file
+    Given an external file "/tmp/restful.txt":
+    """
+    hello avatar
+    """
+    When <method> "/index":
+    """application/octet-stream
+    '/tmp/restful.txt'.file
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
+    """
+    : [{
+      body.base64Bytes.decodeToStr= 'hello avatar'
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |
+
+  Scenario Outline: <method> with binary body of external path
+    Given an external file "/tmp/restful.txt":
+    """
+    hello avatar
+    """
+    When <method> "/index":
+    """application/octet-stream
+    '/tmp/restful.txt'.path
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
+    """
+    : [{
+      body.base64Bytes.decodeToStr= 'hello avatar'
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |

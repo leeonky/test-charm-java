@@ -8,9 +8,12 @@ import io.cucumber.java.en.When;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -185,13 +188,17 @@ public class RestfulStep {
         });
     }
 
-    private byte[] getBytesOf(String expression) {
+    private byte[] getBytesOf(String expression) throws IOException {
         if (expression.startsWith("@")) {
             return request.files.get(expression.substring(1)).getContent();
         }
         Object obj = expect(null).get(expression);
         if (obj instanceof String) {
             return ((String) obj).getBytes(UTF_8);
+        } else if (obj instanceof File) {
+            return Files.readAllBytes(((File) obj).toPath());
+        } else if (obj instanceof Path) {
+            return Files.readAllBytes((Path) obj);
         } else {
             return (byte[]) obj;
         }
