@@ -480,3 +480,23 @@ Feature: RESTful api steps
       | method |
       | POST   |
       | PUT    |
+
+  Scenario Outline: <method> with binary body of file
+    Given a file "an avatar":
+    """
+    hello avatar
+    """
+    When <method> "/index":
+    """application/octet-stream
+    @an avatar
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
+    """
+    : [{
+      body.base64Bytes.decodeToStr= 'hello avatar'
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |

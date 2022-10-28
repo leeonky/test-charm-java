@@ -186,6 +186,9 @@ public class RestfulStep {
     }
 
     private byte[] getBytesOf(String expression) {
+        if (expression.startsWith("@")) {
+            return request.files.get(expression.substring(1)).getContent();
+        }
         Object obj = expect(null).get(expression);
         if (obj instanceof String) {
             return ((String) obj).getBytes(UTF_8);
