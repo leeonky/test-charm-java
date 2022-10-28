@@ -117,7 +117,7 @@ Feature: sftp
     Scenario: dump root empty dir
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
-      sftp dir /tmp/work/test/sftp/
+      sftp user@127.0.0.1:/tmp/work/test/sftp/
       """
 
     @ci-skip
@@ -132,7 +132,7 @@ Feature: sftp
       """
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
-      sftp dir /tmp/work/test/sftp/
+      sftp user@127.0.0.1:/tmp/work/test/sftp/
       -rwxr-xr-x root root     10 2022-10-09T06:47:01Z file1.txt
       """
 
@@ -148,6 +148,7 @@ Feature: sftp
       """
       Then sftp "/tmp/work/test/sftp/file1.txt" should dump:
       """
+      sftp user@127.0.0.1:/tmp/work/test/sftp/file1.txt
       -rwxr-xr-x root root     10 2022-10-09T06:47:01Z file1.txt
       """
 
@@ -164,7 +165,7 @@ Feature: sftp
       """
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
-      sftp dir /tmp/work/test/sftp/
+      sftp user@127.0.0.1:/tmp/work/test/sftp/
       dir/
           -rwxr-xr-x root root      1 2022-10-09T06:47:01Z file1.txt
       """

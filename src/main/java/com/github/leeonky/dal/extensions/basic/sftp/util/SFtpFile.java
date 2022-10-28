@@ -29,7 +29,7 @@ public abstract class SFtpFile {
                 .filter(entry -> !entry.getFilename().equals(".."))
                 .sorted(Comparator.<ChannelSftp.LsEntry, Boolean>comparing(e -> e.getAttrs().isDir())
                         .thenComparing(ChannelSftp.LsEntry::getFilename))
-                .map(entry -> new SFtp.SubSFtpFile(this, entry, channel())).collect(Collectors.toList());
+                .map(entry -> new SFtp.SubSFtpFile(this, entry, channel(), remote())).collect(Collectors.toList());
     }
 
     public Optional<SFtpFile> access(Object property) {
@@ -37,4 +37,11 @@ public abstract class SFtpFile {
     }
 
     public abstract String attribute();
+
+    public abstract String remote();
+
+    String remoteInfo() {
+        String s = "sftp " + remote() + ":" + fullName();
+        return s;
+    }
 }

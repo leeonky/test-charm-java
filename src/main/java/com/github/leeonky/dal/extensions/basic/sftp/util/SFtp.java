@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.not;
 
+//TODO refactor
 public class SFtp extends SFtpFile {
     private final String host, port, user, password;
     private final String path;
@@ -66,6 +67,11 @@ public class SFtp extends SFtpFile {
                 .filter(e -> e.getFilename().equals(name)).findFirst().orElseThrow(IllegalStateException::new));
     }
 
+    @Override
+    public String remote() {
+        return user + "@" + host;
+    }
+
     private static String attribute(ChannelSftp.LsEntry entry) {
         SftpATTRS attrs = entry.getAttrs();
         List<String> items = Arrays.stream(entry.getLongname().split(" ")).filter(not(String::isEmpty))
@@ -83,11 +89,13 @@ public class SFtp extends SFtpFile {
         private final SFtpFile parent;
         private final ChannelSftp.LsEntry entry;
         private final ChannelSftp channel;
+        private final String remote;
 
-        public SubSFtpFile(SFtpFile parent, ChannelSftp.LsEntry entry, ChannelSftp channel) {
+        public SubSFtpFile(SFtpFile parent, ChannelSftp.LsEntry entry, ChannelSftp channel, String remote) {
             this.parent = parent;
             this.entry = entry;
             this.channel = channel;
+            this.remote = remote;
         }
 
         @Override
@@ -118,6 +126,11 @@ public class SFtp extends SFtpFile {
         @Override
         public String attribute() {
             return SFtp.attribute(entry);
+        }
+
+        @Override
+        public String remote() {
+            return remote;
         }
     }
 }

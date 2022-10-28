@@ -13,7 +13,7 @@ class PathDirInspector implements Inspector {
     @Override
     public String inspect(Data data, InspectorContext context) {
         return String.join("\n", new ArrayList<String>() {{
-            add("java.nio.Path dir " + data.getInstance() + "/");
+            add("java.nio.Path " + data.getInstance() + "/");
             data.getDataList().stream().map(Data::dump).forEach(this::add);
         }});
     }

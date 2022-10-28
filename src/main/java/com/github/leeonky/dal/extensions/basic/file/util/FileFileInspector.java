@@ -10,6 +10,11 @@ class FileFileInspector implements Inspector {
 
     @Override
     public String inspect(Data data, InspectorContext context) {
+        return "java.io.File\n" + dump(data, context);
+    }
+
+    @Override
+    public String dump(Data data, InspectorContext context) {
         return Util.attribute(((File) data.getInstance()).toPath());
     }
 }

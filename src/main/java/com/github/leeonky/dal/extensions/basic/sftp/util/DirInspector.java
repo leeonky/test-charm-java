@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 class DirInspector implements Inspector {
     @Override
     public String inspect(Data data, InspectorContext context) {
+        SFtpFile sFtpFile = (SFtpFile) data.getInstance();
         return String.join("\n", new ArrayList<String>() {{
-            add("sftp dir " + ((SFtpFile) data.getInstance()).fullName());
+            add(sFtpFile.remoteInfo());
             data.getDataList().stream().map(Data::dump).forEach(this::add);
         }});
     }

@@ -306,10 +306,10 @@ Feature: dir/file with java File
   Rule: dump
 
     @ci-skip
-    Scenario: dump empty dir
+    Scenario: inspect empty dir
       Then java.io.File "/tmp/work/test/dir" should dump:
       """
-      java.io.File dir /tmp/work/test/dir/
+      java.io.File /tmp/work/test/dir/
       """
 
     @ci-skip
@@ -324,6 +324,7 @@ Feature: dir/file with java File
       """
       Then java.io.File "/tmp/work/test/dir/file1.txt" should dump:
       """
+      java.io.File
       rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """
 
@@ -340,7 +341,7 @@ Feature: dir/file with java File
       """
       Then java.io.File "/tmp/work/test/dir" should dump:
       """
-      java.io.File dir /tmp/work/test/dir/
+      java.io.File /tmp/work/test/dir/
       sub/
           rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """

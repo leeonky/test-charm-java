@@ -13,7 +13,7 @@ class FileDirInspector implements Inspector {
     @Override
     public String inspect(Data data, InspectorContext context) {
         return String.join("\n", new ArrayList<String>() {{
-            add("java.io.File dir " + ((File) data.getInstance()).getPath() + "/");
+            add("java.io.File " + ((File) data.getInstance()).getPath() + "/");
 //            TODO use context dump method, avoid new root context
             data.getDataList().stream().map(Data::dump).forEach(this::add);
         }});

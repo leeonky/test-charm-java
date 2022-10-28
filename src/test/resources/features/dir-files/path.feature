@@ -180,7 +180,7 @@ Feature: dir/file with java path
     Scenario: dump empty dir
       Then java.io.path "/tmp/work/test/dir" should dump:
       """
-      java.nio.Path dir /tmp/work/test/dir/
+      java.nio.Path /tmp/work/test/dir/
       """
 
     @ci-skip
@@ -195,9 +195,9 @@ Feature: dir/file with java path
       """
       Then java.io.path "/tmp/work/test/dir/file1.txt" should dump:
       """
+      java.nio.Path
       rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """
-#      TODO dump file should give a type info
 
     @ci-skip
     Scenario: dump folder with file
@@ -212,7 +212,7 @@ Feature: dir/file with java path
       """
       Then java.io.path "/tmp/work/test/dir" should dump:
       """
-      java.nio.Path dir /tmp/work/test/dir/
+      java.nio.Path /tmp/work/test/dir/
       sub/
           rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
       """
