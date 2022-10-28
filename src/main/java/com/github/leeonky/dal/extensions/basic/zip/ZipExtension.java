@@ -48,7 +48,7 @@ public class ZipExtension implements Extension {
 
         @Override
         public String dump(Data data, InspectorContext context) {
-            return (data.getDataList().stream().map(Data::dump).collect(joining("\n"))).trim();
+            return data.getDataList().stream().map(Data::dump).map(TextUtil::indent).collect(joining("\n"));
         }
     }
 
@@ -61,7 +61,7 @@ public class ZipExtension implements Extension {
                 return (node.name() + "/\n" + data.getDataList().stream().map(Data::dump).map(TextUtil::indent)
                         .collect(joining("\n"))).trim();
             if (node.name().toLowerCase().endsWith(".zip")) {
-                return node.name() + " " + context.getDalRuntimeContext().wrap(new ZipBinary(readAll(node.open()))).dump();
+                return (node.name() + "\n" + context.getDalRuntimeContext().wrap(new ZipBinary(readAll(node.open()))).dump()).trim();
             }
             return String.format("%s %6s %s", node.lastModifiedTime(), node.getSize(), node.name());
         }

@@ -310,41 +310,41 @@ Feature: zip file
 
   Rule: dump
 
-    Scenario: dump empty dir
+    Scenario: inspect root empty zip
       Given an empty zip file "/tmp/work/test/dir/empty.zip"
       Then zip file "/tmp/work/test/dir/empty.zip" should dump:
       """
       zip archive
       """
 
-    Scenario: dump zip file
+    Scenario: inspect root zip files
       Given a file "/tmp/work/test/tmp/file1.txt"
       """
       hello
       """
       And set file attribute "/tmp/work/test/tmp/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x wheel leeonky 2000-01-02T00:00:00Z
+      """
+      Given a file "/tmp/work/test/tmp/file2.txt"
+      """
+      world
+      """
+      And set file attribute "/tmp/work/test/tmp/file2.txt"
+      """
+      rwxr-xr-x wheel leeonky 2000-01-02T00:00:10Z
       """
       And a zip file "/tmp/work/test/dir/file.zip":
         | /tmp/work/test/tmp/file1.txt |
+        | /tmp/work/test/tmp/file2.txt |
       Then zip file "/tmp/work/test/dir/file.zip" should dump:
       """
       zip archive
-      2022-10-09T06:47:00Z      5 file1.txt
+      2000-01-02T00:00:00Z      5 file1.txt
+      2000-01-02T00:00:10Z      5 file2.txt
       """
 
-    Scenario: dump zip empty folder
-      Given a folder "/tmp/work/test/tmp/empty"
-      And a zip file "/tmp/work/test/dir/file.zip":
-        | /tmp/work/test/tmp/empty |
-      Then zip file "/tmp/work/test/dir/file.zip" should dump:
-      """
-      zip archive
-      empty/
-      """
-
-    Scenario: dump zip with folder with file
+    Scenario: inspect zip with folder with file
       Given a folder "/tmp/work/test/tmp/dir"
       Given a file "/tmp/work/test/tmp/dir/file1.txt"
       """
@@ -352,65 +352,75 @@ Feature: zip file
       """
       And set file attribute "/tmp/work/test/tmp/dir/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x wheel leeonky 2000-01-02T00:00:10Z
       """
       And a zip file "/tmp/work/test/dir/file.zip":
         | /tmp/work/test/tmp/dir |
-
       Then zip file "/tmp/work/test/dir/file.zip" should dump:
       """
       zip archive
       dir/
-          2022-10-09T06:47:00Z      5 file1.txt
+          2000-01-02T00:00:10Z      5 file1.txt
       """
 
-    Scenario: dump nested zip files
-      Given a folder "/tmp/work/test/tmp/folder"
-      Given a folder "/tmp/work/test/tmp/zip1"
-      Given a file "/tmp/work/test/tmp/zip1/file1.txt"
+    Scenario: inspect zip with empty nested zip
+      Given an empty zip file "/tmp/work/test/dir/empty.zip"
+      And a zip file "/tmp/work/test/dir/file.zip":
+        | /tmp/work/test/dir/empty.zip |
+      Then zip file "/tmp/work/test/dir/file.zip" should dump:
+      """
+      zip archive
+      empty.zip
+      """
+
+    Scenario: inspect zip with nested zip with files
+      Given a file "/tmp/work/test/tmp/file1.txt"
       """
       hello
       """
-      And set file attribute "/tmp/work/test/tmp/zip1/file1.txt"
+      And set file attribute "/tmp/work/test/tmp/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:30Z
+      rwxr-xr-x wheel leeonky 2000-01-02T00:00:00Z
       """
-      Given a file "/tmp/work/test/tmp/zip1/file2.txt"
+      Given a file "/tmp/work/test/tmp/file2.txt"
       """
       world
       """
-      And set file attribute "/tmp/work/test/tmp/zip1/file2.txt"
+      And set file attribute "/tmp/work/test/tmp/file2.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:02Z
-      """
-      And a zip file "/tmp/work/test/tmp/folder/zip1.zip":
-        | /tmp/work/test/tmp/zip1 |
-      Given a file "/tmp/work/test/tmp/folder/foo.txt"
-      """
-      foo
-      """
-      And set file attribute "/tmp/work/test/tmp/folder/foo.txt"
-      """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:04Z
-      """
-      Given a file "/tmp/work/test/tmp/bar.txt"
-      """
-      bar
-      """
-      And set file attribute "/tmp/work/test/tmp/bar.txt"
-      """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:10Z
+      rwxr-xr-x wheel leeonky 2000-01-02T00:00:10Z
       """
       And a zip file "/tmp/work/test/dir/zip.zip":
-        | /tmp/work/test/tmp/folder  |
-        | /tmp/work/test/tmp/bar.txt |
-      Then zip file "/tmp/work/test/dir/zip.zip" should dump:
+        | /tmp/work/test/tmp/file1.txt |
+        | /tmp/work/test/tmp/file2.txt |
+      And a zip file "/tmp/work/test/dir/file.zip":
+        | /tmp/work/test/dir/zip.zip |
+      Then zip file "/tmp/work/test/dir/file.zip" should dump:
       """
       zip archive
-      2022-10-09T06:47:10Z      3 bar.txt
-      folder/
-          2022-10-09T06:47:04Z      3 foo.txt
-          zip1.zip zip1/
-              2022-10-09T06:47:30Z      5 file1.txt
-              2022-10-09T06:47:02Z      5 file2.txt
+      zip.zip
+          2000-01-02T00:00:00Z      5 file1.txt
+          2000-01-02T00:00:10Z      5 file2.txt
+      """
+
+    Scenario: inspect zip with nested zip with folder with files
+      Given a folder "/tmp/work/test/tmp/dir"
+      Given a file "/tmp/work/test/tmp/dir/file1.txt"
+      """
+      hello
+      """
+      And set file attribute "/tmp/work/test/tmp/dir/file1.txt"
+      """
+      rwxr-xr-x wheel leeonky 2000-01-02T00:00:10Z
+      """
+      And a zip file "/tmp/work/test/dir/zip.zip":
+        | /tmp/work/test/tmp/dir |
+      And a zip file "/tmp/work/test/dir/file.zip":
+        | /tmp/work/test/dir/zip.zip |
+      Then zip file "/tmp/work/test/dir/file.zip" should dump:
+      """
+      zip archive
+      zip.zip
+          dir/
+              2000-01-02T00:00:10Z      5 file1.txt
       """
