@@ -488,7 +488,7 @@ Feature: RESTful api steps
     """
     When <method> "/index":
     """application/octet-stream
-    files['an avatar'].getContent
+    files['an avatar'].binaryContent
     """
     Then "http://www.a.com" got a "<method>" request on "/index" with body matching
     """
