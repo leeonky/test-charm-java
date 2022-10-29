@@ -457,7 +457,7 @@ Feature: RESTful api steps
       headers: {
         ['Content-Type']: ['application/octet-stream']
       }
-      body.base64Bytes.decodeToStr= 'hello world'
+      body.base64Bytes.base64.string= 'hello world'
     }]
     """
     Examples:
@@ -473,7 +473,7 @@ Feature: RESTful api steps
     Then "http://www.a.com" got a "<method>" request on "/index" with body matching
     """
     : [{
-      body.base64Bytes.decodeToStr= 'hello world'
+      body.base64Bytes.base64.string= 'hello world'
     }]
     """
     Examples:
@@ -488,12 +488,12 @@ Feature: RESTful api steps
     """
     When <method> "/index":
     """application/octet-stream
-    @an avatar
+    files['an avatar'].getContent
     """
     Then "http://www.a.com" got a "<method>" request on "/index" with body matching
     """
     : [{
-      body.base64Bytes.decodeToStr= 'hello avatar'
+      body.base64Bytes.base64.string= 'hello avatar'
     }]
     """
     Examples:
@@ -513,7 +513,7 @@ Feature: RESTful api steps
     Then "http://www.a.com" got a "<method>" request on "/index" with body matching
     """
     : [{
-      body.base64Bytes.decodeToStr= 'hello avatar'
+      body.base64Bytes.base64.string= 'hello avatar'
     }]
     """
     Examples:
@@ -533,7 +533,7 @@ Feature: RESTful api steps
     Then "http://www.a.com" got a "<method>" request on "/index" with body matching
     """
     : [{
-      body.base64Bytes.decodeToStr= 'hello avatar'
+      body.base64Bytes.base64.string= 'hello avatar'
     }]
     """
     Examples:

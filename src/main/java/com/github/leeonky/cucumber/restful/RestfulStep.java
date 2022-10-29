@@ -52,8 +52,7 @@ public class RestfulStep {
     public void post(String path, DocString content) throws IOException, URISyntaxException {
         String contentType = content.getContentType();
         if (Objects.equals(contentType, "application/octet-stream")) {
-            byte[] bytes = getBytesOf(content.getContent());
-            post(path, bytes, contentType);
+            post(path, getBytesOf(content.getContent()), contentType);
         } else {
             post(path, evaluator.eval(content.getContent()), content.getContentType());
         }
@@ -192,7 +191,7 @@ public class RestfulStep {
         if (expression.startsWith("@")) {
             return request.files.get(expression.substring(1)).getContent();
         }
-        Object obj = expect(null).get(expression);
+        Object obj = expect(request.getContext()).get(expression);
         if (obj instanceof String) {
             return ((String) obj).getBytes(UTF_8);
         } else if (obj instanceof File) {
@@ -246,6 +245,16 @@ public class RestfulStep {
     private static class Request {
         private final Map<String, UploadFile> files = new HashMap<>();
         private final Map<String, Object> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        public RequestContext getContext() {
+            return new RequestContext();
+        }
+
+        public class RequestContext {
+            public Map<String, UploadFile> getFiles() {
+                return files;
+            }
+        }
 
         private HttpURLConnection applyHeader(HttpURLConnection connection) {
             headers.forEach((key, value) -> {
