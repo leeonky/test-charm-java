@@ -49,8 +49,8 @@ public class Hex {
     @Override
     public String toString() {
         if (data.length == 0)
-            return "empty";
-        StringBuilder builder = new StringBuilder().append("size ").append(data.length);
+            return "Empty binary";
+        StringBuilder builder = new StringBuilder().append("Binary size ").append(data.length);
         int lineCount = 16;
         for (int i = 0; i < data.length; i += lineCount) {
             builder.append("\n");
