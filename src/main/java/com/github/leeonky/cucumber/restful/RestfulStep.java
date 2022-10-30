@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAllAndClose;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.joining;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
@@ -179,6 +180,16 @@ public class RestfulStep {
         return responseShouldBe(expression);
     }
 
+    @When("GET {string}:")
+    public void getWithParams(String path, String params) throws IOException, URISyntaxException {
+        get(pathWithParams(path, params));
+    }
+
+    @When("DELETE {string}:")
+    public void deleteWithParams(String path, String params) throws IOException, URISyntaxException {
+        delete(pathWithParams(path, params));
+    }
+
     private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {
         httpStream.bound(boundary, () -> Suppressor.get(() -> key.startsWith("@") ?
                 httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
@@ -207,6 +218,12 @@ public class RestfulStep {
         } else {
             return (byte[]) obj;
         }
+    }
+
+    private String pathWithParams(String path, String params) {
+        return path + "?" + new JSONObject(evaluator.eval(params)).toMap().entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(joining("&"));
     }
 
     private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) throws IOException, URISyntaxException {

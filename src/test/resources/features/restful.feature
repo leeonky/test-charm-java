@@ -23,6 +23,22 @@ Feature: RESTful api steps
         | GET    |
         | DELETE |
 
+    Scenario Outline: <method> with params from docstring
+      When <method> "/index":
+      """
+      {
+        "中文参数": "中文值",
+        "second": "value1"
+      }
+      """
+      Then "http://www.a.com" got a "<method>" request on "/index" with params
+        | 中文参数 | second |
+        | 中文值  | value1 |
+      Examples:
+        | method |
+        | GET    |
+        | DELETE |
+
     Scenario Outline: <method> with body and no params
       When <method> "/index":
       """
