@@ -3,7 +3,7 @@ package com.github.leeonky.dal.extensions.basic.hex;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.basic.hex.util.Hex;
 import com.github.leeonky.dal.extensions.basic.hex.util.HexFormatter;
-import com.github.leeonky.dal.extensions.basic.hex.util.HexInspector;
+import com.github.leeonky.dal.extensions.basic.hex.util.HexInspectorBk;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.interpreter.StringWithPosition;
@@ -11,7 +11,7 @@ import com.github.leeonky.interpreter.StringWithPosition;
 import java.io.ByteArrayOutputStream;
 
 public class HexExtension implements Extension {
-    private static final HexInspector HEX_INSPECTOR = new HexInspector();
+    private static final HexInspectorBk HEX_INSPECTOR = new HexInspectorBk();
     private static final HexFormatter HEX_FORMATTER = new HexFormatter();
 
     @Override

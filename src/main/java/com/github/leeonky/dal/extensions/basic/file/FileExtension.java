@@ -20,12 +20,12 @@ public class FileExtension implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerStaticMethodExtension(ToString.class)
                 .registerStaticMethodExtension(StaticMethods.class)
-                .registerImplicitData(File.class, file -> get(() -> new FileInputStream(file))).
-                registerListAccessor(File.class, new FileListAccessor()).
-                registerPropertyAccessor(File.class, new FileJavaClassPropertyAccessor()).
-                registerPropertyAccessor(FileGroup.class, new FileGroupJavaClassPropertyAccessor()).
-                registerInspector(File.class, data -> ((File) data.getInstance()).isDirectory()
-                        ? Util.FILE_DIR_INSPECTOR : Util.FILE_FILE_INSPECTOR);
+                .registerImplicitData(File.class, file -> get(() -> new FileInputStream(file)))
+                .registerListAccessor(File.class, new FileListAccessor())
+                .registerPropertyAccessor(File.class, new FileJavaClassPropertyAccessor())
+                .registerPropertyAccessor(FileGroup.class, new FileGroupJavaClassPropertyAccessor())
+                .registerDumper(File.class, data -> ((File) data.getInstance()).isDirectory()
+                        ? Util.FILE_DIR_DUMPER : Util.FILE_FILE_DUMPER);
         dal.getRuntimeContextBuilder().getConverter()
                 .addTypeConverter(File.class, String.class, File::getName);
     }

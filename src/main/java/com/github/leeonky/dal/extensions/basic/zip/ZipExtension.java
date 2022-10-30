@@ -7,8 +7,8 @@ import com.github.leeonky.dal.extensions.basic.zip.util.ZipNodeJavaClassProperty
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.inspector.Inspector;
-import com.github.leeonky.dal.runtime.inspector.InspectorContext;
+import com.github.leeonky.dal.runtime.inspector.DumpingContext;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
 import com.github.leeonky.dal.util.TextUtil;
 
 import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAll;
@@ -16,7 +16,7 @@ import static com.github.leeonky.dal.extensions.basic.FileGroup.register;
 import static java.util.stream.Collectors.joining;
 
 public class ZipExtension implements Extension {
-    private static final Inspector ZIP_BINARY_INSPECTOR = new ZipBinaryInspector();
+    private static final InspectorBk ZIP_BINARY_INSPECTOR_BK = new ZipBinaryInspectorBk();
 
     @Override
     public void extend(DAL dal) {
@@ -25,8 +25,8 @@ public class ZipExtension implements Extension {
                 .registerImplicitData(ZipBinary.ZipNode.class, ZipBinary.ZipNode::open)
                 .registerPropertyAccessor(ZipBinary.class, new ZipBinaryJavaClassPropertyAccessor())
                 .registerPropertyAccessor(ZipBinary.ZipNode.class, new ZipNodeJavaClassPropertyAccessor())
-                .registerInspector(ZipBinary.class, data -> ZIP_BINARY_INSPECTOR)
-                .registerInspector(ZipBinary.ZipNode.class, data -> new ZipNodeInspector())
+                .registerInspector(ZipBinary.class, data -> ZIP_BINARY_INSPECTOR_BK)
+                .registerInspector(ZipBinary.ZipNode.class, data -> new ZipNodeInspectorBk())
         ;
 
         register("zip", inputStream -> new ZipBinary(readAll(inputStream)));
@@ -39,23 +39,23 @@ public class ZipExtension implements Extension {
         }
     }
 
-    public static class ZipBinaryInspector implements Inspector {
+    public static class ZipBinaryInspectorBk implements InspectorBk {
 
         @Override
-        public String inspect(Data data, InspectorContext context) {
+        public String inspect(Data data, DumpingContext context) {
             return ("zip archive\n" + data.getDataList().stream().map(Data::dump).collect(joining("\n"))).trim();
         }
 
         @Override
-        public String dump(Data data, InspectorContext context) {
+        public String dump(Data data, DumpingContext context) {
             return data.getDataList().stream().map(Data::dump).map(TextUtil::indent).collect(joining("\n"));
         }
     }
 
-    public static class ZipNodeInspector implements Inspector {
+    public static class ZipNodeInspectorBk implements InspectorBk {
 
         @Override
-        public String inspect(Data data, InspectorContext context) {
+        public String inspect(Data data, DumpingContext context) {
             ZipBinary.ZipNode node = (ZipBinary.ZipNode) data.getInstance();
             if (node.isDirectory())
                 return (node.name() + "/\n" + data.getDataList().stream().map(Data::dump).map(TextUtil::indent)

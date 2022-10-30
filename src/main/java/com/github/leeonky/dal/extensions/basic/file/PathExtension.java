@@ -22,10 +22,6 @@ public class PathExtension implements Extension {
     @Override
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
-        extendPath(runtimeContextBuilder);
-    }
-
-    private void extendPath(RuntimeContextBuilder runtimeContextBuilder) {
         runtimeContextBuilder.registerImplicitData(Path.class, file -> get(() -> new FileInputStream(file.toFile())));
         runtimeContextBuilder.registerListAccessor(Path.class, new ListAccessor<Path>() {
             @Override
@@ -55,7 +51,8 @@ public class PathExtension implements Extension {
                 });
         runtimeContextBuilder.getConverter().addTypeConverter(Path.class, String.class, ToString::name);
 
-        runtimeContextBuilder.registerInspector(Path.class, data -> ((Path) data.getInstance()).toFile().isDirectory()
-                ? Util.PATH_DIR_INSPECTOR : Util.PATH_FILE_INSPECTOR);
+        runtimeContextBuilder.registerDumper(Path.class, data -> ((Path) data.getInstance()).toFile().isDirectory()
+                ? Util.PATH_DIR_DUMPER : Util.PATH_FILE_DUMPER);
     }
+
 }

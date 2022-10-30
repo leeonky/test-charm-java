@@ -22,8 +22,8 @@ public class SFTPExtension implements Extension {
         builder.registerImplicitData(SFtpFile.class, SFtpFile::download)
                 .registerListAccessor(SFtpFile.class, SFtpFile::ls)
                 .registerPropertyAccessor(SFtpFile.class, new SFtpFileJavaClassPropertyAccessor())
-                .registerInspector(SFtpFile.class, data -> ((SFtpFile) data.getInstance()).isDir()
-                        ? Util.DIR_INSPECTOR : Util.FILE_INSPECTOR);
+                .registerDumper(SFtpFile.class, data -> ((SFtpFile) data.getInstance()).isDir()
+                        ? Util.DIR_DUMPER : Util.FILE_DUMPER);
     }
 
     private class SFtpFileJavaClassPropertyAccessor extends JavaClassPropertyAccessor<SFtpFile> {

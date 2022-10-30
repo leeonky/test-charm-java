@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.file.util;
 
-import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.util.InvocationException;
 
 import java.io.File;
@@ -20,10 +20,10 @@ import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 
 public class Util {
-    public static final Inspector FILE_DIR_INSPECTOR = new FileDirInspector(),
-            FILE_FILE_INSPECTOR = new FileFileInspector(),
-            PATH_DIR_INSPECTOR = new PathDirInspector(),
-            PATH_FILE_INSPECTOR = new PathFileInspector();
+    public static final Dumper FILE_DIR_DUMPER = new FileDirDumper(),
+            FILE_FILE_DUMPER = new FileFileDumper(),
+            PATH_DIR_DUMPER = new PathDirDumper(),
+            PATH_FILE_DUMPER = new PathFileDumper();
 
     public static String formatFileSize(long size) {
         if (size < 10000)
