@@ -427,6 +427,19 @@ Feature: RESTful api steps
       }
       """
 
+    Scenario: delete and verify response in one step
+      Given response 200 on "DELETE" "/index":
+      """
+      Hello world
+      """
+      Then DELETE "/index" should response:
+      """
+      : {
+        code=200
+        body.string='Hello world'
+      }
+      """
+
     Scenario Outline: verify <method> and get response
       Given response 200 on "<method>" "/index":
       """

@@ -173,6 +173,12 @@ public class RestfulStep {
         return responseShouldBe(expression);
     }
 
+    @Then("DELETE {string} should response:")
+    public <T> T deleteAndResponseShouldBe(String path, String expression) throws IOException, URISyntaxException {
+        delete(path);
+        return responseShouldBe(expression);
+    }
+
     private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {
         httpStream.bound(boundary, () -> Suppressor.get(() -> key.startsWith("@") ?
                 httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
