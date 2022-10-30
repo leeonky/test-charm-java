@@ -413,6 +413,14 @@ Feature: zip file
       """
       rwxr-xr-x wheel leeonky 2000-01-02T00:00:10Z
       """
+      Given a file "/tmp/work/test/tmp/dir/file2.txt"
+      """
+      world
+      """
+      And set file attribute "/tmp/work/test/tmp/dir/file2.txt"
+      """
+      rwxr-xr-x wheel leeonky 2000-01-02T00:00:20Z
+      """
       And a zip file "/tmp/work/test/dir/zip.zip":
         | /tmp/work/test/tmp/dir |
       And a zip file "/tmp/work/test/dir/file.zip":
@@ -423,4 +431,5 @@ Feature: zip file
       zip.zip
           dir/
               2000-01-02T00:00:10Z      5 file1.txt
+              2000-01-02T00:00:20Z      5 file2.txt
       """

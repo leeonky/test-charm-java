@@ -163,9 +163,20 @@ Feature: sftp
       """
       rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
       """
+      Given a file "/tmp/work/test/sftp/dir/file2.txt"
+      """
+      12
+      """
+      And set file attribute "/tmp/work/test/sftp/dir/file2.txt"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:11Z
+      """
+      Given root folder "/tmp/work/test/sftp/dir2"
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
       sftp user@127.0.0.1:/tmp/work/test/sftp/
       dir/
           -rwxr-xr-x root root      1 2022-10-09T06:47:01Z file1.txt
+          -rwxr-xr-x root root      2 2022-10-09T06:47:11Z file2.txt
+      dir2/
       """

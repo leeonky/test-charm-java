@@ -339,9 +339,20 @@ Feature: dir/file with java File
       """
       rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
       """
+      Given a file "/tmp/work/test/dir/sub/file2.txt"
+      """
+      world
+      """
+      And set file attribute "/tmp/work/test/dir/sub/file2.txt"
+      """
+      rwxr-xr-x wheel leeonky 2022-10-09T06:47:11Z
+      """
+      Given root folder "/tmp/work/test/dir/sub2"
       Then java.io.File "/tmp/work/test/dir" should dump:
       """
       java.io.File /tmp/work/test/dir/
       sub/
           rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
+          rwxr-xr-x wheel leeonky      5 2022-10-09T06:47:11Z file2.txt
+      sub2/
       """
