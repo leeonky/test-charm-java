@@ -16,6 +16,6 @@ public class FileDumper implements Dumper {
     @Override
     public void dump(Data data, DumpingContext context) {
         SFtpFile sFtpFile = (SFtpFile) data.getInstance();
-        context.append(sFtpFile.attribute() + " " + sFtpFile.name());
+        context.append(sFtpFile.attribute()).append(" ").append(sFtpFile.name());
     }
 }

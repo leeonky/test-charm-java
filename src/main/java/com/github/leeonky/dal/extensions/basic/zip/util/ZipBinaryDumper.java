@@ -1,20 +1,20 @@
-package com.github.leeonky.dal.extensions.basic.sftp.util;
+package com.github.leeonky.dal.extensions.basic.zip.util;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumpingContext;
 
-public class DirDumper implements Dumper {
+public class ZipBinaryDumper implements Dumper {
 
     @Override
     public void dumpDetail(Data data, DumpingContext context) {
-        DumpingContext sub = context.append(((SFtpFile) data.getInstance()).remoteInfo()).sub();
+        DumpingContext sub = context.append("zip archive").sub();
         data.getDataList().forEach(subFile -> sub.newLine().dump(subFile));
     }
 
     @Override
     public void dump(Data data, DumpingContext context) {
-        DumpingContext sub = context.append(((SFtpFile) data.getInstance()).name()).append("/").indent();
+        DumpingContext sub = context.sub();
         data.getDataList().forEach(subFile -> sub.newLine().dump(subFile));
     }
 }
