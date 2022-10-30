@@ -210,4 +210,11 @@ public class Steps {
     public void anExternalFile(String path, String docString) {
         Files.write(Paths.get(path), docString.getBytes());
     }
+
+    @SneakyThrows
+    @Then("{string} got a {string} request on {string} with params from docstring")
+    public void gotARequestOnWithParamsFromDocstring(String url, String method, String path, String paramsExpression) {
+        String receivedRequest = mockServer.retrieveRecordedRequests(request().withMethod(method).withPath(path), Format.JSON);
+        expect(new ObjectMapper().readValue(receivedRequest, List.class)).should(paramsExpression);
+    }
 }

@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAllAndClose;
@@ -34,6 +35,14 @@ public class RestfulStep {
     private Response response;
     private HttpURLConnection connection;
     private Function<Object, String> serializer = RestfulStep::toJson;
+
+    private static Stream<String> getParamString(Map.Entry<String, Object> entry) {
+        if (entry.getValue() instanceof List) {
+            return ((List) entry.getValue()).stream().map(value -> entry.getKey() + "[]=" + value);
+        } else {
+            return Stream.of(entry.getKey() + "=" + entry.getValue());
+        }
+    }
 
     public void setSerializer(Function<Object, String> serializer) {
         this.serializer = serializer;
@@ -222,7 +231,7 @@ public class RestfulStep {
 
     private String pathWithParams(String path, String params) {
         return path + "?" + new JSONObject(evaluator.eval(params)).toMap().entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .flatMap(RestfulStep::getParamString)
                 .collect(joining("&"));
     }
 

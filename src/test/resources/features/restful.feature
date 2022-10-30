@@ -23,7 +23,7 @@ Feature: RESTful api steps
         | GET    |
         | DELETE |
 
-    Scenario Outline: <method> with params from docstring
+    Scenario Outline: <method> with single value params from docstring
       When <method> "/index":
       """
       {
@@ -34,6 +34,39 @@ Feature: RESTful api steps
       Then "http://www.a.com" got a "<method>" request on "/index" with params
         | 中文参数 | second |
         | 中文值  | value1 |
+      Examples:
+        | method |
+        | GET    |
+        | DELETE |
+
+    Scenario Outline: <method> with multiple values param from docstring
+      When <method> "/index":
+      """
+      {
+        "key": ["value1", "value2"]
+      }
+      """
+      Then "http://www.a.com" got a "<method>" request on "/index" with params from docstring
+      """
+      : [{
+        queryStringParameters.'key[]'= [value1, value2]
+      }]
+      """
+      Examples:
+        | method |
+        | GET    |
+        | DELETE |
+
+    Scenario Outline: <method> with single value param need encoding
+      When <method> "/index":
+      """
+      {
+        ":url:": "http://www.a.com/index?中文参数=中文值",
+      }
+      """
+      Then "http://www.a.com" got a "<method>" request on "/index" with params
+        | :url:                           |
+        | http://www.a.com/index?中文参数=中文值 |
       Examples:
         | method |
         | GET    |
