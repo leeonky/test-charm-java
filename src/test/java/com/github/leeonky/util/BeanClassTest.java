@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.util.BeanClass.create;
+import static com.github.leeonky.util.Classes.named;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -208,6 +209,49 @@ class BeanClassTest {
         void is_inherited_from() {
             assertThat(create(String.class).isInheritedFrom(CharSequence.class)).isTrue();
             assertThat(create(String.class).isInheritedFrom(Integer.class)).isFalse();
+        }
+    }
+
+    @Nested
+    class NamedClass {
+
+        @Nested
+        class AnonymousClass {
+
+            @Test
+            void should_return_same_class_when_class_is_named_class() {
+                assertThat(named(StringList.class)).isEqualTo(StringList.class);
+            }
+
+            @Test
+            void should_use_super_class_when_instance_is_anonymous_class() {
+                assertThat(named((Class<? extends StringList>) new StringList() {
+                }.getClass())).isEqualTo(StringList.class);
+            }
+
+            @Test
+            void should_use_super_class_when_instance_is_anonymous_class_fo_interface() {
+                assertThat(named(new Supplier<Object>() {
+                    @Override
+                    public Object get() {
+                        return null;
+                    }
+                }.getClass())).isEqualTo(Supplier.class);
+            }
+        }
+
+        @Nested
+        class Lambda {
+
+            @Test
+            void should_return_same_class_when_class_is_named_class() {
+                assertThat(named(Supplier.class)).isEqualTo(Supplier.class);
+            }
+
+            @Test
+            void should_use_super_class_when_instance_is_lambda() {
+                assertThat(named(((Supplier<Object>) () -> null).getClass())).isEqualTo(Supplier.class);
+            }
         }
     }
 }

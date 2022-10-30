@@ -113,4 +113,18 @@ public class Classes {
     public static String getClassName(Object object) {
         return object == null ? null : object.getClass().getName();
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Class<? super T> named(Class<T> type) {
+        if (type.isAnonymousClass()) {
+            Class<? super T> superclass = type.getSuperclass();
+            return superclass.equals(Object.class) ? (Class<? super T>) type.getInterfaces()[0] : superclass;
+        }
+        if (type.isSynthetic()) {
+            Class<?>[] interfaces = type.getInterfaces();
+            if (interfaces.length > 0)
+                return (Class<? super T>) interfaces[0];
+        }
+        return type;
+    }
 }
