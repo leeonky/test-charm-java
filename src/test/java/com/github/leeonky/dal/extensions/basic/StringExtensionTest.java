@@ -10,7 +10,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.github.leeonky.dal.extensions.basic.StringExtension.StaticMethods.lines;
+import static com.github.leeonky.dal.extensions.basic.string.Methods.lines;
 import static java.nio.file.Files.createTempFile;
 import static org.assertj.core.api.Assertions.assertThat;
 

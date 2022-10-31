@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.basic;
+package com.github.leeonky.dal.extensions.basic.file.util;
 
 import com.github.leeonky.dal.runtime.PartialObject;
 import com.github.leeonky.util.Suppressor;

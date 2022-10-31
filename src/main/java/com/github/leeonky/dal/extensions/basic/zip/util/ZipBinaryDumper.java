@@ -7,14 +7,14 @@ import com.github.leeonky.dal.runtime.inspector.DumpingContext;
 public class ZipBinaryDumper implements Dumper {
 
     @Override
-    public void dumpDetail(Data data, DumpingContext context) {
+    public void dump(Data data, DumpingContext context) {
         DumpingContext sub = context.append("zip archive").sub();
-        data.getDataList().forEach(subFile -> sub.newLine().dump(subFile));
+        data.getDataList().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 
     @Override
-    public void dump(Data data, DumpingContext context) {
+    public void dumpValue(Data data, DumpingContext context) {
         DumpingContext sub = context.sub();
-        data.getDataList().forEach(subFile -> sub.newLine().dump(subFile));
+        data.getDataList().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 }

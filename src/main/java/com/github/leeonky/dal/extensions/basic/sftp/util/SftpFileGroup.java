@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.sftp.util;
 
-import com.github.leeonky.dal.extensions.basic.FileGroup;
+import com.github.leeonky.dal.extensions.basic.file.util.FileGroup;
 
 import java.io.InputStream;
 import java.util.stream.Stream;

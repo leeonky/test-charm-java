@@ -7,8 +7,8 @@ import com.github.leeonky.dal.runtime.inspector.DumpingContext;
 public class PathDirDumper implements Dumper {
 
     @Override
-    public void dumpDetail(Data data, DumpingContext context) {
+    public void dump(Data data, DumpingContext context) {
         DumpingContext sub = context.append("java.nio.Path").appendThen(" ").append(data.getInstance() + "/").sub();
-        data.getDataList().forEach(subPath -> sub.newLine().dump(subPath)); //will dump in FileDirDumper or FileFileDumper
+        data.getDataList().forEach(subPath -> sub.newLine().dumpValue(subPath)); //will dump in FileDirDumper or FileFileDumper
     }
 }

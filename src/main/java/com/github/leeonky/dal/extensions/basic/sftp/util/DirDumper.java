@@ -7,14 +7,14 @@ import com.github.leeonky.dal.runtime.inspector.DumpingContext;
 public class DirDumper implements Dumper {
 
     @Override
-    public void dumpDetail(Data data, DumpingContext context) {
+    public void dump(Data data, DumpingContext context) {
         DumpingContext sub = context.append(((SFtpFile) data.getInstance()).remoteInfo()).sub();
-        data.getDataList().forEach(subFile -> sub.newLine().dump(subFile));
+        data.getDataList().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 
     @Override
-    public void dump(Data data, DumpingContext context) {
+    public void dumpValue(Data data, DumpingContext context) {
         DumpingContext sub = context.append(((SFtpFile) data.getInstance()).name()).append("/").indent();
-        data.getDataList().forEach(subFile -> sub.newLine().dump(subFile));
+        data.getDataList().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 }

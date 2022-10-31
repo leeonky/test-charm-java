@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.extensions.basic.formatters;
 
-import com.github.leeonky.dal.extensions.basic.hex.util.Hex;
+import com.github.leeonky.dal.extensions.basic.binary.util.Hex;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.extensions.basic.hex.util.Hex.hex;
+import static com.github.leeonky.dal.extensions.basic.binary.util.Hex.hex;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

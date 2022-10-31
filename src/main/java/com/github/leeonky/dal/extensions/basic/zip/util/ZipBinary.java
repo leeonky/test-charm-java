@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAll;
+import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAll;
 import static java.util.Arrays.stream;
 
 public class ZipBinary extends ZipNodeCollection {

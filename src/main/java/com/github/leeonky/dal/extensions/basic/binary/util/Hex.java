@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.basic.hex.util;
+package com.github.leeonky.dal.extensions.basic.binary.util;
 
 import com.github.leeonky.interpreter.CharStream;
 import com.github.leeonky.interpreter.Notation;

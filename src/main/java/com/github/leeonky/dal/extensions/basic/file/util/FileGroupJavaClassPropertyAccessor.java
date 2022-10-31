@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.extensions.basic.file.util;
 
-import com.github.leeonky.dal.extensions.basic.FileGroup;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.util.BeanClass;
 

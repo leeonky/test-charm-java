@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.extensions.basic.file.util;
 
-import com.github.leeonky.dal.extensions.basic.FileGroup;
 import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.Suppressor;
 

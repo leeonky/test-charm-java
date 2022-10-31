@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.dal.extensions.basic.JsonExtension.StaticMethods.json;
-import static com.github.leeonky.dal.extensions.basic.zip.ZipExtension.StaticMethods.unzip;
+import static com.github.leeonky.dal.extensions.basic.json.Methods.json;
+import static com.github.leeonky.dal.extensions.basic.zip.Methods.unzip;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
