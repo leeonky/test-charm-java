@@ -50,32 +50,32 @@ class HexTest {
 
         @Test
         void empty() {
-            assertThat(hex("").toString()).isEqualTo("empty");
+            assertThat(hex("").toString()).isEqualTo("Empty binary");
         }
 
 
         @Test
         void one_byte() {
-            assertThat(hex("61").toString()).isEqualTo("size 1\n" +
+            assertThat(hex("61").toString()).isEqualTo("Binary size 1\n" +
                     "00000000: 61                                                 a");
         }
 
         @Test
         void one_line_bytes() {
-            assertThat(hex("61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70").toString()).isEqualTo("size 16\n" +
+            assertThat(hex("61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70").toString()).isEqualTo("Binary size 16\n" +
                     "00000000: 61 62 63 64  65 66 67 68  69 6A 6B 6C  6D 6E 6F 70 abcdefghijklmnop");
         }
 
         @Test
         void tow_line_bytes() {
-            assertThat(hex("61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 71").toString()).isEqualTo("size 17\n" +
+            assertThat(hex("61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 71").toString()).isEqualTo("Binary size 17\n" +
                     "00000000: 61 62 63 64  65 66 67 68  69 6A 6B 6C  6D 6E 6F 70 abcdefghijklmnop\n" +
                     "00000010: 71                                                 q");
         }
 
         @Test
         void one_invalid_code_point_byte() {
-            assertThat(hex("FF").toString()).isEqualTo("size 1\n" +
+            assertThat(hex("FF").toString()).isEqualTo("Binary size 1\n" +
                     "00000000: FF                                                 .");
         }
     }

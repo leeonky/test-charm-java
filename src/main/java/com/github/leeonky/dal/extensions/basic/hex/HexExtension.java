@@ -40,7 +40,7 @@ public class HexExtension implements Extension {
 
             if (!expectActual.getExpectInstance().equals(actualHex)) {
 
-                String expectedString = expectActual.getExpected().inspect();
+                String expectedString = expectActual.getExpected().dumpDetail();
                 String actualString = inspect(actualHex);
                 int diffPosition = TextUtil.differentPosition(expectedString, actualString);
                 String firstPart = new StringWithPosition(expectedString).position(diffPosition).result("Expected to be equal to: ");
