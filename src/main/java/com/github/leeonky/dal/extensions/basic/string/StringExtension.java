@@ -2,22 +2,23 @@ package com.github.leeonky.dal.extensions.basic.string;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.basic.Diff;
-import com.github.leeonky.dal.runtime.ConditionalChecker;
-import com.github.leeonky.dal.runtime.ExpectActual;
-import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.dal.runtime.*;
 
 import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAll;
 import static com.github.leeonky.dal.extensions.basic.file.util.FileGroup.register;
 import static com.github.leeonky.dal.extensions.basic.string.Methods.string;
 import static com.github.leeonky.dal.runtime.ConditionalChecker.matchTypeChecker;
+import static java.util.Optional.of;
 
+@SuppressWarnings("unused")
 public class StringExtension implements Extension {
 
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerStaticMethodExtension(Methods.class)
-                .registerEqualsChecker(CharSequence.class, new CharSequenceChecker())
+//                TODO refactor
+                .registerEqualsChecker(CharSequence.class, CharSequence.class, (a1, a2) -> of(new CharSequenceChecker()))
                 .registerMatchesChecker(CharSequence.class, matchTypeChecker(Number.class, String.class)
                         .and(matchTypeChecker(Boolean.class, String.class))
                         .and(new CharSequenceMatcherChecker()))
@@ -30,18 +31,22 @@ public class StringExtension implements Extension {
     private static class CharSequenceChecker implements ConditionalChecker {
 
         @Override
-        public boolean failed(ExpectActual expectActual) {
-            return !convertToString(expectActual.getExpected().getInstance())
-                    .equals(convertToString(expectActual.getActual().getInstance()));
+        public Data transformActual(Data actual, RuntimeContextBuilder.DALRuntimeContext context) {
+            return context.wrap(actual.getInstance().toString());
         }
 
         @Override
-        public String message(ExpectActual expectActual) {
-            String message = expectActual.verificationMessage(getPrefix());
-            if (expectActual.getActual().isNull())
+        public Data transformExpected(Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
+            return context.wrap(expected.getInstance().toString());
+        }
+
+        @Override
+        public String message(CheckingContext checkingContext) {
+            String message = checkingContext.verificationMessage(getPrefix());
+            if (checkingContext.getActual().isNull())
                 return message;
-            String detail = new Diff(convertToString(expectActual.getExpected().getInstance()),
-                    convertToString(expectActual.getActual().getInstance())).detail();
+            String detail = new Diff(convertToString(checkingContext.getExpected().getInstance()),
+                    convertToString(checkingContext.getActual().getInstance())).detail();
             return detail.isEmpty() ? message : message + "\n\n" + detail;
         }
 
@@ -50,26 +55,34 @@ public class StringExtension implements Extension {
         }
 
         protected String convertToString(Object object) {
-            return object == null ? null : ((CharSequence) object).toString();
+            return ((CharSequence) object).toString();
         }
     }
 
-    private static class CharSequenceMatcherChecker extends CharSequenceChecker {
+    private static class CharSequenceMatcherChecker implements ConditionalChecker {
 
         @Override
-        public boolean failed(ExpectActual expectActual) {
-            return !convertToString(expectActual.getExpected().getInstance())
-                    .equals(convertToString(expectActual.getActual().convert(String.class).getInstance()));
+        public boolean failed(CheckingContext checkingContext) {
+            return !convertToString(checkingContext.getExpected().getInstance())
+                    .equals(convertToString(checkingContext.getActual().convert(String.class).getInstance()));
         }
 
-        @Override
         protected String getPrefix() {
             return "Expected to match: ";
         }
 
-        @Override
         protected String convertToString(Object object) {
             return object == null ? null : object.toString();
+        }
+
+        @Override
+        public String message(CheckingContext checkingContext) {
+            String message = checkingContext.verificationMessage(getPrefix());
+            if (checkingContext.getActual().isNull())
+                return message;
+            String detail = new Diff(convertToString(checkingContext.getExpected().getInstance()),
+                    convertToString(checkingContext.getActual().getInstance())).detail();
+            return detail.isEmpty() ? message : message + "\n\n" + detail;
         }
     }
 }

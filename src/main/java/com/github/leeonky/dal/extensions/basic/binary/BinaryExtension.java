@@ -35,5 +35,4 @@ public class BinaryExtension implements Extension {
                 .registerStaticMethodExtension(Methods.class)
                 .registerImplicitData(InputStream.class, BinaryExtension::readAllAndClose);
     }
-
 }
