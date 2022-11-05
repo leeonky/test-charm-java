@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.extensions.basic;
 
 public interface CheckerType {
-    String getPrefix();
+    String getType();
 
     interface Equals extends CheckerType {
 
         @Override
-        default String getPrefix() {
+        default String getType() {
             return "Expected to be equal to: ";
         }
     }
@@ -14,7 +14,7 @@ public interface CheckerType {
     interface Matches extends CheckerType {
 
         @Override
-        default String getPrefix() {
+        default String getType() {
             return "Expected to match: ";
         }
     }

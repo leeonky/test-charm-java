@@ -23,12 +23,11 @@ Feature: hex
                   ```
                   ^
 
-    Expected to be equal to: Binary size 6
-    00000000: E4 BD A0 E5  A5 BF                                 ......
-                               ^
-    Actual: Binary size 6
-    00000000: E4 BD A0 E5  A5 BD                                 ......
-                               ^
+    Expected to be equal to:                                            | Actual:
+    --------------------------------------------------------------------|--------------------------------------------------------------------
+    Binary size 6                                                       | Binary size 6
+    00000000: E4 BD A0 E5  A5 BF                                 ...... | 00000000: E4 BD A0 E5  A5 BD                                 ......
+                               ^                                        |                            ^
 
     The root value was: null
     """

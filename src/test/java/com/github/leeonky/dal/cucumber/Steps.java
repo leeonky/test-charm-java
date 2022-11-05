@@ -225,6 +225,6 @@ public class Steps {
 
     @Then("the diff should be:")
     public void theDiffShouldBe(String result) {
-        assertThat(new Diff(left, right).detail()).isEqualTo(result);
+        assertThat(new Diff("Diff:\nExpect:", left, right).detail()).isEqualTo(result);
     }
 }

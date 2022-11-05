@@ -6,8 +6,8 @@ import com.github.leeonky.dal.runtime.checker.CheckingContext;
 public abstract class CheckerWithDiff implements Checker, CheckerType {
     @Override
     public String message(CheckingContext checkingContext) {
-        StringBuilder result = new StringBuilder(checkingContext.verificationMessage(getPrefix(), ""));
-        String detail = new Diff(expectedDetail(checkingContext), actualDetail(checkingContext)).detail();
+        StringBuilder result = new StringBuilder(checkingContext.verificationMessage(getType(), ""));
+        String detail = new Diff("Detail:\nExpect:", expectedDetail(checkingContext), actualDetail(checkingContext)).detail();
         if (!detail.isEmpty())
             result.append("\n\n").append(detail);
         return result.toString();

@@ -55,7 +55,7 @@ Feature: assert string
       <hello\nworld>
               ^
 
-      Diff:
+      Detail:
       Expect: | Actual:
       --------|--------
       hello   | hello
@@ -150,7 +150,7 @@ Feature: assert string
       <hello\nworld>
               ^
 
-      Diff:
+      Detail:
       Expect: | Actual:
       --------|--------
       hello   | hello
