@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.not;
 
-//TODO refactor
 public class SFtp extends SFtpFile {
     private final String host, port, user, password;
     private final String path;
