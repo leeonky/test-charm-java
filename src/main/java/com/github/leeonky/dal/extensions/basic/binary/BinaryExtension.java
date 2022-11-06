@@ -6,6 +6,7 @@ import com.github.leeonky.util.Suppressor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class BinaryExtension implements Extension {
 
@@ -33,6 +34,10 @@ public class BinaryExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerStaticMethodExtension(Methods.class)
+                .registerListAccessor(InputStream.class, instance -> new ArrayList<Byte>() {{
+                    for (byte b : readAllAndClose(instance))
+                        add(b);
+                }})
                 .registerImplicitData(InputStream.class, BinaryExtension::readAllAndClose);
     }
 }
