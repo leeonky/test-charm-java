@@ -4,9 +4,11 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.basic.Diff;
 import com.github.leeonky.dal.extensions.basic.sftp.util.SFtp;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -14,8 +16,10 @@ import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
 import net.lingala.zip4j.ZipFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,6 +27,7 @@ import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
@@ -33,9 +38,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Steps {
-
     private AssertionError assertionError;
     private Map<String, String> sshConfig;
+    private Object input;
+    private DAL dal = new DAL().extend();
+
+    @Before
+    public void reset() {
+        assertionError = null;
+        sshConfig = new HashMap<>();
+        input = null;
+        dal = new DAL().extend();
+        dal.getRuntimeContextBuilder().setConverter(new Converter().extend());
+    }
 
     @SneakyThrows
     @Given("root folder {string}")
@@ -57,7 +72,7 @@ public class Steps {
 
     @Then("java.io.File {string} should:")
     public void java_io_file_should(String string, String expression) {
-        expect(Paths.get(string).toFile()).should(expression);
+        expect(Paths.get(string).toFile()).use(dal).should(expression);
     }
 
     @Given("a folder {string}")
@@ -67,7 +82,7 @@ public class Steps {
 
     @Then("java.io.File {string} should failed:")
     public void javaIoFileShouldFailed(String string, String expression) {
-        assertionError = assertThrows(AssertionError.class, () -> expect(Paths.get(string).toFile()).should(expression));
+        assertionError = assertThrows(AssertionError.class, () -> expect(Paths.get(string).toFile()).use(dal).should(expression));
     }
 
     @And("error message should be:")
@@ -77,17 +92,17 @@ public class Steps {
 
     @Then("the following should pass:")
     public void theFollowingShouldPass(String expression) {
-        expect(expression).should(expression);
+        expect(input).use(dal).should(expression);
     }
 
     @Then("java.nio.Path {string} should:")
     public void javaNioPathShould(String string, String expression) {
-        expect(Paths.get(string)).should(expression);
+        expect(Paths.get(string)).use(dal).should(expression);
     }
 
     @Then("java.nio.Path {string} should failed:")
     public void javaNioPathShouldFailed(String string, String expression) {
-        assertionError = assertThrows(AssertionError.class, () -> expect(Paths.get(string)).should(expression));
+        assertionError = assertThrows(AssertionError.class, () -> expect(Paths.get(string)).use(dal).should(expression));
     }
 
     @SneakyThrows
@@ -115,7 +130,7 @@ public class Steps {
 
     @Given("string {string} should:")
     public void string_should(String input, String verification) {
-        expect(input).should(verification);
+        expect(input).use(dal).should(verification);
     }
 
     private static SFtp sFtp;
@@ -128,7 +143,7 @@ public class Steps {
 
     @Then("got sftp:")
     public void gotSftp(String expression) {
-        expect(sFtp).should(expression);
+        expect(sFtp).use(dal).should(expression);
     }
 
     @When("evaluate sftp:")
@@ -190,7 +205,6 @@ public class Steps {
             sFtp.close();
     }
 
-    private Object input;
 
     @Given("the following json:")
     public void theFollowingJson(String json) {
@@ -200,7 +214,7 @@ public class Steps {
     @When("evaluate by:")
     public void evaluateBy(String expression) {
         try {
-            expect(input).should(expression);
+            expect(input).use(dal).should(expression);
         } catch (AssertionError e) {
             assertionError = e;
         }
@@ -226,5 +240,33 @@ public class Steps {
     @Then("the diff should be:")
     public void theDiffShouldBe(String result) {
         assertThat(new Diff("Diff:\nExpect:", left, right).detail()).isEqualTo(result);
+    }
+
+    @Given("a class object with string {string} and can be converted to bytes")
+    public void aClassObjectWithStringAndCanBeConvertedToBytes(String value) {
+        input = new ToBytes(value);
+        dal.getRuntimeContextBuilder().getConverter().addTypeConverter(ToBytes.class, byte[].class, ToBytes::getBytes);
+    }
+
+    @Given("a class object with string {string} and can be converted to input-stream")
+    public void aClassObjectWithStringAndCanBeConvertedToInputStream(String value) {
+        input = new ToBytes(value);
+        dal.getRuntimeContextBuilder().getConverter().addTypeConverter(ToBytes.class, InputStream.class, ToBytes::getInputStream);
+    }
+
+    public static class ToBytes {
+        private final String value;
+
+        public ToBytes(String value) {
+            this.value = value;
+        }
+
+        public byte[] getBytes() {
+            return value.getBytes();
+        }
+
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(getBytes());
+        }
     }
 }

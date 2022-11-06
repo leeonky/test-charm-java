@@ -10,6 +10,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
+//TODO move to dumper
 public class Hex {
     private final byte[] data;
 
@@ -21,7 +22,7 @@ public class Hex {
         return new Hex(parseBinary(hexInText));
     }
 
-    private static byte[] parseBinary(String hexInText) {
+    public static byte[] parseBinary(String hexInText) {
         CharStream charStream = new CharStream(hexInText);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         while (charStream.trimBlackAndComment(asList(Notation.notation("#"))).hasContent()) {

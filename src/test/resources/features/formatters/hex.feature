@@ -32,7 +32,7 @@ Feature: hex
     The root value was: null
     """
 
-  Scenario: raise error when input-stream not equal
+  Scenario: input-stream equal to hex
     Given root folder "/tmp/work/test/dir"
     Given a file "/tmp/work/test/dir/file1.txt"
     """
@@ -45,7 +45,7 @@ Feature: hex
                                                         ```
     """
 
-  Scenario: input-stream equal to hex
+  Scenario: raise error when input-stream not equal
     Given root folder "/tmp/work/test/dir"
     Given a file "/tmp/work/test/dir/file1.txt"
     """
@@ -74,6 +74,24 @@ Feature: hex
     The root value was: null
     """
 
-#  TODO : byte[] and inputstream
-#  TODO : use convertor to byte[] and inputstream
-#  TODO : use convertor to HEX
+  Scenario: convert to bytes and equal to hex
+    Given a class object with string "你好" and can be converted to bytes
+    Then the following should pass:
+    """
+    : ``` HEX
+      E4 BD A0 E5 A5 BD
+      ```
+    """
+
+  Scenario: convert to input-stream and equal to hex
+    Given a class object with string "你好" and can be converted to input-stream
+    Then the following should pass:
+    """
+    : ``` HEX
+      E4 BD A0 E5 A5 BD
+      ```
+    """
+
+#  TODO expected type can also be bytes InputStream
+#  TODO byte[] Byte[] InputStream => byte[]
+#  TODO binary dumper support byte[] Byte[] InputStream
