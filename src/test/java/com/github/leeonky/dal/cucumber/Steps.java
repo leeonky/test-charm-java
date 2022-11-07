@@ -48,8 +48,9 @@ public class Steps {
         assertionError = null;
         sshConfig = new HashMap<>();
         input = null;
-        dal = new DAL().extend();
-        dal.getRuntimeContextBuilder().setConverter(new Converter().extend());
+        dal = new DAL();
+        dal.getRuntimeContextBuilder().setConverter(Converter.createDefault().extend());
+        dal.extend();
     }
 
     @SneakyThrows

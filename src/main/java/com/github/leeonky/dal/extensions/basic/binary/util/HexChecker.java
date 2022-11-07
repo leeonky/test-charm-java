@@ -9,7 +9,6 @@ import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.util.CannotToStreamException;
 import com.github.leeonky.util.ConvertException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Optional;
 
@@ -30,14 +29,17 @@ public abstract class HexChecker implements Checker, CheckerType {
         return new Diff(getType(), context.getExpected().dumpAll(), context.getActual().dumpAll()).detail();
     }
 
+    @Override
+    public Data transformExpected(Data expected, DALRuntimeContext context) {
+        return context.wrap(Hex.getBytes(expected));
+    }
+
     public static class Equals extends HexChecker implements CheckerType.Equals {
         private static final Optional<Checker> INSTANCE = of(new HexChecker.Equals());
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            actual.getValueList().forEach(b -> stream.write((byte) b));
-            return context.wrap(new Hex(stream.toByteArray()));
+            return context.wrap(Hex.getBytes(actual));
         }
     }
 
@@ -46,10 +48,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            Data convert = convert(actual);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            convert.getValueList().forEach(b -> stream.write((byte) b));
-            return context.wrap(new Hex(stream.toByteArray()));
+            return context.wrap(Hex.getBytes(convert(actual)));
         }
 
         private Data convert(Data actual) {

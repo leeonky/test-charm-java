@@ -3,7 +3,7 @@ package com.github.leeonky.dal.extensions.basic.binary.util;
 import com.github.leeonky.dal.runtime.TextAttribute;
 import com.github.leeonky.dal.runtime.TextFormatter;
 
-import static com.github.leeonky.dal.extensions.basic.binary.util.Hex.hex;
+import static com.github.leeonky.dal.extensions.basic.binary.util.Hex.parseBinary;
 
 public class HexFormatter extends TextFormatter {
 
@@ -14,6 +14,6 @@ public class HexFormatter extends TextFormatter {
 
     @Override
     public Object format(Object content, TextAttribute attribute) {
-        return hex((String) content);
+        return parseBinary((String) content);
     }
 }

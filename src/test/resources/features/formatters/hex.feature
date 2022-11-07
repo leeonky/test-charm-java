@@ -92,6 +92,4 @@ Feature: hex
       ```
     """
 
-#  TODO expected type can also be bytes InputStream
-#  TODO byte[] Byte[] InputStream => byte[]
 #  TODO binary dumper support byte[] Byte[] InputStream

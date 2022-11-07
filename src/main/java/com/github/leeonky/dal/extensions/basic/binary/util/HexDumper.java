@@ -8,6 +8,6 @@ public class HexDumper implements Dumper {
 
     @Override
     public void dump(Data data, DumpingContext context) {
-        context.append(data.getInstance().toString());
+        context.append(new Hex(Hex.getBytes(data)).toString());
     }
 }

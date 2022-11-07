@@ -1,11 +1,14 @@
 package com.github.leeonky.dal.extensions.basic.binary.util;
 
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.interpreter.CharStream;
 import com.github.leeonky.interpreter.Notation;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 
+import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -35,6 +38,19 @@ public class Hex {
                 throw new IllegalArgumentException(String.format("incomplete byte: %c, each byte should has 2 hex numbers", c));
         }
         return stream.toByteArray();
+    }
+
+    public static byte[] getBytes(Data data) {
+        if (data.getInstance() instanceof byte[])
+            return (byte[]) data.getInstance();
+        if (data.getInstance() instanceof InputStream)
+            return readAllAndClose((InputStream) data.getInstance());
+        if (data.getInstance() instanceof Byte[]) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            data.getValueList().forEach(b -> stream.write((byte) b));
+            return stream.toByteArray();
+        }
+        throw new IllegalArgumentException(data.getInstance() + " is not binary type");
     }
 
     @Override
