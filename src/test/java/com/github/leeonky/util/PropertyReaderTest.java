@@ -15,6 +15,12 @@ class PropertyReaderTest {
     private static final int ANY_INT = 100;
     private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.create(BeanWithPubField.class);
 
+    public interface Interface {
+        void setValue(String value);
+
+        String getValue();
+    }
+
     public static class BeanWithPubField {
 
         public static int staticField = 1;
@@ -80,9 +86,45 @@ class PropertyReaderTest {
         }
 
         @Test
+        void get_field_value_of_anonymous_class() {
+            BeanWithPubField bean = new BeanWithPubField() {
+            };
+            assertThat(BeanClass.createFrom(bean).getPropertyValue(bean, "field")).isEqualTo(100);
+        }
+
+        @Test
+        void get_property_value_of_interface_instance() {
+            Interface anInterface = new Interface() {
+                private String value;
+
+                @Override
+                public void setValue(String value) {
+                    this.value = value;
+                }
+
+                @Override
+                public String getValue() {
+                    return value;
+                }
+            };
+            anInterface.setValue("hello");
+
+            assertThat(BeanClass.createFrom(anInterface).getPropertyValue(anInterface, "value")).isEqualTo("hello");
+        }
+
+        @Test
         void get_value_via_getter_override_field() {
             assertThat(beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "field2")).isEqualTo(200);
         }
+
+        @Test
+        void get_value_via_getter_of_anonymous_class() {
+            BeanWithPubField bean = new BeanWithPubField() {
+            };
+
+            assertThat(BeanClass.createFrom(bean).getPropertyValue(bean, "field2")).isEqualTo(200);
+        }
+
 
         @Test
         void should_support_boolean_getter() {

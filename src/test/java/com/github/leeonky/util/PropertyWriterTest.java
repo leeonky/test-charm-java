@@ -12,6 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class PropertyWriterTest {
     private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = create(BeanWithPubField.class);
 
+    public interface Interface {
+        void setValue(String value);
+
+        String getValue();
+    }
+
     public static class BeanWithPubField {
         public static int staticField = 1;
         public final int constField = 2;
@@ -69,8 +75,46 @@ class PropertyWriterTest {
         }
 
         @Test
+        void set_field_value_via_anonymous_class() {
+            BeanWithPubField bean = new BeanWithPubField() {
+            };
+            BeanClass.createFrom(bean).setPropertyValue(bean, "field", 100);
+            assertThat(bean.field).isEqualTo(100);
+        }
+
+        @Test
         void set_value_via_setter_override_field() {
             beanWithPubFieldBeanClass.setPropertyValue(bean, "field2", 100);
+            assertThat(bean.field2).isEqualTo(200);
+        }
+
+        @Test
+        void set_property_via_interface() {
+            PropertyReaderTest.Interface anInterface = new PropertyReaderTest.Interface() {
+                private String value;
+
+                @Override
+                public void setValue(String value) {
+                    this.value = value;
+                }
+
+                @Override
+                public String getValue() {
+                    return value;
+                }
+            };
+            BeanClass.createFrom(anInterface).setPropertyValue(anInterface, "value", "hello");
+
+            assertThat(anInterface.getValue()).isEqualTo("hello");
+        }
+
+        @Test
+        void set_property_via_anonymous_class() {
+            BeanWithPubField bean = new BeanWithPubField() {
+            };
+
+            BeanClass.createFrom(bean).setPropertyValue(bean, "field2", 100);
+
             assertThat(bean.field2).isEqualTo(200);
         }
 
