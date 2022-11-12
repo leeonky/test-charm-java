@@ -7,6 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static com.github.leeonky.util.BeanClass.createFrom;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,6 +19,10 @@ class PropertyReaderTest {
     public interface Interface {
         void setValue(String value);
 
+        String getValue();
+    }
+
+    public interface InterfaceLambda {
         String getValue();
     }
 
@@ -89,7 +94,7 @@ class PropertyReaderTest {
         void get_field_value_of_anonymous_class() {
             BeanWithPubField bean = new BeanWithPubField() {
             };
-            assertThat(BeanClass.createFrom(bean).getPropertyValue(bean, "field")).isEqualTo(100);
+            assertThat(createFrom(bean).getPropertyValue(bean, "field")).isEqualTo(100);
         }
 
         @Test
@@ -109,7 +114,7 @@ class PropertyReaderTest {
             };
             anInterface.setValue("hello");
 
-            assertThat(BeanClass.createFrom(anInterface).getPropertyValue(anInterface, "value")).isEqualTo("hello");
+            assertThat(createFrom(anInterface).getPropertyValue(anInterface, "value")).isEqualTo("hello");
         }
 
         @Test
@@ -118,13 +123,19 @@ class PropertyReaderTest {
         }
 
         @Test
+        void get_property_via_interface() {
+            InterfaceLambda lambda = () -> "hello";
+
+            assertThat(createFrom(lambda).getPropertyValue(lambda, "value")).isEqualTo("hello");
+        }
+
+        @Test
         void get_value_via_getter_of_anonymous_class() {
             BeanWithPubField bean = new BeanWithPubField() {
             };
 
-            assertThat(BeanClass.createFrom(bean).getPropertyValue(bean, "field2")).isEqualTo(200);
+            assertThat(createFrom(bean).getPropertyValue(bean, "field2")).isEqualTo(200);
         }
-
 
         @Test
         void should_support_boolean_getter() {

@@ -3,9 +3,11 @@ package com.github.leeonky.util;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.leeonky.util.BeanClass.create;
+import static com.github.leeonky.util.BeanClass.createFrom;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -16,6 +18,10 @@ class PropertyWriterTest {
         void setValue(String value);
 
         String getValue();
+    }
+
+    public interface InterfaceLambda {
+        void setValue(List<?> list);
     }
 
     public static class BeanWithPubField {
@@ -78,7 +84,7 @@ class PropertyWriterTest {
         void set_field_value_via_anonymous_class() {
             BeanWithPubField bean = new BeanWithPubField() {
             };
-            BeanClass.createFrom(bean).setPropertyValue(bean, "field", 100);
+            createFrom(bean).setPropertyValue(bean, "field", 100);
             assertThat(bean.field).isEqualTo(100);
         }
 
@@ -103,9 +109,19 @@ class PropertyWriterTest {
                     return value;
                 }
             };
-            BeanClass.createFrom(anInterface).setPropertyValue(anInterface, "value", "hello");
+            createFrom(anInterface).setPropertyValue(anInterface, "value", "hello");
 
             assertThat(anInterface.getValue()).isEqualTo("hello");
+        }
+
+        @Test
+        void set_property_via_lambda() {
+            InterfaceLambda lambda = List::clear;
+            List<String> list = new ArrayList<String>() {{
+                add("hello");
+            }};
+            createFrom(lambda).setPropertyValue(lambda, "value", list);
+            assertThat(list).isEmpty();
         }
 
         @Test
@@ -113,7 +129,7 @@ class PropertyWriterTest {
             BeanWithPubField bean = new BeanWithPubField() {
             };
 
-            BeanClass.createFrom(bean).setPropertyValue(bean, "field2", 100);
+            createFrom(bean).setPropertyValue(bean, "field2", 100);
 
             assertThat(bean.field2).isEqualTo(200);
         }
