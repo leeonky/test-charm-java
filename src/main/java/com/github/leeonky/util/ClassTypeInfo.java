@@ -22,7 +22,7 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     }
 
     private void collectGetterSetters(BeanClass<T> type) {
-        for (Method method : type.getType().getMethods()) {
+        for (Method method : typeWithoutLambda(type).getMethods()) {
             if (MethodPropertyReader.isGetter(method))
                 addAccessor(new MethodPropertyReader<>(type, method), readers, allReaders);
             if (MethodPropertyWriter.isSetter(method))
@@ -47,6 +47,18 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
                 }
             }
         }
+    }
+
+    private Class<? super T> typeWithoutLambda(BeanClass<T> beanClass) {
+        Class<T> type = beanClass.getType();
+        if (type.isAnonymousClass()) {
+            if (type.getSuperclass() == Object.class && type.getInterfaces().length > 0)
+                return (Class<? super T>) type.getInterfaces()[0];
+            return type;
+        }
+        if (type.isSynthetic() && type.getInterfaces().length > 0)
+            return (Class<? super T>) type.getInterfaces()[0];
+        return type;
     }
 
     private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap,

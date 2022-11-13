@@ -1,5 +1,8 @@
-package com.github.leeonky.util;
+package com.github.leeonky;
 
+import com.github.leeonky.util.Attr;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.NoSuchAccessorException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -96,7 +99,7 @@ class PropertyWriterTest {
 
         @Test
         void set_property_via_interface() {
-            PropertyReaderTest.Interface anInterface = new PropertyReaderTest.Interface() {
+            Interface anInterface = new Interface() {
                 private String value;
 
                 @Override
@@ -165,7 +168,7 @@ class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Beans.class).setPropertyValue(beans, "bean", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property com.github.leeonky.util.PropertyWriterTest$Beans.bean<com.github.leeonky.util.PropertyWriterTest$Bean>");
+                            "property com.github.leeonky.PropertyWriterTest$Beans.bean<com.github.leeonky.PropertyWriterTest$Bean>");
         }
 
         @Test
@@ -175,7 +178,7 @@ class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Beans.class).setPropertyValue(beans, "beanSetter", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property com.github.leeonky.util.PropertyWriterTest$Beans.beanSetter<com.github.leeonky.util.PropertyWriterTest$Bean>");
+                            "property com.github.leeonky.PropertyWriterTest$Beans.beanSetter<com.github.leeonky.PropertyWriterTest$Bean>");
         }
 
         @Test
@@ -184,7 +187,7 @@ class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Bean[].class).setPropertyValue(beans, "0", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property [Lcom.github.leeonky.util.PropertyWriterTest$Bean;[0]<com.github.leeonky.util.PropertyWriterTest$Bean>");
+                            "property [Lcom.github.leeonky.PropertyWriterTest$Bean;[0]<com.github.leeonky.PropertyWriterTest$Bean>");
         }
 
         @Test

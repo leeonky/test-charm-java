@@ -1,5 +1,9 @@
-package com.github.leeonky.util;
+package com.github.leeonky;
 
+import com.github.leeonky.util.AnnotationGetter;
+import com.github.leeonky.util.Attr;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.NoSuchAccessorException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -126,7 +130,8 @@ class PropertyReaderTest {
         void get_property_via_interface() {
             InterfaceLambda lambda = () -> "hello";
 
-            assertThat(createFrom(lambda).getPropertyValue(lambda, "value")).isEqualTo("hello");
+            Object value = createFrom(lambda).getPropertyValue(lambda, "value");
+            assertThat(value).isEqualTo("hello");
         }
 
         @Test
