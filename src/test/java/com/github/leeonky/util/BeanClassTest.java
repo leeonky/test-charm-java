@@ -224,9 +224,10 @@ class BeanClassTest {
             }
 
             @Test
-            void should_use_super_class_when_instance_is_anonymous_class() {
-                assertThat(named((Class<? extends StringList>) new StringList() {
-                }.getClass())).isEqualTo(StringList.class);
+            void should_return_same_class_when_instance_is_anonymous_class() {
+                Class<? extends StringList> type = new StringList() {
+                }.getClass();
+                assertThat(named((Class<? extends StringList>) type)).isEqualTo(type);
             }
 
             @Test
