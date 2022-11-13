@@ -454,18 +454,4 @@ class SourceCodeTest extends BaseTest {
             assertThat(testNode.getPositionBegin()).isEqualTo(1);
         }
     }
-
-    @Nested
-    class Indent {
-
-        @Test
-        void indent_of_first_line() {
-            assertThat(createSourceCode("12345").indent(3, "\n")).isEqualTo(3);
-        }
-
-        @Test
-        void indent_of_second_line_with_lf_as_new_line() {
-            assertThat(createSourceCode("12345\n12345").indent(7, "\n")).isEqualTo(1);
-        }
-    }
 }

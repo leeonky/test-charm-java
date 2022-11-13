@@ -40,7 +40,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.14' + System.env.VERSION_SCOPE
+version = '0.0.15' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -55,7 +55,7 @@ repositories {
 }
 
 dependencies {
-    implementation dep(':bean-util', '0.6.2')
+    implementation dep(':bean-util', '0.6.3')
     testImplementation 'org.assertj:assertj-core:3.21.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.3.1")
