@@ -1,11 +1,11 @@
 package com.github.leeonky.dal.extensions.basic.binary.util;
 
+import com.github.leeonky.dal.runtime.BuildInTextFormatter;
 import com.github.leeonky.dal.runtime.TextAttribute;
-import com.github.leeonky.dal.runtime.TextFormatter;
 
 import static com.github.leeonky.dal.extensions.basic.binary.util.Hex.parseBinary;
 
-public class HexFormatter extends TextFormatter {
+public class HexFormatter extends BuildInTextFormatter {
 
     @Override
     public String description() {
