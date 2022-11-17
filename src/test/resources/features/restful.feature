@@ -560,7 +560,7 @@ Feature: RESTful api steps
       """
       When <method> "/index":
       """application/octet-stream
-      files['an avatar'].binaryContent
+      files['an avatar'].content
       """
       Then "http://www.a.com" got a "<method>" request on "/index" with body matching
       """

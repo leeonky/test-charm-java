@@ -1,5 +1,6 @@
 package com.github.leeonky.cucumber.restful;
 
+import com.github.leeonky.dal.Accessors;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
@@ -22,8 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.dal.extensions.basic.BinaryExtension.readAllAndClose;
+import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
 
@@ -164,7 +164,7 @@ public class RestfulStep {
 
     @Then("response should be:")
     public <T> T responseShouldBe(String expression) {
-        return expect(response).get(System.lineSeparator() + expression);
+        return Accessors.get(System.lineSeparator() + expression).from(response);
     }
 
     @Then("data should be saved to {string} with response:")
@@ -217,7 +217,7 @@ public class RestfulStep {
         if (expression.startsWith("@")) {
             return request.files.get(expression.substring(1)).getContent();
         }
-        Object obj = expect(request.getContext()).get(expression);
+        Object obj = Accessors.get(expression).from(request.getContext());
         if (obj instanceof String) {
             return ((String) obj).getBytes(UTF_8);
         } else if (obj instanceof File) {

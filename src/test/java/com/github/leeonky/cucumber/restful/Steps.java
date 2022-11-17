@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
+import com.github.leeonky.dal.Accessors;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -122,9 +123,9 @@ public class Steps {
     @Then("got request form value:")
     public void got_request_form_value(String expression) {
         List<?> actual = new ObjectMapper().readValue(mockServer.retrieveRecordedRequests(request(), Format.JSON), List.class);
-        String string = expect(actual).get("[0].body.string");
+        String string = Accessors.get("[0].body.string").from(actual);
 
-        Object evaluate = expect(actual).get("[0].body.rawBytes");
+        Object evaluate = Accessors.get("[0].body.rawBytes").from(actual);
         byte[] bytes = Base64.getDecoder().decode(evaluate.toString());
         String substring = string.substring(2, string.indexOf('\r'));
         MultipartStream multipartStream = new MultipartStream(new ByteArrayInputStream(bytes),
