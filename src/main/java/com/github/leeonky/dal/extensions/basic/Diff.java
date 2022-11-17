@@ -25,20 +25,16 @@ public class Diff {
     //    TODO refactor
     private String makeDiffDetail(String expected, String actual, String leftTitle) {
         int position = TextUtil.differentPosition(expected, Objects.requireNonNull(actual));
-        List<String> expectedInfo = new ArrayList<>(TextUtil.lines(new StringWithPosition(expected).position(position).result()));
-        List<String> actualInfo = new ArrayList<>(TextUtil.lines(new StringWithPosition(actual).position(position).result()));
-
-
+        List<String> expectedInfo = formatToLines(expected, position);
+        List<String> actualInfo = formatToLines(actual, position);
         int titleNewLine = leftTitle.lastIndexOf('\n');
         String title;
-        if (titleNewLine == -1) {
+        if (titleNewLine == -1)
             title = "";
-            leftTitle = leftTitle;
-        } else {
+        else {
             title = leftTitle.substring(0, titleNewLine + 1);
             leftTitle = leftTitle.substring(titleNewLine + 1);
         }
-
         int leftWidth = Math.max(expectedInfo.stream().mapToInt(String::length).max().orElse(0), leftTitle.length());
         int rightWidth = Math.max(actualInfo.stream().mapToInt(String::length).max().orElse(0), RIGHT_ACTUAL.length());
         int maxLine = Math.max(actualInfo.size(), expectedInfo.size());
@@ -57,6 +53,10 @@ public class Diff {
         for (int i = 0; i < maxLine; i++)
             builder.append('\n').append(format(leftFormat, expectedInfo.get(i))).append(" | ").append(actualInfo.get(i));
         return builder.toString().trim();
+    }
+
+    private ArrayList<String> formatToLines(String expected, int position) {
+        return new ArrayList<>(TextUtil.lines(new StringWithPosition(expected).position(position).result()));
     }
 
     public String detail() {

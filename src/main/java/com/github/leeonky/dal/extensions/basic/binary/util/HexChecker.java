@@ -31,7 +31,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
     @Override
     public Data transformExpected(Data expected, DALRuntimeContext context) {
-        return context.wrap(Hex.getBytes(expected));
+        return context.wrap(HexDumper.getBytes(expected));
     }
 
     public static class Equals extends HexChecker implements CheckerType.Equals {
@@ -39,7 +39,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return context.wrap(Hex.getBytes(actual));
+            return context.wrap(HexDumper.getBytes(actual));
         }
     }
 
@@ -48,7 +48,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return context.wrap(Hex.getBytes(convert(actual)));
+            return context.wrap(HexDumper.getBytes(convert(actual)));
         }
 
         private Data convert(Data actual) {
