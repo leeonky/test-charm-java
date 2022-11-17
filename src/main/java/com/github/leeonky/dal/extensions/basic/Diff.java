@@ -22,11 +22,8 @@ public class Diff {
                 || expected.contains("\n") || expected.contains("\r"));
     }
 
-    //    TODO refactor
     private String makeDiffDetail(String expected, String actual, String leftTitle) {
         int position = TextUtil.differentPosition(expected, Objects.requireNonNull(actual));
-        List<String> expectedInfo = formatToLines(expected, position);
-        List<String> actualInfo = formatToLines(actual, position);
         int titleNewLine = leftTitle.lastIndexOf('\n');
         String title;
         if (titleNewLine == -1)
@@ -35,31 +32,46 @@ public class Diff {
             title = leftTitle.substring(0, titleNewLine + 1);
             leftTitle = leftTitle.substring(titleNewLine + 1);
         }
-        int leftWidth = Math.max(expectedInfo.stream().mapToInt(String::length).max().orElse(0), leftTitle.length());
-        int rightWidth = Math.max(actualInfo.stream().mapToInt(String::length).max().orElse(0), RIGHT_ACTUAL.length());
-        int maxLine = Math.max(actualInfo.size(), expectedInfo.size());
-        for (int i = expectedInfo.size(); i < maxLine; i++)
-            expectedInfo.add("");
-        for (int i = actualInfo.size(); i < maxLine; i++)
-            actualInfo.add("");
-        String leftFormat = "%-" + leftWidth + "s";
-        StringBuilder builder = new StringBuilder().append(title);
-        builder.append(format(leftFormat, leftTitle)).append(" | ").append(RIGHT_ACTUAL).append('\n');
-        for (int i = 0; i < leftWidth; i++)
-            builder.append('-');
-        builder.append("-|-");
-        for (int i = 0; i < rightWidth; i++)
-            builder.append('-');
-        for (int i = 0; i < maxLine; i++)
-            builder.append('\n').append(format(leftFormat, expectedInfo.get(i))).append(" | ").append(actualInfo.get(i));
-        return builder.toString().trim();
-    }
-
-    private ArrayList<String> formatToLines(String expected, int position) {
-        return new ArrayList<>(TextUtil.lines(new StringWithPosition(expected).position(position).result()));
+        return new SideText(expected, position, leftTitle).merge(new SideText(actual, position, RIGHT_ACTUAL), title);
     }
 
     public String detail() {
         return detail;
+    }
+
+    private static class SideText {
+        private final String title;
+        private final List<String> lines;
+        private final int width;
+
+        public SideText(String content, int position, String title) {
+            this.title = title;
+            lines = new ArrayList<>(TextUtil.lines(new StringWithPosition(content).position(position).result()));
+            width = Math.max(lines.stream().mapToInt(String::length).max().orElse(0), title.length());
+        }
+
+        private String merge(SideText right, String title) {
+            StringBuilder builder = new StringBuilder().append(title);
+            fillToSameLines(right);
+            right.fillToSameLines(this);
+            String leftFormat = "%-" + width + "s";
+            builder.append(format(leftFormat, this.title)).append(" | ").append(right.title).append('\n');
+            appendHeadMinus(builder);
+            builder.append("-|-");
+            right.appendHeadMinus(builder);
+            for (int i = 0; i < lines.size(); i++)
+                builder.append('\n').append(format(leftFormat, lines.get(i))).append(" | ").append(right.lines.get(i));
+            return builder.toString().trim();
+        }
+
+        private void appendHeadMinus(StringBuilder builder) {
+            for (int i = 0; i < width; i++)
+                builder.append('-');
+        }
+
+        private void fillToSameLines(SideText another) {
+            for (int i = lines.size(); i < another.lines.size(); i++)
+                lines.add("");
+        }
     }
 }
