@@ -38,7 +38,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.27' + System.env.VERSION_SCOPE
+version = '0.0.28' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -55,7 +55,7 @@ repositories {
 dependencies {
     implementation 'ma.glasnost.orika:orika-core:1.5.4'
     implementation 'org.reflections:reflections:0.9.11'
-    implementation dep(':bean-util', '0.6.2')
+    implementation dep(':bean-util', '0.6.3')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation 'org.assertj:assertj-core:3.10.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
