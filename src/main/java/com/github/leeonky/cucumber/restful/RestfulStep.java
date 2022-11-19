@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
@@ -162,15 +163,19 @@ public class RestfulStep {
         return this;
     }
 
+    public <T> T response(String expression) {
+        return Accessors.get(expression).from(response);
+    }
+
     @Then("response should be:")
-    public <T> T responseShouldBe(String expression) {
-        return Accessors.get(System.lineSeparator() + expression).from(response);
+    public void responseShouldBe(String expression) {
+        expect(response).should(expression);
     }
 
     @Then("data should be saved to {string} with response:")
-    public <T> T resourceShouldBe(String path, String expression) throws IOException, URISyntaxException {
+    public void resourceShouldBe(String path, String expression) throws IOException, URISyntaxException {
         responseShouldBe(expression);
-        return getAndResponseShouldBe(path, expression);
+        getAndResponseShouldBe(path, expression);
     }
 
     public void file(String fileKey, UploadFile file) {
@@ -178,15 +183,15 @@ public class RestfulStep {
     }
 
     @Then("{string} should response:")
-    public <T> T getAndResponseShouldBe(String path, String expression) throws IOException, URISyntaxException {
+    public void getAndResponseShouldBe(String path, String expression) throws IOException, URISyntaxException {
         get(path);
-        return responseShouldBe(expression);
+        responseShouldBe(expression);
     }
 
     @Then("DELETE {string} should response:")
-    public <T> T deleteAndResponseShouldBe(String path, String expression) throws IOException, URISyntaxException {
+    public void deleteAndResponseShouldBe(String path, String expression) throws IOException, URISyntaxException {
         delete(path);
-        return responseShouldBe(expression);
+        responseShouldBe(expression);
     }
 
     @When("GET {string}:")

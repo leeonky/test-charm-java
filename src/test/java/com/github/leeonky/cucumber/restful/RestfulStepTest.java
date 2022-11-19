@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RestfulStepTest {
     private RestfulStep restfulStep = new RestfulStep();
@@ -129,6 +130,20 @@ public class RestfulStepTest {
             restfulStep.put("/test", asList(1, "hello", true));
 
             steps.verifyRequest(": [{path= '/test' body.json= [1 hello true]}]");
+        }
+    }
+
+    @Nested
+    class GetFromResponse {
+
+        @SneakyThrows
+        @Test
+        void get_response_property() {
+            restfulStep.setBaseUrl("http://www.a.com:8080");
+
+            restfulStep.post("/test", "any-string");
+
+            assertThat((Object) restfulStep.response("code")).isEqualTo(404);
         }
     }
 }
