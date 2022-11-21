@@ -3,11 +3,16 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.6.0'
     }
     ext {
         repoName = "git config --get remote.origin.url".execute().getText()
         projectName = "basename -s .git ${repoName}".execute().getText().trim()
     }
+}
+
+def dep(p, version) {
+    return (gradle.ext.has('projects') && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
 }
 
 plugins {
@@ -22,6 +27,7 @@ jacoco {
 
 apply plugin: 'java'
 apply plugin: 'signing'
+apply plugin: 'info.solidsoft.pitest'
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
@@ -34,7 +40,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.1' + System.env.VERSION_SCOPE
+version = '0.0.2' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -49,18 +55,27 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-    testAnnotationProcessor('org.projectlombok:lombok:1.18.4')
-    testCompile('org.projectlombok:lombok:1.18.4')
+    compile dep(':bean-util', '0.6.3')
+    annotationProcessor('org.projectlombok:lombok:1.18.4')
+    compile('org.projectlombok:lombok:1.18.4')
 }
 
 test {
-    useJUnitPlatform()
-    testLogging {
-        events "failed"
-        exceptionFormat "full"
+    test {
+        systemProperty("cucumber.publish.quiet", true)
+        useJUnitPlatform {
+            excludeTags("disabled")
+        }
     }
+}
+
+pitest {
+    targetClasses = ['com.github.leeonky.dal.*']
+    excludedClasses = ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema']
+    outputFormats = ['HTML2']
+    pitestVersion = '1.6.9'
+    threads = 8
+    junit5PluginVersion = "0.12"
 }
 
 publishing {
@@ -117,4 +132,10 @@ task currentVersion {
 
 tasks.coveralls {
     dependsOn jacocoTestReport
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
 }
