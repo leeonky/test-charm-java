@@ -6,13 +6,13 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - 'c3:1b:f4:4e:38:4f:72:ac:d4:7b:23:bc:85:e9:25:f8'
+            - 'eb:b6:4f:dc:48:3c:ea:a6:01:9a:eb:1a:fd:28:24:c5'
       - checkout
       - run:
           name: build
           command: |
             export VERSION_SCOPE=''
-            ./gradlew check build coveralls
+            ./gradlew check build
             export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
               echo "====== Still version ${PUB_VERSION}, CI done ======"
