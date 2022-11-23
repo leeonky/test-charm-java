@@ -1,14 +1,16 @@
 package com.github.leeonky.interpreter;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class StringWithPosition {
     private final String content;
-    private final List<Integer> positions = new ArrayList<>();
-    private final List<Integer> rows = new ArrayList<>();
-    private final List<Integer> columns = new ArrayList<>();
+    private final Set<Integer> positions = new LinkedHashSet<>();
+    private final Set<Integer> rows = new LinkedHashSet<>();
+    private final Set<Integer> columns = new LinkedHashSet<>();
 
     public StringWithPosition(String content) {
         this.content = content;
@@ -101,7 +103,7 @@ public class StringWithPosition {
             return line.length() + (int) line.chars().filter(this::isFullWidth).count();
         }
 
-        private void printPositions(StringBuilder builder, List<Integer> positions) {
+        private void printPositions(StringBuilder builder, Collection<Integer> positions) {
             List<Integer> linePositions = linePosition(positions);
             if (!linePositions.isEmpty()) {
                 int lastPosition = startPosition;
@@ -121,9 +123,8 @@ public class StringWithPosition {
             return String.format("%" + (count + 1) + "c", '^');
         }
 
-        private List<Integer> linePosition(List<Integer> positions) {
-            return positions.stream()
-                    .map(i -> i - offset)
+        private List<Integer> linePosition(Collection<Integer> positions) {
+            return positions.stream().map(i -> i - offset)
                     .filter(i -> i >= startPosition && i <= startPosition + lines[0].length())
                     .sorted().collect(Collectors.toList());
         }
