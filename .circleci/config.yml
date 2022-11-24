@@ -21,7 +21,7 @@ jobs:
             java -version
             export CI=true
             export VERSION_SCOPE=''
-            sudo bash -c "echo '127.0.0.1 www.a.com' >> /etc/hosts"
+            sudo bash -c "echo '127.0.0.1 www.s.com' >> /etc/hosts"
             ./gradlew cucumber check build coveralls
             export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
