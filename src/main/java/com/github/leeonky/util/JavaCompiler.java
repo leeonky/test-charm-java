@@ -35,8 +35,8 @@ public class JavaCompiler {
         return URLClassLoader.newInstance(new URL[]{new File("").toURI().toURL()});
     }
 
-    private String guessClassName(String schemaCode) {
-        String s = Stream.of(schemaCode.split("\n")).filter(l -> l.contains("class") || l.contains("interface"))
+    public static String guessClassName(String code) {
+        String s = Stream.of(code.split("\n")).filter(l -> l.contains("class") || l.contains("interface"))
                 .findFirst().orElse(null);
         Matcher matcher = Pattern.compile(".* class\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
