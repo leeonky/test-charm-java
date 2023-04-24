@@ -1,6 +1,7 @@
 package com.github.leeonky.cucumber.restful;
 
 import com.github.leeonky.dal.Accessors;
+import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
@@ -36,6 +37,7 @@ public class RestfulStep {
     private Response response;
     private HttpURLConnection connection;
     private Function<Object, String> serializer = RestfulStep::toJson;
+    private JFactory jFactory;
 
     private static Stream<String> getParamString(Map.Entry<String, Object> entry) {
         if (entry.getValue() instanceof List) {
@@ -43,6 +45,10 @@ public class RestfulStep {
         } else {
             return Stream.of(entry.getKey() + "=" + entry.getValue());
         }
+    }
+
+    public void setJFactory(JFactory jFactory) {
+        this.jFactory = jFactory;
     }
 
     public void setSerializer(Function<Object, String> serializer) {
@@ -202,6 +208,16 @@ public class RestfulStep {
     @When("DELETE {string}:")
     public void deleteWithParams(String path, String params) throws IOException, URISyntaxException {
         delete(pathWithParams(path, params));
+    }
+
+    @When("POST {string} {string}:")
+    public void postWithSpec(String spec, String path, String body) throws IOException, URISyntaxException {
+        post(path, serializer.apply(jFactory.spec(spec).properties(new JSONObject(body).toMap()).create()));
+    }
+
+    @When("PUT {string} {string}:")
+    public void putWithSpec(String spec, String path, String body) throws IOException, URISyntaxException {
+        put(path, serializer.apply(jFactory.spec(spec).properties(new JSONObject(body).toMap()).create()));
     }
 
     private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {

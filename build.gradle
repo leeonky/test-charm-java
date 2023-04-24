@@ -60,6 +60,7 @@ dependencies {
     implementation 'io.cucumber:cucumber-java:6.10.4'
     implementation dep(':DAL-java', '0.3.19')
     implementation dep(':DAL-extension-basic', '0.0.12')
+    implementation dep(':jfactory', '0.3.20')
     implementation 'org.json:json:20220924'
 
     testImplementation 'org.mock-server:mockserver:5.11.2'

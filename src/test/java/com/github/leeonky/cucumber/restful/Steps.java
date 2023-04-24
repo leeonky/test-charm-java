@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
+import com.github.leeonky.cucumber.restful.spec.LoginRequests;
 import com.github.leeonky.dal.Accessors;
+import com.github.leeonky.jfactory.JFactory;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -39,6 +41,13 @@ public class Steps {
 
     public Steps(RestfulStep restfulStep) {
         this.restfulStep = restfulStep;
+    }
+
+    @Before("@jfactory")
+    public void setJFactory() {
+        JFactory jFactory = new JFactory();
+        jFactory.register(LoginRequests.LoginRequest.class);
+        restfulStep.setJFactory(jFactory);
     }
 
     @Given("base url {string}")
