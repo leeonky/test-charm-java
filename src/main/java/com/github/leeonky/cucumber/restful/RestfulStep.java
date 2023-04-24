@@ -2,6 +2,7 @@ package com.github.leeonky.cucumber.restful;
 
 import com.github.leeonky.dal.Accessors;
 import com.github.leeonky.jfactory.JFactory;
+import com.github.leeonky.jfactory.cucumber.Table;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
@@ -212,12 +213,12 @@ public class RestfulStep {
 
     @When("POST {string} {string}:")
     public void postWithSpec(String spec, String path, String body) throws IOException, URISyntaxException {
-        post(path, serializer.apply(jFactory.spec(spec).properties(new JSONObject(body).toMap()).create()));
+        post(path, serializer.apply(jFactory.spec(spec).properties(Table.create(body).flatSub()[0]).create()));
     }
 
     @When("PUT {string} {string}:")
     public void putWithSpec(String spec, String path, String body) throws IOException, URISyntaxException {
-        put(path, serializer.apply(jFactory.spec(spec).properties(new JSONObject(body).toMap()).create()));
+        put(path, serializer.apply(jFactory.spec(spec).properties(Table.create(body).flatSub()[0]).create()));
     }
 
     private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {

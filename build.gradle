@@ -61,6 +61,7 @@ dependencies {
     implementation dep(':DAL-java', '0.3.19')
     implementation dep(':DAL-extension-basic', '0.0.12')
     implementation dep(':jfactory', '0.3.20')
+    implementation dep(':jfactory-cucumber', '0.1.24')
     implementation 'org.json:json:20220924'
 
     testImplementation 'org.mock-server:mockserver:5.11.2'

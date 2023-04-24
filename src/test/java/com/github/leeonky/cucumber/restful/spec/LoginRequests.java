@@ -14,5 +14,12 @@ public class LoginRequests {
     @Setter
     public static class LoginRequestDto {
         private String username, password;
+        private Captcha captcha;
+
+        @Getter
+        @Setter
+        public static class Captcha {
+            private String code;
+        }
     }
 }
