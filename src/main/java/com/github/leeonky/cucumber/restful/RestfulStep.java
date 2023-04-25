@@ -221,11 +221,12 @@ public class RestfulStep {
     private void sendWithSpec(String spec, String path, String body, BiConsumer<String, String> method) throws IOException {
         Object json = new JSONArray("[" + body + "]").get(0);
         Map<String, Object>[] maps = Table.create(body).flatSub();
+        String[] delimiters = spec.split("[ ,]");
         if (json instanceof JSONObject) {
-            method.accept(path, serializer.apply(jFactory.spec(spec).properties(maps[0]).create()));
+            method.accept(path, serializer.apply(jFactory.spec(delimiters).properties(maps[0]).create()));
         } else {
             method.accept(path, serializer.apply(Arrays.stream(maps)
-                    .map(map -> jFactory.spec(spec).properties(map).create())
+                    .map(map -> jFactory.spec(delimiters).properties(map).create())
                     .collect(toList())));
         }
     }

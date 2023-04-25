@@ -62,3 +62,52 @@ Feature: JFactory Integration
       | method |
       | POST   |
       | PUT    |
+
+  Scenario Outline: <method> with body created by trait and spec
+    When <method> "<traitAndSpec>" "/index":
+    """
+    {
+      "username": "admin"
+    }
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
+    """
+    : [{
+      body.json= {
+        username: admin,
+        password: wrongPassword,
+        captcha: null
+      }
+    }]
+    """
+    Examples:
+      | method | traitAndSpec               |
+      | POST   | WrongPassword LoginRequest |
+      | POST   | WrongPassword,LoginRequest |
+      | PUT    | WrongPassword LoginRequest |
+      | PUT    | WrongPassword,LoginRequest |
+
+
+  Scenario Outline: <method> with body array created by trait and spec
+    When <method> "<traitAndSpec>" "/index":
+    """
+    [{
+      "username": "admin"
+    }]
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
+    """
+    : [{
+      body.json= [{
+        username: admin,
+        password: wrongPassword,
+        captcha: null
+      }]
+    }]
+    """
+    Examples:
+      | method | traitAndSpec               |
+      | POST   | WrongPassword LoginRequest |
+      | POST   | WrongPassword,LoginRequest |
+      | PUT    | WrongPassword LoginRequest |
+      | PUT    | WrongPassword,LoginRequest |

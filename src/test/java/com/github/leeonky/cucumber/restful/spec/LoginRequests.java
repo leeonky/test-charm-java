@@ -1,12 +1,18 @@
 package com.github.leeonky.cucumber.restful.spec;
 
 import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.jfactory.Trait;
 import lombok.Getter;
 import lombok.Setter;
 
 public class LoginRequests {
 
     public static class LoginRequest extends Spec<LoginRequestDto> {
+
+        @Trait
+        public void WrongPassword() {
+            property("password").value("wrongPassword");
+        }
 
     }
 
