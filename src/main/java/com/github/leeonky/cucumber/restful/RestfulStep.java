@@ -220,7 +220,7 @@ public class RestfulStep {
 
     private void sendWithSpec(String spec, String path, String body, BiConsumer<String, String> method) throws IOException {
         Object json = new JSONArray("[" + body + "]").get(0);
-        Map<String, Object>[] maps = Table.create(body).flatSub();
+        Map<String, Object>[] maps = Table.create(evaluator.eval(body)).flatSub();
         String[] delimiters = spec.split("[ ,]");
         if (json instanceof JSONObject) {
             method.accept(path, serializer.apply(jFactory.spec(delimiters).properties(maps[0]).create()));

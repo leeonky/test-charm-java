@@ -111,3 +111,22 @@ Feature: JFactory Integration
       | POST   | WrongPassword,LoginRequest |
       | PUT    | WrongPassword LoginRequest |
       | PUT    | WrongPassword,LoginRequest |
+
+  Scenario Outline: <method> with body created by spec and inline replace
+    Given var "user" value is "admin"
+    When <method> "LoginRequest" "/index":
+    """
+    {
+      "username": "${user}"
+    }
+    """
+    Then "http://www.a.com" got a "<method>" request on "/index" with body matching
+    """
+    : [{
+      body.json.username= admin
+    }]
+    """
+    Examples:
+      | method |
+      | POST   |
+      | PUT    |
