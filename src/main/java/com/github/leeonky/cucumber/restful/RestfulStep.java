@@ -18,6 +18,7 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -29,6 +30,7 @@ import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
@@ -212,13 +214,41 @@ public class RestfulStep {
     }
 
     @When("POST {string} {string}:")
-    public void postWithSpec(String spec, String path, String body) throws IOException, URISyntaxException {
-        post(path, serializer.apply(jFactory.spec(spec).properties(Table.create(body).flatSub()[0]).create()));
+    public void postWithSpec(String spec, String path, String body) throws IOException {
+        sendWithSpec(spec, path, body, this::silentPost);
+    }
+
+    private void sendWithSpec(String spec, String path, String body, BiConsumer<String, String> method) throws IOException {
+        Object json = new JSONArray("[" + body + "]").get(0);
+        Map<String, Object>[] maps = Table.create(body).flatSub();
+        if (json instanceof JSONObject) {
+            method.accept(path, serializer.apply(jFactory.spec(spec).properties(maps[0]).create()));
+        } else {
+            method.accept(path, serializer.apply(Arrays.stream(maps)
+                    .map(map -> jFactory.spec(spec).properties(map).create())
+                    .collect(toList())));
+        }
+    }
+
+    private void silentPost(String path, String body) {
+        try {
+            post(path, body);
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @When("PUT {string} {string}:")
-    public void putWithSpec(String spec, String path, String body) throws IOException, URISyntaxException {
-        put(path, serializer.apply(jFactory.spec(spec).properties(Table.create(body).flatSub()[0]).create()));
+    public void putWithSpec(String spec, String path, String body) throws IOException {
+        sendWithSpec(spec, path, body, this::silentPut);
+    }
+
+    private void silentPut(String path, String body) {
+        try {
+            put(path, body);
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {
