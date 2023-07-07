@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
+import static com.github.leeonky.util.Converter.getInstance;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -325,6 +326,15 @@ class ConverterTest {
         void convent_to_big_integer() {
             numbers.forEach(number ->
                     assertThat(converter.tryConvert(BigInteger.class, number)).isEqualTo(new BigInteger("0")));
+        }
+    }
+
+    @Nested
+    class BooleanCovert {
+
+        @Test
+        void convert_to_primitive_type() {
+            Assertions.assertThat(getInstance().convert(boolean.class, true)).isTrue();
         }
     }
 

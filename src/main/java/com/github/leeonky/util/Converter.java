@@ -43,6 +43,7 @@ public class Converter {
                 .addTypeConverter(String.class, float.class, Float::valueOf)
                 .addTypeConverter(String.class, Boolean.class, Boolean::valueOf)
                 .addTypeConverter(String.class, boolean.class, Boolean::valueOf)
+                .addTypeConverter(Boolean.class, boolean.class, Boolean::booleanValue)
                 .addTypeConverter(String.class, BigInteger.class, BigInteger::new)
                 .addTypeConverter(String.class, BigDecimal.class, BigDecimal::new)
                 .addTypeConverter(String.class, UUID.class, UUID::fromString)
