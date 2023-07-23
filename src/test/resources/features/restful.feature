@@ -85,6 +85,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> with body and params
       When <method> "/index?中文参数=中文值&second=value2":
@@ -99,6 +100,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> with header
       Given header by RESTful api:
@@ -155,6 +157,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> with content type and not set in header
       When <method> "/index":
@@ -171,6 +174,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> without content type but set in header already
       Given header by RESTful api:
@@ -193,6 +197,7 @@ Feature: RESTful api steps
         | method | header       |
         | POST   | Content-Type |
         | PUT    | content-type |
+        | PATCH  | content-Type |
 
     Scenario Outline: <method> with content type and set in header
       Given header by RESTful api:
@@ -215,6 +220,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> without content type and set in header
       Given header by RESTful api:
@@ -237,6 +243,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
   Rule: Basic Response
 
@@ -340,6 +347,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
   Rule: Post Form, Upload and Download
 
@@ -513,6 +521,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
   Rule: Request with Binary Body
 
@@ -536,6 +545,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> with binary body of string
       When <method> "/index":
@@ -552,6 +562,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> with binary body of file
       Given a file "an avatar":
@@ -572,6 +583,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> with binary body of external file
       Given an external file "/tmp/restful.txt":
@@ -592,6 +604,7 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |
 
     Scenario Outline: <method> with binary body of external path
       Given an external file "/tmp/restful.txt":
@@ -612,3 +625,4 @@ Feature: RESTful api steps
         | method |
         | POST   |
         | PUT    |
+        | PATCH  |

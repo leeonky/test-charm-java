@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -147,6 +148,24 @@ public class RestfulStep {
 
     public void put(String path, Object body) throws IOException, URISyntaxException {
         put(path, body, null);
+    }
+
+    @When("PATCH {string}:")
+    public void patch(String path, DocString content) throws IOException, URISyntaxException {
+        String contentType = content.getContentType();
+        if (Objects.equals(contentType, "application/octet-stream")) {
+            patch(path, getBytesOf(content.getContent()), contentType);
+        } else {
+            patch(path, content.getContent(), contentType);
+        }
+    }
+
+    public void patch(String path, byte[] body, String contentType) throws IOException, URISyntaxException {
+        requestAndResponse("PATCH", path, connection -> buildRequestBody(connection, contentType, body));
+    }
+
+    public void patch(String path, String body, String contentType) throws IOException, URISyntaxException {
+        patch(path, body.getBytes(UTF_8), contentType);
     }
 
     @When("DELETE {string}")
@@ -292,9 +311,32 @@ public class RestfulStep {
         URL url = new URL(baseUrl + evaluator.eval(path));
         URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
         connection = request.applyHeader((HttpURLConnection) new URL(uri.toASCIIString()).openConnection());
-        connection.setRequestMethod(method);
+        setRequestMethod(method);
         body.accept(connection);
         response = new Response(connection);
+    }
+
+    private void setRequestMethod(String method) {
+        try {
+            Field field = getField(connection.getClass(), "method");
+            field.setAccessible(true);
+            field.set(connection, method);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to set method " + method + " to " + connection, e);
+        }
+    }
+
+    private Field getField(Class clazz, String fieldName) {
+        try {
+            return clazz.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            Class superClass = clazz.getSuperclass();
+            if (superClass == null) {
+                throw new RuntimeException("Failed to get field " + fieldName + " from " + clazz, e);
+            } else {
+                return getField(superClass, fieldName);
+            }
+        }
     }
 
     public interface UploadFile {
