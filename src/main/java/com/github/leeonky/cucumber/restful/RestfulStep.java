@@ -172,6 +172,14 @@ public class RestfulStep {
         patch(path, body, null);
     }
 
+    public void patch(String path, Object body, String contentType) throws IOException, URISyntaxException {
+        patch(path, serializer.apply(body), contentType);
+    }
+
+    public void patch(String path, Object object) throws IOException, URISyntaxException {
+        patch(path, object, null);
+    }
+
     @When("DELETE {string}")
     public void delete(String path) throws IOException, URISyntaxException {
         requestAndResponse("DELETE", path, connection -> {
