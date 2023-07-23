@@ -31,6 +31,7 @@ Feature: Replace
       | method |
       | POST   |
       | PUT    |
+      | PATCH  |
 
   Scenario: Replace in upload file request
     Given var "fileKeyVar" value is "an avatar"

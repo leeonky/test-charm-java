@@ -156,7 +156,7 @@ public class RestfulStep {
         if (Objects.equals(contentType, "application/octet-stream")) {
             patch(path, getBytesOf(content.getContent()), contentType);
         } else {
-            patch(path, content.getContent(), contentType);
+            patch(path, evaluator.eval(content.getContent()), contentType);
         }
     }
 
