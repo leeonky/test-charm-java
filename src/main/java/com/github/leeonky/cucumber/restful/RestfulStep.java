@@ -168,6 +168,10 @@ public class RestfulStep {
         patch(path, body.getBytes(UTF_8), contentType);
     }
 
+    public void patch(String path, String body) throws IOException, URISyntaxException {
+        patch(path, body, null);
+    }
+
     @When("DELETE {string}")
     public void delete(String path) throws IOException, URISyntaxException {
         requestAndResponse("DELETE", path, connection -> {
@@ -266,6 +270,19 @@ public class RestfulStep {
     private void silentPut(String path, String body) {
         try {
             put(path, body);
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @When("PATCH {string} {string}:")
+    public void patchWithSpec(String string, String path, String body) throws IOException {
+        sendWithSpec(string, path, body, this::silentPatch);
+    }
+
+    private void silentPatch(String path, String body) {
+        try {
+            patch(path, body);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
