@@ -19,9 +19,13 @@ public class DBSteps {
     public DBSteps() throws SQLException {
     }
 
+    @SneakyThrows
     @Before
     public void reBuild() {
         builder = new DataBaseBuilder();
+        connection.createStatement().execute("delete from products");
+        connection.createStatement().execute("delete from order_lines");
+        connection.createStatement().execute("delete from orders");
     }
 
     @SneakyThrows

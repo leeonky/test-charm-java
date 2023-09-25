@@ -6,6 +6,7 @@ import lombok.Setter;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -16,4 +17,5 @@ public class Product {
     private long id;
     private String name;
     private int price;
+    private Instant createdAt;
 }
