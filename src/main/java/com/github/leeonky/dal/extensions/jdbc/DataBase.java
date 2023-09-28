@@ -5,6 +5,7 @@ import com.github.leeonky.util.Suppressor;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class DataBase {
@@ -29,6 +30,24 @@ public class DataBase {
                 .collect(Collectors.toMap(Function.identity(), Table::new));
     }
 
+    private <T extends Map<String, Object>> List<T> executeQuery(String sql, Supplier<T> rowFactory, Object... params)
+            throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        for (int i = 0; i < params.length; i++)
+            preparedStatement.setObject(i + 1, params[i]);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        List<T> result = new ArrayList<>();
+        while (resultSet.next()) {
+            int columnCount = metaData.getColumnCount();
+            T row = rowFactory.get();
+            for (int i = 1; i <= columnCount; ++i)
+                row.put(metaData.getColumnName(i).toLowerCase(), resultSet.getObject(i));
+            result.add(row);
+        }
+        return result;
+    }
+
     public class Table implements Iterable<Table.Row> {
         private final String name;
 
@@ -38,36 +57,17 @@ public class DataBase {
 
         @Override
         public Iterator<Row> iterator() {
-            return Suppressor.get(this::build);
-        }
-
-        private Iterator<Row> build() throws SQLException {
-            ResultSet resultSet = connection.createStatement().executeQuery("select * from " + name);
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            return new Iterator<Row>() {
-                @Override
-                public boolean hasNext() {
-                    return Suppressor.get(resultSet::next);
-                }
-
-                @Override
-                public Row next() {
-                    return Suppressor.get(this::buildRow);
-                }
-
-                private Row buildRow() throws SQLException {
-                    int columnCount = metaData.getColumnCount();
-                    Row row = new Row();
-                    for (int i = 1; i <= columnCount; ++i)
-                        row.put(metaData.getColumnName(i).toLowerCase(), resultSet.getObject(i));
-                    return row;
-                }
-            };
+            return Suppressor.get(() -> executeQuery("select * from " + name, Row::new)).iterator();
         }
 
         public class Row extends LinkedHashMap<String, Object> {
             public Callable<BelongsTo> callBelongsTo() {
-                return table -> new BelongsTo(table, "");
+//TODO default clause
+                return table -> {
+                    if (table.contains("@"))
+                        return new BelongsTo(table.substring(0, table.indexOf('@')), String.format(":%s = id", table.substring(table.indexOf('@') + 1)));
+                    return new BelongsTo(table, ":product_id = id");
+                };
             }
 
             public class BelongsTo {
@@ -91,17 +91,12 @@ public class DataBase {
                 }
 
                 private void queryDB() throws SQLException {
-                    PreparedStatement preparedStatement = connection.prepareStatement("select * from " + table + " where " + clause.replace(":product_id", "?"));
-                    preparedStatement.setObject(1, get("product_id"));
-                    ResultSet resultSet = preparedStatement.executeQuery();
-                    ResultSetMetaData metaData = resultSet.getMetaData();
-
-                    if (resultSet.next()) {
-                        data = new LinkedHashMap<>();
-
-                        int columnCount = metaData.getColumnCount();
-                        for (int i = 1; i <= columnCount; ++i)
-                            data.put(metaData.getColumnName(i).toLowerCase(), resultSet.getObject(i));
+//TODO hardcode
+//TODO hardcode
+                    List<Map<String, Object>> result = executeQuery("select * from " + table + " where " + clause.replace(":product_id", "?"),
+                            LinkedHashMap::new, get("product_id"));
+                    if (result.size() > 0) {
+                        data = result.get(0);
                     }
                 }
 

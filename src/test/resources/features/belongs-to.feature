@@ -13,14 +13,18 @@ Feature: assert db as data via jdbc
         ::belongsTo.products::on[':product_id=id']: {
           name= MBP
         }
-#        ::belongsTo.products::where[':product_id=id']: {
-#          name= MBP
-#        }
-#        ::belongsTo.products@product_id: {
-#          name= MBP
-#        }
-#        ::belongsTo.products: {
-#          name= MBP
-#        }
+        ::belongsTo.products::where[':product_id=id']: {
+          name= MBP
+        }
+        ::belongsTo.products@product_id: {
+          name= MBP
+        }
+        ::belongsTo.products: {
+          name= MBP
+        }
       }]
       """
+
+#   join sql error
+#  join no data
+#  join more than one data

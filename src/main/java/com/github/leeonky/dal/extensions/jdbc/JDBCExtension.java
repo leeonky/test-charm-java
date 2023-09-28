@@ -17,6 +17,7 @@ public class JDBCExtension implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("belongsTo", MetaProperties::belongsTo)
                 .registerMetaProperty("on", MetaProperties::on)
+                .registerMetaProperty("where", MetaProperties::on)
                 .registerPropertyAccessor(Callable.class, new JavaClassPropertyAccessor<Callable>(BeanClass.create(Callable.class)) {
                     @Override
                     public Set<Object> getPropertyNames(Callable callable) {
@@ -31,14 +32,14 @@ public class JDBCExtension implements Extension {
                 .registerPropertyAccessor(BelongsTo.class, new JavaClassPropertyAccessor<BelongsTo>(BeanClass.create(BelongsTo.class)) {
                     @Override
                     public Object getValue(BelongsTo belongsTo, Object property) {
-//                        need test
+// TODO                        need test
                         belongsTo.query();
                         return belongsTo.getValue(String.valueOf(property));
                     }
 
                     @Override
                     public Set<Object> getPropertyNames(BelongsTo belongsTo) {
-//                        need test
+// TODO                        need test
                         belongsTo.query();
                         return new LinkedHashSet<>(belongsTo.keys());
                     }
