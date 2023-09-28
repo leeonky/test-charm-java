@@ -40,7 +40,7 @@ Feature: assert db as data via jdbc
     Then db should:
       """
       tables.products: [{
-        ID= 10L
-        NAME= MBP
+        id= 10L
+        name= MBP
       }]
       """

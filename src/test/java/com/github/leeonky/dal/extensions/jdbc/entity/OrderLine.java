@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Getter
@@ -14,6 +15,10 @@ import javax.persistence.Table;
 public class OrderLine {
     @Id
     private long id;
-    private long orderId, productId;
+    @ManyToOne
+    private Order order;
+
+    @ManyToOne
+    private Product product;
     private int quantity;
 }

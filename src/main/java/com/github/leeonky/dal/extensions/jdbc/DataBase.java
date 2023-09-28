@@ -3,10 +3,7 @@ package com.github.leeonky.dal.extensions.jdbc;
 import com.github.leeonky.util.Suppressor;
 
 import java.sql.*;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -14,28 +11,25 @@ public class DataBase {
     private final Connection connection;
     private final Function<Statement, Collection<String>> tableQuerier;
     private final Function<Statement, Collection<String>> viewQuerier;
-    private final Map<String, Table> tables, views;
 
     DataBase(Connection connection, Function<Statement, Collection<String>> tableQuerier,
              Function<Statement, Collection<String>> viewQuerier) {
         this.connection = connection;
         this.tableQuerier = tableQuerier;
         this.viewQuerier = viewQuerier;
-        tables = Suppressor.get(() -> this.tableQuerier.apply(this.connection.createStatement())).stream()
-                .collect(Collectors.toMap(Function.identity(), Table::new));
-        views = Suppressor.get(() -> this.viewQuerier.apply(this.connection.createStatement())).stream()
-                .collect(Collectors.toMap(Function.identity(), Table::new));
     }
 
     public Map<String, Table> getTables() {
-        return tables;
+        return Suppressor.get(() -> tableQuerier.apply(connection.createStatement())).stream()
+                .collect(Collectors.toMap(Function.identity(), Table::new));
     }
 
     public Map<String, Table> getViews() {
-        return views;
+        return Suppressor.get(() -> viewQuerier.apply(connection.createStatement())).stream()
+                .collect(Collectors.toMap(Function.identity(), Table::new));
     }
 
-    public class Table implements Iterable<Row> {
+    public class Table implements Iterable<Table.Row> {
         private final String name;
 
         public Table(String name) {
@@ -65,13 +59,60 @@ public class DataBase {
                     int columnCount = metaData.getColumnCount();
                     Row row = new Row();
                     for (int i = 1; i <= columnCount; ++i)
-                        row.put(metaData.getColumnName(i), resultSet.getObject(i));
+                        row.put(metaData.getColumnName(i).toLowerCase(), resultSet.getObject(i));
                     return row;
                 }
             };
         }
-    }
 
-    public class Row extends LinkedHashMap<String, Object> {
+        public class Row extends LinkedHashMap<String, Object> {
+            public Callable<BelongsTo> callBelongsTo() {
+                return table -> new BelongsTo(table, "");
+            }
+
+            public class BelongsTo {
+                private final String table;
+                private final String clause;
+                private Map<String, Object> data;
+
+                public BelongsTo(String table, String clause) {
+                    this.table = table;
+                    this.clause = clause;
+                }
+
+                public Callable<BelongsTo> clause() {
+                    return clause -> new BelongsTo(table, clause);
+                }
+
+                public void query() {
+                    if (data == null) {
+                        Suppressor.run(this::queryDB);
+                    }
+                }
+
+                private void queryDB() throws SQLException {
+                    PreparedStatement preparedStatement = connection.prepareStatement("select * from " + table + " where " + clause.replace(":product_id", "?"));
+                    preparedStatement.setObject(1, get("product_id"));
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+
+                    if (resultSet.next()) {
+                        data = new LinkedHashMap<>();
+
+                        int columnCount = metaData.getColumnCount();
+                        for (int i = 1; i <= columnCount; ++i)
+                            data.put(metaData.getColumnName(i).toLowerCase(), resultSet.getObject(i));
+                    }
+                }
+
+                public Object getValue(String column) {
+                    return data.get(column);
+                }
+
+                public Set<String> keys() {
+                    return data.keySet();
+                }
+            }
+        }
     }
 }

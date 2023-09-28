@@ -56,6 +56,7 @@ repositories {
 
 dependencies {
     implementation dep(':DAL-java', '0.3.19')
+    implementation 'org.atteo:evo-inflector:1.3'
     testImplementation dep(':jfactory', '0.3.20')
     testImplementation dep(':jfactory-cucumber', '0.1.24')
     testImplementation dep(':jfactory-repo-jpa', '0.1.13')
