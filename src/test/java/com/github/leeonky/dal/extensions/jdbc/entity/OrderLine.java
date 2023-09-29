@@ -21,4 +21,5 @@ public class OrderLine {
     @ManyToOne
     private Product product;
     private int quantity;
+    private long refId;
 }

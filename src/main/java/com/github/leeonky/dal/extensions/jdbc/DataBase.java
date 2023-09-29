@@ -1,12 +1,15 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.util.Suppressor;
+import org.javalite.common.Inflector;
 
 import java.sql.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 public class DataBase {
     private final Connection connection;
@@ -62,22 +65,21 @@ public class DataBase {
 
         public class Row extends LinkedHashMap<String, Object> {
             public Callable<BelongsTo> callBelongsTo() {
-//TODO default clause
                 return table -> {
                     if (table.contains("@"))
-                        return new BelongsTo(table.substring(0, table.indexOf('@')), String.format(":%s = id", table.substring(table.indexOf('@') + 1)));
-                    return new BelongsTo(table, ":product_id = id");
+                        return new BelongsTo(table.substring(0, table.indexOf('@')), format(":%s = id", table.substring(table.indexOf('@') + 1)));
+                    return new BelongsTo(table, String.format(":%s_id = id", Inflector.singularize(table)));
                 };
             }
 
             public class BelongsTo {
                 private final String table;
-                private final String clause;
+                private final Clause clause;
                 private Map<String, Object> data;
 
                 public BelongsTo(String table, String clause) {
                     this.table = table;
-                    this.clause = clause;
+                    this.clause = new Clause(clause);
                 }
 
                 public Callable<BelongsTo> clause() {
@@ -86,17 +88,12 @@ public class DataBase {
 
                 public void query() {
                     if (data == null) {
-                        Suppressor.run(this::queryDB);
-                    }
-                }
-
-                private void queryDB() throws SQLException {
-//TODO hardcode
-//TODO hardcode
-                    List<Map<String, Object>> result = executeQuery("select * from " + table + " where " + clause.replace(":product_id", "?"),
-                            LinkedHashMap::new, get("product_id"));
-                    if (result.size() > 0) {
-                        data = result.get(0);
+                        List<Map<String, Object>> result = Suppressor.get(() ->
+                                executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                                        LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
+                        if (result.size() > 0) {
+                            data = result.get(0);
+                        }
                     }
                 }
 
@@ -106,6 +103,10 @@ public class DataBase {
 
                 public Set<String> keys() {
                     return data.keySet();
+                }
+
+                public boolean hasData() {
+                    return data != null;
                 }
             }
         }

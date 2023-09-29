@@ -43,6 +43,12 @@ public class JDBCExtension implements Extension {
                         belongsTo.query();
                         return new LinkedHashSet<>(belongsTo.keys());
                     }
+
+                    @Override
+                    public boolean isNull(BelongsTo belongsTo) {
+                        belongsTo.query();
+                        return !belongsTo.hasData();
+                    }
                 })
         ;
     }

@@ -25,6 +25,37 @@ Feature: assert db as data via jdbc
       }]
       """
 
+  Scenario: belongs to data is null
+    Given Exists data "OrderLine":
+      | product |
+      |         |
+    When all follow tables:
+      | products | order_lines |
+    Then db should:
+      """
+      tables.order_lines: [{
+        ::belongsTo.products= null
+      }]
+      """
+
+  Scenario: override default join column
+    Given Exists data "Product":
+      | id  | name |
+      | 100 | MBP  |
+    Given Exists data "OrderLine":
+      | refId | product |
+      | 100   |         |
+    When all follow tables:
+      | products | order_lines |
+    Then db should:
+      """
+      tables.order_lines: [{
+        ::belongsTo.products= null,
+        ::belongsTo.products@refid: {
+          name= MBP
+        }
+      }]
+      """
+
 #   join sql error
-#  join no data
 #  join more than one data
