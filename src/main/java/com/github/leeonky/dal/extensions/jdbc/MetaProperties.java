@@ -12,12 +12,21 @@ public class MetaProperties {
         throw new RuntimeException("`belongsTo` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 
+    public static Object hasOne(MetaData metaData) {
+        Data data = metaData.evaluateInput();
+        if (data.getInstance() instanceof DataBase.Table.Row)
+            return ((DataBase.Table.Row) data.getInstance()).callHasOne();
+        throw new RuntimeException("`hasOne` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
+    }
+
     public static Object on(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Table.Row.BelongsTo)
             return ((DataBase.Table.Row.BelongsTo) data.getInstance()).clause();
         else if (data.getInstance() instanceof DataBase.Table.Row.HasMany)
             return ((DataBase.Table.Row.HasMany) data.getInstance()).clause();
+        else if (data.getInstance() instanceof DataBase.Table.Row.HasOne)
+            return ((DataBase.Table.Row.HasOne) data.getInstance()).clause();
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 

@@ -64,6 +64,10 @@ public class DataBase {
                 return table -> new HasMany(table, String.format("%s = :id", Inflector.singularize(name) + "_id"));
             }
 
+            public Callable<HasOne> callHasOne() {
+                return table -> new HasOne(table, String.format("%s = :id", Inflector.singularize(name) + "_id"));
+            }
+
             public class BelongsTo {
                 private final String table;
                 private final Clause clause;
@@ -139,6 +143,57 @@ public class DataBase {
 
                 public Callable<HasMany> clause() {
                     return clause -> new HasMany(table, clause);
+                }
+            }
+
+            public class HasOne {
+                private final String table;
+                private final Clause clause;
+                private Map<String, Object> data;
+
+                public HasOne(String table, String clause) {
+                    this.table = table;
+                    this.clause = new Clause(clause);
+                }
+
+                public Callable<HasOne> clause() {
+                    return clause -> new HasOne(table, clause);
+                }
+
+                private void query() {
+                    if (data == null) {
+                        List<Map<String, Object>> result = querySubObject();
+                        if (result.size() == 1)
+                            data = result.get(0);
+                        else if (result.size() > 1)
+                            throw new RuntimeException("Query more than one record");
+                    }
+                }
+
+                private List<Map<String, Object>> querySubObject() {
+                    if (clause.onlyParameter())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
+                                LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
+                    if (clause.onlyColumn())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
+                                LinkedHashMap::new, get("id")));
+                    return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                            LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
+                }
+
+                public Object getValue(String column) {
+                    query();
+                    return data.get(column);
+                }
+
+                public Set<String> keys() {
+                    query();
+                    return data.keySet();
+                }
+
+                public boolean hasData() {
+                    query();
+                    return data != null;
                 }
             }
         }

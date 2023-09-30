@@ -11,6 +11,10 @@ Feature: assert has many
       """
       orders: [{
         code= S01
+        ::hasMany[order_lines]::on[order_id = :id]: | quantity | ::belongsTo[products].name |
+                                         | 1        | MBP                        |
+                                         | 2        | iPod                       |
+
         ::hasMany[order_lines]::on[order_id]: | quantity | ::belongsTo[products].name |
                                          | 1        | MBP                        |
                                          | 2        | iPod                       |
