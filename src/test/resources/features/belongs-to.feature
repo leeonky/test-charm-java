@@ -31,7 +31,10 @@ Feature: assert db as data via jdbc
     Then db should:
       """
       order_lines: [{
-        ::belongsTo.products= null
+        ::belongsTo.products= null,
+        ::belongsTo.products::on[:product_id]= null,
+        ::belongsTo.products::on[id]= null,
+        ::belongsTo.products::on[:product_id=id]= null
       }]
       """
 
@@ -103,4 +106,35 @@ Feature: assert db as data via jdbc
                   ```
     """
 
-#   join sql error
+  Scenario: raise error when invalid sql
+    Given Exists data "Product":
+      | pid |
+      | 100 |
+      | 100 |
+    Given Exists data "OrderLine":
+      | refId |
+      | 100   |
+    When assert DB :
+      """
+      order_lines: [{
+        ::belongsTo.products::on[:refid=pidx]: {
+          name= any
+        }
+      }]
+      """
+    Then raise error
+    """
+    message.trim: ```
+                  order_lines: [{
+                    ::belongsTo.products::on[:refid=pidx]: {
+                                            ^
+                      name= any
+                    }
+                  }]
+
+                  org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "PIDX" not found; SQL statement:
+                  select * from products where ?=pidx [42122-200]
+
+                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {}
+                  ```
+    """
