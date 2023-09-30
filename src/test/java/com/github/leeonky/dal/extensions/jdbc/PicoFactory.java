@@ -14,6 +14,7 @@ public class PicoFactory implements ObjectFactory {
     private final EntityManager entityManager = Persistence.createEntityManagerFactory("jfactory-repo").createEntityManager();
     private final io.cucumber.picocontainer.PicoFactory delegate = new io.cucumber.picocontainer.PicoFactory();
     private final Object jData = jData();
+    public static JFactory jFactory;
 
     @Override
     public void start() {
@@ -38,7 +39,7 @@ public class PicoFactory implements ObjectFactory {
     }
 
     private JData jData() {
-        JFactory jFactory = new JFactory(new JPADataRepository(entityManager));
+        jFactory = new JFactory(new JPADataRepository(entityManager));
         Classes.assignableTypesOf(Spec.class, "com.github.leeonky.dal.extensions.jdbc").forEach(jFactory::register);
         return new JData(jFactory);
     }

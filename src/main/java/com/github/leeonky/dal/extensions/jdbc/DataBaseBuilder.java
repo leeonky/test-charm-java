@@ -7,20 +7,14 @@ import java.util.Collections;
 import java.util.function.Function;
 
 public class DataBaseBuilder {
-    private Function<Statement, Collection<String>> tableQuerier = s -> Collections.emptyList();
-    private Function<Statement, Collection<String>> viewQuerier = s -> Collections.emptyList();
+    private Function<Statement, Collection<String>> tableQuery = s -> Collections.emptyList();
 
-    public DataBaseBuilder tableQuerier(Function<Statement, Collection<String>> querier) {
-        tableQuerier = querier;
+    public DataBaseBuilder tableQuery(Function<Statement, Collection<String>> query) {
+        tableQuery = query;
         return this;
     }
 
     public DataBase connect(Connection connection) {
-        return new DataBase(connection, tableQuerier, viewQuerier);
-    }
-
-    public DataBaseBuilder viewQuerier(Function<Statement, Collection<String>> querier) {
-        viewQuerier = querier;
-        return this;
+        return new DataBase(connection, tableQuery);
     }
 }

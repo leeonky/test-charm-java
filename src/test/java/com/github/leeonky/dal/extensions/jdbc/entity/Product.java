@@ -15,6 +15,7 @@ import java.time.Instant;
 public class Product {
     @Id
     private long id;
+    private long pid;
     private String name;
     private int price;
     private Instant createdAt;

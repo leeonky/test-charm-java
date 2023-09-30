@@ -7,30 +7,22 @@ import java.sql.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import static java.lang.String.format;
 
 public class DataBase {
     private final Connection connection;
-    private final Function<Statement, Collection<String>> tableQuerier;
-    private final Function<Statement, Collection<String>> viewQuerier;
+    private final Function<Statement, Collection<String>> tableQuery;
 
-    DataBase(Connection connection, Function<Statement, Collection<String>> tableQuerier,
-             Function<Statement, Collection<String>> viewQuerier) {
+    DataBase(Connection connection, Function<Statement, Collection<String>> tableQuery) {
         this.connection = connection;
-        this.tableQuerier = tableQuerier;
-        this.viewQuerier = viewQuerier;
+        this.tableQuery = tableQuery;
     }
 
-    public Map<String, Table> getTables() {
-        return Suppressor.get(() -> tableQuerier.apply(connection.createStatement())).stream()
-                .collect(Collectors.toMap(Function.identity(), Table::new));
+    public Collection<String> allTableNames() {
+        return tableQuery.apply(Suppressor.get(connection::createStatement));
     }
 
-    public Map<String, Table> getViews() {
-        return Suppressor.get(() -> viewQuerier.apply(connection.createStatement())).stream()
-                .collect(Collectors.toMap(Function.identity(), Table::new));
+    public Table table(String name) {
+        return new Table(name);
     }
 
     private <T extends Map<String, Object>> List<T> executeQuery(String sql, Supplier<T> rowFactory, Object... params)
@@ -65,11 +57,7 @@ public class DataBase {
 
         public class Row extends LinkedHashMap<String, Object> {
             public Callable<BelongsTo> callBelongsTo() {
-                return table -> {
-                    if (table.contains("@"))
-                        return new BelongsTo(table.substring(0, table.indexOf('@')), format(":%s = id", table.substring(table.indexOf('@') + 1)));
-                    return new BelongsTo(table, String.format(":%s_id = id", Inflector.singularize(table)));
-                };
+                return table -> new BelongsTo(table, String.format(":%s = id", Inflector.singularize(table) + "_id"));
             }
 
             public class BelongsTo {
@@ -86,26 +74,40 @@ public class DataBase {
                     return clause -> new BelongsTo(table, clause);
                 }
 
-                public void query() {
+                private void query() {
                     if (data == null) {
-                        List<Map<String, Object>> result = Suppressor.get(() ->
-                                executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
-                                        LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
-                        if (result.size() > 0) {
+                        List<Map<String, Object>> result = querySubObject();
+                        if (result.size() == 1)
                             data = result.get(0);
-                        }
+                        else if (result.size() > 1)
+                            throw new RuntimeException("Query more than one record");
                     }
                 }
 
+                private List<Map<String, Object>> querySubObject() {
+                    if (clause.onlyColumn())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
+                                LinkedHashMap::new, get(Inflector.singularize(table) + "_id")));
+                    else if (clause.onlyParameter())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = id", table, clause.getClause()),
+                                LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
+                    else
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                                LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
+                }
+
                 public Object getValue(String column) {
+                    query();
                     return data.get(column);
                 }
 
                 public Set<String> keys() {
+                    query();
                     return data.keySet();
                 }
 
                 public boolean hasData() {
+                    query();
                     return data != null;
                 }
             }

@@ -4,6 +4,7 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
 
 import java.sql.Connection;
@@ -15,6 +16,7 @@ import static com.github.leeonky.dal.Assertions.expect;
 public class DBSteps {
     private DataBaseBuilder builder;
     private final Connection connection = DriverManager.getConnection("jdbc:h2:mem:test", "sa", "");
+    private Throwable exception;
 
     public DBSteps() throws SQLException {
     }
@@ -26,12 +28,13 @@ public class DBSteps {
         connection.createStatement().execute("delete from order_lines");
         connection.createStatement().execute("delete from products");
         connection.createStatement().execute("delete from orders");
+        PicoFactory.jFactory.getDataRepository().clear();
     }
 
     @SneakyThrows
     @Given("all follow tables:")
     public void allFollowTables(DataTable tables) {
-        builder.tableQuerier(statement -> tables.asList());
+        builder.tableQuery(statement -> tables.asList());
     }
 
     @Then("db should:")
@@ -39,8 +42,17 @@ public class DBSteps {
         expect(builder.connect(connection)).should(expression);
     }
 
-    @Given("all follow views:")
-    public void allFollowViews(DataTable views) {
-        builder.viewQuerier(statement -> views.asList());
+    @When("assert DB :")
+    public void assertDB(String expression) {
+        try {
+            expect(builder.connect(connection)).should(expression);
+        } catch (Throwable e) {
+            exception = e;
+        }
+    }
+
+    @Then("raise error")
+    public void raiseError(String expression) {
+        expect(exception).should(expression);
     }
 }

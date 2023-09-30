@@ -18,6 +18,17 @@ public class JDBCExtension implements Extension {
                 .registerMetaProperty("belongsTo", MetaProperties::belongsTo)
                 .registerMetaProperty("on", MetaProperties::on)
                 .registerMetaProperty("where", MetaProperties::on)
+                .registerPropertyAccessor(DataBase.class, new JavaClassPropertyAccessor<DataBase>(BeanClass.create(DataBase.class)) {
+                    @Override
+                    public Set<Object> getPropertyNames(DataBase dataBase) {
+                        return new LinkedHashSet<>(dataBase.allTableNames());
+                    }
+
+                    @Override
+                    public Object getValue(DataBase dataBase, Object property) {
+                        return dataBase.table((String) property);
+                    }
+                })
                 .registerPropertyAccessor(Callable.class, new JavaClassPropertyAccessor<Callable>(BeanClass.create(Callable.class)) {
                     @Override
                     public Set<Object> getPropertyNames(Callable callable) {
@@ -32,21 +43,16 @@ public class JDBCExtension implements Extension {
                 .registerPropertyAccessor(BelongsTo.class, new JavaClassPropertyAccessor<BelongsTo>(BeanClass.create(BelongsTo.class)) {
                     @Override
                     public Object getValue(BelongsTo belongsTo, Object property) {
-// TODO                        need test
-                        belongsTo.query();
                         return belongsTo.getValue(String.valueOf(property));
                     }
 
                     @Override
                     public Set<Object> getPropertyNames(BelongsTo belongsTo) {
-// TODO                        need test
-                        belongsTo.query();
                         return new LinkedHashSet<>(belongsTo.keys());
                     }
 
                     @Override
                     public boolean isNull(BelongsTo belongsTo) {
-                        belongsTo.query();
                         return !belongsTo.hasData();
                     }
                 })

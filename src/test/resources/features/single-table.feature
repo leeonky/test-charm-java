@@ -5,18 +5,7 @@ Feature: assert db as data via jdbc
       | products | orders |
     Then db should:
       """
-      tables= {
-        products: {...}
-        orders: {...}
-      }
-      """
-
-  Scenario: list all configured views
-    Given all follow views:
-      | products | orders |
-    Then db should:
-      """
-      views= {
+      : {
         products: {...}
         orders: {...}
       }
@@ -28,7 +17,7 @@ Feature: assert db as data via jdbc
       | products |
     Then db should:
       """
-      tables.products::size=1
+      products::size=1
       """
 
   Scenario: assert table data
@@ -39,7 +28,7 @@ Feature: assert db as data via jdbc
       | products |
     Then db should:
       """
-      tables.products: [{
+      products: [{
         id= 10L
         name= MBP
       }]

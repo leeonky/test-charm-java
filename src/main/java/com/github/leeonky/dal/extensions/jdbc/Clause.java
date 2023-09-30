@@ -11,9 +11,9 @@ public class Clause {
         StringBuilder clauseBuilder = new StringBuilder();
         StringBuilder parameterBuilder = new StringBuilder();
         boolean isParameter = false;
-        for (char c : clause.toCharArray()) {
+        for (char c : clause.trim().toCharArray()) {
             if (isParameter) {
-                if (validParameter(c)) {
+                if (validColumn(c)) {
                     parameterBuilder.append(c);
                     continue;
                 } else {
@@ -33,7 +33,7 @@ public class Clause {
             parameters.add(parameterBuilder.toString());
     }
 
-    private boolean validParameter(char c) {
+    public static boolean validColumn(char c) {
         return Character.isAlphabetic(c) || Character.isDigit(c) || c == '_';
     }
 
@@ -43,5 +43,16 @@ public class Clause {
 
     public List<String> getParameters() {
         return parameters;
+    }
+
+    public boolean onlyParameter() {
+        return getClause().equals("?");
+    }
+
+    public boolean onlyColumn() {
+        for (char c : getClause().toCharArray())
+            if (!validColumn(c))
+                return false;
+        return true;
     }
 }
