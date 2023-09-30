@@ -1,4 +1,4 @@
-Feature: assert db as data via jdbc
+Feature: assert belongs to
 
   Scenario: belongs to with where clause
     Given Exists data "OrderLine":
@@ -10,13 +10,13 @@ Feature: assert db as data via jdbc
       """
       order_lines: [{
         quantity= 100,
-        ::belongsTo.products::on[:product_id=id]: {
+        ::belongsTo[products]::on[:product_id=id]: {
           name= MBP
         }
-        ::belongsTo.products::where[:product_id=id]: {
+        ::belongsTo[products]::where[:product_id=id]: {
           name= MBP
         }
-        ::belongsTo.products: {
+        ::belongsTo[products]: {
           name= MBP
         }
       }]
@@ -82,7 +82,7 @@ Feature: assert db as data via jdbc
     Given Exists data "OrderLine":
       | refId |
       | 100   |
-    When assert DB :
+    When assert DB:
       """
       order_lines: [{
         ::belongsTo.products::on[:refid=pid]: {
@@ -114,7 +114,7 @@ Feature: assert db as data via jdbc
     Given Exists data "OrderLine":
       | refId |
       | 100   |
-    When assert DB :
+    When assert DB:
       """
       order_lines: [{
         ::belongsTo.products::on[:refid=pidx]: {

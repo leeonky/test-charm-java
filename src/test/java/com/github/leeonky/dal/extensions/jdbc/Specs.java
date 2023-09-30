@@ -5,6 +5,10 @@ import com.github.leeonky.jfactory.Spec;
 
 public class Specs {
     @Global
+    public static class Order extends Spec<com.github.leeonky.dal.extensions.jdbc.entity.Order> {
+    }
+
+    @Global
     public static class Product extends Spec<com.github.leeonky.dal.extensions.jdbc.entity.Product> {
     }
 

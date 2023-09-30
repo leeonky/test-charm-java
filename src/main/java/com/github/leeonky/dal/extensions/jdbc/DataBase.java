@@ -60,6 +60,10 @@ public class DataBase {
                 return table -> new BelongsTo(table, String.format(":%s = id", Inflector.singularize(table) + "_id"));
             }
 
+            public Callable<HasMany> callHasMany() {
+                return table -> new HasMany(table, String.format("%s = :id", Inflector.singularize(name) + "_id"));
+            }
+
             public class BelongsTo {
                 private final String table;
                 private final Clause clause;
@@ -109,6 +113,32 @@ public class DataBase {
                 public boolean hasData() {
                     query();
                     return data != null;
+                }
+            }
+
+            public class HasMany implements Iterable<Row> {
+                private final String table;
+                private final Clause clause;
+
+                public HasMany(String table, String clause) {
+                    this.clause = new Clause(clause);
+                    this.table = table;
+                }
+
+                @Override
+                public Iterator<Row> iterator() {
+                    if (clause.onlyParameter())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
+                                Row::new, clause.getParameters().stream().map(Row.this::get).toArray())).iterator();
+                    if (clause.onlyColumn())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
+                                Row::new, get("id"))).iterator();
+                    return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                            Row::new, clause.getParameters().stream().map(Row.this::get).toArray())).iterator();
+                }
+
+                public Callable<HasMany> clause() {
+                    return clause -> new HasMany(table, clause);
                 }
             }
         }

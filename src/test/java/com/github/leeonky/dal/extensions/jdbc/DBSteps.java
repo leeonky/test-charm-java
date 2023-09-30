@@ -42,7 +42,7 @@ public class DBSteps {
         expect(builder.connect(connection)).should(expression);
     }
 
-    @When("assert DB :")
+    @When("assert DB:")
     public void assertDB(String expression) {
         try {
             expect(builder.connect(connection)).should(expression);

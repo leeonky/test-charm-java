@@ -16,6 +16,15 @@ public class MetaProperties {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Table.Row.BelongsTo)
             return ((DataBase.Table.Row.BelongsTo) data.getInstance()).clause();
+        else if (data.getInstance() instanceof DataBase.Table.Row.HasMany)
+            return ((DataBase.Table.Row.HasMany) data.getInstance()).clause();
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
+    }
+
+    public static Object hasMany(MetaData metaData) {
+        Data data = metaData.evaluateInput();
+        if (data.getInstance() instanceof DataBase.Table.Row)
+            return ((DataBase.Table.Row) data.getInstance()).callHasMany();
+        throw new RuntimeException("`hasMany` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 }

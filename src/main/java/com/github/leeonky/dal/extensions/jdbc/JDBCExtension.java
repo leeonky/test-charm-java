@@ -16,6 +16,7 @@ public class JDBCExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("belongsTo", MetaProperties::belongsTo)
+                .registerMetaProperty("hasMany", MetaProperties::hasMany)
                 .registerMetaProperty("on", MetaProperties::on)
                 .registerMetaProperty("where", MetaProperties::on)
                 .registerPropertyAccessor(DataBase.class, new JavaClassPropertyAccessor<DataBase>(BeanClass.create(DataBase.class)) {
