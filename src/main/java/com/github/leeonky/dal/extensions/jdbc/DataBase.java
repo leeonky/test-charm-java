@@ -5,21 +5,21 @@ import org.javalite.common.Inflector;
 
 import java.sql.*;
 import java.util.*;
-import java.util.function.Function;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 public class DataBase {
     private final Connection connection;
-    private final Function<Statement, Collection<String>> tableQuery;
+    private final DataBaseBuilder builder;
 
-    DataBase(Connection connection, Function<Statement, Collection<String>> tableQuery) {
+    DataBase(Connection connection, DataBaseBuilder builder) {
         this.connection = connection;
-        this.tableQuery = tableQuery;
+        this.builder = builder;
     }
 
     public Collection<String> allTableNames() {
-        return tableQuery.apply(Suppressor.get(connection::createStatement));
+        return builder.tableQuery().apply(Suppressor.get(connection::createStatement));
     }
 
     public Table table(String name) {
@@ -45,6 +45,7 @@ public class DataBase {
     }
 
     public class Table implements Iterable<Table.Row> {
+
         private final String name;
 
         public Table(String name) {
@@ -57,6 +58,7 @@ public class DataBase {
         }
 
         public class Row {
+
             protected Map<String, Object> data;
 
             public Row(Map<String, Object> data) {
@@ -64,15 +66,23 @@ public class DataBase {
             }
 
             public Callable<BelongsTo> callBelongsTo() {
-                return table -> new BelongsTo(table, String.format(":%s = id", Inflector.singularize(table) + "_id"));
+                return table -> new BelongsTo(table, format("%s = :%s",
+                        builder.referencedColumn().apply(name, table),
+                        builder.joinColumn().apply(name, table)));
             }
 
             public Callable<HasMany> callHasMany() {
-                return table -> new HasMany(table, String.format("%s = :id", Inflector.singularize(name) + "_id"));
+                return table -> new HasMany(table, format("%s = :%s",
+                        builder.joinColumn().apply(table, name),
+                        builder.referencedColumn().apply(table, name)
+                ));
             }
 
             public Callable<HasOne> callHasOne() {
-                return table -> new HasOne(table, String.format("%s = :id", Inflector.singularize(name) + "_id"));
+                return table -> new HasOne(table, format("%s = :%s",
+                        builder.joinColumn().apply(table, name),
+                        builder.referencedColumn().apply(table, name)
+                ));
             }
 
             public Object get(String key) {
@@ -131,13 +141,13 @@ public class DataBase {
                 @Override
                 protected List<Map<String, Object>> query() {
                     if (clause.onlyColumn())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
+                        return Suppressor.get(() -> executeQuery(format("select * from %s where ? = %s", table, clause.getClause()),
                                 Row.this.get(Inflector.singularize(table) + "_id")));
                     else if (clause.onlyParameter())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = id", table, clause.getClause()),
+                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s = id", table, clause.getClause()),
                                 clause.getParameters().stream().map(Row.this::get).toArray()));
                     else
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, clause.getClause()),
                                 clause.getParameters().stream().map(Row.this::get).toArray()));
                 }
             }
@@ -150,12 +160,12 @@ public class DataBase {
                 @Override
                 protected List<Map<String, Object>> query() {
                     if (clause.onlyParameter())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
+                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
                                 clause.getParameters().stream().map(Row.this::get).toArray()));
                     if (clause.onlyColumn())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
+                        return Suppressor.get(() -> executeQuery(format("select * from %s where ? = %s", table, clause.getClause()),
                                 Row.this.get("id")));
-                    return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                    return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, clause.getClause()),
                             clause.getParameters().stream().map(Row.this::get).toArray()));
                 }
             }
@@ -172,12 +182,12 @@ public class DataBase {
                 @Override
                 public Iterator<Row> iterator() {
                     if (clause.onlyParameter())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
+                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
                                 clause.getParameters().stream().map(Row.this::get).toArray())).stream().map(Row::new).iterator();
                     if (clause.onlyColumn())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
+                        return Suppressor.get(() -> executeQuery(format("select * from %s where ? = %s", table, clause.getClause()),
                                 get("id"))).stream().map(Row::new).iterator();
-                    return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                    return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, clause.getClause()),
                             clause.getParameters().stream().map(Row.this::get).toArray())).stream().map(Row::new).iterator();
                 }
 
