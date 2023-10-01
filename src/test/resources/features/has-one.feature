@@ -12,22 +12,22 @@ Feature: assert has one
         code= S01
         ::hasOne[order_lines]::where[order_id = :id]: {
           quantity: 1,
-#          ::belongsTo[products].name= MBP
+          ::belongsTo[products].name= MBP
         }
 
         ::hasOne[order_lines]::where[order_id]: {
           quantity: 1,
-#          ::belongsTo[products].name= MBP
+          ::belongsTo[products].name= MBP
         }
 
         ::hasOne[order_lines]::on[:id]: {
           quantity: 1,
-#          ::belongsTo[products].name= MBP
+          ::belongsTo[products].name= MBP
         }
 
         ::hasOne[order_lines]: {
           quantity: 1,
-#          ::belongsTo[products].name= MBP
+          ::belongsTo[products].name= MBP
         }
       }]
       """
@@ -66,23 +66,23 @@ Feature: assert has one
         name= product1
         ::hasOne[order_lines]: {
           quantity= 1,
-#          ::belongsTo[products].name= product1
+          ::belongsTo[products].name= product1
         }
 
         ::hasOne[order_lines]::on[:pid]: {
           quantity= 2,
-#          ::belongsTo[products].name= product2
+          ::belongsTo[products].name= product2
         }
       } {
         name= product2
         ::hasOne[order_lines]: {
           quantity= 2,
-#          ::belongsTo[products].name= product2
+          ::belongsTo[products].name= product2
         }
 
         ::hasOne[order_lines]::on[:pid]: {
           quantity= 1,
-#          ::belongsTo[products].name= product1
+          ::belongsTo[products].name= product1
         }
       }]
       """
@@ -104,21 +104,21 @@ Feature: assert has one
         name= product1
         ::hasOne[order_lines]: {
           quantity= 1,
-#          ::belongsTo[products].name= product1
+          ::belongsTo[products].name= product1
         }
         ::hasOne[order_lines]::on[refid]: {
           quantity= 2,
-#          ::belongsTo[products].name= product2
+          ::belongsTo[products].name= product2
         }
       } {
         name= product2
         ::hasOne[order_lines]: {
           quantity= 2,
-#          ::belongsTo[products].name= product2
+          ::belongsTo[products].name= product2
         }
         ::hasOne[order_lines]::on[refid]: {
           quantity= 1,
-#          ::belongsTo[products].name= product1
+          ::belongsTo[products].name= product1
         }
       }]
       """
@@ -180,5 +180,3 @@ Feature: assert has one
                   The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {}
                   ```
     """
-
-#TODO    hasOne and hasMany not work

@@ -6,7 +6,8 @@ import org.javalite.common.Inflector;
 import java.sql.*;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
+
+import static java.util.Collections.emptyList;
 
 public class DataBase {
     private final Connection connection;
@@ -25,17 +26,17 @@ public class DataBase {
         return new Table(name);
     }
 
-    private <T extends Map<String, Object>> List<T> executeQuery(String sql, Supplier<T> rowFactory, Object... params)
+    private List<Map<String, Object>> executeQuery(String sql, Object... params)
             throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         for (int i = 0; i < params.length; i++)
             preparedStatement.setObject(i + 1, params[i]);
         ResultSet resultSet = preparedStatement.executeQuery();
         ResultSetMetaData metaData = resultSet.getMetaData();
-        List<T> result = new ArrayList<>();
+        List<Map<String, Object>> result = new ArrayList<>();
         while (resultSet.next()) {
             int columnCount = metaData.getColumnCount();
-            T row = rowFactory.get();
+            Map<String, Object> row = new LinkedHashMap<>();
             for (int i = 1; i <= columnCount; ++i)
                 row.put(metaData.getColumnName(i).toLowerCase(), resultSet.getObject(i));
             result.add(row);
@@ -52,10 +53,16 @@ public class DataBase {
 
         @Override
         public Iterator<Row> iterator() {
-            return Suppressor.get(() -> executeQuery("select * from " + name, Row::new)).iterator();
+            return Suppressor.get(() -> executeQuery("select * from " + name)).stream().map(Row::new).iterator();
         }
 
-        public class Row extends LinkedHashMap<String, Object> {
+        public class Row {
+            protected Map<String, Object> data;
+
+            public Row(Map<String, Object> data) {
+                this.data = data;
+            }
+
             public Callable<BelongsTo> callBelongsTo() {
                 return table -> new BelongsTo(table, String.format(":%s = id", Inflector.singularize(table) + "_id"));
             }
@@ -68,55 +75,88 @@ public class DataBase {
                 return table -> new HasOne(table, String.format("%s = :id", Inflector.singularize(name) + "_id"));
             }
 
-            public class BelongsTo {
-                private final String table;
-                private final Clause clause;
-                private Map<String, Object> data;
+            public Object get(String key) {
+                lazyQuery();
+                return data.get(key);
+            }
 
-                public BelongsTo(String table, String clause) {
+            protected void lazyQuery() {
+                if (data == null) {
+                    List<Map<String, Object>> result = query();
+                    if (result.size() == 1)
+                        data = result.get(0);
+                    else if (result.size() > 1)
+                        throw new RuntimeException("Query more than one record");
+                }
+            }
+
+            protected List<Map<String, Object>> query() {
+                return emptyList();
+            }
+
+            public Set<String> columns() {
+                lazyQuery();
+                return data.keySet();
+            }
+
+            public boolean hasData() {
+                lazyQuery();
+                return data != null;
+            }
+
+            public abstract class Association extends DataBase.Table.Row {
+                protected final String table;
+                protected Clause clause;
+
+                public Association(String table, String clause) {
+                    super(null);
                     this.table = table;
                     this.clause = new Clause(clause);
                 }
 
-                public Callable<BelongsTo> clause() {
-                    return clause -> new BelongsTo(table, clause);
+                public Callable<Association> clause() {
+                    return clause -> {
+                        data = null;
+                        this.clause = new Clause(clause);
+                        return this;
+                    };
+                }
+            }
+
+            public class BelongsTo extends Association {
+                public BelongsTo(String table, String clause) {
+                    super(table, clause);
                 }
 
-                private void query() {
-                    if (data == null) {
-                        List<Map<String, Object>> result = querySubObject();
-                        if (result.size() == 1)
-                            data = result.get(0);
-                        else if (result.size() > 1)
-                            throw new RuntimeException("Query more than one record");
-                    }
-                }
-
-                private List<Map<String, Object>> querySubObject() {
+                @Override
+                protected List<Map<String, Object>> query() {
                     if (clause.onlyColumn())
                         return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
-                                LinkedHashMap::new, get(Inflector.singularize(table) + "_id")));
+                                Row.this.get(Inflector.singularize(table) + "_id")));
                     else if (clause.onlyParameter())
                         return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = id", table, clause.getClause()),
-                                LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
+                                clause.getParameters().stream().map(Row.this::get).toArray()));
                     else
                         return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
-                                LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
+                                clause.getParameters().stream().map(Row.this::get).toArray()));
+                }
+            }
+
+            public class HasOne extends Association {
+                public HasOne(String table, String clause) {
+                    super(table, clause);
                 }
 
-                public Object getValue(String column) {
-                    query();
-                    return data.get(column);
-                }
-
-                public Set<String> keys() {
-                    query();
-                    return data.keySet();
-                }
-
-                public boolean hasData() {
-                    query();
-                    return data != null;
+                @Override
+                protected List<Map<String, Object>> query() {
+                    if (clause.onlyParameter())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
+                                clause.getParameters().stream().map(Row.this::get).toArray()));
+                    if (clause.onlyColumn())
+                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
+                                Row.this.get("id")));
+                    return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
+                            clause.getParameters().stream().map(Row.this::get).toArray()));
                 }
             }
 
@@ -133,67 +173,16 @@ public class DataBase {
                 public Iterator<Row> iterator() {
                     if (clause.onlyParameter())
                         return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
-                                Row::new, clause.getParameters().stream().map(Row.this::get).toArray())).iterator();
+                                clause.getParameters().stream().map(Row.this::get).toArray())).stream().map(Row::new).iterator();
                     if (clause.onlyColumn())
                         return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
-                                Row::new, get("id"))).iterator();
+                                get("id"))).stream().map(Row::new).iterator();
                     return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
-                            Row::new, clause.getParameters().stream().map(Row.this::get).toArray())).iterator();
+                            clause.getParameters().stream().map(Row.this::get).toArray())).stream().map(Row::new).iterator();
                 }
 
                 public Callable<HasMany> clause() {
                     return clause -> new HasMany(table, clause);
-                }
-            }
-
-            public class HasOne {
-                private final String table;
-                private final Clause clause;
-                private Map<String, Object> data;
-
-                public HasOne(String table, String clause) {
-                    this.table = table;
-                    this.clause = new Clause(clause);
-                }
-
-                public Callable<HasOne> clause() {
-                    return clause -> new HasOne(table, clause);
-                }
-
-                private void query() {
-                    if (data == null) {
-                        List<Map<String, Object>> result = querySubObject();
-                        if (result.size() == 1)
-                            data = result.get(0);
-                        else if (result.size() > 1)
-                            throw new RuntimeException("Query more than one record");
-                    }
-                }
-
-                private List<Map<String, Object>> querySubObject() {
-                    if (clause.onlyParameter())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
-                                LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
-                    if (clause.onlyColumn())
-                        return Suppressor.get(() -> executeQuery(String.format("select * from %s where ? = %s", table, clause.getClause()),
-                                LinkedHashMap::new, get("id")));
-                    return Suppressor.get(() -> executeQuery(String.format("select * from %s where %s", table, clause.getClause()),
-                            LinkedHashMap::new, clause.getParameters().stream().map(Row.this::get).toArray()));
-                }
-
-                public Object getValue(String column) {
-                    query();
-                    return data.get(column);
-                }
-
-                public Set<String> keys() {
-                    query();
-                    return data.keySet();
-                }
-
-                public boolean hasData() {
-                    query();
-                    return data != null;
                 }
             }
         }
