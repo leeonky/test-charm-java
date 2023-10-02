@@ -65,30 +65,27 @@ public class DataBase {
             }
 
             public Callable<OneToOne> callBelongsTo() {
-                return table -> {
-                    Query query = new Query(table)
-                            .column(builder.referencedColumn().apply(name, table))
-                            .value(builder.joinColumn().apply(name, table));
-                    return new OneToOne(query);
-                };
+                return table -> new OneToOne(join(table));
             }
 
             public Callable<OneToMany> callHasMany() {
-                return table -> {
-                    Query query = new Query(table)
-                            .column(builder.joinColumn().apply(table, name))
-                            .value(builder.referencedColumn().apply(table, name));
-                    return new OneToMany(query);
-                };
+                return table -> new OneToMany(reversJoin(table));
             }
 
             public Callable<OneToOne> callHasOne() {
-                return table -> {
-                    Query query = new Query(table)
-                            .column(builder.joinColumn().apply(table, name))
-                            .value(builder.referencedColumn().apply(table, name));
-                    return new OneToOne(query);
-                };
+                return table -> new OneToOne(reversJoin(table));
+            }
+
+            private Query join(String table) {
+                return new Query(table)
+                        .column(builder.referencedColumn().apply(name, table))
+                        .value(builder.joinColumn().apply(name, table));
+            }
+
+            private Query reversJoin(String table) {
+                return new Query(table)
+                        .column(builder.joinColumn().apply(table, name))
+                        .value(builder.referencedColumn().apply(table, name));
             }
 
             public Object get(String key) {
