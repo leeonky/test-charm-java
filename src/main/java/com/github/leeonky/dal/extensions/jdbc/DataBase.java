@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.util.Suppressor;
-import org.javalite.common.Inflector;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.BiFunction;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -58,31 +58,37 @@ public class DataBase {
         }
 
         public class Row {
-
             protected Map<String, Object> data;
 
             public Row(Map<String, Object> data) {
                 this.data = data;
             }
 
-            public Callable<BelongsTo> callBelongsTo() {
-                return table -> new BelongsTo(table, format("%s = :%s",
-                        builder.referencedColumn().apply(name, table),
-                        builder.joinColumn().apply(name, table)));
+            public Callable<OneToOne> callBelongsTo() {
+                return table -> {
+                    Query query = new Query(table)
+                            .column(builder.referencedColumn().apply(name, table))
+                            .value(builder.joinColumn().apply(name, table));
+                    return new OneToOne(query);
+                };
             }
 
-            public Callable<HasMany> callHasMany() {
-                return table -> new HasMany(table, format("%s = :%s",
-                        builder.joinColumn().apply(table, name),
-                        builder.referencedColumn().apply(table, name)
-                ));
+            public Callable<OneToMany> callHasMany() {
+                return table -> {
+                    Query query = new Query(table)
+                            .column(builder.joinColumn().apply(table, name))
+                            .value(builder.referencedColumn().apply(table, name));
+                    return new OneToMany(query);
+                };
             }
 
-            public Callable<HasOne> callHasOne() {
-                return table -> new HasOne(table, format("%s = :%s",
-                        builder.joinColumn().apply(table, name),
-                        builder.referencedColumn().apply(table, name)
-                ));
+            public Callable<OneToOne> callHasOne() {
+                return table -> {
+                    Query query = new Query(table)
+                            .column(builder.joinColumn().apply(table, name))
+                            .value(builder.referencedColumn().apply(table, name));
+                    return new OneToOne(query);
+                };
             }
 
             public Object get(String key) {
@@ -114,85 +120,80 @@ public class DataBase {
                 return data != null;
             }
 
-            public abstract class Association extends DataBase.Table.Row {
-                protected final String table;
-                protected Clause clause;
-
-                public Association(String table, String clause) {
-                    super(null);
-                    this.table = table;
-                    this.clause = new Clause(clause);
-                }
-
-                public Callable<Association> clause() {
-                    return clause -> {
-                        data = null;
-                        this.clause = new Clause(clause);
-                        return this;
-                    };
-                }
+            public void reset() {
+                data = null;
             }
 
-            public class BelongsTo extends Association {
-                public BelongsTo(String table, String clause) {
-                    super(table, clause);
-                }
-
-                @Override
-                protected List<Map<String, Object>> query() {
-                    if (clause.onlyColumn())
-                        return Suppressor.get(() -> executeQuery(format("select * from %s where ? = %s", table, clause.getClause()),
-                                Row.this.get(Inflector.singularize(table) + "_id")));
-                    else if (clause.onlyParameter())
-                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s = id", table, clause.getClause()),
-                                clause.getParameters().stream().map(Row.this::get).toArray()));
-                    else
-                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, clause.getClause()),
-                                clause.getParameters().stream().map(Row.this::get).toArray()));
-                }
-            }
-
-            public class HasOne extends Association {
-                public HasOne(String table, String clause) {
-                    super(table, clause);
-                }
-
-                @Override
-                protected List<Map<String, Object>> query() {
-                    if (clause.onlyParameter())
-                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
-                                clause.getParameters().stream().map(Row.this::get).toArray()));
-                    if (clause.onlyColumn())
-                        return Suppressor.get(() -> executeQuery(format("select * from %s where ? = %s", table, clause.getClause()),
-                                Row.this.get("id")));
-                    return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, clause.getClause()),
-                            clause.getParameters().stream().map(Row.this::get).toArray()));
-                }
-            }
-
-            public class HasMany implements Iterable<Row> {
+            public class Query {
                 private final String table;
-                private final Clause clause;
+                private String column, value;
+                private BiFunction<String, String, String> clause = (c, v) -> c + " = :" + v;
 
-                public HasMany(String table, String clause) {
-                    this.clause = new Clause(clause);
+                public Query(String table) {
                     this.table = table;
+                }
+
+                public Query column(String column) {
+                    this.column = column;
+                    return this;
+                }
+
+                public Query value(String value) {
+                    this.value = value;
+                    return this;
+                }
+
+                public void clause(String clause) {
+                    ClauseParser clauseParser = new ClauseParser(clause);
+                    if (clauseParser.onlyColumn())
+                        column(clauseParser.getClause());
+                    else if (clauseParser.onlyParameter())
+                        value(clauseParser.getParameters().get(0));
+                    else
+                        this.clause = (c, v) -> clause;
+                }
+
+                public List<Map<String, Object>> query() {
+                    ClauseParser parser = new ClauseParser(clause.apply(column, value));
+                    return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, parser.getClause()),
+                            parser.getParameters().stream().map(Row.this::get).toArray()));
+                }
+            }
+
+            public class OneToOne extends DataBase.Table.Row implements Association<OneToOne> {
+                private final Query query;
+
+                public OneToOne(Query query) {
+                    super(null);
+                    this.query = query;
+                }
+
+                @Override
+                public Query getQuery() {
+                    return query;
+                }
+
+                @Override
+                protected List<Map<String, Object>> query() {
+                    return query.query();
+                }
+            }
+
+            public class OneToMany implements Iterable<Row>, Association<OneToMany> {
+                private final Query query;
+
+                @Override
+                public Query getQuery() {
+                    return query;
+                }
+
+                public OneToMany(Query query) {
+                    this.query = query;
                 }
 
                 @Override
                 public Iterator<Row> iterator() {
-                    if (clause.onlyParameter())
-                        return Suppressor.get(() -> executeQuery(format("select * from %s where %s = ?", table, Inflector.singularize(name) + "_id"),
-                                clause.getParameters().stream().map(Row.this::get).toArray())).stream().map(Row::new).iterator();
-                    if (clause.onlyColumn())
-                        return Suppressor.get(() -> executeQuery(format("select * from %s where ? = %s", table, clause.getClause()),
-                                get("id"))).stream().map(Row::new).iterator();
-                    return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, clause.getClause()),
-                            clause.getParameters().stream().map(Row.this::get).toArray())).stream().map(Row::new).iterator();
-                }
-
-                public Callable<HasMany> clause() {
-                    return clause -> new HasMany(table, clause);
+                    return query.query().stream().map(Row::new).iterator();
                 }
             }
         }

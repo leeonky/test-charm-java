@@ -28,10 +28,8 @@ public class MetaProperties {
 
     public static Object on(MetaData metaData) {
         Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.Table.Row.Association)
-            return ((DataBase.Table.Row.Association) data.getInstance()).clause();
-        else if (data.getInstance() instanceof DataBase.Table.Row.HasMany)
-            return ((DataBase.Table.Row.HasMany) data.getInstance()).clause();
+        if (data.getInstance() instanceof Association)
+            return ((Association<?>) data.getInstance()).clause();
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 }

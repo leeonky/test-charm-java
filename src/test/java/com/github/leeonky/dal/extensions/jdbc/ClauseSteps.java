@@ -6,15 +6,15 @@ import io.cucumber.java.en.Then;
 import static com.github.leeonky.dal.Assertions.expect;
 
 public class ClauseSteps {
-    Clause clause;
+    ClauseParser clauseParser;
 
     @Given("clause")
     public void clause(String clause) {
-        this.clause = new Clause(clause);
+        clauseParser = new ClauseParser(clause);
     }
 
     @Then("clause should be:")
     public void clauseShouldBe(String expression) {
-        expect(clause).should(expression);
+        expect(clauseParser).should(expression);
     }
 }

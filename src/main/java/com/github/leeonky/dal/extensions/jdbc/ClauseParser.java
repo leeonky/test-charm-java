@@ -3,11 +3,11 @@ package com.github.leeonky.dal.extensions.jdbc;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Clause {
+public class ClauseParser {
     private final String clause;
     private final List<String> parameters = new ArrayList<>();
 
-    public Clause(String clause) {
+    public ClauseParser(String clause) {
         StringBuilder clauseBuilder = new StringBuilder();
         StringBuilder parameterBuilder = new StringBuilder();
         boolean isParameter = false;
