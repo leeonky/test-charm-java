@@ -4,6 +4,9 @@ Feature: assert belongs to
     Given Exists data "OrderLine":
       | quantity | product.name |
       | 100      | MBP          |
+    And Exists data "Product":
+      | name       |
+      | unexpected |
     When all follow tables:
       | products | order_lines |
     Then db should:
@@ -40,8 +43,9 @@ Feature: assert belongs to
 
   Scenario: override default join column
     Given Exists data "Product":
-      | id  | name |
-      | 100 | MBP  |
+      | id  | name       |
+      | 100 | MBP        |
+      | 101 | unexpected |
     Given Exists data "OrderLine":
       | refId | product |
       | 100   |         |

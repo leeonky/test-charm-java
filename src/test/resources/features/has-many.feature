@@ -2,14 +2,15 @@ Feature: assert has many
 
   Scenario: has many with where clause
     Given Exists data "OrderLine":
-      | quantity | order.code | product.name |
-      | 1        | S01        | MBP          |
-      | 2        | S01        | iPod         |
+      | quantity | order.code    | product.name |
+      | 1        | S01           | MBP          |
+      | 2        | S01           | iPod         |
+      | 3        | another_order | any          |
     When all follow tables:
       | products | order_lines | orders |
     Then db should:
       """
-      orders: [{
+      orders[0]: {
         code= S01
         ::hasMany[order_lines]::on[order_id = :id]: | quantity | ::belongsTo[products].name |
                                          | 1        | MBP                        |
@@ -26,7 +27,7 @@ Feature: assert has many
         ::hasMany[order_lines]: | quantity | ::belongsTo[products].name |
                                 | 1        | MBP                        |
                                 | 2        | iPod                       |
-      }]
+      }
       """
 
   Scenario: has many return empty list
@@ -52,6 +53,10 @@ Feature: assert has many
       | product.name | quantity |
       | product1     | 1        |
       | product2     | 2        |
+#    unexpected
+    Given Exists data "OrderLine":
+      | product |
+      |         |
     When all follow tables:
       | products | order_lines |
     Then db should:
@@ -82,6 +87,10 @@ Feature: assert has many
       | product.name | quantity | refId |
       | product1     | 1        | 2     |
       | product2     | 2        | 1     |
+#    unexpected
+    Given Exists data "OrderLine":
+      | product |
+      |         |
     When all follow tables:
       | products | order_lines |
     Then db should:

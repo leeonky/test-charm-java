@@ -4,6 +4,10 @@ Feature: assert has one
     Given Exists data "OrderLine":
       | quantity | order.code | product.name |
       | 1        | S01        | MBP          |
+#    unexpected
+    Given Exists data "OrderLine":
+      | order |
+      |       |
     When all follow tables:
       | products | order_lines | orders |
     Then db should:
@@ -58,6 +62,10 @@ Feature: assert has one
       | product.name | quantity |
       | product1     | 1        |
       | product2     | 2        |
+#    unexpected
+    Given Exists data "OrderLine":
+      | product |
+      |         |
     When all follow tables:
       | products | order_lines |
     Then db should:
@@ -96,6 +104,10 @@ Feature: assert has one
       | product.name | quantity | refId |
       | product1     | 1        | 2     |
       | product2     | 2        | 1     |
+#    unexpected
+    Given Exists data "OrderLine":
+      | product |
+      |         |
     When all follow tables:
       | products | order_lines |
     Then db should:
