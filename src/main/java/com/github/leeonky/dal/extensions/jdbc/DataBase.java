@@ -65,27 +65,15 @@ public class DataBase {
             }
 
             public Callable<OneToOne> callBelongsTo() {
-                return table -> new OneToOne(join(table));
+                return table -> new OneToOne(new QueryBuilder(table).join());
             }
 
             public Callable<OneToMany> callHasMany() {
-                return table -> new OneToMany(reversJoin(table));
+                return table -> new OneToMany(new QueryBuilder(table).reversJoin());
             }
 
             public Callable<OneToOne> callHasOne() {
-                return table -> new OneToOne(reversJoin(table));
-            }
-
-            private Query join(String table) {
-                return new Query(table)
-                        .column(builder.referencedColumn().apply(name, table))
-                        .value(builder.joinColumn().apply(name, table));
-            }
-
-            private Query reversJoin(String table) {
-                return new Query(table)
-                        .column(builder.joinColumn().apply(table, name))
-                        .value(builder.referencedColumn().apply(table, name));
+                return table -> new OneToOne(new QueryBuilder(table).reversJoin());
             }
 
             public Object get(String key) {
@@ -121,6 +109,26 @@ public class DataBase {
                 data = null;
             }
 
+            public class QueryBuilder {
+                private final String table;
+
+                public QueryBuilder(String table) {
+                    this.table = table;
+                }
+
+                public Query reversJoin() {
+                    return Row.this.new Query(table)
+                            .column(builder.joinColumn().apply(table, name))
+                            .value(builder.referencedColumn().apply(table, name));
+                }
+
+                public Query join() {
+                    return Row.this.new Query(table)
+                            .column(builder.referencedColumn().apply(name, table))
+                            .value(builder.joinColumn().apply(name, table));
+                }
+            }
+
             public class Query {
                 private final String table;
                 private String column, value;
@@ -141,11 +149,10 @@ public class DataBase {
                 }
 
                 public void clause(String clause) {
-                    ClauseParser clauseParser = new ClauseParser(clause);
-                    if (clauseParser.onlyColumn())
-                        column(clauseParser.getClause());
-                    else if (clauseParser.onlyParameter())
-                        value(clauseParser.getParameters().get(0));
+                    if (ClauseParser.onlyColumn(clause))
+                        column(clause);
+                    else if (ClauseParser.onlyParameter(clause))
+                        value(clause.substring(1));
                     else
                         this.clause = (c, v) -> clause;
                 }

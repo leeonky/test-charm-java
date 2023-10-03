@@ -45,14 +45,14 @@ public class ClauseParser {
         return parameters;
     }
 
-    public boolean onlyParameter() {
-        return getClause().equals("?");
-    }
-
-    public boolean onlyColumn() {
-        for (char c : getClause().toCharArray())
+    public static boolean onlyColumn(String clause) {
+        for (char c : clause.toCharArray())
             if (!validColumn(c))
                 return false;
         return true;
+    }
+
+    public static boolean onlyParameter(String clause) {
+        return clause.indexOf(':') == 0 && onlyColumn(clause.substring(1));
     }
 }
