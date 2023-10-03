@@ -3,10 +3,10 @@ package com.github.leeonky.dal.extensions.jdbc.entity;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -19,4 +19,10 @@ public class Product {
     private String name;
     private int price;
     private Instant createdAt;
+
+    @ManyToMany
+    @JoinTable(name = "sku_products",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "sku_id"))
+    private Set<Sku> skus = new HashSet<>();
 }

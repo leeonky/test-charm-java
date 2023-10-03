@@ -105,10 +105,6 @@ public class DataBase {
                 return data != null;
             }
 
-            public void reset() {
-                data = null;
-            }
-
             public class QueryBuilder {
                 private final String table;
 
@@ -117,50 +113,82 @@ public class DataBase {
                 }
 
                 public Query reversJoin() {
-                    return Row.this.new Query(table)
+                    return Row.this.new SubQuery(table)
                             .column(builder.joinColumn().apply(table, name))
                             .value(builder.referencedColumn().apply(table, name));
                 }
 
                 public Query join() {
-                    return Row.this.new Query(table)
+                    return Row.this.new SubQuery(table)
                             .column(builder.referencedColumn().apply(name, table))
                             .value(builder.joinColumn().apply(name, table));
                 }
             }
 
-            public class Query {
+            public class SubQuery implements Query {
                 private final String table;
                 private String column, value;
                 private BiFunction<String, String, String> clause = (c, v) -> c + " = :" + v;
 
-                public Query(String table) {
+                public SubQuery(String table) {
                     this.table = table;
                 }
 
+                @Override
                 public Query column(String column) {
                     this.column = column;
                     return this;
                 }
 
+                @Override
                 public Query value(String value) {
                     this.value = value;
                     return this;
                 }
 
-                public void clause(String clause) {
+                @Override
+                public Query clause(String clause) {
                     if (ClauseParser.onlyColumn(clause))
                         column(clause);
                     else if (ClauseParser.onlyParameter(clause))
                         value(clause.substring(1));
                     else
                         this.clause = (c, v) -> clause;
+                    return this;
                 }
 
+                protected String clauseParser() {
+                    return clause.apply(column, value);
+                }
+
+                @Override
                 public List<Map<String, Object>> query() {
-                    ClauseParser parser = new ClauseParser(clause.apply(column, value));
+                    ClauseParser parser = new ClauseParser(clauseParser());
                     return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, parser.getClause()),
                             parser.getParameters().stream().map(Row.this::get).toArray()));
+                }
+
+                @Override
+                public Query through(String table) {
+                    String[] tableAndId = table.split("\\.");
+                    return new JoinQuery(tableAndId[0], tableAndId[1]);
+                }
+
+                public class JoinQuery extends SubQuery {
+                    private final String joinId;
+
+                    public JoinQuery(String joinTable, String joinId) {
+                        super(joinTable);
+                        this.joinId = joinId;
+                    }
+
+                    @Override
+                    public List<Map<String, Object>> query() {
+                        ClauseParser parser = new ClauseParser(clauseParser());
+                        String sql = String.format("select %s.* from %s where %s in (select %s from %s where %s)",
+                                SubQuery.this.table, SubQuery.this.table, SubQuery.this.column, joinId, super.table, parser.getClause());
+                        return Suppressor.get(() -> executeQuery(sql, parser.getParameters().stream().map(Row.this::get).toArray()));
+                    }
                 }
             }
 
@@ -181,6 +209,11 @@ public class DataBase {
                 protected List<Map<String, Object>> query() {
                     return query.query();
                 }
+
+                @Override
+                public OneToOne create(Query query) {
+                    return Row.this.new OneToOne(query);
+                }
             }
 
             public class OneToMany implements Iterable<Row>, Association<OneToMany> {
@@ -198,6 +231,11 @@ public class DataBase {
                 @Override
                 public Iterator<Row> iterator() {
                     return query.query().stream().map(Row::new).iterator();
+                }
+
+                @Override
+                public OneToMany create(Query query) {
+                    return Row.this.new OneToMany(query);
                 }
             }
         }

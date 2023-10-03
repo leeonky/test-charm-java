@@ -32,4 +32,11 @@ public class MetaProperties {
             return ((Association<?>) data.getInstance()).clause();
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
+
+    public static Object through(MetaData metaData) {
+        Data data = metaData.evaluateInput();
+        if (data.getInstance() instanceof Association)
+            return ((Association<?>) data.getInstance()).through();
+        throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
+    }
 }

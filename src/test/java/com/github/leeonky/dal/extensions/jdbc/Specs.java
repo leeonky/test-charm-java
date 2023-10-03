@@ -19,4 +19,8 @@ public class Specs {
             property("product").is(Product.class);
         }
     }
+
+    @Global
+    public static class Sku extends Spec<com.github.leeonky.dal.extensions.jdbc.entity.Sku> {
+    }
 }

@@ -7,6 +7,7 @@
         <class>com.github.leeonky.dal.extensions.jdbc.entity.Order</class>
         <class>com.github.leeonky.dal.extensions.jdbc.entity.OrderLine</class>
         <class>com.github.leeonky.dal.extensions.jdbc.entity.Product</class>
+        <class>com.github.leeonky.dal.extensions.jdbc.entity.Sku</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test"/>
