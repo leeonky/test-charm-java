@@ -52,6 +52,10 @@ public class DataBase {
             this.name = name;
         }
 
+        public String name() {
+            return name;
+        }
+
         @Override
         public Iterator<Row> iterator() {
             return Suppressor.get(() -> executeQuery("select * from " + name)).stream().map(Row::new).iterator();
@@ -113,104 +117,15 @@ public class DataBase {
                 }
 
                 public Query reversJoin() {
-                    return Row.this.new SubQuery(table)
+                    return new DataBase.SubQuery(Table.this, Row.this, table)
                             .defaultColumn(builder.joinColumn().apply(table, name))
                             .defaultValue(builder.referencedColumn().apply(table, name));
                 }
 
                 public Query join() {
-                    return Row.this.new SubQuery(table)
+                    return new DataBase.SubQuery(Table.this, Row.this, table)
                             .defaultColumn(builder.referencedColumn().apply(name, table))
                             .defaultValue(builder.joinColumn().apply(name, table));
-                }
-            }
-
-            public class SubQuery implements Query {
-                private final String table;
-                private String column, value, defaultColumn, defaultValue;
-                private BiFunction<String, String, String> clause = (c, v) -> c + " = :" + v;
-
-                public SubQuery(String table) {
-                    this.table = table;
-                }
-
-                @Override
-                public Query column(String column) {
-                    this.column = column;
-                    return this;
-                }
-
-                public String column() {
-                    return column == null ? defaultColumn : column;
-                }
-
-                public String value() {
-                    return value == null ? defaultValue : value;
-                }
-
-                @Override
-                public Query value(String value) {
-                    this.value = value;
-                    return this;
-                }
-
-                @Override
-                public Query clause(String clause) {
-                    if (ClauseParser.onlyColumn(clause))
-                        column(clause);
-                    else if (ClauseParser.onlyParameter(clause))
-                        value(clause.substring(1));
-                    else
-                        this.clause = (c, v) -> clause;
-                    return this;
-                }
-
-                protected String clauseParser() {
-                    return clause.apply(column(), value());
-                }
-
-                @Override
-                public List<Map<String, Object>> query() {
-                    ClauseParser parser = new ClauseParser(clauseParser());
-                    return Suppressor.get(() -> executeQuery(format("select * from %s where %s", table, parser.getClause()),
-                            parser.getParameters().stream().map(Row.this::get).toArray()));
-                }
-
-                @Override
-                public Query through(String table) {
-                    String[] tableAndId = table.split("\\.");
-                    if (column == null)
-                        column(builder.referencedColumn().apply(SubQuery.this.table, tableAndId[0]));
-                    return new JoinQuery(tableAndId[0], tableAndId.length == 1 ? builder.joinColumn().apply(tableAndId[0], this.table) : tableAndId[1])
-                            .defaultColumn(builder.joinColumn().apply(tableAndId[0], name))
-                            .defaultValue(builder.referencedColumn().apply(tableAndId[0], name));
-                }
-
-                public SubQuery defaultColumn(String defaultColumn) {
-                    this.defaultColumn = defaultColumn;
-                    return this;
-                }
-
-                public SubQuery defaultValue(String defaultValue) {
-                    this.defaultValue = defaultValue;
-                    return this;
-                }
-
-                public class JoinQuery extends SubQuery {
-                    private final String joinId;
-
-                    public JoinQuery(String joinTable, String joinId) {
-                        super(joinTable);
-                        this.joinId = joinId;
-                    }
-
-                    @Override
-                    public List<Map<String, Object>> query() {
-                        ClauseParser parser = new ClauseParser(clauseParser());
-                        String sql = String.format("select %s.* from %s where %s in (select %s from %s where %s)",
-                                SubQuery.this.table, SubQuery.this.table, SubQuery.this.column, joinId, super.table, parser.getClause());
-                        return Suppressor.get(() -> executeQuery(sql, parser.getParameters().stream().map(Row.this::get).toArray()));
-                    }
                 }
             }
 
@@ -259,6 +174,88 @@ public class DataBase {
                 public OneToMany create(Query query) {
                     return Row.this.new OneToMany(query);
                 }
+            }
+        }
+
+    }
+
+    public class SubQuery implements Query {
+        private final Table mainTable;
+        private final Table.Row row;
+        private final String subTable;
+        private String column, value, defaultColumn, defaultValue;
+        private BiFunction<String, String, String> clause = (c, v) -> c + " = :" + v;
+
+        public SubQuery(Table mainTable, Table.Row row, String subTable) {
+            this.mainTable = mainTable;
+            this.row = row;
+            this.subTable = subTable;
+        }
+
+        public String column() {
+            return column == null ? defaultColumn : column;
+        }
+
+        public String value() {
+            return value == null ? defaultValue : value;
+        }
+
+        @Override
+        public Query clause(String clause) {
+            if (ClauseParser.onlyColumn(clause))
+                column = clause;
+            else if (ClauseParser.onlyParameter(clause))
+                value = clause.substring(1);
+            else
+                this.clause = (c, v) -> clause;
+            return this;
+        }
+
+        protected String clauseParser() {
+            return clause.apply(column(), value());
+        }
+
+        @Override
+        public List<Map<String, Object>> query() {
+            ClauseParser parser = new ClauseParser(clauseParser());
+            return Suppressor.get(() -> executeQuery(format("select * from %s where %s", subTable, parser.getClause()),
+                    parser.getParameters().stream().map(row::get).toArray()));
+        }
+
+        @Override
+        public Query through(String table) {
+            String[] tableAndId = table.split("\\.");
+            if (column == null)
+                column = builder.referencedColumn().apply(subTable, tableAndId[0]);
+            return new JoinQuery(row, tableAndId[0], tableAndId.length == 1 ? builder.joinColumn().apply(tableAndId[0], subTable) : tableAndId[1])
+                    .defaultColumn(builder.joinColumn().apply(tableAndId[0], mainTable.name))
+                    .defaultValue(builder.referencedColumn().apply(tableAndId[0], mainTable.name));
+        }
+
+        public SubQuery defaultColumn(String defaultColumn) {
+            this.defaultColumn = defaultColumn;
+            return this;
+        }
+
+        public SubQuery defaultValue(String defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public class JoinQuery extends SubQuery {
+            private final String joinId;
+
+            public JoinQuery(Table.Row row, String joinTable, String joinId) {
+                super(mainTable, row, joinTable);
+                this.joinId = joinId;
+            }
+
+            @Override
+            public List<Map<String, Object>> query() {
+                ClauseParser parser = new ClauseParser(clauseParser());
+                String sql = String.format("select %s.* from %s where %s in (select %s from %s where %s)",
+                        SubQuery.this.subTable, SubQuery.this.subTable, SubQuery.this.column, joinId, super.subTable, parser.getClause());
+                return Suppressor.get(() -> executeQuery(sql, parser.getParameters().stream().map(row::get).toArray()));
             }
         }
     }
