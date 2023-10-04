@@ -14,7 +14,7 @@ public class DataBaseBuilder {
     private Function<Statement, Collection<String>> tableQuery = s -> Collections.emptyList();
     private BiFunction<String, String, String> joinColumn = (table, joinTable) -> Inflector.singularize(joinTable) + "_id";
     private BiFunction<String, String, String> referencedColumn = (table, joinTable) -> "id";
-    private final Map<String, Function<DataBase.Table.Row, ?>> rowMethods = new HashMap<>();
+    private final Map<String, Function<DataBase.Row, ?>> rowMethods = new HashMap<>();
 
     public DataBaseBuilder tableQuery(Function<Statement, Collection<String>> query) {
         tableQuery = query;
@@ -51,11 +51,11 @@ public class DataBaseBuilder {
         return this;
     }
 
-    public <T> void registerRowMethod(String table, Function<DataBase.Table.Row, T> method) {
+    public <T> void registerRowMethod(String table, Function<DataBase.Row, T> method) {
         rowMethods.put(table, method);
     }
 
-    public Optional<Function<DataBase.Table.Row, ?>> rowMethod(String table) {
+    public Optional<Function<DataBase.Row, ?>> rowMethod(String table) {
         return ofNullable(rowMethods.get(table));
     }
 }

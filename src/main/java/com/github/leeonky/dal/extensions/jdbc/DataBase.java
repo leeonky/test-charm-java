@@ -19,13 +19,13 @@ public class DataBase {
         return builder.tableQuery().apply(Suppressor.get(connection::createStatement));
     }
 
-    public Table table(String name) {
-        return new Table(name);
+    public Table<?> table(String name) {
+        return new Table<>(name);
     }
 
-    public class Table implements Iterable<Table.Row> {
+    public class Table<T extends Table<T>> implements Iterable<Row<T>> {
         private final String name;
-        private final Clause clause;
+        protected final Clause clause;
 
         public Table(String name) {
             this(name, new Clause(name + ".*"));
@@ -41,34 +41,22 @@ public class DataBase {
         }
 
         @Override
-        public Iterator<Row> iterator() {
+        public Iterator<DataBase.Row<T>> iterator() {
             return Suppressor.get(() -> query(clause.buildSql(name)));
         }
 
-        public Table where(String clause) {
-            return new Table(name, this.clause.where(clause));
+        protected T createInstance(String name, Clause clause) {
+            return (T) new Table(name, clause);
         }
 
-        public Table on(String condition) {
-            return new Table(name, clause.on(condition));
-        }
-
-        public Table appendParameters(Map<String, Object> parameters) {
-            return new Table(name, clause.parameters(parameters));
-        }
-
-        public Table select(String select) {
-            return new Table(name, clause.select(select));
-        }
-
-        private Iterator<Row> query(String sql) throws SQLException {
+        private Iterator<DataBase.Row<T>> query(String sql) throws SQLException {
             ClauseParser parser = new ClauseParser(sql);
             PreparedStatement preparedStatement = connection.prepareStatement(parser.getClause());
             int parameterIndex = 1;
             for (String parameter : parser.getParameters())
                 preparedStatement.setObject(parameterIndex++, clause.parameters.get(parameter));
             ResultSet resultSet = preparedStatement.executeQuery();
-            return new Iterator<Row>() {
+            return new Iterator<DataBase.Row<T>>() {
                 private final Set<String> columns = new LinkedHashSet<String>() {{
                     ResultSetMetaData metaData = resultSet.getMetaData();
                     int columnCount = metaData.getColumnCount();
@@ -82,13 +70,13 @@ public class DataBase {
                 }
 
                 @Override
-                public Row next() {
+                public DataBase.Row<T> next() {
                     return Suppressor.get(this::getRow);
                 }
 
-                private Row getRow() throws SQLException {
+                private DataBase.Row<T> getRow() throws SQLException {
                     Map<String, Object> rowData = new LinkedHashMap<>();
-                    Row row = new Row(rowData);
+                    DataBase.Row<T> row = new DataBase.Row<>((T) Table.this, rowData);
                     for (String column : columns)
                         rowData.put(column, resultSet.getObject(column));
                     return row;
@@ -96,76 +84,121 @@ public class DataBase {
             };
         }
 
-        private Row exactlyOne() {
-            return new Row(() -> {
-                Iterator<Row> iterator = iterator();
+        public T select(String select) {
+            return createInstance(name, clause.select(select));
+        }
+
+        public T where(String clause) {
+            return createInstance(name, this.clause.where(clause));
+        }
+
+        public T appendParameters(Map<String, Object> parameters) {
+            return createInstance(name, clause.parameters(parameters));
+        }
+
+    }
+
+    public class Row<T extends Table<T>> {
+        protected final T table;
+        protected Map<String, Object> data;
+
+        public Row(T table, Map<String, Object> data) {
+            this.table = table;
+            this.data = data;
+        }
+
+        public Object column(String column) {
+            if (data().containsKey(column))
+                return data().get(column);
+            return builder.rowMethod(table.name())
+                    .orElseThrow(() -> new RuntimeException("No such column: " + column)).apply(this);
+        }
+
+        public Set<String> columns() {
+            return data().keySet();
+        }
+
+        public Map<String, Object> data() {
+            return data;
+        }
+
+        public boolean empty() {
+            return data() == null;
+        }
+
+        public LinkedRow belongsTo(String parentTableName) {
+            return new LinkedTable(parentTableName)
+                    .defaultJoinColumn(builder.referencedColumn().apply(table.name(), parentTableName))
+                    .defaultValueColumn(builder.joinColumn().apply(table.name(), parentTableName))
+                    .appendParameters(data).exactlyOne();
+        }
+    }
+
+    public class LinkedTable extends Table<LinkedTable> {
+        public LinkedTable(String name) {
+            super(name);
+        }
+
+        public LinkedTable(String name, Clause clause) {
+            super(name, clause);
+        }
+
+        public LinkedTable defaultValueColumn(String valueColumn) {
+            return new LinkedTable(name(), clause.defaultValueColumn(valueColumn));
+        }
+
+        public LinkedTable defaultJoinColumn(String joinColumn) {
+            return new LinkedTable(name(), clause.defaultJoinColumn(joinColumn));
+        }
+
+        public LinkedTable on(String condition) {
+            return new LinkedTable(name(), clause.on(condition));
+        }
+
+        @Override
+        protected LinkedTable createInstance(String name, Clause clause) {
+            return new LinkedTable(name, clause);
+        }
+
+        public DataBase.LinkedRow exactlyOne() {
+            return new DataBase.LinkedRow(this, () -> {
+                Iterator<Row<LinkedTable>> iterator = iterator();
                 if (iterator.hasNext()) {
-                    Row row = iterator.next();
+                    DataBase.Row<LinkedTable> row = iterator.next();
                     if (iterator.hasNext())
                         throw new RuntimeException("Result set has multiple records");
-                    return row.query();
+                    return row.data();
                 }
                 return null;
             });
         }
+    }
 
-        public class Row {
-            private Map<String, Object> data;
-            private Supplier<Map<String, Object>> query;
+    public class LinkedRow extends Row<LinkedTable> {
+        protected Supplier<Map<String, Object>> query;
 
-            public Row(Map<String, Object> data) {
-                this.data = data;
-            }
-
-            public Row(Supplier<Map<String, Object>> query) {
-                this.query = query;
-            }
-
-            public Object column(String column) {
-                query();
-                if (data.containsKey(column))
-                    return data.get(column);
-                return builder.rowMethod(name())
-                        .orElseThrow(() -> new RuntimeException("No such column: " + column)).apply(this);
-            }
-
-            public Set<String> columns() {
-                query();
-                return data.keySet();
-            }
-
-            public Map<String, Object> query() {
-                if (data == null)
-                    data = query.get();
-                return data;
-            }
-
-            public Row belongsTo(String parentTableName) {
-                return table(parentTableName)
-                        .defaultJoinColumn(builder.referencedColumn().apply(name(), parentTableName))
-                        .defaultValueColumn(builder.joinColumn().apply(name(), parentTableName))
-                        .appendParameters(query()).exactlyOne();
-            }
-
-            public Row where(String clause) {
-                return Table.this.where(clause).exactlyOne();
-            }
-
-            public boolean empty() {
-                return query() == null;
-            }
-
-            public Row on(String condition) {
-                return Table.this.on(condition).exactlyOne();
-            }
+        public LinkedRow(LinkedTable table, Supplier<Map<String, Object>> query) {
+            super(table, null);
+            this.query = query;
         }
 
-        public Table defaultValueColumn(String valueColumn) {
-            return new Table(name, clause.defaultValueColumn(valueColumn));
+        private void query() {
+            if (data == null)
+                data = query.get();
         }
 
-        public Table defaultJoinColumn(String joinColumn) {
-            return new Table(name, clause.defaultJoinColumn(joinColumn));
+        @Override
+        public Map<String, Object> data() {
+            query();
+            return super.data();
+        }
+
+        public LinkedRow where(String clause) {
+            return table.where(clause).exactlyOne();
+        }
+
+        public LinkedRow on(String condition) {
+            return table.on(condition).exactlyOne();
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.jdbc.DataBase.Table.Row;
+import com.github.leeonky.dal.extensions.jdbc.DataBase.Row;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 
