@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.jdbc.DataBase.Table.Row;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 
@@ -16,12 +15,27 @@ public class JDBCExtension implements Extension {
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
+                .registerMetaProperty("where", MetaProperties::where)
+                .registerMetaProperty("select", MetaProperties::select)
                 .registerMetaProperty("belongsTo", MetaProperties::belongsTo)
+                .registerMetaProperty("on", MetaProperties::where)
+
                 .registerMetaProperty("hasMany", MetaProperties::hasMany)
                 .registerMetaProperty("hasOne", MetaProperties::hasOne)
-                .registerMetaProperty("on", MetaProperties::on)
-                .registerMetaProperty("where", MetaProperties::on)
+//                .registerMetaProperty("where", MetaProperties::on)
                 .registerMetaProperty("through", MetaProperties::through)
+
+                .registerPropertyAccessor(DataBaseBk.class, new JavaClassPropertyAccessor<DataBaseBk>(create(DataBaseBk.class)) {
+                    @Override
+                    public Set<Object> getPropertyNames(DataBaseBk dataBaseBk) {
+                        return new LinkedHashSet<>(dataBaseBk.allTableNames());
+                    }
+
+                    @Override
+                    public Object getValue(DataBaseBk dataBaseBk, Object property) {
+                        return dataBaseBk.table((String) property);
+                    }
+                })
                 .registerPropertyAccessor(DataBase.class, new JavaClassPropertyAccessor<DataBase>(create(DataBase.class)) {
                     @Override
                     public Set<Object> getPropertyNames(DataBase dataBase) {
@@ -29,24 +43,19 @@ public class JDBCExtension implements Extension {
                     }
 
                     @Override
-                    public Object getValue(DataBase dataBase, Object property) {
-                        return dataBase.table((String) property);
+                    public Object getValue(DataBase dataBaseBk, Object property) {
+                        return dataBaseBk.table((String) property);
                     }
                 })
-                .registerPropertyAccessor(Row.class, new JavaClassPropertyAccessor<Row>(create(Row.class)) {
+                .registerPropertyAccessor(DataBase.Table.class, new JavaClassPropertyAccessor<DataBase.Table>(create(DataBase.Table.class)) {
                     @Override
-                    public Set<Object> getPropertyNames(Row row) {
-                        return new LinkedHashSet<>(row.columns());
+                    public Set<Object> getPropertyNames(DataBase.Table table) {
+                        return new LinkedHashSet<>(table.oneRowColumnNames());
                     }
 
                     @Override
-                    public Object getValue(Row row, Object property) {
-                        return row.get((String) property);
-                    }
-
-                    @Override
-                    public boolean isNull(Row row) {
-                        return !row.hasData();
+                    public Object getValue(DataBase.Table table, Object property) {
+                        return table.oneRowColumn((String) property);
                     }
                 })
                 .registerPropertyAccessor(Callable.class, new JavaClassPropertyAccessor<Callable>(create(Callable.class)) {

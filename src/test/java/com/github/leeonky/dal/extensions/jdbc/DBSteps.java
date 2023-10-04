@@ -2,6 +2,7 @@ package com.github.leeonky.dal.extensions.jdbc;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -56,5 +57,10 @@ public class DBSteps {
     @Then("raise error")
     public void raiseError(String expression) {
         expect(exception).should(expression);
+    }
+
+    @And("define to to upper name method on products row")
+    public void defineToToUpperNameMethodOnProductsRow() {
+        builder.registerRowMethod("products", row -> ((String) row.get("name")).toUpperCase());
     }
 }
