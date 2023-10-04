@@ -61,6 +61,6 @@ public class DBSteps {
 
     @And("define to to upper name method on products row")
     public void defineToToUpperNameMethodOnProductsRow() {
-        builder.registerRowMethod("products", row -> ((String) row.get("name")).toUpperCase());
+        builder.registerRowMethod("products", row -> ((String) row.column("name")).toUpperCase());
     }
 }

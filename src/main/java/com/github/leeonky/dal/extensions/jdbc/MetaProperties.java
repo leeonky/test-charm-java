@@ -27,10 +27,10 @@ public class MetaProperties {
         throw new RuntimeException("`hasMany` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 
-    public static Object on(MetaData metaData) {
+    public static Callable<?> on(MetaData metaData) {
         Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof Association)
-            return ((Association<?>) data.getInstance()).clause();
+        if (data.getInstance() instanceof DataBase.Table.Row)
+            return ((DataBase.Table.Row) data.getInstance())::on;
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 
@@ -45,8 +45,8 @@ public class MetaProperties {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Table)
             return ((DataBase.Table) data.getInstance())::where;
-//        if (data.getInstance() instanceof DataBase.Row)
-//            return ((DataBase.Row) data.getInstance())::where;
+        if (data.getInstance() instanceof DataBase.Table.Row)
+            return ((DataBase.Table.Row) data.getInstance())::where;
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 
@@ -59,8 +59,8 @@ public class MetaProperties {
 
     public static Callable<?> belongsTo(MetaData metaData) {
         Data data = metaData.evaluateInput();
-//        if (data.getInstance() instanceof DataBase.Row)
-//            return ((DataBase.Row) data.getInstance())::belongsTo;
+        if (data.getInstance() instanceof DataBase.Table.Row)
+            return ((DataBase.Table.Row) data.getInstance())::belongsTo;
         throw new RuntimeException("`belongsTo` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 }

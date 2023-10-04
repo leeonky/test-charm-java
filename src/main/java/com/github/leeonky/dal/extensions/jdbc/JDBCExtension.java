@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.extensions.jdbc.DataBase.Table.Row;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 
@@ -18,7 +19,7 @@ public class JDBCExtension implements Extension {
                 .registerMetaProperty("where", MetaProperties::where)
                 .registerMetaProperty("select", MetaProperties::select)
                 .registerMetaProperty("belongsTo", MetaProperties::belongsTo)
-                .registerMetaProperty("on", MetaProperties::where)
+                .registerMetaProperty("on", MetaProperties::on)
 
                 .registerMetaProperty("hasMany", MetaProperties::hasMany)
                 .registerMetaProperty("hasOne", MetaProperties::hasOne)
@@ -47,15 +48,20 @@ public class JDBCExtension implements Extension {
                         return dataBaseBk.table((String) property);
                     }
                 })
-                .registerPropertyAccessor(DataBase.Table.class, new JavaClassPropertyAccessor<DataBase.Table>(create(DataBase.Table.class)) {
+                .registerPropertyAccessor(Row.class, new JavaClassPropertyAccessor<Row>(create(Row.class)) {
                     @Override
-                    public Set<Object> getPropertyNames(DataBase.Table table) {
-                        return new LinkedHashSet<>(table.oneRowColumnNames());
+                    public Set<Object> getPropertyNames(Row row) {
+                        return new LinkedHashSet<>(row.columns());
                     }
 
                     @Override
-                    public Object getValue(DataBase.Table table, Object property) {
-                        return table.oneRowColumn((String) property);
+                    public Object getValue(Row row, Object property) {
+                        return row.column((String) property);
+                    }
+
+                    @Override
+                    public boolean isNull(Row row) {
+                        return row.empty();
                     }
                 })
                 .registerPropertyAccessor(Callable.class, new JavaClassPropertyAccessor<Callable>(create(Callable.class)) {

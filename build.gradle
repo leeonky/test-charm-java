@@ -72,6 +72,7 @@ dependencies {
 
     testImplementation 'javax.persistence:javax.persistence-api:2.2'
     testImplementation 'org.hibernate:hibernate-core:5.4.0.Final'
+    testImplementation dep(':DAL-extension-basic', '0.0.12')
 
     testImplementation 'org.hibernate:hibernate-entitymanager:5.4.0.Final'
     testImplementation 'com.h2database:h2:1.4.200'
