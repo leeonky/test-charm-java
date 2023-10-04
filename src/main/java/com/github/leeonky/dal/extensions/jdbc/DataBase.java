@@ -45,12 +45,14 @@ public class DataBase {
             return Suppressor.get(() -> query(clause.buildSql(name)));
         }
 
+        @SuppressWarnings("unchecked")
         protected T createInstance(String name, Clause clause) {
-            return (T) new Table(name, clause);
+            return (T) new Table<>(name, clause);
         }
 
         private Iterator<DataBase.Row<T>> query(String sql) throws SQLException {
             ClauseParser parser = new ClauseParser(sql);
+//            TODO refactor
             PreparedStatement preparedStatement = connection.prepareStatement(parser.getClause());
             int parameterIndex = 1;
             for (String parameter : parser.getParameters())
@@ -74,6 +76,7 @@ public class DataBase {
                     return Suppressor.get(this::getRow);
                 }
 
+                @SuppressWarnings("unchecked")
                 private DataBase.Row<T> getRow() throws SQLException {
                     Map<String, Object> rowData = new LinkedHashMap<>();
                     DataBase.Row<T> row = new DataBase.Row<>((T) Table.this, rowData);
@@ -130,6 +133,13 @@ public class DataBase {
             return new LinkedTable(parentTableName)
                     .defaultJoinColumn(builder.referencedColumn().apply(table.name(), parentTableName))
                     .defaultValueColumn(builder.joinColumn().apply(table.name(), parentTableName))
+                    .appendParameters(data).exactlyOne();
+        }
+
+        public LinkedRow hasOne(String childTableName) {
+            return new LinkedTable(childTableName)
+                    .defaultJoinColumn(builder.joinColumn().apply(childTableName, table.name()))
+                    .defaultValueColumn(builder.referencedColumn().apply(childTableName, table.name()))
                     .appendParameters(data).exactlyOne();
         }
     }

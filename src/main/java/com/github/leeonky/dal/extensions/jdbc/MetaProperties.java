@@ -13,10 +13,10 @@ public class MetaProperties {
         throw new RuntimeException("`belongsTo` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 
-    public static Object hasOne(MetaData metaData) {
+    public static Callable<?> hasOne(MetaData metaData) {
         Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBaseBk.Table.Row)
-            return ((DataBaseBk.Table.Row) data.getInstance()).callHasOne();
+        if (data.getInstance() instanceof DataBase.Row)
+            return ((DataBase.Row) data.getInstance())::hasOne;
         throw new RuntimeException("`hasOne` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 

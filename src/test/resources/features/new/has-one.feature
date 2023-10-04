@@ -158,7 +158,7 @@ Feature: assert has one
                     }
                   }]
 
-                  Query more than one record
+                  Result set has multiple records
 
                   The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {}
                   ```
@@ -187,7 +187,7 @@ Feature: assert has one
                   }]
 
                   org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "NOT_EXIST" not found; SQL statement:
-                  select * from order_lines where ?=not_exist [42122-200]
+                  select order_lines.* from order_lines where ?=not_exist [42122-200]
 
                   The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {}
                   ```
