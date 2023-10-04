@@ -98,7 +98,6 @@ public class DataBase {
         public T appendParameters(Map<String, Object> parameters) {
             return createInstance(name, clause.parameters(parameters));
         }
-
     }
 
     public class Row<T extends Table<T>> {
@@ -141,6 +140,13 @@ public class DataBase {
                     .defaultJoinColumn(builder.joinColumn().apply(childTableName, table.name()))
                     .defaultValueColumn(builder.referencedColumn().apply(childTableName, table.name()))
                     .appendParameters(data).exactlyOne();
+        }
+
+        public LinkedTable hasMany(String mayBeChildTableName) {
+            return new LinkedTable(mayBeChildTableName)
+                    .defaultJoinColumn(builder.joinColumn().apply(mayBeChildTableName, table.name()))
+                    .defaultValueColumn(builder.referencedColumn().apply(mayBeChildTableName, table.name()))
+                    .appendParameters(data);
         }
     }
 

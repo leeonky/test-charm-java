@@ -20,10 +20,10 @@ public class MetaProperties {
         throw new RuntimeException("`hasOne` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 
-    public static Object hasMany(MetaData metaData) {
+    public static Callable<DataBase.LinkedTable> hasMany(MetaData metaData) {
         Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBaseBk.Table.Row)
-            return ((DataBaseBk.Table.Row) data.getInstance()).callHasMany();
+        if (data.getInstance() instanceof DataBase.Row)
+            return ((DataBase.Row) data.getInstance())::hasMany;
         throw new RuntimeException("`hasMany` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 
@@ -31,6 +31,8 @@ public class MetaProperties {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.LinkedRow)
             return ((DataBase.LinkedRow) data.getInstance())::on;
+        if (data.getInstance() instanceof DataBase.LinkedTable)
+            return ((DataBase.LinkedTable) data.getInstance())::on;
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 
