@@ -114,20 +114,20 @@ public class DataBase {
 
                 public Query reversJoin() {
                     return Row.this.new SubQuery(table)
-                            .column(builder.joinColumn().apply(table, name))
-                            .value(builder.referencedColumn().apply(table, name));
+                            .defaultColumn(builder.joinColumn().apply(table, name))
+                            .defaultValue(builder.referencedColumn().apply(table, name));
                 }
 
                 public Query join() {
                     return Row.this.new SubQuery(table)
-                            .column(builder.referencedColumn().apply(name, table))
-                            .value(builder.joinColumn().apply(name, table));
+                            .defaultColumn(builder.referencedColumn().apply(name, table))
+                            .defaultValue(builder.joinColumn().apply(name, table));
                 }
             }
 
             public class SubQuery implements Query {
                 private final String table;
-                private String column, value;
+                private String column, value, defaultColumn, defaultValue;
                 private BiFunction<String, String, String> clause = (c, v) -> c + " = :" + v;
 
                 public SubQuery(String table) {
@@ -138,6 +138,14 @@ public class DataBase {
                 public Query column(String column) {
                     this.column = column;
                     return this;
+                }
+
+                public String column() {
+                    return column == null ? defaultColumn : column;
+                }
+
+                public String value() {
+                    return value == null ? defaultValue : value;
                 }
 
                 @Override
@@ -158,7 +166,7 @@ public class DataBase {
                 }
 
                 protected String clauseParser() {
-                    return clause.apply(column, value);
+                    return clause.apply(column(), value());
                 }
 
                 @Override
@@ -171,7 +179,21 @@ public class DataBase {
                 @Override
                 public Query through(String table) {
                     String[] tableAndId = table.split("\\.");
-                    return new JoinQuery(tableAndId[0], tableAndId[1]);
+                    if (column == null)
+                        column(builder.referencedColumn().apply(SubQuery.this.table, tableAndId[0]));
+                    return new JoinQuery(tableAndId[0], tableAndId.length == 1 ? builder.joinColumn().apply(tableAndId[0], this.table) : tableAndId[1])
+                            .defaultColumn(builder.joinColumn().apply(tableAndId[0], name))
+                            .defaultValue(builder.referencedColumn().apply(tableAndId[0], name));
+                }
+
+                public SubQuery defaultColumn(String defaultColumn) {
+                    this.defaultColumn = defaultColumn;
+                    return this;
+                }
+
+                public SubQuery defaultValue(String defaultValue) {
+                    this.defaultValue = defaultValue;
+                    return this;
                 }
 
                 public class JoinQuery extends SubQuery {
