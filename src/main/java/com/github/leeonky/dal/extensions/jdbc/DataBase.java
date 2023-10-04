@@ -6,8 +6,8 @@ import java.sql.*;
 import java.util.*;
 
 public class DataBase {
-    private final Connection connection;
-    private final DataBaseBuilder builder;
+    public final Connection connection;
+    public final DataBaseBuilder builder;
 
     public DataBase(Connection connection, DataBaseBuilder builder) {
         this.connection = connection;
@@ -22,16 +22,18 @@ public class DataBase {
         return new Table(name);
     }
 
-    public class Table implements Iterable<Row> {
+    public class Table implements Iterable<Table.Row> {
         private final String name;
-        private String select;
-        private String clause;
-        private final Map<String, Object> parameters = new HashMap<>();
+        private final Clause clause;
         private Row oneRow;
 
         public Table(String name) {
+            this(name, new Clause(name + ".*", null));
+        }
+
+        private Table(String name, Clause clause) {
             this.name = name;
-            select = name + ".*";
+            this.clause = clause;
         }
 
         public String name() {
@@ -39,40 +41,30 @@ public class DataBase {
         }
 
         @Override
-        public Iterator<DataBase.Row> iterator() {
-            return Suppressor.get(() -> {
-                StringBuilder sql = new StringBuilder().append("select ").append(select).append(" from ").append(name);
-                if (clause != null) {
-                    sql.append(" where ");
-                    sql.append(clause);
-                }
-                return query(sql.toString());
-            });
+        public Iterator<Row> iterator() {
+            return Suppressor.get(() -> query(clause.buildSql(name)));
         }
 
         public Table where(String clause) {
-            this.clause = clause;
-            return this;
+            return new Table(name, this.clause.where(clause));
         }
 
         public Table appendParameters(Map<String, Object> parameters) {
-            this.parameters.putAll(parameters);
-            return this;
+            return new Table(name, clause.parameters(parameters));
         }
 
         public Table select(String select) {
-            this.select = select;
-            return this;
+            return new Table(name, clause.select(select));
         }
 
-        private Iterator<DataBase.Row> query(String sql) throws SQLException {
+        private Iterator<Row> query(String sql) throws SQLException {
             ClauseParser parser = new ClauseParser(sql);
             PreparedStatement preparedStatement = connection.prepareStatement(parser.getClause());
             int parameterIndex = 1;
             for (String parameter : parser.getParameters())
-                preparedStatement.setObject(parameterIndex++, parameters.get(parameter));
+                preparedStatement.setObject(parameterIndex++, clause.parameters.get(parameter));
             ResultSet resultSet = preparedStatement.executeQuery();
-            return new Iterator<DataBase.Row>() {
+            return new Iterator<Row>() {
                 private final Set<String> columns = new LinkedHashSet<String>() {{
                     ResultSetMetaData metaData = resultSet.getMetaData();
                     int columnCount = metaData.getColumnCount();
@@ -86,12 +78,12 @@ public class DataBase {
                 }
 
                 @Override
-                public DataBase.Row next() {
+                public Row next() {
                     return Suppressor.get(this::getRow);
                 }
 
-                private DataBase.Row getRow() throws SQLException {
-                    Row row = new Row(Table.this);
+                private Row getRow() throws SQLException {
+                    Row row = new Row();
                     for (String column : columns)
                         row.put(column, resultSet.getObject(column));
                     return row;
@@ -120,21 +112,16 @@ public class DataBase {
             queryOneRow();
             return oneRow.get(property);
         }
-    }
 
-    public class Row extends LinkedHashMap<String, Object> {
-        private final Table table;
+        public class Row extends LinkedHashMap<String, Object> {
 
-        public Row(Table table) {
-            this.table = table;
-        }
-
-        @Override
-        public Object get(Object key) {
-            if (containsKey(key))
-                return super.get(key);
-            return builder.rowMethod(table.name())
-                    .orElseThrow(() -> new RuntimeException("No such column: " + key)).apply(this);
+            @Override
+            public Object get(Object key) {
+                if (containsKey(key))
+                    return super.get(key);
+                return builder.rowMethod(name())
+                        .orElseThrow(() -> new RuntimeException("No such column: " + key)).apply(this);
+            }
         }
     }
 }
