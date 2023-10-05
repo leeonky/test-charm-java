@@ -86,12 +86,12 @@ test {
 
 pitest {
     targetClasses = ['com.github.leeonky.dal.extensions.jdbc.*']
-//    excludedClasses = ['com.github.leeonky.jfactory.repo.beans.*']
+//  excludedClasses = ['com.github.leeonky.jfactory.repo.beans.*']
     outputFormats = ['HTML2']
     junit5PluginVersion = "0.12"
 }
 
-build.dependsOn 'pitest'
+// build.dependsOn 'pitest'
 
 publishing {
     publications {
