@@ -25,15 +25,15 @@ public class DataBase {
 
     public class Table<T extends Table<T>> implements Iterable<Row<T>> {
         private final String name;
-        protected final Clause clause;
+        protected final Query query;
 
         public Table(String name) {
-            this(name, new Clause(name + ".*"));
+            this(name, new Query(name, name + ".*"));
         }
 
-        private Table(String name, Clause clause) {
+        private Table(String name, Query query) {
             this.name = name;
-            this.clause = clause;
+            this.query = query;
         }
 
         public String name() {
@@ -46,21 +46,20 @@ public class DataBase {
         }
 
         protected String buildSql() {
-            return clause.buildSql(name);
+            return query.buildSql();
         }
 
         @SuppressWarnings("unchecked")
-        protected T createInstance(Clause clause) {
-            return (T) new Table<>(name, clause);
+        protected T createInstance(Query query) {
+            return (T) new Table<>(name, query);
         }
 
         private Iterator<DataBase.Row<T>> query(String sql) throws SQLException {
             ClauseParser parser = new ClauseParser(sql);
-//            TODO refactor
             PreparedStatement preparedStatement = connection.prepareStatement(parser.getClause());
             int parameterIndex = 1;
             for (String parameter : parser.getParameters())
-                preparedStatement.setObject(parameterIndex++, clause.parameters().get(parameter));
+                preparedStatement.setObject(parameterIndex++, query.parameters().get(parameter));
             ResultSet resultSet = preparedStatement.executeQuery();
             return new Iterator<DataBase.Row<T>>() {
                 private final Set<String> columns = new LinkedHashSet<String>() {{
@@ -91,20 +90,20 @@ public class DataBase {
             };
         }
 
-        public Clause clause() {
-            return clause;
+        public Query clause() {
+            return query;
         }
 
         public T select(String select) {
-            return createInstance(clause.select(select));
+            return createInstance(query.select(select));
         }
 
         public T where(String clause) {
-            return createInstance(this.clause.where(clause));
+            return createInstance(query.where(clause));
         }
 
         public T where(String clause, Map<String, Object> parameters) {
-            return createInstance(this.clause.where(clause).parameters(parameters));
+            return createInstance(query.where(clause).parameters(parameters));
         }
     }
 
@@ -163,31 +162,30 @@ public class DataBase {
         public LinkedTable(Row<? extends Table<?>> row, String name) {
             super(name);
             this.row = row;
-            clause.parameters().putAll(row.table().clause().parameters());
-            clause.parameters().putAll(row.data());
+            query.parameters().putAll(row.table().clause().parameters());
+            query.parameters().putAll(row.data());
         }
 
-        public LinkedTable(Row<? extends Table<?>> row, String name, Clause clause) {
-            super(name, clause);
+        public LinkedTable(Row<? extends Table<?>> row, String name, Query query) {
+            super(name, query);
             this.row = row;
         }
 
-        //        TODO rename
-        public LinkedTable valueColumn(String valueColumn) {
-            return createInstance(clause.defaultParameterColumn(valueColumn));
+        public LinkedTable defaultParameterColumn(String parameterColumn) {
+            return createInstance(query.defaultParameterColumn(parameterColumn));
         }
 
-        public LinkedTable joinColumn(String joinColumn) {
-            return createInstance(clause.defaultLinkColumn(joinColumn));
+        public LinkedTable defaultLinkColumn(String linkColumn) {
+            return createInstance(query.defaultLinkColumn(linkColumn));
         }
 
         public LinkedTable on(String condition) {
-            return createInstance(clause.on(condition));
+            return createInstance(query.on(condition));
         }
 
         @Override
-        protected LinkedTable createInstance(Clause clause) {
-            return new LinkedTable(row, name(), clause);
+        protected LinkedTable createInstance(Query query) {
+            return new LinkedTable(row, name(), query);
         }
 
         public DataBase.LinkedRow exactlyOne() {
@@ -204,13 +202,13 @@ public class DataBase {
         }
 
         public LinkedTable asParent() {
-            return joinColumn(builder.referencedColumn(name(), row.table().name()))
-                    .valueColumn(builder.joinColumn(name(), row.table().name()));
+            return defaultLinkColumn(builder.referencedColumn(name(), row.table().name()))
+                    .defaultParameterColumn(builder.joinColumn(name(), row.table().name()));
         }
 
         public LinkedTable asChildren() {
-            return joinColumn(builder.joinColumn(row.table().name(), name()))
-                    .valueColumn(builder.referencedColumn(row.table().name(), name()));
+            return defaultLinkColumn(builder.joinColumn(row.table().name(), name()))
+                    .defaultParameterColumn(builder.referencedColumn(row.table().name(), name()));
         }
 
         public LinkedTable through(String table) {
@@ -218,8 +216,7 @@ public class DataBase {
         }
 
         public LinkedThroughTable through(String table, String joinColumn) {
-            LinkedTable thoughTable = row.join(table).asChildren().select(joinColumn);
-            return new LinkedThroughTable(this, thoughTable);
+            return new LinkedThroughTable(this, row.join(table).asChildren().select(joinColumn));
         }
     }
 
@@ -236,25 +233,25 @@ public class DataBase {
         }
 
         public LinkedThroughTable(LinkedTable thoughTable, String referencedColumn,
-                                  Row<? extends Table<?>> row, String name, Clause clause) {
-            super(row, name, clause);
+                                  Row<? extends Table<?>> row, String name, Query query) {
+            super(row, name, query);
             this.thoughTable = thoughTable;
             this.referencedColumn = referencedColumn;
         }
 
         @Override
         protected String buildSql() {
-            return clause().where(String.format("%s in (%s)", referencedColumn, thoughTable.buildSql())).buildSql(name());
+            return clause().where(String.format("%s in (%s)", referencedColumn, thoughTable.buildSql())).buildSql();
         }
 
         @Override
-        protected LinkedTable createInstance(Clause clause) {
-            return new LinkedThroughTable(thoughTable, referencedColumn, row, name(), clause);
+        protected LinkedTable createInstance(Query query) {
+            return new LinkedThroughTable(thoughTable, referencedColumn, row, name(), query);
         }
 
         @Override
         public LinkedTable on(String condition) {
-            return new LinkedThroughTable(thoughTable.on(condition), referencedColumn, row, name(), clause);
+            return new LinkedThroughTable(thoughTable.on(condition), referencedColumn, row, name(), query);
         }
     }
 
@@ -266,14 +263,10 @@ public class DataBase {
             this.query = query;
         }
 
-        private void query() {
-            if (data == null)
-                data = query.get();
-        }
-
         @Override
         public Map<String, Object> data() {
-            query();
+            if (data == null)
+                data = query.get();
             return super.data();
         }
 
