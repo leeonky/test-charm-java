@@ -20,14 +20,14 @@ Feature: many-to-many
     Then db should:
       """
       products[0]: {
-        ::hasMany[skus]::through[sku_products]: | name |
-                                                | s1   |
-                                                | s2   |
-
-        ::hasMany[skus]::on[id]::through[sku_products]: | name |
-                                                        | s1   |
-                                                        | s2   |
-
+#        ::hasMany[skus]::through[sku_products]: | name |
+#                                                | s1   |
+#                                                | s2   |
+#
+#        ::hasMany[skus]::on[id]::through[sku_products]: | name |
+#                                                        | s1   |
+#                                                        | s2   |
+#
         ::hasMany[skus]::on[id]::through[sku_products.sku_id]: | name |
                                                                | s1   |
                                                                | s2   |

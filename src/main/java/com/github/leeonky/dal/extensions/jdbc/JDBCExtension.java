@@ -23,7 +23,6 @@ public class JDBCExtension implements Extension {
 
                 .registerMetaProperty("hasMany", MetaProperties::hasMany)
                 .registerMetaProperty("hasOne", MetaProperties::hasOne)
-//                .registerMetaProperty("where", MetaProperties::on)
                 .registerMetaProperty("through", MetaProperties::through)
 
                 .registerPropertyAccessor(DataBaseBk.class, new JavaClassPropertyAccessor<DataBaseBk>(create(DataBaseBk.class)) {

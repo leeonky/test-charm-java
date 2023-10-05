@@ -50,9 +50,11 @@ Feature: assert db as data via jdbc
 
   Scenario: assert table with many wheres
     Given Exists data "Product":
-      | name | pid |
-      | MBP  | 1   |
-      | iPod | 2   |
+      | name       | pid |
+      | MBP        | 1   |
+      | iPod       | 2   |
+      | iPod       | 3   |
+      | unexpected | 3   |
     Then db should:
       """
       : {
@@ -60,7 +62,7 @@ Feature: assert db as data via jdbc
           ::where[name='MBP']: [{
             name= MBP
           }]
-          ::where[name='iPod']: [{
+          ::where[name='iPod']::where[pid=3]: [{
             name= iPod
           }]
         }
