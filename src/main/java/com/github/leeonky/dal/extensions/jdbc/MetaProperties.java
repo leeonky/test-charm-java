@@ -5,14 +5,6 @@ import com.github.leeonky.dal.runtime.MetaData;
 import com.github.leeonky.dal.runtime.RuntimeException;
 
 public class MetaProperties {
-    @Deprecated
-    public static Object belongsToBk(MetaData metaData) {
-        Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBaseBk.Table.Row)
-            return ((DataBaseBk.Table.Row) data.getInstance()).callBelongsTo();
-        throw new RuntimeException("`belongsTo` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
-    }
-
     public static Callable<?> hasOne(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Row)

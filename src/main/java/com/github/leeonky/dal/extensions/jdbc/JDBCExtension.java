@@ -25,17 +25,6 @@ public class JDBCExtension implements Extension {
                 .registerMetaProperty("hasOne", MetaProperties::hasOne)
                 .registerMetaProperty("through", MetaProperties::through)
 
-                .registerPropertyAccessor(DataBaseBk.class, new JavaClassPropertyAccessor<DataBaseBk>(create(DataBaseBk.class)) {
-                    @Override
-                    public Set<Object> getPropertyNames(DataBaseBk dataBaseBk) {
-                        return new LinkedHashSet<>(dataBaseBk.allTableNames());
-                    }
-
-                    @Override
-                    public Object getValue(DataBaseBk dataBaseBk, Object property) {
-                        return dataBaseBk.table((String) property);
-                    }
-                })
                 .registerPropertyAccessor(DataBase.class, new JavaClassPropertyAccessor<DataBase>(create(DataBase.class)) {
                     @Override
                     public Set<Object> getPropertyNames(DataBase dataBase) {

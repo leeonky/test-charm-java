@@ -26,10 +26,6 @@ public class DataBaseBuilder {
         return new DataBase(connection, this);
     }
 
-    public DataBaseBk connect2(Connection connection) {
-        return new DataBaseBk(connection, this);
-    }
-
     public Function<Statement, Collection<String>> tableQuery() {
         return tableQuery;
     }
