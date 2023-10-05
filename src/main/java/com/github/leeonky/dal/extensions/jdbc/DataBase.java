@@ -102,11 +102,6 @@ public class DataBase {
         public T where(String clause) {
             return createInstance(this.clause.where(clause));
         }
-
-        public T appendParameters(Map<String, Object> parameters) {
-            return createInstance(clause.parameters(parameters));
-        }
-
     }
 
     public class Row<T extends Table<T>> {
@@ -216,7 +211,9 @@ public class DataBase {
 
         public LinkedTable through(String joinTableName) {
             String[] joinTableAndColumn = joinTableName.split("\\.");
-            LinkedTable thoughTable = row.join(joinTableAndColumn[0]).asChildren().select(joinTableAndColumn[1]);
+            String joinColumn = joinTableAndColumn.length > 1 ? joinTableAndColumn[1]
+                    : builder.joinColumn().apply(joinTableAndColumn[0], name());
+            LinkedTable thoughTable = row.join(joinTableAndColumn[0]).asChildren().select(joinColumn);
             return new LinkedThroughTable(this, thoughTable);
         }
     }
@@ -228,7 +225,9 @@ public class DataBase {
         public LinkedThroughTable(LinkedTable linkedTable, LinkedTable thoughTable) {
             super(linkedTable.row, linkedTable.name(), linkedTable.clause().on(null));
             this.thoughTable = thoughTable;
-            referencedColumn = linkedTable.clause().defaultJoinColumn();
+            referencedColumn = linkedTable.clause().joinColumn() == null ? "" +
+                    builder.referencedColumn().apply(thoughTable.name(), linkedTable.name())
+                    : linkedTable.clause().joinColumn();
         }
 
         public LinkedThroughTable(LinkedTable thoughTable, String referencedColumn,

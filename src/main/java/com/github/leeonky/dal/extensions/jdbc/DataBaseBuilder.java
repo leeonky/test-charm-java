@@ -12,6 +12,7 @@ import static java.util.Optional.ofNullable;
 
 public class DataBaseBuilder {
     private Function<Statement, Collection<String>> tableQuery = s -> Collections.emptyList();
+    //    orderline order=> order_id
     private BiFunction<String, String, String> joinColumn = (table, joinTable) -> Inflector.singularize(joinTable) + "_id";
     private BiFunction<String, String, String> referencedColumn = (table, joinTable) -> "id";
     private final Map<String, Function<DataBase.Row, ?>> rowMethods = new HashMap<>();
