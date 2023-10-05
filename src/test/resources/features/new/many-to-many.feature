@@ -37,3 +37,17 @@ Feature: many-to-many
                                                                                    | s2   |
       }
       """
+    When define to to hasMany skus method on products row
+    Then db should:
+      """
+      products[0]: {
+        skus: | name |
+              | s1   |
+              | s2   |
+
+        skusInSql: | name |
+                   | s1   |
+                   | s2   |
+      }
+      """
+

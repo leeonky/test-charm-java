@@ -31,7 +31,12 @@ public class MetaProperties {
     public static Callable<?> through(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.LinkedTable)
-            return ((DataBase.LinkedTable) data.getInstance())::through;
+            return joinTableName -> {
+                String[] joinTableAndColumn = joinTableName.split("\\.");
+                if (joinTableAndColumn.length > 1)
+                    return ((DataBase.LinkedTable) data.getInstance()).through(joinTableAndColumn[0], joinTableAndColumn[1]);
+                return ((DataBase.LinkedTable) data.getInstance()).through(joinTableAndColumn[0]);
+            };
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 

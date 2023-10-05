@@ -16,7 +16,7 @@ public class DataBase {
     }
 
     public Collection<String> allTableNames() {
-        return builder.tableQuery().apply(Suppressor.get(connection::createStatement));
+        return builder.tablesProvider().apply(Suppressor.get(connection::createStatement));
     }
 
     public Table<?> table(String name) {
@@ -102,6 +102,10 @@ public class DataBase {
         public T where(String clause) {
             return createInstance(this.clause.where(clause));
         }
+
+        public T where(String clause, Map<String, Object> parameters) {
+            return createInstance(this.clause.where(clause).parameters(parameters));
+        }
     }
 
     public class Row<T extends Table<T>> {
@@ -116,7 +120,7 @@ public class DataBase {
         public Object column(String column) {
             if (data().containsKey(column))
                 return data().get(column);
-            return builder.rowMethod(table.name())
+            return builder.rowMethod(table.name(), column)
                     .orElseThrow(() -> new RuntimeException("No such column: " + column)).apply(this);
         }
 
@@ -132,20 +136,20 @@ public class DataBase {
             return data() == null;
         }
 
-        public LinkedRow belongsTo(String parentTableName) {
-            return join(parentTableName).asParent().exactlyOne();
+        public LinkedRow belongsTo(String parentTable) {
+            return join(parentTable).asParent().exactlyOne();
         }
 
-        public LinkedTable join(String anotherTableName) {
-            return new LinkedTable(this, anotherTableName);
+        public LinkedTable join(String anotherTable) {
+            return new LinkedTable(this, anotherTable);
         }
 
-        public LinkedRow hasOne(String maybeChildTableName) {
-            return join(maybeChildTableName).asChildren().exactlyOne();
+        public LinkedRow hasOne(String childTableOrManyToMany) {
+            return join(childTableOrManyToMany).asChildren().exactlyOne();
         }
 
-        public LinkedTable hasMany(String mayBeChildTableName) {
-            return join(mayBeChildTableName).asChildren();
+        public LinkedTable hasMany(String childTableOrManyToMany) {
+            return join(childTableOrManyToMany).asChildren();
         }
 
         public T table() {
@@ -170,11 +174,11 @@ public class DataBase {
 
         //        TODO rename
         public LinkedTable valueColumn(String valueColumn) {
-            return createInstance(clause.defaultValueColumn(valueColumn));
+            return createInstance(clause.defaultParameterColumn(valueColumn));
         }
 
         public LinkedTable joinColumn(String joinColumn) {
-            return createInstance(clause.defaultJoinColumn(joinColumn));
+            return createInstance(clause.defaultLinkColumn(joinColumn));
         }
 
         public LinkedTable on(String condition) {
@@ -200,20 +204,21 @@ public class DataBase {
         }
 
         public LinkedTable asParent() {
-            return joinColumn(builder.referencedColumn().apply(row.table().name(), name()))
-                    .valueColumn(builder.joinColumn().apply(row.table().name(), name()));
+            return joinColumn(builder.referencedColumn(name(), row.table().name()))
+                    .valueColumn(builder.joinColumn(name(), row.table().name()));
         }
 
         public LinkedTable asChildren() {
-            return joinColumn(builder.joinColumn().apply(name(), row.table().name()))
-                    .valueColumn(builder.referencedColumn().apply(name(), row.table().name()));
+            return joinColumn(builder.joinColumn(row.table().name(), name()))
+                    .valueColumn(builder.referencedColumn(row.table().name(), name()));
         }
 
-        public LinkedTable through(String joinTableName) {
-            String[] joinTableAndColumn = joinTableName.split("\\.");
-            String joinColumn = joinTableAndColumn.length > 1 ? joinTableAndColumn[1]
-                    : builder.joinColumn().apply(joinTableAndColumn[0], name());
-            LinkedTable thoughTable = row.join(joinTableAndColumn[0]).asChildren().select(joinColumn);
+        public LinkedTable through(String table) {
+            return through(table, builder.joinColumn(name(), table));
+        }
+
+        public LinkedThroughTable through(String table, String joinColumn) {
+            LinkedTable thoughTable = row.join(table).asChildren().select(joinColumn);
             return new LinkedThroughTable(this, thoughTable);
         }
     }
@@ -225,9 +230,9 @@ public class DataBase {
         public LinkedThroughTable(LinkedTable linkedTable, LinkedTable thoughTable) {
             super(linkedTable.row, linkedTable.name(), linkedTable.clause().on(null));
             this.thoughTable = thoughTable;
-            referencedColumn = linkedTable.clause().joinColumn() == null ? "" +
-                    builder.referencedColumn().apply(thoughTable.name(), linkedTable.name())
-                    : linkedTable.clause().joinColumn();
+            referencedColumn = linkedTable.clause().linkColumn() == null ? "" +
+                    builder.referencedColumn(linkedTable.name(), thoughTable.name())
+                    : linkedTable.clause().linkColumn();
         }
 
         public LinkedThroughTable(LinkedTable thoughTable, String referencedColumn,

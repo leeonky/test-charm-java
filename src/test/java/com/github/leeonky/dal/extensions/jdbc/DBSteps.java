@@ -37,7 +37,7 @@ public class DBSteps {
     @SneakyThrows
     @Given("all follow tables:")
     public void allFollowTables(DataTable tables) {
-        builder.tableQuery(statement -> tables.asList());
+        builder.tablesProvider(statement -> tables.asList());
     }
 
     @Then("db should:")
@@ -61,6 +61,16 @@ public class DBSteps {
 
     @And("define to to upper name method on products row")
     public void defineToToUpperNameMethodOnProductsRow() {
-        builder.registerRowMethod("products", row -> ((String) row.column("name")).toUpperCase());
+        builder.registerRowMethod("products", "upperName", row -> ((String) row.column("name")).toUpperCase());
+    }
+
+    @When("define to to hasMany skus method on products row")
+    public void defineToToHasManySkusMethodOnProductsRow() {
+        builder.registerRowMethod("products", "skus", row ->
+                row.hasMany("skus").on("id").through("sku_products", "sku_id").on("product_id = :id"));
+
+        builder.registerRowMethod("products", "skusInSql", row ->
+                row.join("skus").where("id in (select sku_id from sku_products where product_id = :id)")
+        );
     }
 }

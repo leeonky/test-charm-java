@@ -8,16 +8,16 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 
 public class DataBaseBuilder {
     private Function<Statement, Collection<String>> tableQuery = s -> Collections.emptyList();
-    //    orderline order=> order_id
-    private BiFunction<String, String, String> joinColumn = (table, joinTable) -> Inflector.singularize(joinTable) + "_id";
-    private BiFunction<String, String, String> referencedColumn = (table, joinTable) -> "id";
-    private final Map<String, Function<DataBase.Row, ?>> rowMethods = new HashMap<>();
+    private BiFunction<String, String, String> joinColumnStrategy = (parent, child) -> Inflector.singularize(parent) + "_id";
+    private BiFunction<String, String, String> referencedColumnStrategy = (parent, child) -> "id";
+    private final Map<String, Map<String, Function<DataBase.Row<?>, ?>>> rowMethods = new HashMap<>();
 
-    public DataBaseBuilder tableQuery(Function<Statement, Collection<String>> query) {
+    public DataBaseBuilder tablesProvider(Function<Statement, Collection<String>> query) {
         tableQuery = query;
         return this;
     }
@@ -26,33 +26,33 @@ public class DataBaseBuilder {
         return new DataBase(connection, this);
     }
 
-    public Function<Statement, Collection<String>> tableQuery() {
+    public Function<Statement, Collection<String>> tablesProvider() {
         return tableQuery;
     }
 
-    public BiFunction<String, String, String> joinColumn() {
-        return joinColumn;
-    }
-
-    public BiFunction<String, String, String> referencedColumn() {
-        return referencedColumn;
-    }
-
     public DataBaseBuilder joinColumn(BiFunction<String, String, String> joinColumn) {
-        this.joinColumn = joinColumn;
+        joinColumnStrategy = joinColumn;
         return this;
     }
 
     public DataBaseBuilder referencedColumn(BiFunction<String, String, String> referencedColumn) {
-        this.referencedColumn = referencedColumn;
+        referencedColumnStrategy = referencedColumn;
         return this;
     }
 
-    public <T> void registerRowMethod(String table, Function<DataBase.Row, T> method) {
-        rowMethods.put(table, method);
+    public <T> void registerRowMethod(String table, String property, Function<DataBase.Row<?>, T> method) {
+        rowMethods.computeIfAbsent(table, t -> new HashMap<>()).put(property, method);
     }
 
-    public Optional<Function<DataBase.Row, ?>> rowMethod(String table) {
-        return ofNullable(rowMethods.get(table));
+    public Optional<Function<DataBase.Row<?>, ?>> rowMethod(String table, String column) {
+        return ofNullable(rowMethods.getOrDefault(table, emptyMap()).get(column));
+    }
+
+    public String joinColumn(String parent, String child) {
+        return joinColumnStrategy.apply(parent, child);
+    }
+
+    public String referencedColumn(String parent, String child) {
+        return referencedColumnStrategy.apply(parent, child);
     }
 }
