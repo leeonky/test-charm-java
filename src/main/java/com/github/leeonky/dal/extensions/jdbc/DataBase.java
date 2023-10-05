@@ -202,17 +202,17 @@ public class DataBase {
         }
 
         public LinkedTable asParent() {
-            return defaultLinkColumn(builder.referencedColumn(name(), row.table().name()))
-                    .defaultParameterColumn(builder.joinColumn(name(), row.table().name()));
+            return defaultLinkColumn(builder.referencedColumnStrategy(name(), row.table().name()))
+                    .defaultParameterColumn(builder.joinColumnStrategy(name(), row.table().name()));
         }
 
         public LinkedTable asChildren() {
-            return defaultLinkColumn(builder.joinColumn(row.table().name(), name()))
-                    .defaultParameterColumn(builder.referencedColumn(row.table().name(), name()));
+            return defaultLinkColumn(builder.joinColumnStrategy(row.table().name(), name()))
+                    .defaultParameterColumn(builder.referencedColumnStrategy(row.table().name(), name()));
         }
 
         public LinkedTable through(String table) {
-            return through(table, builder.joinColumn(name(), table));
+            return through(table, builder.joinColumnStrategy(name(), table));
         }
 
         public LinkedThroughTable through(String table, String joinColumn) {
@@ -228,7 +228,7 @@ public class DataBase {
             super(linkedTable.row, linkedTable.name(), linkedTable.clause().on(null));
             this.thoughTable = thoughTable;
             referencedColumn = linkedTable.clause().linkColumn() == null ? "" +
-                    builder.referencedColumn(linkedTable.name(), thoughTable.name())
+                    builder.referencedColumnStrategy(linkedTable.name(), thoughTable.name())
                     : linkedTable.clause().linkColumn();
         }
 

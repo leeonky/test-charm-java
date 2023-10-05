@@ -30,16 +30,21 @@ public class DataBaseBuilder {
         return tableQuery;
     }
 
-    public DataBaseBuilder joinColumn(BiFunction<String, String, String> joinColumn) {
-        joinColumnStrategy = joinColumn;
+    //    TODO improve parent, method chain register(table).joinColumnStrategy()
+    //    TODO improve parent, method chain register(table).joinColumnStrategy(child)
+    public DataBaseBuilder joinColumnStrategy(BiFunction<String, String, String> strategy) {
+        joinColumnStrategy = strategy;
         return this;
     }
 
-    public DataBaseBuilder referencedColumn(BiFunction<String, String, String> referencedColumn) {
-        referencedColumnStrategy = referencedColumn;
+    //    TODO improve parent, method chain register(table).referencedColumnStrategy()
+    //    TODO improve parent, method chain register(table).referencedColumnStrategy(child)
+    public DataBaseBuilder referencedColumnStrategy(BiFunction<String, String, String> strategy) {
+        referencedColumnStrategy = strategy;
         return this;
     }
 
+    //    TODO improve parent, method chain register(table).method(property, method);
     public <T> void registerRowMethod(String table, String property, Function<DataBase.Row<?>, T> method) {
         rowMethods.computeIfAbsent(table, t -> new HashMap<>()).put(property, method);
     }
@@ -48,11 +53,11 @@ public class DataBaseBuilder {
         return ofNullable(rowMethods.getOrDefault(table, emptyMap()).get(column));
     }
 
-    public String joinColumn(String parent, String child) {
+    public String joinColumnStrategy(String parent, String child) {
         return joinColumnStrategy.apply(parent, child);
     }
 
-    public String referencedColumn(String parent, String child) {
+    public String referencedColumnStrategy(String parent, String child) {
         return referencedColumnStrategy.apply(parent, child);
     }
 }
