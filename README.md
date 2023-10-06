@@ -45,10 +45,10 @@ Then you can assert database through DAL:
                       | p2 | MBP    |
                       
             orders: [{
-                customer=  Tom
-                ::hasMany[order_lines]:  | id | product_id | order_id | quantity | ::belongsTo[products].name |
-                                         | 1  | p1         | S01      | 1        | iPhone                     |
-                                         | 2  | p2         | S01      | 100      | MBP                        |
+                customer= Tom
+                ::hasMany[order_lines]: | id | product_id | order_id | quantity | ::belongsTo[products].name |
+                                        | 1  | p1         | S01      | 1        | iPhone                     |
+                                        | 2  | p2         | S01      | 100      | MBP                        |
             }]
         }
     """);
@@ -71,10 +71,10 @@ And then you can query association data directly
     expect(builder.connect(connection)).should("""
         : {
             orders: [{
-                customer=  Tom
-                orderLines:  | id | quantity | products.name |
-                             | 1  | 1        | iPhone        |
-                             | 2  | 100      | MBP           |
+                customer= Tom
+                orderLines: | id | quantity | products.name |
+                            | 1  | 1        | iPhone        |
+                            | 2  | 100      | MBP           |
             }]
         }
     """);

@@ -126,7 +126,7 @@ public class DataBaseBuilder {
 
         @SuppressWarnings("unchecked")
         public <R> R callTableMethod(Table<?> table, String methodName) {
-            return (R) query(tableMethods, defaultStrategy.tableMethods, table.name())
+            return (R) query(tableMethods, defaultStrategy.tableMethods, methodName)
                     .orElseThrow(() -> new RuntimeException("No such table method: " + methodName))
                     .apply(table);
         }
