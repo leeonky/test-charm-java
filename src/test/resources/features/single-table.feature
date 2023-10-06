@@ -108,16 +108,37 @@ Feature: assert db as data via jdbc
                     6. static method extension
                   java.lang.RuntimeException: No such column: notExist
 
-                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {
-                      products: [
-                          com.github.leeonky.dal.extensions.jdbc.DataBase$Row {
-                              id: java.lang.Long <66>,
-                              createdat: java.sql.Timestamp <1996-01-23 00:01:06.0>,
-                              name: java.lang.String <name#66>,
-                              pid: java.lang.Long <66>,
-                              price: java.lang.Integer <66>
-                          }
-                      ]
+                  The root value was: DataBase[jdbc:h2:mem:test] {
+                      products:
+                          | id |             createdat |    name | pid | price |
+                          | 66 | 1996-01-23 00:01:06.0 | name#66 |  66 |    66 |
                   }
                   ```
+    """
+
+  Scenario: dump table as a 'table'
+    Given Exists data "Order":
+      | id | code |
+      | 10 | S01  |
+    And all follow tables:
+      | orders |
+    Then dumped data base should:
+    """
+    = ```
+      DataBase[jdbc:h2:mem:test] {
+          orders:
+              | id | code |
+              | 10 |  S01 |
+      }
+      ```
+    """
+
+  Scenario: do not dump table when table is empty
+    And all follow tables:
+      | orders |
+    Then dumped data base should:
+    """
+    = ```
+      DataBase[jdbc:h2:mem:test] {}
+      ```
     """

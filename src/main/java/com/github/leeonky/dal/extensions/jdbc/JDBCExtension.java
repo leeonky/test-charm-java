@@ -2,13 +2,17 @@ package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.jdbc.DataBase.Row;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
+import com.github.leeonky.dal.runtime.inspector.Dumper;
+import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.dal.runtime.inspector.MapDumper;
 import com.github.leeonky.util.BeanClass;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class JDBCExtension implements Extension {
 
@@ -27,6 +31,8 @@ public class JDBCExtension implements Extension {
                 .registerPropertyAccessor(DataBase.class, new DataBaseJavaClassPropertyAccessor())
                 .registerPropertyAccessor(Row.class, new RowJavaClassPropertyAccessor())
                 .registerPropertyAccessor(Callable.class, new CallableJavaClassPropertyAccessor())
+                .registerDumper(DataBase.Table.class, data -> new TableDumper())
+                .registerDumper(DataBase.class, data -> new DataBaseDumper())
         ;
     }
 
@@ -82,5 +88,48 @@ public class JDBCExtension implements Extension {
             return dataBaseBk.table((String) property);
         }
     }
-}
 
+    private static class TableDumper implements Dumper {
+
+        @Override
+        public void dump(Data data, DumpingBuffer dumpingBuffer) {
+            List<List<String>> tableData = new ArrayList<>();
+            StreamSupport.stream(((DataBase.Table<?>) data.getInstance()).spliterator(), false)
+                    .limit(100).forEach(row -> {
+                        if (tableData.isEmpty())
+                            tableData.add(new ArrayList<>(row.columns()));
+                        tableData.add(row.data().values().stream().map(String::valueOf).collect(Collectors.toList()));
+                    });
+
+            if (!tableData.isEmpty()) {
+                List<String> columns = tableData.get(0);
+                Integer[] lengths = columns.stream().map(String::length).toArray(Integer[]::new);
+                tableData.stream().skip(1).forEach(row -> {
+                    for (int c = 0; c < lengths.length; c++)
+                        lengths[c] = Math.max(lengths[c], row.get(c).length());
+                });
+                for (List<String> line : tableData) {
+                    DumpingBuffer rowBuffer = dumpingBuffer.indent().newLine().append("|");
+                    for (int c = 0; c < line.size(); c++)
+                        rowBuffer.append(String.format(String.format(" %%%ds |", lengths[c]), line.get(c)));
+                }
+            }
+        }
+    }
+
+    private static class DataBaseDumper extends MapDumper {
+
+        @Override
+        protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
+            DataBase dataBase = (DataBase) data.getInstance();
+            dumpingBuffer.append("DataBase[").append(dataBase.getUrl()).append("] ");
+        }
+
+        @Override
+        protected void dumpField(Data data, Object field, DumpingBuffer context) {
+            DataBase.Table<?> table = (DataBase.Table<?>) data.getValue(field).getInstance();
+            if (table.iterator().hasNext())
+                context.append(key(field)).append(":").dumpValue(data.getValue(field));
+        }
+    }
+}

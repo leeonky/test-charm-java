@@ -106,16 +106,10 @@ Feature: assert belongs to
 
                   Result set has multiple records
 
-                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {
-                      order_lines: [
-                          com.github.leeonky.dal.extensions.jdbc.DataBase$Row {
-                              id: java.lang.Long <5>,
-                              quantity: java.lang.Integer <5>,
-                              refid: java.lang.Long <100>,
-                              order_id: null,
-                              product_id: java.lang.Long <14>
-                          }
-                      ]
+                  The root value was: DataBase[jdbc:h2:mem:test] {
+                      order_lines:
+                          | id | quantity | refid | order_id | product_id |
+                          |  5 |        5 |   100 |     null |         14 |
                   }
                   ```
     """
@@ -149,16 +143,10 @@ Feature: assert belongs to
                   org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "PIDX" not found; SQL statement:
                   select products.* from products where ?=pidx [42122-200]
 
-                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {
-                      order_lines: [
-                          com.github.leeonky.dal.extensions.jdbc.DataBase$Row {
-                              id: java.lang.Long <6>,
-                              quantity: java.lang.Integer <6>,
-                              refid: java.lang.Long <100>,
-                              order_id: null,
-                              product_id: java.lang.Long <17>
-                          }
-                      ]
+                  The root value was: DataBase[jdbc:h2:mem:test] {
+                      order_lines:
+                          | id | quantity | refid | order_id | product_id |
+                          |  6 |        6 |   100 |     null |         17 |
                   }
                   ```
     """

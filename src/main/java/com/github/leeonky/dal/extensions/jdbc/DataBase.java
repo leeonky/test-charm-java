@@ -31,6 +31,10 @@ public class DataBase {
         return new Table<>(name);
     }
 
+    public String getUrl() {
+        return Suppressor.get(() -> connection.getMetaData().getURL());
+    }
+
     public class Table<T extends Table<T>> implements Iterable<Row<T>>, CanWhere<T> {
         private final String name;
         protected final Query query;

@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
+import com.github.leeonky.dal.DAL;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -73,5 +74,11 @@ public class DBSteps {
 
         builder.tableStrategy("products").registerRowMethod("skusInSql", row ->
                 row.join("skus").where("id in (select sku_id from sku_products where product_id = :id)"));
+    }
+
+    @Then("dumped data base should:")
+    public void dumpedDataBaseShould(String expression) {
+        expect(DAL.getInstance().getRuntimeContextBuilder().build(null).wrap(builder.connect(connection)).dumpValue())
+                .should(expression);
     }
 }

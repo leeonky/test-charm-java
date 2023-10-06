@@ -94,13 +94,12 @@ public class Query {
         return linkColumn;
     }
 
-    ResultSet execute(Connection connection1) throws SQLException {
+    public ResultSet execute(Connection connection) throws SQLException {
         ClauseParser parser = new ClauseParser(buildSql());
-        PreparedStatement preparedStatement = connection1.prepareStatement(parser.getClause());
+        PreparedStatement preparedStatement = connection.prepareStatement(parser.getClause());
         int parameterIndex = 1;
         for (String parameter : parser.getParameters())
             preparedStatement.setObject(parameterIndex++, parameters().get(parameter));
-        ResultSet resultSet = preparedStatement.executeQuery();
-        return resultSet;
+        return preparedStatement.executeQuery();
     }
 }
