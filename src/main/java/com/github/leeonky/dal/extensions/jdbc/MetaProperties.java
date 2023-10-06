@@ -8,14 +8,14 @@ public class MetaProperties {
     public static Callable<?> hasOne(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Row)
-            return ((DataBase.Row) data.getInstance())::hasOne;
+            return ((DataBase.Row<?>) data.getInstance())::hasOne;
         throw new RuntimeException("`hasOne` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 
     public static Callable<DataBase.LinkedTable> hasMany(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Row)
-            return ((DataBase.Row) data.getInstance())::hasMany;
+            return ((DataBase.Row<?>) data.getInstance())::hasMany;
         throw new RuntimeException("`hasMany` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 
@@ -43,23 +43,23 @@ public class MetaProperties {
     public static Callable<?> where(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Table)
-            return ((DataBase.Table) data.getInstance())::where;
+            return ((DataBase.Table<?>) data.getInstance())::where;
         if (data.getInstance() instanceof DataBase.LinkedRow)
             return ((DataBase.LinkedRow) data.getInstance())::where;
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 
-    public static Callable<DataBase.Table> select(MetaData metaData) {
+    public static Callable<DataBase.Table<?>> select(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Table)
-            return ((DataBase.Table) data.getInstance())::select;
+            return ((DataBase.Table<?>) data.getInstance())::select;
         throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
     }
 
     public static Callable<?> belongsTo(MetaData metaData) {
         Data data = metaData.evaluateInput();
         if (data.getInstance() instanceof DataBase.Row)
-            return ((DataBase.Row) data.getInstance())::belongsTo;
+            return ((DataBase.Row<?>) data.getInstance())::belongsTo;
         throw new RuntimeException("`belongsTo` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
     }
 }

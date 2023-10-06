@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
+import com.github.leeonky.dal.extensions.jdbc.DataBase.Table;
 import org.javalite.common.Inflector;
 
 import java.sql.Connection;
@@ -13,8 +14,8 @@ import static java.util.Optional.ofNullable;
 
 public class DataBaseBuilder {
     private Function<Statement, Collection<String>> tableQuery = s -> Collections.emptyList();
-    private BiFunction<String, String, String> joinColumnStrategy = (parent, child) -> Inflector.singularize(parent) + "_id";
-    private BiFunction<String, String, String> referencedColumnStrategy = (parent, child) -> "id";
+    private BiFunction<Table<?>, Table<?>, String> joinColumnStrategy = (parent, child) -> Inflector.singularize(parent.name()) + "_id";
+    private BiFunction<Table<?>, Table<?>, String> referencedColumnStrategy = (parent, child) -> "id";
     private final Map<String, Map<String, Function<DataBase.Row<?>, ?>>> rowMethods = new HashMap<>();
 
     public DataBaseBuilder tablesProvider(Function<Statement, Collection<String>> query) {
@@ -32,14 +33,14 @@ public class DataBaseBuilder {
 
     //    TODO improve parent, method chain register(table).joinColumnStrategy()
     //    TODO improve parent, method chain register(table).joinColumnStrategy(child)
-    public DataBaseBuilder joinColumnStrategy(BiFunction<String, String, String> strategy) {
+    public DataBaseBuilder joinColumnStrategy(BiFunction<Table<?>, Table<?>, String> strategy) {
         joinColumnStrategy = strategy;
         return this;
     }
 
     //    TODO improve parent, method chain register(table).referencedColumnStrategy()
     //    TODO improve parent, method chain register(table).referencedColumnStrategy(child)
-    public DataBaseBuilder referencedColumnStrategy(BiFunction<String, String, String> strategy) {
+    public DataBaseBuilder referencedColumnStrategy(BiFunction<Table<?>, Table<?>, String> strategy) {
         referencedColumnStrategy = strategy;
         return this;
     }
@@ -53,11 +54,11 @@ public class DataBaseBuilder {
         return ofNullable(rowMethods.getOrDefault(table, emptyMap()).get(column));
     }
 
-    public String joinColumnStrategy(String parent, String child) {
+    public String joinColumnStrategy(Table<?> parent, Table<?> child) {
         return joinColumnStrategy.apply(parent, child);
     }
 
-    public String referencedColumnStrategy(String parent, String child) {
+    public String referencedColumnStrategy(Table<?> parent, Table<?> child) {
         return referencedColumnStrategy.apply(parent, child);
     }
 }
