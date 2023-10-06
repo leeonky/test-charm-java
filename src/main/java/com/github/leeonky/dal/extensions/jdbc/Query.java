@@ -1,5 +1,9 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class Query {
@@ -77,5 +81,15 @@ public class Query {
 
     public String linkColumn() {
         return linkColumn;
+    }
+
+    ResultSet execute(Connection connection1) throws SQLException {
+        ClauseParser parser = new ClauseParser(buildSql());
+        PreparedStatement preparedStatement = connection1.prepareStatement(parser.getClause());
+        int parameterIndex = 1;
+        for (String parameter : parser.getParameters())
+            preparedStatement.setObject(parameterIndex++, parameters().get(parameter));
+        ResultSet resultSet = preparedStatement.executeQuery();
+        return resultSet;
     }
 }

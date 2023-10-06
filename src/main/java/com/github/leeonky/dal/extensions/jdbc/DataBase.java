@@ -2,7 +2,10 @@ package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.util.Suppressor;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -47,11 +50,7 @@ public class DataBase {
 
         @Override
         public Iterator<DataBase.Row<T>> iterator() {
-            return Suppressor.get(() -> query(buildSql()));
-        }
-
-        protected String buildSql() {
-            return query.buildSql();
+            return Suppressor.get(() -> query(query()));
         }
 
         @SuppressWarnings("unchecked")
@@ -59,13 +58,8 @@ public class DataBase {
             return (T) new Table<>(name, query);
         }
 
-        private Iterator<DataBase.Row<T>> query(String sql) throws SQLException {
-            ClauseParser parser = new ClauseParser(sql);
-            PreparedStatement preparedStatement = connection.prepareStatement(parser.getClause());
-            int parameterIndex = 1;
-            for (String parameter : parser.getParameters())
-                preparedStatement.setObject(parameterIndex++, query.parameters().get(parameter));
-            ResultSet resultSet = preparedStatement.executeQuery();
+        protected Iterator<DataBase.Row<T>> query(Query query) throws SQLException {
+            ResultSet resultSet = query.execute(connection);
             return new Iterator<DataBase.Row<T>>() {
                 private final Set<String> columns = new LinkedHashSet<String>() {{
                     ResultSetMetaData metaData = resultSet.getMetaData();
@@ -86,16 +80,15 @@ public class DataBase {
 
                 @SuppressWarnings("unchecked")
                 private DataBase.Row<T> getRow() throws SQLException {
-                    Map<String, Object> rowData = new LinkedHashMap<>();
-                    DataBase.Row<T> row = new DataBase.Row<>((T) Table.this, rowData);
-                    for (String column : columns)
-                        rowData.put(column, resultSet.getObject(column));
-                    return row;
+                    return new Row<>((T) Table.this, new LinkedHashMap<String, Object>() {{
+                        for (String column : columns)
+                            put(column, resultSet.getObject(column));
+                    }});
                 }
             };
         }
 
-        public Query clause() {
+        public Query query() {
             return query;
         }
 
@@ -166,7 +159,7 @@ public class DataBase {
         public LinkedTable(Row<? extends Table<?>> row, String name) {
             super(name);
             this.row = row;
-            query.parameters().putAll(row.table().clause().parameters());
+            query.parameters().putAll(row.table().query().parameters());
             query.parameters().putAll(row.data());
         }
 
@@ -231,11 +224,11 @@ public class DataBase {
         private final String referencedColumn;
 
         public LinkedThroughTable(LinkedTable linkedTable, LinkedTable thoughTable) {
-            super(linkedTable.row, linkedTable.name(), linkedTable.clause().on(null));
+            super(linkedTable.row, linkedTable.name(), linkedTable.query().on(null));
             this.thoughTable = thoughTable;
-            referencedColumn = linkedTable.clause().linkColumn() == null ? "" +
+            referencedColumn = linkedTable.query().linkColumn() == null ? "" +
                     builder.resolveReferencedColumn(linkedTable, thoughTable)
-                    : linkedTable.clause().linkColumn();
+                    : linkedTable.query().linkColumn();
         }
 
         public LinkedThroughTable(LinkedTable thoughTable, String referencedColumn,
@@ -246,8 +239,8 @@ public class DataBase {
         }
 
         @Override
-        protected String buildSql() {
-            return clause().where(String.format("%s in (%s)", referencedColumn, thoughTable.buildSql())).buildSql();
+        protected Iterator<Row<LinkedTable>> query(Query query) throws SQLException {
+            return super.query(query.where(String.format("%s in (%s)", referencedColumn, thoughTable.query().buildSql())));
         }
 
         @Override
