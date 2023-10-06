@@ -91,5 +91,3 @@ Feature: hex
       E4 BD A0 E5 A5 BD
       ```
     """
-
-#  TODO binary dumper support byte[] Byte[] InputStream
