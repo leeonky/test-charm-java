@@ -12,7 +12,8 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
+import static java.util.stream.StreamSupport.stream;
 
 public class JDBCExtension implements Extension {
 
@@ -93,27 +94,36 @@ public class JDBCExtension implements Extension {
 
         @Override
         public void dump(Data data, DumpingBuffer dumpingBuffer) {
-            List<List<String>> tableData = new ArrayList<>();
-            StreamSupport.stream(((DataBase.Table<?>) data.getInstance()).spliterator(), false)
-                    .limit(100).forEach(row -> {
-                        if (tableData.isEmpty())
-                            tableData.add(new ArrayList<>(row.columns()));
-                        tableData.add(row.data().values().stream().map(String::valueOf).collect(Collectors.toList()));
-                    });
-
-            if (!tableData.isEmpty()) {
-                List<String> columns = tableData.get(0);
-                Integer[] lengths = columns.stream().map(String::length).toArray(Integer[]::new);
-                tableData.stream().skip(1).forEach(row -> {
-                    for (int c = 0; c < lengths.length; c++)
-                        lengths[c] = Math.max(lengths[c], row.get(c).length());
-                });
-                for (List<String> line : tableData) {
+            List<List<String>> tableData = getData(data);
+            if (tableData.isEmpty())
+                dumpingBuffer.append("[]");
+            else {
+                Integer[] lengths = resolveColumnWidth(tableData);
+                tableData.forEach(line -> {
                     DumpingBuffer rowBuffer = dumpingBuffer.indent().newLine().append("|");
                     for (int c = 0; c < line.size(); c++)
                         rowBuffer.append(String.format(String.format(" %%%ds |", lengths[c]), line.get(c)));
-                }
+                });
             }
+        }
+
+        private List<List<String>> getData(Data data) {
+            List<List<String>> tableData = new ArrayList<>();
+            stream(((DataBase.Table<?>) data.getInstance()).spliterator(), false).limit(100).forEach(row -> {
+                if (tableData.isEmpty())
+                    tableData.add(new ArrayList<>(row.columns()));
+                tableData.add(row.data().values().stream().map(String::valueOf).collect(Collectors.toList()));
+            });
+            return tableData;
+        }
+
+        private Integer[] resolveColumnWidth(List<List<String>> tableData) {
+            Integer[] lengths = tableData.get(0).stream().map(String::length).toArray(Integer[]::new);
+            tableData.stream().skip(1).forEach(row -> {
+                for (int c = 0; c < lengths.length; c++)
+                    lengths[c] = Math.max(lengths[c], row.get(c).length());
+            });
+            return lengths;
         }
     }
 
