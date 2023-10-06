@@ -4,62 +4,46 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.MetaData;
 import com.github.leeonky.dal.runtime.RuntimeException;
 
+import java.util.function.BiFunction;
+
 public class MetaProperties {
     public static Callable<?> hasOne(MetaData metaData) {
-        Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.Row)
-            return ((DataBase.Row<?>) data.getInstance())::hasOne;
-        throw new RuntimeException("`hasOne` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
+        return call(metaData, DataBase.Row.class, DataBase.Row::hasOne, "`hasOne` meta property only apply to Row");
     }
 
     public static Callable<DataBase.LinkedTable> hasMany(MetaData metaData) {
-        Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.Row)
-            return ((DataBase.Row<?>) data.getInstance())::hasMany;
-        throw new RuntimeException("`hasMany` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
+        return call(metaData, DataBase.Row.class, DataBase.Row::hasMany, "`hasMany` meta property only apply to Row");
     }
 
     public static Callable<?> on(MetaData metaData) {
-        Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.LinkedRow)
-            return ((DataBase.LinkedRow) data.getInstance())::on;
-        if (data.getInstance() instanceof DataBase.LinkedTable)
-            return ((DataBase.LinkedTable) data.getInstance())::on;
-        throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
+        return call(metaData, Association.class, Association::on, "`on` meta property only apply to Association");
     }
 
     public static Callable<?> through(MetaData metaData) {
-        Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.LinkedTable)
-            return joinTableName -> {
-                String[] joinTableAndColumn = joinTableName.split("\\.");
-                if (joinTableAndColumn.length > 1)
-                    return ((DataBase.LinkedTable) data.getInstance()).through(joinTableAndColumn[0], joinTableAndColumn[1]);
-                return ((DataBase.LinkedTable) data.getInstance()).through(joinTableAndColumn[0]);
-            };
-        throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
+        return call(metaData, Association.class, Association::throughWithColumn,
+                "`where` meta property only apply Table or Association");
     }
 
     public static Callable<?> where(MetaData metaData) {
-        Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.Table)
-            return ((DataBase.Table<?>) data.getInstance())::where;
-        if (data.getInstance() instanceof DataBase.LinkedRow)
-            return ((DataBase.LinkedRow) data.getInstance())::where;
-        throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
+        return call(metaData, CanWhere.class, CanWhere::where,
+                "`where` meta property only apply Table or Association");
     }
 
-    public static Callable<DataBase.Table<?>> select(MetaData metaData) {
-        Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.Table)
-            return ((DataBase.Table<?>) data.getInstance())::select;
-        throw new RuntimeException("Invalid meta property", metaData.getSymbolNode().getPositionBegin());
+    public static Callable<?> select(MetaData metaData) {
+        return call(metaData, DataBase.Table.class, DataBase.Table::select,
+                "`select` meta property only apply Table");
     }
 
     public static Callable<?> belongsTo(MetaData metaData) {
+        return call(metaData, DataBase.Row.class, DataBase.Row::belongsTo,
+                "`belongsTo` meta property only apply Row");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T, R> Callable<R> call(MetaData metaData, Class<T> type, BiFunction<T, String, R> action, String message) {
         Data data = metaData.evaluateInput();
-        if (data.getInstance() instanceof DataBase.Row)
-            return ((DataBase.Row<?>) data.getInstance())::belongsTo;
-        throw new RuntimeException("`belongsTo` meta property only apply DataBase.Table.Row", metaData.getSymbolNode().getPositionBegin());
+        if (type.isInstance(data.getInstance()))
+            return arg -> action.apply((T) data.getInstance(), arg);
+        throw new RuntimeException(message, metaData.getSymbolNode().getPositionBegin());
     }
 }

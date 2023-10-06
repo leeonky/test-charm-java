@@ -1,6 +1,6 @@
 Feature: many-to-many
 
-  Scenario: join table
+  Scenario: has many with join table
     Given Exists data "Product":
       | name |
       | p1   |
@@ -15,8 +15,6 @@ Feature: many-to-many
     Given Exists "Product.name[any].skus" as data "Sku":
       | name |
       | any  |
-    When all follow tables:
-      | products | skus | sku_products |
     Then db should:
       """
       products[0]: {
@@ -51,3 +49,17 @@ Feature: many-to-many
       }
       """
 
+
+  Scenario: has one with join table
+    Given Exists data "Product":
+      | name |
+      | p1   |
+    Given Exists "Product.name[p1].skus" as data "Sku":
+      | name |
+      | s1   |
+    Then db should:
+      """
+      products[0]: {
+        ::hasOne[skus]::through[sku_products].name= s1
+      }
+      """

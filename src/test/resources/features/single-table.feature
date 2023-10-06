@@ -111,11 +111,11 @@ Feature: assert db as data via jdbc
                   The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {
                       products: [
                           com.github.leeonky.dal.extensions.jdbc.DataBase$Row {
-                              id: java.lang.Long <65>,
-                              createdat: java.sql.Timestamp <1996-01-23 00:01:05.0>,
-                              name: java.lang.String <name#65>,
-                              pid: java.lang.Long <65>,
-                              price: java.lang.Integer <65>
+                              id: java.lang.Long <66>,
+                              createdat: java.sql.Timestamp <1996-01-23 00:01:06.0>,
+                              name: java.lang.String <name#66>,
+                              pid: java.lang.Long <66>,
+                              price: java.lang.Integer <66>
                           }
                       ]
                   }

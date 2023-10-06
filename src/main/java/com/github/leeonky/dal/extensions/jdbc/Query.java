@@ -30,17 +30,19 @@ public class Query {
     }
 
     public String buildSql() {
-        StringBuilder sql = new StringBuilder().append("select ").append(select).append(" from ").append(name);
+        return String.format("select %s from %s%s", select, name, buildWhere());
+    }
+
+    private String buildWhere() {
         List<String> clauses = new ArrayList<>(this.clauses);
-        if (defaultLink != null) {
+        if (defaultLink != null)
             clauses.add(defaultLink);
-        } else {
+        else {
             String joinColumn = linkColumn == null ? defaultLinkColumn : linkColumn;
             if (joinColumn != null && defaultParameterColumn != null)
                 clauses.add(joinColumn + " = :" + defaultParameterColumn);
         }
-        if (!clauses.isEmpty()) sql.append(" where ").append(String.join(" and ", clauses));
-        return sql.toString();
+        return clauses.isEmpty() ? "" : " where " + String.join(" and ", clauses);
     }
 
     public Query select(String select) {

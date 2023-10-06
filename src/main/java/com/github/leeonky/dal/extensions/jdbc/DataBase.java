@@ -31,7 +31,7 @@ public class DataBase {
         return new Table<>(name);
     }
 
-    public class Table<T extends Table<T>> implements Iterable<Row<T>> {
+    public class Table<T extends Table<T>> implements Iterable<Row<T>>, CanWhere<T> {
         private final String name;
         protected final Query query;
 
@@ -96,6 +96,7 @@ public class DataBase {
             return createInstance(query.select(select));
         }
 
+        @Override
         public T where(String clause) {
             return createInstance(query.where(clause));
         }
@@ -153,7 +154,7 @@ public class DataBase {
         }
     }
 
-    public class LinkedTable extends Table<LinkedTable> {
+    public class LinkedTable extends Table<LinkedTable> implements Association<LinkedTable> {
         protected final Row<? extends Table<?>> row;
 
         public LinkedTable(Row<? extends Table<?>> row, String name) {
@@ -176,6 +177,7 @@ public class DataBase {
             return createInstance(query.defaultLinkColumn(linkColumn));
         }
 
+        @Override
         public LinkedTable on(String condition) {
             return createInstance(query.on(condition));
         }
@@ -208,13 +210,15 @@ public class DataBase {
                     .defaultParameterColumn(builder.resolveReferencedColumn(row.table(), this));
         }
 
+        @Override
         public LinkedTable through(String table) {
             LinkedTable throughTable = row.join(table).asChildren();
             String joinColumn = builder.resolveJoinColumn(this, throughTable);
             return new LinkedThroughTable(this, throughTable.select(joinColumn));
         }
 
-        public LinkedThroughTable through(String table, String joinColumn) {
+        @Override
+        public LinkedTable through(String table, String joinColumn) {
             return new LinkedThroughTable(this, row.join(table).asChildren().select(joinColumn));
         }
     }
@@ -254,7 +258,7 @@ public class DataBase {
         }
     }
 
-    public class LinkedRow extends Row<LinkedTable> {
+    public class LinkedRow extends Row<LinkedTable> implements CanWhere<LinkedRow>, Association<LinkedRow> {
         protected Supplier<Map<String, Object>> query;
 
         public LinkedRow(LinkedTable table, Supplier<Map<String, Object>> query) {
@@ -269,12 +273,24 @@ public class DataBase {
             return super.data();
         }
 
+        @Override
         public LinkedRow where(String clause) {
-            return table.where(clause).exactlyOne();
+            return table().where(clause).exactlyOne();
         }
 
+        @Override
         public LinkedRow on(String condition) {
-            return table.on(condition).exactlyOne();
+            return table().on(condition).exactlyOne();
+        }
+
+        @Override
+        public LinkedRow through(String table) {
+            return table().through(table).exactlyOne();
+        }
+
+        @Override
+        public LinkedRow through(String table, String joinColumn) {
+            return table().through(table, joinColumn).exactlyOne();
         }
     }
 }
