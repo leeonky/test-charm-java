@@ -11,6 +11,7 @@ import lombok.SneakyThrows;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.TimeZone;
 
 import static com.github.leeonky.dal.Assertions.expect;
 
@@ -20,6 +21,7 @@ public class DBSteps {
     private Throwable exception;
 
     public DBSteps() throws SQLException {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     @SneakyThrows
