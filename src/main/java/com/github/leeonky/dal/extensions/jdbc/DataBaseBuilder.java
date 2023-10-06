@@ -7,18 +7,22 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Optional.ofNullable;
 
 public class DataBaseBuilder {
     private Function<Statement, Collection<String>> tableQuery = s -> Collections.emptyList();
-    private BiFunction<Table<?>, Table<?>, String> joinColumnStrategy = (parent, child) -> Inflector.singularize(parent.name()) + "_id";
-    private BiFunction<Table<?>, Table<?>, String> referencedColumnStrategy = (parent, child) -> "id";
-    private final Map<String, Map<String, Function<DataBase.Row<?>, ?>>> rowMethods = new HashMap<>();
+    private final Map<String, TableStrategy> tableStrategies = new LinkedHashMap<>();
+    private final TableStrategy defaultStrategy = new TableStrategy();
+
+    {
+        defaultStrategy.joinColumnStrategy((parent, child) -> Inflector.singularize(parent.name()) + "_id");
+        defaultStrategy.referencedColumnStrategy((parent, child) -> "id");
+    }
 
     public DataBaseBuilder tablesProvider(Function<Statement, Collection<String>> query) {
         tableQuery = query;
@@ -33,38 +37,107 @@ public class DataBaseBuilder {
         return tableQuery;
     }
 
-    //    TODO improve parent, method chain register(table).joinColumnStrategy()
-    //    TODO improve parent, method chain register(table).joinColumnStrategy(child)
-    public DataBaseBuilder joinColumnStrategy(BiFunction<Table<?>, Table<?>, String> strategy) {
-        joinColumnStrategy = strategy;
-        return this;
-    }
-
-    //    TODO improve parent, method chain register(table).referencedColumnStrategy()
-    //    TODO improve parent, method chain register(table).referencedColumnStrategy(child)
-    public DataBaseBuilder referencedColumnStrategy(BiFunction<Table<?>, Table<?>, String> strategy) {
-        referencedColumnStrategy = strategy;
-        return this;
-    }
-
-    //    TODO improve parent, method chain register(table).method(property, method);
-    public <T> void registerRowMethod(String table, String property, Function<DataBase.Row<?>, T> method) {
-        rowMethods.computeIfAbsent(table, t -> new HashMap<>()).put(property, method);
+    public TableStrategy defaultStrategy() {
+        return defaultStrategy;
     }
 
     public String resolveJoinColumn(Table<?> parent, Table<?> child) {
-        return joinColumnStrategy.apply(parent, child);
+        return tableStrategy(parent.name()).resolveJoinColumn(parent, child);
     }
 
     public String resolveReferencedColumn(Table<?> parent, Table<?> child) {
-        return referencedColumnStrategy.apply(parent, child);
+        return tableStrategy(parent.name()).resolveReferencedColumn(parent, child);
     }
 
-    @SuppressWarnings("unchecked")
     public <R> R callRowMethod(DataBase.Row<?> row, String column) {
-        Function<DataBase.Row<?>, ?> rowFunction = rowMethods.getOrDefault(row.table.name(), emptyMap()).get(column);
-        if (rowFunction == null)
+        return tableStrategy(row.table().name()).callRowMethod(row, column);
+    }
+
+    public TableStrategy tableStrategy(String table) {
+        return tableStrategies.computeIfAbsent(table, k -> new TableStrategy());
+    }
+
+    public <R> R callTableMethod(Table<?> table, String methodName) {
+        return tableStrategy(table.name()).callTableMethod(table, methodName);
+    }
+
+    public <T> DataBaseBuilder registerRowMethod(String name, Function<DataBase.Row<?>, T> method) {
+        defaultStrategy.registerRowMethod(name, method);
+        return this;
+    }
+
+    public <R> DataBaseBuilder registerMethod(String name, Function<Table<?>, R> method) {
+        defaultStrategy.registerMethod(name, method);
+        return this;
+    }
+
+    public class TableStrategy {
+        private final Map<String, BiFunction<Table<?>, Table<?>, String>> joinColumnStrategies = new LinkedHashMap<>();
+        private final Map<String, BiFunction<Table<?>, Table<?>, String>> referencedColumnStrategies = new LinkedHashMap<>();
+
+        private BiFunction<Table<?>, Table<?>, String> joinColumnStrategy;
+        private BiFunction<Table<?>, Table<?>, String> referencedColumnStrategy;
+        private final Map<String, Function<DataBase.Row<?>, ?>> rowMethods = new LinkedHashMap<>();
+        private final Map<String, Function<DataBase.Table<?>, ?>> tableMethods = new LinkedHashMap<>();
+
+        public TableStrategy joinColumnStrategy(String table, BiFunction<Table<?>, Table<?>, String> strategy) {
+            joinColumnStrategies.put(table, strategy);
+            return this;
+        }
+
+        public TableStrategy joinColumnStrategy(BiFunction<Table<?>, Table<?>, String> strategy) {
+            joinColumnStrategy = strategy;
+            return this;
+        }
+
+        public TableStrategy referencedColumnStrategy(String table, BiFunction<Table<?>, Table<?>, String> strategy) {
+            referencedColumnStrategies.put(table, strategy);
+            return this;
+        }
+
+        public TableStrategy referencedColumnStrategy(BiFunction<Table<?>, Table<?>, String> strategy) {
+            referencedColumnStrategy = strategy;
+            return this;
+        }
+
+        public <T> TableStrategy registerRowMethod(String name, Function<DataBase.Row<?>, T> method) {
+            rowMethods.put(name, method);
+            return this;
+        }
+
+        public <R> TableStrategy registerMethod(String name, Function<Table<?>, R> method) {
+            tableMethods.put(name, method);
+            return this;
+        }
+
+        public String resolveJoinColumn(Table<?> parent, Table<?> child) {
+            return ofNullable(joinColumnStrategies.getOrDefault(child.name(), joinColumnStrategy))
+                    .orElse(defaultStrategy.joinColumnStrategy).apply(parent, child);
+        }
+
+        public String resolveReferencedColumn(Table<?> parent, Table<?> child) {
+            return ofNullable(referencedColumnStrategies.getOrDefault(child.name(), referencedColumnStrategy))
+                    .orElse(defaultStrategy.referencedColumnStrategy).apply(parent, child);
+        }
+
+        @SuppressWarnings("unchecked")
+        public <R> R callRowMethod(DataBase.Row<?> row, String column) {
+            Function<DataBase.Row<?>, ?> rowFunction = rowMethods.get(column);
+            if (rowFunction == null)
+                rowFunction = defaultStrategy.rowMethods.get(column);
+            if (rowFunction != null)
+                return (R) rowFunction.apply(row);
             throw new RuntimeException("No such column: " + column);
-        return (R) rowFunction.apply(row);
+        }
+
+        @SuppressWarnings("unchecked")
+        public <R> R callTableMethod(Table<?> table, String methodName) {
+            Function<Table<?>, ?> tableFunction = tableMethods.get(methodName);
+            if (tableFunction == null)
+                tableFunction = defaultStrategy.tableMethods.get(methodName);
+            if (tableFunction != null)
+                return (R) tableFunction.apply(table);
+            throw new RuntimeException("No such table method: " + methodName);
+        }
     }
 }
