@@ -5,10 +5,7 @@ import org.javalite.common.Inflector;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -122,22 +119,23 @@ public class DataBaseBuilder {
 
         @SuppressWarnings("unchecked")
         public <R> R callRowMethod(DataBase.Row<?> row, String column) {
-            Function<DataBase.Row<?>, ?> rowFunction = rowMethods.get(column);
-            if (rowFunction == null)
-                rowFunction = defaultStrategy.rowMethods.get(column);
-            if (rowFunction != null)
-                return (R) rowFunction.apply(row);
-            throw new RuntimeException("No such column: " + column);
+            return (R) query(rowMethods, defaultStrategy.rowMethods, column)
+                    .orElseThrow(() -> new RuntimeException("No such column: " + column))
+                    .apply(row);
         }
 
         @SuppressWarnings("unchecked")
         public <R> R callTableMethod(Table<?> table, String methodName) {
-            Function<Table<?>, ?> tableFunction = tableMethods.get(methodName);
-            if (tableFunction == null)
-                tableFunction = defaultStrategy.tableMethods.get(methodName);
-            if (tableFunction != null)
-                return (R) tableFunction.apply(table);
-            throw new RuntimeException("No such table method: " + methodName);
+            return (R) query(tableMethods, defaultStrategy.tableMethods, table.name())
+                    .orElseThrow(() -> new RuntimeException("No such table method: " + methodName))
+                    .apply(table);
+        }
+
+        private <T> Optional<T> query(Map<String, T> map1, Map<String, T> map2, String key) {
+            T t = map1.get(key);
+            if (t == null)
+                t = map2.get(key);
+            return ofNullable(t);
         }
     }
 }

@@ -5,6 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Stream.of;
 
 public class Query {
     private final String select;
@@ -34,15 +38,20 @@ public class Query {
     }
 
     private String buildWhere() {
-        List<String> clauses = new ArrayList<>(this.clauses);
-        if (defaultLink != null)
-            clauses.add(defaultLink);
-        else {
-            String joinColumn = linkColumn == null ? defaultLinkColumn : linkColumn;
-            if (joinColumn != null && defaultParameterColumn != null)
-                clauses.add(joinColumn + " = :" + defaultParameterColumn);
-        }
-        return clauses.isEmpty() ? "" : " where " + String.join(" and ", clauses);
+        String clause = Stream.concat(clauses.stream(), of(resolveLinkClause()))
+                .filter(Objects::nonNull).collect(Collectors.joining(" and "));
+        return clause.isEmpty() ? "" : " where " + clause;
+    }
+
+    private String resolveLinkClause() {
+        return defaultLink != null ? defaultLink : defaultLinkClause();
+    }
+
+    private String defaultLinkClause() {
+        String joinColumn = linkColumn == null ? defaultLinkColumn : linkColumn;
+        if (joinColumn != null && defaultParameterColumn != null)
+            return joinColumn + " = :" + defaultParameterColumn;
+        return null;
     }
 
     public Query select(String select) {
