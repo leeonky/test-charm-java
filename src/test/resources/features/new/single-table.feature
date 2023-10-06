@@ -108,6 +108,16 @@ Feature: assert db as data via jdbc
                     6. static method extension
                   java.lang.RuntimeException: No such column: notExist
 
-                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {}
+                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {
+                      products: [
+                          com.github.leeonky.dal.extensions.jdbc.DataBase$Row {
+                              id: java.lang.Long <65>,
+                              createdat: java.sql.Timestamp <1996-01-23 08:01:05.0>,
+                              name: java.lang.String <name#65>,
+                              pid: java.lang.Long <65>,
+                              price: java.lang.Integer <65>
+                          }
+                      ]
+                  }
                   ```
     """

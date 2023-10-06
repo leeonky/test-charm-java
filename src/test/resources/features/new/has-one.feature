@@ -160,7 +160,14 @@ Feature: assert has one
 
                   Result set has multiple records
 
-                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {}
+                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {
+                      orders: [
+                          com.github.leeonky.dal.extensions.jdbc.DataBase$Row {
+                              id: java.lang.Long <7>,
+                              code: java.lang.String <S01>
+                          }
+                      ]
+                  }
                   ```
     """
 
@@ -189,6 +196,13 @@ Feature: assert has one
                   org.h2.jdbc.JdbcSQLSyntaxErrorException: Column "NOT_EXIST" not found; SQL statement:
                   select order_lines.* from order_lines where ?=not_exist [42122-200]
 
-                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {}
+                  The root value was: com.github.leeonky.dal.extensions.jdbc.DataBase {
+                      orders: [
+                          com.github.leeonky.dal.extensions.jdbc.DataBase$Row {
+                              id: java.lang.Long <8>,
+                              code: java.lang.String <S01>
+                          }
+                      ]
+                  }
                   ```
     """

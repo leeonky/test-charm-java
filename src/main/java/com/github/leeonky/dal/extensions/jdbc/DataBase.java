@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 public class DataBase {
     public final Connection connection;
     public final DataBaseBuilder builder;
+    public Set<String> queriedTables = new LinkedHashSet<>();
 
     public DataBase(Connection connection, DataBaseBuilder builder) {
         this.connection = connection;
@@ -16,10 +17,14 @@ public class DataBase {
     }
 
     public Collection<String> allTableNames() {
-        return builder.tablesProvider().apply(Suppressor.get(connection::createStatement));
+        return new LinkedHashSet<String>() {{
+            addAll(builder.tablesProvider().apply(Suppressor.get(connection::createStatement)));
+            addAll(queriedTables);
+        }};
     }
 
     public Table<?> table(String name) {
+        queriedTables.add(name);
         return new Table<>(name);
     }
 
