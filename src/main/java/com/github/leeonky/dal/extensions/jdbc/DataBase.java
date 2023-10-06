@@ -124,8 +124,7 @@ public class DataBase {
         public Object column(String column) {
             if (data().containsKey(column))
                 return data().get(column);
-            return builder.rowMethod(table.name(), column)
-                    .orElseThrow(() -> new RuntimeException("No such column: " + column)).apply(this);
+            return builder.callRowMethod(this, column);
         }
 
         public Set<String> columns() {
@@ -207,18 +206,18 @@ public class DataBase {
         }
 
         public LinkedTable asParent() {
-            return defaultLinkColumn(builder.referencedColumnStrategy(this, row.table()))
-                    .defaultParameterColumn(builder.joinColumnStrategy(this, row.table()));
+            return defaultLinkColumn(builder.resolveReferencedColumn(this, row.table()))
+                    .defaultParameterColumn(builder.resolveJoinColumn(this, row.table()));
         }
 
         public LinkedTable asChildren() {
-            return defaultLinkColumn(builder.joinColumnStrategy(row.table(), this))
-                    .defaultParameterColumn(builder.referencedColumnStrategy(row.table(), this));
+            return defaultLinkColumn(builder.resolveJoinColumn(row.table(), this))
+                    .defaultParameterColumn(builder.resolveReferencedColumn(row.table(), this));
         }
 
         public LinkedTable through(String table) {
             LinkedTable throughTable = row.join(table).asChildren();
-            String joinColumn = builder.joinColumnStrategy(this, throughTable);
+            String joinColumn = builder.resolveJoinColumn(this, throughTable);
             return new LinkedThroughTable(this, throughTable.select(joinColumn));
         }
 
@@ -235,7 +234,7 @@ public class DataBase {
             super(linkedTable.row, linkedTable.name(), linkedTable.clause().on(null));
             this.thoughTable = thoughTable;
             referencedColumn = linkedTable.clause().linkColumn() == null ? "" +
-                    builder.referencedColumnStrategy(linkedTable, thoughTable)
+                    builder.resolveReferencedColumn(linkedTable, thoughTable)
                     : linkedTable.clause().linkColumn();
         }
 

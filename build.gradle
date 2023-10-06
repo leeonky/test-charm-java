@@ -76,6 +76,7 @@ dependencies {
 
     testImplementation 'org.hibernate:hibernate-entitymanager:5.4.0.Final'
     testImplementation 'com.h2database:h2:1.4.200'
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'
 
     pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }

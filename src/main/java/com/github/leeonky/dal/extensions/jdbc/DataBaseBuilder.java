@@ -5,12 +5,14 @@ import org.javalite.common.Inflector;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Optional.ofNullable;
 
 public class DataBaseBuilder {
     private Function<Statement, Collection<String>> tableQuery = s -> Collections.emptyList();
@@ -50,15 +52,19 @@ public class DataBaseBuilder {
         rowMethods.computeIfAbsent(table, t -> new HashMap<>()).put(property, method);
     }
 
-    public Optional<Function<DataBase.Row<?>, ?>> rowMethod(String table, String column) {
-        return ofNullable(rowMethods.getOrDefault(table, emptyMap()).get(column));
-    }
-
-    public String joinColumnStrategy(Table<?> parent, Table<?> child) {
+    public String resolveJoinColumn(Table<?> parent, Table<?> child) {
         return joinColumnStrategy.apply(parent, child);
     }
 
-    public String referencedColumnStrategy(Table<?> parent, Table<?> child) {
+    public String resolveReferencedColumn(Table<?> parent, Table<?> child) {
         return referencedColumnStrategy.apply(parent, child);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <R> R callRowMethod(DataBase.Row<?> row, String column) {
+        Function<DataBase.Row<?>, ?> rowFunction = rowMethods.getOrDefault(row.table.name(), emptyMap()).get(column);
+        if (rowFunction == null)
+            throw new RuntimeException("No such column: " + column);
+        return (R) rowFunction.apply(row);
     }
 }
