@@ -17,10 +17,23 @@ public class Extension {
         return (Predicate<T>) t.negate();
     }
 
-    @SuppressWarnings("unchecked")
     @SafeVarargs
+    @Deprecated
+//    TODO to be removed
     public static <T> Optional<T> oneOf(Supplier<Optional<? extends T>>... optionals) {
+        return getFirstPresent(optionals);
+    }
+
+    @SafeVarargs
+    @SuppressWarnings("unchecked")
+    public static <T> Optional<T> getFirstPresent(Supplier<Optional<? extends T>>... optionals) {
         return (Optional<T>) of(optionals).map(Supplier::get).filter(Optional::isPresent).findFirst().orElse(empty());
+    }
+
+    @SafeVarargs
+    @SuppressWarnings("unchecked")
+    public static <T> Optional<T> firstPresent(Optional<? extends T>... optionals) {
+        return (Optional<T>) of(optionals).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
     public static <T> BinaryOperator<T> notAllowParallelReduce() {

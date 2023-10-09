@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Suppressor.get;
-import static com.github.leeonky.util.function.Extension.oneOf;
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
@@ -32,7 +32,7 @@ public class Classes {
     }
 
     private static ClassLoader getClassLoader() {
-        return oneOf(() -> classLoader(Thread.currentThread()::getContextClassLoader),
+        return getFirstPresent(() -> classLoader(Thread.currentThread()::getContextClassLoader),
                 () -> classLoader(Classes.class::getClassLoader),
                 () -> classLoader(ClassLoader::getSystemClassLoader))
                 .orElseThrow(IllegalStateException::new);
