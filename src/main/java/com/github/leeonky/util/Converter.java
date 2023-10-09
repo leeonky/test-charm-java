@@ -11,7 +11,9 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static com.github.leeonky.util.BeanClass.create;
 import static com.github.leeonky.util.Classes.getClassName;
 
 public class Converter {
@@ -111,9 +113,13 @@ public class Converter {
         if (target.isEnum())
             return convertEnum(source, (Class<? extends Enum>) target, value);
         if (value != null) {
-            BeanClass<T> targetBean = BeanClass.create(target);
+            BeanClass<T> targetBean = create(target);
             if (targetBean.isCollection())
-                return CollectionHelper.convert(value, targetBean, this);
+                try {
+                    return CollectionHelper.convert(value, targetBean, this);
+                } catch (CannotToStreamException e) {
+                    throw new ConvertException(String.format("Cannot convert from %s to %s", getClassName(value), target), e);
+                }
         }
         return defaultValue.apply(value);
     }
@@ -144,5 +150,17 @@ public class Converter {
         Classes.subTypesOf(ConverterExtension.class, "com.github.leeonky.extensions.util")
                 .forEach(c -> Classes.newInstance(c).extend(this));
         return this;
+    }
+
+    public boolean supported(Class<?> source, Class<?> target) {
+        if (target.isAssignableFrom(source))
+            return true;
+        if (typeConverterSet.findHandler(source, target, Collections::emptyList).isPresent())
+            return true;
+        if (target.isEnum())
+            return true;
+        if (create(target).isCollection())
+            return source.isArray() || Iterable.class.isAssignableFrom(source) || Stream.class.isAssignableFrom(source);
+        return false;
     }
 }

@@ -1,7 +1,6 @@
 package com.github.leeonky.util;
 
 import lombok.Getter;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +10,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Converter.getInstance;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConverterTest {
@@ -31,7 +32,7 @@ class ConverterTest {
         converter.addTypeConverter(Object.class, String.class, value -> "object to string");
         converter.addTypeConverter(BaseInterface.class, String.class, value -> "not object to string");
 
-        Assertions.assertThat(converter.tryConvert(String.class, new TargetClass())).isEqualTo("not object to string");
+        assertThat(converter.tryConvert(String.class, new TargetClass())).isEqualTo("not object to string");
     }
 
     enum NameEnums {
@@ -218,7 +219,7 @@ class ConverterTest {
             int fixInt = 1000;
             converter.addTypeConverter(String.class, Integer.class, str -> fixInt);
 
-            Assertions.assertThat(converter.convert(Integer.class, "2000")).isEqualTo(1000);
+            assertThat(converter.convert(Integer.class, "2000")).isEqualTo(1000);
         }
 
         @Nested
@@ -334,7 +335,7 @@ class ConverterTest {
 
         @Test
         void convert_to_primitive_type() {
-            Assertions.assertThat(getInstance().convert(boolean.class, true)).isTrue();
+            assertThat(getInstance().convert(boolean.class, true)).isTrue();
         }
     }
 
@@ -358,5 +359,67 @@ class ConverterTest {
                     .isInstanceOf(LinkedHashSet.class)
                     .containsExactly("A", "B");
         }
+
+        @Test
+        void raise_convert_error_when_not_supported() {
+            assertThatThrownBy(() -> converter.convert(ArrayList.class, new Object()))
+                    .hasMessage("Cannot convert from java.lang.Object to class java.util.ArrayList")
+                    .hasCauseExactlyInstanceOf(CannotToStreamException.class);
+        }
+    }
+
+    @Nested
+    class CanConvert {
+
+        class Super {
+        }
+
+        class Sub extends Super {
+
+        }
+
+        @Test
+        void not_supported() {
+            assertThat(converter.supported(Object.class, ConverterTest.class)).isFalse();
+        }
+
+        @Nested
+        class Supported {
+
+            @Test
+            void from_sub_to_super() {
+                assertThat(converter.supported(Sub.class, Super.class)).isTrue();
+            }
+
+            @Test
+            void register_convertor() {
+                converter.addTypeConverter(Object.class, ConverterTest.class, o -> null);
+
+                assertThat(converter.supported(Object.class, ConverterTest.class)).isTrue();
+            }
+
+            @Test
+            void target_is_enum() {
+                assertThat(converter.supported(Object.class, TargetEnum.class)).isTrue();
+            }
+
+            @Test
+            void target_is_collection_and_source_is_array() {
+                assertThat(converter.supported(String[].class, List.class)).isTrue();
+            }
+
+            @Test
+            void target_is_collection_and_source_is_iterable() {
+                assertThat(converter.supported(List.class, String[].class)).isTrue();
+            }
+
+            @Test
+            void target_is_collection_and_source_is_stream() {
+                assertThat(converter.supported(Stream.class, String[].class)).isTrue();
+            }
+        }
+    }
+
+    public enum TargetEnum {
     }
 }

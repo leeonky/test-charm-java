@@ -39,6 +39,12 @@ public class CollectionHelperTest {
             assertThat(toStream(asList("hello", "world")).collect(Collectors.toList()))
                     .isEqualTo(asList("hello", "world"));
         }
+
+        @Test
+        void support_get_stream_elements() {
+            assertThat(toStream(asList("hello", "world").stream()).collect(Collectors.toList()))
+                    .isEqualTo(asList("hello", "world"));
+        }
     }
 
     @Nested

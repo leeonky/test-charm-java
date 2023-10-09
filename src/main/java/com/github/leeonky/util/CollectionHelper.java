@@ -19,6 +19,8 @@ public class CollectionHelper {
                 return IntStream.range(0, Array.getLength(collection)).mapToObj(i -> (E) Array.get(collection, i));
             else if (collection instanceof Iterable)
                 return StreamSupport.stream(((Iterable<E>) collection).spliterator(), false);
+            else if (collection instanceof Stream)
+                return (Stream<E>) collection;
         }
         throw new CannotToStreamException(collection);
     }
