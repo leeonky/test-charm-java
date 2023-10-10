@@ -341,13 +341,17 @@ public class RestfulStep {
         response = new Response(connection);
     }
 
-    private void setRequestMethod(String method) {
-        try {
-            Field field = getField(connection.getClass(), "method");
-            field.setAccessible(true);
-            field.set(connection, method);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to set method " + method + " to " + connection, e);
+    private void setRequestMethod(String method) throws ProtocolException {
+        if (method.equals("PATCH")) {
+            try {
+                Field field = getField(connection.getClass(), "method");
+                field.setAccessible(true);
+                field.set(connection, method);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Failed to set method " + method + " to " + connection, e);
+            }
+        } else {
+            connection.setRequestMethod(method);
         }
     }
 

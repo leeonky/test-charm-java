@@ -81,6 +81,22 @@ test {
     useJUnitPlatform()
 }
 
+task testAll(type: Test) {
+    useJUnitPlatform()
+    filter {
+        excludeTestsMatching "RestfulStepPatchTest"
+    }
+    jvmArgs = ['--illegal-access=deny']
+}
+
+task testPatch(type: Test) {
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching "RestfulStepPatchTest"
+    }
+    jvmArgs = ['--add-opens', 'java.base/java.net=ALL-UNNAMED']
+}
+
 pitest {
     targetClasses = ['com.github.leeonky.cucumber.restful*']
     outputFormats = ['HTML2']
@@ -155,11 +171,35 @@ task cucumber() {
         javaexec {
             main = "io.cucumber.core.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/features']
+            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources']
         }
     }
 
     build {
         dependsOn cucumber
+    }
+}
+
+task cucumberAll() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/features']
+            jvmArgs = ['--illegal-access=deny']
+        }
+    }
+}
+
+task cucumberPatch() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/patch_features']
+            jvmArgs = ['--add-opens', 'java.base/java.net=ALL-UNNAMED']
+        }
     }
 }

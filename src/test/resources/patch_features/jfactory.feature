@@ -33,8 +33,7 @@ Feature: JFactory Integration
     """
     Examples:
       | method |
-      | POST   |
-      | PUT    |
+      | PATCH  |
 
   Scenario Outline: <method> with body array created by spec
     When <method> "LoginRequest" "/index":
@@ -60,8 +59,7 @@ Feature: JFactory Integration
     """
     Examples:
       | method |
-      | POST   |
-      | PUT    |
+      | PATCH  |
 
   Scenario Outline: <method> with body created by trait and spec
     When <method> "<traitAndSpec>" "/index":
@@ -82,10 +80,8 @@ Feature: JFactory Integration
     """
     Examples:
       | method | traitAndSpec               |
-      | POST   | WrongPassword LoginRequest |
-      | POST   | WrongPassword,LoginRequest |
-      | PUT    | WrongPassword LoginRequest |
-      | PUT    | WrongPassword,LoginRequest |
+      | PATCH  | WrongPassword LoginRequest |
+      | PATCH  | WrongPassword,LoginRequest |
 
   Scenario Outline: <method> with body array created by trait and spec
     When <method> "<traitAndSpec>" "/index":
@@ -106,10 +102,8 @@ Feature: JFactory Integration
     """
     Examples:
       | method | traitAndSpec               |
-      | POST   | WrongPassword LoginRequest |
-      | POST   | WrongPassword,LoginRequest |
-      | PUT    | WrongPassword LoginRequest |
-      | PUT    | WrongPassword,LoginRequest |
+      | PATCH  | WrongPassword LoginRequest |
+      | PATCH  | WrongPassword,LoginRequest |
 
   Scenario Outline: <method> with body created by spec and inline replace
     Given var "user" value is "admin"
@@ -127,5 +121,4 @@ Feature: JFactory Integration
     """
     Examples:
       | method |
-      | POST   |
-      | PUT    |
+      | PATCH  |
