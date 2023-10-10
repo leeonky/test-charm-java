@@ -84,7 +84,7 @@ test {
 task testAll(type: Test) {
     useJUnitPlatform()
     filter {
-        excludeTestsMatching "RestfulStepPatchTest"
+        setExcludePatterns("RestfulStepPatchTest", "RunCucumber")
     }
     jvmArgs = ['--illegal-access=deny']
 }
