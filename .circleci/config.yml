@@ -1,5 +1,14 @@
 version: 2.1
 jobs:
+  test-java9:
+    docker:
+      - image: openjdk:9
+    steps:
+      - checkout
+      - run:
+          name: test
+          command: |
+            ./gradlew testAll testPatch cucumberAll cucumberPatch
   build:
     docker:
       - image: openjdk:8u342

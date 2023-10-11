@@ -42,7 +42,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.18' + System.env.VERSION_SCOPE
+version = '0.0.19' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -94,7 +94,7 @@ task testPatch(type: Test) {
     filter {
         includeTestsMatching "RestfulStepPatchTest"
     }
-    jvmArgs = ['--add-opens', 'java.base/java.net=ALL-UNNAMED']
+    jvmArgs = ['--illegal-access=deny', '--add-opens', 'java.base/java.net=ALL-UNNAMED']
 }
 
 pitest {
@@ -174,10 +174,6 @@ task cucumber() {
             args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources']
         }
     }
-
-    build {
-        dependsOn cucumber
-    }
 }
 
 task cucumberAll() {
@@ -199,7 +195,7 @@ task cucumberPatch() {
             main = "io.cucumber.core.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
             args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/patch_features']
-            jvmArgs = ['--add-opens', 'java.base/java.net=ALL-UNNAMED']
+            jvmArgs = ['--illegal-access=deny', '--add-opens', 'java.base/java.net=ALL-UNNAMED']
         }
     }
 }
