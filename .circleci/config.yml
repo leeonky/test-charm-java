@@ -8,6 +8,7 @@ jobs:
       - run:
           name: test
           command: |
+            echo '127.0.0.1 www.a.com' >> /etc/hosts
             ./gradlew testAll testPatch cucumberAll cucumberPatch
   build:
     docker:
