@@ -20,14 +20,14 @@ public class JDBCExtension implements Extension {
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
-                .registerMetaProperty("where", MetaProperties::where)
-                .registerMetaProperty("select", MetaProperties::select)
-                .registerMetaProperty("belongsTo", MetaProperties::belongsTo)
-                .registerMetaProperty("on", MetaProperties::on)
+                .registerMetaProperty(CanWhere.class, "where", MetaProperties::where)
+                .registerMetaProperty(DataBase.Table.class, "select", MetaProperties::select)
+                .registerMetaProperty(DataBase.Row.class, "belongsTo", MetaProperties::belongsTo)
+                .registerMetaProperty(Association.class, "on", MetaProperties::on)
 
-                .registerMetaProperty("hasMany", MetaProperties::hasMany)
-                .registerMetaProperty("hasOne", MetaProperties::hasOne)
-                .registerMetaProperty("through", MetaProperties::through)
+                .registerMetaProperty(DataBase.Row.class, "hasMany", MetaProperties::hasMany)
+                .registerMetaProperty(DataBase.Row.class, "hasOne", MetaProperties::hasOne)
+                .registerMetaProperty(Association.class, "through", MetaProperties::through)
 
                 .registerPropertyAccessor(DataBase.class, new DataBaseJavaClassPropertyAccessor())
                 .registerPropertyAccessor(Row.class, new RowJavaClassPropertyAccessor())
