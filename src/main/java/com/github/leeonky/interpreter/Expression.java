@@ -18,6 +18,13 @@ public interface Expression<C extends RuntimeContext, N extends Node<C, N>, E ex
                         factory.create(leftExpression.getRightOperand(), getOperator(), getRightOperand())
                                 .applyPrecedence(factory));
         }
+        if (getRightOperand() instanceof Expression) {
+            E rightExpression = (E) getRightOperand();
+            if (getOperator().isPrecedentThan(rightExpression.getOperator()))
+                return (N) factory.create(factory.create(getLeftOperand(), getOperator(),
+                                rightExpression.getLeftOperand()).applyPrecedence(factory),
+                        rightExpression.getOperator(), rightExpression.getRightOperand());
+        }
         return (N) this;
     }
 }

@@ -45,5 +45,27 @@ class ExpressionTest {
             assertThat(rightOperand.getOperator()).isSameAs(operator2);
             assertThat(rightOperand.getRightOperand()).isSameAs(node3);
         }
+
+        @Test
+        void change_expression_when_current_expression_has_higher_precedence_than_right_operand_expression() {
+            TestNode left = new TestNode();
+            TestNode rightLeft = new TestNode();
+            TestNode rightRight = new TestNode();
+            TestOperator operator10 = new TestOperator(10);
+            TestOperator operator9 = new TestOperator(9);
+            TestExpression testExpression = new TestExpression(left,
+                    operator10, new TestExpression(rightLeft, operator9, rightRight));
+
+            TestExpression newExpression = (TestExpression) testExpression.applyPrecedence(TestExpression::new);
+
+            TestExpression leftExpression = (TestExpression) newExpression.getLeftOperand();
+            assertThat(leftExpression.getLeftOperand()).isSameAs(left);
+            assertThat(leftExpression.getOperator()).isSameAs(operator10);
+            assertThat(leftExpression.getRightOperand()).isSameAs(rightLeft);
+
+            assertThat(newExpression.getOperator()).isSameAs(operator9);
+
+            assertThat(newExpression.getRightOperand()).isSameAs(rightRight);
+        }
     }
 }
