@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.extensions.basic.binary.util;
 
-import com.github.leeonky.dal.runtime.BuildInTextFormatter;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.TextAttribute;
+import com.github.leeonky.dal.runtime.TextFormatter;
 import com.github.leeonky.interpreter.CharStream;
 import com.github.leeonky.interpreter.Notation;
 
@@ -10,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 
-public class HexFormatter extends BuildInTextFormatter {
+public class HexFormatter extends TextFormatter<String, byte[]> {
 
     private static byte[] parseBinary(String hexInText) {
         CharStream charStream = new CharStream(hexInText);
@@ -33,7 +34,7 @@ public class HexFormatter extends BuildInTextFormatter {
     }
 
     @Override
-    public Object format(Object content, TextAttribute attribute) {
-        return parseBinary((String) content);
+    public byte[] format(String content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
+        return parseBinary(content);
     }
 }

@@ -6,7 +6,6 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
-import com.github.leeonky.util.CannotToStreamException;
 import com.github.leeonky.util.ConvertException;
 
 import java.io.InputStream;
@@ -54,10 +53,10 @@ public abstract class HexChecker implements Checker, CheckerType {
         private Data convert(Data actual) {
             try {
                 return actual.convert(byte[].class);
-            } catch (ConvertException | CannotToStreamException _ignore) {
+            } catch (ConvertException _ignore) {
                 try {
                     return actual.convert(Byte[].class);
-                } catch (ConvertException | CannotToStreamException _ignore2) {
+                } catch (ConvertException _ignore2) {
                     return actual.convert(InputStream.class);
                 }
             }
