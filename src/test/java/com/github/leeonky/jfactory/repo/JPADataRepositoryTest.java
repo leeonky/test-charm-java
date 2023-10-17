@@ -15,8 +15,7 @@ import javax.persistence.Persistence;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JPADataRepositoryTest {
     private final EntityManager entityManager = Persistence.createEntityManagerFactory("jfactory-repo").createEntityManager();
@@ -86,6 +85,24 @@ class JPADataRepositoryTest {
         jpaDataRepository.clear();
 
         assertNotSame(entityManager.find(Bean.class, 1L), bean);
+    }
+
+    @Test
+    void should_roll_back_when_save_failed() {
+        Bean bean = new Bean().setId(1).setValue("hello");
+        jpaDataRepository.save(bean);
+
+        Bean duplicated = new Bean().setId(1).setValue("hello");
+        try {
+            jpaDataRepository.save(duplicated);
+            fail();
+        } catch (Exception ignore) {
+        }
+
+        Bean world = new Bean().setId(2).setValue("world");
+        jpaDataRepository.save(world);
+
+        assertSame(entityManager.find(Bean.class, 2L), world);
     }
 
     @Nested

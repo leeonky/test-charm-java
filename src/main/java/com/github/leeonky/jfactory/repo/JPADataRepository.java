@@ -50,8 +50,13 @@ public class JPADataRepository implements DataRepository {
         if (object != null && isEntity(object.getClass())) {
             EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();
-            entityManager.persist(object);
-            transaction.commit();
+            try {
+                entityManager.persist(object);
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+                throw e;
+            }
         }
     }
 }
