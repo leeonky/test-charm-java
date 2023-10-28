@@ -9,7 +9,8 @@ import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toSet;
 
-public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>>
+public class Notation<C extends RuntimeContext, N extends Node<C, N>, O extends Operator<C, N, O, E>,
+        P extends Procedure<C, N, E, O>, E extends Expression<C, N, E, O>>
         implements ObjectParser<P, String> {
     private final String label;
 
@@ -17,8 +18,9 @@ public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P exten
         this.label = label;
     }
 
-    public static <N extends Node<?, N>, O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>>
-    Notation<N, O, P> notation(String label) {
+    public static <C extends RuntimeContext, N extends Node<C, N>, O extends Operator<C, N, O, E>,
+            P extends Procedure<C, N, E, O>, E extends Expression<C, N, E, O>>
+    Notation<C, N, O, P, E> notation(String label) {
         return new Notation<>(label);
     }
 
@@ -54,15 +56,15 @@ public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P exten
                 && delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
     }
 
-    public OperatorParser<N, O, P> operator(Supplier<O> factory, Predicate<P> predicate) {
+    public OperatorParser<C, N, O, P, E> operator(Supplier<O> factory, Predicate<P> predicate) {
         return procedure -> getToken(procedure, predicate).map(token -> factory.get().setPosition(token.getPosition()));
     }
 
-    public OperatorParser<N, O, P> operator(Supplier<O> factory) {
+    public OperatorParser<C, N, O, P, E> operator(Supplier<O> factory) {
         return operator(factory, procedure -> true);
     }
 
-    public OperatorParser<N, O, P> keywordOperator(Supplier<O> factory, Set<String> Delimiter) {
+    public OperatorParser<C, N, O, P, E> keywordOperator(Supplier<O> factory, Set<String> Delimiter) {
         return procedure -> procedure.getSourceCode().tryFetch(() -> operator(factory, p -> true)
                 .parse(procedure).map(operator -> notAWord(Delimiter, procedure) ? null : operator));
     }
@@ -90,7 +92,7 @@ public class Notation<N extends Node<?, N>, O extends Operator<?, N, O>, P exten
         return procedure.getSourceCode().popString(getLabel());
     }
 
-    public Set<Notation<N, O, P>> postfix(Set<?> postfixes) {
-        return postfixes.stream().map(c -> getLabel() + c).map(label -> Notation.<N, O, P>notation(label)).collect(toSet());
+    public Set<Notation<C, N, O, P, E>> postfix(Set<?> postfixes) {
+        return postfixes.stream().map(c -> getLabel() + c).map(label -> Notation.<C, N, O, P, E>notation(label)).collect(toSet());
     }
 }

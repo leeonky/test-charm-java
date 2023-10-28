@@ -133,13 +133,13 @@ class ProcedureTest {
 
             TestExpression newExpression = (TestExpression) procedure.createExpression(new TestExpression(left, operator1, right), operator2, node3);
 
-            assertThat(newExpression.getLeftOperand()).isSameAs(left);
-            assertThat(newExpression.getOperator()).isSameAs(operator1);
+            assertThat(newExpression.left()).isSameAs(left);
+            assertThat(newExpression.operator()).isSameAs(operator1);
 
-            TestExpression rightOperand = (TestExpression) newExpression.getRightOperand();
-            assertThat(rightOperand.getLeftOperand()).isSameAs(right);
-            assertThat(rightOperand.getOperator()).isSameAs(operator2);
-            assertThat(rightOperand.getRightOperand()).isSameAs(node3);
+            TestExpression rightOperand = (TestExpression) newExpression.right();
+            assertThat(rightOperand.left()).isSameAs(right);
+            assertThat(rightOperand.operator()).isSameAs(operator2);
+            assertThat(rightOperand.right()).isSameAs(node3);
         }
     }
 }

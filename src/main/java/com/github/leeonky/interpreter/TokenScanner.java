@@ -4,9 +4,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface TokenScanner<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O>> {
+        O extends Operator<C, N, O, E>, P extends Procedure<C, N, E, O>> {
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O>> Mandatory<C, N, E, O, S> tokenScanner(
+            O extends Operator<C, N, O, E>, S extends Procedure<C, N, E, O>> Mandatory<C, N, E, O, S> tokenScanner(
             boolean trimStart, TriplePredicate<String, Integer, Integer> endsWith) {
         return sourceCode -> sourceCode.fetchToken(trimStart, endsWith);
     }
@@ -19,7 +19,7 @@ public interface TokenScanner<C extends RuntimeContext, N extends Node<C, N>, E 
     }
 
     interface Mandatory<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O>> {
+            O extends Operator<C, N, O, E>, P extends Procedure<C, N, E, O>> {
         Token scan(SourceCode sourceCode);
 
         default NodeParser.Mandatory<N, P> nodeParser(Function<Token, N> mapper) {

@@ -24,7 +24,7 @@ public class CharStream {
         return position < code.length();
     }
 
-    private boolean codeStartWith(Notation<?, ?, ?> notation) {
+    private boolean codeStartWith(Notation<?, ?, ?, ?, ?> notation) {
         trimBlank();
         return code.startsWith(notation.getLabel(), position);
     }
@@ -35,7 +35,7 @@ public class CharStream {
         return this;
     }
 
-    public CharStream trimBlackAndComment(List<Notation<?, ?, ?>> comments) {
+    public CharStream trimBlackAndComment(List<Notation<?, ?, ?, ?, ?>> comments) {
         while (comments.stream().anyMatch(this::codeStartWith)) {
             int newLinePosition = code.indexOf("\n", position);
             position = newLinePosition == -1 ? code.length() : newLinePosition + 1;

@@ -13,17 +13,17 @@ public class TestExpression extends TestNode implements Expression<TestContext, 
     }
 
     @Override
-    public TestNode getLeftOperand() {
+    public TestNode left() {
         return left;
     }
 
     @Override
-    public TestNode getRightOperand() {
+    public TestNode right() {
         return right;
     }
 
     @Override
-    public TestOperator getOperator() {
+    public TestOperator operator() {
         return operator;
     }
 }

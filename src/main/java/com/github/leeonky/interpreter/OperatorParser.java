@@ -1,18 +1,18 @@
 package com.github.leeonky.interpreter;
 
-public interface OperatorParser<N extends Node<?, N>,
-        O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>>
-        extends Parser<P, OperatorParser<N, O, P>, OperatorParser.Mandatory<N, O, P>, O> {
+public interface OperatorParser<C extends RuntimeContext, N extends Node<C, N>,
+        O extends Operator<C, N, O, E>, P extends Procedure<C, N, E, O>, E extends Expression<C, N, E, O>>
+        extends Parser<P, OperatorParser<C, N, O, P, E>, OperatorParser.Mandatory<C, N, O, P, E>, O> {
 
     @Override
-    default Mandatory<N, O, P> castMandatory(Parser.Mandatory<P, OperatorParser<N, O, P>,
-            Mandatory<N, O, P>, O> mandatory) {
+    default Mandatory<C, N, O, P, E> castMandatory(Parser.Mandatory<P, OperatorParser<C, N, O, P, E>,
+            Mandatory<C, N, O, P, E>, O> mandatory) {
         return mandatory::parse;
     }
 
     @Override
-    default OperatorParser<N, O, P> castParser(Parser<P, OperatorParser<N, O, P>,
-            Mandatory<N, O, P>, O> parser) {
+    default OperatorParser<C, N, O, P, E> castParser(Parser<P, OperatorParser<C, N, O, P, E>,
+            Mandatory<C, N, O, P, E>, O> parser) {
         return parser::parse;
     }
 
@@ -34,18 +34,19 @@ public interface OperatorParser<N extends Node<?, N>,
                 procedure.createExpression(null, operator, nodeFactory.parse(procedure))));
     }
 
-    interface Mandatory<N extends Node<?, N>, O extends Operator<?, N, O>, P extends Procedure<?, N, ?, O>>
-            extends Parser.Mandatory<P, OperatorParser<N, O, P>, Mandatory<N, O, P>, O> {
+    interface Mandatory<C extends RuntimeContext, N extends Node<C, N>, O extends Operator<C, N, O, E>,
+            P extends Procedure<C, N, E, O>, E extends Expression<C, N, E, O>>
+            extends Parser.Mandatory<P, OperatorParser<C, N, O, P, E>, Mandatory<C, N, O, P, E>, O> {
 
         @Override
-        default OperatorParser<N, O, P> castParser(Parser<P, OperatorParser<N, O, P>,
-                Mandatory<N, O, P>, O> parser) {
+        default OperatorParser<C, N, O, P, E> castParser(Parser<P, OperatorParser<C, N, O, P, E>,
+                Mandatory<C, N, O, P, E>, O> parser) {
             return parser::parse;
         }
 
         @Override
-        default Mandatory<N, O, P> castMandatory(Parser.Mandatory<P, OperatorParser<N, O, P>,
-                Mandatory<N, O, P>, O> mandatory) {
+        default Mandatory<C, N, O, P, E> castMandatory(Parser.Mandatory<P, OperatorParser<C, N, O, P, E>,
+                Mandatory<C, N, O, P, E>, O> mandatory) {
             return mandatory::parse;
         }
 

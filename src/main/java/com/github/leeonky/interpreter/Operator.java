@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
-public abstract class Operator<C extends RuntimeContext, N extends Node<C, N>, O extends Operator<C, N, O>> {
+public abstract class Operator<C extends RuntimeContext, N extends Node<C, N>, O extends Operator<C, N, O, E>,
+        E extends Expression<C, N, E, O>> {
     protected final int precedence;
     protected final String label;
     private int position;
@@ -14,7 +15,7 @@ public abstract class Operator<C extends RuntimeContext, N extends Node<C, N>, O
         return precedence > operator.precedence;
     }
 
-    public abstract Object calculate(N node1, N node2, C context);
+    public abstract Object calculate(E expression, C context);
 
     public int getPosition() {
         return position;

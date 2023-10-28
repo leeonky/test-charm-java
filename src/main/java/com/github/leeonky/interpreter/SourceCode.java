@@ -10,11 +10,11 @@ import java.util.function.Supplier;
 import static com.github.leeonky.util.function.When.when;
 
 public class SourceCode {
-    private final List<Notation<?, ?, ?>> lineComments;
+    private final List<Notation<?, ?, ?, ?, ?>> lineComments;
     private final CharStream charStream;
     private final int startPosition;
 
-    public SourceCode(String code, List<Notation<?, ?, ?>> lineComments) {
+    public SourceCode(String code, List<Notation<?, ?, ?, ?, ?>> lineComments) {
         charStream = new CharStream(code);
         this.lineComments = lineComments;
         trimBlankAndComment();
@@ -34,7 +34,7 @@ public class SourceCode {
         return charStream.hasContent();
     }
 
-    public boolean startsWith(Notation<?, ?, ?> notation, String... excepts) {
+    public boolean startsWith(Notation<?, ?, ?, ?, ?> notation, String... excepts) {
         trimBlankAndComment();
         return charStream.startsWith(notation.getLabel()) && Arrays.stream(excepts).noneMatch(this::startsWith);
     }
@@ -65,11 +65,11 @@ public class SourceCode {
         });
     }
 
-    public Optional<Token> popWord(Notation<?, ?, ?> notation) {
+    public Optional<Token> popWord(Notation<?, ?, ?, ?, ?> notation) {
         return popWord(notation, () -> true);
     }
 
-    public Optional<Token> popWord(Notation<?, ?, ?> notation, Supplier<Boolean> predicate) {
+    public Optional<Token> popWord(Notation<?, ?, ?, ?, ?> notation, Supplier<Boolean> predicate) {
         return when(startsWith(notation) && predicate.get())
                 .optional(() -> new Token(charStream.seek(notation.length())).append(notation.getLabel()));
     }
@@ -86,7 +86,7 @@ public class SourceCode {
         return charStream.current() == '\n';
     }
 
-    public String codeBefore(Notation<?, ?, ?> notation) {
+    public String codeBefore(Notation<?, ?, ?, ?, ?> notation) {
         return charStream.contentUntil(notation.getLabel());
     }
 

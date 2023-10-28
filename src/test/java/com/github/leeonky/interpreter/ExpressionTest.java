@@ -37,13 +37,13 @@ class ExpressionTest {
 
             TestExpression newExpression = (TestExpression) testExpression.applyPrecedence((TestExpression::new));
 
-            assertThat(newExpression.getLeftOperand()).isSameAs(left);
-            assertThat(newExpression.getOperator()).isSameAs(operator1);
+            assertThat(newExpression.left()).isSameAs(left);
+            assertThat(newExpression.operator()).isSameAs(operator1);
 
-            TestExpression rightOperand = (TestExpression) newExpression.getRightOperand();
-            assertThat(rightOperand.getLeftOperand()).isSameAs(right);
-            assertThat(rightOperand.getOperator()).isSameAs(operator2);
-            assertThat(rightOperand.getRightOperand()).isSameAs(node3);
+            TestExpression rightOperand = (TestExpression) newExpression.right();
+            assertThat(rightOperand.left()).isSameAs(right);
+            assertThat(rightOperand.operator()).isSameAs(operator2);
+            assertThat(rightOperand.right()).isSameAs(node3);
         }
 
         @Test
@@ -58,14 +58,14 @@ class ExpressionTest {
 
             TestExpression newExpression = (TestExpression) testExpression.applyPrecedence(TestExpression::new);
 
-            TestExpression leftExpression = (TestExpression) newExpression.getLeftOperand();
-            assertThat(leftExpression.getLeftOperand()).isSameAs(left);
-            assertThat(leftExpression.getOperator()).isSameAs(operator10);
-            assertThat(leftExpression.getRightOperand()).isSameAs(rightLeft);
+            TestExpression leftExpression = (TestExpression) newExpression.left();
+            assertThat(leftExpression.left()).isSameAs(left);
+            assertThat(leftExpression.operator()).isSameAs(operator10);
+            assertThat(leftExpression.right()).isSameAs(rightLeft);
 
-            assertThat(newExpression.getOperator()).isSameAs(operator9);
+            assertThat(newExpression.operator()).isSameAs(operator9);
 
-            assertThat(newExpression.getRightOperand()).isSameAs(rightRight);
+            assertThat(newExpression.right()).isSameAs(rightRight);
         }
     }
 }

@@ -7,7 +7,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class Procedure<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>> {
+        O extends Operator<C, N, O, E>> {
 
     private final SourceCode sourceCode;
     private final C runtimeContext;

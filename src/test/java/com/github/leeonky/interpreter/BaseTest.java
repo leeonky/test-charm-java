@@ -23,7 +23,7 @@ public class BaseTest {
         return sourceCode;
     }
 
-    protected Notation<TestNode, TestOperator, TestProcedure> nt(String label) {
+    protected Notation<TestContext, TestNode, TestOperator, TestProcedure, TestExpression> nt(String label) {
         return notation(label);
     }
 }

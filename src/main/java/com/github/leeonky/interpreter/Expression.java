@@ -1,29 +1,29 @@
 package com.github.leeonky.interpreter;
 
 public interface Expression<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>> extends Node<C, N> {
+        O extends Operator<C, N, O, E>> extends Node<C, N> {
 
-    N getLeftOperand();
+    N left();
 
-    N getRightOperand();
+    N right();
 
-    O getOperator();
+    O operator();
 
     @SuppressWarnings("unchecked")
     default N applyPrecedence(ExpressionFactory<C, N, E, O> factory) {
-        if (getLeftOperand() instanceof Expression) {
-            E leftExpression = (E) getLeftOperand();
-            if (getOperator().isPrecedentThan(leftExpression.getOperator()))
-                return (N) factory.create(leftExpression.getLeftOperand(), leftExpression.getOperator(),
-                        factory.create(leftExpression.getRightOperand(), getOperator(), getRightOperand())
+        if (left() instanceof Expression) {
+            E leftExpression = (E) left();
+            if (operator().isPrecedentThan(leftExpression.operator()))
+                return (N) factory.create(leftExpression.left(), leftExpression.operator(),
+                        factory.create(leftExpression.right(), operator(), right())
                                 .applyPrecedence(factory));
         }
-        if (getRightOperand() instanceof Expression) {
-            E rightExpression = (E) getRightOperand();
-            if (getOperator().isPrecedentThan(rightExpression.getOperator()))
-                return (N) factory.create(factory.create(getLeftOperand(), getOperator(),
-                                rightExpression.getLeftOperand()).applyPrecedence(factory),
-                        rightExpression.getOperator(), rightExpression.getRightOperand());
+        if (right() instanceof Expression) {
+            E rightExpression = (E) right();
+            if (operator().isPrecedentThan(rightExpression.operator()))
+                return (N) factory.create(factory.create(left(), operator(),
+                                rightExpression.left()).applyPrecedence(factory),
+                        rightExpression.operator(), rightExpression.right());
         }
         return (N) this;
     }

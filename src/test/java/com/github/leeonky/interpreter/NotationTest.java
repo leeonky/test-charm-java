@@ -103,7 +103,7 @@ class NotationTest extends BaseTest {
 
     @Nested
     class KeywordOperator {
-        OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser = nt("and")
+        OperatorParser<TestContext, TestNode, TestOperator, TestProcedure, TestExpression> operatorParser = nt("and")
                 .keywordOperator(TestOperator::new, new HashSet<>(Arrays.asList("delimiter")));
 
         @Test
@@ -178,7 +178,7 @@ class NotationTest extends BaseTest {
         void return_when_match_symbol() {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = givenSourceCode(" +=");
-            OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser =
+            OperatorParser<TestContext, TestNode, TestOperator, TestProcedure, TestExpression> operatorParser =
                     nt("+=").operator(() -> testOperator);
 
             TestOperator testOperator2 = operatorParser.parse(new TestProcedure(sourceCode)).get();
@@ -190,7 +190,7 @@ class NotationTest extends BaseTest {
         @Test
         void return_empty_when_not_match() {
             SourceCode sourceCode = givenSourceCode(" +=");
-            OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser =
+            OperatorParser<TestContext, TestNode, TestOperator, TestProcedure, TestExpression> operatorParser =
                     nt("++").operator(TestOperator::new);
 
             assertThat(operatorParser.parse(new TestProcedure(sourceCode))).isEmpty();
@@ -203,7 +203,7 @@ class NotationTest extends BaseTest {
             SourceCode sourceCode = givenSourceCode(" +=");
             TestProcedure testProcedure = new TestProcedure(sourceCode);
 
-            OperatorParser<TestNode, TestOperator, TestProcedure> operatorParser =
+            OperatorParser<TestContext, TestNode, TestOperator, TestProcedure, TestExpression> operatorParser =
                     nt("+=").operator(() -> testOperator, scanner1 -> {
                         assertThat(scanner1).isSameAs(testProcedure);
                         return false;

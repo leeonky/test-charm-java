@@ -1,6 +1,6 @@
 package com.github.leeonky.interpreter;
 
-public class TestOperator extends Operator<TestContext, TestNode, TestOperator> {
+public class TestOperator extends Operator<TestContext, TestNode, TestOperator, TestExpression> {
 
     public TestOperator() {
         super(0, "");
@@ -11,7 +11,7 @@ public class TestOperator extends Operator<TestContext, TestNode, TestOperator> 
     }
 
     @Override
-    public Object calculate(TestNode node1, TestNode node2, TestContext context) {
+    public Object calculate(TestExpression expression, TestContext context) {
         return null;
     }
 }
