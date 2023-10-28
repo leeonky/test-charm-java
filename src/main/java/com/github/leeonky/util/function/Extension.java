@@ -18,13 +18,6 @@ public class Extension {
     }
 
     @SafeVarargs
-    @Deprecated
-//    TODO to be removed
-    public static <T> Optional<T> oneOf(Supplier<Optional<? extends T>>... optionals) {
-        return getFirstPresent(optionals);
-    }
-
-    @SafeVarargs
     @SuppressWarnings("unchecked")
     public static <T> Optional<T> getFirstPresent(Supplier<Optional<? extends T>>... optionals) {
         return (Optional<T>) of(optionals).map(Supplier::get).filter(Optional::isPresent).findFirst().orElse(empty());

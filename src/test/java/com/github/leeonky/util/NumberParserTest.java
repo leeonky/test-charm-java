@@ -28,10 +28,7 @@ class NumberParserTest {
     }
 
     private void assertParse(String inputCode, Number expected) {
-        if (expected instanceof BigDecimal) {
-            assertThat(((BigDecimal) new NumberParser().parse(inputCode)).subtract((BigDecimal) expected)).isZero();
-        } else
-            assertThat(new NumberParser().parse(inputCode)).isEqualTo(expected);
+        assertThat(new NumberParser().parse(inputCode)).isEqualTo(expected);
     }
 
     @Test
@@ -602,8 +599,14 @@ class NumberParserTest {
 
         @Test
         void long_float_to_big_decimal() {
-            assertParse("1" + String.join("", Collections.nCopies(400, "0")) + ".0", new BigDecimal("1.0E400"));
-            assertParse("-1" + String.join("", Collections.nCopies(400, "0")) + ".0", new BigDecimal("-1.0E400"));
+            String _400_0 = String.join("", Collections.nCopies(400, "0"));
+            assertParse("1" + _400_0 + ".0", new BigDecimal("1" + _400_0 + ".0"));
+            assertParse("-1" + _400_0 + ".0", new BigDecimal("-1" + _400_0 + ".0"));
+        }
+
+        @Test
+        void big_decimal_with_precision() {
+            assertParse("1.00BD", new BigDecimal("1.00"));
         }
     }
 
