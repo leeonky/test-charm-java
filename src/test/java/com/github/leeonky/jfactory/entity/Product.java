@@ -16,9 +16,8 @@ public class Product {
     private String name;
     private String color;
     private String camelCaseName;
-
     private List<ProductStock> stocks = new ArrayList<>();
-
     private Category category;
+    private List<String> labels = new ArrayList<>();
 }
 
