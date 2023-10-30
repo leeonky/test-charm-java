@@ -27,11 +27,7 @@ public class DALHelper {
         return new PropertyValue() {
             @Override
             public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
-                String prefix = "";
-                if (dalExpression.trim().startsWith("{"))
-                    prefix = ":";
-                ObjectReference objectReference = collectData(prefix, dalExpression);
-                Object value = objectReference.value();
+                Object value = dalParse(dalExpression);
                 if (value instanceof ObjectValue)
                     value = ((ObjectValue) value).flat();
                 return builder.properties((Map<String, ?>) value);
@@ -39,7 +35,10 @@ public class DALHelper {
         };
     }
 
-    private static ObjectReference collectData(String prefix, String dalExpression) {
+    public static Object dalParse(String dalExpression) {
+        String prefix = "";
+        if (dalExpression.trim().startsWith("{") || dalExpression.trim().startsWith("|"))
+            prefix = ":";
         DAL dal = getDal();
         ObjectReference objectReference = new ObjectReference();
         try {
@@ -47,7 +46,7 @@ public class DALHelper {
         } catch (InterpreterException e) {
             throw new IllegalArgumentException("\n" + e.show(prefix + dalExpression, prefix.length()) + "\n\n" + e.getMessage());
         }
-        return objectReference;
+        return objectReference.value();
     }
 
     private static DAL getDal() {
@@ -186,10 +185,14 @@ public class DALHelper {
         private static final ObjectReference EMPTY_REFERENCE = new ObjectReference();
 
         private Object list() {
+            int maxIndex = elements.keySet().stream().max(Integer::compare).orElse(-1);
             if (RAW_LIST == rawType) {
-                int maxIndex = elements.keySet().stream().max(Integer::compare).orElse(-1);
                 return IntStream.range(0, maxIndex + 1).mapToObj(i -> elements.getOrDefault(i, EMPTY_REFERENCE))
                         .map(ObjectReference::value).collect(Collectors.toList());
+            }
+            if (maxIndex + 1 == elements.size()) {
+                return IntStream.range(0, maxIndex + 1).mapToObj(elements::get)
+                        .map(ObjectReference::value).collect(Collectors.toCollection(ListValue::new));
             }
             Map<String, Object> result = new ObjectValue();
             elements.forEach((k, v) -> result.put("[" + k + "]", v.value()));
@@ -222,15 +225,36 @@ public class DALHelper {
         }
     }
 
-    public static class ObjectValue extends LinkedHashMap<String, Object> {
-        public Map<String, ?> flat() {
+    public interface FlatAble {
+        Map<String, Object> flat();
+    }
+
+    public static class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
+        @Override
+        public Map<String, Object> flat() {
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
             forEach((key, value) -> {
-                if (value instanceof ObjectValue) {
-                    ((ObjectValue) value).flat().forEach((subKey, subValue) -> result.put(key + "." + subKey, subValue));
-                } else
+                if (value instanceof FlatAble)
+                    ((FlatAble) value).flat().forEach((subKey, subValue) -> result.put(key + "." + subKey, subValue));
+                else
                     result.put(key, value);
             });
+            return result;
+        }
+    }
+
+    public static class ListValue extends ArrayList<Object> implements FlatAble {
+        @Override
+        public Map<String, Object> flat() {
+            LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+            for (int i = 0; i < size(); i++) {
+                Object value = get(i);
+                if (value instanceof FlatAble)
+                    for (Map.Entry<String, ?> entry : ((FlatAble) value).flat().entrySet())
+                        result.put("[" + i + "]." + entry.getKey(), entry.getValue());
+                else
+                    result.put("[" + i + "]", value);
+            }
             return result;
         }
     }

@@ -43,8 +43,7 @@ Feature: dal
   Scenario: error notation in {}
     When try to create "商品":
     """
-    {
-      name
+    { name tom
       color: red
     }
     """
@@ -52,10 +51,9 @@ Feature: dal
     """
     message: ```
 
-             {
-               name
+             { name tom
+                    ^
                color: red
-               ^
              }
 
              Expect a verification operator

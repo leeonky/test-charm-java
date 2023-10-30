@@ -8,6 +8,8 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.util.List;
+
 import static com.github.leeonky.dal.Assertions.expect;
 
 public class Steps {
@@ -38,6 +40,11 @@ public class Steps {
         context.shouldRaise(expression);
     }
 
+    @When("create some {string}:")
+    public void createSome(String traitSpec, String dal) {
+        context.createSome(traitSpec, dal);
+    }
+
     public static class Context {
         private final JFactory jFactory = new JFactory() {{
             Classes.assignableTypesOf(Spec.class, "com.github.leeonky.jfactory.specs").forEach(this::register);
@@ -47,6 +54,12 @@ public class Steps {
 
         public void createOne(String traitSpec, String dal) {
             jFactory.spec(traitSpec.split(" ")).properties(DALHelper.given(dal)).create();
+        }
+
+        public void createSome(String traitSpec, String dal) {
+            Object object = DALHelper.dalParse(dal);
+            ((List<DALHelper.ObjectValue>) object).forEach(objectValue ->
+                    jFactory.spec(traitSpec.split(" ")).properties(objectValue.flat()).create());
         }
 
         public void shouldBe(String spec, String content) {
