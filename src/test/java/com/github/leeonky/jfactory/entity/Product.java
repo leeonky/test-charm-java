@@ -11,7 +11,6 @@ import java.util.List;
 @Setter
 @Accessors(chain = true)
 public class Product {
-
     private long id;
     private String name;
     private String color;
@@ -19,5 +18,5 @@ public class Product {
     private List<ProductStock> stocks = new ArrayList<>();
     private Category category;
     private List<String> labels = new ArrayList<>();
+    private Object object;
 }
-

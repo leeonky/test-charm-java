@@ -6,10 +6,20 @@ import com.github.leeonky.dal.runtime.InfiniteDALCollection;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
+import com.github.leeonky.dal.runtime.checker.EqualsChecker;
 import com.github.leeonky.dal.runtime.checker.MatchesChecker;
+import com.github.leeonky.dal.runtime.checker.ObjectScopeChecker;
 import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static com.github.leeonky.dal.runtime.NodeType.LIST_SCOPE;
+import static com.github.leeonky.dal.runtime.NodeType.OBJECT_SCOPE;
+import static com.github.leeonky.jfactory.DALHelper.ObjectReference.RawType.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 public class DALHelper {
 
@@ -21,7 +31,10 @@ public class DALHelper {
                 if (dalExpression.trim().startsWith("{"))
                     prefix = ":";
                 ObjectReference objectReference = collectData(prefix, dalExpression);
-                return builder.properties(objectReference.map().flat());
+                Object value = objectReference.value();
+                if (value instanceof ObjectValue)
+                    value = ((ObjectValue) value).flat();
+                return builder.properties((Map<String, ?>) value);
             }
         };
     }
@@ -39,20 +52,83 @@ public class DALHelper {
 
     private static DAL getDal() {
         DAL dal = new DAL().extend();
-        dal.getRuntimeContextBuilder().checkerSetForMatching()
+        dal.getRuntimeContextBuilder().checkerSetForEqualing()
                 .register((expected, actual) -> {
                     if (actual.getInstance() instanceof ObjectReference) {
-                        return Optional.of(new MatchesChecker() {
+                        if (OBJECT_SCOPE.equals(expected.getInstance())) {
+                            return Optional.of(new ObjectScopeChecker() {
+                                @Override
+                                public boolean failed(CheckingContext context) {
+                                    ((ObjectReference) context.getActual().getInstance()).rawType(RAW_OBJECT);
+                                    return false; // always pass
+                                }
+                            });
+                        }
+                        if (LIST_SCOPE.equals(expected.getInstance())) {
+                            return Optional.of(new ObjectScopeChecker() {
+                                @Override
+                                public boolean failed(CheckingContext context) {
+                                    ((ObjectReference) context.getActual().getInstance()).rawType(RAW_LIST);
+                                    return false; // always pass
+                                }
+                            });
+                        }
+
+                        return Optional.of(new EqualsChecker() {
                             @Override
                             public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
-                                return actual;
+                                return actual; //do not convert
                             }
 
                             @Override
-                            public boolean failed(CheckingContext checkingContext) {
-                                ((ObjectReference) checkingContext.getActual().getInstance())
-                                        .setValue(checkingContext.getExpected().getInstance());
-                                return false;
+                            public boolean failed(CheckingContext context) {
+                                ((ObjectReference) context.getActual().getInstance()).setValue(context.getExpected().getInstance());
+                                return false; // always pass
+                            }
+                        });
+                    }
+                    return Optional.empty();
+                });
+        dal.getRuntimeContextBuilder().checkerSetForMatching()
+                .register((expected, actual) -> {
+                    if (actual.getInstance() instanceof ObjectReference) {
+                        if (OBJECT_SCOPE.equals(expected.getInstance())) {
+                            return Optional.of(new MatchesChecker() {
+                                @Override
+                                public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
+                                    return actual; //do not convert
+                                }
+
+                                @Override
+                                public boolean failed(CheckingContext context) {
+                                    ((ObjectReference) context.getActual().getInstance()).rawType(OBJECT);
+                                    return false; // always pass
+                                }
+                            });
+                        } else if (LIST_SCOPE.equals(expected.getInstance())) {
+                            return Optional.of(new MatchesChecker() {
+                                @Override
+                                public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
+                                    return actual; //do not convert
+                                }
+
+                                @Override
+                                public boolean failed(CheckingContext context) {
+                                    ((ObjectReference) context.getActual().getInstance()).rawType(LIST);
+                                    return false; // always pass
+                                }
+                            });
+                        }
+                        return Optional.of(new MatchesChecker() {
+                            @Override
+                            public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
+                                return actual; //do not convert
+                            }
+
+                            @Override
+                            public boolean failed(CheckingContext context) {
+                                ((ObjectReference) context.getActual().getInstance()).setValue(context.getExpected().getInstance());
+                                return false; // always pass
                             }
                         });
                     }
@@ -79,14 +155,19 @@ public class DALHelper {
                             protected ObjectReference getByPosition(int position) {
                                 return reference.touchElement(position, super.getByPosition(position));
                             }
-                        });
+                        })
+                .registerDumper(ObjectReference.class, _ignore -> (data, dumpingBuffer) ->
+                        dumpingBuffer.dump(dumpingBuffer.getRuntimeContext()
+                                .wrap(((ObjectReference) data.getInstance()).value())))
+        ;
         return dal;
     }
 
     public static class ObjectReference {
         private final LinkedHashMap<String, ObjectReference> fields = new LinkedHashMap<>();
-        private final LinkedHashMap<String, ObjectReference> elements = new LinkedHashMap<>();
+        private final LinkedHashMap<Integer, ObjectReference> elements = new LinkedHashMap<>();
         private Object value;
+        private RawType rawType = null;
 
         public void setValue(Object value) {
             this.value = value;
@@ -96,21 +177,48 @@ public class DALHelper {
             return fields.computeIfAbsent(property, k -> new ObjectReference());
         }
 
-        private ObjectValue map() {
-            ObjectValue result = new ObjectValue();
-            fields.forEach((k, v) -> result.put(k, v.getValue()));
+        private Map<String, Object> map() {
+            Map<String, Object> result = RAW_OBJECT == rawType ? new LinkedHashMap<>() : new ObjectValue();
+            fields.forEach((k, v) -> result.put(k, v.value()));
             return result;
         }
 
-        public Object getValue() {
-            if (fields.size() > 0)
+        private static final ObjectReference EMPTY_REFERENCE = new ObjectReference();
+
+        private Object list() {
+            if (RAW_LIST == rawType) {
+                int maxIndex = elements.keySet().stream().max(Integer::compare).orElse(-1);
+                return IntStream.range(0, maxIndex + 1).mapToObj(i -> elements.getOrDefault(i, EMPTY_REFERENCE))
+                        .map(ObjectReference::value).collect(Collectors.toList());
+            }
+            Map<String, Object> result = new ObjectValue();
+            elements.forEach((k, v) -> result.put("[" + k + "]", v.value()));
+            return result;
+        }
+
+        public Object value() {
+            if (fields.size() > 0 || RAW_OBJECT == rawType)
                 return map();
+            if (elements.size() > 0 || RAW_LIST == rawType)
+                return list();
+            if (LIST == rawType)
+                return emptyList();
+            if (OBJECT == rawType)
+                return emptyMap();
             return value;
         }
 
         public ObjectReference touchElement(int position, ObjectReference touched) {
-            fields.put("[" + position + "]", touched);
+            elements.put(position, touched);
             return touched;
+        }
+
+        public void rawType(RawType type) {
+            rawType = type;
+        }
+
+        public enum RawType {
+            RAW_OBJECT, RAW_LIST, LIST, OBJECT
         }
     }
 
@@ -119,16 +227,11 @@ public class DALHelper {
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
             forEach((key, value) -> {
                 if (value instanceof ObjectValue) {
-                    Map<String, ?> sub = ((ObjectValue) value).flat();
-                    sub.forEach((subKey, subValue) ->
-                            result.put(key + "." + subKey, subValue));
+                    ((ObjectValue) value).flat().forEach((subKey, subValue) -> result.put(key + "." + subKey, subValue));
                 } else
                     result.put(key, value);
             });
             return result;
         }
-    }
-
-    public static class ListValue extends ArrayList<Object> {
     }
 }
