@@ -9,6 +9,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.github.leeonky.dal.Assertions.expect;
 
@@ -45,6 +46,11 @@ public class Steps {
         context.createSome(traitSpec, dal);
     }
 
+    @When("create")
+    public void create(String dal) {
+        context.create(dal);
+    }
+
     public static class Context {
         private final JFactory jFactory = new JFactory() {{
             Classes.assignableTypesOf(Spec.class, "com.github.leeonky.jfactory.specs").forEach(this::register);
@@ -58,8 +64,15 @@ public class Steps {
 
         public void createSome(String traitSpec, String dal) {
             Object object = DALHelper.dalParse(dal);
-            ((List<DALHelper.ObjectValue>) object).forEach(objectValue ->
-                    jFactory.spec(traitSpec.split(" ")).properties(objectValue.flat()).create());
+            createSome(traitSpec, object);
+        }
+
+        private void createSome(String traitSpec, Object object) {
+            if (object instanceof List)
+                ((List<DALHelper.ObjectValue>) object).forEach(objectValue ->
+                        jFactory.spec(traitSpec.split(" ")).properties(objectValue.flat()).create());
+            else
+                jFactory.spec(traitSpec.split(" ")).properties(((DALHelper.ObjectValue) object).flat()).create();
         }
 
         public void shouldBe(String spec, String content) {
@@ -76,6 +89,10 @@ public class Steps {
 
         public void shouldRaise(String expression) {
             expect(e).should(expression);
+        }
+
+        public void create(String dal) {
+            ((Map<String, Object>) DALHelper.dalParse(dal)).forEach(this::createSome);
         }
     }
 }

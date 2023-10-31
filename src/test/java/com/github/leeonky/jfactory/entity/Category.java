@@ -8,7 +8,5 @@ import lombok.experimental.Accessors;
 @Setter
 @Accessors(chain = true)
 public class Category {
-    private long id;
-
-    private String name;
+    private String id, name;
 }
