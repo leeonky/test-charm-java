@@ -62,6 +62,11 @@ public interface ClauseParser<N extends Node<?, N>, P extends Procedure<?, N, ?,
         return parseAndMakeExpressionOrInputContinuously(procedure, expression);
     }
 
+    default ClauseParser<N, P> concatAll(ClauseParser<N, P> clauseParser) {
+        return procedure -> parse(procedure).map(clause -> input ->
+                clauseParser.parseAndMakeExpressionOrInputContinuously(procedure, clause.expression(input)));
+    }
+
     interface Mandatory<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> extends
             Parser.Mandatory<P, ClauseParser<N, P>, Mandatory<N, P>, Clause<N>> {
 
