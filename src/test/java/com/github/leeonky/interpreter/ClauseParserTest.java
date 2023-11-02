@@ -118,20 +118,17 @@ class ClauseParserTest extends BaseTest {
         @Test
         void concat_with_another_empty_clause_parser_should_return_first_part_clause_parser() {
             TestProcedure givenProcedure = givenProcedureWithCode("");
+            TestNode inputNode = new TestNode();
+            TestNode operand = new TestNode();
 
-            Clause<TestNode> clause = mock(Clause.class);
+            ClauseParser<TestNode, TestProcedure> clauseParser = procedure ->
+                    of(input -> new TestExpression(input, new TestOperator(), operand));
 
-            ClauseParser<TestNode, TestProcedure> clauseParser = procedure -> {
-                assertThat(procedure).isSameAs(givenProcedure);
-                return of(clause);
-            };
+            ClauseParser<TestNode, TestProcedure> clauseParser2 = procedure -> empty();
 
-            ClauseParser<TestNode, TestProcedure> clauseParser2 = procedure -> {
-                assertThat(procedure).isSameAs(givenProcedure);
-                return empty();
-            };
-
-            assertThat(clauseParser.concatAll(clauseParser2).parse(givenProcedure).get()).isSameAs(clause);
+            TestExpression expression = (TestExpression) clauseParser.concatAll(clauseParser2).parse(givenProcedure).get().expression(inputNode);
+            assertThat(expression.left()).isSameAs(inputNode);
+            assertThat(expression.right()).isSameAs(operand);
         }
 
         @Test
@@ -144,7 +141,6 @@ class ClauseParserTest extends BaseTest {
 
             assertThat(clauseParser.concatAll(mock(ClauseParser.class)).parse(testProcedure)).isEmpty();
         }
-
 
         @Test
         void concat_with_another_present_clause_parser_as_many_times_as_possible() {
