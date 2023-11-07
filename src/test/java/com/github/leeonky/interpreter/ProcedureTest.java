@@ -117,29 +117,4 @@ class ProcedureTest {
             })).isEqualTo(testNode);
         }
     }
-
-    @Nested
-    class CreateExpression {
-
-        @Test
-        void create_expression_with_factory_and_apply_precedence() {
-            Procedure procedure = new Procedure<>(null, null, TestExpression::new);
-
-            TestNode left = new TestNode();
-            TestNode right = new TestNode();
-            TestNode node3 = new TestNode();
-            TestOperator operator1 = new TestOperator(1);
-            TestOperator operator2 = new TestOperator(2);
-
-            TestExpression newExpression = (TestExpression) procedure.createExpression(new TestExpression(left, operator1, right), operator2, node3);
-
-            assertThat(newExpression.left()).isSameAs(left);
-            assertThat(newExpression.operator()).isSameAs(operator1);
-
-            TestExpression rightOperand = (TestExpression) newExpression.right();
-            assertThat(rightOperand.left()).isSameAs(right);
-            assertThat(rightOperand.operator()).isSameAs(operator2);
-            assertThat(rightOperand.right()).isSameAs(node3);
-        }
-    }
 }

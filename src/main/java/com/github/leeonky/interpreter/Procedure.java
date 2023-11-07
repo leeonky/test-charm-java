@@ -6,19 +6,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-public class Procedure<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+public abstract class Procedure<C extends RuntimeContext, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O, E>> {
 
     private final SourceCode sourceCode;
     private final C runtimeContext;
     private final LinkedList<O> operators = new LinkedList<>();
-    private final ExpressionFactory<C, N, E, O> expressionFactory;
     private final LinkedList<AtomicInteger> columns = new LinkedList<>();
 
-    public Procedure(SourceCode sourceCode, C runtimeContext, ExpressionFactory<C, N, E, O> expressionFactory) {
+    public Procedure(SourceCode sourceCode, C runtimeContext) {
         this.sourceCode = sourceCode;
         this.runtimeContext = runtimeContext;
-        this.expressionFactory = expressionFactory;
     }
 
     public SourceCode getSourceCode() {
@@ -55,9 +53,7 @@ public class Procedure<C extends RuntimeContext, N extends Node<C, N>, E extends
         columns.getFirst().incrementAndGet();
     }
 
-    public N createExpression(N node1, O operator, N node2) {
-        return expressionFactory.create(node1, operator, node2).applyPrecedence(expressionFactory);
-    }
+    public abstract N createExpression(N node1, O operator, N node2);
 
     public C getRuntimeContext() {
         return runtimeContext;

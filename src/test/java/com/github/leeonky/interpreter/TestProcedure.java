@@ -2,11 +2,11 @@ package com.github.leeonky.interpreter;
 
 public class TestProcedure extends Procedure<TestContext, TestNode, TestExpression, TestOperator> {
     public TestProcedure(SourceCode sourceCode) {
-        super(sourceCode, null, null);
+        super(sourceCode, null);
     }
 
-    public TestProcedure(SourceCode sourceCode,
-                         ExpressionFactory<TestContext, TestNode, TestExpression, TestOperator> expressionFactory) {
-        super(sourceCode, null, expressionFactory);
+    @Override
+    public TestNode createExpression(TestNode node1, TestOperator operator, TestNode node2) {
+        return new TestExpression(node1, operator, node2).applyPrecedence(TestExpression::new);
     }
 }
