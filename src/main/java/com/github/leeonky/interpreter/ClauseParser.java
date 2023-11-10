@@ -1,5 +1,7 @@
 package com.github.leeonky.interpreter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -63,8 +65,14 @@ public interface ClauseParser<N extends Node<?, N>, P extends Procedure<?, N, ?,
     }
 
     default ClauseParser<N, P> concatAll(ClauseParser<N, P> clauseParser) {
-        return procedure -> parse(procedure).map(clause -> input ->
-                clauseParser.parseAndMakeExpressionOrInputContinuously(procedure, clause.expression(input)));
+        return procedure -> {
+            List<Clause<N>> clauses = new ArrayList<>();
+            for (Optional<Clause<N>> optionalClause = parse(procedure);
+                 optionalClause.isPresent();
+                 optionalClause = clauseParser.parse(procedure))
+                clauses.add(optionalClause.get());
+            return clauses.stream().reduce(Clause::merge);
+        };
     }
 
     interface Mandatory<N extends Node<?, N>, P extends Procedure<?, N, ?, ?>> extends
