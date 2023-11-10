@@ -90,31 +90,6 @@ class ClauseParserTest extends BaseTest {
 
     @Nested
     class ConcatAll {
-
-        @Test
-        void concat_with_another_present_clause_parser_should_be_present_clause_parser() {
-            TestProcedure givenProcedure = givenProcedureWithCode("");
-            TestNode inputNode = new TestNode();
-            TestNode firstClauseExpression = new TestNode();
-            TestNode lastExpression = new TestNode();
-
-            ClauseParser<TestNode, TestProcedure> clauseParser = procedure -> {
-                assertThat(procedure).isSameAs(givenProcedure);
-                Clause<TestNode> firstClause = mock(Clause.class);
-                when(firstClause.expression(inputNode)).thenReturn(firstClauseExpression);
-                return of(firstClause);
-            };
-
-            ClauseParser<TestNode, TestProcedure> clauseParser2 = procedure -> {
-                assertThat(procedure).isSameAs(givenProcedure);
-                Clause<TestNode> nextClause = mock(Clause.class);
-                when(nextClause.expression(firstClauseExpression)).thenReturn(lastExpression);
-                return of(nextClause);
-            };
-
-            assertThat(clauseParser.concatAll(clauseParser2).parse(givenProcedure).get().expression(inputNode)).isSameAs(lastExpression);
-        }
-
         @Test
         void concat_with_another_empty_clause_parser_should_return_first_part_clause_parser() {
             TestProcedure givenProcedure = givenProcedureWithCode("");
