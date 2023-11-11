@@ -10,7 +10,10 @@ import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.MapDumper;
 import com.github.leeonky.util.BeanClass;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.stream.StreamSupport.stream;
@@ -31,26 +34,9 @@ public class JDBCExtension implements Extension {
 
                 .registerPropertyAccessor(DataBase.class, new DataBaseJavaClassPropertyAccessor())
                 .registerPropertyAccessor(Row.class, new RowJavaClassPropertyAccessor())
-                .registerPropertyAccessor(Callable.class, new CallableJavaClassPropertyAccessor())
                 .registerDumper(DataBase.Table.class, data -> new TableDumper())
                 .registerDumper(DataBase.class, data -> new DataBaseDumper())
         ;
-    }
-
-    private static class CallableJavaClassPropertyAccessor extends JavaClassPropertyAccessor<Callable> {
-        public CallableJavaClassPropertyAccessor() {
-            super(BeanClass.create(Callable.class));
-        }
-
-        @Override
-        public Set<Object> getPropertyNames(Callable callable) {
-            return Collections.emptySet();
-        }
-
-        @Override
-        public Object getValue(Callable callable, Object property) {
-            return callable.apply(property);
-        }
     }
 
     private static class RowJavaClassPropertyAccessor extends JavaClassPropertyAccessor<Row> {
@@ -109,7 +95,7 @@ public class JDBCExtension implements Extension {
 
         private List<List<String>> getData(Data data) {
             List<List<String>> tableData = new ArrayList<>();
-            stream(((DataBase.Table<?>) data.getInstance()).spliterator(), false).limit(100).forEach(row -> {
+            stream(((DataBase.Table<?>) data.instance()).spliterator(), false).limit(100).forEach(row -> {
                 if (tableData.isEmpty())
                     tableData.add(new ArrayList<>(row.columns()));
                 tableData.add(row.data().values().stream().map(String::valueOf).collect(Collectors.toList()));
@@ -131,13 +117,13 @@ public class JDBCExtension implements Extension {
 
         @Override
         protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
-            DataBase dataBase = (DataBase) data.getInstance();
+            DataBase dataBase = (DataBase) data.instance();
             dumpingBuffer.append("DataBase[").append(dataBase.getUrl()).append("] ");
         }
 
         @Override
         protected void dumpField(Data data, Object field, DumpingBuffer context) {
-            DataBase.Table<?> table = (DataBase.Table<?>) data.getValue(field).getInstance();
+            DataBase.Table<?> table = (DataBase.Table<?>) data.getValue(field).instance();
             if (table.iterator().hasNext())
                 context.append(key(field)).append(":").dumpValue(data.getValue(field));
         }
