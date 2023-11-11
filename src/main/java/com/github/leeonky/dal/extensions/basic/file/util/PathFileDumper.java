@@ -15,6 +15,6 @@ public class PathFileDumper implements Dumper {
 
     @Override
     public void dumpValue(Data data, DumpingBuffer context) {
-        context.append(Util.attribute((Path) data.getInstance()));
+        context.append(Util.attribute((Path) data.instance()));
     }
 }

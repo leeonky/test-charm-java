@@ -55,16 +55,16 @@ public class HexDumper implements Dumper {
     }
 
     public static byte[] getBytes(Data data) {
-        if (data.getInstance() instanceof byte[])
-            return (byte[]) data.getInstance();
-        if (data.getInstance() instanceof InputStream)
-            return readAllAndClose((InputStream) data.getInstance());
-        if (data.getInstance() instanceof Byte[]) {
+        if (data.instance() instanceof byte[])
+            return (byte[]) data.instance();
+        if (data.instance() instanceof InputStream)
+            return readAllAndClose((InputStream) data.instance());
+        if (data.instance() instanceof Byte[]) {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            data.getValueList().forEach(b -> stream.write((byte) b));
+            data.list().values().forEach(b -> stream.write((byte) b));
             return stream.toByteArray();
         }
-        throw new IllegalArgumentException(data.getInstance() + " is not binary type");
+        throw new IllegalArgumentException(data.instance() + " is not binary type");
     }
 
     @Override

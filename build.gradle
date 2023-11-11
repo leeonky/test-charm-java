@@ -40,7 +40,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.13' + System.env.VERSION_SCOPE
+version = '0.0.14' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -55,7 +55,7 @@ repositories {
 }
 
 dependencies {
-    implementation dep(':DAL-java', '0.4.1')
+    implementation dep(':DAL-java', '0.4.3')
     implementation 'org.json:json:20220924'
     implementation 'com.jcraft:jsch:0.1.55'
     testImplementation 'org.assertj:assertj-core:3.21.0'

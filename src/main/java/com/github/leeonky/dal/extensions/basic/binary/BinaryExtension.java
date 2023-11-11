@@ -5,13 +5,13 @@ import com.github.leeonky.dal.extensions.basic.binary.util.HexChecker;
 import com.github.leeonky.dal.extensions.basic.binary.util.HexDumper;
 import com.github.leeonky.dal.extensions.basic.binary.util.HexFormatter;
 import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.dal.runtime.JavaArrayDALCollectionFactory;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 public class BinaryExtension implements Extension {
     private static final HexFormatter HEX_FORMATTER = new HexFormatter();
@@ -44,10 +44,8 @@ public class BinaryExtension implements Extension {
         RuntimeContextBuilder contextBuilder = dal.getRuntimeContextBuilder();
         contextBuilder
                 .registerStaticMethodExtension(Methods.class)
-                .registerListAccessor(InputStream.class, instance -> new ArrayList<Byte>() {{
-                    for (byte b : readAllAndClose(instance))
-                        add(b);
-                }})
+                .registerDALCollectionFactory(InputStream.class, (stream) ->
+                        new JavaArrayDALCollectionFactory(readAllAndClose(stream)))
                 .registerImplicitData(InputStream.class, BinaryExtension::readAllAndClose)
                 .registerTextFormatter("HEX", HEX_FORMATTER);
 

@@ -68,4 +68,11 @@ public class Util {
                 .sorted(comparing(File::isDirectory).thenComparing(File::getName))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    public static Set<Path> listFile(Path path) {
+        File[] files = path.toFile().listFiles();
+        return (files == null ? Collections.emptySet() : stream(files)
+                .sorted(comparing(File::isDirectory).thenComparing(File::getName)).map(File::toPath)
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
 }

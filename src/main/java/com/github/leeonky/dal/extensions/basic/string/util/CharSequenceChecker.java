@@ -22,17 +22,17 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
 
     @Override
     public Data transformExpected(Data expected, DALRuntimeContext context) {
-        return context.wrap(expected.getInstance().toString());
+        return context.wrap(expected.instance().toString());
     }
 
     @Override
     protected String actualDetail(CheckingContext checkingContext) {
-        return (String) checkingContext.getActual().getInstance();
+        return (String) checkingContext.getActual().instance();
     }
 
     @Override
     protected String expectedDetail(CheckingContext checkingContext) {
-        return (String) checkingContext.getExpected().getInstance();
+        return (String) checkingContext.getExpected().instance();
     }
 
     public static class Equals extends CharSequenceChecker implements CheckerType.Equals {
@@ -40,7 +40,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return context.wrap(actual.getInstance().toString());
+            return context.wrap(actual.instance().toString());
         }
     }
 

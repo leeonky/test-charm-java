@@ -9,12 +9,12 @@ public class ZipBinaryDumper implements Dumper {
     @Override
     public void dump(Data data, DumpingBuffer context) {
         DumpingBuffer sub = context.append("zip archive").sub();
-        data.getDataList().forEach(subFile -> sub.newLine().dumpValue(subFile));
+        data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 
     @Override
     public void dumpValue(Data data, DumpingBuffer context) {
         DumpingBuffer sub = context.sub();
-        data.getDataList().forEach(subFile -> sub.newLine().dumpValue(subFile));
+        data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 }

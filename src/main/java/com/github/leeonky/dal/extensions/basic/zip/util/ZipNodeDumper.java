@@ -10,10 +10,10 @@ public class ZipNodeDumper implements Dumper {
 
     @Override
     public void dump(Data data, DumpingBuffer context) {
-        ZipBinary.ZipNode node = (ZipBinary.ZipNode) data.getInstance();
+        ZipBinary.ZipNode node = (ZipBinary.ZipNode) data.instance();
         if (node.isDirectory()) {
             DumpingBuffer sub = context.append(node.name()).append("/").indent();
-            data.getDataList().forEach(subFile -> sub.newLine().dumpValue(subFile));
+            data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
         } else if (node.name().toLowerCase().endsWith(".zip"))
             context.append(node.name()).indent().dumpValue(context.getRuntimeContext().wrap(new ZipBinary(readAll(node.open()))));
         else
