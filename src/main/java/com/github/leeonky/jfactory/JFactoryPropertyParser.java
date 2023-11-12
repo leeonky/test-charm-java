@@ -10,24 +10,28 @@ import com.github.leeonky.dal.runtime.checker.EqualsChecker;
 import com.github.leeonky.dal.runtime.checker.MatchesChecker;
 import com.github.leeonky.dal.runtime.checker.ObjectScopeChecker;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.jfactory.JFactoryPropertyParser.ObjectReference.ObjectValue;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.github.leeonky.dal.runtime.NodeType.LIST_SCOPE;
 import static com.github.leeonky.dal.runtime.NodeType.OBJECT_SCOPE;
-import static com.github.leeonky.jfactory.DALHelper.ObjectReference.RawType.*;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
+import static com.github.leeonky.jfactory.JFactoryPropertyParser.ObjectReference.RawType.*;
+import static java.util.Collections.*;
 
-public class DALHelper {
+public class JFactoryPropertyParser {
+    private static final DAL DAL = getDal();
 
-    public static PropertyValue given(String dalExpression) {
+    //TODO expression is list
+    //TODO property is not ""
+    public static PropertyValue given(String expression) {
         return new PropertyValue() {
             @Override
             public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
-                Object value = dalParse(dalExpression);
+                Object value = parseProperties(expression);
                 if (value instanceof ObjectValue)
                     value = ((ObjectValue) value).flat();
                 return builder.properties((Map<String, ?>) value);
@@ -35,39 +39,54 @@ public class DALHelper {
         };
     }
 
-    public static Object dalParse(String dalExpression) {
-        String prefix = "";
-        if (dalExpression.trim().startsWith("{") || dalExpression.trim().startsWith("|"))
-            prefix = ":";
-        DAL dal = getDal();
+    public static Object parseProperties(String expression) {
+        String prefix = guessPrefix(expression);
         ObjectReference objectReference = new ObjectReference();
         try {
-            dal.evaluateAll(objectReference, prefix + dalExpression);
+            DAL.evaluateAll(objectReference, prefix + expression);
         } catch (InterpreterException e) {
-            throw new IllegalArgumentException("\n" + e.show(prefix + dalExpression, prefix.length()) + "\n\n" + e.getMessage());
+            throw new IllegalArgumentException("\n" + e.show(prefix + expression, prefix.length()) + "\n\n" + e.getMessage());
         }
         return objectReference.value();
+    }
+
+    private static String guessPrefix(String expression) {
+        String prefix = "";
+        if (expression.trim().startsWith("{") || expression.trim().startsWith("|") || expression.trim().startsWith("["))
+            prefix = ":";
+        return prefix;
+    }
+
+    public static Specs specs(String expression) {
+        String prefix = guessPrefix(expression);
+        Specs specs = new Specs();
+        try {
+            DAL.evaluateAll(specs, prefix + expression);
+        } catch (InterpreterException e) {
+            throw new IllegalArgumentException("\n" + e.show(prefix + expression, prefix.length()) + "\n\n" + e.getMessage());
+        }
+        return specs;
     }
 
     private static DAL getDal() {
         DAL dal = new DAL().extend();
         dal.getRuntimeContextBuilder().checkerSetForEqualing()
                 .register((expected, actual) -> {
-                    if (actual.getInstance() instanceof ObjectReference) {
-                        if (OBJECT_SCOPE.equals(expected.getInstance())) {
+                    if (actual.instance() instanceof ObjectReference) {
+                        if (OBJECT_SCOPE.equals(expected.instance())) {
                             return Optional.of(new ObjectScopeChecker() {
                                 @Override
                                 public boolean failed(CheckingContext context) {
-                                    ((ObjectReference) context.getActual().getInstance()).rawType(RAW_OBJECT);
+                                    ((ObjectReference) context.getActual().instance()).rawType(RAW_OBJECT);
                                     return false; // always pass
                                 }
                             });
                         }
-                        if (LIST_SCOPE.equals(expected.getInstance())) {
+                        if (LIST_SCOPE.equals(expected.instance())) {
                             return Optional.of(new ObjectScopeChecker() {
                                 @Override
                                 public boolean failed(CheckingContext context) {
-                                    ((ObjectReference) context.getActual().getInstance()).rawType(RAW_LIST);
+                                    ((ObjectReference) context.getActual().instance()).rawType(RAW_LIST);
                                     return false; // always pass
                                 }
                             });
@@ -81,7 +100,7 @@ public class DALHelper {
 
                             @Override
                             public boolean failed(CheckingContext context) {
-                                ((ObjectReference) context.getActual().getInstance()).setValue(context.getExpected().getInstance());
+                                ((ObjectReference) context.getActual().instance()).setValue(context.getExpected().instance());
                                 return false; // always pass
                             }
                         });
@@ -90,8 +109,8 @@ public class DALHelper {
                 });
         dal.getRuntimeContextBuilder().checkerSetForMatching()
                 .register((expected, actual) -> {
-                    if (actual.getInstance() instanceof ObjectReference) {
-                        if (OBJECT_SCOPE.equals(expected.getInstance())) {
+                    if (actual.instance() instanceof ObjectReference) {
+                        if (OBJECT_SCOPE.equals(expected.instance())) {
                             return Optional.of(new MatchesChecker() {
                                 @Override
                                 public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
@@ -100,11 +119,11 @@ public class DALHelper {
 
                                 @Override
                                 public boolean failed(CheckingContext context) {
-                                    ((ObjectReference) context.getActual().getInstance()).rawType(OBJECT);
+                                    ((ObjectReference) context.getActual().instance()).rawType(OBJECT);
                                     return false; // always pass
                                 }
                             });
-                        } else if (LIST_SCOPE.equals(expected.getInstance())) {
+                        } else if (LIST_SCOPE.equals(expected.instance())) {
                             return Optional.of(new MatchesChecker() {
                                 @Override
                                 public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
@@ -113,7 +132,7 @@ public class DALHelper {
 
                                 @Override
                                 public boolean failed(CheckingContext context) {
-                                    ((ObjectReference) context.getActual().getInstance()).rawType(LIST);
+                                    ((ObjectReference) context.getActual().instance()).rawType(LIST);
                                     return false; // always pass
                                 }
                             });
@@ -126,7 +145,7 @@ public class DALHelper {
 
                             @Override
                             public boolean failed(CheckingContext context) {
-                                ((ObjectReference) context.getActual().getInstance()).setValue(context.getExpected().getInstance());
+                                ((ObjectReference) context.getActual().instance()).setValue(context.getExpected().instance());
                                 return false; // always pass
                             }
                         });
@@ -155,10 +174,28 @@ public class DALHelper {
                                 return reference.touchElement(position, super.getByPosition(position));
                             }
                         })
+
                 .registerDumper(ObjectReference.class, _ignore -> (data, dumpingBuffer) ->
                         dumpingBuffer.dump(dumpingBuffer.getRuntimeContext()
-                                .wrap(((ObjectReference) data.getInstance()).value())))
-        ;
+                                .wrap(((ObjectReference) data.instance()).value())))
+
+                .registerPropertyAccessor(Specs.class, new PropertyAccessor<Specs>() {
+                    @Override
+                    public Object getValue(Specs specs, Object property) {
+                        return specs.addData((String) property).getData();
+                    }
+
+                    @Override
+                    public Set<Object> getPropertyNames(Specs instance) {
+                        return emptySet();
+                    }
+                });
+
+        dal.getRuntimeContextBuilder().registerDataRemark(ObjectReference.class, remarkData -> {
+            ObjectReference objectReference = (ObjectReference) remarkData.data().instance();
+            objectReference.addTraitSpec(remarkData.remark());
+            return remarkData.data();
+        });
         return dal;
     }
 
@@ -167,6 +204,7 @@ public class DALHelper {
         private final LinkedHashMap<Integer, ObjectReference> elements = new LinkedHashMap<>();
         private Object value;
         private RawType rawType = null;
+        private String traitSpec;
 
         public void setValue(Object value) {
             this.value = value;
@@ -220,42 +258,81 @@ public class DALHelper {
             rawType = type;
         }
 
+        public void addTraitSpec(String traitSpec) {
+            this.traitSpec = traitSpec;
+        }
+
         public enum RawType {
             RAW_OBJECT, RAW_LIST, LIST, OBJECT
+        }
+
+        public class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
+
+            @Override
+            public String buildPropertyName(String property) {
+                if (traitSpec != null)
+                    property += "(" + traitSpec + ")";
+                return property;
+            }
         }
     }
 
     public interface FlatAble {
-        Map<String, Object> flat();
-    }
-
-    public static class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
-        @Override
-        public Map<String, Object> flat() {
+        default Map<String, Object> flat() {
             LinkedHashMap<String, Object> result = new LinkedHashMap<>();
             forEach((key, value) -> {
-                if (value instanceof FlatAble)
-                    ((FlatAble) value).flat().forEach((subKey, subValue) -> result.put(key + "." + subKey, subValue));
-                else
+                if (value instanceof FlatAble) {
+                    ((FlatAble) value).flatSub(result, key);
+                } else
                     result.put(key, value);
             });
             return result;
+        }
+
+        default String buildPropertyName(String property) {
+            return property;
+        }
+
+        void forEach(BiConsumer<? super String, ? super Object> action);
+
+        default void flatSub(LinkedHashMap<String, Object> result, String key) {
+            for (Map.Entry<String, Object> entry : flat().entrySet())
+                result.put(buildPropertyName(key) +
+                        (entry.getKey().startsWith("[") ? entry.getKey() : "." + entry.getKey()), entry.getValue());
         }
     }
 
     public static class ListValue extends ArrayList<Object> implements FlatAble {
         @Override
-        public Map<String, Object> flat() {
-            LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-            for (int i = 0; i < size(); i++) {
-                Object value = get(i);
-                if (value instanceof FlatAble)
-                    for (Map.Entry<String, ?> entry : ((FlatAble) value).flat().entrySet())
-                        result.put("[" + i + "]." + entry.getKey(), entry.getValue());
-                else
-                    result.put("[" + i + "]", value);
+        public void forEach(BiConsumer<? super String, ? super Object> action) {
+            for (int i = 0; i < size(); i++)
+                action.accept("[" + i + "]", get(i));
+        }
+    }
+
+    public static class Specs extends ArrayList<Specs.SpecData> {
+
+        public static class SpecData {
+            private final String traitSpec;
+            private final ObjectReference data = new ObjectReference();
+
+            public SpecData(String traitSpec) {
+                this.traitSpec = traitSpec;
             }
-            return result;
+
+            public ObjectReference getData() {
+                return data;
+            }
+
+            public String traitSpec() {
+                return traitSpec;
+            }
+        }
+
+        public SpecData addData(String name) {
+            SpecData specData = new SpecData(name);
+            add(specData);
+            return specData;
         }
     }
 }

@@ -1,11 +1,14 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.function.TriFunction;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
+@Deprecated
 public class TablePropertyValue implements PropertyValue {
     private final String table;
 
@@ -51,10 +54,5 @@ public class TablePropertyValue implements PropertyValue {
 
     private String[] getCells(String line) {
         return Stream.of(line.split("\\|")).skip(1).map(String::trim).toArray(String[]::new);
-    }
-
-    @FunctionalInterface
-    interface TriFunction<A, B, C, R> {
-        R apply(A a, B b, C c);
     }
 }

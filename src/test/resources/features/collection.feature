@@ -1,4 +1,4 @@
-Feature: dal
+Feature: collection
 
   Scenario: create object list with given spec
     When create some "商品":
@@ -17,6 +17,34 @@ Feature: dal
     """
     | name | color |
     | book | red   |
+    """
+    Then all "商品" should:
+    """
+    : | name | color |
+      | book | red   |
+    """
+
+  Scenario: create object list with given spec use []
+    When create some "商品":
+    """
+    : [{
+      name: book
+      color: red
+    }]
+    """
+    Then all "商品" should:
+    """
+    : | name | color |
+      | book | red   |
+    """
+
+  Scenario: create object list with given spec use [] ignore :
+    When create some "商品":
+    """
+    [{
+      name: book
+      color: red
+    }]
     """
     Then all "商品" should:
     """
@@ -58,4 +86,22 @@ Feature: dal
     : | id | name |
       | C1 | it   |
       | C2 | xx   |
+    """
+
+  Scenario: create duplicated spec
+    When create
+    """
+    商品: {
+      name: book
+      color: red
+    }
+
+    商品: | name   | color |
+          | iphone | white |
+    """
+    Then all "商品" should:
+    """
+    : | name   | color |
+      | book   | red   |
+      | iphone | white |
     """

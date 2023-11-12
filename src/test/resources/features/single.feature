@@ -1,4 +1,4 @@
-Feature: dal
+Feature: single
 
   Scenario: create one object with given spec
     When create "商品":
@@ -72,7 +72,7 @@ Feature: dal
     Then all "商品" should:
     """
     : | name | category.id | category.name |
-      | book | 100         | B01           |
+      | book | '100'       | B01           |
     """
 
   Scenario: create with list arg

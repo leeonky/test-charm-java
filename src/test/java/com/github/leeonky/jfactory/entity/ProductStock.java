@@ -15,4 +15,6 @@ public class ProductStock {
 
     private String size;
     private int count;
+
+    private String remark;
 }
