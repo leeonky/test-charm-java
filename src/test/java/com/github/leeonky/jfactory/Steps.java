@@ -1,9 +1,6 @@
-package com.github.leeonky.jfactory.entity;
+package com.github.leeonky.jfactory;
 
-import com.github.leeonky.jfactory.JFactory;
-import com.github.leeonky.jfactory.JFactoryPropertyParser;
-import com.github.leeonky.jfactory.JFactoryPropertyParser.ObjectReference.ObjectValue;
-import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.jfactory.JFactoryPropertyParser.ObjectValue;
 import com.github.leeonky.util.Classes;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;

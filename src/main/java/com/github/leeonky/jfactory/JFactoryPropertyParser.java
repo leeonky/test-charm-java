@@ -10,7 +10,6 @@ import com.github.leeonky.dal.runtime.checker.EqualsChecker;
 import com.github.leeonky.dal.runtime.checker.MatchesChecker;
 import com.github.leeonky.dal.runtime.checker.ObjectScopeChecker;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.jfactory.JFactoryPropertyParser.ObjectReference.ObjectValue;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -25,15 +24,18 @@ import static java.util.Collections.*;
 public class JFactoryPropertyParser {
     private static final DAL DAL = getDal();
 
-    //TODO expression is list
-    //TODO property is not ""
     public static PropertyValue given(String expression) {
         return new PropertyValue() {
             @Override
             public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
                 Object value = parseProperties(expression);
-                if (value instanceof ObjectValue)
-                    value = ((ObjectValue) value).flat();
+                if (!property.equals("")) {
+                    ObjectValue objectValue = new ObjectValue();
+                    objectValue.put(property, value);
+                    return builder.properties(objectValue.flat());
+                }
+                if (value instanceof FlatAble)
+                    value = ((FlatAble) value).flat();
                 return builder.properties((Map<String, ?>) value);
             }
         };
@@ -238,7 +240,7 @@ public class JFactoryPropertyParser {
         }
 
         private Map<String, Object> map() {
-            Map<String, Object> result = RAW_OBJECT == rawType ? new LinkedHashMap<>() : new ObjectValue();
+            Map<String, Object> result = RAW_OBJECT == rawType ? new LinkedHashMap<>() : new TraitSpecObjectValue();
             fields.forEach((k, v) -> result.put(k, v.value()));
             return result;
         }
@@ -255,7 +257,7 @@ public class JFactoryPropertyParser {
                 return IntStream.range(0, maxIndex + 1).mapToObj(elements::get)
                         .map(ObjectReference::value).collect(Collectors.toCollection(ListValue::new));
             }
-            Map<String, Object> result = new ObjectValue();
+            Map<String, Object> result = new TraitSpecObjectValue();
             elements.forEach((k, v) -> result.put("[" + k + "]", v.value()));
             return result;
         }
@@ -293,7 +295,7 @@ public class JFactoryPropertyParser {
             RAW_OBJECT, RAW_LIST, LIST, OBJECT
         }
 
-        public class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
+        public class TraitSpecObjectValue extends ObjectValue {
 
             @Override
             public String buildPropertyName(String property) {
@@ -342,6 +344,9 @@ public class JFactoryPropertyParser {
                 result.put(buildPropertyName(key) +
                         (entry.getKey().startsWith("[") ? entry.getKey() : "." + entry.getKey()), entry.getValue());
         }
+    }
+
+    public static class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
     }
 
     public static class ListValue extends ArrayList<Object> implements FlatAble {
