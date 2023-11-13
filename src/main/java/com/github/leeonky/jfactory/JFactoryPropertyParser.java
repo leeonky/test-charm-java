@@ -52,7 +52,9 @@ public class JFactoryPropertyParser {
 
     private static String guessPrefix(String expression) {
         String prefix = "";
-        if (expression.trim().startsWith("{") || expression.trim().startsWith("|") || expression.trim().startsWith("["))
+        String trim = expression.trim();
+        if (trim.startsWith("{") || trim.startsWith("|")
+                || (trim.startsWith("[") && trim.endsWith("]")))
             prefix = ":";
         return prefix;
     }
@@ -109,6 +111,20 @@ public class JFactoryPropertyParser {
                 });
         dal.getRuntimeContextBuilder().checkerSetForMatching()
                 .register((expected, actual) -> {
+                    if (actual.instance() instanceof LegacyTraitSetter) {
+                        return Optional.of(new MatchesChecker() {
+                            @Override
+                            public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
+                                return actual; //do not convert
+                            }
+
+                            @Override
+                            public boolean failed(CheckingContext context) {
+                                ((LegacyTraitSetter) actual.instance()).addTraitSpec((String) expected.instance());
+                                return false; // always pass
+                            }
+                        });
+                    }
                     if (actual.instance() instanceof ObjectReference) {
                         if (OBJECT_SCOPE.equals(expected.instance())) {
                             return Optional.of(new MatchesChecker() {
@@ -158,6 +174,8 @@ public class JFactoryPropertyParser {
 
                     @Override
                     public Object getValue(ObjectReference builder, Object property) {
+                        if (property.equals("_"))
+                            return new LegacyTraitSetter(builder);
                         return builder.add((String) property);
                     }
 
@@ -192,9 +210,13 @@ public class JFactoryPropertyParser {
                 });
 
         dal.getRuntimeContextBuilder().registerDataRemark(ObjectReference.class, remarkData -> {
-            ObjectReference objectReference = (ObjectReference) remarkData.data().instance();
-            objectReference.addTraitSpec(remarkData.remark());
+            ((ObjectReference) remarkData.data().instance()).addTraitSpec(remarkData.remark());
             return remarkData.data();
+        });
+
+        dal.getRuntimeContextBuilder().registerExclamation(ObjectReference.class, runtimeData -> {
+            ((ObjectReference) runtimeData.data().instance()).intently();
+            return runtimeData.data();
         });
         return dal;
     }
@@ -205,6 +227,7 @@ public class JFactoryPropertyParser {
         private Object value;
         private RawType rawType = null;
         private String traitSpec;
+        private boolean intently = false;
 
         public void setValue(Object value) {
             this.value = value;
@@ -262,6 +285,10 @@ public class JFactoryPropertyParser {
             this.traitSpec = traitSpec;
         }
 
+        public void intently() {
+            intently = true;
+        }
+
         public enum RawType {
             RAW_OBJECT, RAW_LIST, LIST, OBJECT
         }
@@ -272,8 +299,23 @@ public class JFactoryPropertyParser {
             public String buildPropertyName(String property) {
                 if (traitSpec != null)
                     property += "(" + traitSpec + ")";
+                if (intently)
+                    property += "!";
                 return property;
             }
+        }
+    }
+
+    public static class LegacyTraitSetter {
+        private final ObjectReference objectReference;
+
+        public LegacyTraitSetter(ObjectReference objectReference) {
+            this.objectReference = objectReference;
+        }
+
+        public void addTraitSpec(String traitSpec) {
+            traitSpec = traitSpec.trim();
+            objectReference.addTraitSpec(traitSpec.substring(1, traitSpec.length() - 1));
         }
     }
 
