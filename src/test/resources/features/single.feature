@@ -105,6 +105,50 @@ Feature: single
     }]
     """
 
+  Scenario: create with list object and specify index, skipped element will be null
+    When create "商品":
+    """
+    stocks: | size |
+          1 | A    |
+    """
+    Then all "商品" should:
+    """
+    [0].stocks: {
+      [0]: null,
+      [1].size= A
+    }
+    """
+
+  Scenario: create with list object and skip one row with ***, skipped element will be null
+    When create "商品":
+    """
+    stocks: | size |
+            | ***  |
+            | A    |
+    """
+    Then all "商品" should:
+    """
+    [0].stocks: {
+      [0]: null,
+      [1].size= A
+    }
+    """
+
+  Scenario: create with list object and skip all colmun with *, skipped will be attach or create any same type object
+    When create "商品":
+    """
+    stocks: | size |
+            | *    |
+            | A    |
+    """
+    Then all "商品" should:
+    """
+    [0].stocks: {
+      [0].class.simpleName= ProductStock
+      [1].size= A
+    }
+    """
+
   Scenario: pass raw map to input property
     When create "商品":
     """

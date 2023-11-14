@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.jfactory.JFactoryPropertyParser.ObjectValue;
+import com.github.leeonky.jfactory.helper.ObjectValue;
+import com.github.leeonky.jfactory.helper.Specs;
 import com.github.leeonky.util.Classes;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
@@ -9,7 +10,7 @@ import io.cucumber.java.en.When;
 import java.util.List;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.jfactory.JFactoryPropertyParser.given;
+import static com.github.leeonky.jfactory.DataParser.data;
 
 public class Steps {
     Context context = new Context();
@@ -57,11 +58,11 @@ public class Steps {
         private Exception e;
 
         public void createOne(String traitSpec, String dal) {
-            jFactory.spec(traitSpec.split(" ")).properties(given(dal)).create();
+            jFactory.spec(traitSpec.split(" ")).properties(data(dal)).create();
         }
 
         public void createSome(String traitSpec, String dal) {
-            Object object = JFactoryPropertyParser.parseProperties(dal);
+            Object object = DataParser.parse(dal);
             createSome(traitSpec, object);
         }
 
@@ -90,7 +91,7 @@ public class Steps {
         }
 
         public void create(String dal) {
-            JFactoryPropertyParser.Specs specData = JFactoryPropertyParser.specs(dal);
+            Specs specData = DataParser.specs(dal);
             specData.forEach(spec -> createSome(spec.traitSpec(), spec.getData().value()));
         }
     }

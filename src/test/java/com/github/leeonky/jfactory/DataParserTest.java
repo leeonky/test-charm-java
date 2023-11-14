@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.jfactory.JFactoryPropertyParser.given;
+import static com.github.leeonky.jfactory.DataParser.data;
 
-public class JFactoryPropertyParserTest {
+public class DataParserTest {
 
     public static class Bean {
         public String value;
@@ -22,7 +22,7 @@ public class JFactoryPropertyParserTest {
     void create_with_sub_object() {
         JFactory jFactory = new JFactory();
 
-        BeanObject beanObject = jFactory.type(BeanObject.class).propertyValue("bean", given("value= hello")).create();
+        BeanObject beanObject = jFactory.type(BeanObject.class).propertyValue("bean", data("value= hello")).create();
 
         expect(beanObject).should("bean.value= hello");
     }
@@ -31,7 +31,7 @@ public class JFactoryPropertyParserTest {
     void create_sub_array() {
         JFactory jFactory = new JFactory();
 
-        BeanObject beanObject = jFactory.type(BeanObject.class).propertyValue("beans", given("[{value= hello} {value=world}]")).create();
+        BeanObject beanObject = jFactory.type(BeanObject.class).propertyValue("beans", data("[{value= hello} {value=world}]")).create();
 
         expect(beanObject).should("beans.value[]= [hello world]");
     }
@@ -40,7 +40,7 @@ public class JFactoryPropertyParserTest {
     void create_array() {
         JFactory jFactory = new JFactory();
 
-        Bean[] beans = jFactory.type(Bean[].class).properties(given("[{value= hello} {value=world}]")).create();
+        Bean[] beans = jFactory.type(Bean[].class).properties(data("[{value= hello} {value=world}]")).create();
 
         expect(beans).should("value[]= [hello world]");
     }
