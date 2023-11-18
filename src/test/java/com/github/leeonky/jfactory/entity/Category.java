@@ -10,6 +10,6 @@ import java.util.List;
 @Setter
 @Accessors(chain = true)
 public class Category {
-    private String id, name;
+    private String id, name, remark, level;
     private List<Product> products;
 }

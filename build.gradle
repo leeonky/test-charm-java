@@ -54,7 +54,7 @@ repositories {
 
 dependencies {
     implementation dep(':jfactory', '0.3.23')
-    implementation dep(':DAL-java', '0.4.3')
+    implementation dep(':DAL-java', '0.4.4')
     testImplementation dep(':DAL-extension-basic', '0.0.14')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'

@@ -7,23 +7,27 @@ import com.github.leeonky.jfactory.helper.*;
 import java.util.Map;
 
 public class DataParser {
-    private static final DAL DAL = DALHelper.getDal();
+    private static final DAL DAL = new DALHelper().dal();
 
     public static PropertyValue data(String expression) {
         return new PropertyValue() {
             @Override
             public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
-                Object value = parse(expression);
-                if (!property.equals("")) {
-                    ObjectValue objectValue = new ObjectValue();
-                    objectValue.put(property, value);
-                    return builder.properties(objectValue.flat());
-                }
-                if (value instanceof FlatAble)
-                    value = ((FlatAble) value).flat();
-                return builder.properties((Map<String, ?>) value);
+                Object data = parse(expression);
+                if (property.equals(""))
+                    return builder.properties(tryFlat(data));
+                ObjectValue objectValue = new ObjectValue();
+                objectValue.put(property, data);
+                return builder.properties(objectValue.flat());
             }
         };
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, ?> tryFlat(Object object) {
+        if (object instanceof FlatAble)
+            return ((FlatAble) object).flat();
+        return (Map<String, ?>) object;
     }
 
     public static Object parse(String expression) {
@@ -56,5 +60,4 @@ public class DataParser {
         }
         return specs;
     }
-
 }
