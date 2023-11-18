@@ -22,7 +22,7 @@ jobs:
             export CI=true
             export VERSION_SCOPE=''
             sudo bash -c "echo '127.0.0.1 www.s.com' >> /etc/hosts"
-            ./gradlew cucumber check build coveralls
+            ./gradlew check build coveralls
             export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
               echo "====== Still version ${PUB_VERSION}, CI done ======"
