@@ -53,7 +53,7 @@ public class JavaCompiler {
         matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        throw new IllegalStateException("Can not guess class name");
+        throw new IllegalStateException("Can not guess class name of code:\n" + code);
     }
 
     @SneakyThrows
@@ -68,7 +68,7 @@ public class JavaCompiler {
         StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
         standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(new File("./")));
         if (!systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, files).call()) {
-            System.out.println(diagnostics.getDiagnostics().stream().collect(groupingBy(Diagnostic::getSource))
+            System.out.println(diagnostics.getDiagnostics().stream().filter(d -> d.getSource() != null).collect(groupingBy(Diagnostic::getSource))
                     .entrySet().stream().map(this::compileResults).collect(Collectors.joining("\n")));
             throw new IllegalStateException("Failed to compile java code: \n");
         }
