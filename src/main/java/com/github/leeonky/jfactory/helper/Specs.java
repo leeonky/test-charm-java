@@ -17,7 +17,7 @@ public class Specs extends ArrayList<Specs.SpecData> {
         }
 
         public String traitSpec() {
-            return traitSpec;
+            return getData().getTraitSpec() != null ? getData().getTraitSpec() + " " + traitSpec : traitSpec;
         }
     }
 

@@ -42,23 +42,23 @@ Feature: all in one
       | iphone | white |
     """
 
+  Scenario: create with trait
+    When create
+    """
+    商品(红色的): {
+      name: book
+    }
+    商品(红色的): | name |
+                   | PC   |
+    """
+    Then all "商品" should:
+    """
+    : | name | color |
+      | book | red   |
+      | PC   | red   |
+    """
+
 #  TODO
-#  Scenario: create with trait
-#    When create
-#    """
-#    (红色的 商品): {
-#      name: book
-#    }
-#    (红色的 商品): | name |
-#                   | PC   |
-#    """
-#    Then all "商品" should:
-#    """
-#    : | name   | color |
-#      | book   | red   |
-#      | iphone | white |
-#    """
-#
 #  Scenario: create duplicated object
 #    When create
 #    """

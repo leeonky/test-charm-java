@@ -77,6 +77,10 @@ public class ObjectReference {
         intently = true;
     }
 
+    public String getTraitSpec() {
+        return traitSpec;
+    }
+
     public enum RawType {
         RAW_OBJECT, RAW_LIST, LIST, OBJECT
     }
