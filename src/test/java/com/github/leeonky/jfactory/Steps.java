@@ -71,9 +71,10 @@ public class Steps {
             if (object instanceof List)
                 ((List<ObjectValue>) object).forEach(objectValue ->
                         jFactory.spec(traitSpec.split(" ")).properties(objectValue.flat()).create());
-            if (object instanceof ObjectValue)
+            else if (object instanceof ObjectValue)
                 jFactory.spec(traitSpec.split(" ")).properties(((ObjectValue) object).flat()).create();
-            jFactory.spec(traitSpec.split(" ")).properties((Map) object).create();
+            else
+                jFactory.spec(traitSpec.split(" ")).properties((Map) object).create();
 
         }
 
