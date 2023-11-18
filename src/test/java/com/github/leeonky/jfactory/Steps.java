@@ -8,6 +8,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.jfactory.DataParser.data;
@@ -70,8 +71,10 @@ public class Steps {
             if (object instanceof List)
                 ((List<ObjectValue>) object).forEach(objectValue ->
                         jFactory.spec(traitSpec.split(" ")).properties(objectValue.flat()).create());
-            else
+            if (object instanceof ObjectValue)
                 jFactory.spec(traitSpec.split(" ")).properties(((ObjectValue) object).flat()).create();
+            jFactory.spec(traitSpec.split(" ")).properties((Map) object).create();
+
         }
 
         public void shouldBe(String spec, String content) {
@@ -92,7 +95,7 @@ public class Steps {
 
         public void create(String dal) {
             Specs specData = DataParser.specs(dal);
-            specData.forEach(spec -> createSome(spec.traitSpec(), spec.getData().value()));
+            specData.forEach(spec -> createSome(spec.traitSpec(), spec.properties()));
         }
     }
 }

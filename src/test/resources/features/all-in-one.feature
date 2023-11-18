@@ -58,6 +58,19 @@ Feature: all in one
       | PC   | red   |
     """
 
+  Scenario: create with trait and without property
+    When create
+    """
+    商品(红色的)
+    商品(红色的)
+    """
+    Then all "商品" should:
+    """
+    : | color |
+      | red   |
+      | red   |
+    """
+
 #  TODO
 #  Scenario: create duplicated object
 #    When create

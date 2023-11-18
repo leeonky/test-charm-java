@@ -2,6 +2,8 @@ package com.github.leeonky.jfactory.helper;
 
 import java.util.ArrayList;
 
+import static java.util.Collections.emptyMap;
+
 public class Specs extends ArrayList<Specs.SpecData> {
 
     public static class SpecData {
@@ -14,6 +16,10 @@ public class Specs extends ArrayList<Specs.SpecData> {
 
         public ObjectReference getData() {
             return data;
+        }
+
+        public Object properties() {
+            return data.value() == null ? emptyMap() : data.value();
         }
 
         public String traitSpec() {
