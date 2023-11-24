@@ -593,4 +593,18 @@ class NodeParserTest extends BaseTest {
             }
         }
     }
+
+    @Nested
+    class NotStartWith {
+
+        @Test
+        void return_empty_and_back_position_when_start_with_given_notation() {
+            NodeParser<TestNode, TestProcedure> nodeParser = nt("a").node(TestNode::new);
+            TestProcedure procedure = givenProcedureWithCode("ab");
+
+            assertThat(nodeParser.notStartWith(nt("ab")).parse(procedure)).isEmpty();
+
+            assertThat(procedure.getSourceCode().nextPosition()).isEqualTo(0);
+        }
+    }
 }

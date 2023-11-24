@@ -51,6 +51,14 @@ public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA
                 .orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
     }
 
+    default PA notStartWith(Notation<?, ?, ?, P, ?> notation) {
+        return castParser(procedure -> {
+            if (procedure.getSourceCode().startsWith(notation))
+                return empty();
+            return parse(procedure);
+        });
+    }
+
     interface Mandatory<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Mandatory<P, PA, MA, T>, T> extends MapAble<MA, T> {
 
