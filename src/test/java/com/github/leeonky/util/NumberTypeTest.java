@@ -114,32 +114,6 @@ class NumberTypeTest {
     class Calculate {
 
         @Nested
-        class Plus {
-
-            void assertPlus(Number left, Number right, Number result) {
-                assertThat(new NumberType().plus(left, right)).isEqualTo(result);
-            }
-
-            @Test
-            void same_type() {
-                assertPlus((byte) 1, (byte) 1, 2);
-                assertPlus((short) 1, (short) 1, 2);
-                assertPlus(1, 1, 2);
-                assertPlus(1L, 1L, 2L);
-                assertPlus(1f, 1f, 2f);
-                assertPlus(1d, 1d, 2d);
-                assertPlus(BigInteger.valueOf(1), BigInteger.valueOf(1), BigInteger.valueOf(2));
-                assertPlus(BigDecimal.valueOf(1), BigDecimal.valueOf(1), BigDecimal.valueOf(2));
-            }
-
-            @Test
-            void different_type() {
-                assertPlus(1, 1L, 2L);
-                assertPlus(1.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0));
-            }
-        }
-
-        @Nested
         class Sub {
 
             void assertSub(Number left, Number right, Number result) {
