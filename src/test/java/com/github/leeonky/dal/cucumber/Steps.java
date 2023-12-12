@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
@@ -253,6 +254,11 @@ public class Steps {
     public void aClassObjectWithStringAndCanBeConvertedToInputStream(String value) {
         input = new ToBytes(value);
         dal.getRuntimeContextBuilder().getConverter().addTypeConverter(ToBytes.class, InputStream.class, ToBytes::getInputStream);
+    }
+
+    @Given("a list from {int} to n")
+    public void aListFromToN(int start) {
+        input = Stream.iterate(1, i -> i + 1);
     }
 
     public static class ToBytes {
