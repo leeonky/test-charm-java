@@ -1,14 +1,12 @@
 package com.github.leeonky.jfactory.helper;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.InfiniteDALCollection;
-import com.github.leeonky.dal.runtime.PropertyAccessor;
+import com.github.leeonky.dal.ast.opt.DALOperator;
+import com.github.leeonky.dal.runtime.*;
 
 import java.util.Optional;
 import java.util.Set;
 
-import static com.github.leeonky.dal.runtime.NodeType.LIST_SCOPE;
-import static com.github.leeonky.dal.runtime.NodeType.OBJECT_SCOPE;
 import static com.github.leeonky.jfactory.helper.ObjectReference.RawType.*;
 import static java.util.Collections.emptySet;
 import static java.util.Optional.of;
@@ -85,36 +83,52 @@ public class DALHelper {
     }
 
     private void overrideOptMatch(DAL dal) {
+        dal.getRuntimeContextBuilder().registerOperator(Operators.MATCH, new Operation() {
+            @Override
+            public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+                return v1.instance() instanceof ObjectReference && v2.instance() instanceof ExpectationFactory;
+            }
+
+            @Override
+            public Data operate(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+                ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
+                ExpectationFactory.Type type = expectation.type();
+                if (type == ExpectationFactory.Type.OBJECT)
+                    ((ObjectReference) v1.instance()).rawType(OBJECT);
+                else if (type == ExpectationFactory.Type.LIST)
+                    ((ObjectReference) v1.instance()).rawType(LIST);
+                return expectation.matches();
+            }
+        });
         dal.getRuntimeContextBuilder().checkerSetForMatching()
                 .register((expected, actual) -> {
                     if (actual.instance() instanceof LegacyTraitSetter)
                         return of(new OverrideVerificationOptChecker<>(LegacyTraitSetter::addTraitSpec));
-                    if (actual.instance() instanceof ObjectReference) {
-                        if (OBJECT_SCOPE.equals(expected.instance()))
-                            return of(new OverrideVerificationOptChecker<ObjectReference, Object>((reference, ignore) ->
-                                    reference.rawType(OBJECT)));
-                        if (LIST_SCOPE.equals(expected.instance()))
-                            return of(new OverrideVerificationOptChecker<ObjectReference, Object>((reference, ignore) ->
-                                    reference.rawType(LIST)));
-                        return of(new OverrideVerificationOptChecker<>(ObjectReference::setValue));
-                    }
-                    return Optional.empty();
+                    return actual.instance() instanceof ObjectReference
+                            ? of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty();
                 });
     }
 
     private void overrideOptEqual(DAL dal) {
+        dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation() {
+            @Override
+            public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+                return v1.instance() instanceof ObjectReference && v2.instance() instanceof ExpectationFactory;
+            }
+
+            @Override
+            public Data operate(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+                ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
+                ExpectationFactory.Type type = expectation.type();
+                if (type == ExpectationFactory.Type.OBJECT)
+                    ((ObjectReference) v1.instance()).rawType(RAW_OBJECT);
+                else if (type == ExpectationFactory.Type.LIST)
+                    ((ObjectReference) v1.instance()).rawType(RAW_LIST);
+                return expectation.equalTo();
+            }
+        });
         dal.getRuntimeContextBuilder().checkerSetForEqualing()
-                .register((expected, actual) -> {
-                    if (actual.instance() instanceof ObjectReference) {
-                        if (OBJECT_SCOPE.equals(expected.instance()))
-                            return of(new OverrideVerificationOptChecker<ObjectReference, Object>((reference, ignore) ->
-                                    reference.rawType(RAW_OBJECT)));
-                        if (LIST_SCOPE.equals(expected.instance()))
-                            return of(new OverrideVerificationOptChecker<ObjectReference, Object>((reference, ignore) ->
-                                    reference.rawType(RAW_LIST)));
-                        return of(new OverrideVerificationOptChecker<>(ObjectReference::setValue));
-                    }
-                    return Optional.empty();
-                });
+                .register((expected, actual) -> actual.instance() instanceof ObjectReference
+                        ? of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty());
     }
 }
