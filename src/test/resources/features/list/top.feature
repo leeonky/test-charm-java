@@ -16,3 +16,19 @@ Feature: top n lit
     """
     ::top[3]= [1 2 3]
     """
+
+  Scenario: raise error when input is not list
+    When evaluate by:
+    """
+    ::top[3]= [1 2 3]
+    """
+    Then failed with the message:
+    """
+
+    ::top[3]= [1 2 3]
+      ^
+
+    Invalid input value, expect a List but: null
+
+    The root value was: null
+    """
