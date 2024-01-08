@@ -354,71 +354,20 @@ Feature: single
     }]
     """
 
-#  TODO
-#  Scenario: pass raw map to input property with table
-#    When create "商品":
-#    """
-#    name: book
-#    object= {
-#      key: k
-#      value: v
-#    }
-#    """
-#    Then all "商品" should:
-#    """
-#    : [{
-#      name: book
-#      object: {
-#        key: k
-#        value: v
-#      }
-#    }]
-#    """
-#
-#  Scenario: pass raw empty map to input property with table
-#    When create "商品":
-#    """
-#    name: book
-#    object= {}
-#    """
-#    Then all "商品" should:
-#    """
-#    : [{
-#      name: book
-#      object= {}
-#    }]
-#    """
-#
-#  Scenario: pass raw list to input property with table
-#    When create "商品":
-#    """
-#    name: book
-#    object= [a b c]
-#    """
-#    Then all "商品" should:
-#    """
-#    : [{
-#      name: book
-#      object= [a b c]
-#    }]
-#    """
-#
-#  Scenario: pass raw list with object element to input property with table
-#    When create "商品":
-#    """
-#    name: book
-#    object= [{
-#      key: k
-#      value: v
-#    }]
-#    """
-#    Then all "商品" should:
-#    """
-#    : [{
-#      name: book
-#      object= [{
-#        key: k
-#        value: v
-#      }]
-#    }]
-#    """
+  Scenario: pass raw list with object element to input property with table
+    When create "商品":
+    """
+    name: book
+    object= | key | value |
+            | k   | v     |
+    """
+    Then all "商品" should:
+    """
+    : [{
+      name: book
+      object= [{
+        key: k
+        value: v
+      }]
+    }]
+    """
