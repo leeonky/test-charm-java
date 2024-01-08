@@ -61,7 +61,7 @@ public class DALHelper {
                 new InfiniteDALCollection<ObjectReference>(ObjectReference::new) {
                     @Override
                     protected ObjectReference getByPosition(int position) {
-                        return reference.touchElement(position, super.getByPosition(position));
+                        return reference.getElement(position);
                     }
                 });
     }

@@ -75,6 +75,18 @@ Feature: single
       | book | '100'       | B01           |
     """
 
+  Scenario: support merge properties of nested object
+    When create "商品":
+    """
+    category.id: 100
+    category.name: B01
+    """
+    Then all "商品" should:
+    """
+    : | category.id | category.name |
+      | '100'       | B01           |
+    """
+
   Scenario: create with list arg
     When create "商品":
     """
@@ -100,6 +112,20 @@ Feature: single
     """
     : [{
       name: book
+      stocks: | size | count |
+              | A    | 100   |
+    }]
+    """
+
+  Scenario: support merge properties of list element
+    When create "商品":
+    """
+    stocks[0].size: A
+    stocks[0].count: 100
+    """
+    Then all "商品" should:
+    """
+    : [{
       stocks: | size | count |
               | A    | 100   |
     }]

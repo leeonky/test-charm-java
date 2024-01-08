@@ -65,6 +65,10 @@ public class ObjectReference {
         return touched;
     }
 
+    public ObjectReference getElement(int position) {
+        return elements.computeIfAbsent(position, p -> new ObjectReference());
+    }
+
     public void rawType(RawType type) {
         rawType = type;
     }
