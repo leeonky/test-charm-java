@@ -120,10 +120,12 @@ public class DALHelper {
             public Data operate(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
+                ObjectReference objectReference = (ObjectReference) v1.instance();
                 if (type == ExpectationFactory.Type.OBJECT)
-                    ((ObjectReference) v1.instance()).rawType(RAW_OBJECT);
+                    objectReference.rawType(RAW_OBJECT);
                 else if (type == ExpectationFactory.Type.LIST)
-                    ((ObjectReference) v1.instance()).rawType(RAW_LIST);
+                    objectReference.rawType(RAW_LIST);
+                objectReference.clear();
                 return expectation.equalTo();
             }
         });

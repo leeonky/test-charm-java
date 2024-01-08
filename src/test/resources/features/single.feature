@@ -120,6 +120,22 @@ Feature: single
   Scenario: support merge properties of list element
     When create "商品":
     """
+    stocks: | size | count |
+            | A    | 100   |
+            | B    | 200   |
+
+    stocks= []
+    """
+    Then all "商品" should:
+    """
+    : [{
+      stocks: []
+    }]
+    """
+
+  Scenario: support override whole list
+    When create "商品":
+    """
     stocks[0].size: A
     stocks[0].count: 100
     """
@@ -190,6 +206,27 @@ Feature: single
       name: book
       object: {
         key: k
+        value: v
+      }
+    }]
+    """
+
+  Scenario: = should override whole map
+    When create "商品":
+    """
+    name: book
+    object= {
+      key: k
+    }
+    object= {
+      value: v
+    }
+    """
+    Then all "商品" should:
+    """
+    : [{
+      name: book
+      object= {
         value: v
       }
     }]

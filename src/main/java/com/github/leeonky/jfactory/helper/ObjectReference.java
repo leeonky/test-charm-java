@@ -60,11 +60,6 @@ public class ObjectReference {
         return value;
     }
 
-    public ObjectReference touchElement(int position, ObjectReference touched) {
-        elements.put(position, touched);
-        return touched;
-    }
-
     public ObjectReference getElement(int position) {
         return elements.computeIfAbsent(position, p -> new ObjectReference());
     }
@@ -83,6 +78,11 @@ public class ObjectReference {
 
     public String getTraitSpec() {
         return traitSpec;
+    }
+
+    public void clear() {
+        fields.clear();
+        elements.clear();
     }
 
     public enum RawType {
