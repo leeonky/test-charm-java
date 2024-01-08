@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.basic.json;
+package com.github.leeonky.dal.extensions.basic.text;
 
 import org.json.JSONArray;
 

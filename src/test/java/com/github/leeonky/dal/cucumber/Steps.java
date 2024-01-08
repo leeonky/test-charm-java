@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.dal.extensions.basic.json.Methods.json;
+import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 import static com.github.leeonky.dal.extensions.basic.zip.Methods.unzip;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;

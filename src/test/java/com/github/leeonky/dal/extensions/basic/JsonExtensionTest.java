@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.leeonky.dal.extensions.basic.json.Methods.json;
+import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 import static java.nio.file.Files.createTempFile;
 import static org.assertj.core.api.Assertions.assertThat;
 
