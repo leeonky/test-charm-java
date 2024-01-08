@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
-public class DataBase {
+public class DataBase implements AutoCloseable {
     public final Connection connection;
     public final DataBaseBuilder builder;
     public Set<String> queriedTables = new LinkedHashSet<>();
@@ -33,6 +33,11 @@ public class DataBase {
 
     public String getUrl() {
         return Suppressor.get(() -> connection.getMetaData().getURL());
+    }
+
+    @Override
+    public void close() throws Exception {
+        connection.close();
     }
 
     public class Table<T extends Table<T>> implements Iterable<Row<T>>, CanWhere<T> {
@@ -234,9 +239,8 @@ public class DataBase {
         public LinkedThroughTable(LinkedTable linkedTable, LinkedTable thoughTable) {
             super(linkedTable.row, linkedTable.name(), linkedTable.query().on(null));
             this.thoughTable = thoughTable;
-            referencedColumn = linkedTable.query().linkColumn() == null ? "" +
-                    builder.resolveReferencedColumn(linkedTable, thoughTable)
-                    : linkedTable.query().linkColumn();
+            referencedColumn = linkedTable.query().linkColumn() == null ?
+                    "" + builder.resolveReferencedColumn(linkedTable, thoughTable) : linkedTable.query().linkColumn();
         }
 
         public LinkedThroughTable(LinkedTable thoughTable, String referencedColumn,
