@@ -17,7 +17,7 @@ import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 import static java.nio.file.Files.createTempFile;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JsonExtensionTest {
+class TextExtensionTest {
 
     @SneakyThrows
     @Test
