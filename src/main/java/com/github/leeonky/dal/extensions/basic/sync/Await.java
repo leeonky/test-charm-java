@@ -44,8 +44,8 @@ public class Await {
         throw exception;
     }
 
-    public DataRemarkParameterAcceptor<Await> within() {
-        return s -> new Await(data, interval, TimeUtil.parseTime(s));
+    public Await within(String s) {
+        return new Await(data, interval, TimeUtil.parseTime(s));
     }
 
     public DataRemarkParameterAcceptor<Await> interval() {

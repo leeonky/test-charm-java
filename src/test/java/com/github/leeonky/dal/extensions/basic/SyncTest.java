@@ -72,14 +72,14 @@ public class SyncTest {
 
         @Test
         void set_waiting_time_in_dal() {
-            expectRun(() -> expect(new TargetList()).should("::await.within(100ms): {value::filter!: {id= 1}}"))
+            expectRun(() -> expect(new TargetList()).should("::await(100ms): {value::filter!: {id= 1}}"))
                     .should("::throw.message= /.*Filtered result is empty, try again.*/");
         }
 
         @Test
         void set_interval_time_in_dal() {
             expectRun(() ->
-                    expect(new TargetList()).should("::await.within(3s).interval(1.8s): {value::filter(1): {id= 1}}"))
+                    expect(new TargetList()).should("::await(3s).interval(1.8s): {value::filter(1): {id= 1}}"))
                     .should("::throw.message= /.*There are only 0 elements, try again.*/");
         }
     }
