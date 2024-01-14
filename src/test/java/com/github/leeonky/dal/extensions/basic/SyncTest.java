@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static com.github.leeonky.dal.Assertions.expectRun;
 
 public class SyncTest {
 
@@ -43,7 +44,9 @@ public class SyncTest {
 
         @Test
         void set_interval_time_in_dal() {
-            expect(new Target(2)).should("::eventually.interval(1s): {value= done}");
+            expectRun(() ->
+                    expect(new TargetList()).should("::eventually.within(3s).interval(1.8s): {value::filter(1): {id= 1}}"))
+                    .should("::throw.message= /.*There are only 0 elements, try again.*/");
         }
     }
 
@@ -54,11 +57,31 @@ public class SyncTest {
         void reset() {
             Await.setDefaultWaitingTime(5000);
         }
-//
-//        @Test
-//        void raise_error_when_no_matches_list() {
-//            expect(new TargetList()).should("");
-//        }
+
+        @Test
+        void raise_error_when_no_matches_list() {
+            Await.setDefaultWaitingTime(2000);
+            expectRun(() -> expect(new TargetList()).should("::await: {value::filter!: {id= 'not-exist'}}"))
+                    .should("::throw.message= /.*Filtered result is empty, try again.*/");
+        }
+
+        @Test
+        void return_filtered_result_at_last() {
+            expect(new TargetList()).should("::await: {value::filter!: {id= 1}: [* ...]}");
+        }
+
+        @Test
+        void set_waiting_time_in_dal() {
+            expectRun(() -> expect(new TargetList()).should("::await.within(100ms): {value::filter!: {id= 1}}"))
+                    .should("::throw.message= /.*Filtered result is empty, try again.*/");
+        }
+
+        @Test
+        void set_interval_time_in_dal() {
+            expectRun(() ->
+                    expect(new TargetList()).should("::await.within(3s).interval(1.8s): {value::filter(1): {id= 1}}"))
+                    .should("::throw.message= /.*There are only 0 elements, try again.*/");
+        }
     }
 
     public static class Target {
@@ -85,7 +108,7 @@ public class SyncTest {
                 while (true) {
                     Suppressor.run(() -> Thread.sleep(1000));
                     values.add(new HashMap<Object, Object>() {{
-                        put("id", i % 4);
+                        put("id", i++ / 2);
                         put("value", "string");
                     }});
                 }

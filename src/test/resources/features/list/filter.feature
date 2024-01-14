@@ -158,7 +158,7 @@ Feature: filter
     {}::filter!: {type= C}
               ^
 
-    Filtered results are empty, try again
+    Filtered result is empty, try again
 
     The root value was: [
         {
@@ -222,7 +222,7 @@ Feature: filter
     {}::filter(2): {type= A}
                ^
 
-    There is only 1 elements, try again
+    There are only 1 elements, try again
 
     The root value was: [
         {

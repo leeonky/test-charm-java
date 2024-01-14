@@ -31,13 +31,15 @@ public class Eventually {
         RuntimeException exception;
         int times = waitingTime / interval;
         do {
+            times--;
             try {
                 return context.calculate(data, operator, v2);
             } catch (RuntimeException e) {
                 exception = e;
-                Suppressor.run(() -> Thread.sleep(interval));
+                if (times > 0)
+                    Suppressor.run(() -> Thread.sleep(interval));
             }
-        } while (times-- > 0);
+        } while (times > 0);
         throw exception;
     }
 

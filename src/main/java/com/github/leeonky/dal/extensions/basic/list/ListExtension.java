@@ -55,7 +55,7 @@ public class ListExtension implements Extension {
                     DALCollection<Object> list = super.filterList(operator, v2, context);
                     if (!list.iterator().hasNext())
                         throw ExpressionException.exception(expression -> new NotReadyException(
-                                "Filtered results are empty, try again", expression.left().getOperandPosition()));
+                                "Filtered result is empty, try again", expression.left().getOperandPosition()));
                     return list;
                 }
             };
@@ -70,7 +70,7 @@ public class ListExtension implements Extension {
                     if (list.size() >= size)
                         return list;
                     throw ExpressionException.exception(expression -> new NotReadyException(
-                            format("There is only %d elements, try again", list.size()), expression.left().getOperandPosition()));
+                            format("There are only %d elements, try again", list.size()), expression.left().getOperandPosition()));
                 }
             };
         }
