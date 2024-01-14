@@ -1,8 +1,10 @@
 package com.github.leeonky.dal.extensions.basic;
 
+import com.github.leeonky.dal.extensions.basic.sync.Await;
 import com.github.leeonky.dal.extensions.basic.sync.Eventually;
 import com.github.leeonky.util.Suppressor;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,44 +13,53 @@ import java.util.List;
 
 import static com.github.leeonky.dal.Assertions.expect;
 
-public class EventuallyTest {
-    @BeforeEach
-    void reset() {
-        Eventually.setDefaultWaitingTime(5000);
+public class SyncTest {
+
+    @Nested
+    class EventuallyTest {
+
+        @BeforeEach
+        void reset() {
+            Eventually.setDefaultWaitingTime(5000);
+        }
+
+        @Test
+        void pass_right_now() {
+            expect(new HashMap<String, Object>() {{
+                put("value", 1);
+            }}).should("::eventually: {value= 1}");
+        }
+
+        @Test
+        void pass_in_1_second() {
+            expect(new Target(1)).should("::eventually: {value= done}");
+        }
+
+        @Test
+        void set_waiting_time_in_dal() {
+            Eventually.setDefaultWaitingTime(100);
+            expect(new Target(1)).should("::eventually.within(2s): {value= done}");
+        }
+
+        @Test
+        void set_interval_time_in_dal() {
+            expect(new Target(2)).should("::eventually.interval(1s): {value= done}");
+        }
     }
 
-    @Test
-    void pass_right_now() {
-        expect(new HashMap<String, Object>() {{
-            put("value", 1);
-        }}).should("::eventually: {value= 1}");
-    }
+    @Nested
+    public class AwaitTest {
 
-    @Test
-    void pass_in_1_second() {
-        expect(new Target(1)).should("::eventually: {value= done}");
-    }
-
-    @Test
-    void set_waiting_time_in_dal() {
-        Eventually.setDefaultWaitingTime(100);
-        expect(new Target(1)).should("::eventually.within(2s): {value= done}");
-    }
-
-    @Test
-    void set_interval_time_in_dal() {
-        expect(new Target(2)).should("::eventually.interval(1s): {value= done}");
-    }
-
-//    @Test
-//    void eventually_filter() {
-////        expect(new TargetList()).should("::eventually: {value: [... {id: 2, value: int}]}");
+        @BeforeEach
+        void reset() {
+            Await.setDefaultWaitingTime(5000);
+        }
 //
-//        expect(new TargetList()).should("" +
-//                                        "::eventually: {value: [...{id: 3}...]}" +
-//                                        "= 1" +
-//                                        "");
-//    }
+//        @Test
+//        void raise_error_when_no_matches_list() {
+//            expect(new TargetList()).should("");
+//        }
+    }
 
     public static class Target {
         private String value = "";
@@ -74,7 +85,7 @@ public class EventuallyTest {
                 while (true) {
                     Suppressor.run(() -> Thread.sleep(1000));
                     values.add(new HashMap<Object, Object>() {{
-                        put("id", i++);
+                        put("id", i % 4);
                         put("value", "string");
                     }});
                 }

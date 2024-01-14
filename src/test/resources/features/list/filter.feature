@@ -113,3 +113,125 @@ Feature: filter
 
     The root value was: null
     """
+
+  Scenario: filter! result should have at least one element
+    Given the following json:
+    """
+    [{
+      "type": "A",
+      "value": "1"
+    }, {
+      "type": "B",
+      "value": "b"
+    }, {
+      "type": "A",
+      "value": "2"
+    }]
+    """
+    Then the following should pass:
+    """
+    {}::filter!: {type= A}
+      : [* *]
+    """
+
+  Scenario: raise error when no data in filter!
+    Given the following json:
+    """
+    [{
+      "type": "A",
+      "value": "1"
+    }, {
+      "type": "B",
+      "value": "b"
+    }, {
+      "type": "A",
+      "value": "2"
+    }]
+    """
+    When evaluate by:
+    """
+    {}::filter!: {type= C}
+    """
+    Then failed with the message:
+    """
+
+    {}::filter!: {type= C}
+              ^
+
+    Filtered results are empty, try again
+
+    The root value was: [
+        {
+            type: java.lang.String <A>,
+            value: java.lang.String <1>
+        },
+        {
+            type: java.lang.String <B>,
+            value: java.lang.String <b>
+        },
+        {
+            type: java.lang.String <A>,
+            value: java.lang.String <2>
+        }
+    ]
+    """
+
+  Scenario: filter(2) result should return top 2 of filtered result
+    Given the following json:
+    """
+    [{
+      "type": "A",
+      "value": "1"
+    }, {
+      "type": "B",
+      "value": "b"
+    }, {
+      "type": "A",
+      "value": "2"
+    }, {
+      "type": "A",
+      "value": "3"
+    }]
+    """
+    Then the following should pass:
+    """
+    {}::filter(2): {type= A}
+      : | type | value |
+        | A    | '1'   |
+        | A    | '2'   |
+    """
+
+  Scenario: raise error when filter(2) result less than two elements
+    Given the following json:
+    """
+    [{
+      "type": "A",
+      "value": "1"
+    }, {
+      "type": "B",
+      "value": "b"
+    }]
+    """
+    When evaluate by:
+    """
+    {}::filter(2): {type= A}
+    """
+    Then failed with the message:
+    """
+
+    {}::filter(2): {type= A}
+               ^
+
+    There is only 1 elements, try again
+
+    The root value was: [
+        {
+            type: java.lang.String <A>,
+            value: java.lang.String <1>
+        },
+        {
+            type: java.lang.String <B>,
+            value: java.lang.String <b>
+        }
+    ]
+    """
