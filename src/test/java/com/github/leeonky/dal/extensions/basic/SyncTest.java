@@ -82,6 +82,12 @@ public class SyncTest {
                     expect(new TargetList()).should("::await(3s).interval(1.8s): {value::filter(1): {id= 1}}"))
                     .should("::throw.message= /.*There are only 0 elements, try again.*/");
         }
+
+        @Test
+        void await_should_return_right_value_of_expression() {
+            expect(new TargetList()).should("::await: {value::filter(2): {id= 0}}: [* *]");
+            expect(new TargetList()).should("::await= {value::filter(2): {id= 0}}: [* *]");
+        }
     }
 
     public static class Target {

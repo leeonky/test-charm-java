@@ -5,8 +5,10 @@ import com.github.leeonky.dal.extensions.basic.TimeUtil;
 import com.github.leeonky.dal.extensions.basic.list.NotReadyException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.DataRemarkParameterAcceptor;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.util.Suppressor;
+
+import java.util.function.Function;
 
 public class Await {
     private static int defaultWaitingTime = 5000;
@@ -28,13 +30,13 @@ public class Await {
         Await.defaultWaitingTime = ms;
     }
 
-    public Data await(DALOperator operator, Data v2, DALRuntimeContext context) {
+    public Data await(DALOperator operator, Data v2, Function<ExpectationFactory.Expectation, Data> action) {
         RuntimeException exception;
         int times = waitingTime / interval;
         do {
             times--;
             try {
-                return context.calculate(data, operator, v2);
+                return action.apply(((ExpectationFactory) v2.instance()).create(operator, data));
             } catch (NotReadyException e) {
                 exception = e;
                 if (times > 0)
