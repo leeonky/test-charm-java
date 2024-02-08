@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.text;
 
-import org.json.JSONArray;
+import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONArray;
 import org.yaml.snakeyaml.Yaml;
 
 public class Methods {
