@@ -1,6 +1,8 @@
 package com.github.leeonky.cucumber.restful;
 
 import com.github.leeonky.dal.Accessors;
+import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONArray;
+import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONObject;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.cucumber.Table;
 import com.github.leeonky.util.Suppressor;
@@ -8,8 +10,6 @@ import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -424,9 +424,9 @@ public class RestfulStep {
     }
 
     public static class Response {
-        public final HttpURLConnection raw;
         public final int code;
         public final byte[] body;
+        public final HttpURLConnection raw;
 
         public Response(HttpURLConnection connection) {
             raw = connection;
@@ -435,7 +435,7 @@ public class RestfulStep {
             body = stream == null ? null : readAllAndClose(stream);
         }
 
-        public Map<String, Object> headers() {
+        public Map<String, Object> getHeaders() {
             return raw.getHeaderFields().entrySet().stream()
                     .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue() != null && entry.getValue().size() == 1 ? entry.getValue().get(0) : entry.getValue()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

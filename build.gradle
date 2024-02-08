@@ -42,7 +42,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.20' + System.env.VERSION_SCOPE
+version = '0.0.21' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -62,7 +62,6 @@ dependencies {
     implementation dep(':DAL-extension-basic', '0.0.14')
     implementation dep(':jfactory', '0.3.23')
     implementation dep(':jfactory-cucumber', '0.1.27')
-    implementation 'org.json:json:20220924'
 
     testImplementation 'org.mock-server:mockserver:5.11.2'
     testImplementation 'org.mock-server:mockserver-netty:5.11.2'
