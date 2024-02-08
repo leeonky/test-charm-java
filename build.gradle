@@ -59,7 +59,7 @@ repositories {
 dependencies {
     implementation 'io.cucumber:cucumber-java:6.10.4'
     implementation dep(':DAL-java', '0.4.3')
-    implementation dep(':DAL-extension-basic', '0.0.14')
+    implementation dep(':DAL-extension-basic', '0.0.16')
     implementation dep(':jfactory', '0.3.23')
     implementation dep(':jfactory-cucumber', '0.1.27')
 
