@@ -10,6 +10,10 @@ jobs:
           command: |
             echo '127.0.0.1 www.a.com' >> /etc/hosts
             ./gradlew testAll testPatch cucumberAll cucumberPatch
+
+      - store_artifacts:
+          path: /root/project/build/reports/
+          destination: build-reports
   build:
     docker:
       - image: openjdk:8u342
