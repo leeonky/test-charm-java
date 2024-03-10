@@ -1,7 +1,12 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
+import lombok.SneakyThrows;
+import org.hibernate.Session;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static org.mockito.Mockito.mock;
@@ -126,6 +131,24 @@ class DataBaseBuilderTest {
         }
     }
 
+    @Nested
+    class Provider {
+
+        @SneakyThrows
+        @Test
+        void support_query_all_table_names_in_via_sql() {
+            EntityManager entityManager = Persistence.createEntityManagerFactory("jfactory-repo").createEntityManager();
+
+            builder.sqlTablesProvider("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES\n" +
+                    "WHERE TABLE_SCHEMA = 'PUBLIC' AND TABLE_TYPE IN ('TABLE', 'VIEW');");
+
+            Session session = entityManager.unwrap(Session.class);
+            session.doWork(connection -> {
+                DataBase connect = builder.connect(connection);
+                expect(connect.allTableNames()).should(": [SKUS SKU_PRODUCTS PRODUCTS ORDERS ORDER_LINES]");
+            });
+        }
+    }
 
     private DataBase.Table<?> givenTableWithName(String name) {
         DataBase.Table<?> table = mock(DataBase.Table.class);

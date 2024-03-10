@@ -71,8 +71,8 @@ public class JDBCExtension implements Extension {
         }
 
         @Override
-        public Object getValue(DataBase dataBaseBk, Object property) {
-            return dataBaseBk.table((String) property);
+        public Object getValue(DataBase dataBase, Object property) {
+            return dataBase.table((String) property);
         }
     }
 

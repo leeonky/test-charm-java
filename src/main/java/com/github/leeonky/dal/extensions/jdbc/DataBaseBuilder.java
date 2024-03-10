@@ -1,9 +1,11 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.extensions.jdbc.DataBase.Table;
+import com.github.leeonky.util.Suppressor;
 import org.javalite.common.Inflector;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -23,6 +25,17 @@ public class DataBaseBuilder {
 
     public DataBaseBuilder tablesProvider(Function<Statement, Collection<String>> query) {
         tableQuery = query;
+        return this;
+    }
+
+    public DataBaseBuilder sqlTablesProvider(String sql) {
+        tableQuery = statement -> Suppressor.get(() -> {
+            ResultSet resultSet = statement.executeQuery(sql);
+            return new LinkedHashSet<String>() {{
+                while (resultSet.next())
+                    add(resultSet.getString(1));
+            }};
+        });
         return this;
     }
 
