@@ -53,7 +53,7 @@ public class Notation<C extends RuntimeContext, N extends Node<C, N>, O extends 
 
     private boolean notAWord(Set<String> delimiter, P procedure) {
         return procedure.getSourceCode().hasCode()
-                && delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
+               && delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
     }
 
     public OperatorParser<C, N, O, P, E> operator(Supplier<O> factory, Predicate<P> predicate) {

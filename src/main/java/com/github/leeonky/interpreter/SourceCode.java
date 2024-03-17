@@ -110,4 +110,8 @@ public class SourceCode {
         int linePosition = charStream.lastIndexOf(newLine, charStream.position);
         return linePosition == -1 ? charStream.position : charStream.position - linePosition - 1;
     }
+
+    public CharStream chars() {
+        return charStream;
+    }
 }

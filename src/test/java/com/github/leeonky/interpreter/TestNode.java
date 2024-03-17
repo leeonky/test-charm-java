@@ -1,8 +1,10 @@
 package com.github.leeonky.interpreter;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class TestNode extends NodeBase<TestContext, TestNode> {
     private final Object content;
 

@@ -74,11 +74,29 @@ public class CharStream {
         return optionalNode;
     }
 
-    String getCode() {
+    public String getCode() {
         return code;
     }
 
     public int lastIndexOf(String str, int position) {
         return code.lastIndexOf(str, position);
+    }
+
+    public int firstNonBlankBetween(int first, int second) {
+        if (first < 0 || first >= second || second >= code.length())
+            return -1;
+        int position = second - 1;
+        char c = code.charAt(position--);
+        if (isBlank(c)) {
+            while (position >= first && isBlank(code.charAt(position))) {
+                position--;
+            }
+            return position;
+        }
+        return -1;
+    }
+
+    private boolean isBlank(char c) {
+        return c == ' ';
     }
 }

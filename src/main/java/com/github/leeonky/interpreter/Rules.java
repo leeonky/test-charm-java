@@ -258,6 +258,7 @@ public class Rules {
         private final Notation<?, N, ?, P, ?>[] notations;
         private boolean closed;
 
+        @SafeVarargs
         public EndBefore(Syntax<N, P, PA, MA, T, R, A> syntax, Notation<?, N, ?, P, ?>... notations) {
             super(syntax);
             this.notations = notations;
