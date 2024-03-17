@@ -52,6 +52,13 @@ class CharStreamTest {
             assertThat(charStream.firstNonBlankBetween(1, 3)).isEqualTo(0);
         }
 
+        @Test
+        void supported_blank_chars() {
+            CharStream charStream = new CharStream("xA \t\n\r\bC");
+
+            assertThat(charStream.firstNonBlankBetween(0, 7)).isEqualTo(1);
+        }
+
         @Nested
         class InvalidPosition {
 

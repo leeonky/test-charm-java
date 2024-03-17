@@ -97,6 +97,6 @@ public class CharStream {
     }
 
     private boolean isBlank(char c) {
-        return c == ' ';
+        return c == ' ' || c == '\n' || c == '\r' || c == '\b' || c == '\t';
     }
 }
