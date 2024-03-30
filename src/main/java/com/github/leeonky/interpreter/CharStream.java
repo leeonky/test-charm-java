@@ -2,6 +2,7 @@ package com.github.leeonky.interpreter;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class CharStream {
@@ -82,21 +83,30 @@ public class CharStream {
         return code.lastIndexOf(str, position);
     }
 
-    public int firstNonBlankBetween(int first, int second) {
+    public int newlineBetween(int first, int second) {
         if (first < 0 || first >= second || second >= code.length())
             return -1;
-        int position = second - 1;
-        char c = code.charAt(position--);
-        if (isBlank(c)) {
-            while (position >= first && isBlank(code.charAt(position))) {
-                position--;
-            }
-            return position;
-        }
+        int position = rightScan(first, second - 1, CharStream::isBlank);
+        if (position == -1)
+            return -1;
+        if (isNewline(code.charAt(position)))
+            return rightScan(first, position, c -> isNewline(c) || isBlank(c));
         return -1;
     }
 
-    private boolean isBlank(char c) {
-        return c == ' ' || c == '\n' || c == '\r' || c == '\b' || c == '\t';
+    private int rightScan(int rightToLeftEnd, int position, Predicate<Character> predicate) {
+        while (predicate.test(code.charAt(position))) {
+            if (--position < rightToLeftEnd)
+                return -1;
+        }
+        return position;
+    }
+
+    private static boolean isBlank(char c) {
+        return c == ' ' || c == '\b' || c == '\t';
+    }
+
+    private static boolean isNewline(char c) {
+        return c == '\n' || c == '\r';
     }
 }
