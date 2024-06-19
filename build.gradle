@@ -5,8 +5,19 @@ buildscript {
     dependencies {
         classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.6.0'
     }
+
     ext {
-        current_version = 'beta-ci-0.0.1'
+        versions = [
+                project: 'beta-ci-0.0.1',
+                test   : [
+                        junit            : '5.3.1',
+                        assertj          : '3.10.0',
+                        mockito          : '4.0.0',
+                        dal              : '0.2.0-beta',
+                        dalExtensionBasic: '0.0.2',
+                        lombok           : '1.18.4'
+                ]
+        ]
     }
 }
 
@@ -18,7 +29,7 @@ plugins {
 
 task currentVersion {
     doLast {
-        println current_version
+        println versions.project
     }
 }
 
@@ -49,7 +60,7 @@ subprojects {
     }
 
     group = 'com.github.leeonky'
-    version = current_version
+    version = versions.project
     sourceCompatibility = 1.8
 
     jacocoTestReport {
