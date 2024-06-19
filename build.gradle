@@ -11,11 +11,12 @@ buildscript {
                 project: 'beta-ci-0.0.1',
                 test   : [
                         junit            : '5.3.1',
-                        assertj          : '3.10.0',
+                        assertj          : '3.21.0',
                         mockito          : '4.0.0',
                         dal              : '0.2.0-beta',
                         dalExtensionBasic: '0.0.2',
-                        lombok           : '1.18.4'
+                        lombok           : '1.18.4',
+                        cucumber         : '6.10.4'
                 ]
         ]
     }
@@ -30,6 +31,15 @@ plugins {
 task currentVersion {
     doLast {
         println versions.project
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = System.env.ossrhUsername
+            password = System.env.ossrhPassword
+        }
     }
 }
 
@@ -141,15 +151,6 @@ subprojects {
 
     signing {
         sign publishing.publications.mavenJava
-    }
-
-    nexusPublishing {
-        repositories {
-            sonatype {
-                username = System.env.ossrhUsername
-                password = System.env.ossrhPassword
-            }
-        }
     }
 
     tasks.coveralls {
