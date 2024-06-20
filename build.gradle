@@ -34,6 +34,8 @@ task currentVersion {
     }
 }
 
+group = 'com.github.leeonky'
+
 nexusPublishing {
     repositories {
         sonatype {
@@ -150,7 +152,6 @@ subprojects {
     }
 
     signing {
-        useInMemoryPgpKeys(System.getenv('SIGNING_KEYID'), System.getenv('SIGNING_SECRETKEYRINGFILE'), System.getenv('SIGNING_PASSWORD'))
         sign publishing.publications.mavenJava
     }
 
