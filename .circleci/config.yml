@@ -6,7 +6,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - ''
+            - 'SHA256:Rd0VJUqHdYKf6WXkY6BsTF3k4bPzsBUav88rPAPu6Wg'
       - checkout
       - run:
           name: build
@@ -19,7 +19,8 @@ jobs:
             fi
             echo "====== Release and tag new version $PUB_VERSION ======"
             echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
-            ./gradlew publishToNexus
+            ./gradlew publishToSonatype
+            ./gradlew closeAndReleaseSonatypeStagingRepository
             git config --global user.email "leeonky@gmail.com"
             git config --global user.name "leeonky"
             git tag ${PUB_VERSION} -a -m 'CI Release'
