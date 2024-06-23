@@ -2,6 +2,7 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
     dependencies {
         classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.6.0'
     }
@@ -45,13 +46,17 @@ nexusPublishing {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
+jacoco {
+    toolVersion = "0.8.2"
+}
+
 subprojects {
     ext {
         projectName = project.projectDir.name
-    }
-
-    jacoco {
-        toolVersion = "0.8.2"
     }
 
     apply plugin: 'java'
@@ -59,7 +64,6 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'info.solidsoft.pitest'
     apply plugin: 'jacoco'
-    apply plugin: 'com.github.kt3k.coveralls'
 
     task javadocJar(type: Jar, dependsOn: classes) {
         classifier 'javadoc'
@@ -155,9 +159,6 @@ subprojects {
         sign publishing.publications.mavenJava
     }
 
-    tasks.coveralls {
-        dependsOn jacocoTestReport
-    }
 
 //    pitest {
 //        targetClasses = ['com.github.leeonky.dal.*']
@@ -168,4 +169,21 @@ subprojects {
 //        junit5PluginVersion = "0.12"
 //    }
 //
+}
+
+task jacocoRootReport(type: JacocoReport) {
+    dependsOn = subprojects.test
+    additionalSourceDirs.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories.from files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from files(subprojects.sourceSets.main.output)
+    executionData.from files(subprojects.jacocoTestReport.executionData)
+
+    reports {
+        html.enabled true
+        xml.enabled true
+    }
+}
+
+tasks.coveralls {
+    dependsOn jacocoRootReport
 }
