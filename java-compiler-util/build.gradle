@@ -1,0 +1,141 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.6.0'
+    }
+    ext {
+        repoName = "git config --get remote.origin.url".execute().getText()
+        projectName = "basename -s .git ${repoName}".execute().getText().trim()
+    }
+}
+
+def dep(p, version) {
+    return (gradle.ext.has('projects') && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
+}
+
+plugins {
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
+    id 'de.marcphilipp.nexus-publish' version '0.2.0'
+}
+
+jacoco {
+    toolVersion = "0.8.2"
+}
+
+apply plugin: 'java'
+apply plugin: 'signing'
+apply plugin: 'info.solidsoft.pitest'
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+group = 'com.github.leeonky'
+version = '0.0.3' + System.env.VERSION_SCOPE
+sourceCompatibility = 1.8
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // for coveralls
+        html.enabled = true
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile dep(':bean-util', '0.6.3')
+    annotationProcessor('org.projectlombok:lombok:1.18.4')
+    compile('org.projectlombok:lombok:1.18.4')
+}
+
+test {
+    test {
+        systemProperty("cucumber.publish.quiet", true)
+        useJUnitPlatform {
+            excludeTags("disabled")
+        }
+    }
+}
+
+pitest {
+    targetClasses = ['com.github.leeonky.dal.*']
+    excludedClasses = ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema']
+    outputFormats = ['HTML2']
+    pitestVersion = '1.6.9'
+    threads = 8
+    junit5PluginVersion = "0.12"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = projectName
+            from(components.java)
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = projectName
+                description = projectName
+                url = 'https://github.com/leeonky/' + projectName
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'leeonky'
+                        name = 'Liangchen'
+                        email = 'leeonky@gmail.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/leeonky/' + projectName + '.git'
+                    developerConnection = 'scm:git:git@github.com:leeonky' + projectName + '.git'
+                    url = 'https://github.com/leeonky/' + projectName + '.git'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+nexusPublishing {
+    username = System.env.ossrhUsername
+    password = System.env.ossrhPassword
+}
+
+task currentVersion {
+    doLast {
+        println project.version
+    }
+}
+
+tasks.coveralls {
+    dependsOn jacocoTestReport
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
