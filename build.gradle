@@ -184,6 +184,10 @@ task jacocoRootReport(type: JacocoReport) {
     }
 }
 
+coveralls {
+    jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+}
+
 tasks.coveralls {
     dependsOn jacocoRootReport
 }
