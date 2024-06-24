@@ -1,0 +1,14 @@
+version: '3'
+services:
+  ssh-sever:
+    image: linuxserver/openssh-server
+    ports:
+      - 2222:2222
+    volumes:
+      - /tmp:/tmp
+    environment:
+      PASSWORD_ACCESS: 'true'
+      USER_NAME: 'user'
+      USER_PASSWORD: 'password'
+      UID: $UID
+      GID: $GID

@@ -1,0 +1,37 @@
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - '46:be:cc:ef:71:f3:f1:eb:c5:96:c4:15:a0:b5:96:7d'
+      - checkout
+      - run:
+          name: env
+          command: |
+            sudo apt-get update
+            sudo apt-get install openjdk-8-jdk
+            sudo update-java-alternatives --set java-1.8.0-openjdk-amd64
+            sudo docker-compose up -d
+      - run:
+          name: build
+          command: |
+            java -version
+            export CI=true
+            export VERSION_SCOPE=''
+            sudo bash -c "echo '127.0.0.1 www.s.com' >> /etc/hosts"
+            ./gradlew check build coveralls
+            export PUB_VERSION=$(./gradlew currentVersion -q)
+            if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
+              echo "====== Still version ${PUB_VERSION}, CI done ======"
+              exit 0
+            fi
+            echo "====== Release and tag new version $PUB_VERSION ======"
+            echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
+            ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
+            git config --global user.email "leeonky@gmail.com"
+            git config --global user.name "leeonky"
+            git tag ${PUB_VERSION} -a -m 'CI Release'
+            git push --tags
