@@ -1,0 +1,30 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: openjdk:8u342
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - '53:58:e3:1a:94:82:81:74:88:08:bd:7b:5e:b8:01:e4'
+      - checkout
+      - run:
+          name: build
+          command: |
+            export VERSION_SCOPE=''
+            ./gradlew test build coveralls
+            export PUB_VERSION=$(./gradlew currentVersion -q)
+            if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
+              echo "====== Still version ${PUB_VERSION}, CI done ======"
+              exit 0
+            fi
+            echo "====== Release and tag new version $PUB_VERSION ======"
+            echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
+            ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
+            git config --global user.email "leeonky@gmail.com"
+            git config --global user.name "leeonky"
+            git tag ${PUB_VERSION} -a -m 'CI Release'
+            git push --tags
+      - store_artifacts:
+          path: /root/project/build/reports/
+          destination: build-reports
