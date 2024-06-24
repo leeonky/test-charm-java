@@ -4,41 +4,10 @@ dependencies {
 
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${versions.test.jackson}"
 
-    testImplementation "org.assertj:assertj-core:${versions.test.assertj}"
-
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.test.junit}"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.test.junit}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.test.junit}"
-
-    testImplementation "org.mockito:mockito-inline:${versions.test.mockito}"
-
 //    TODO remove
     testImplementation "org.skyscreamer:jsonassert:${versions.test.jsonassert}"
-
-    testImplementation "io.cucumber:cucumber-java:${versions.test.cucumber}"
-    testAnnotationProcessor "org.projectlombok:lombok:${versions.test.lombok}"
-    testCompile "org.projectlombok:lombok:${versions.test.lombok}"
 
     testImplementation project(':java-compiler-util')
 }
 
-test {
-    test {
-        systemProperty("cucumber.publish.quiet", true)
-        useJUnitPlatform {
-            excludeTags("disabled")
-        }
-    }
-}
-
-task cucumber() {
-    dependsOn assemble, testClasses
-    doLast {
-        javaexec {
-            environment('CUCUMBER_PUBLISH_QUIET', true)
-            main = "io.cucumber.core.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.dal.cucumber', 'src/test/resources/features']
-        }
-    }
-}
+configCucumber(['com.github.leeonky.dal.cucumber'])

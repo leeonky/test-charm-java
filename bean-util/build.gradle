@@ -1,15 +1,4 @@
 dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.test.junit}"
-    testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.test.junit}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.test.junit}"
-
-    testImplementation "org.mockito:mockito-inline:${versions.test.mockito}"
-
-    testImplementation "org.assertj:assertj-core:${versions.test.assertj}"
-
-    testAnnotationProcessor "org.projectlombok:lombok:${versions.test.lombok}"
-    testCompile "org.projectlombok:lombok:${versions.test.lombok}"
-
     testImplementation "com.github.leeonky:DAL-java:${versions.test.dal}"
     testImplementation "com.github.leeonky:DAL-extension-basic:${versions.test.dalExtensionBasic}"
 }

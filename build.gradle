@@ -50,6 +50,46 @@ nexusPublishing {
 subprojects {
     ext {
         projectName = project.projectDir.name
+
+        configCucumber = { glues ->
+            dependencies {
+                testImplementation "io.cucumber:cucumber-java:${versions.test.cucumber}"
+            }
+
+            configurations {
+                cucumberRuntime {
+                    extendsFrom testImplementation
+                }
+            }
+
+            test {
+                test {
+                    systemProperty("cucumber.publish.quiet", true)
+                    useJUnitPlatform {
+                        excludeTags("disabled")
+                    }
+                }
+            }
+
+            cucumberArgs = ['--plugin', 'pretty']
+            for (glue in glues) {
+                cucumberArgs.add('--glue')
+                cucumberArgs.add(glue)
+            }
+            cucumberArgs.add('src/test/resources/features')
+
+            task cucumber() {
+                dependsOn assemble, testClasses
+                doLast {
+                    javaexec {
+                        environment('CUCUMBER_PUBLISH_QUIET', true)
+                        main = "io.cucumber.core.cli.Main"
+                        classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+                        args = cucumberArgs
+                    }
+                }
+            }
+        }
     }
 
     jacoco {
@@ -85,6 +125,19 @@ subprojects {
 
     repositories {
         mavenCentral()
+    }
+
+    dependencies {
+        testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.test.junit}"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.test.junit}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.test.junit}"
+
+        testImplementation "org.mockito:mockito-inline:${versions.test.mockito}"
+
+        testImplementation "org.assertj:assertj-core:${versions.test.assertj}"
+
+        testAnnotationProcessor "org.projectlombok:lombok:${versions.test.lombok}"
+        testCompile "org.projectlombok:lombok:${versions.test.lombok}"
     }
 
     test {
@@ -141,7 +194,7 @@ subprojects {
         dependsOn jacocoTestReport
     }
 
-    def configPitest = { name, target, excluded ->
+    def enablePitest = { name, target, excluded ->
         if (projectName == name) {
             project.apply plugin: 'info.solidsoft.pitest'
 
@@ -160,7 +213,8 @@ subprojects {
         }
     }
 
-//    configPitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
+//    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
+//    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
 }
 
 task mergedTestReport(type: TestReport) {
