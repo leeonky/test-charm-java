@@ -9,5 +9,3 @@ dependencies {
 
     testImplementation project(':java-compiler-util')
 }
-
-configCucumber(['com.github.leeonky.dal.cucumber'])

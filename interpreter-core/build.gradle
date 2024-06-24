@@ -1,5 +1,3 @@
 dependencies {
     implementation project(':bean-util')
 }
-
-configCucumber(['com.github.leeonky.interpreter'])

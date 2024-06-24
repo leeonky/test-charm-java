@@ -12,7 +12,11 @@ buildscript {
                         cucumber         : '6.10.4',
                         jackson          : '2.13.1',
                         jsonassert       : '1.5.0',
-                        pitest           : '1.6.0'
+                        pitest           : [
+                                plugin  : '1.15.0',
+                                elements: '0.6.3',
+                                junit5  : '1.0.0'
+                        ]
                 ]
         ]
     }
@@ -20,7 +24,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "info.solidsoft.gradle.pitest:gradle-pitest-plugin:${versions.test.pitest}"
+        classpath "info.solidsoft.gradle.pitest:gradle-pitest-plugin:${versions.test.pitest.plugin}"
     }
 }
 
@@ -50,46 +54,6 @@ nexusPublishing {
 subprojects {
     ext {
         projectName = project.projectDir.name
-
-        configCucumber = { glues ->
-            dependencies {
-                testImplementation "io.cucumber:cucumber-java:${versions.test.cucumber}"
-            }
-
-            configurations {
-                cucumberRuntime {
-                    extendsFrom testImplementation
-                }
-            }
-
-            test {
-                test {
-                    systemProperty("cucumber.publish.quiet", true)
-                    useJUnitPlatform {
-                        excludeTags("disabled")
-                    }
-                }
-            }
-
-            cucumberArgs = ['--plugin', 'pretty']
-            for (glue in glues) {
-                cucumberArgs.add('--glue')
-                cucumberArgs.add(glue)
-            }
-            cucumberArgs.add('src/test/resources/features')
-
-            task cucumber() {
-                dependsOn assemble, testClasses
-                doLast {
-                    javaexec {
-                        environment('CUCUMBER_PUBLISH_QUIET', true)
-                        main = "io.cucumber.core.cli.Main"
-                        classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-                        args = cucumberArgs
-                    }
-                }
-            }
-        }
     }
 
     jacoco {
@@ -199,22 +163,67 @@ subprojects {
             project.apply plugin: 'info.solidsoft.pitest'
 
             project.dependencies {
-                pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1"
+                pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:${versions.test.pitest.elements}"
             }
 
             project.pitest {
                 targetClasses = target
                 excludedClasses = excluded
-                outputFormats = ['HTML2']
-                pitestVersion = '1.6.9'
+                outputFormats = ['HTML', 'HTML2']
                 threads = 8
-                junit5PluginVersion = "0.12"
+                junit5PluginVersion = versions.test.pitest.junit5
             }
         }
     }
 
-//    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
+    def configCucumber = { name, glues ->
+        if (projectName == name) {
+            dependencies {
+                testImplementation "io.cucumber:cucumber-java:${versions.test.cucumber}"
+            }
+
+            configurations {
+                cucumberRuntime {
+                    extendsFrom testImplementation
+                }
+            }
+
+            test {
+                test {
+                    systemProperty("cucumber.publish.quiet", true)
+                    useJUnitPlatform {
+                        excludeTags("disabled")
+                    }
+                }
+            }
+
+            def cucumberArgs = ['--plugin', 'pretty']
+            for (glue in glues) {
+                cucumberArgs.add('--glue')
+                cucumberArgs.add(glue)
+            }
+            cucumberArgs.add(projectName + '/src/test/resources/features')
+
+            task cucumber() {
+                dependsOn assemble, testClasses
+                doLast {
+                    javaexec {
+                        environment('CUCUMBER_PUBLISH_QUIET', true)
+                        main = "io.cucumber.core.cli.Main"
+                        classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+                        args = cucumberArgs
+                    }
+                }
+            }
+        }
+    }
+
+    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
+//    enablePitest('interpreter-core', ['com.github.leeonky.interpreter.*'], [])
 //    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
+
+    configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
+    configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
 }
 
 task mergedTestReport(type: TestReport) {
