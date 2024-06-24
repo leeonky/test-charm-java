@@ -1,11 +1,4 @@
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.6.0'
-    }
-
     ext {
         versions = [
                 project: 'beta-ci-0.0.2',
@@ -19,9 +12,15 @@ buildscript {
                         cucumber         : '6.10.4',
                         jackson          : '2.13.1',
                         jsonassert       : '1.5.0',
-                        pitestMutation   : '0.3.1'
+                        pitest           : '1.6.0'
                 ]
         ]
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "info.solidsoft.gradle.pitest:gradle-pitest-plugin:${versions.test.pitest}"
     }
 }
 
@@ -60,7 +59,6 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'signing'
     apply plugin: 'maven-publish'
-    apply plugin: 'info.solidsoft.pitest'
     apply plugin: 'jacoco'
     apply plugin: 'com.github.kt3k.coveralls'
 
@@ -143,15 +141,26 @@ subprojects {
         dependsOn jacocoTestReport
     }
 
-//    pitest {
-//        targetClasses = ['com.github.leeonky.dal.*']
-//        excludedClasses = ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema']
-//        outputFormats = ['HTML2']
-//        pitestVersion = '1.6.9'
-//        threads = 8
-//        junit5PluginVersion = "0.12"
-//    }
-//
+    def configPitest = { name, target, excluded ->
+        if (projectName == name) {
+            project.apply plugin: 'info.solidsoft.pitest'
+
+            project.dependencies {
+                pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1"
+            }
+
+            project.pitest {
+                targetClasses = target
+                excludedClasses = excluded
+                outputFormats = ['HTML2']
+                pitestVersion = '1.6.9'
+                threads = 8
+                junit5PluginVersion = "0.12"
+            }
+        }
+    }
+
+//    configPitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
 }
 
 task mergedTestReport(type: TestReport) {

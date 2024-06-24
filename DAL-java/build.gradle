@@ -20,7 +20,6 @@ dependencies {
     testCompile "org.projectlombok:lombok:${versions.test.lombok}"
 
     testImplementation project(':java-compiler-util')
-    pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:${versions.test.pitestMutation}"
 }
 
 test {
@@ -30,15 +29,6 @@ test {
             excludeTags("disabled")
         }
     }
-}
-
-pitest {
-    targetClasses = ['com.github.leeonky.dal.*']
-    excludedClasses = ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema']
-    outputFormats = ['HTML2']
-    pitestVersion = '1.6.9'
-    threads = 8
-    junit5PluginVersion = "0.12"
 }
 
 task cucumber() {
