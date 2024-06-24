@@ -4,23 +4,28 @@ buildscript {
                 project: 'beta-ci-0.0.2',
                 prod   : [
                         jsch     : '0.1.55',
-                        snakeyaml: '2.0'
+                        snakeyaml: '2.0',
+                        javalite : '1.2.2'
                 ],
                 test   : [
-                        junit     : '5.3.1',
-                        assertj   : '3.21.0',
-                        mockito   : '4.0.0',
-                        lombok    : '1.18.4',
-                        cucumber  : '6.10.4',
-                        jackson   : '2.13.1',
-                        jsonassert: '1.5.0',
-                        pitest    : [
+                        junit        : '5.3.1',
+                        assertj      : '3.21.0',
+                        mockito      : '4.0.0',
+                        lombok       : '1.18.4',
+                        cucumber     : '6.10.4',
+                        jackson      : '2.13.1',
+                        jsonassert   : '1.5.0',
+                        pitest       : [
                                 plugin  : '1.15.0',
                                 elements: '0.6.3',
                                 junit5  : '1.0.0'
                         ],
-                        zip4j     : '2.10.0',
-                        awaitility: '3.0.0'
+                        zip4j        : '2.10.0',
+                        awaitility   : '3.0.0',
+                        cucumberJunit: '5.1.1',
+                        h2           : '1.4.200',
+                        jpa          : '2.2',
+                        hibernate    : '5.4.0.Final'
                 ]
         ]
     }
@@ -260,10 +265,12 @@ subprojects {
     enablePitest('interpreter-core', ['com.github.leeonky.interpreter.*'], [])
 //    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
 //    enablePitest('DAL-extension-basic', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.cucumber.*'])
+//    enablePitest('DAL-extension-jdbc', ['com.github.leeonky.dal.*'], [])
 
     configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
     configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
+    configCucumber('DAL-extension-jdbc', ['com.github.leeonky.dal.extensions'])
 }
 
 task mergedTestReport(type: TestReport) {
