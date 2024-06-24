@@ -16,7 +16,10 @@ buildscript {
                         dal              : '0.2.0-beta',
                         dalExtensionBasic: '0.0.2',
                         lombok           : '1.18.4',
-                        cucumber         : '6.10.4'
+                        cucumber         : '6.10.4',
+                        jackson          : '2.13.1',
+                        jsonassert       : '1.5.0',
+                        pitestMutation   : '0.3.1'
                 ]
         ]
     }
@@ -154,4 +157,8 @@ subprojects {
 task mergedTestReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/allTests")
     reportOn subprojects*.test
+}
+
+task test {
+    finalizedBy mergedTestReport
 }

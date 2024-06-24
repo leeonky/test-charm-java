@@ -1,3 +1,3 @@
 rootProject.name = 'test-charm-java'
 
-include('bean-util', 'interpreter-core')
+include('bean-util', 'interpreter-core', 'java-compiler-util', 'DAL-java')
