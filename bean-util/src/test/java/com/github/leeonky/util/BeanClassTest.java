@@ -1,7 +1,7 @@
 package com.github.leeonky.util;
 
 import com.github.leeonky.dal.extensions.ExtensionInSrcFolder;
-import com.github.leeonky.dal.extensions.StringExtension;
+import com.github.leeonky.dal.extensions.basic.string.StringExtension;
 import hastype.One;
 import hastype.Two;
 import hastype.pkg.Five;
