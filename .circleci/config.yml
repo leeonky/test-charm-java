@@ -1,16 +1,25 @@
 version: 2.1
 jobs:
   build:
-    docker:
-      - image: openjdk:8u342
+    machine:
+      image: ubuntu-2004:202010-01
     steps:
       - add_ssh_keys:
           fingerprints:
             - 'SHA256:RsiwAXfsyThB7csOUCQMDj92/KopbaHoxYY5olkmWF8'
       - checkout
       - run:
+          name: env
+          command: |
+            sudo apt-get update
+            sudo apt-get install openjdk-8-jdk
+            sudo update-java-alternatives --set java-1.8.0-openjdk-amd64
+            sudo docker-compose up -d
+            sudo bash -c "echo '127.0.0.1 www.s.com' >> /etc/hosts"
+      - run:
           name: build
           command: |
+            export CI=true
             ./gradlew test pitest build coveralls
             export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
