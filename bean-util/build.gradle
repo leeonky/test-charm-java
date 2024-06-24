@@ -1,4 +1,4 @@
 dependencies {
-    testImplementation "com.github.leeonky:DAL-java:${versions.test.dal}"
-    testImplementation "com.github.leeonky:DAL-extension-basic:${versions.test.dalExtensionBasic}"
+    testImplementation project('DAL-java')
+    testImplementation project('DAL-extension-basic')
 }
