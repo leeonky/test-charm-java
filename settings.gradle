@@ -11,4 +11,5 @@ include(
         'jfactory-repo-jpa',
         'jfactory-cucumber',
         'jfactory-property-value',
+        'RESTful-cucumber',
 )
