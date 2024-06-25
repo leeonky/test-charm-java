@@ -1,0 +1,50 @@
+version: 2.1
+jobs:
+  test-java9:
+    docker:
+      - image: openjdk:9
+    steps:
+      - checkout
+      - run:
+          name: test
+          command: |
+            echo '127.0.0.1 www.a.com' >> /etc/hosts
+            ./gradlew testAll testPatch cucumberAll cucumberPatch
+
+      - store_artifacts:
+          path: /root/project/build/reports/
+          destination: build-reports
+  build:
+    docker:
+      - image: openjdk:8u342
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - '67:f6:f7:58:66:22:8b:c4:9e:86:68:27:d2:cc:d0:a3'
+      - checkout
+      - run:
+          name: build
+          command: |
+            echo '127.0.0.1 www.a.com' >> /etc/hosts
+            export VERSION_SCOPE=''
+            ./gradlew check build coveralls
+            export PUB_VERSION=$(./gradlew currentVersion -q)
+            if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
+              echo "====== Still version ${PUB_VERSION}, CI done ======"
+              exit 0
+            fi
+            echo "====== Release and tag new version $PUB_VERSION ======"
+            echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
+            ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" publishToNexus
+            git config --global user.email "leeonky@gmail.com"
+            git config --global user.name "leeonky"
+            git tag ${PUB_VERSION} -a -m 'CI Release'
+            git push --tags
+
+workflows:
+  test-and-build:
+    jobs:
+      - test-java9
+      - build:
+          requires:
+            - test-java9
