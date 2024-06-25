@@ -9,4 +9,5 @@ include(
         'DAL-extension-jdbc',
         'jfactory',
         'jfactory-repo-jpa',
+        'jfactory-cucumber',
 )

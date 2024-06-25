@@ -6,7 +6,9 @@ buildscript {
                         jsch     : '0.1.55',
                         snakeyaml: '2.0',
                         javalite : '1.2.2',
-                        jpa      : '2.2'
+                        jpa      : '2.2',
+                        cucumber : '6.10.4',
+                        jackson  : '2.9.0',
                 ],
                 test   : [
                         junit        : '5.3.1',
@@ -26,7 +28,8 @@ buildscript {
                         cucumberJunit: '5.1.1',
                         h2           : '1.4.200',
                         jpa          : '2.2',
-                        hibernate    : '5.4.0.Final'
+                        hibernate    : '5.4.0.Final',
+                        guava        : '20.0',
                 ]
         ]
     }
@@ -269,12 +272,14 @@ subprojects {
 //    enablePitest('DAL-extension-jdbc', ['com.github.leeonky.dal.*'], [])
 //    enablePitest('jfactory', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.spec.*'])
 //    enablePitest('jfactory-repo-jpa', ['com.github.leeonky.jfactory.repo*'], ['com.github.leeonky.jfactory.repo.beans.*'])
+//    enablePitest('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber*'], ['com.github.leeonky.jfactory.cucumber.entity.*'])
 
     configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
     configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-jdbc', ['com.github.leeonky.dal.extensions'])
     configCucumber('jfactory', ['com.github.leeonky'])
+    configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
 }
 
 task mergedTestReport(type: TestReport) {

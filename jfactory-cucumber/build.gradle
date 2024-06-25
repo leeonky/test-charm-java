@@ -1,175 +1,21 @@
-buildscript {
-    ext {
-        libVersions = [
-                cucumberJVM: '6.10.4',
-                jacksonXml : '2.9.0'
-        ]
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
-    }
-    ext {
-        repoName = "git config --get remote.origin.url".execute().getText()
-        projectName = "basename -s .git ${repoName}".execute().getText().trim()
-    }
-}
-
 def dep(p, version) {
     return (gradle.ext.has('projects') && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
 }
 
-plugins {
-    id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.12.2'
-    id 'de.marcphilipp.nexus-publish' version '0.2.0'
-}
-
-jacoco {
-    toolVersion = "0.8.2"
-}
-
-apply plugin: 'java'
-apply plugin: 'signing'
-apply plugin: 'info.solidsoft.pitest'
-apply plugin: "maven"
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-group = 'com.github.leeonky'
-version = '0.1.31' + System.env.VERSION_SCOPE
-sourceCompatibility = 1.8
-
-jacocoTestReport {
-    reports {
-        xml.enabled = true // for coveralls
-        html.enabled = true
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile dep(':jfactory', '0.3.23')
-    compile dep(':DAL-java', '0.5.1')
+    compile project(':jfactory')
+    compile project(':DAL-java')
     implementation dep(':jfactory-property-value', '0.0.15')
 
-    implementation "io.cucumber:cucumber-java:${libVersions.cucumberJVM}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:${libVersions.jacksonXml}"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${libVersions.jacksonXml}"
+    implementation "io.cucumber:cucumber-java:${versions.prod.cucumber}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${versions.prod.jackson}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${versions.prod.jackson}"
 
-    testImplementation dep(':jfactory-repo-jpa', '0.1.12')
-    testImplementation "io.cucumber:cucumber-junit:5.1.1"
-    testImplementation "io.cucumber:cucumber-picocontainer:5.1.1"
-    testImplementation 'org.hibernate:hibernate-core:5.4.0.Final'
-    testImplementation 'org.hibernate:hibernate-entitymanager:5.4.0.Final'
-    testImplementation 'com.h2database:h2:1.4.200'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.3'
-    testImplementation 'org.assertj:assertj-core:3.15.0'
-    testImplementation 'org.projectlombok:lombok:1.18.12'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.3'
-    testImplementation("com.google.guava:guava:20.0")
-
-    pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-pitest {
-    targetClasses = ['com.github.leeonky.jfactory.cucumber*']
-    excludedClasses = ['com.github.leeonky.jfactory.cucumber.entity.*']
-    outputFormats = ['HTML2']
-    junit5PluginVersion = "0.12"
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = projectName
-            from(components.java)
-            artifact sourcesJar
-            artifact javadocJar
-            pom {
-                name = projectName
-                description = projectName
-                url = 'https://github.com/leeonky/' + projectName
-
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'leeonky'
-                        name = 'Liangchen'
-                        email = 'leeonky@gmail.com'
-                    }
-                }
-
-                scm {
-                    connection = 'scm:git:https://github.com/leeonky/' + projectName + '.git'
-                    developerConnection = 'scm:git:git@github.com:leeonky' + projectName + '.git'
-                    url = 'https://github.com/leeonky/' + projectName + '.git'
-                }
-            }
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenJava
-}
-
-nexusPublishing {
-    username = System.env.ossrhUsername
-    password = System.env.ossrhPassword
-}
-
-task currentVersion {
-    doLast {
-        println project.version
-    }
-}
-
-tasks.coveralls {
-    dependsOn jacocoTestReport
-}
-
-configurations {
-    cucumberRuntime {
-        extendsFrom testImplementation
-    }
-}
-
-task cucumber() {
-    dependsOn assemble, testClasses
-    doLast {
-        javaexec {
-            main = "io.cucumber.core.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.jfactory.cucumber', 'src/test/resources/features']
-        }
-    }
-
-    build {
-        dependsOn cucumber
-    }
+    testImplementation project(':jfactory-repo-jpa')
+    testImplementation "io.cucumber:cucumber-junit:${versions.test.cucumberJunit}"
+    testImplementation "io.cucumber:cucumber-picocontainer:${versions.test.cucumberJunit}"
+    testImplementation "org.hibernate:hibernate-core:${versions.test.hibernate}"
+    testImplementation "org.hibernate:hibernate-entitymanager:${versions.test.hibernate}"
+    testImplementation "com.h2database:h2:${versions.test.h2}"
+    testImplementation("com.google.guava:guava:${versions.test.guava}")
 }
