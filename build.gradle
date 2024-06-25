@@ -273,6 +273,7 @@ subprojects {
 //    enablePitest('jfactory', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.spec.*'])
 //    enablePitest('jfactory-repo-jpa', ['com.github.leeonky.jfactory.repo*'], ['com.github.leeonky.jfactory.repo.beans.*'])
 //    enablePitest('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber*'], ['com.github.leeonky.jfactory.cucumber.entity.*'])
+//    enablePitest('jfactory-property-value', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.specs.*', 'com.github.leeonky.jfactory.entity'])
 
     configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
     configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
@@ -280,6 +281,7 @@ subprojects {
     configCucumber('DAL-extension-jdbc', ['com.github.leeonky.dal.extensions'])
     configCucumber('jfactory', ['com.github.leeonky'])
     configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
+    configCucumber('jfactory-property-value', ['com.github.leeonky'])
 }
 
 task mergedTestReport(type: TestReport) {

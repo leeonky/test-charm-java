@@ -1,13 +1,9 @@
-def dep(p, version) {
-    return (gradle.ext.has('projects') && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
-}
-
 dependencies {
     implementation project(':DAL-java')
     implementation "org.javalite:javalite-common:${versions.prod.javalite}"
-    testImplementation dep(':jfactory', '0.3.23')
-    testImplementation dep(':jfactory-cucumber', '0.1.31')
-    testImplementation dep(':jfactory-repo-jpa', '0.1.14')
+    testImplementation project(':jfactory')
+    testImplementation project(':jfactory-cucumber')
+    testImplementation project(':jfactory-repo-jpa')
 
     testImplementation "io.cucumber:cucumber-junit:${versions.test.cucumberJunit}"
     testImplementation "io.cucumber:cucumber-picocontainer:${versions.test.cucumberJunit}"

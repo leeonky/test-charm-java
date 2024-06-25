@@ -1,11 +1,7 @@
-def dep(p, version) {
-    return (gradle.ext.has('projects') && gradle.projects.contains(p)) ? project(p) : "com.github.leeonky${p}:${version}"
-}
-
 dependencies {
     compile project(':jfactory')
     compile project(':DAL-java')
-    implementation dep(':jfactory-property-value', '0.0.15')
+    implementation project(':jfactory-property-value')
 
     implementation "io.cucumber:cucumber-java:${versions.prod.cucumber}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${versions.prod.jackson}"
