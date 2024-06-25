@@ -266,11 +266,13 @@ subprojects {
 //    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
 //    enablePitest('DAL-extension-basic', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.cucumber.*'])
 //    enablePitest('DAL-extension-jdbc', ['com.github.leeonky.dal.*'], [])
+//    enablePitest('jfactory', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.spec.*'])
 
     configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
     configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-jdbc', ['com.github.leeonky.dal.extensions'])
+    configCucumber('jfactory', ['com.github.leeonky'])
 }
 
 task mergedTestReport(type: TestReport) {

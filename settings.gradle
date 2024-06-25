@@ -6,5 +6,6 @@ include(
         'java-compiler-util',
         'DAL-java',
         'DAL-extension-basic',
-        'DAL-extension-jdbc'
+        'DAL-extension-jdbc',
+        'jfactory'
 )
