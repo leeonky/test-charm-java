@@ -281,11 +281,11 @@ subprojects {
     configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
     configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
-    configCucumber('DAL-extension-jdbc', ['com.github.leeonky.dal.extensions'])
+    configCucumber('DAL-extension-jdbc', ['com.github.leeonky'])
     configCucumber('jfactory', ['com.github.leeonky'])
     configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
     configCucumber('jfactory-property-value', ['com.github.leeonky'])
-    configCucumber('RESTful-cucumber', ['com.github.leeonky.cucumber.restful'], [])
+    configCucumber('RESTful-cucumber', ['com.github.leeonky.cucumber.restful'])
 }
 
 task mergedTestReport(type: TestReport) {

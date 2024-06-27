@@ -12,52 +12,38 @@ dependencies {
     testImplementation "commons-fileupload:commons-fileupload:${versions.test.commonsFileupload}"
 }
 
-task testAll(type: Test) {
+task testModuleSafe(type: Test) {
     useJUnitPlatform()
     filter {
-        setExcludePatterns("RestfulStepPatchTest", "RunCucumber")
+        setExcludePatterns("RunCucumberRequiresAddOpens")
     }
     jvmArgs = ['--illegal-access=deny']
 }
 
-task testPatch(type: Test) {
+task testRequiresAddOpens(type: Test) {
     useJUnitPlatform()
-    filter {
-        includeTestsMatching "RestfulStepPatchTest"
-    }
     jvmArgs = ['--illegal-access=deny', '--add-opens', 'java.base/java.net=ALL-UNNAMED']
 }
 
-task cucumber() {
+task cucumberModuleSafe() {
     dependsOn assemble, testClasses
     doLast {
         javaexec {
             main = "io.cucumber.core.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources']
-        }
-    }
-}
-
-task cucumberAll() {
-    dependsOn assemble, testClasses
-    doLast {
-        javaexec {
-            main = "io.cucumber.core.cli.Main"
-            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/features']
+            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/features/module-safe']
             jvmArgs = ['--illegal-access=deny']
         }
     }
 }
 
-task cucumberPatch() {
+task cucumberRequiresAddOpens() {
     dependsOn assemble, testClasses
     doLast {
         javaexec {
             main = "io.cucumber.core.cli.Main"
             classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/patch_features']
+            args = ['--plugin', 'pretty', '--glue', 'com.github.leeonky.cucumber.restful', 'src/test/resources/features/']
             jvmArgs = ['--illegal-access=deny', '--add-opens', 'java.base/java.net=ALL-UNNAMED']
         }
     }

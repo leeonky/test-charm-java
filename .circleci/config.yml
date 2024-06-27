@@ -1,5 +1,33 @@
 version: 2.1
 jobs:
+  test-in-java9-module-safe:
+    docker:
+      - image: openjdk:9
+    steps:
+      - checkout
+      - run:
+          name: test
+          command: |
+            echo '127.0.0.1 www.a.com' >> /etc/hosts
+            ./gradlew testModuleSafe mergedTestReport
+      - store_artifacts:
+          path: /root/project/build/reports/
+          destination: build-reports-java9-module-safe
+
+  test-in-java9-requires-add-opens:
+    docker:
+      - image: openjdk:9
+    steps:
+      - checkout
+      - run:
+          name: test
+          command: |
+            echo '127.0.0.1 www.a.com' >> /etc/hosts
+            ./gradlew testRequiresAddOpens mergedTestReport
+      - store_artifacts:
+          path: /root/project/build/reports/
+          destination: build-reports-java9-requires-add-opens
+
   build:
     machine:
       image: ubuntu-2004:202010-01
@@ -37,3 +65,13 @@ jobs:
       - store_artifacts:
           path: /root/project/build/reports/
           destination: build-reports
+
+workflows:
+  all-build:
+    jobs:
+      - test-in-java9-module-safe
+      - test-in-java9-requires-add-opens
+      - build:
+          requires:
+            - test-in-java9-module-safe
+            - test-in-java9-requires-add-opens
