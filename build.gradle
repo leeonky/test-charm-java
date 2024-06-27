@@ -290,9 +290,16 @@ subprojects {
 
 task mergedTestReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/allTests")
-    reportOn subprojects*.test
 }
 
 task test {
+    finalizedBy mergedTestReport
+}
+
+task testModuleSafe {
+    finalizedBy mergedTestReport
+}
+
+task testRequiresAddOpens {
     finalizedBy mergedTestReport
 }
