@@ -18,11 +18,19 @@ task testModuleSafe(type: Test) {
         setExcludePatterns("RunCucumberRequiresAddOpens", "RestfulStepPatchTest")
     }
     jvmArgs = ['--illegal-access=deny']
+    reports {
+        html.destination = file("${rootProject.buildDir}/allTests-module-safe/${project.name}")
+        junitXml.destination = file("${rootProject.buildDir}/allTests-module-safe/${project.name}")
+    }
 }
 
 task testRequiresAddOpens(type: Test) {
     useJUnitPlatform()
     jvmArgs = ['--illegal-access=deny', '--add-opens', 'java.base/java.net=ALL-UNNAMED']
+    reports {
+        html.destination = file("${rootProject.buildDir}/allTests-requires-add-open/${project.name}")
+        junitXml.destination = file("${rootProject.buildDir}/allTests-requires-add-open/${project.name}")
+    }
 }
 
 task cucumberModuleSafe() {
