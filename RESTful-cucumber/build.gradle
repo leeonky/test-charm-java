@@ -19,8 +19,8 @@ task testModuleSafe(type: Test) {
     }
     jvmArgs = ['--illegal-access=deny']
     reports {
-        html.destination = file("${rootProject.buildDir}/allTests-module-safe/${project.name}")
-        junitXml.destination = file("${rootProject.buildDir}/allTests-module-safe/${project.name}")
+        html.destination = file("${rootProject.buildDir}/tests-module-safe/${project.name}")
+        junitXml.destination = file("${rootProject.buildDir}/tests-module-safe/${project.name}")
     }
 }
 
@@ -28,8 +28,8 @@ task testRequiresAddOpens(type: Test) {
     useJUnitPlatform()
     jvmArgs = ['--illegal-access=deny', '--add-opens', 'java.base/java.net=ALL-UNNAMED']
     reports {
-        html.destination = file("${rootProject.buildDir}/allTests-requires-add-open/${project.name}")
-        junitXml.destination = file("${rootProject.buildDir}/allTests-requires-add-open/${project.name}")
+        html.destination = file("${rootProject.buildDir}/tests-requires-add-open/${project.name}")
+        junitXml.destination = file("${rootProject.buildDir}/tests-requires-add-open/${project.name}")
     }
 }
 

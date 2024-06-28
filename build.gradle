@@ -289,8 +289,8 @@ subprojects {
 
     test {
         reports {
-            html.destination = file("${rootProject.buildDir}/allTests/${project.name}")
-            junitXml.destination = file("${rootProject.buildDir}/allTests/${project.name}")
+            html.destination = file("${rootProject.buildDir}/tests/${project.name}")
+            junitXml.destination = file("${rootProject.buildDir}/tests/${project.name}")
         }
     }
 }
