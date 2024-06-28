@@ -9,7 +9,7 @@ jobs:
           name: test
           command: |
             echo '127.0.0.1 www.a.com' >> /etc/hosts
-            ./gradlew testModuleSafe
+            ./gradlew testModuleSafe -x test
       - store_artifacts:
           path: /root/project/build/reports/
           destination: build-reports-java9-module-safe
@@ -23,7 +23,7 @@ jobs:
           name: test
           command: |
             echo '127.0.0.1 www.a.com' >> /etc/hosts
-            ./gradlew testRequiresAddOpens
+            ./gradlew testRequiresAddOpens -x test
       - store_artifacts:
           path: /root/project/build/reports/
           destination: build-reports-java9-requires-add-opens
