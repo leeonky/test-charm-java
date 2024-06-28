@@ -11,7 +11,7 @@ jobs:
             echo '127.0.0.1 www.a.com' >> /etc/hosts
             ./gradlew testModuleSafe -x test
       - store_artifacts:
-          path: $CIRCLE_WORKING_DIRECTORY/build/tests-module-safe/
+          path: build/tests-module-safe/
           destination: build-reports-java9-module-safe
 
   test-in-java9-requires-add-opens:
@@ -25,7 +25,7 @@ jobs:
             echo '127.0.0.1 www.a.com' >> /etc/hosts
             ./gradlew testRequiresAddOpens -x test
       - store_artifacts:
-          path: $CIRCLE_WORKING_DIRECTORY/build/tests-requires-add-open/
+          path: build/tests-requires-add-open/
           destination: build-reports-java9-requires-add-opens
 
   build:
@@ -64,7 +64,7 @@ jobs:
             git push --tags
 
       - store_artifacts:
-          path: $CIRCLE_WORKING_DIRECTORY/build/tests/
+          path: build/tests/
           destination: build-reports
 
 workflows:
