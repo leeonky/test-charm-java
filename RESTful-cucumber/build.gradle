@@ -15,7 +15,7 @@ dependencies {
 task testModuleSafe(type: Test) {
     useJUnitPlatform()
     filter {
-        setExcludePatterns("RunCucumberRequiresAddOpens")
+        setExcludePatterns("RunCucumberRequiresAddOpens", "RestfulStepPatchTest")
     }
     jvmArgs = ['--illegal-access=deny']
 }
