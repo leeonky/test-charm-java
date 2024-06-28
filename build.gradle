@@ -290,6 +290,18 @@ subprojects {
 
 task mergedTestReport(type: TestReport) {
     destinationDir = file("$buildDir/reports/allTests")
+    List<Task> testsToReportOn = []
+
+    subprojects { subproject ->
+        if (subproject.tasks.findByName('test') != null)
+            testsToReportOn.add(subproject.tasks['test'])
+        if (subproject.tasks.findByName('testModuleSafe') != null)
+            testsToReportOn.add(subproject.tasks['testModuleSafe'])
+        if (subproject.tasks.findByName('testRequiresAddOpens') != null)
+            testsToReportOn.add(subproject.tasks['testRequiresAddOpens'])
+    }
+
+    reportOn testsToReportOn
 }
 
 task test {
