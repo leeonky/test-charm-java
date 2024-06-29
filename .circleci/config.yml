@@ -49,7 +49,7 @@ jobs:
           name: build
           command: |
             export CI=true
-            ./gradlew test pitest build coveralls
+            ./gradlew test pitest build coveralls --parallel
             export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
               echo "====== Still version ${PUB_VERSION}, CI done ======"

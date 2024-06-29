@@ -122,11 +122,9 @@ subprojects {
     }
 
     test {
-        test {
-            systemProperty("cucumber.publish.quiet", true)
-            useJUnitPlatform {
-                excludeTags("disabled")
-            }
+        systemProperty("cucumber.publish.quiet", true)
+        useJUnitPlatform {
+            excludeTags("disabled")
         }
     }
 
@@ -236,15 +234,6 @@ subprojects {
             configurations {
                 cucumberRuntime {
                     extendsFrom testImplementation
-                }
-            }
-
-            test {
-                test {
-                    systemProperty("cucumber.publish.quiet", true)
-                    useJUnitPlatform {
-                        excludeTags("disabled")
-                    }
                 }
             }
 
