@@ -3,12 +3,14 @@ buildscript {
         versions = [
                 project: 'beta-ci-0.0.2',
                 prod   : [
-                        jsch     : '0.1.55',
-                        snakeyaml: '2.0',
-                        javalite : '1.2.2',
-                        jpa      : '2.2',
-                        cucumber : '6.10.4',
-                        jackson  : '2.9.0',
+                        jsch       : '0.1.55',
+                        snakeyaml  : '2.0',
+                        javalite   : '1.2.2',
+                        jpa        : '2.2',
+                        cucumber   : '6.10.4',
+                        jackson    : '2.9.0',
+                        orika      : '1.5.4',
+                        reflections: '0.9.11'
                 ],
                 test   : [
                         junit            : '5.3.1',

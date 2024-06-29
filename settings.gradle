@@ -12,4 +12,5 @@ include(
         'jfactory-cucumber',
         'jfactory-property-value',
         'RESTful-cucumber',
+        'view-mapper'
 )
