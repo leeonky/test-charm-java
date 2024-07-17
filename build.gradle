@@ -1,7 +1,7 @@
 buildscript {
     ext {
         versions = [
-                project: 'beta-ci-0.0.2',
+                project: '0.6.7',
                 prod   : [
                         jsch       : '0.1.55',
                         snakeyaml  : '2.0',
