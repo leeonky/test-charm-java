@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeParseException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -103,7 +102,7 @@ public class Converter {
         Class<?> source = value.getClass();
         if (target.isAssignableFrom(source))
             return value;
-        return typeConverterSet.findHandler(source, target, Collections::emptyList)
+        return typeConverterSet.findHandler(source, target)
                 .map(c -> c.getHandler().apply(value))
                 .orElseGet(() -> defaultConvert(target, value, defaultValue, source));
     }
@@ -155,7 +154,7 @@ public class Converter {
     public boolean supported(Class<?> source, Class<?> target) {
         if (target.isAssignableFrom(source))
             return true;
-        if (typeConverterSet.findHandler(source, target, Collections::emptyList).isPresent())
+        if (typeConverterSet.findHandler(source, target).isPresent())
             return true;
         if (target.isEnum())
             return true;

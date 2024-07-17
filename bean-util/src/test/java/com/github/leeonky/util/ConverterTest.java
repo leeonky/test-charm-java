@@ -22,6 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ConverterTest {
     private Converter converter = new Converter();
 
+    public static class NumberString {
+        public String string;
+    }
+
     @Test
     void support_convert_null() {
         assertThat(converter.tryConvert(String.class, null)).isNull();
@@ -327,6 +331,14 @@ class ConverterTest {
         void convent_to_big_integer() {
             numbers.forEach(number ->
                     assertThat(converter.tryConvert(BigInteger.class, number)).isEqualTo(new BigInteger("0")));
+        }
+
+        @Test
+        void convert_to_number() {
+            converter.addTypeConverter(NumberString.class, Number.class, n -> new NumberParser().parse(n.string));
+            assertThat(converter.convert(Number.class, new NumberString() {{
+                string = "1000L";
+            }})).isEqualTo(1000L);
         }
     }
 
