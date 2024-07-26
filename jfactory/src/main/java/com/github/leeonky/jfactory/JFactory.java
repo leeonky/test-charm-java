@@ -7,6 +7,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static com.github.leeonky.jfactory.DefaultBuilder.BuildFrom.SPEC;
+import static com.github.leeonky.jfactory.DefaultBuilder.BuildFrom.TYPE;
+
 public class JFactory {
     final AliasSetStore aliasSetStore = new AliasSetStore();
     private final FactorySet factorySet = new FactorySet();
@@ -38,7 +41,7 @@ public class JFactory {
     }
 
     public <T> Builder<T> type(BeanClass<T> type) {
-        return new DefaultBuilder<>(factorySet.queryObjectFactory(type), this);
+        return new DefaultBuilder<>(factorySet.queryObjectFactory(type), this, TYPE);
     }
 
     public <T> Builder<T> type(TypeReference<T> type) {
@@ -46,11 +49,11 @@ public class JFactory {
     }
 
     public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass) {
-        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specClass), this);
+        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specClass), this, SPEC);
     }
 
     public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass, Consumer<S> trait) {
-        return new DefaultBuilder<>(factorySet.createSpecFactory(specClass, trait), this);
+        return new DefaultBuilder<>(factorySet.createSpecFactory(specClass, trait), this, SPEC);
     }
 
     public <T, S extends Spec<T>> JFactory register(Class<S> specClass) {
@@ -75,7 +78,7 @@ public class JFactory {
     }
 
     public <T> Builder<T> spec(String... traitsAndSpec) {
-        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(traitsAndSpec[traitsAndSpec.length - 1]), this)
+        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(traitsAndSpec[traitsAndSpec.length - 1]), this, SPEC)
                 .traits(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
     }
 

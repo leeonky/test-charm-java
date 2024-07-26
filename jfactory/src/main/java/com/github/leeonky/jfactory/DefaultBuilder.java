@@ -6,11 +6,16 @@ import com.github.leeonky.util.CollectionHelper;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.jfactory.DefaultBuilder.BuildFrom.SPEC;
 import static com.github.leeonky.util.BeanClass.cast;
 import static java.util.Arrays.asList;
 import static java.util.Objects.hash;
 
 class DefaultBuilder<T> implements Builder<T> {
+    enum BuildFrom {
+        TYPE, SPEC
+    }
+
     private final ObjectFactory<T> objectFactory;
     private final JFactory jFactory;
     private final Set<String> traits = new LinkedHashSet<>();
@@ -18,11 +23,13 @@ class DefaultBuilder<T> implements Builder<T> {
     private final KeyValueCollection properties;
     private final DefaultArguments arguments = new DefaultArguments();
     private int collectionSize = 0;
+    private final BuildFrom buildFrom;
 
-    public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory) {
+    public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory, BuildFrom buildFrom) {
         this.jFactory = jFactory;
         this.objectFactory = objectFactory;
         properties = new KeyValueCollection(objectFactory.getFactorySet());
+        this.buildFrom = buildFrom;
     }
 
     @Override
@@ -77,11 +84,11 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public DefaultBuilder<T> clone() {
-        return clone(objectFactory);
+        return clone(objectFactory, buildFrom);
     }
 
-    private DefaultBuilder<T> clone(ObjectFactory<T> objectFactory) {
-        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory);
+    private DefaultBuilder<T> clone(ObjectFactory<T> objectFactory, BuildFrom from) {
+        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory, from);
         builder.properties.appendAll(properties);
         builder.traits.addAll(traits);
         builder.arguments.merge(arguments);
@@ -169,9 +176,9 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public DefaultBuilder<T> marge(DefaultBuilder<T> another) {
-        ObjectFactory<T> objectFactory = another.objectFactory instanceof SpecClassFactory ? another.objectFactory
-                : this.objectFactory;
-        DefaultBuilder<T> newBuilder = clone(objectFactory);
+        ObjectFactory<T> objectFactory = another.buildFrom == SPEC && another.objectFactory instanceof SpecClassFactory
+                ? another.objectFactory : this.objectFactory;
+        DefaultBuilder<T> newBuilder = clone(objectFactory, BuildFrom.TYPE);
         newBuilder.properties.appendAll(another.properties);
         newBuilder.traits.addAll(another.traits);
         newBuilder.collectionSize = collectionSize;
