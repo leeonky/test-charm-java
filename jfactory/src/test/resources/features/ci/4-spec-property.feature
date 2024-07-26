@@ -182,6 +182,49 @@ Feature: define spec
       value= hello
       """
 
+    Scenario: define lazy mode default value by rotate array
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+      }
+      """
+      And the following spec class:
+      """
+      @Global
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value").defaultValue(instance().rotate("a", "b"));
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeans extends Spec<Beans> {
+        @Override
+        public void main() {
+          property("beans[0]").is(ABean.class);
+          property("beans[1]").is(ABean.class);
+          property("beans[2]").is(ABean.class);
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABeans.class);
+      """
+      Then the result should:
+      """
+      beans.value[]= [b a b]
+      """
+
     Scenario: null value - null should be considered as null object value, not null Supplier<Object>
       Given the following bean class:
       """

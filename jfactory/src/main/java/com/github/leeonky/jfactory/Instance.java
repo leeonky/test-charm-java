@@ -26,4 +26,8 @@ public interface Instance<T> {
     default Object traitParam(int index) {
         return traitParams()[index];
     }
+
+    default <T> Supplier<T> rotate(T... values) {
+        return () -> values[getSequence() % values.length];
+    }
 }
