@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast.node;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -172,7 +173,7 @@ public class ListScopeNode extends DALNode {
                         clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                                 new SymbolNode(elementIndex, BRACKET))).evaluate(context);
                         break;
-                    } catch (AssertionFailure ignore) {
+                    } catch (AssertionFailure | RuntimeException ignore) {
                     }
                 }
             } catch (AssertionFailure exception) {

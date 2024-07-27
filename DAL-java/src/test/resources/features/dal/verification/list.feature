@@ -452,6 +452,29 @@ Feature: list
       ...]
       """
 
+    Scenario: list "contains" should ignore dal runtime exception
+      Given the following java class:
+      """
+      public class A {
+      }
+      """
+      Given the following java class:
+      """
+      public class B {
+        public String value = "b";
+      }
+      """
+      Given the following java class:
+      """
+      public class Data {
+        public Object[] values = new Object[]{ new A(), new B()};
+      }
+      """
+      Then the following verification for the instance of java class "Data" should pass:
+      """
+      values: [... {value: b} ...]
+      """
+
     Scenario: sort list
       Given the following json:
       """
