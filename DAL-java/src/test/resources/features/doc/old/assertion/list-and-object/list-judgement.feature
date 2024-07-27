@@ -15,9 +15,13 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Different list size
+    Unexpected list size
     Expected: <1>
     Actual: <2>
+    Actual list: org.json.JSONArray [
+        java.lang.Integer <1>,
+        java.lang.Integer <2>
+    ]
     """
     And got the following source code information:
     """
@@ -58,9 +62,13 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Different list size
+    Unexpected list size
     Expected: <1>
     Actual: <2>
+    Actual list: org.json.JSONArray [
+        java.lang.Integer <1>,
+        java.lang.Integer <2>
+    ]
     """
     And got the following source code information:
     """
@@ -145,9 +153,13 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Different list size
+    Unexpected list size
     Expected: <1>
     Actual: <2>
+    Actual list: org.json.JSONArray [
+        java.lang.Integer <2>,
+        java.lang.Integer <3>
+    ]
     """
     And got the following source code information:
     """

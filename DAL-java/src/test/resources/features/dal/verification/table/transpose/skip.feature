@@ -274,7 +274,20 @@ Feature: skip
     """
     Then failed with the message:
     """
-    No such element
+    No such element in list: [
+        {
+            name: java.lang.String <Tom>,
+            age: java.lang.Integer <10>
+        },
+        {
+            name: java.lang.String <John>,
+            age: java.lang.Integer <20>
+        },
+        {
+            name: java.lang.String <Lily>,
+            age: java.lang.Integer <15>
+        }
+    ]
     """
     And got the following notation:
     """
@@ -297,9 +310,10 @@ Feature: skip
     """
     Then failed with the message:
     """
-    Different list size
+    Unexpected list size
     Expected: <1>
     Actual: <0>
+    Actual list: []
     """
     And got the following notation:
     """

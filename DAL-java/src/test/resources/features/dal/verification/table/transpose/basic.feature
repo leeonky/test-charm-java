@@ -27,9 +27,12 @@ Feature: basic verification via table
     """
     Then failed with the message:
     """
-    Different list size
+    Unexpected list size
     Expected: <0>
     Actual: <1>
+    Actual list: [
+        java.lang.Integer <1>
+    ]
     """
     And got the following notation:
     """
@@ -68,9 +71,12 @@ Feature: basic verification via table
     """
     Then failed with the message:
     """
-    Different list size
+    Unexpected list size
     Expected: <0>
     Actual: <1>
+    Actual list: [
+        java.lang.Integer <1>
+    ]
     """
     And got the following notation:
     """

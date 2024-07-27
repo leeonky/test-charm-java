@@ -31,9 +31,14 @@ Feature: two dimensional array
     """
     Then failed with the message:
     """
-    Different list size
+    Unexpected list size
     Expected: <2>
     Actual: <3>
+    Actual list: [
+        java.lang.String <str3>,
+        java.lang.String <str4>,
+        java.lang.String <strB>
+    ]
     """
     And got the following notation:
     """

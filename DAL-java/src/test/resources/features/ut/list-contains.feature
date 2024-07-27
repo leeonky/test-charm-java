@@ -44,7 +44,9 @@ Feature: list contains UT
     """
     Then failed with the message:
     """
-    No such element
+    No such element in list: [
+        java.lang.Integer <1>
+    ]
     """
     And got the following notation:
     """
@@ -73,7 +75,7 @@ Feature: list contains UT
     """
     Then failed with the message:
     """
-    No such element
+    No such element in list: []
     """
     And got the following notation:
     """
@@ -100,7 +102,10 @@ Feature: list contains UT
     """
     Then failed with the message:
     """
-    No such element
+    No such element in list: [
+        java.lang.Integer <1>,
+        java.lang.Integer <2>
+    ]
     """
     And got the following notation:
     """
@@ -119,7 +124,10 @@ Feature: list contains UT
     """
     Then failed with the message:
     """
-    No such element
+    No such element in list: [
+        java.lang.Integer <1>,
+        java.lang.Integer <2>
+    ]
     """
     And got the following notation:
     """
