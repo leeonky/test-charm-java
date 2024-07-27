@@ -81,7 +81,7 @@ public class Data {
     }
 
     private String listMappingMessage(Data data, Object symbol) {
-        return data.isList() ? format("\nImplicit list mapping is not allowed in current version of DAL, use `%s[]` instead",
+        return data.isList() ? format("\nImplicit list mapping is not allowed in current version of DAL, use `%s[]` instead or specify index in []",
                 symbol) : "";
     }
 

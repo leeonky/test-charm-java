@@ -127,7 +127,7 @@ Feature: list mapping
       5. customized type getter
       6. static method extension
     Method or property `id` does not exist in `java.util.ArrayList`
-    Implicit list mapping is not allowed in current version of DAL, use `id[]` instead
+    Implicit list mapping is not allowed in current version of DAL, use `id[]` instead or specify index in []
     """
     And got the following notation:
     """

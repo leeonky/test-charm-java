@@ -31,9 +31,12 @@ Feature: list
       """
       Then failed with the message:
       """
-      Different list size
+      Unexpected list size
       Expected: <2>
       Actual: <1>
+      Actual list: [
+          java.lang.Integer <1>
+      ]
       """
       And got the following notation:
       """
@@ -46,9 +49,12 @@ Feature: list
       """
       Then failed with the message:
       """
-      Different list size
+      Unexpected list size
       Expected: <0>
       Actual: <1>
+      Actual list: [
+          java.lang.Integer <1>
+      ]
       """
       And got the following notation:
       """
@@ -397,7 +403,12 @@ Feature: list
       """
       Then failed with the message:
       """
-      No such element
+      No such element in list: [
+          java.lang.Integer <1>,
+          java.lang.Integer <2>,
+          java.lang.Integer <3>,
+          java.lang.Integer <4>
+      ]
       """
       And got the following notation:
       """
@@ -438,7 +449,16 @@ Feature: list
       """
       Then failed with the message:
       """
-      No such element
+      No such element in list: [
+          {
+              name: java.lang.String <Tom>,
+              age: java.lang.Integer <18>
+          },
+          {
+              name: java.lang.String <John>,
+              age: java.lang.Integer <20>
+          }
+      ]
       """
       And got the following notation:
       """
@@ -753,7 +773,7 @@ Feature: list
         5. customized type getter
         6. static method extension
       Not support negative index in infinite collection
-      Implicit list mapping is not allowed in current version of DAL, use `-1[]` instead
+      Implicit list mapping is not allowed in current version of DAL, use `-1[]` instead or specify index in []
       """
       And got the following notation:
       """
