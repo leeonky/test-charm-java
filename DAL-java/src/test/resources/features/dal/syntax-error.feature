@@ -85,3 +85,114 @@ Feature: syntax error expression
     1 is Number * 1
                 ^
     """
+
+  Scenario: give an error when have space between property in object verification
+    Given set error when ambiguous missed comma
+    Given the following json:
+    """
+    {
+      "length": 5,
+      "value": "value",
+      "list": [1, 2, 3, 4, 5]
+    }
+    """
+    When evaluate by:
+    """
+    : {
+      length= 'value'
+      [length]
+    }
+    """
+    Then failed with the message:
+    """
+    Missing a comma or remove whitespace.
+    """
+    And got the following notation:
+    """
+    : {
+      length= 'value'
+                    ^
+      [length]
+      ^
+    }
+    """
+    When evaluate by:
+    """
+    : {
+      length= .value
+      [length]
+    }
+    """
+    Then failed with the message:
+    """
+    Missing a comma or remove whitespace.
+    """
+    And got the following notation:
+    """
+    : {
+      length= .value
+                   ^
+      [length]
+      ^
+    }
+    """
+    When evaluate by:
+    """
+    : {
+      length= .value
+      .length
+    }
+    """
+    Then failed with the message:
+    """
+    Missing a comma or remove whitespace.
+    """
+    And got the following notation:
+    """
+    : {
+      length= .value
+                   ^
+      .length
+      ^
+    }
+    """
+    When evaluate by:
+    """
+    : {
+      length= .list
+      ::size
+    }
+    """
+    Then failed with the message:
+    """
+    Missing a comma or remove whitespace.
+    """
+    And got the following notation:
+    """
+    : {
+      length= .list
+                  ^
+      ::size
+      ^
+    }
+    """
+    When evaluate by:
+    """
+    : {
+      length= .list
+      <<size>>
+    }
+    """
+    Then failed with the message:
+    """
+    Missing a comma or remove whitespace.
+    """
+    And got the following notation:
+    """
+    : {
+      length= .list
+                  ^
+      <<size>>
+      ^
+    }
+    """

@@ -78,4 +78,9 @@ public class GroupExpression extends DALNode {
             rowType = rowType.merge(expression.guessTableHeaderType());
         return rowType;
     }
+
+    @Override
+    public boolean needPrefixBlankWarningCheck() {
+        return true;
+    }
 }

@@ -271,4 +271,14 @@ public class IntegrationSteps {
     public void gotTheFollowingWarning(String verification) {
         integrationTestContext.shouldHaveWarning(verification);
     }
+
+    @Given("set warning when ambiguous missed comma")
+    public void setWarningWhenAmbiguousMissedComma() {
+        integrationTestContext.setWarningWhenAmbiguousMissedComma();
+    }
+
+    @Given("set error when ambiguous missed comma")
+    public void setErrorWhenAmbiguousMissedComma() {
+        integrationTestContext.setErrorWhenAmbiguousMissedComma();
+    }
 }

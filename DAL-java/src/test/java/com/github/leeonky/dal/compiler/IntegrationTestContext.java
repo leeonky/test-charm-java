@@ -436,6 +436,14 @@ public class IntegrationTestContext {
         assertThat("\n" + message).isEqualTo("\n" + verification);
     }
 
+    public void setWarningWhenAmbiguousMissedComma() {
+        dal.getRuntimeContextBuilder().features().ambiguousMissedComma(Features.Level.WARNING);
+    }
+
+    public void setErrorWhenAmbiguousMissedComma() {
+        dal.getRuntimeContextBuilder().features().ambiguousMissedComma(Features.Level.ERROR);
+    }
+
     public static class Empty {
     }
 }

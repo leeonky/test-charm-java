@@ -1,6 +1,7 @@
 Feature: syntax-warning
 
   Scenario: give an warning when have space between property in object verification
+    Given set warning when ambiguous missed comma
     Given the following json:
     """
     {
@@ -76,6 +77,24 @@ Feature: syntax-warning
       length= .list
                   ^
       ::size
+      ^
+    }
+
+    Warning: may be ambiguous. Please add a comma or remove whitespace to clear this warning.
+    """
+    Then the following verification should pass:
+    """
+    : {
+      length= .list
+      <<size>>
+    }
+    """
+    But got the following warning:
+    """
+    : {
+      length= .list
+                  ^
+      <<size>>
       ^
     }
 

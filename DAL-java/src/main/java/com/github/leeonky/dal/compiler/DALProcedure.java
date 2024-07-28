@@ -4,11 +4,8 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.NodeParser;
+import com.github.leeonky.interpreter.*;
 import com.github.leeonky.interpreter.NodeParser.Mandatory;
-import com.github.leeonky.interpreter.Procedure;
-import com.github.leeonky.interpreter.SourceCode;
-import com.github.leeonky.interpreter.StringWithPosition;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -16,6 +13,7 @@ import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.compiler.Notations.OPENING_GROUP;
 import static com.github.leeonky.dal.compiler.Notations.Operators.NOT_EQUAL;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
 import static java.util.Collections.singleton;
 
 public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
@@ -136,10 +134,16 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
             int rightPosition = operator.getPosition() > 0 ? operator.getPosition() : right.getPositionBegin();
             int first = getSourceCode().chars().newlineBetween(left.getOperandPosition(), rightPosition);
             if (first != -1) {
-                StringWithPosition stringWithPosition = new StringWithPosition(getSourceCode().chars().getCode());
-                stringWithPosition.position(first).position(rightPosition);
-                runtimeContext.warningOutput().append(stringWithPosition.result())
-                        .append("\n\nWarning: may be ambiguous. Please add a comma or remove whitespace to clear this warning.");
+                switch (runtimeContext.features().ambiguousMissedComma()) {
+                    case WARNING:
+                        StringWithPosition stringWithPosition = new StringWithPosition(getSourceCode().chars().getCode());
+                        stringWithPosition.position(first).position(rightPosition);
+                        runtimeContext.warningOutput().append(stringWithPosition.result())
+                                .append("\n\nWarning: may be ambiguous. Please add a comma or remove whitespace to clear this warning.");
+                        break;
+                    case ERROR:
+                        throw new SyntaxException("Missing a comma or remove whitespace.", first).multiPosition(rightPosition, CHAR);
+                }
             }
         }
         return DALExpression.expression(left, operator, right);

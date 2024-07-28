@@ -66,6 +66,7 @@ public class RuntimeContextBuilder {
     private final Map<Class<?>, Map<Object, Function<MetaData, Object>>> localMetaProperties
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
+    private final Features features = new Features();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -287,11 +288,19 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public Features features() {
+        return features;
+    }
+
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
         private final Data inputValue;
         private final Throwable inputError;
+
+        public Features features() {
+            return features;
+        }
 
         public DALRuntimeContext(InputCode<?> supplier, Class<?> schema) {
             BeanClass<?> rootSchema = null;
