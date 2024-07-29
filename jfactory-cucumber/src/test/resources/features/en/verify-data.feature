@@ -7,5 +7,5 @@ Feature: verify data in one step
     Then should be:
     """
     商品: | name |
-          | booK |
+          | book |
     """

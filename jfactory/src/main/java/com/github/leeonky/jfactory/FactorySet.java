@@ -3,10 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Classes;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 class FactorySet {
@@ -14,7 +11,7 @@ class FactorySet {
     private final DefaultValueFactories defaultValueFactories = new DefaultValueFactories();
     private final Map<BeanClass<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
-    private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new HashMap<>();
+    private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new LinkedHashMap<>();
 
     @SuppressWarnings("unchecked")
     public <T> ObjectFactory<T> queryObjectFactory(BeanClass<T> type) {
@@ -88,6 +85,6 @@ class FactorySet {
     }
 
     public Set<String> specNames() {
-        return specClassFactoriesWithName.keySet();
+        return new HashSet<>(specClassFactoriesWithName.keySet());
     }
 }
