@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':DAL-java')
+    implementation project(':jfactory')
+    testImplementation project(':jfactory-cucumber')
+}

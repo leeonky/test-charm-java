@@ -46,9 +46,8 @@ class CurryingMethodGroup implements CurryingMethod {
     private Optional<InstanceCurryingMethod> selectCurryingMethod(Predicate<InstanceCurryingMethod> predicate) {
         List<InstanceCurryingMethod> methods = curryingMethods.stream().filter(predicate).collect(toList());
         if (methods.size() > 1) {
-            List<InstanceCurryingMethod> sameInstanceTypeMethods = methods.stream()
-                    .filter(StaticCurryingMethod.class::isInstance).collect(toList());
-            return of(getFirstPresent(() -> getOnlyOne(sameInstanceTypeMethods), () -> getOnlyOne(sameInstanceTypeMethods.stream()
+            List<InstanceCurryingMethod> highPriorityMethod = methods.stream().filter(StaticCurryingMethod.class::isInstance).collect(toList());
+            return of(getFirstPresent(() -> getOnlyOne(highPriorityMethod), () -> getOnlyOne(highPriorityMethod.stream()
                     .filter(InstanceCurryingMethod::isSameInstanceType).collect(toList())))
                     .orElseThrow(() -> new InvalidPropertyException("More than one currying method:\n"
                             + methods.stream().map(instanceCurryingMethod -> "  " + instanceCurryingMethod.toString())

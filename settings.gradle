@@ -7,6 +7,7 @@ include(
         'DAL-java',
         'DAL-extension-basic',
         'DAL-extension-jdbc',
+        'DAL-extension-jfactory',
         'jfactory',
         'jfactory-repo-jpa',
         'jfactory-cucumber',
