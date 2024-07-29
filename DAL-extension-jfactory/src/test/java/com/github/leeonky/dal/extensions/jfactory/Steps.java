@@ -5,6 +5,7 @@ import com.github.leeonky.dal.extensions.Beans;
 import com.github.leeonky.dal.extensions.Orders;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.cucumber.JData;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 
@@ -17,6 +18,11 @@ public class Steps {
         register(Beans.class);
     }};
     private static final JData jdata = new JData(jFactory);
+
+    @Before
+    public void reset() {
+        jFactory.getDataRepository().clear();
+    }
 
     @Given("{string}:")
     public void givenData(String spec, io.cucumber.datatable.DataTable dataTable) {

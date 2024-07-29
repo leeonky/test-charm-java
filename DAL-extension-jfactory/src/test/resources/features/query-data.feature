@@ -6,7 +6,7 @@ Feature: query data
       | 1  | SN1  |
     Then query data by jfactory:
     """
-    = {
+    : {
       Orders: [{
         id= 1
         code= SN1
