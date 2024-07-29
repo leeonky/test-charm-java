@@ -133,4 +133,8 @@ public class JFactory {
         factorySet.removeGlobalSpec(BeanClass.create(type));
         return this;
     }
+
+    public Set<String> specNames() {
+        return factorySet.specNames();
+    }
 }

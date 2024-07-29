@@ -9,6 +9,7 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.DocStringType;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.But;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.zh_cn.假如;
@@ -180,6 +181,16 @@ public class JData {
     @And("exists data:")
     public void prepare(String data) {
         DataParser.specs(data).forEach(spec -> prepare(spec.traitSpec(), flattenTable(spec.properties())));
+    }
+
+    @假如("数据:")
+    @并且("数据应为:")
+    @Then("should be:")
+    @And("Should be:")
+    @But("all data should be:")
+    @Given("All data should be:")
+    public void allDataShouldBe(String dalExpression) {
+        expect(jFactory).should(dalExpression);
     }
 
     private List<Map<String, ?>> addAssociationProperty(String reverseAssociationProperty, String queryExpression,

@@ -6,6 +6,7 @@ import com.github.leeonky.util.Classes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 class FactorySet {
@@ -84,5 +85,9 @@ class FactorySet {
 
     public <T> void registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {
         defaultValueFactories.register(type, factory);
+    }
+
+    public Set<String> specNames() {
+        return specClassFactoriesWithName.keySet();
     }
 }
