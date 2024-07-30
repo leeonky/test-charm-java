@@ -70,7 +70,7 @@ abstract class Producer<T> {
         return Stream.of(defaultLinkerReference(root, absoluteCurrent));
     }
 
-    public Optional<Producer> subDefaultValueProducer(PropertyWriter<?> property) {
+    public Optional<Producer<?>> createPropertyDefaultValueProducer(PropertyWriter<?> property) {
         return Optional.empty();
     }
 

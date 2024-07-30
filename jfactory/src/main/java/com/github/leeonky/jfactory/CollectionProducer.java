@@ -9,24 +9,29 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static java.lang.Integer.max;
-import static java.lang.Integer.valueOf;
+import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final List<Producer<?>> children = new ArrayList<>();
-    private final Function<Integer, Producer<?>> placeholderFactory;
-    private final Function<String, Optional<Producer>> subDefaultValueProducerFactory;
+    private final BeanClass<T> parentType;
+    private final CollectionInstance<T> collection;
+    private final FactorySet factorySet;
+    private Function<Integer, Producer<?>> elementDefaultValueProducerFactory;
 
     public CollectionProducer(BeanClass<T> parentType, BeanClass<C> collectionType,
                               SubInstance<T> instance, FactorySet factorySet) {
         super(collectionType);
-        CollectionInstance<T> collection = instance.inCollection();
-        BeanClass<?> elementType = collectionType.getElementType();
-        placeholderFactory = index -> new DefaultValueFactoryProducer<>(parentType,
-                factorySet.getDefaultValueBuilder(elementType), collection.element(index));
-        subDefaultValueProducerFactory = index -> factorySet.queryDefaultValueBuilder(elementType)
-                .map(builder -> new DefaultValueFactoryProducer<>(parentType, builder, collection.element(valueOf(index))));
+        this.parentType = parentType;
+        collection = instance.inCollection();
+        this.factorySet = factorySet;
+        elementDefaultValueProducerFactory = index -> new DefaultValueFactoryProducer<>(parentType,
+                factorySet.getDefaultValueFactory(collectionType.getElementType()), collection.element(index));
+    }
+
+    public void changeElementDefaultValueProducerFactory(Function<Integer, Producer<?>> factory) {
+        elementDefaultValueProducerFactory = factory;
     }
 
     @Override
@@ -37,14 +42,14 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     public Optional<Producer<?>> child(String property) {
-        int index = valueOf(property);
+        int index = parseInt(property);
         index = transformNegativeIndex(index);
         return Optional.ofNullable(index < children.size() ? children.get(index) : null);
     }
 
     @Override
     public void setChild(String property, Producer<?> producer) {
-        int index = valueOf(property);
+        int index = parseInt(property);
         fillCollectionWithDefaultValue(index);
         children.set(transformNegativeIndex(index), producer);
     }
@@ -59,18 +64,18 @@ class CollectionProducer<T, C> extends Producer<C> {
         int changed = 0;
         if (index >= 0) {
             for (int i = children.size(); i <= index; i++, changed++)
-                children.add(placeholderFactory.apply(i));
+                children.add(elementDefaultValueProducerFactory.apply(i));
         } else {
             int count = max(children.size(), -index) - children.size();
             for (int i = 0; i < count; i++, changed++)
-                children.add(i, placeholderFactory.apply(i));
+                children.add(i, elementDefaultValueProducerFactory.apply(i));
         }
         return changed;
     }
 
     @Override
     public Producer<?> childOrDefault(String property) {
-        int index = valueOf(property);
+        int index = parseInt(property);
         fillCollectionWithDefaultValue(index);
         return children.get(transformNegativeIndex(index));
     }
@@ -87,8 +92,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Optional<Producer> subDefaultValueProducer(PropertyWriter<?> property) {
-        return subDefaultValueProducerFactory.apply(property.getName());
+    public Optional<Producer<?>> createPropertyDefaultValueProducer(PropertyWriter<?> property) {
+        return factorySet.queryDefaultValueFactory(getType().getElementType()).map(builder ->
+                new DefaultValueFactoryProducer<>(parentType, builder, collection.element(parseInt(property.getName()))));
     }
 
     @Override

@@ -1356,6 +1356,80 @@ Feature: input property
       }]
       """
 
+  Rule: try to use a collection element spec
+
+    Scenario: element byFactory of all list without index
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").byFactory());
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[1].value", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [{...} {
+        value= world
+      }]
+      """
+
+    Scenario: element spec of all list without index
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        public void main() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").is(ABean.class));
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[0].value2", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [{
+        value1= hello
+        value2= world
+      }]
+      """
+
+#    Scenario: collection element property should override collection spec
+#  raise error property is not list
+#  is xxx
+#  byfactroy
+
   Rule: property in structured way
 
     Scenario: use PropertyValue

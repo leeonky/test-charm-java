@@ -58,13 +58,13 @@ public class PropertySpec<T> {
 
     public Spec<T> byFactory() {
         return appendProducer((jFactory, producer, property) ->
-                producer.subDefaultValueProducer(producer.getType().getPropertyWriter(property)).orElseGet(() ->
+                producer.createPropertyDefaultValueProducer(producer.getType().getPropertyWriter(property)).orElseGet(() ->
                         createCreateProducer(jFactory.type(producer.getPropertyWriterType(property).getType()))));
     }
 
     public Spec<T> byFactory(Function<Builder<?>, Builder<?>> builder) {
         return appendProducer((jFactory, producer, property) ->
-                producer.subDefaultValueProducer(producer.getType().getPropertyWriter(property))
+                producer.createPropertyDefaultValueProducer(producer.getType().getPropertyWriter(property))
                         .orElseGet(() -> createQueryOrCreateProducer(builder.apply(jFactory.type(
                                 producer.getPropertyWriterType(property).getType())))));
     }
@@ -81,8 +81,16 @@ public class PropertySpec<T> {
 
     private Spec<T> appendProducer(Fuc<JFactory, Producer<?>, String, Producer<?>> producerFactory) {
         if (property.isSingle() || property.isTopLevelPropertyCollection())
-            return spec.append((jFactory, objectProducer) -> objectProducer.changeDescendant(property,
-                    ((nextToLast, property) -> producerFactory.apply(jFactory, nextToLast, property))));
+            return spec.append((jFactory, objectProducer) -> {
+                objectProducer.changeDescendant(property, ((nextToLast, property) -> producerFactory.apply(jFactory, nextToLast, property)));
+            });
+        if (property.isDefaultPropertyCollection()) {
+            return spec.append((jFactory, objectProducer) -> {
+                CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) objectProducer.childOrDefault((String) property.head());
+                collectionProducer.changeElementDefaultValueProducerFactory(index ->
+                        producerFactory.apply(jFactory, collectionProducer, index.toString()));
+            });
+        }
         throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
     }
 

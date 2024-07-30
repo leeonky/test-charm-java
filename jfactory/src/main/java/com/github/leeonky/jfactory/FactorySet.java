@@ -64,12 +64,12 @@ class FactorySet {
         });
     }
 
-    public <T> Optional<DefaultValueFactory<T>> queryDefaultValueBuilder(BeanClass<T> type) {
+    public <T> Optional<DefaultValueFactory<T>> queryDefaultValueFactory(BeanClass<T> type) {
         return defaultValueFactories.query(type.getType());
     }
 
-    public <T> DefaultValueFactory<T> getDefaultValueBuilder(BeanClass<T> type) {
-        return queryDefaultValueBuilder(type).orElseGet(() -> new DefaultValueFactories.DefaultTypeFactory<>(type));
+    public <T> DefaultValueFactory<T> getDefaultValueFactory(BeanClass<T> type) {
+        return queryDefaultValueFactory(type).orElseGet(() -> new DefaultValueFactories.DefaultTypeFactory<>(type));
     }
 
     public int nextSequence(Class<?> type) {

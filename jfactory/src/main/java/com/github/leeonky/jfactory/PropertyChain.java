@@ -15,9 +15,9 @@ class PropertyChain {
 
     private PropertyChain(String property) {
 //        TODO refactor
-        this.property = Arrays.stream(property.replaceAll("\\[\\$]", "###").split("[\\[\\].]"))
+        this.property = Arrays.stream(property.replaceAll("\\[\\$]", "###").replaceAll("\\[]", "__####").split("[\\[\\].]|__"))
                 .filter(s -> !s.isEmpty())
-                .map(s -> s.replaceAll("###", "[\\$]"))
+                .map(s -> s.replaceAll("####", "[]").replaceAll("###", "[\\$]"))
                 .map(this::tryToNumber).collect(Collectors.toList());
     }
 
@@ -112,5 +112,9 @@ class PropertyChain {
 
     public PropertyChain removeHead() {
         return new PropertyChain(property.stream().skip(1).collect(Collectors.toList()));
+    }
+
+    public boolean isDefaultPropertyCollection() {
+        return property.size() == 2 && "[]".equals(property.get(1));
     }
 }
