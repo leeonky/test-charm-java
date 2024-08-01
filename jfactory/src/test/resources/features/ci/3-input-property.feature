@@ -1358,36 +1358,55 @@ Feature: input property
 
   Rule: try to use a collection element spec
 
-    Scenario: element byFactory of all list without index
+    Scenario: element value of all list without index
       Given the following bean class:
       """
-      public class Bean {
-        public String value;
-      }
-      """
-      And the following bean class:
-      """
-      public class BeanList {
-        public Bean[] beans;
+      public class IntList {
+        public int[] ints;
       }
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
-        .property("beans[]").byFactory());
+      jFactory.factory(IntList.class).spec(instance -> instance.spec()
+        .property("ints[]").value(100));
       """
       When build:
       """
-      jFactory.type(BeanList.class).property("beans[1].value", "world").create();
+      jFactory.type(IntList.class).property("ints[3]", 3).create();
       """
       Then the result should:
       """
-      beans: [{...} {
-        value= world
-      }]
+      ints= [100 100 100 3]
       """
 
-    Scenario: element spec of all list without index
+    Scenario: element lazy value of all list without index
+      Given the following bean class:
+      """
+      public class IntList {
+        public int[] ints;
+      }
+      """
+      And the following bean class:
+      """
+      public class Bean {
+        public IntList[] lists;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(IntList.class).spec(instance -> instance.spec()
+        .property("ints[]").value(instance::getSequence));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("lists[0].ints[2]", 100).property("lists[1].ints[2]", 200).create();
+      """
+      Then the result should:
+      """
+      lists:[{ints= [1 1 100]} {ints= [2 2 200]}]
+      """
+
+    Scenario: element spec by type of all list without index
       Given the following bean class:
       """
       public class Bean {
@@ -1425,10 +1444,259 @@ Feature: input property
       }]
       """
 
-#    Scenario: collection element property should override collection spec
-#  raise error property is not list
-#  is xxx
-#  byfactroy
+    Scenario: element spec by name of all list without index
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        public void main() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").is("ABean"));
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[0].value2", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [{
+        value1= hello
+        value2= world
+      }]
+      """
+
+    Scenario: element from spec of all list without index
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        public void main() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").from(ABean.class).which(spec->{}));
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[0].value2", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [{
+        value1= hello
+        value2= world
+      }]
+      """
+
+    Scenario: element default value of all list without index
+      And the following bean class:
+      """
+      public class IntList {
+        public int[] ints;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(IntList.class).spec(instance -> instance.spec()
+        .property("ints[]").defaultValue(100));
+      """
+      When build:
+      """
+      jFactory.type(IntList.class).property("ints[3]", 3).create();
+      """
+      Then the result should:
+      """
+      ints= [100 100 100 3]
+      """
+
+    Scenario: element lazy default value of all list without index
+      And the following bean class:
+      """
+      public class IntList {
+        public int[] ints;
+      }
+      """
+      And the following bean class:
+      """
+      public class Bean {
+        public IntList[] lists;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(IntList.class).spec(instance -> instance.spec()
+        .property("ints[]").defaultValue(instance::getSequence));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("lists[0].ints[2]", 100).property("lists[1].ints[2]", 200).create();
+      """
+      Then the result should:
+      """
+      lists:[{ints= [1 1 100]} {ints= [2 2 200]}]
+      """
+
+    Scenario: element byFactory of all list without index
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").byFactory());
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[1].value", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [{...} {
+        value= world
+      }]
+      """
+
+    Scenario: element byFactory with properties of all list without index
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").byFactory(builder-> builder.property("value", "hello")));
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[1].value", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [{
+        value= hello
+        } {
+        value= world
+      }]
+      """
+
+    Scenario: specified collection element property should override collection default element spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public Bean[] beans;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        public void main() {
+          property("value1").value("A");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class HelloBean extends Spec<Bean> {
+        public void main() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").is(ABean.class));
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[0](HelloBean).value2", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [{
+        value1= hello
+        value2= world
+      }]
+      """
+
+    Scenario: raise error when property is not list
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        public void main() {
+          property("value[]").byFactory();
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class).create();
+      """
+      Then should raise error:
+      """
+      message: '#package#Bean.value is not list'
+      """
 
   Rule: property in structured way
 

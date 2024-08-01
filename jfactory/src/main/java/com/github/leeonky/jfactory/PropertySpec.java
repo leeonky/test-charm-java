@@ -86,7 +86,9 @@ public class PropertySpec<T> {
             });
         if (property.isDefaultPropertyCollection()) {
             return spec.append((jFactory, objectProducer) -> {
-                CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) objectProducer.childOrDefault((String) property.head());
+                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.childOrDefault((String) property.head()),
+                        CollectionProducer.class).orElseThrow(() ->
+                        new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
                 collectionProducer.changeElementDefaultValueProducerFactory(index ->
                         producerFactory.apply(jFactory, collectionProducer, index.toString()));
             });
