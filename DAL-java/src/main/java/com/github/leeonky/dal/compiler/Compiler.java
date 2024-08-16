@@ -85,7 +85,7 @@ public class Compiler {
 
     private NodeParser.Mandatory<DALNode, DALProcedure> textAttribute(DALNode notationNode) {
         return many(TEXT_ATTRIBUTE).and(endWithLine()).as(attributes ->
-                new NotationAttributeNode(notationNode, new TextBlockAttributeListNode(attributes)));
+                new NotationAttributeNode((TextBlockNotationNode) notationNode, new TextBlockAttributeListNode(attributes)));
     }
 
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {

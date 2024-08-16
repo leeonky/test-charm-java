@@ -12,9 +12,9 @@ import static java.util.stream.Collectors.toList;
 
 public class NotationAttributeNode extends DALNode {
     private final TextBlockAttributeListNode attributeList;
-    private final DALNode notation;
+    private final TextBlockNotationNode notation;
 
-    public NotationAttributeNode(DALNode notation, TextBlockAttributeListNode attributeList) {
+    public NotationAttributeNode(TextBlockNotationNode notation, TextBlockAttributeListNode attributeList) {
         this.notation = notation;
         this.attributeList = attributeList;
     }
@@ -45,7 +45,7 @@ public class NotationAttributeNode extends DALNode {
                 if (s.charAt(i) != ' ')
                     return i;
             return 0;
-        }).min().orElse(0);
+        }).map(i -> Math.min(i, notation.getIndent())).min().orElse(0);
     }
 
     private List<String> joinToLines(List<Character> content) {

@@ -195,6 +195,21 @@ Feature: ```string```
               ^
       """
 
+    Scenario: start ``` as text block indent
+      Given the following json:
+      """
+      {
+        "key": "  a\n  b"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ```
+             a
+             b
+           ```
+      """
+
   Rule: customer
 
     Scenario: customer number of notation `
