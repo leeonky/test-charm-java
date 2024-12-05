@@ -80,6 +80,28 @@ Feature: list
          ^
       """
 
+    Scenario: input list is null
+      Given the following json:
+      """
+      null
+      """
+      When evaluate by:
+      """
+      : []
+      """
+      Then failed with the message:
+      """
+      Invalid input value, expect a List but: null
+      """
+      When evaluate by:
+      """
+      : [1]
+      """
+      Then failed with the message:
+      """
+      Invalid input value, expect a List but: null
+      """
+
     Scenario: default verification operator
       Given the following json:
       """
@@ -146,10 +168,23 @@ Feature: list
           ^
       """
 
-    Scenario: support incomplete List
+    Scenario: support verify first n elements or last n elements
       Given the following json:
       """
       [ 1, 2, 3 ]
+      """
+      When evaluate by:
+      """
+      : [2 ...]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <2>
+       ^
+      Actual: java.lang.Integer
+      <1>
+       ^
       """
       Then the following verification should pass:
       """
@@ -159,6 +194,19 @@ Feature: list
       """
       : [[0]: 1, ...]
       """
+      When evaluate by:
+      """
+      : [... 2]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <2>
+       ^
+      Actual: java.lang.Integer
+      <3>
+       ^
+      """
       And the following verification should pass:
       """
       : [... 3]
@@ -166,6 +214,197 @@ Feature: list
       And the inspect should:
       """
       : [..., [-1]: 3]
+      """
+
+    Scenario: call object property in first n elements or last n elements verification
+      Given the following json:
+      """
+      [ "a", "word" ]
+      """
+      When evaluate by:
+      """
+      : [... {length: 3}]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <3>
+       ^
+      Actual: java.lang.Integer
+      <4>
+       ^
+      """
+      And the following verification should pass:
+      """
+      : [... {length: 4}]
+      """
+      When evaluate by:
+      """
+      : [{length: 3} ...]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <3>
+       ^
+      Actual: java.lang.Integer
+      <1>
+       ^
+      """
+      And the following verification should pass:
+      """
+      : [{length: 1} ...]
+      """
+
+    Scenario: matched whole list when verify first n elements or last n elements
+      Given the following json:
+      """
+      [ 1 ]
+      """
+      When evaluate by:
+      """
+      : [2 ...]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <2>
+       ^
+      Actual: java.lang.Integer
+      <1>
+       ^
+      """
+      Then the following verification should pass:
+      """
+      : [1 ...]
+      """
+      When evaluate by:
+      """
+      : [... 2]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <2>
+       ^
+      Actual: java.lang.Integer
+      <1>
+       ^
+      """
+      And the following verification should pass:
+      """
+      : [... 1]
+      """
+
+    Scenario: matched whole list when verify first n elements or last n elements as object verification
+      Given the following json:
+      """
+      [ "word" ]
+      """
+      When evaluate by:
+      """
+      : [... {length: 3}]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <3>
+       ^
+      Actual: java.lang.Integer
+      <4>
+       ^
+      """
+      And the following verification should pass:
+      """
+      : [... {length: 4}]
+      """
+      When evaluate by:
+      """
+      : [{length: 3} ...]
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <3>
+       ^
+      Actual: java.lang.Integer
+      <4>
+       ^
+      """
+      And the following verification should pass:
+      """
+      : [{length: 4} ...]
+      """
+
+    Scenario: input list is null when verify first n elements or last n elements
+      Given the following json:
+      """
+      null
+      """
+      When evaluate by:
+      """
+      : [... 1]
+      """
+      Then failed with the message:
+      """
+      Invalid input value, expect a List but: null
+      """
+      When evaluate by:
+      """
+      : [1 ...]
+      """
+      Then failed with the message:
+      """
+      Invalid input value, expect a List but: null
+      """
+
+    Scenario: input list is empty when verify first n elements or last n elements
+      Given the following json:
+      """
+      []
+      """
+      When evaluate by:
+      """
+      : [... 1]
+      """
+      Then failed with the message:
+      """
+      Index out of bounds (-1), first index is: 0
+      """
+      And got the following notation:
+      """
+      : [... 1]
+             ^
+      """
+      When evaluate by:
+      """
+      : [1 ...]
+      """
+      Then failed with the message:
+      """
+      Index out of bounds (0), first index is: 0
+      """
+      And got the following notation:
+      """
+      : [1 ...]
+         ^
+      """
+      Given the following json:
+      """
+      [1]
+      """
+      When evaluate by:
+      """
+      : [1 2 ...]
+      """
+      Then failed with the message:
+      """
+      Index out of bounds (1), first index is: 0
+      """
+      And got the following notation:
+      """
+      : [1 2 ...]
+           ^
       """
 
     Scenario: should raise error when invalid incomplete List

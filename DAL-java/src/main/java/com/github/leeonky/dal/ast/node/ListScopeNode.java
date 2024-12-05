@@ -61,29 +61,32 @@ public class ListScopeNode extends DALNode {
     private List<DALNode> buildVerificationExpressions(Data.DataList list, Data actual) {
         if (inputExpressions != null)
             return inputExpressions;
-        return new ArrayList<DALNode>() {{
-            List<Clause<DALNode>> usefulInputClauses = inputClauses;
-            if (type == Type.FIRST_N_ITEMS)
-                usefulInputClauses.remove(usefulInputClauses.size() - 1);
-            if (type == Type.LAST_N_ITEMS) {
-                int negativeIndex = -1;
-                for (int i = usefulInputClauses.size() - 1; i >= 0; i--)
-                    add(0, usefulInputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
-                            new SymbolNode(negativeIndex--, BRACKET))));
-            } else {
-                Zipped<Clause<DALNode>, Integer> zipped = zip(usefulInputClauses, list.indexes());
-                zipped.forEachElement((clause, index) -> add(clause.expression(
-                        expression(INPUT_NODE, Factory.executable(Notations.EMPTY), new SymbolNode(index, BRACKET)))));
-                if (type == Type.ALL_ITEMS) {
-                    if (zipped.hasLeft()) {
+        return new ArrayList<DALNode>() {
+            {
+                List<Clause<DALNode>> usefulInputClauses = new ArrayList<>(inputClauses);
+                if (type == Type.FIRST_N_ITEMS)
+                    for (int i = 0; i < usefulInputClauses.size() - 1; i++)
+                        add(buildIndexExpression(usefulInputClauses.get(i), i + list.firstIndex()));
+                else if (type == Type.LAST_N_ITEMS)
+                    for (int i = usefulInputClauses.size() - 1; i >= 0; i--)
+                        add(0, buildIndexExpression(usefulInputClauses.get(i), i - usefulInputClauses.size()));
+                else if (type == Type.ALL_ITEMS) {
+                    Zipped<Clause<DALNode>, Integer> zipped = zip(usefulInputClauses, list.indexes());
+                    zipped.forEachElement((clause, index) -> add(buildIndexExpression(clause, index)));
+                    if (zipped.hasLeft())
                         throw differentSizeException(usefulInputClauses, actual, zipped.index());
-                    }
-                    if (zipped.hasRight() && !list.infinite()) {
+                    if (zipped.hasRight() && !list.infinite())
                         throw differentSizeException(usefulInputClauses, actual, list.size());
-                    }
                 }
             }
-        }};
+
+            private DALNode buildIndexExpression(Clause<DALNode> clause, Integer index) {
+                DALNode symbolNode = new SymbolNode(index, BRACKET);
+                DALNode expression = clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY), symbolNode));
+                symbolNode.setPositionBegin(expression.getOperandPosition());
+                return expression;
+            }
+        };
     }
 
     private AssertionFailure differentSizeException(List<Clause<DALNode>> usefulInputClauses, Data actual, int index) {
