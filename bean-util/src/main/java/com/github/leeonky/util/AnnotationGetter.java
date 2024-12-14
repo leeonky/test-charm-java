@@ -20,7 +20,6 @@ public class AnnotationGetter {
         return field.getAnnotation(annotationClass);
     }
 
-
     public <A extends Annotation> A getAnnotation(Method method, Class<A> annotationClass) {
         return method.getAnnotation(annotationClass);
     }

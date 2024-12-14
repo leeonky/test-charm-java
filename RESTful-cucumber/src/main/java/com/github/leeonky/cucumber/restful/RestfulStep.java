@@ -5,6 +5,8 @@ import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONAr
 import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONObject;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.cucumber.Table;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyReader;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
@@ -115,9 +117,29 @@ public class RestfulStep {
             String boundary = UUID.randomUUID().toString();
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
             HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
-            params.forEach((key, value) -> appendEntry(httpStream, key, value == null ? null : value.toString(), boundary));
+            params.forEach((key, value) -> appendEntry(httpStream, key, Objects.requireNonNull(value).toString(), boundary));
             httpStream.close(boundary);
         }));
+    }
+
+    @When("POST form {string} {string}:")
+    @Then("POST form {string} to {string}:")
+    public void postForm(String spec, String path, String form) throws IOException, URISyntaxException {
+        Map<String, Object>[] maps = Table.create(evaluator.eval(form)).flatSub();
+        String[] delimiters = spec.split("[ ,]");
+        Object formObject = jFactory.spec(delimiters).properties(maps[0]).create();
+        BeanClass<Object> type = BeanClass.createFrom(formObject);
+        postForm(path, new LinkedHashMap<String, Object>() {{
+            type.getPropertyReaders().forEach((key, property) -> {
+                Optional<PropertyReader<Object>> linkName = ((BeanClass<Object>) property.getType()).getPropertyReaders().values()
+                        .stream().filter(p -> p.annotation(FormFileLinkName.class).isPresent()).findFirst();
+                Object value = property.getValue(formObject);
+                if (linkName.isPresent())
+                    put("@" + key, linkName.get().getValue(value));
+                else
+                    put(key, value);
+            });
+        }});
     }
 
     @When("PUT {string}:")
@@ -245,11 +267,12 @@ public class RestfulStep {
     }
 
     @When("POST {string} {string}:")
+    @Then("POST {string} to {string}:")
     public void postWithSpec(String spec, String path, String body) throws IOException {
-        sendWithSpec(spec, path, body, this::silentPost);
+        requestWithSpec(spec, path, body, this::silentPost);
     }
 
-    private void sendWithSpec(String spec, String path, String body, BiConsumer<String, String> method) throws IOException {
+    private void requestWithSpec(String spec, String path, String body, BiConsumer<String, String> method) throws IOException {
         Object json = new JSONArray("[" + body + "]").get(0);
         Map<String, Object>[] maps = Table.create(evaluator.eval(body)).flatSub();
         String[] delimiters = spec.split("[ ,]");
@@ -271,8 +294,9 @@ public class RestfulStep {
     }
 
     @When("PUT {string} {string}:")
+    @Then("PUT {string} to {string}:")
     public void putWithSpec(String spec, String path, String body) throws IOException {
-        sendWithSpec(spec, path, body, this::silentPut);
+        requestWithSpec(spec, path, body, this::silentPut);
     }
 
     private void silentPut(String path, String body) {
@@ -284,8 +308,9 @@ public class RestfulStep {
     }
 
     @When("PATCH {string} {string}:")
-    public void patchWithSpec(String string, String path, String body) throws IOException {
-        sendWithSpec(string, path, body, this::silentPatch);
+    @Then("PATCH {string} to {string}:")
+    public void patchWithSpec(String spec, String path, String body) throws IOException {
+        requestWithSpec(spec, path, body, this::silentPatch);
     }
 
     private void silentPatch(String path, String body) {
