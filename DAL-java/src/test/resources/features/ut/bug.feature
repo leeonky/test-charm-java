@@ -89,3 +89,22 @@ Feature: bug
       """
       acc.inc[100]= 101
       """
+
+  Rule: incorrect code position
+
+    Scenario: incorrect position of verification of const remark
+      Given the following json:
+      """
+      {
+        "value": 10
+      }
+      """
+      When evaluate by:
+      """
+      value= 11 (5+6)
+      """
+      Then got the following notation:
+      """
+      value= 11 (5+6)
+             ^
+      """

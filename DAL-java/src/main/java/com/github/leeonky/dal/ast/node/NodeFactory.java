@@ -97,7 +97,7 @@ public class NodeFactory {
     }
 
     public static DALNode constRemarkNode(DALNode constNode, DALNode parentheses) {
-        return new ConstRemarkNode(constNode, parentheses);
+        return new ConstRemarkNode(constNode, parentheses).setPositionBegin(constNode.getPositionBegin());
     }
 
     public static DALNode dataRemarkNode(List<Character> characters) {
