@@ -141,18 +141,12 @@ Feature: JFactory Integration
       body.string= /.*username#1.*/
     }]
     """
-    And got request form value:
+    And got request form data:
       """
-      : [{
-        headers: /.*name="username"(.|\r|\n)*/
-        body.string: /.*username.*/
-      } {
-        headers: /.*name="captcha"(.|\r|\n)*/
-        body.string: /.*Captcha.*/
-      } {
-        headers: /.*name="password"(.|\r|\n)*/
-        body.string: /.*password.*/
-      }]
+      : | +fieldName | string        |
+        | captcha    | /.*Captcha.*/ |
+        | password   | /password.*/  |
+        | username   | /username.*/  |
       """
 
   Scenario: post form with body created by trait and spec
@@ -160,18 +154,12 @@ Feature: JFactory Integration
     """
     {captcha: {...}}
     """
-    And got request form value:
+    And got request form data:
       """
-      : [{
-        headers: /.*name="username"(.|\r|\n)*/
-        body.string: /.*username.*/
-      } {
-        headers: /.*name="captcha"(.|\r|\n)*/
-        body.string: /.*Captcha.*/
-      } {
-        headers: /.*name="password"(.|\r|\n)*/
-        body.string: /.*wrongPassword.*/
-      }]
+      : | +fieldName | string            |
+        | captcha    | /.*Captcha.*/     |
+        | password   | /wrongPassword.*/ |
+        | username   | /username.*/      |
       """
 
   Scenario: post form with file created by spec
@@ -185,14 +173,9 @@ Feature: JFactory Integration
       str= bla
     }
     """
-    And got request form value:
+    And got request form data:
       """
-      : [{
-        headers: /.*name="str"(.|\r|\n)*/
-        body.string: bla
-      }{
-        headers: /.*name="oneFile"(.|\r|\n)*/
-        headers: /.*filename="图片.png"(.|\r|\n)*/
-        body.string: 'hello 头像'
-      }]
+      : | +fieldName | outputStream.data.string | name      |
+        | oneFile    | hello 头像               | image.png |
+        | str        | bla                      | *         |
       """

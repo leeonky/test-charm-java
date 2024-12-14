@@ -47,14 +47,9 @@ Feature: Replace
       "@avatar": "${fileKeyVar}"
     }
     """
-    And got request form value:
-    """
-    : [{
-      headers: /.*name="name"(.|\r|\n)*/
-      body.string: 'Tom'
-    } {
-      headers: /.*name="avatar"(.|\r|\n)*/
-      headers: /.*filename=".*\.upload"(.|\r|\n)*/
-      body.string: 'hello avatar'
-    }]
-    """
+    And got request form data:
+      """
+      : | +fieldName | outputStream.data.string | name       |
+        | avatar     | hello avatar             | /.*upload/ |
+        | name       | Tom                      | *          |
+      """

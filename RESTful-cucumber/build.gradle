@@ -10,6 +10,7 @@ dependencies {
     testImplementation "org.mock-server:mockserver-netty:${versions.test.mockserver}"
     testImplementation "io.cucumber:cucumber-picocontainer:${versions.test.cucumberJunit}"
     testImplementation "commons-fileupload:commons-fileupload:${versions.test.commonsFileupload}"
+    testImplementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
 }
 
 task testModuleSafe(type: Test) {

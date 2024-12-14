@@ -365,16 +365,11 @@ Feature: RESTful api steps
         }
       }]
       """
-      And got request form value:
+      And got request form data:
       """
-      : [{
-        headers: /.*name="姓名"(.|\r|\n)*/
-        body.string: 张三
-      } {
-        headers: /.*name="附件"(.|\r|\n)*/
-        headers: /.*filename="图片.png"(.|\r|\n)*/
-        body.string: 'hello 头像'
-      }]
+      : | +fieldName | outputStream.data.string | name     |
+        | 姓名       | 张三                     | *        |
+        | 附件       | hello 头像               | 图片.png |
       """
 
     Scenario: GET download response
@@ -429,16 +424,11 @@ Feature: RESTful api steps
         }
       }]
       """
-      And got request form value:
+      And got request form data:
       """
-      : [{
-        headers: /.*name="name"(.|\r|\n)*/
-        body.string: 'Tom'
-      } {
-        headers: /.*name="avatar"(.|\r|\n)*/
-        headers: /.*filename=".*\.upload"(.|\r|\n)*/
-        body.string: 'hello avatar'
-      }]
+      : | +fieldName | outputStream.data.string | name       |
+        | avatar     | hello avatar             | /.*upload/ |
+        | name       | Tom                      | *          |
       """
 
     Scenario: upload file request with name
@@ -452,13 +442,10 @@ Feature: RESTful api steps
         "@avatar": "an avatar"
       }
       """
-      And got request form value:
+      And got request form data:
       """
-      : [{
-        headers: /.*name="avatar"(.|\r|\n)*/
-        headers: /.*filename="image\.png"(.|\r|\n)*/
-        body.string: 'hello avatar'
-      }]
+      : | +fieldName | outputStream.data.string | name      |
+        | avatar     | hello avatar             | image.png |
       """
 
   Rule: Request and Response in One Step

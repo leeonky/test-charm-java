@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.cucumber.restful.extensions.PathVariableReplacement;
 import com.github.leeonky.cucumber.restful.spec.FormBeans;
 import com.github.leeonky.cucumber.restful.spec.LoginRequests;
-import com.github.leeonky.dal.Accessors;
 import com.github.leeonky.jfactory.JFactory;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
@@ -14,7 +13,9 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import lombok.SneakyThrows;
-import org.apache.commons.fileupload.MultipartStream;
+import org.apache.commons.fileupload.RequestContext;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Format;
 import org.mockserver.model.Header;
@@ -22,15 +23,18 @@ import org.mockserver.model.Parameter;
 import org.mockserver.verify.VerificationTimes;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.cucumber.restful.RestfulStep.UploadFile.content;
+import static com.github.leeonky.dal.Accessors.get;
 import static com.github.leeonky.dal.Assertions.expect;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
@@ -130,29 +134,37 @@ public class Steps {
     }
 
     @SneakyThrows
-    @Then("got request form value:")
+    @Then("got request form data:")
     public void got_request_form_value(String expression) {
-        List<?> actual = new ObjectMapper().readValue(mockServer.retrieveRecordedRequests(request(), Format.JSON), List.class);
-        String string = Accessors.get("[0].body.string").from(actual);
+        Object request = new ObjectMapper().readValue(mockServer.retrieveRecordedRequests(request(), Format.JSON), List.class);
 
-        Object evaluate = Accessors.get("[0].body.rawBytes").from(actual);
-        byte[] bytes = Base64.getDecoder().decode(evaluate.toString());
-        String substring = string.substring(2, string.indexOf('\r'));
-        MultipartStream multipartStream = new MultipartStream(new ByteArrayInputStream(bytes),
-                substring.getBytes(StandardCharsets.UTF_8));
+        byte[] bodyBytes = get("[-1].body.rawBytes.base64").from(request);
 
-        List<Map<String, Object>> bodyHeaders = new ArrayList<>();
-        boolean nextPart = multipartStream.skipPreamble();
-        while (nextPart) {
-            bodyHeaders.add(new HashMap<String, Object>() {{
-                put("headers", multipartStream.readHeaders().trim());
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                multipartStream.readBodyData(stream);
-                put("body", stream.toByteArray());
-            }});
-            nextPart = multipartStream.readBoundary();
-        }
-        expect(bodyHeaders).should(expression);
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        ServletFileUpload upload = new ServletFileUpload(factory);
+
+        RequestContext context = new RequestContext() {
+            @Override
+            public String getCharacterEncoding() {
+                return "UTF-8";
+            }
+
+            @Override
+            public int getContentLength() {
+                return bodyBytes.length;
+            }
+
+            @Override
+            public String getContentType() {
+                return get("[-1].headers[Content-Type][0]").from(request);
+            }
+
+            @Override
+            public InputStream getInputStream() {
+                return new ByteArrayInputStream(bodyBytes);
+            }
+        };
+        expect(upload.parseRequest(context)).should(expression);
     }
 
     @Before
