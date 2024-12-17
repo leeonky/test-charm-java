@@ -136,5 +136,18 @@ class CompositeDataRepositoryTest {
             verify(registeredRepo, never()).queryAll(any(Class.class));
             verify(defaultRepo, never()).queryAll(any(Class.class));
         }
+
+        @Test
+        void should_clear_all_sub_repo_when_clear() {
+            DataRepository later = Mockito.mock(DataRepository.class);
+            compositeDataRepository.registerByType(Object.class, registeredRepo);
+            compositeDataRepository.registerBy(type -> type.equals(Object.class), later);
+
+            compositeDataRepository.clear();
+
+            verify(later).clear();
+            verify(registeredRepo).clear();
+            verify(defaultRepo).clear();
+        }
     }
 }

@@ -24,6 +24,7 @@ public class CompositeDataRepository implements DataRepository {
 
     @Override
     public void clear() {
+        subRepos.stream().map(Map.Entry::getValue).forEach(DataRepository::clear);
         if (defaultRepo != null)
             defaultRepo.clear();
     }
