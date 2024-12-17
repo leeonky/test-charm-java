@@ -1415,3 +1415,31 @@ Feature: System Default Value
         enumValue: A
       }
       """
+
+    Scenario: ignore property with in one method on spec
+      Given the following spec class:
+      """
+      public class BeanSpecOne extends Spec<BeanOne> {
+
+        @Override
+        public void main() {
+          ignore("stringValue", "intValue");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class BeanSpecTwo extends Spec<BeanTwo> {
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpecOne.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        stringValue= null
+        intValue= 0
+      }
+      """

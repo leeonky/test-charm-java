@@ -88,6 +88,12 @@ public class Spec<T> {
         return instance;
     }
 
+    public Spec<T> ignore(String... properties) {
+        for (String property : properties)
+            property(property).ignore();
+        return this;
+    }
+
     <V, S extends Spec<V>> PropertySpec<T>.IsSpec<V, S> newIsSpec(Class<S> specClass, PropertySpec<T> propertySpec) {
         PropertySpec<T>.IsSpec<V, S> isSpec = propertySpec.new IsSpec<V, S>(specClass);
         invalidIsSpecs.add(isSpec);
