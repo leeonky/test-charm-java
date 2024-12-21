@@ -301,4 +301,20 @@ Feature: async
       }
       """
 
-# TODO await single property
+    Scenario: await single property
+      Given the following java class:
+      """
+      public class Data {
+        private Instant time = Instant.now();
+
+        public int getInt() {
+          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1 )
+            return 100;
+          throw new java.lang.RuntimeException();
+        }
+      }
+      """
+      Then the following should pass:
+      """
+      ::await.int= 100
+      """

@@ -4,6 +4,9 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.util.Suppressor;
+
+import java.util.Set;
 
 public class AwaitExtension implements Extension {
     @Override
@@ -15,18 +18,31 @@ public class AwaitExtension implements Extension {
                 .registerOperator(Operators.MATCH, new AwaitVerification() {
                     @Override
                     public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                        return ((Await) v1.instance()).await(operator, v2, ExpectationFactory.Expectation::matches);
+                        return Suppressor.get(() -> ((Await) v1.instance()).await((data) ->
+                                ((ExpectationFactory) v2.instance()).create(operator, data).matches()));
                     }
                 })
                 .registerOperator(Operators.EQUAL, new AwaitVerification() {
                     @Override
                     public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                        return ((Await) v1.instance()).await(operator, v2, ExpectationFactory.Expectation::equalTo);
+                        return Suppressor.get(() -> ((Await) v1.instance()).await(data ->
+                                ((ExpectationFactory) v2.instance()).create(operator, data).equalTo()));
                     }
                 })
                 .registerMetaProperty(Await.class, "every", metaData ->
                         (DataRemarkParameterAcceptor<Await>) s -> ((Await) metaData.data().instance()).interval(s))
-        ;
+                .registerPropertyAccessor(Await.class, new PropertyAccessor<Await>() {
+
+                    @Override
+                    public Object getValue(Await await, Object property) {
+                        return Suppressor.get(() -> await.await(data -> data.getValue(property).instance()));
+                    }
+
+                    @Override
+                    public Set<Object> getPropertyNames(Await await) {
+                        return await.fieldNames();
+                    }
+                });
     }
 
     private static abstract class AwaitVerification implements Operation {
