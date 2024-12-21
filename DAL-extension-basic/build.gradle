@@ -4,5 +4,6 @@ dependencies {
     implementation "org.yaml:snakeyaml:${versions.prod.snakeyaml}"
     testImplementation "net.lingala.zip4j:zip4j:${versions.test.zip4j}"
     testImplementation "org.awaitility:awaitility:${versions.test.awaitility}"
+    testImplementation project(':java-compiler-util')
 }
 

@@ -3,8 +3,12 @@ package com.github.leeonky.dal.cucumber;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.basic.Diff;
 import com.github.leeonky.dal.extensions.basic.sftp.util.SFtp;
+import com.github.leeonky.dal.extensions.basic.sync.Await;
+import com.github.leeonky.dal.extensions.basic.sync.Eventually;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerPool;
 import com.github.leeonky.util.Suppressor;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
@@ -26,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +49,9 @@ public class Steps {
     private Object input;
     private DAL dal = new DAL().extend();
 
+    private JavaCompiler javaCompiler;
+    private static final JavaCompilerPool JAVA_COMPILER_POOL = new JavaCompilerPool(2, "src.test.generate.ws");
+
     @Before
     public void reset() {
         assertionError = null;
@@ -52,6 +60,9 @@ public class Steps {
         dal = new DAL();
         dal.getRuntimeContextBuilder().setConverter(Converter.createDefault().extend());
         dal.extend();
+        javaCompiler = JAVA_COMPILER_POOL.take();
+        Eventually.setDefaultWaitingTime(5000);
+        Await.setDefaultWaitingTime(5000);
     }
 
     @SneakyThrows
@@ -157,10 +168,6 @@ public class Steps {
         }
     }
 
-    @Then("got failed message:")
-    public void gotFailedMessage() {
-    }
-
     @Then("java.io.File {string} should dump:")
     public void javaIoFileShouldDump(String path, String content) {
         DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
@@ -202,9 +209,10 @@ public class Steps {
     }
 
     @After
-    void closeFtp() {
+    public void closeFtp() {
         if (sFtp != null)
             sFtp.close();
+        JAVA_COMPILER_POOL.giveBack(javaCompiler);
     }
 
 
@@ -224,7 +232,7 @@ public class Steps {
 
     @Then("failed with the message:")
     public void failedWithTheMessage(String message) {
-        assertThat(assertionError.getMessage()).isEqualTo(message);
+        assertThat(assertionError.getMessage()).isEqualTo(message.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     private String left, right;
@@ -259,6 +267,21 @@ public class Steps {
     @Given("a list from {int} to n")
     public void aListFromToN(int start) {
         input = Stream.iterate(1, i -> i + 1);
+    }
+
+    @SneakyThrows
+    @Given("the following java class:")
+    public void theFollowingJavaClass(String code) {
+        input = javaCompiler.compileToClasses(Arrays.asList(
+                "import com.github.leeonky.dal.*;\n" +
+                        "import com.github.leeonky.dal.type.*;\n" +
+                        "import com.github.leeonky.util.*;\n" +
+                        "import com.github.leeonky.dal.runtime.*;\n" +
+                        "import java.util.*;\n" +
+                        "import java.util.function.*;\n" +
+                        "import java.time.*;\n" +
+                        "import com.github.leeonky.dal.extensions.basic.sync.*;\n" +
+                        "import java.math.*;\n" + code)).get(0).newInstance();
     }
 
     public static class ToBytes {
