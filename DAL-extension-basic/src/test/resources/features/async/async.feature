@@ -80,14 +80,14 @@ Feature: async
       """
       When evaluate by:
       """
-      ::eventually.within(1s): {
+      ::eventually::in(1s): {
         int: 100
       }
       """
       Then failed with the message:
       """
 
-      ::eventually.within(1s): {
+      ::eventually::in(1s): {
         int: 100
              ^
       }
@@ -119,14 +119,14 @@ Feature: async
       """
       When evaluate by:
       """
-      ::eventually.within(1.5s).interval(2s): {
+      ::eventually::in(1.5s)::every(2s): {
         int: 100
       }
       """
       Then failed with the message:
       """
 
-      ::eventually.within(1.5s).interval(2s): {
+      ::eventually::in(1.5s)::every(2s): {
         int: 100
              ^
       }
@@ -286,13 +286,13 @@ Feature: async
       """
       When evaluate by:
       """
-      ::await(1.5s).interval(2s): {list::filter!: {i=1}}
+      ::await(1.5s)::every(2s): {list::filter!: {i=1}}
       """
       Then failed with the message:
       """
 
-      ::await(1.5s).interval(2s): {list::filter!: {i=1}}
-                                               ^
+      ::await(1.5s)::every(2s): {list::filter!: {i=1}}
+                                             ^
 
       Filtered result is empty, try again
 
@@ -300,3 +300,5 @@ Feature: async
           list: []
       }
       """
+
+# TODO await single property

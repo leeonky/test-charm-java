@@ -24,6 +24,8 @@ public class AwaitExtension implements Extension {
                         return ((Await) v1.instance()).await(operator, v2, ExpectationFactory.Expectation::equalTo);
                     }
                 })
+                .registerMetaProperty(Await.class, "every", metaData ->
+                        (DataRemarkParameterAcceptor<Await>) s -> ((Await) metaData.data().instance()).interval(s))
         ;
     }
 

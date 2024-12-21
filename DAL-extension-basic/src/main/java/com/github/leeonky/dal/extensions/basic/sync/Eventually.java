@@ -3,7 +3,6 @@ package com.github.leeonky.dal.extensions.basic.sync;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.extensions.basic.TimeUtil;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.DataRemarkParameterAcceptor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.Suppressor;
 
@@ -43,11 +42,11 @@ public class Eventually {
         throw exception;
     }
 
-    public DataRemarkParameterAcceptor<Eventually> within() {
-        return s -> new Eventually(data, interval, TimeUtil.parseTime(s));
+    public Eventually within(String s) {
+        return new Eventually(data, interval, TimeUtil.parseTime(s));
     }
 
-    public DataRemarkParameterAcceptor<Eventually> interval() {
-        return s -> new Eventually(data, TimeUtil.parseTime(s), waitingTime);
+    public Eventually interval(String s) {
+        return new Eventually(data, TimeUtil.parseTime(s), waitingTime);
     }
 }

@@ -4,7 +4,6 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.extensions.basic.TimeUtil;
 import com.github.leeonky.dal.extensions.basic.list.NotReadyException;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.DataRemarkParameterAcceptor;
 import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.util.Suppressor;
 
@@ -50,7 +49,7 @@ public class Await {
         return new Await(data, interval, TimeUtil.parseTime(s));
     }
 
-    public DataRemarkParameterAcceptor<Await> interval() {
-        return s -> new Await(data, TimeUtil.parseTime(s), waitingTime);
+    public Await interval(String s) {
+        return new Await(data, TimeUtil.parseTime(s), waitingTime);
     }
 }
