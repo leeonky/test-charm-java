@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 import static com.github.leeonky.dal.runtime.inspector.Dumper.STRING_DUMPER;
-import static com.github.leeonky.dal.runtime.inspector.Dumper.VALUE_INSPECTOR;
+import static com.github.leeonky.dal.runtime.inspector.Dumper.VALUE_DUMPER;
 
 @Order(BUILD_IN)
 @SuppressWarnings("used")
@@ -40,7 +40,7 @@ public class Dumpers implements Extension {
 
     private void registerValueTypes(DAL dal, Class<?>... types) {
         for (Class<?> type : types)
-            dal.getRuntimeContextBuilder().registerDumper(type, data -> VALUE_INSPECTOR);
+            dal.getRuntimeContextBuilder().registerDumper(type, data -> VALUE_DUMPER);
     }
 
     private static class StackTraceDumper implements Dumper {

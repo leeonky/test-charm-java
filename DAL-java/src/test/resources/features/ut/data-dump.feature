@@ -453,3 +453,20 @@ Feature: dump-data
                   The root value was: *dump throw* java.lang.RuntimeException: Error
                   ```
     """
+
+  Scenario: dump enum
+    Given the following java class:
+    """
+    public class Data {
+      public E e = E.A;
+      public enum E {
+        A,B
+      }
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    #package#Data {
+        e: #package#Data$E <A>
+    }
+    """

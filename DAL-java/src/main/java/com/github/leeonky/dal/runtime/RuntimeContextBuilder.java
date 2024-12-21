@@ -487,6 +487,8 @@ public class RuntimeContextBuilder {
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
                     return Dumper.LIST_DUMPER;
+                if (data.instance() != null && data.instance().getClass().isEnum())
+                    return Dumper.VALUE_DUMPER;
                 return Dumper.MAP_DUMPER;
             });
         }
