@@ -501,8 +501,8 @@ public class RuntimeContextBuilder {
             return maxDumpingObjectSize;
         }
 
-        public void hookError(ThrowingSupplier<Object> input, String expression, Throwable error) {
-            errorHook.handle(input, expression, error);
+        public void hookError(String expression, Throwable error) {
+            errorHook.handle(getThis().instance(), expression, error);
         }
 
         public Object invokeMetaProperty(MetaData metaData) {

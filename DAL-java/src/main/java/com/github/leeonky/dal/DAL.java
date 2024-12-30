@@ -55,7 +55,7 @@ public class DAL {
                     .map(node -> (T) node.evaluate(runtimeContext))
                     .collect(Collectors.toList());
         } catch (Throwable e) {
-            runtimeContext.hookError(input, expressions, e);
+            runtimeContext.hookError(expressions, e);
             throw e;
         }
     }
@@ -78,7 +78,7 @@ public class DAL {
                 throw new SyntaxException("more than one expression", getOperandPosition(nodes.get(1)));
             return (T) nodes.get(0).evaluate(runtimeContext);
         } catch (Throwable e) {
-            runtimeContext.hookError(input, expression, e);
+            runtimeContext.hookError(expression, e);
             throw e;
         }
     }

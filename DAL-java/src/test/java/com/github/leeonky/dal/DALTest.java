@@ -1,7 +1,6 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.extensions.DALExtension;
-import com.github.leeonky.util.Suppressor;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +28,7 @@ public class DALTest {
         isCalled = false;
 
         dal.getRuntimeContextBuilder().registerErrorHook((i, code, e) -> {
-            ((DALTest) Suppressor.get(i::get)).isCalled = true;
+            ((DALTest) i).isCalled = true;
             assertThat(i).isSameAs(DALTest.this);
             assertEquals("Error", e.getMessage());
             assertEquals("throwError", code);
@@ -45,7 +44,7 @@ public class DALTest {
         isCalled = false;
 
         dal.getRuntimeContextBuilder().registerErrorHook((i, code, e) -> {
-            ((DALTest) Suppressor.get(i::get)).isCalled = true;
+            ((DALTest) i).isCalled = true;
             assertThat(i).isSameAs(DALTest.this);
             assertEquals("Error", e.getMessage());
             assertEquals("throwError", code);
