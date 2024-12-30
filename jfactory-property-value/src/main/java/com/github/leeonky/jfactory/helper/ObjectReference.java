@@ -27,7 +27,13 @@ public class ObjectReference {
 
     private Map<String, Object> map() {
         Map<String, Object> result = RAW_OBJECT == rawType ? new LinkedHashMap<>() : new TraitSpecObjectValue();
-        fields.forEach((k, v) -> result.put(k, v.value()));
+        fields.forEach((k, v) -> {
+            Object subValue = v.value();
+            if (subValue instanceof Map && ((Map<?, ?>) subValue).isEmpty()) {
+                result.put(v.buildKey(k), subValue);
+            } else
+                result.put(k, subValue);
+        });
         return result;
     }
 
@@ -93,11 +99,15 @@ public class ObjectReference {
 
         @Override
         public String buildPropertyName(String property) {
-            if (traitSpec != null)
-                property += "(" + traitSpec + ")";
-            if (intently)
-                property += "!";
-            return property;
+            return buildKey(property);
         }
+    }
+
+    private String buildKey(String property) {
+        if (traitSpec != null)
+            property += "(" + traitSpec + ")";
+        if (intently)
+            property += "!";
+        return property;
     }
 }

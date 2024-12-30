@@ -149,3 +149,28 @@ Feature: trait-spec
       | PC   |
       | PC   |
     """
+
+  Scenario: bug use trait spec in sub object
+    When create
+    """
+    库存: {
+      product(红色的 商品): {...}
+    }
+    """
+    Then all "库存" should:
+    """
+    [0].product.color= red
+    """
+
+#  TODO bug
+#  Scenario: bug use trait spec in sub list element
+#    When create
+#    """
+#    商品: {
+#      stocks[0](无货 库存): {...}
+#    }
+#    """
+#    Then all "库存" should:
+#    """
+#    [0].count= 0
+#    """

@@ -331,6 +331,40 @@ Feature: input property
       author.contact.name: Tom
       """
 
+    Scenario: force creation and pass empty map with no properties
+      Given the following bean class:
+      """
+      public class Contact {
+        public String name, email;
+      }
+      """
+      And the following bean class:
+      """
+      public class Author {
+        public Contact contact;
+      }
+      """
+      And the following bean class:
+      """
+      public class Book {
+        public Author author;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Contact.class).property("name", "Jerry").create();
+      """
+      And build:
+      """
+      jFactory.type(Book.class)
+        .property("author.contact!", new HashMap<String, String>() {{
+        }}).create();
+      """
+      Then the result should:
+      """
+      author.contact.name= /name.*/
+      """
+
   Rule: collection property
 
     Scenario: support input collection element property
