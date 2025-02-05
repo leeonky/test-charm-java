@@ -71,8 +71,20 @@ workflows:
   all-build:
     jobs:
       - test-in-java9-module-safe
+          filters:
+            branches:
+              only:
+                - main
       - test-in-java9-requires-add-opens
+          filters:
+            branches:
+              only:
+                - main
       - build:
           requires:
             - test-in-java9-module-safe
             - test-in-java9-requires-add-opens
+          filters:
+            branches:
+              only:
+                - main
