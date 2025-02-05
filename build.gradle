@@ -273,6 +273,7 @@ subprojects {
     configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
     configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
+    configCucumber('DAL-extension-debugger', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-jdbc', ['com.github.leeonky'])
     configCucumber('DAL-extension-jfactory', ['com.github.leeonky'])
     configCucumber('jfactory', ['com.github.leeonky'])
