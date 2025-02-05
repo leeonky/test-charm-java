@@ -1,4 +1,0 @@
-dependencies {
-    implementation project(':DAL-java')
-    implementation 'io.javalin:javalin:4.6.8'
-}
