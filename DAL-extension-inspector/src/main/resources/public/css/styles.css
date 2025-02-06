@@ -1,0 +1,21 @@
+.title-container {
+    display: flex;
+    align-items: baseline;
+
+}
+
+.title-container h1 {
+    margin-right: 10px;
+}
+
+.code-container {
+}
+
+.code-container textarea {
+}
+
+.code-container button {
+}
+
+.result-container pre {
+}

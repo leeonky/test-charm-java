@@ -276,6 +276,7 @@ subprojects {
     configCucumber('DAL-extension-debugger', ['com.github.leeonky.dal.cucumber'])
     configCucumber('DAL-extension-jdbc', ['com.github.leeonky'])
     configCucumber('DAL-extension-jfactory', ['com.github.leeonky'])
+    configCucumber('DAL-extension-inspector', ['com.github.leeonky'])
     configCucumber('jfactory', ['com.github.leeonky'])
     configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
     configCucumber('jfactory-property-value', ['com.github.leeonky'])
