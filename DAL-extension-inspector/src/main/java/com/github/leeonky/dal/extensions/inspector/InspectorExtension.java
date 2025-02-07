@@ -5,8 +5,12 @@ import com.github.leeonky.dal.runtime.Extension;
 
 public class InspectorExtension implements Extension {
 
+
     @Override
     public void extend(DAL dal) {
-        Server.INSTANCE.start();
+        Inspector inspector = Inspector.inspector();
+        inspector.launch();
+
+        dal.getRuntimeContextBuilder().registerErrorHook((input, code, error) -> inspector.inspect(dal, input, code));
     }
 }
