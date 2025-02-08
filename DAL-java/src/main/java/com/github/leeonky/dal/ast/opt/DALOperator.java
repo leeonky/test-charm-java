@@ -39,4 +39,8 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     public Operators overrideType() {
         return type;
     }
+
+    public boolean isVerification() {
+        return false;
+    }
 }

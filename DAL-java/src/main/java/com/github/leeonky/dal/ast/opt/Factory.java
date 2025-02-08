@@ -187,5 +187,10 @@ public class Factory {
         public String inspect(String node1, String node2) {
             return String.format("%s%s %s", node1, label, node2);
         }
+
+        @Override
+        public boolean isVerification() {
+            return true;
+        }
     }
 }

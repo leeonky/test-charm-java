@@ -124,4 +124,9 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     public boolean needPostBlankWarningCheck() {
         return true;
     }
+
+    @Override
+    public boolean isVerification() {
+        return operator.isVerification();
+    }
 }

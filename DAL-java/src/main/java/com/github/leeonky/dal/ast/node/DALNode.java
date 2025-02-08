@@ -82,4 +82,8 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     public boolean needPostBlankWarningCheck() {
         return false;
     }
+
+    public boolean isVerification() {
+        return false;
+    }
 }

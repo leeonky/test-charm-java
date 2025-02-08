@@ -9,7 +9,7 @@ public class Inspector {
     private static final Inspector instance = new Inspector();
     private HttpServer server;
     private Mode mode;
-    private InspectorContext inspectorContext;
+    private InspectorCore inspectorCore;
 
     public static Inspector inspector() {
         return instance;
@@ -22,8 +22,8 @@ public class Inspector {
     public void launch() {
         synchronized (Inspector.class) {
             if (server == null) {
-                inspectorContext = new InspectorContext();
-                server = new HttpServer(inspectorContext.apiProvider()).start();
+                inspectorCore = new InspectorCore();
+                server = new HttpServer(inspectorCore.apiProvider()).start();
             }
         }
     }
@@ -45,7 +45,7 @@ public class Inspector {
 
     public void inspect(DAL dal, Object input, String code) {
         if (!isRecursive())
-            inspectorContext.inspect(dal, input, code);
+            inspectorCore.inspect(dal, input, code);
     }
 
     public Mode currentMode() {
@@ -57,7 +57,7 @@ public class Inspector {
 
     private boolean isRecursive() {
         for (StackTraceElement stack : Thread.currentThread().getStackTrace())
-            if (InspectorContext.ApiProvider.class.getName().equals(stack.getClassName()))
+            if (InspectorCore.ApiProvider.class.getName().equals(stack.getClassName()))
                 return true;
         return false;
     }

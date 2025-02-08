@@ -12,11 +12,11 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 public class HttpServer {
-    private final InspectorContext.ApiProvider apiProvider;
+    private final InspectorCore.ApiProvider apiProvider;
     private Javalin javalin;
     private CountDownLatch serverReadyLatch;
 
-    public HttpServer(InspectorContext.ApiProvider apiProvider) {
+    public HttpServer(InspectorCore.ApiProvider apiProvider) {
         this.apiProvider = apiProvider;
         JadeConfiguration jadeConfiguration = new JadeConfiguration();
         jadeConfiguration.setCaching(false);
