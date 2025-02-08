@@ -96,4 +96,9 @@ public class InspectorSteps {
                 assertThat(getWebDriver().findElement(xpath("//*[@placeholder='Result']")).getText())
                         .isEqualTo(result));
     }
+
+    @Then("test failed with error:")
+    public void testFailedWithError(String error) {
+        testContext.shouldFailedWith(error);
+    }
 }

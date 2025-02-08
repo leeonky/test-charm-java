@@ -4,7 +4,9 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
 import lombok.SneakyThrows;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 
 public class TestContext {
     private final DAL dal;
@@ -51,5 +53,10 @@ public class TestContext {
 
     public String lastEvaluating() {
         return lastEvaluating;
+    }
+
+    public void shouldFailedWith(String error) {
+        await().ignoreExceptions().untilAsserted(() -> assertThat(running).isFalse());
+        assertThat(lastThrow.getMessage()).isEqualTo(error);
     }
 }

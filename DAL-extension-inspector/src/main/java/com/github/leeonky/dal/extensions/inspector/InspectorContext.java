@@ -7,7 +7,7 @@ import static com.github.leeonky.dal.Assertions.expect;
 
 public class InspectorContext {
     private boolean running = true;
-    private DAL dal;
+    private DAL dal = DAL.create(InspectorExtension.class);
     private Object input;
     private String code;
 

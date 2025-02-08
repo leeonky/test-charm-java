@@ -36,9 +36,12 @@ public class Inspector {
     }
 
     public void inspect(DAL dal, Object input, String code) {
-        if (isRecursive())
-            return;
-        inspectorContext.inspect(dal, input, code);
+        if (currentMode() == Mode.DAL_INSPECTOR_ASSERT_FORCED && !isRecursive())
+            inspectorContext.inspect(dal, input, code);
+    }
+
+    private Mode currentMode() {
+        return defaultMode;
     }
 
     private boolean isRecursive() {
@@ -49,6 +52,6 @@ public class Inspector {
     }
 
     public enum Mode {
-        DAL_INSPECTOR_ASSERT_DISABLED, DAL_INSPECTOR_AUTO, DAL_INSPECTOR_FORCED
+        DAL_INSPECTOR_ASSERT_DISABLED, DAL_INSPECTOR_ASSERT_FORCED
     }
 }
