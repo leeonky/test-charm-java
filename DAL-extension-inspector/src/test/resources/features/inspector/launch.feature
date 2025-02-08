@@ -18,8 +18,8 @@ Feature: launch inspector
         value= incorrect
       }
       """
-    Then test is still running after 1s
     When launch inspector
+    Then test is still running after 1s
     Then should display the same DAL expression
     And should show the following result:
       """
@@ -40,7 +40,7 @@ Feature: launch inspector
       }
       """
 
-  Scenario: DAL_INSPECTOR_DISABLED: test failed and exit no hanging
+  Scenario: DAL_INSPECTOR_ASSERT_DISABLED: test failed and exit no hanging
     Given DAL inspector is in mode 'DAL_INSPECTOR_ASSERT_DISABLED'
     Given the following data:
       """
@@ -63,3 +63,20 @@ Feature: launch inspector
       <hello>
        ^
       """
+
+  Scenario Outline: always hang when use meta property ::inspect
+    Given DAL inspector is in mode '<mode>'
+    When evaluating the following:
+      """
+      ::inspect
+      """
+    When launch inspector
+    Then test is still running after 1s
+    Then should display DAL expression:
+    """
+    {}
+    """
+    Examples:
+      | mode                          |
+      | DAL_INSPECTOR_ASSERT_DISABLED |
+      | DAL_INSPECTOR_ASSERT_FORCED   |

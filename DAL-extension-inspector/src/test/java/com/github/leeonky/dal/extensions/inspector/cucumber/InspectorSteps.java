@@ -101,4 +101,11 @@ public class InspectorSteps {
     public void testFailedWithError(String error) {
         testContext.shouldFailedWith(error);
     }
+
+    @Then("should display DAL expression:")
+    public void shouldDisplayDALExpression(String dalExpression) {
+        await().ignoreExceptions().untilAsserted(() ->
+                assertThat(getWebDriver().findElement(xpath("//*[@placeholder='DAL expression']")).getAttribute("value"))
+                        .isEqualTo(dalExpression));
+    }
 }

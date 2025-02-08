@@ -4,6 +4,8 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
 import lombok.SneakyThrows;
 
+import java.time.Instant;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
@@ -15,13 +17,14 @@ public class TestContext {
     private Throwable lastThrow;
     private boolean running;
 
+    private Instant startedAt;
+
     public TestContext() {
-        Inspector.inspector().setDefaultMode(null);
         dal = DAL.getInstance();
     }
 
     public void changeInspectorMode(String mode) {
-        Inspector.inspector().setDefaultMode(Inspector.Mode.valueOf(mode));
+        Inspector.inspector().setMode(Inspector.Mode.valueOf(mode));
     }
 
     public void givenData(Object data) {
@@ -31,6 +34,7 @@ public class TestContext {
     public void evaluating(String expression) {
         lastEvaluating = expression;
         running = true;
+        startedAt = Instant.now();
         Thread thread = new Thread(() -> {
             try {
                 dal.evaluate(givenData, expression);
@@ -45,10 +49,11 @@ public class TestContext {
 
     @SneakyThrows
     public void shouldStillRunningAfter(int ms) {
-        Thread.sleep(ms);
-        if (!running) {
+        long wait = ms - (Instant.now().toEpochMilli() - startedAt.toEpochMilli());
+        if (wait > 0)
+            Thread.sleep(ms);
+        if (!running)
             fail("Test ended");
-        }
     }
 
     public String lastEvaluating() {
