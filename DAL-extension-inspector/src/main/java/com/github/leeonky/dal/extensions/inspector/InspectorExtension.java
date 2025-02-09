@@ -5,29 +5,14 @@ import com.github.leeonky.dal.runtime.Extension;
 
 public class InspectorExtension implements Extension {
 
-    private static Inspector inspector;
-
-    public static void launch() {
-        if (inspector == null) {
-            inspector = new Inspector();
-        }
-    }
-
-    public static void shutdown() {
-        if (inspector != null) {
-            inspector.exit();
-            inspector = null;
-        }
-    }
-
     @Override
     public void extend(DAL dal) {
-        launch();
+        Inspector.launch();
         dal.getRuntimeContextBuilder()
-                .registerErrorHook((input, code, error) -> inspector.inspectViaMode(dal, input, code))
+                .registerErrorHook((input, code, error) -> Inspector.inspector().inspectViaMode(dal, input, code))
                 .registerMetaProperty("inspect", metaData -> {
                     Object input = metaData.data().instance();
-                    inspector.inspect(dal, input, "{}");
+                    Inspector.inspector().inspect(dal, input, "{}");
                     return input;
                 });
     }

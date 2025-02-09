@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.inspector.Inspector;
+import com.github.leeonky.dal.extensions.inspector.InspectorCore;
 import lombok.SneakyThrows;
 
 import java.time.Instant;
@@ -24,7 +24,7 @@ public class TestContext {
     }
 
     public void changeInspectorMode(String mode) {
-        Inspector.setMode(Inspector.Mode.valueOf(mode));
+        InspectorCore.setMode(InspectorCore.Mode.valueOf(mode));
     }
 
     public void givenData(Object data) {

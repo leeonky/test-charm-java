@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber;
 
-import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
+import com.github.leeonky.dal.extensions.inspector.Inspector;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -37,8 +37,8 @@ public class InspectorSteps {
 
     @Before
     public void resetInspectorServer() {
-        InspectorExtension.shutdown();
-        InspectorExtension.launch();
+        Inspector.shutdown();
+        Inspector.launch();
     }
 
     @Before("@inspector")
