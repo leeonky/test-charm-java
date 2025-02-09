@@ -34,7 +34,7 @@ function switchToTab(tabId) {
     $('#' + tabId).addClass('active');
 }
 
-$(document).ready(function() {
+function setupEditor() {
     var debounceTimer = null;
     $('#code').on('input', function() {
         clearTimeout(debounceTimer);
@@ -43,6 +43,45 @@ $(document).ready(function() {
             execute()
         }, 500);
     });
+}
+
+function createWS(uri) {
+    socket = new WebSocket(uri);
+    socket.onopen = function() {
+        console.log("WebSocket connection established");
+    };
+
+    socket.onerror = function(err) {
+        console.error("WebSocket encountered an error");
+        socket.close()
+    };
+
+    socket.onclose = function(event) {
+        console.log("WebSocket closed")
+        setTimeout(function() {
+            console.log("Re-setup WebSocket connection")
+            createWS(uri)
+        }, 500);
+    };
+}
+
+function setupWS() {
+    const loc = window.location;
+    let newUri;
+    if (loc.protocol === "https:")
+        newUri = "wss:";
+    else
+        newUri = "ws:";
+    newUri += "//" + loc.host+"/ws/ping";
+    createWS(newUri)
+}
+
+var socket = null
+
+$(document).ready(function() {
+    setupEditor()
+
+    setupWS()
 
     $.ajax({
         url: '/api/fetch-code',

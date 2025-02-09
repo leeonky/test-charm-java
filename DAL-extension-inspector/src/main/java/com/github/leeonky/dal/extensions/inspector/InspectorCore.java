@@ -15,6 +15,8 @@ public class InspectorCore {
     private Object input;
     private String code;
 
+    HttpServer httpServer = new HttpServer(new ApiProvider()).start();
+
     public void inspect(DAL dal, Object input, String code) {
         this.dal = dal;
         this.input = input;

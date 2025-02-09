@@ -23,7 +23,7 @@ public class Inspector {
         synchronized (Inspector.class) {
             if (server == null) {
                 inspectorCore = new InspectorCore();
-                server = new HttpServer(inspectorCore.apiProvider()).start();
+                server = inspectorCore.httpServer;
             }
         }
     }

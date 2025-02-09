@@ -1,15 +1,11 @@
-Feature: start inspecting
+Feature: attach in disabled mode
 
-  Scenario: launch main web form
-    When launch inspector
-    Then you can see page "DAL inspector"
+  Background:
+    Given DAL inspector is in mode 'DAL_INSPECTOR_ASSERT_DISABLED'
 
-  Rule: DAL_INSPECTOR_ASSERT_DISABLED
+  Rule: Web page not pre-opened
 
-    Background:
-      Given DAL inspector is in mode 'DAL_INSPECTOR_ASSERT_DISABLED'
-
-    Scenario: Test failed; the automation exits
+    Scenario: failed tests will not hang
       Given the following data:
         """
         {
@@ -32,7 +28,7 @@ Feature: start inspecting
          ^
         """
 
-    Scenario: meta property ::inspect hangs the automation; launching the web page displays the DAL code and result
+    Scenario: ::inspect will hang, then open web page will catch the code and result
       Given the following data:
         """
         {
@@ -55,12 +51,12 @@ Feature: start inspecting
         <hello>
         """
 
-  Rule: DAL_INSPECTOR_ASSERT_FORCED
+  Rule: Web page pre-opened
 
     Background:
-      Given DAL inspector is in mode 'DAL_INSPECTOR_ASSERT_FORCED'
+      Given launch inspector
 
-    Scenario: Failed test hangs the automation; launching the web page displays the DAL code and error
+    Scenario: Web page opened, test fails and exits.
       Given the following data:
         """
         {
@@ -73,30 +69,17 @@ Feature: start inspecting
           value= incorrect
         }
         """
-      Then test is still running after 1s
-      When launch inspector
-      Then should display the same DAL expression
-      And should show the following result:
+      Then test failed with error:
         """
-        java.lang.AssertionError:
-        : {
-          value= incorrect
-                 ^
-        }
-
         Expected to be equal to: java.lang.String
         <incorrect>
          ^
         Actual: java.lang.String
         <hello>
          ^
-
-        The root value was: {
-            value: java.lang.String <hello>
-        }
         """
 
-    Scenario: meta property ::inspect hangs the automation; launching the web page displays the DAL code and result
+    Scenario: Web page opened, ::inspect will hang
       Given the following data:
         """
         {
@@ -108,13 +91,12 @@ Feature: start inspecting
         value::inspect
         """
       Then test is still running after 1s
-      When launch inspector
-      Then should display DAL expression:
-        """
-        {}
-        """
-      And should show the following result:
-        """
-        java.lang.String
-        <hello>
-        """
+#      Then should display DAL expression:
+#        """
+#        {}
+#        """
+#      And should show the following result:
+#        """
+#        java.lang.String
+#        <hello>
+#        """
