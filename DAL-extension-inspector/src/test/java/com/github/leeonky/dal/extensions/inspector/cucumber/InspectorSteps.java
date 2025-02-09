@@ -14,6 +14,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
 
+import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -93,7 +94,7 @@ public class InspectorSteps {
     @And("should show the following result:")
     public void shouldShowTheFollowingResult(String result) {
         await().ignoreExceptions().untilAsserted(() ->
-                assertThat(getWebDriver().findElement(xpath("//*[@placeholder='Result']")).getText())
+                expect(getWebDriver().findElement(xpath("//*[@placeholder='Result']")).getText())
                         .isEqualTo(result));
     }
 
@@ -105,7 +106,7 @@ public class InspectorSteps {
     @Then("should display DAL expression:")
     public void shouldDisplayDALExpression(String dalExpression) {
         await().ignoreExceptions().untilAsserted(() ->
-                assertThat(getWebDriver().findElement(xpath("//*[@placeholder='DAL expression']")).getAttribute("value"))
+                expect(getWebDriver().findElement(xpath("//*[@placeholder='DAL expression']")).getAttribute("value"))
                         .isEqualTo(dalExpression));
     }
 }

@@ -78,6 +78,7 @@ Feature: start inspecting
       Then should display the same DAL expression
       And should show the following result:
         """
+        java.lang.AssertionError:
         : {
           value= incorrect
                  ^

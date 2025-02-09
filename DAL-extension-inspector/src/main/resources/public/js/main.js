@@ -27,6 +27,13 @@ function setResult(result) {
     $('#result').text(result)
 }
 
+function switchToTab(tabId) {
+    $('.tab').removeClass('active');
+    $('[data-tab="'+tabId+'"]').addClass('active')
+    $('.tab-content').removeClass('active');
+    $('#' + tabId).addClass('active');
+}
+
 $(document).ready(function() {
     var debounceTimer = null;
     $('#code').on('input', function() {
@@ -46,5 +53,11 @@ $(document).ready(function() {
         },
         error: function() {
         }
+    });
+
+    switchToTab("tab-result")
+
+    $('.tab').on('click', function() {
+        switchToTab($(this).data('tab'))
     });
 });

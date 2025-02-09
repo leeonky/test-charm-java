@@ -7,6 +7,7 @@ import com.github.leeonky.util.Suppressor;
 
 import static com.github.leeonky.dal.Accessors.get;
 import static com.github.leeonky.dal.Assertions.expect;
+import static java.lang.String.format;
 
 public class InspectorCore {
     private boolean running = true;
@@ -43,7 +44,7 @@ public class InspectorCore {
                 }
                 return "";
             } catch (Throwable e) {
-                return e.getMessage();
+                return format("%s:%s", e.getClass().getName(), e.getMessage());
             }
         }
     }

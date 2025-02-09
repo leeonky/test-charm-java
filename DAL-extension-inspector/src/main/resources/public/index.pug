@@ -5,18 +5,23 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title DAL inspector
     link(rel='stylesheet' href='css/styles.css')
-    link(rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@400;700&display=swap')
-    script(src='https://code.jquery.com/jquery-3.6.0.min.js')
+    script(src='js/jquery-3.6.0.min.js')
     script(src='js/main.js')
   body
     .title-container
-      h1 DAL inspector
-      p Welcome to DAL inspector
+      .title
+        h1 DAL inspector
+        p inspect / debug DAL expression
 
     .code-container
       textarea(id='code' placeholder='DAL expression')
       div(id='status')
-      button(id='run') Run
 
     .result-container
-      pre(id='result' placeholder='Result')
+      .tabs
+        .tab(data-tab='tab-result') Result
+        .tab(data-tab='tab-inspect') Inspect
+      .tab-content(id='tab-result')
+        pre.result(id='result' placeholder='Result')
+      .tab-content(id='tab-result')
+        pre.inspect(id='inspect' placeholder='Inspect')

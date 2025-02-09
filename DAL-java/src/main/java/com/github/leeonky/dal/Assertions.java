@@ -1,5 +1,8 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.ast.node.ConstValueNode;
+import com.github.leeonky.dal.ast.node.InputNode;
+import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.InputException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
@@ -12,6 +15,7 @@ import com.github.leeonky.interpreter.InterpreterException;
 import java.lang.reflect.Array;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.util.BeanClass.create;
 
@@ -102,5 +106,10 @@ public class Assertions {
             return is(Array.newInstance(dal.getRuntimeContextBuilder().schemaType(
                     schema.replace('[', ' ').replace(']', ' ').trim()).getType(), 0).getClass());
         return is(dal.getRuntimeContextBuilder().schemaType(schema).getType());
+    }
+
+    public Assertions isEqualTo(Object expect) {
+        return execute(() -> expression(InputNode.INPUT_NODE, Factory.equal(), new ConstValueNode(expect))
+                .evaluate(dal.getRuntimeContextBuilder().build(inputCode)));
     }
 }
