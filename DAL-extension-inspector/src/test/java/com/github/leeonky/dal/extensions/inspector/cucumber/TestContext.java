@@ -24,7 +24,7 @@ public class TestContext {
     }
 
     public void changeInspectorMode(String mode) {
-        Inspector.inspector().setMode(Inspector.Mode.valueOf(mode));
+        Inspector.setMode(Inspector.Mode.valueOf(mode));
     }
 
     public void givenData(Object data) {
