@@ -9,37 +9,37 @@ html(lang="en")
     script(src='js/alpine-3.10.3.js')
     script(src='js/main.js')
   body
-//-     .title-container
-//-       .title
-//-         h1 DAL inspector
-//-         p inspect / debug DAL expression
-//-       .controls
-//-         .dal-session
-//-           label.dal-session-title
-//-             span Current:
-//-           label.dal-session-current
-//-             span(id='current')
-//-         .dal-instances
-//-           .dal-instances-title
-//-             span Remote:
-//-           .dal-instances-switches
-//-         .buttons
-//-           button.resume(id='resume') Resume
-//-
-//-     .code-container
-//-       textarea.code-editing(id='code' placeholder='DAL expression')
-//-
-//-     .result-container
-//-       .tabs
-//-         .tab(data-tab='tab-root') Root
-//-         .tab(data-tab='tab-error') Error
-//-         .tab(data-tab='tab-result') Result
-//-         .tab(data-tab='tab-inspect') Inspect
-//-       .tab-content(id='tab-root')
-//-         pre.result(id='root' placeholder='Root')
-//-       .tab-content(id='tab-error')
-//-         pre.result(id='error' placeholder='Error')
-//-       .tab-content(id='tab-result')
-//-         pre.result(id='result' placeholder='Result')
-//-       .tab-content(id='tab-inspect')
-//-         pre.inspect(id='inspect' placeholder='Inspect')
+    .title-container
+      .title
+        h1.text-dark DAL inspector
+        p inspect / debug DAL expression
+      .controls
+        .dal-session
+          label.dal-session-title
+            span Current:
+          label.dal-session-current
+            span(id='current')
+        .dal-instances
+          .dal-instances-title
+            span Remote:
+          .dal-instances-switches
+        .buttons
+          button.resume(id='resume') Resume
+
+    .code-container
+      textarea.code-editing(id='code' placeholder='DAL expression')
+
+    .result-container
+      .tabs
+        .tab(data-tab='tab-root') Root
+        .tab(data-tab='tab-error') Error
+        .tab(data-tab='tab-result') Result
+        .tab(data-tab='tab-inspect') Inspect
+      .tab-content(id='tab-root')
+        pre.result(id='root' placeholder='Root')
+      .tab-content(id='tab-error')
+        pre.result(id='error' placeholder='Error')
+      .tab-content(id='tab-result')
+        pre.result(id='result' placeholder='Result')
+      .tab-content(id='tab-inspect')
+        pre.inspect(id='inspect' placeholder='Inspect')

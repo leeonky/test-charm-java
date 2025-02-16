@@ -3,9 +3,15 @@ body {
     background-color: #f3f4f6;
     margin: 0;
     padding: 20px;
-    color: #333;
+    color: #7d889e;
 }
-/*
+
+.text-dark {
+    color: #5c677d;
+}
+
+/* --------------------- */
+
 .title-container {
     display: flex;
     justify-content: space-between;
@@ -13,12 +19,8 @@ body {
     margin-bottom: 10px;
 }
 
-.title-container .title h1 {
-    margin: 0;
-    color: #5c677d;
-}
 .title-container .title p {
-    color: #7d889e;
+    /* color: #7d889e; */
     font-size: 16px;
 }
 
@@ -123,7 +125,7 @@ button {
     background-color: #ffffff;
     border: 1px solid #5c677d;
     border-radius: 4px;
-    color: #5c677d;
+    /*color: #5c677d;*/
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
     outline: none;
@@ -206,4 +208,3 @@ button.resume:disabled::after {
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
-*/

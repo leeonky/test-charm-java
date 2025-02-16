@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.util.Optional.ofNullable;
@@ -54,10 +53,6 @@ public class InspectorCore {
         JavalinRenderer.register((filePath, model, context) ->
                 jadeConfiguration.renderTemplate(jadeConfiguration.getTemplate("public" + filePath), model), ".pug", ".PNG", ".Png");
 
-        start();
-    }
-
-    public void start() {
         serverReadyLatch = new CountDownLatch(1);
         javalin = Javalin.create(config -> config.addStaticFiles("/public", Location.CLASSPATH))
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
@@ -127,7 +122,7 @@ public class InspectorCore {
         public String sync() {
             Map<String, Object> response = new HashMap<>();
             response.put("mode", currentMode().name());
-            response.put("instances", Inspector.getInstances().stream().map(DAL::getName).collect(Collectors.toSet()));
+//            response.put("instances", Inspector.getInstances().stream().map(DAL::getName).collect(Collectors.toSet()));
             response.put("code", code);
             if (dal != null)
                 response.put("current", dal.getName());

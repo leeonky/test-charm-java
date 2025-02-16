@@ -8,13 +8,13 @@ public class InspectorExtension implements Extension {
     public void extend(DAL dal) {
         Inspector.launch();
         System.out.println("add dal = " + dal.getName());
-        Inspector.getInstances().add(dal);
-        dal.getRuntimeContextBuilder()
-                .registerErrorHook((input, code, error) -> Inspector.inspector().inspectViaMode(dal, input, code))
-                .registerMetaProperty("inspect", metaData -> {
-                    Object input = metaData.data().instance();
-                    Inspector.inspector().inspect(dal, input, "{}");
-                    return input;
-                });
+//        Inspector.getInstances().add(dal);
+//        dal.getRuntimeContextBuilder()
+//                .registerErrorHook((input, code, error) -> Inspector.inspector().inspectViaMode(dal, input, code))
+//                .registerMetaProperty("inspect", metaData -> {
+//                    Object input = metaData.data().instance();
+//                    Inspector.inspector().inspect(dal, input, "{}");
+//                    return input;
+//                });
     }
 }

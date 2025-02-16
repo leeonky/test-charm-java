@@ -1,12 +1,24 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber;
 
+import com.github.leeonky.dal.extensions.inspector.Inspector;
 import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
+import java.util.List;
+
+import static com.github.leeonky.util.function.Extension.not;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.openqa.selenium.By.xpath;
 
 public class InspectorSteps {
     private WebDriver webDriver = null;
@@ -31,6 +43,30 @@ public class InspectorSteps {
         }
     }
 
+    @Before
+    public void initTest() {
+        testContext = new TestContext();
+        Inspector.shutdown();
+    }
+
+    @When("launch inspector web server")
+    public void launchInspectorWebServer() {
+        Inspector.launch();
+    }
+
+    @And("launch inspector web page")
+    public void launchInspectorWebPage() {
+        getWebDriver().get("http://host.docker.internal:10081");
+    }
+
+    @Then("you can see page {string}")
+    public void youCanSeePage(String text) {
+        List<WebElement> elements = await().ignoreExceptions().until(() -> getWebDriver().findElements(
+                xpath(String.format("//body//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text))), not(List::isEmpty));
+
+        assertThat(elements).isNotEmpty();
+    }
+
 //    @SneakyThrows
 //    @And("restart inspector")
 //    public void resetInspectorServer() {
@@ -51,10 +87,6 @@ public class InspectorSteps {
 //        }
 //    }
 //
-//    @Then("you can see page {string}")
-//    public void youCanSeePage(String text) {
-//        assertThat(getWebDriver().findElements(xpath("//*[text()='" + text + "']"))).isNotEmpty();
-//    }
 //
 //    @Before
 //    public void initTest() {
