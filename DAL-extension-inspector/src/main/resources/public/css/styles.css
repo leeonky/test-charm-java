@@ -5,7 +5,7 @@ body {
     padding: 20px;
     color: #333;
 }
-
+/*
 .title-container {
     display: flex;
     justify-content: space-between;
@@ -31,13 +31,24 @@ body {
     box-sizing: border-box;
     border: 1px solid #d1d9e6;
     border-radius: 4px;
+    resize: none;
+    overflow-y: hidden;
+}
+
+.code-editing {
     background-color: #fff;
 }
 
-.code-container button {
+.code-error {
+    background-color: #fff0f0;
 }
 
-.result-container .result {
+.code-success {
+    background-color: #f0fff0;
+}
+
+.code-executing {
+    background-color: #fffff0;
 }
 
 .tabs {
@@ -68,10 +79,131 @@ body {
 .tab-content {
     padding: 10px;
     background-color: #ffffff;
-    border: 1px solid #d1d9e6;
+    border: 1px solid #ffffff;
     border-radius: 0 0 4px 4px;
     display: none;
 }
 .tab-content.active {
     display: block;
 }
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+.dal-session {
+  margin-right: 100px;
+  display: flex;
+  gap: 10px;
+}
+
+.dal-instances {
+    display: flex;
+    gap: 10px;
+}
+
+.dal-instances-switches {
+    display: flex;
+    gap: 10px;
+}
+
+.buttons {
+    display: flex;
+}
+
+button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    background-color: #ffffff;
+    border: 1px solid #5c677d;
+    border-radius: 4px;
+    color: #5c677d;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    outline: none;
+    position: relative;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #5c677d;
+    color: #ffffff;
+}
+
+button:active {
+    background-color: #4a5568;
+    color: #ffffff;
+    transform: translateY(1px);
+}
+
+button:disabled {
+    background-color: #e2e8f0;
+    color: #cbd5e1;
+    border: 1px solid #cbd5e1;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+button.resume::after {
+    content: '';
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%235c677d' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 3.5v9l6-4.5-6-4.5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    display: block;
+    width: 8px;
+    height: 16px;
+}
+
+button.resume:disabled::after {
+    content: '';
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23cbd5e1' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 3.5v9l6-4.5-6-4.5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    display: block;
+    width: 8px;
+    height: 16px;
+}
+
+.switch {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.switch input[type="checkbox"] {
+    display: none;
+}
+
+.switch .custom-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #5c677d;
+    border-radius: 4px;
+    display: inline-block;
+    margin-right: 8px;
+    position: relative;
+}
+
+.switch input[type="checkbox"]:checked + .custom-checkbox {
+    background-color: #5c677d;
+    border-color: #5c677d;
+}
+
+.switch input[type="checkbox"]:checked + .custom-checkbox::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+*/

@@ -1,9 +1,19 @@
 package com.github.leeonky.dal.extensions.inspector;
 
+import com.github.leeonky.dal.DAL;
+
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class Inspector {
     public static InspectorCore inspector;
+
+    public static final Set<DAL> instances = new LinkedHashSet<>();
+
+    public static Set<DAL> getInstances() {
+        return instances;
+    }
 
     public static void launch() {
         if (inspector == null) {

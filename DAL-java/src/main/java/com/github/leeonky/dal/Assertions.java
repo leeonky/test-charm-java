@@ -36,7 +36,6 @@ public class Assertions {
 
     private Assertions(InputCode<Object> input) {
         inputCode = input;
-        dal = dalFactory.get();
     }
 
     public Assertions use(DAL dal) {
@@ -59,13 +58,19 @@ public class Assertions {
     public Assertions should(String prefix, String verification) {
         String fullCode = prefix + verification;
         try {
-            return execute(() -> dal.evaluate(inputCode, fullCode, schema));
+            return execute(() -> getDal().evaluate(inputCode, fullCode, schema));
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
+                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
             throw new AssertionError(detailMessage);
         }
+    }
+
+    private DAL getDal() {
+        if (dal == null)
+            dal = dalFactory.get();
+        return dal;
     }
 
     private Assertions execute(Runnable runnable) {
@@ -73,7 +78,7 @@ public class Assertions {
             runnable.run();
         } catch (InputException e) {
             String detailMessage = "\n" + e.getMessage();
-            detailMessage += "\n\nInput code got exception: " + dal.getRuntimeContextBuilder().build(null).wrap(e.getInputClause()).dumpAll();
+            detailMessage += "\n\nInput code got exception: " + getDal().getRuntimeContextBuilder().build(null).wrap(e.getInputClause()).dumpAll();
             throw new AssertionError(detailMessage);
         }
         return this;
@@ -88,7 +93,7 @@ public class Assertions {
     }
 
     public Assertions is(Class<?> schema) {
-        RuntimeContextBuilder.DALRuntimeContext context = dal.getRuntimeContextBuilder().build(inputCode, schema);
+        RuntimeContextBuilder.DALRuntimeContext context = getDal().getRuntimeContextBuilder().build(inputCode, schema);
         try {
             this.schema = schema;
             return execute(() -> Verification.expect(new Expect(create((Class) schema), null))
@@ -96,20 +101,20 @@ public class Assertions {
         } catch (IllegalTypeException e) {
             String detailMessage = "\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
+                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
             throw new AssertionError(detailMessage);
         }
     }
 
     public Assertions is(String schema) {
         if (schema.startsWith("[") && schema.endsWith("]"))
-            return is(Array.newInstance(dal.getRuntimeContextBuilder().schemaType(
+            return is(Array.newInstance(getDal().getRuntimeContextBuilder().schemaType(
                     schema.replace('[', ' ').replace(']', ' ').trim()).getType(), 0).getClass());
-        return is(dal.getRuntimeContextBuilder().schemaType(schema).getType());
+        return is(getDal().getRuntimeContextBuilder().schemaType(schema).getType());
     }
 
     public Assertions isEqualTo(Object expect) {
         return execute(() -> expression(InputNode.INPUT_NODE, Factory.equal(), new ConstValueNode(expect))
-                .evaluate(dal.getRuntimeContextBuilder().build(inputCode)));
+                .evaluate(getDal().getRuntimeContextBuilder().build(inputCode)));
     }
 }

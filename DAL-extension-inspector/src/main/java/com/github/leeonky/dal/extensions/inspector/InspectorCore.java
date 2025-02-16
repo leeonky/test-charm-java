@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.Suppressor;
 import de.neuland.jade4j.JadeConfiguration;
 import de.neuland.jade4j.template.ClasspathTemplateLoader;
@@ -10,21 +10,27 @@ import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.plugin.rendering.JavalinRenderer;
 import io.javalin.websocket.WsContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.Accessors.get;
-import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
 public class InspectorCore {
-
     private static Mode mode;
 
     public static void setMode(Mode mode) {
@@ -32,15 +38,14 @@ public class InspectorCore {
     }
 
     private boolean running = true;
-    private DAL dal = DAL.create(InspectorExtension.class);
+    private DAL dal;
     private Object input;
     private String code;
 
     private Javalin javalin;
     private CountDownLatch serverReadyLatch;
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
-
-    private ApiProvider apiProvider = new ApiProvider();
+    private final ApiProvider apiProvider = new ApiProvider();
 
     public InspectorCore() {
         JadeConfiguration jadeConfiguration = new JadeConfiguration();
@@ -58,10 +63,18 @@ public class InspectorCore {
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
         Objects.requireNonNull(javalin.jettyServer()).setServerPort(10081);
         javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
-        javalin.get("/api/fetch-code", ctx -> ctx.status(200).html(apiProvider.fetchCode()));
+        javalin.get("/api/sync", ctx -> ctx.status(200).html(apiProvider.sync()));
+        javalin.post("/api/resume", ctx -> apiProvider.resume());
         javalin.post("/api/execute", ctx -> ctx.status(200).html(apiProvider.execute(ctx.body())));
         javalin.ws("/ws/ping", ws -> {
-            ws.onConnect(ctx -> clientConnections.put(ctx.getSessionId(), ctx));
+            ws.onConnect(ctx -> {
+                clientConnections.put(ctx.getSessionId(), ctx);
+                if (running)
+                    for (WsContext wsContext : clientConnections.values()) {
+                        wsContext.send("start");
+                    }
+            });
+            ws.onClose(ctx -> clientConnections.remove(ctx.getSessionId()));
         });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
@@ -78,9 +91,15 @@ public class InspectorCore {
 
     public void inspect(DAL dal, Object input, String code) {
         if (!isRecursive()) {
+            this.running = true;
             this.dal = dal;
             this.input = input;
             this.code = code;
+
+            for (WsContext wsContext : clientConnections.values()) {
+                wsContext.send("start");
+            }
+
             while (running)
                 Suppressor.run(() -> Thread.sleep(100));
         }
@@ -105,24 +124,66 @@ public class InspectorCore {
     }
 
     public class ApiProvider {
-        public String fetchCode() {
-            return code;
+        public String sync() {
+            Map<String, Object> response = new HashMap<>();
+            response.put("mode", currentMode().name());
+            response.put("instances", Inspector.getInstances().stream().map(DAL::getName).collect(Collectors.toSet()));
+            response.put("code", code);
+            if (dal != null)
+                response.put("current", dal.getName());
+            return ObjectWriter.serialize(response);
         }
 
         public String execute(String code) {
+            Map<String, String> response = new HashMap<>();
+            RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input);
             try {
-                RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input);
-                DALNode node = dal.compileSingle(code, runtimeContext);
-                if (node.isVerification()) {
-                    expect(input).use(dal).should(code);
-                } else {
-                    Object result = get(code).by(dal).from(input);
-                    return runtimeContext.wrap(result).dumpAll();
-                }
-                return "";
-            } catch (Throwable e) {
-                return format("%s:%s", e.getClass().getName(), e.getMessage());
+                response.put("root", runtimeContext.wrap(input).dumpAll());
+                response.put("inspect", dal.compileSingle(code, runtimeContext).inspect());
+                response.put("result", runtimeContext.wrap(dal.evaluate(input, code)).dumpAll());
+            } catch (InterpreterException e) {
+                response.put("error", e.show(code) + "\n\n" + e.getMessage());
             }
+            return ObjectWriter.serialize(response);
+        }
+
+        public void resume() {
+            running = false;
+        }
+    }
+
+    public static class ObjectWriter {
+        private final Document doc = Suppressor.get(DocumentBuilderFactory.newInstance()::newDocumentBuilder).newDocument();
+
+        private String xmlString() {
+            StringWriter writer = new StringWriter();
+            Suppressor.run(() -> Suppressor.get(TransformerFactory.newInstance()::newTransformer)
+                    .transform(new DOMSource(doc), new StreamResult(writer)));
+            return writer.getBuffer().toString();
+        }
+
+        private void appendEntry(Node parent, String name, Object data) {
+            Element newNode = doc.createElement(name);
+            parent.appendChild(newNode);
+            appendValue(newNode, data);
+        }
+
+        @SuppressWarnings("unchecked")
+        private void appendValue(Element parent, Object data) {
+            if (data instanceof Map)
+                for (Map.Entry<String, ?> entry : ((Map<String, ?>) data).entrySet())
+                    appendEntry(parent, entry.getKey(), entry.getValue());
+            else if (data instanceof Iterable)
+                for (Object e : ((Iterable<?>) data))
+                    appendEntry(parent, "__item", e);
+            else
+                parent.appendChild(doc.createTextNode(String.valueOf(String.valueOf(data))));
+        }
+
+        public static String serialize(Object data) {
+            ObjectWriter objectWriter = new ObjectWriter();
+            objectWriter.appendEntry(objectWriter.doc, "response", data);
+            return objectWriter.xmlString();
         }
     }
 }

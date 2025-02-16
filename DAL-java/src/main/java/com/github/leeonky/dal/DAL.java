@@ -25,6 +25,14 @@ public class DAL {
     private final Compiler compiler = new Compiler();
     private final RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
     private static final ThreadLocal<DAL> instance = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, DAL>> instances = new ThreadLocal<Map<String, DAL>>() {{
+        set(new HashMap<>());
+    }};
+    private final String name;
+
+    public DAL() {
+        this.name = String.valueOf(hashCode());
+    }
 
     public static synchronized DAL getInstance() {
         if (instance.get() == null)
@@ -37,6 +45,25 @@ public class DAL {
         if (iterator.hasNext())
             return iterator.next().newInstance();
         return new DAL().extend(exceptExtensions);
+    }
+
+    public DAL(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public static synchronized DAL getInstance(String name) {
+        return instances.get().computeIfAbsent(name, DAL::create);
+    }
+
+    public static DAL create(String name, Class<?>... exceptExtensions) {
+        Iterator<DALFactory> iterator = ServiceLoader.load(DALFactory.class).iterator();
+        if (iterator.hasNext())
+            return iterator.next().newInstance();
+        return new DAL(name).extend(exceptExtensions);
     }
 
     public RuntimeContextBuilder getRuntimeContextBuilder() {
