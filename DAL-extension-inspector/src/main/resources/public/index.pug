@@ -6,40 +6,40 @@ html(lang="en")
     title DAL inspector
     link(rel='stylesheet' href='css/styles.css')
     script(src='js/jquery-3.6.0.min.js')
-    script(src='js/alpine-3.10.3.js')
+    script(defer src='js/alpine-3.10.3.js')
     script(src='js/main.js')
-  body
-    .title-container
-      .title
-        h1.text-dark DAL inspector
-        p inspect / debug DAL expression
-      .controls
-        .dal-session
-          label.dal-session-title
-            span Current:
-          label.dal-session-current
-            span(id='current')
-        .dal-instances
-          .dal-instances-title
-            span Remote:
-          .dal-instances-switches
-        .buttons
-          button.resume(id='resume') Resume
+  body.text-color.background-color.font-normal(x-data='appData' )
+    .flex.space-between.align-bottom
+      div
+        h1.text-deep DAL inspector
+        p.font-large inspect / debug DAL expression
+      .flex.align-center.gap-20.controls.text-dark
+        .flex.align-center.gap-10
+          span Remote:
+          .instance-monitors
+            template(x-for="[name, active] in instances")
+              label.switch
+                input(type="checkbox" hidden=true x-model="active")
+                span.custom-checkbox
+                span(x-text="name")
 
-    .code-container
-      textarea.code-editing(id='code' placeholder='DAL expression')
-
-    .result-container
-      .tabs
-        .tab(data-tab='tab-root') Root
-        .tab(data-tab='tab-error') Error
-        .tab(data-tab='tab-result') Result
-        .tab(data-tab='tab-inspect') Inspect
-      .tab-content(id='tab-root')
-        pre.result(id='root' placeholder='Root')
-      .tab-content(id='tab-error')
-        pre.result(id='error' placeholder='Error')
-      .tab-content(id='tab-result')
-        pre.result(id='result' placeholder='Result')
-      .tab-content(id='tab-inspect')
-        pre.inspect(id='inspect' placeholder='Inspect')
+//-         .buttons
+//-           button.resume(id='resume') Resume
+//-
+//-     .code-container
+//-       textarea.code-editing(id='code' placeholder='DAL expression')
+//-
+//-     .result-container
+//-       .tabs
+//-         .tab(data-tab='tab-root') Root
+//-         .tab(data-tab='tab-error') Error
+//-         .tab(data-tab='tab-result') Result
+//-         .tab(data-tab='tab-inspect') Inspect
+//-       .tab-content(id='tab-root')
+//-         pre.result(id='root' placeholder='Root')
+//-       .tab-content(id='tab-error')
+//-         pre.result(id='error' placeholder='Error')
+//-       .tab-content(id='tab-result')
+//-         pre.result(id='result' placeholder='Result')
+//-       .tab-content(id='tab-inspect')
+//-         pre.inspect(id='inspect' placeholder='Inspect')

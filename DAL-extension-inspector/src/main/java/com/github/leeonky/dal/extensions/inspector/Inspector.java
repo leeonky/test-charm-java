@@ -1,23 +1,27 @@
 package com.github.leeonky.dal.extensions.inspector;
 
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.util.Suppressor;
 import de.neuland.jade4j.JadeConfiguration;
 import de.neuland.jade4j.template.ClasspathTemplateLoader;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.plugin.rendering.JavalinRenderer;
+import io.javalin.websocket.WsContext;
 
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 public class Inspector {
     public static InspectorCore inspectorBk;
-
     private static Inspector inspector = null;
 
-    private Javalin javalin;
+    private final Javalin javalin;
     private CountDownLatch serverReadyLatch;
+    private final List<DAL> instances = new ArrayList<>();
+    private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
 
     public Inspector() {
         JadeConfiguration jadeConfiguration = new JadeConfiguration();
@@ -34,18 +38,25 @@ public class Inspector {
 //        javalin.get("/api/sync", ctx -> ctx.status(200).html(apiProvider.sync()));
 //        javalin.post("/api/resume", ctx -> apiProvider.resume());
 //        javalin.post("/api/execute", ctx -> ctx.status(200).html(apiProvider.execute(ctx.body())));
-//        javalin.ws("/ws/ping", ws -> {
-//            ws.onConnect(ctx -> {
-//                clientConnections.put(ctx.getSessionId(), ctx);
-//                if (running)
-//                    for (WsContext wsContext : clientConnections.values()) {
-//                        wsContext.send("start");
-//                    }
-//            });
-//            ws.onClose(ctx -> clientConnections.remove(ctx.getSessionId()));
-//        });
+        javalin.ws("/ws/exchange", ws -> {
+            ws.onConnect(ctx -> {
+                clientConnections.put(ctx.getSessionId(), ctx);
+                ctx.send(ObjectWriter.serialize(new HashMap<String, Iterable<String>>() {{
+                    put("instances", instances.stream().map(DAL::getName).collect(Collectors.toSet()));
+                }}));
+            });
+            ws.onClose(ctx -> clientConnections.remove(ctx.getSessionId()));
+        });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
+    }
+
+    public static void register(DAL dal) {
+        inspector.addInstance(dal);
+    }
+
+    private void addInstance(DAL dal) {
+        instances.add(dal);
     }
 
     private void stop() {
@@ -64,16 +75,6 @@ public class Inspector {
             inspector = null;
         }
     }
-
-//    public static InspectorCore inspector() {
-//        return Objects.requireNonNull(inspector);
-//    }
-
-//    public static final Set<DAL> instances = new LinkedHashSet<>();
-//
-//    public static Set<DAL> getInstances() {
-//        return instances;
-//    }
 
     public static void main(String[] args) {
         launch();

@@ -4,25 +4,70 @@ function xmlToJson(xmlStr) {
     const rootNode = xmlDoc.documentElement;
 
     function parseNode(nodes) {
-      const children = Array.from(nodes);
-      let obj
-      children.forEach(child => {
-        let childObj = parseNode(child.childNodes);
-        if (child.nodeName === '__item') {
-          obj = (obj || [])
-          obj.push(childObj);
-        } else if (child.nodeType === Node.TEXT_NODE) {
-          obj = child.textContent.trim();
-          return
-        } else {
-          obj = (obj || {})
-          obj[child.nodeName] = childObj
-        }
-      });
-      return obj
+        const children = Array.from(nodes);
+        let obj
+        children.forEach(child => {
+            let childObj = parseNode(child.childNodes);
+            if (child.nodeName === '__item') {
+                obj = (obj || [])
+                obj.push(childObj);
+            } else if (child.nodeType === Node.TEXT_NODE) {
+                obj = child.textContent.trim();
+                return
+            } else {
+                obj = (obj || {})
+                obj[child.nodeName] = childObj
+            }
+        });
+        return obj
     }
     return parseNode(rootNode.childNodes)
 }
+
+class WSSession {
+    constructor(path, handler) {
+        const setupWebSocket = () => {
+            this.socket = new WebSocket((window.location.protocol === "https:" ? "wss:" : "ws:")
+                + "//" + window.location.host + path);
+            this.socket.onopen = () => console.log("WebSocket connection established");
+
+            this.socket.onerror = err => {
+                console.error("WebSocket encountered an error");
+                this.socket.close()
+            };
+
+            this.socket.onclose = event => {
+                console.log("WebSocket closed")
+                setTimeout(() => {
+                    console.log("Re-setup WebSocket connection")
+                    setupWebSocket()
+                }, 500);
+            };
+
+            this.socket.onmessage = event => {
+                handler(xmlToJson(event.data))
+            };
+        }
+        setupWebSocket()
+    }
+}
+
+const appData = () => {
+    return {
+        instances: [['ins1', true]],
+
+        exchangeSession: null,
+
+        exchange(message) {
+            if(message.instances)
+                this.instances = message.instances.map(instance => [instance, true])
+        },
+
+        init() {
+            this.exchangeSession = new WSSession('/ws/exchange', this.exchange.bind(this))
+        }
+    }
+};
 /*
 function execute() {
     statusExecuting()

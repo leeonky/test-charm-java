@@ -1,9 +1,12 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber;
 
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
@@ -14,10 +17,12 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.not;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.By.xpath;
 
 public class InspectorSteps {
@@ -65,6 +70,17 @@ public class InspectorSteps {
                 xpath(String.format("//body//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text))), not(List::isEmpty));
 
         assertThat(elements).isNotEmpty();
+    }
+
+    @Given("created DAL {string} with inspector extended")
+    public void createdDALInsWithInspectorExtended(String name) {
+        DAL.create(name);
+    }
+
+    @Then("you will see all remote DAL intances:")
+    public void youWillSeeAllRemoteDALIntances(DataTable table) {
+        await().ignoreExceptions().untilAsserted(() -> assertThat(getWebDriver().findElements(cssSelector(".instance-monitors .switch")).stream()
+                .map(WebElement::getText).collect(Collectors.toList())).isEqualTo(table.asList()));
     }
 
 //    @SneakyThrows
