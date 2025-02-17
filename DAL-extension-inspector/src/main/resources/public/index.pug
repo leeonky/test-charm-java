@@ -17,11 +17,15 @@ html(lang="en")
         .flex.align-center.gap-10
           span Remote:
           .instance-monitors
-            template(x-for="[name, active] in instances")
+            template(x-for="[name, active] in instances" :key='name')
               label.switch
                 input(type="checkbox" hidden=true x-model="active")
                 span.custom-checkbox
                 span(x-text="name")
+
+    .code-container
+      button Try
+      textarea.code-editor.code-editing(id='code' placeholder='DAL expression')
 
 //-         .buttons
 //-           button.resume(id='resume') Resume

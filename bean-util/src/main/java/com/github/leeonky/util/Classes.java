@@ -6,10 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -21,14 +18,14 @@ import static java.util.stream.Collectors.toList;
 
 public class Classes {
     public static List<Class<?>> allTypesIn(String packageName) {
-        return new ArrayList<Class<?>>() {{
+        return new ArrayList<>(new HashSet<Class<?>>() {{
             try {
                 Enumeration<URL> resources = getClassLoader().getResources(packageName.replaceAll("[.]", "/"));
                 while (resources.hasMoreElements())
                     addAll(getClasses(packageName, resources.nextElement()));
             } catch (Exception ignore) {
             }
-        }};
+        }});
     }
 
     private static ClassLoader getClassLoader() {

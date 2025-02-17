@@ -54,15 +54,12 @@ class WSSession {
 
 const appData = () => {
     return {
-        instances: [['ins1', true]],
-
+        instances: [], //[['name', active true]],
         exchangeSession: null,
-
         exchange(message) {
             if(message.instances)
                 this.instances = message.instances.map(instance => [instance, true])
         },
-
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.exchange.bind(this))
         }

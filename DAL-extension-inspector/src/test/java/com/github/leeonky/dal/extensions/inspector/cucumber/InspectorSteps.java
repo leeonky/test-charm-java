@@ -64,10 +64,14 @@ public class InspectorSteps {
         getWebDriver().get("http://host.docker.internal:10081");
     }
 
+    @And("shutdown web server")
+    public void shutdownWebServer() {
+        Inspector.shutdown();
+    }
+
     @Then("you can see page {string}")
     public void youCanSeePage(String text) {
-        List<WebElement> elements = await().ignoreExceptions().until(() -> getWebDriver().findElements(
-                xpath(String.format("//body//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text))), not(List::isEmpty));
+        List<WebElement> elements = await().ignoreExceptions().until(() -> getWebDriver().findElements(xpath(String.format("//body//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text))), not(List::isEmpty));
 
         assertThat(elements).isNotEmpty();
     }
@@ -77,13 +81,24 @@ public class InspectorSteps {
         DAL.create(name);
     }
 
-    @Then("you will see all remote DAL intances:")
-    public void youWillSeeAllRemoteDALIntances(DataTable table) {
-        await().ignoreExceptions().untilAsserted(() -> assertThat(getWebDriver().findElements(cssSelector(".instance-monitors .switch")).stream()
-                .map(WebElement::getText).collect(Collectors.toList())).isEqualTo(table.asList()));
+    @Then("you will see all remote DAL instances:")
+    public void youWillSeeAllRemoteDALInstances(DataTable table) {
+        await().ignoreExceptions().untilAsserted(() -> assertThat(getWebDriver().findElements(cssSelector(".instance-monitors .switch")).stream().map(WebElement::getText).collect(Collectors.toList())).isEqualTo(table.asList()));
     }
 
-//    @SneakyThrows
+    @When("try dal on page:")
+    public void tryDalOnPage(String expression) {
+        List<WebElement> list = await().ignoreExceptions().until(() -> getWebDriver().findElements(xpath(String.format("//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", "Try", "Try"))), not(List::isEmpty));
+        if (list.size() > 1)
+            throw new IllegalStateException("Found more than one elements");
+        list.get(0).click();
+    }
+
+    @Then("yon can see the same expression")
+    public void yonCanSeeTheSameExpression() {
+    }
+
+    //    @SneakyThrows
 //    @And("restart inspector")
 //    public void resetInspectorServer() {
 //        Inspector.shutdown();

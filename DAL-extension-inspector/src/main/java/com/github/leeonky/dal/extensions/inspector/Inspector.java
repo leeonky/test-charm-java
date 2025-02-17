@@ -2,17 +2,24 @@ package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.util.Suppressor;
-import de.neuland.jade4j.JadeConfiguration;
-import de.neuland.jade4j.template.ClasspathTemplateLoader;
+import de.neuland.pug4j.PugConfiguration;
+import de.neuland.pug4j.template.TemplateLoader;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.plugin.rendering.JavalinRenderer;
 import io.javalin.websocket.WsContext;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
+
+import static java.lang.Thread.currentThread;
+import static java.util.Objects.requireNonNull;
 
 public class Inspector {
     public static InspectorCore inspectorBk;
@@ -20,30 +27,46 @@ public class Inspector {
 
     private final Javalin javalin;
     private CountDownLatch serverReadyLatch;
-    private final List<DAL> instances = new ArrayList<>();
+    private final Set<DAL> instances = new LinkedHashSet<>();
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
 
     public Inspector() {
-        JadeConfiguration jadeConfiguration = new JadeConfiguration();
-        jadeConfiguration.setCaching(false);
-        jadeConfiguration.setTemplateLoader(new ClasspathTemplateLoader());
+        PugConfiguration pugConfiguration = new PugConfiguration();
+        pugConfiguration.setTemplateLoader(new TemplateLoader() {
+            @Override
+            public long getLastModified(String name) throws IOException {
+                return -1;
+            }
+
+            @Override
+            public Reader getReader(String name) throws IOException {
+                return new InputStreamReader(requireNonNull(currentThread().getContextClassLoader().getResourceAsStream(name)),
+                        StandardCharsets.UTF_8);
+            }
+
+            @Override
+            public String getExtension() {
+                return "pug";
+            }
+
+            @Override
+            public String getBase() {
+                return "";
+            }
+        });
+
         JavalinRenderer.register((filePath, model, context) ->
-                jadeConfiguration.renderTemplate(jadeConfiguration.getTemplate("public" + filePath), model), ".pug", ".PNG", ".Png");
+                pugConfiguration.renderTemplate(pugConfiguration.getTemplate("public/" + filePath), model), ".pug", ".PNG", ".Png");
 
         serverReadyLatch = new CountDownLatch(1);
         javalin = Javalin.create(config -> config.addStaticFiles("/public", Location.CLASSPATH))
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
-        Objects.requireNonNull(javalin.jettyServer()).setServerPort(10081);
+        requireNonNull(javalin.jettyServer()).setServerPort(10081);
         javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
-//        javalin.get("/api/sync", ctx -> ctx.status(200).html(apiProvider.sync()));
-//        javalin.post("/api/resume", ctx -> apiProvider.resume());
-//        javalin.post("/api/execute", ctx -> ctx.status(200).html(apiProvider.execute(ctx.body())));
         javalin.ws("/ws/exchange", ws -> {
             ws.onConnect(ctx -> {
                 clientConnections.put(ctx.getSessionId(), ctx);
-                ctx.send(ObjectWriter.serialize(new HashMap<String, Iterable<String>>() {{
-                    put("instances", instances.stream().map(DAL::getName).collect(Collectors.toSet()));
-                }}));
+                sendInstances(ctx);
             });
             ws.onClose(ctx -> clientConnections.remove(ctx.getSessionId()));
         });
@@ -57,6 +80,15 @@ public class Inspector {
 
     private void addInstance(DAL dal) {
         instances.add(dal);
+        for (WsContext ctx : clientConnections.values()) {
+            sendInstances(ctx);
+        }
+    }
+
+    private void sendInstances(WsContext ctx) {
+        ctx.send(ObjectWriter.serialize(new HashMap<String, Iterable<String>>() {{
+            put("instances", instances.stream().map(DAL::getName).collect(Collectors.toSet()));
+        }}));
     }
 
     private void stop() {

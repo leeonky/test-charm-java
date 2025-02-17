@@ -144,6 +144,19 @@ button.resume:disabled::after {
     height: 16px;
 }
 
+.code-editor {
+    font-family: inherit !important;
+    width: 100%;
+    min-height: 150px;
+    margin-bottom: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #d1d9e6;
+    border-radius: 4px;
+    resize: none;
+    overflow-y: hidden;
+}
+
 /* ---------- tabs ------------*/
 
 
