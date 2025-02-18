@@ -10,6 +10,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -62,7 +63,15 @@ public class InspectorSteps {
     @When("try dal on page:")
     public void tryDalOnPage(String expression) {
         browser.byText("Try").click();
-        browser.byPlaceholder("DAL expression").input(expression);
+        browser.byPlaceholder("DAL expression").fillIn(expression);
+    }
+
+    @Then("yon can see the {string}:")
+    public void yonCanSeeTheResult(String type, String text) {
+        browser.byText("Try").click();
+        browser.byText(type).click();
+        await().ignoreExceptions().untilAsserted(() ->
+                assertThat(browser.byPlaceholder(type).text()).isEqualTo(text));
     }
 
     @Then("yon can see the Error:")
@@ -79,6 +88,17 @@ public class InspectorSteps {
         browser.byText("Inspect").click();
         await().ignoreExceptions().untilAsserted(() ->
                 assertThat(browser.byPlaceholder("Inspect").text()).isEqualTo(text));
+    }
+
+    @When("given default input value:")
+    public void givenDefaultInputValue(String json) {
+        Inspector.setDefaultInput(() -> json(json));
+    }
+
+    @When("append try dal on page:")
+    public void appendTryDalOnPage(String code) {
+        browser.byText("Try").click();
+        browser.byPlaceholder("DAL expression").typeIn(code);
     }
 
     //    @SneakyThrows

@@ -18,21 +18,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 
 public class Inspector {
-    public static InspectorCore inspectorBk;
     private static Inspector inspector = null;
-
     private final Javalin javalin;
     private CountDownLatch serverReadyLatch;
     private final Set<DAL> instances = new LinkedHashSet<>();
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
-    private DAL dal = DAL.create(InspectorExtension.class);
-    private Object input = null;
+    private DAL defaultDal = DAL.create(InspectorExtension.class);
+    private static Supplier<Object> defaultInput = () -> null;
 
     public Inspector() {
         PugConfiguration pugConfiguration = new PugConfiguration();
@@ -81,11 +80,12 @@ public class Inspector {
 
     private String execute(String code) {
         Map<String, String> response = new HashMap<>();
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input);
+        Object inputObject = Inspector.defaultInput.get();
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = defaultDal.getRuntimeContextBuilder().build(inputObject);
         try {
-            response.put("root", runtimeContext.wrap(input).dumpAll());
-            response.put("inspect", dal.compileSingle(code, runtimeContext).inspect());
-            response.put("result", runtimeContext.wrap(dal.evaluate(input, code)).dumpAll());
+            response.put("root", runtimeContext.wrap(inputObject).dumpAll());
+            response.put("inspect", defaultDal.compileSingle(code, runtimeContext).inspect());
+            response.put("result", runtimeContext.wrap(defaultDal.evaluate(inputObject, code)).dumpAll());
         } catch (InterpreterException e) {
             response.put("error", e.show(code) + "\n\n" + e.getMessage());
         }
@@ -124,6 +124,10 @@ public class Inspector {
             inspector.stop();
             inspector = null;
         }
+    }
+
+    public static void setDefaultInput(Supplier<Object> supplier) {
+        defaultInput = supplier;
     }
 
     public static void main(String[] args) {

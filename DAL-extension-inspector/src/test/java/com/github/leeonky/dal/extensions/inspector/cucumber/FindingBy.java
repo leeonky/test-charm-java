@@ -42,7 +42,13 @@ public class FindingBy {
         return findAll().stream().map(WebElement::getText).collect(Collectors.toList());
     }
 
-    public void input(String text) {
+    public void fillIn(String text) {
+        WebElement locate = locate();
+        locate.clear();
+        locate.sendKeys(text);
+    }
+
+    public void typeIn(String text) {
         locate().sendKeys(text);
     }
 }
