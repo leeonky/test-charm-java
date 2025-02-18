@@ -10,7 +10,22 @@ Feature: basic
 
     Scenario: execute expression and get result
       When try dal on page:
-      """
-      1= 2
-      """
-      Then yon can see the same expression
+        """
+        1= 2
+        """
+      Then yon can see the Error:
+        """
+        1= 2
+           ^
+
+        Expected to be equal to: java.lang.Integer
+        <2>
+         ^
+        Actual: java.lang.Integer
+        <1>
+         ^
+        """
+      And you can see the Inspect:
+        """
+        1= 2
+        """

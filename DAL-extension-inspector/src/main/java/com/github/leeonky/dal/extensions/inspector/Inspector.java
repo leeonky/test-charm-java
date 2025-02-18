@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.Suppressor;
 import de.neuland.pug4j.PugConfiguration;
 import de.neuland.pug4j.template.TemplateLoader;
@@ -29,6 +31,8 @@ public class Inspector {
     private CountDownLatch serverReadyLatch;
     private final Set<DAL> instances = new LinkedHashSet<>();
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
+    private DAL dal = DAL.create(InspectorExtension.class);
+    private Object input = null;
 
     public Inspector() {
         PugConfiguration pugConfiguration = new PugConfiguration();
@@ -63,6 +67,7 @@ public class Inspector {
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
         requireNonNull(javalin.jettyServer()).setServerPort(10081);
         javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
+        javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.body())));
         javalin.ws("/ws/exchange", ws -> {
             ws.onConnect(ctx -> {
                 clientConnections.put(ctx.getSessionId(), ctx);
@@ -72,6 +77,19 @@ public class Inspector {
         });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
+    }
+
+    private String execute(String code) {
+        Map<String, String> response = new HashMap<>();
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input);
+        try {
+            response.put("root", runtimeContext.wrap(input).dumpAll());
+            response.put("inspect", dal.compileSingle(code, runtimeContext).inspect());
+            response.put("result", runtimeContext.wrap(dal.evaluate(input, code)).dumpAll());
+        } catch (InterpreterException e) {
+            response.put("error", e.show(code) + "\n\n" + e.getMessage());
+        }
+        return ObjectWriter.serialize(response);
     }
 
     public static void register(DAL dal) {

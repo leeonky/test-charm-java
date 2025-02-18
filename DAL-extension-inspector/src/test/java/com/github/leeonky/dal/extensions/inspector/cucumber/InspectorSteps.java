@@ -9,43 +9,17 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import lombok.SneakyThrows;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
-import java.net.URL;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.github.leeonky.util.function.Extension.not;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.openqa.selenium.By.cssSelector;
-import static org.openqa.selenium.By.xpath;
 
 public class InspectorSteps {
-    private WebDriver webDriver = null;
+    private final Browser browser = new Browser();
     private TestContext testContext;
-
-    @SneakyThrows
-    private WebDriver createWebDriver() {
-        return new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome());
-    }
-
-    public WebDriver getWebDriver() {
-        if (webDriver == null)
-            webDriver = createWebDriver();
-        return webDriver;
-    }
 
     @After
     public void close() {
-        if (webDriver != null) {
-            webDriver.quit();
-            webDriver = null;
-        }
+        browser.quit();
     }
 
     @Before
@@ -61,7 +35,7 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        getWebDriver().get("http://host.docker.internal:10081");
+        browser.launch();
     }
 
     @And("shutdown web server")
@@ -71,9 +45,7 @@ public class InspectorSteps {
 
     @Then("you can see page {string}")
     public void youCanSeePage(String text) {
-        List<WebElement> elements = await().ignoreExceptions().until(() -> getWebDriver().findElements(xpath(String.format("//body//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text))), not(List::isEmpty));
-
-        assertThat(elements).isNotEmpty();
+        browser.byText(text).locate();
     }
 
     @Given("created DAL {string} with inspector extended")
@@ -83,19 +55,30 @@ public class InspectorSteps {
 
     @Then("you will see all remote DAL instances:")
     public void youWillSeeAllRemoteDALInstances(DataTable table) {
-        await().ignoreExceptions().untilAsserted(() -> assertThat(getWebDriver().findElements(cssSelector(".instance-monitors .switch")).stream().map(WebElement::getText).collect(Collectors.toList())).isEqualTo(table.asList()));
+        await().ignoreExceptions().untilAsserted(() ->
+                assertThat(browser.byCss(".instance-monitors .switch").eachText()).isEqualTo(table.asList()));
     }
 
     @When("try dal on page:")
     public void tryDalOnPage(String expression) {
-        List<WebElement> list = await().ignoreExceptions().until(() -> getWebDriver().findElements(xpath(String.format("//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", "Try", "Try"))), not(List::isEmpty));
-        if (list.size() > 1)
-            throw new IllegalStateException("Found more than one elements");
-        list.get(0).click();
+        browser.byText("Try").click();
+        browser.byPlaceholder("DAL expression").input(expression);
     }
 
-    @Then("yon can see the same expression")
-    public void yonCanSeeTheSameExpression() {
+    @Then("yon can see the Error:")
+    public void yonCanSeeTheError(String text) {
+        browser.byText("Try").click();
+        browser.byText("Error").click();
+        await().ignoreExceptions().untilAsserted(() ->
+                assertThat(browser.byPlaceholder("Error").text()).isEqualTo(text));
+    }
+
+    @And("you can see the Inspect:")
+    public void youCanSeeTheInspect(String text) {
+        browser.byText("Try").click();
+        browser.byText("Inspect").click();
+        await().ignoreExceptions().untilAsserted(() ->
+                assertThat(browser.byPlaceholder("Inspect").text()).isEqualTo(text));
     }
 
     //    @SneakyThrows

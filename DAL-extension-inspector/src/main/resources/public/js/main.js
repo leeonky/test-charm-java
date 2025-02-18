@@ -55,16 +55,75 @@ class WSSession {
 const appData = () => {
     return {
         instances: [], //[['name', active true]],
+        dalResult: {
+            root: 'root',
+            error: '',
+            result: '',
+            inspect: ''
+        },
         exchangeSession: null,
         exchange(message) {
             if(message.instances)
                 this.instances = message.instances.map(instance => [instance, true])
+        },
+        async execute(dalName, code) {
+            const response = await fetch('/api/execute?name='+dalName, {
+                method: 'POST',
+                body: code
+            })
+            let xmlStr = await response.text();
+            console.log(xmlStr)
+            let xmlToJson1 = xmlToJson(xmlStr);
+            console.log(xmlToJson1)
+            return xmlToJson1
         },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.exchange.bind(this))
         }
     }
 };
+
+const tab = () => {
+    return {
+        init() {
+            this.$el.querySelectorAll('.tab-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    this.switchTab(header.getAttribute('target'));
+                });
+            });
+        },
+        switchTab(target) {
+            this.$el.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            this.$el.querySelectorAll('.tab-header').forEach(content => {
+                content.classList.remove('active');
+            });
+            this.$el.querySelector(`.tab-content[target="${target}"]`).classList.add('active');
+            this.$el.querySelector(`.tab-header[target="${target}"]`).classList.add('active');
+        }
+    };
+}
+
+const codeEditor = () => {
+    return {
+        init() {
+            let debounceTimer = null
+            this.$el.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    this.$el.dispatchEvent(new CustomEvent('code-update', {
+                        detail: this.$el.value
+                    }))
+                }, 500);
+                this.$el.style.height = 'auto';
+                if (this.$el.scrollHeight > this.$el.clientHeight) {
+                    this.$el.style.height = this.$el.scrollHeight + 'px';
+                }
+            })
+        }
+    }
+}
 /*
 function execute() {
     statusExecuting()
