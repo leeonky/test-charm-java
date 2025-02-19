@@ -8,15 +8,21 @@ Feature: exchange
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
       When launch inspector web page
-      Then you will see all remote DAL instances:
-        | Ins1 | Ins2 |
+      Then you should see:
+        """
+        instances: [Ins1 Ins2]
+        """
 
     Scenario: update instance names on page when create more DAL instance with inspector extension
       When launch inspector web page
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
-      Then you will see all remote DAL instances:
-        | Ins1 | Ins2 |
+      Then you should see:
+        """
+        ::eventually : {
+          instances: [Ins1 Ins2]
+        }
+        """
 
   Rule: inspect not active, launch opened and start web server
     Background:
@@ -28,14 +34,20 @@ Feature: exchange
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
       When launch inspector web server
-      Then you will see all remote DAL instances:
-        | Ins1 | Ins2 |
+      Then you should see:
+        """
+        instances: [Ins1 Ins2]
+        """
 
     Scenario: update instance names on page when create more DAL instance with inspector extension
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
-      Then you will see all remote DAL instances:
-        | Ins1 | Ins2 |
+      Then you should see:
+        """
+        ::eventually : {
+          instances: [Ins1 Ins2]
+        }
+        """
 
 #  Rule: inspect active, web server started and launch page
 #    Background:

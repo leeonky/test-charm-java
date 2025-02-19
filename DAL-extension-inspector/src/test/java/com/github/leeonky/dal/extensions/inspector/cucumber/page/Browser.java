@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber;
+package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import lombok.SneakyThrows;
 import org.openqa.selenium.By;
@@ -11,14 +11,14 @@ import java.net.URL;
 import static org.openqa.selenium.By.xpath;
 
 public class Browser {
-    WebDriver webDriver = null;
+    private WebDriver webDriver = null;
 
     @SneakyThrows
-    WebDriver createWebDriver() {
+    private WebDriver createWebDriver() {
         return new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome());
     }
 
-    public WebDriver getWebDriver() {
+    private WebDriver getWebDriver() {
         if (webDriver == null)
             webDriver = createWebDriver();
         return webDriver;
@@ -31,8 +31,9 @@ public class Browser {
         }
     }
 
-    public void launch() {
+    public MainPage launch() {
         getWebDriver().get("http://host.docker.internal:10081");
+        return new MainPage(this);
     }
 
     public FindingBy byText(String text) {

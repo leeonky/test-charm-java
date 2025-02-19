@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber;
+package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -11,8 +11,8 @@ import static com.github.leeonky.util.function.Extension.not;
 import static org.awaitility.Awaitility.await;
 
 public class FindingBy {
-    private final By by;
-    private final WebDriver webDriver;
+    protected final By by;
+    protected final WebDriver webDriver;
 
     public FindingBy(By by, WebDriver webDriver) {
         this.by = by;
@@ -26,7 +26,7 @@ public class FindingBy {
         return list.get(0);
     }
 
-    private List<WebElement> findAll() {
+    public List<WebElement> findAll() {
         return webDriver.findElements(by);
     }
 

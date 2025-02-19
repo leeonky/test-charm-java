@@ -6,7 +6,10 @@ Feature: basic
       And  launch inspector web page
 
     Scenario: launch server and page
-      Then you can see page "DAL inspector"
+      Then you should see:
+      """
+      title: 'DAL inspector'
+      """
 
     Scenario: execute expression and get result
       When given default input value:
@@ -53,3 +56,16 @@ Feature: basic
         <hello>
          ^
         """
+
+#    Scenario: auto switch to result when no error
+#      When try dal on page:
+#        """
+#        'hello'
+#        """
+#      And page switch to 'Result' and yon can see:
+#        """
+#        java.lang.String
+#        <hello>
+#        """
+#
+#    Scenario: auto switch to error when got error

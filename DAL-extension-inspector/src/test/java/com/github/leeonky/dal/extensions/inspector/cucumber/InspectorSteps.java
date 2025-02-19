@@ -2,7 +2,9 @@ package com.github.leeonky.dal.extensions.inspector.cucumber;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
-import io.cucumber.datatable.DataTable;
+import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.Browser;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -10,6 +12,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -17,6 +20,8 @@ import static org.awaitility.Awaitility.await;
 public class InspectorSteps {
     private final Browser browser = new Browser();
     private TestContext testContext;
+    private MainPage mainPage;
+    private DAL dal = DAL.create(InspectorExtension.class);
 
     @After
     public void close() {
@@ -36,7 +41,7 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        browser.launch();
+        mainPage = browser.launch();
     }
 
     @And("shutdown web server")
@@ -44,20 +49,9 @@ public class InspectorSteps {
         Inspector.shutdown();
     }
 
-    @Then("you can see page {string}")
-    public void youCanSeePage(String text) {
-        browser.byText(text).locate();
-    }
-
     @Given("created DAL {string} with inspector extended")
     public void createdDALInsWithInspectorExtended(String name) {
         DAL.create(name);
-    }
-
-    @Then("you will see all remote DAL instances:")
-    public void youWillSeeAllRemoteDALInstances(DataTable table) {
-        await().ignoreExceptions().untilAsserted(() ->
-                assertThat(browser.byCss(".instance-monitors .switch").eachText()).isEqualTo(table.asList()));
     }
 
     @When("try dal on page:")
@@ -99,6 +93,11 @@ public class InspectorSteps {
     public void appendTryDalOnPage(String code) {
         browser.byText("Try").click();
         browser.byPlaceholder("DAL expression").typeIn(code);
+    }
+
+    @Then("you should see:")
+    public void youShouldSee(String expression) {
+        expect(mainPage).use(dal).should(expression);
     }
 
     //    @SneakyThrows
