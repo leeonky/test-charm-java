@@ -37,7 +37,7 @@ public class Browser {
     }
 
     public FindingBy byText(String text) {
-        return by(xpath(String.format("//body//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text)));
+        return by(xpath(String.format("//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text)));
     }
 
     public FindingBy byCss(String cssSelector) {

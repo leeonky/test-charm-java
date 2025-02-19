@@ -5,6 +5,7 @@ import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.Browser;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
+import com.github.leeonky.interpreter.InterpreterException;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -14,8 +15,6 @@ import io.cucumber.java.en.When;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 public class InspectorSteps {
     private final Browser browser = new Browser();
@@ -54,50 +53,23 @@ public class InspectorSteps {
         DAL.create(name);
     }
 
-    @When("try dal on page:")
-    public void tryDalOnPage(String expression) {
-        browser.byText("Try").click();
-        browser.byPlaceholder("DAL expression").fillIn(expression);
-    }
-
-    @Then("yon can see the {string}:")
-    public void yonCanSeeTheResult(String type, String text) {
-        browser.byText("Try").click();
-        browser.byText(type).click();
-        await().ignoreExceptions().untilAsserted(() ->
-                assertThat(browser.byPlaceholder(type).text()).isEqualTo(text));
-    }
-
-    @Then("yon can see the Error:")
-    public void yonCanSeeTheError(String text) {
-        browser.byText("Try").click();
-        browser.byText("Error").click();
-        await().ignoreExceptions().untilAsserted(() ->
-                assertThat(browser.byPlaceholder("Error").text()).isEqualTo(text));
-    }
-
-    @And("you can see the Inspect:")
-    public void youCanSeeTheInspect(String text) {
-        browser.byText("Try").click();
-        browser.byText("Inspect").click();
-        await().ignoreExceptions().untilAsserted(() ->
-                assertThat(browser.byPlaceholder("Inspect").text()).isEqualTo(text));
-    }
-
     @When("given default input value:")
     public void givenDefaultInputValue(String json) {
         Inspector.setDefaultInput(() -> json(json));
     }
 
-    @When("append try dal on page:")
-    public void appendTryDalOnPage(String code) {
-        browser.byText("Try").click();
-        browser.byPlaceholder("DAL expression").typeIn(code);
-    }
-
     @Then("you should see:")
     public void youShouldSee(String expression) {
         expect(mainPage).use(dal).should(expression);
+    }
+
+    @When("you:")
+    public void you(String expression) {
+        try {
+            dal.evaluateAll(mainPage, expression);
+        } catch (InterpreterException e) {
+            throw new AssertionError("\n" + e.show(expression) + "\n\n" + e.getMessage());
+        }
     }
 
     //    @SneakyThrows

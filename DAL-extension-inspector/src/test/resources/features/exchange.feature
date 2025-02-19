@@ -10,7 +10,9 @@ Feature: exchange
       When launch inspector web page
       Then you should see:
         """
-        instances: [Ins1 Ins2]
+        ::eventually : {
+          instances: [Ins1 Ins2]
+        }
         """
 
     Scenario: update instance names on page when create more DAL instance with inspector extension
@@ -36,7 +38,9 @@ Feature: exchange
       When launch inspector web server
       Then you should see:
         """
-        instances: [Ins1 Ins2]
+        ::eventually : {
+          instances: [Ins1 Ins2]
+        }
         """
 
     Scenario: update instance names on page when create more DAL instance with inspector extension

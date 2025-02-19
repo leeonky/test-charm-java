@@ -18,43 +18,64 @@ Feature: basic
           "message": "hello"
         }
         """
-      When try dal on page:
+      When you:
+      """
+      tryIt.DAL: message
+      """
+      Then you should see:
         """
-        message
-        """
-      Then yon can see the 'Root':
-        """
-        {
-            message: java.lang.String <hello>
+        ::eventually: {
+          tryIt: {
+            Root: ```
+                  {
+                      message: java.lang.String <hello>
+                  }
+                  ```
+
+            Error: ''
+
+            Result: ```
+                    java.lang.String
+                    <hello>
+                    ```
+
+            Inspect: message
+          }
         }
         """
-      And yon can see the 'Error':
+      When you:
+      """
+      tryIt.appendDAL: '= world'
+      """
+      Then you should see:
         """
-        """
-      And yon can see the 'Result':
-        """
-        java.lang.String
-        <hello>
-        """
-      And yon can see the 'Inspect':
-        """
-        message
-        """
-      When append try dal on page:
-        """
-        = world
-        """
-      Then yon can see the Error:
-        """
-        message= world
-                 ^
+        ::eventually: {
+          tryIt: {
+            Root: ```
+                  {
+                      message: java.lang.String <hello>
+                  }
+                  ```
 
-        Expected to be equal to: java.lang.String
-        <world>
-         ^
-        Actual: java.lang.String
-        <hello>
-         ^
+            Error: ```
+                   message= world
+                            ^
+
+                   Expected to be equal to: java.lang.String
+                   <world>
+                    ^
+                   Actual: java.lang.String
+                   <hello>
+                    ^
+                   ```
+
+            Result: ''
+
+            Inspect: ```
+                     message= 'world'
+                     ```
+          }
+        }
         """
 
 #    Scenario: auto switch to result when no error
