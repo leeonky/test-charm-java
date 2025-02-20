@@ -2,11 +2,17 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import org.openqa.selenium.WebElement;
 
-public class SeleniumWebElement {
-    private final WebElement element;
+import java.util.List;
 
-    public SeleniumWebElement(WebElement element) {
+import static java.util.stream.Collectors.toList;
+
+public class SeleniumWebElement {
+    protected final SeleniumWebDriver driver;
+    protected final WebElement element;
+
+    public SeleniumWebElement(SeleniumWebDriver driver, WebElement element) {
         this.element = element;
+        this.driver = driver;
     }
 
     public void click() {
@@ -23,5 +29,10 @@ public class SeleniumWebElement {
 
     public void sendKeys(String text) {
         element.sendKeys(text);
+    }
+
+    public List<SeleniumWebElement> findAll(By by) {
+        return element.findElements(driver.getBy(by)).stream()
+                .map(element -> new SeleniumWebElement(driver, element)).collect(toList());
     }
 }

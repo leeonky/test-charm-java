@@ -30,10 +30,10 @@ public class SeleniumWebDriver {
 
     public List<SeleniumWebElement> findAll(By by) {
         return getWebDriver().findElements(Objects.requireNonNull(getBy(by), "Unsupported find " + by)).stream()
-                .map(SeleniumWebElement::new).collect(Collectors.toList());
+                .map(element -> new SeleniumWebElement(this, element)).collect(Collectors.toList());
     }
 
-    protected org.openqa.selenium.By getBy(By by) {
+    public org.openqa.selenium.By getBy(By by) {
         switch (by.type()) {
             case By.XPATH:
                 return org.openqa.selenium.By.xpath(Objects.requireNonNull(by.value()).toString());

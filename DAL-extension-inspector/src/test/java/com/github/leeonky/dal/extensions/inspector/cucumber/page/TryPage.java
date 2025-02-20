@@ -6,7 +6,7 @@ public class TryPage {
 
     public TryPage(Panel panel) {
         this.panel = panel;
-        outputs = new SubPageSwitcher(panel);
+        outputs = new SubPageSwitcher();
     }
 
     public StringSetter DAL() {

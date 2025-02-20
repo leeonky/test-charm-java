@@ -8,16 +8,16 @@ public class MainPage {
 
     public MainPage(SeleniumWebDriver driver) {
         driver.open("http://host.docker.internal:10081");
-        panel = new Panel(driver);
-        remotes = new SubPageSwitcher(panel);
+        panel = new Panel(driver.findAll(new By("css", "body")).get(0));
+        remotes = new SubPageSwitcher();
     }
 
-    public SeleniumWebElement title() {
-        return panel.byCss(".main-title").locate();
+    public Panel title() {
+        return panel.byCss(".main-title");
     }
 
-    public List<SeleniumWebElement> instances() {
-        return panel.byCss(".instance-monitors .switch").findAll();
+    public List<Panel> instances() {
+        return panel.allByCss(".instance-monitors .switch");
     }
 
     public TryPage TryIt() {
