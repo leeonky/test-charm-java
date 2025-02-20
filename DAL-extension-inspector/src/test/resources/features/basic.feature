@@ -20,61 +20,57 @@ Feature: basic
         """
       When you:
       """
-      tryIt.DAL: message
+      TryIt.DAL: message
       """
       Then you should see:
         """
-        ::eventually: {
-          tryIt: {
-            Root: ```
-                  {
-                      message: java.lang.String <hello>
-                  }
+        TryIt::eventually: {
+          Root: ```
+                {
+                    message: java.lang.String <hello>
+                }
+                ```
+
+          Error: ''
+
+          Result: ```
+                  java.lang.String
+                  <hello>
                   ```
 
-            Error: ''
-
-            Result: ```
-                    java.lang.String
-                    <hello>
-                    ```
-
-            Inspect: message
-          }
+          Inspect: message
         }
         """
       When you:
       """
-      tryIt.appendDAL: '= world'
+      TryIt.appendDAL: '= world'
       """
       Then you should see:
         """
-        ::eventually: {
-          tryIt: {
-            Root: ```
-                  {
-                      message: java.lang.String <hello>
-                  }
-                  ```
+        TryIt::eventually: {
+          Root: ```
+                {
+                    message: java.lang.String <hello>
+                }
+                ```
 
-            Error: ```
-                   message= world
-                            ^
+          Error: ```
+                 message= world
+                          ^
 
-                   Expected to be equal to: java.lang.String
-                   <world>
-                    ^
-                   Actual: java.lang.String
-                   <hello>
-                    ^
+                 Expected to be equal to: java.lang.String
+                 <world>
+                  ^
+                 Actual: java.lang.String
+                 <hello>
+                  ^
+                 ```
+
+          Result: ''
+
+          Inspect: ```
+                   message= 'world'
                    ```
-
-            Result: ''
-
-            Inspect: ```
-                     message= 'world'
-                     ```
-          }
         }
         """
 

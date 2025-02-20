@@ -21,7 +21,7 @@ public class MainPage {
         return browser.byCss(".instance-monitors .switch").findAll();
     }
 
-    public TryPage tryIt() {
+    public TryPage TryIt() {
         return inspectingPanel.switchTo(() -> browser.byText("Try").click(), () -> new TryPage(browser), TryPage.class
         );
     }
