@@ -3,12 +3,12 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class ViewFrame {
-    protected final Browser browser;
+public class SubPageSwitcher {
+    protected final Panel panel;
     protected Object current = null;
 
-    public ViewFrame(Browser browser) {
-        this.browser = browser;
+    public SubPageSwitcher(Panel panel) {
+        this.panel = panel;
     }
 
     public <T> T switchTo(Runnable open, Supplier<T> constructor, Class<T> frameType) {

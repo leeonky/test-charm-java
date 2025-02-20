@@ -1,20 +1,20 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 public class TryPage {
-    private final Browser browser;
-    private final ViewFrame outputs;
+    private final Panel panel;
+    private final SubPageSwitcher outputs;
 
-    public TryPage(Browser browser) {
-        this.browser = browser;
-        outputs = new ViewFrame(browser);
+    public TryPage(Panel panel) {
+        this.panel = panel;
+        outputs = new SubPageSwitcher(panel);
     }
 
     public StringSetter DAL() {
-        return value -> browser.byPlaceholder("DAL expression").fillIn(value);
+        return value -> panel.byPlaceholder("DAL expression").fillIn(value);
     }
 
     public StringSetter appendDAL() {
-        return value -> browser.byPlaceholder("DAL expression").typeIn(value);
+        return value -> panel.byPlaceholder("DAL expression").typeIn(value);
     }
 
     public OutputPage Root() {
@@ -34,7 +34,7 @@ public class TryPage {
     }
 
     private OutputPage switchTo(String type) {
-        return outputs.switchTo(() -> browser.byText(type).click(), () -> new OutputPage(browser, type),
+        return outputs.switchTo(() -> panel.byText(type).click(), () -> new OutputPage(panel, type),
                 instance -> instance instanceof OutputPage && ((OutputPage) instance).isType(type));
     }
 }

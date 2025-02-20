@@ -1,33 +1,29 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.not;
 import static org.awaitility.Awaitility.await;
 
-public class FindingBy {
+public class Locator {
+    protected final SeleniumWebDriver seleniumWebDriver;
     protected final By by;
-    protected final WebDriver webDriver;
 
-    public FindingBy(By by, WebDriver webDriver) {
+    public Locator(By by, SeleniumWebDriver seleniumWebDriver) {
         this.by = by;
-        this.webDriver = webDriver;
+        this.seleniumWebDriver = seleniumWebDriver;
     }
 
-    public WebElement locate() {
-        List<WebElement> list = await().ignoreExceptions().until(this::findAll, not(List::isEmpty));
+    public List<SeleniumWebElement> findAll() {
+        return seleniumWebDriver.findAll(by);
+    }
+
+    public SeleniumWebElement locate() {
+        List<SeleniumWebElement> list = await().ignoreExceptions().until(this::findAll, not(List::isEmpty));
         if (list.size() > 1)
             throw new IllegalStateException("Found more than one elements: " + by.toString());
         return list.get(0);
-    }
-
-    public List<WebElement> findAll() {
-        return webDriver.findElements(by);
     }
 
     public void click() {
@@ -39,11 +35,11 @@ public class FindingBy {
     }
 
     public List<String> eachText() {
-        return findAll().stream().map(WebElement::getText).collect(Collectors.toList());
+        return findAll().stream().map(SeleniumWebElement::getText).collect(Collectors.toList());
     }
 
     public void fillIn(String text) {
-        WebElement locate = locate();
+        SeleniumWebElement locate = locate();
         locate.clear();
         locate.sendKeys(text);
     }

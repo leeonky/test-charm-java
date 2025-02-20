@@ -3,28 +3,35 @@ package com.github.leeonky.dal.extensions.inspector.cucumber;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
-import com.github.leeonky.dal.extensions.inspector.cucumber.page.Browser;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.SeleniumWebDriver;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.util.Suppressor;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.net.URL;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 
 public class InspectorSteps {
-    private final Browser browser = new Browser();
     private TestContext testContext;
     private MainPage mainPage;
-    private DAL dal = DAL.create(InspectorExtension.class);
+    private final DAL dal = DAL.create(InspectorExtension.class);
+
+    private final SeleniumWebDriver seleniumWebDriver = new SeleniumWebDriver(() ->
+            Suppressor.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
 
     @After
     public void close() {
-        browser.quit();
+        seleniumWebDriver.destroy();
     }
 
     @Before
@@ -40,7 +47,7 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        mainPage = browser.launch();
+        mainPage = new MainPage(seleniumWebDriver);
     }
 
     @And("shutdown web server")

@@ -1,11 +1,11 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 public class OutputPage {
-    private final Browser browser;
+    private final Panel panel;
     private final String type;
 
-    public OutputPage(Browser browser, String type) {
-        this.browser = browser;
+    public OutputPage(Panel panel, String type) {
+        this.panel = panel;
         this.type = type;
     }
 
@@ -15,6 +15,6 @@ public class OutputPage {
 
     @Override
     public String toString() {
-        return browser.byPlaceholder(type).text();
+        return panel.byPlaceholder(type).text();
     }
 }
