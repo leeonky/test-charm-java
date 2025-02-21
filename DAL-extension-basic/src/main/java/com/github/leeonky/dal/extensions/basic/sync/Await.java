@@ -4,6 +4,8 @@ import com.github.leeonky.dal.extensions.basic.TimeUtil;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.util.Suppressor;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -30,6 +32,7 @@ public class Await {
     public <T> T await(Function<Data, T> supplier) throws Exception {
         Exception exception;
         int times = waitingTime / interval;
+        Instant now = Instant.now();
         do {
             times--;
             try {
@@ -39,7 +42,7 @@ public class Await {
                 if (times > 0)
                     Suppressor.run(() -> Thread.sleep(interval));
             }
-        } while (times > 0);
+        } while (times > 0 && Duration.between(now, Instant.now()).toMillis() < waitingTime);
         throw exception;
     }
 
