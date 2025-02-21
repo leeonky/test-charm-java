@@ -2,11 +2,10 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 public class TryPage {
     private final Panel panel;
-    private final SubPageSwitcher outputs;
+    private final SubPageSwitcher<OutputPage> outputs = new SubPageSwitcher<>();
 
     public TryPage(Panel panel) {
         this.panel = panel;
-        outputs = new SubPageSwitcher();
     }
 
     public StringSetter DAL() {
@@ -34,7 +33,21 @@ public class TryPage {
     }
 
     private OutputPage switchTo(String type) {
-        return outputs.switchTo(() -> panel.byText(type).click(), () -> new OutputPage(panel, type),
-                instance -> instance instanceof OutputPage && ((OutputPage) instance).isType(type));
+        return outputs.switchTo(new Target<OutputPage>() {
+            @Override
+            public OutputPage create() {
+                return new OutputPage(panel.byCss(".tab-content[target='" + type.toLowerCase() + "']"), type);
+            }
+
+            @Override
+            public void navigateTo() {
+                panel.byText(type).click();
+            }
+
+            @Override
+            public boolean matches(OutputPage current) {
+                return current.isType(type);
+            }
+        });
     }
 }

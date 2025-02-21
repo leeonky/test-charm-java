@@ -23,26 +23,27 @@ html(lang="en")
                 span.custom-checkbox
                 span(x-text="name")
 
-    .code-container
-      button Try
-      textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
-        @code-update='dalResult = await execute("Try", $event.detail)')
+    .work-bench
+      button Try It!
+      .work-bench-try
+        textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
+          @code-update='dalResult = await execute("Try", $event.detail)')
 
-      .tab(x-data='tab()')
-        .tab-headers
-          .tab-header(target='root') Root
-          .tab-header(target='error') Error
-          .tab-header(target='result') Result
-          .tab-header(target='inspect') Inspect
-        .tab-contents
-          .tab-content.active(target='root' placeholder='Root')
-            pre(x-text='dalResult.root')
-          .tab-content(target='error' placeholder='Error')
-            pre(x-text='dalResult.error')
-          .tab-content(target='result' placeholder='Result')
-            pre(x-text='dalResult.result')
-          .tab-content(target='inspect' placeholder='Inspect')
-            pre(x-text='dalResult.inspect')
+        .tab(x-data='tab()')
+          .tab-headers
+            .tab-header(target='root') Root
+            .tab-header(target='error') Error
+            .tab-header(target='result') Result
+            .tab-header(target='inspect') Inspect
+          .tab-contents
+            .tab-content.active(target='root' placeholder='Root')
+              pre(x-text='dalResult.root')
+            .tab-content(target='error' placeholder='Error')
+              pre(x-text='dalResult.error')
+            .tab-content(target='result' placeholder='Result')
+              pre(x-text='dalResult.result')
+            .tab-content(target='inspect' placeholder='Inspect')
+              pre(x-text='dalResult.inspect')
 
 //-         .buttons
 //-           button.resume(id='resume') Resume
