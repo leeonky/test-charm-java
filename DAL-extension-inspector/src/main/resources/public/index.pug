@@ -28,8 +28,7 @@ html(lang="en")
       .work-bench-try
         textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
           @code-update='dalResult = await execute("Try", $event.detail); active=activated()')
-
-        .tab(x-data='tab()')
+        .tab(x-data='tab()' x-effect='switchTab(active)')
           .tab-headers
             .tab-header(target='root' :class="active=='root'? 'active': null") Root
             .tab-header(target='error' :class="active=='error'? 'active': null") Error

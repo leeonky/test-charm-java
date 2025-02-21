@@ -21,6 +21,7 @@ function xmlToJson(xmlStr) {
         });
         return obj
     }
+
     return parseNode(rootNode.childNodes)
 }
 
@@ -63,33 +64,25 @@ const appData = () => {
         },
         active: 'root',
         activated() {
-          if(this.dalResult.error!=null && this.dalResult.error!='')
-            return 'error'
-          else if(this.dalResult.result!=null && this.result!='')
-            return 'result'
-          else
-            return 'root'
+            if (this.dalResult.error != null && this.dalResult.error != '')
+                return 'error'
+            else if (this.dalResult.result != null && this.result != '')
+                return 'result'
+            else
+                return 'root'
         },
         exchangeSession: null,
         exchange(message) {
-            if(message.instances)
+            if (message.instances)
                 this.instances = message.instances.map(instance => [instance, true])
         },
         async execute(dalName, code) {
-            const response = await fetch('/api/execute?name='+dalName, {
+            const response = await fetch('/api/execute?name=' + dalName, {
                 method: 'POST',
                 body: code
             })
-            let xmlStr = await response.text();
-            console.log(xmlStr)
-            let xmlToJson1 = xmlToJson(xmlStr);
-            console.log(xmlToJson1)
-            return xmlToJson1
+            return xmlToJson(await response.text())
         },
-//        outputTabs: ['root', 'result', 'error', 'inspect'],
-//        title(str) {
-//          return str.charAt(0).toUpperCase() + str.slice(1);
-//        },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.exchange.bind(this))
         }
@@ -99,21 +92,23 @@ const appData = () => {
 const tab = () => {
     return {
         init() {
-            this.$el.querySelectorAll('.tab-header').forEach(header => {
+            this.$root.querySelectorAll('.tab-header').forEach(header => {
                 header.addEventListener('click', () => {
                     this.switchTab(header.getAttribute('target'));
                 });
             });
         },
         switchTab(target) {
-            this.$el.querySelectorAll('.tab-content').forEach(content => {
+            console.log(this.$root)
+            console.log(this.$el)
+            this.$root.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
-            this.$el.querySelectorAll('.tab-header').forEach(content => {
+            this.$root.querySelectorAll('.tab-header').forEach(content => {
                 content.classList.remove('active');
             });
-            this.$el.querySelector(`.tab-content[target="${target}"]`).classList.add('active');
-            this.$el.querySelector(`.tab-header[target="${target}"]`).classList.add('active');
+            this.$root.querySelector(`.tab-content[target="${target}"]`).classList.add('active');
+            this.$root.querySelector(`.tab-header[target="${target}"]`).classList.add('active');
         }
     };
 }
