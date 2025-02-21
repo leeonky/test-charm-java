@@ -74,15 +74,21 @@ Feature: basic
         }
         """
 
-#    Scenario: auto switch to result when no error
-#      When try dal on page:
-#        """
-#        'hello'
-#        """
-#      And page switch to 'Result' and yon can see:
-#        """
-#        java.lang.String
-#        <hello>
-#        """
+    Scenario: auto switch to result when no error
+      When you:
+      """
+      TryIt.DAL: ```
+                 'hello'
+                 ```
+      """
+      Then you should see:
+        """
+        TryIt::eventually: {
+          Current: ```
+                   java.lang.String
+                   <hello>
+                   ```
+        }
+        """
 #
 #    Scenario: auto switch to error when got error

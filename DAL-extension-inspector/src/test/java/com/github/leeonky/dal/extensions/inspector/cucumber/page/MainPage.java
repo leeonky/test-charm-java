@@ -4,7 +4,7 @@ import java.util.List;
 
 public class MainPage {
     private final Panel panel;
-    private final SubPageSwitcher<Object> remotes = new SubPageSwitcher();
+    private final PageContainer<Object> remotes = new PageContainer();
 
     public MainPage(SeleniumWebDriver driver) {
         driver.open("http://host.docker.internal:10081");

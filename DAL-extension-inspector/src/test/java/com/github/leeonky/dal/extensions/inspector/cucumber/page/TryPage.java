@@ -2,7 +2,12 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 public class TryPage {
     private final Panel panel;
-    private final SubPageSwitcher<OutputPage> outputs = new SubPageSwitcher<>();
+    private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
+        @Override
+        public OutputPage getCurrent() {
+            return new OutputPage(panel.byCss(".tab-content.active"), panel.byCss(".tab-header.active").text());
+        }
+    };
 
     public TryPage(Panel panel) {
         this.panel = panel;
@@ -30,6 +35,10 @@ public class TryPage {
 
     public OutputPage Inspect() {
         return switchTo("Inspect");
+    }
+
+    public OutputPage Current() {
+        return outputs.getCurrent();
     }
 
     private OutputPage switchTo(String type) {

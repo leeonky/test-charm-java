@@ -61,6 +61,15 @@ const appData = () => {
             result: '',
             inspect: ''
         },
+        active: 'root',
+        activated() {
+          if(this.dalResult.error!=null && this.dalResult.error!='')
+            return 'error'
+          else if(this.dalResult.result!=null && this.result!='')
+            return 'result'
+          else
+            return 'root'
+        },
         exchangeSession: null,
         exchange(message) {
             if(message.instances)
@@ -77,6 +86,10 @@ const appData = () => {
             console.log(xmlToJson1)
             return xmlToJson1
         },
+//        outputTabs: ['root', 'result', 'error', 'inspect'],
+//        title(str) {
+//          return str.charAt(0).toUpperCase() + str.slice(1);
+//        },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.exchange.bind(this))
         }

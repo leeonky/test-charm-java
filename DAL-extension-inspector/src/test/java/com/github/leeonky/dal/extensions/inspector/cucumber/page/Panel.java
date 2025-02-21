@@ -18,7 +18,7 @@ public class Panel {
     }
 
     public Panel by(By by) {
-        List<Panel> list = await().ignoreExceptions().until(() -> allBy(by), not(List::isEmpty));
+        List<Panel> list = await("No elements found by: " + by).ignoreExceptions().until(() -> allBy(by), not(List::isEmpty));
         if (list.size() > 1)
             throw new IllegalStateException("Found more than one elements: " + by.toString());
         return list.get(0);
