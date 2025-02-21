@@ -53,28 +53,34 @@ class WSSession {
     }
 }
 
-const appData = () => {
+const dalInstance = () => {
     return {
-        instances: [], //[['name', active true]],
-        dalResult: {
+        result: {
             root: 'root',
             error: '',
             result: '',
             inspect: ''
         },
-        active: 'root',
-        activated() {
-            if (this.dalResult.error != null && this.dalResult.error != '')
-                return 'error'
-            else if (this.dalResult.result != null && this.result != '')
-                return 'result'
-            else
-                return 'root'
-        },
+        active: 'root'
+    }
+}
+
+const appData = () => {
+    return {
+        instanceNames: [],
         exchangeSession: null,
         exchange(message) {
             if (message.instances)
-                this.instances = message.instances.map(instance => [instance, true])
+                this.instanceNames = message.instances.map(instance => [instance, true])
+        },
+        updateResult(result, newResult) {
+            result.result = newResult
+            if (newResult.error != null && newResult.error != '')
+                result.active = 'error'
+            else if (newResult.result != null && newResult.result != '')
+                result.active = 'result'
+            else
+                result.active = 'root'
         },
         async execute(dalName, code) {
             const response = await fetch('/api/execute?name=' + dalName, {
@@ -92,19 +98,17 @@ const appData = () => {
 const tab = () => {
     return {
         init() {
-            this.$root.querySelectorAll('.tab-header').forEach(header => {
+            Array.from(this.$root.querySelector('.tab-headers').children).forEach(header => {
                 header.addEventListener('click', () => {
                     this.switchTab(header.getAttribute('target'));
                 });
             });
         },
         switchTab(target) {
-            console.log(this.$root)
-            console.log(this.$el)
-            this.$root.querySelectorAll('.tab-content').forEach(content => {
+            Array.from(this.$root.querySelector('.tab-contents').children).forEach(content => {
                 content.classList.remove('active');
             });
-            this.$root.querySelectorAll('.tab-header').forEach(content => {
+            Array.from(this.$root.querySelector('.tab-headers').children).forEach(content => {
                 content.classList.remove('active');
             });
             this.$root.querySelector(`.tab-content[target="${target}"]`).classList.add('active');

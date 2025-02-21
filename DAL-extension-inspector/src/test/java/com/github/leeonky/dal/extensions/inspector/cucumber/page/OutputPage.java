@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
+import java.util.Objects;
+
 public class OutputPage {
     private final Panel panel;
     private final String type;
@@ -10,11 +12,11 @@ public class OutputPage {
     }
 
     public boolean isType(String type) {
-        return false;
+        return Objects.equals(this.type, type);
     }
 
     @Override
     public String toString() {
-        return panel.byPlaceholder(type).text();
+        return panel.text();
     }
 }

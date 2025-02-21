@@ -29,11 +29,11 @@ public class Panel {
     }
 
     public Panel byPlaceholder(String dalExpression) {
-        return byXpath(String.format("//*[@placeholder='%s']", dalExpression));
+        return byXpath(String.format(".//*[@placeholder='%s']", dalExpression));
     }
 
     public Panel byText(String text) {
-        return byXpath(String.format("//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text));
+        return byXpath(String.format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text));
     }
 
     public List<Panel> allByCss(String css) {
