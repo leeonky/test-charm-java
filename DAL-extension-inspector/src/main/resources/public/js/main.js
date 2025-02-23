@@ -82,14 +82,13 @@ const appData = () => {
                 await this.request(message.request)
             }
         },
-        updateResult(result, newResult) {
-            result.result = newResult
-            if (newResult.error != null && newResult.error != '')
-                result.active = 'error'
-            else if (newResult.result != null && newResult.result != '')
-                result.active = 'result'
-            else
-                result.active = 'root'
+        async updateResult(result) {
+            const response = await fetch('/api/execute?name=' + result.name, {
+                method: 'POST',
+                body: result.code
+            })
+            result.result = xmlToJson(await response.text())
+            result.active = result.result.error ? 'error' : (result.result.result ? 'result' : 'root');
         },
         async request(dalName) {
             const response = await fetch('/api/request?name=' + dalName, {
