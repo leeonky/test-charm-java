@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
+import static java.lang.String.format;
+
 public class TryPage {
     private final Panel panel;
     private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
@@ -45,7 +47,7 @@ public class TryPage {
         return outputs.switchTo(new Target<OutputPage>() {
             @Override
             public OutputPage create() {
-                return new OutputPage(panel.byCss(".tab-content[target='" + type.toLowerCase() + "']"), type);
+                return new OutputPage(panel.byCss(format(".tab-content[target='%s']", type.toLowerCase())), type);
             }
 
             @Override

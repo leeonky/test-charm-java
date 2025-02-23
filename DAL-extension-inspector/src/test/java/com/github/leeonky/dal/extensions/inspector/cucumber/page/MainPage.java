@@ -2,6 +2,8 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class MainPage {
     private final Panel panel;
     private final PageContainer<Object> remotes = new PageContainer();
@@ -23,7 +25,7 @@ public class MainPage {
         return remotes.switchTo(new Target<TryPage>() {
             @Override
             public TryPage create() {
-                return new TryPage(panel.byCss(".work-bench-try"));
+                return new TryPage(panel.byCss(format(".tab-content[target='%s']", "Try It!")));
             }
 
             @Override

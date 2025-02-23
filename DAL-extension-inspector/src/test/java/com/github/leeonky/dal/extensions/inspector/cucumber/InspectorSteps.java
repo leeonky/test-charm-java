@@ -18,7 +18,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
 
-import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 
 public class InspectorSteps {
@@ -65,12 +64,8 @@ public class InspectorSteps {
         Inspector.setDefaultInput(() -> json(json));
     }
 
-    @Then("you should see:")
-    public void youShouldSee(String expression) {
-        expect(mainPage).use(dal).should(expression);
-    }
-
     @When("you:")
+    @Then("you should see:")
     public void you(String expression) {
         try {
             dal.evaluateAll(mainPage, expression);

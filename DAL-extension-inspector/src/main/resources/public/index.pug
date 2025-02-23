@@ -17,56 +17,38 @@ html(lang="en")
         .flex.align-center.gap-10
           span Remote:
           .instance-monitors
-            template(x-for="[name, active] in instanceNames" :key='name')
+            template(x-for="[name, active] in dalInstanceNames" :key='name')
               label.switch
                 input(type="checkbox" hidden=true x-model="active")
                 span.custom-checkbox
                 span(x-text="name")
 
-    .work-benchs
-      .tab(x-data='tab()' x-init='fun()')
+    .work-benches
+      .tab(x-data='tab()')
         .tab-headers
-          .tab-header.active(target='try') Try It!
-          .tab-header(target='try2') Try2 It!
+          template(x-for="dalIns in dalInstances" :key='dalIns.name')
+            .tab-header.active(:target='dalIns.name' x-text='dalIns.name')
         .tab-contents
-          .tab-content.active(target='try')
-            .work-bench-try(x-data='{dalIns: dalInstance()}')
-              textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
-                @code-update='updateResult(dalIns, await execute("Try", $event.detail))')
-              .tab(x-data='tab()' x-effect='switchTab(dalIns.active)')
-                .tab-headers
-                  .tab-header(target='root') Root
-                  .tab-header(target='error') Error
-                  .tab-header(target='result') Result
-                  .tab-header(target='inspect') Inspect
-                .tab-contents
-                  .tab-content(target='root')
-                    pre(x-text='dalIns.result.root')
-                  .tab-content(target='error')
-                    pre(x-text='dalIns.result.error')
-                  .tab-content(target='result')
-                    pre(x-text='dalIns.result.result')
-                  .tab-content(target='inspect')
-                    pre(x-text='dalIns.result.inspect')
-          .tab-content(target='try2')
-            .work-bench-try2(x-data='{dalIns: dalInstance()}')
-              textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
-                @code-update='updateResult(dalIns, await execute("Try", $event.detail))')
-              .tab(x-data='tab()' x-effect='switchTab(dalIns.active)')
-                .tab-headers
-                  .tab-header(target='root') Root
-                  .tab-header(target='error') Error
-                  .tab-header(target='result') Result
-                  .tab-header(target='inspect') Inspect
-                .tab-contents
-                  .tab-content(target='root')
-                    pre(x-text='dalIns.result.root')
-                  .tab-content(target='error')
-                    pre(x-text='dalIns.result.error')
-                  .tab-content(target='result')
-                    pre(x-text='dalIns.result.result')
-                  .tab-content(target='inspect')
-                    pre(x-text='dalIns.result.inspect')
+          template(x-for="dalIns in dalInstances" :key='dalIns.name')
+            .tab-content.active(:target='dalIns.name')
+              .work-bench
+                textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
+                  @code-update='updateResult(dalIns, await execute(dalIns.name, $event.detail))')
+                .tab(x-data='tab()' x-effect='switchTab(dalIns.active)')
+                  .tab-headers
+                    .tab-header(target='root') Root
+                    .tab-header(target='error') Error
+                    .tab-header(target='result') Result
+                    .tab-header(target='inspect') Inspect
+                  .tab-contents
+                    .tab-content(target='root')
+                      pre(x-text='dalIns.result.root')
+                    .tab-content(target='error')
+                      pre(x-text='dalIns.result.error')
+                    .tab-content(target='result')
+                      pre(x-text='dalIns.result.result')
+                    .tab-content(target='inspect')
+                      pre(x-text='dalIns.result.inspect')
 
 //-         .buttons
 //-           button.resume(id='resume') Resume

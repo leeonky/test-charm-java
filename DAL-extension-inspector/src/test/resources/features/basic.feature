@@ -1,4 +1,5 @@
 Feature: basic
+
   Rule: web server ready, web page opened
 
     Background:
@@ -11,7 +12,7 @@ Feature: basic
       title: 'DAL inspector'
       """
 
-    Scenario: execute expression and get result
+    Scenario: execute expression and get result or error
       When given default input value:
         """
         {
@@ -19,12 +20,22 @@ Feature: basic
         }
         """
       When you:
-      """
-      TryIt.DAL: message
-      """
+        """
+        TryIt.DAL: message
+        """
       Then you should see:
         """
         TryIt::eventually: {
+          Current: { type: Result }
+                 : ```
+                   java.lang.String
+                   <hello>
+                   ```
+        }
+        """
+      And you should see:
+        """
+        TryIt: {
           Root: ```
                 {
                     message: java.lang.String <hello>
@@ -33,38 +44,38 @@ Feature: basic
 
           Error: ''
 
-          Result: ```
-                  java.lang.String
-                  <hello>
-                  ```
-
           Inspect: message
         }
         """
       When you:
-      """
-      TryIt.appendDAL: '= world'
-      """
+        """
+        TryIt.appendDAL: '= world'
+        """
       Then you should see:
         """
         TryIt::eventually: {
+          Current: { type: Error }
+                 : ```
+                   message= world
+                            ^
+
+                   Expected to be equal to: java.lang.String
+                   <world>
+                    ^
+                   Actual: java.lang.String
+                   <hello>
+                    ^
+                   ```
+        }
+        """
+      And you should see:
+        """
+        TryIt: {
           Root: ```
                 {
                     message: java.lang.String <hello>
                 }
                 ```
-
-          Error: ```
-                 message= world
-                          ^
-
-                 Expected to be equal to: java.lang.String
-                 <world>
-                  ^
-                 Actual: java.lang.String
-                 <hello>
-                  ^
-                 ```
 
           Result: ''
 
@@ -73,22 +84,3 @@ Feature: basic
                    ```
         }
         """
-
-    Scenario: auto switch to result when no error
-      When you:
-      """
-      TryIt.DAL: ```
-                 'hello'
-                 ```
-      """
-      Then you should see:
-        """
-        TryIt::eventually: {
-          Current: ```
-                   java.lang.String
-                   <hello>
-                   ```
-        }
-        """
-#
-#    Scenario: auto switch to error when got error

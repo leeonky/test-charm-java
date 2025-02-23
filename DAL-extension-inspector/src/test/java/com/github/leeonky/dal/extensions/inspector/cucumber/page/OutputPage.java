@@ -15,6 +15,10 @@ public class OutputPage {
         return Objects.equals(this.type, type);
     }
 
+    public String getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return panel.text();

@@ -53,7 +53,7 @@ class WSSession {
     }
 }
 
-const dalInstance = () => {
+const dalInstance = (name) => {
     return {
         result: {
             root: 'root',
@@ -61,17 +61,20 @@ const dalInstance = () => {
             result: '',
             inspect: ''
         },
-        active: 'root'
+        active: 'root',
+        name: name
     }
 }
 
 const appData = () => {
     return {
-        instanceNames: [],
+        dalInstanceNames: [],
+        dalInstances: [dalInstance('Try It!')],
         exchangeSession: null,
         exchange(message) {
+            console.log(this.dalInstances)
             if (message.instances)
-                this.instanceNames = message.instances.map(instance => [instance, true])
+                this.dalInstanceNames = message.instances.map(instance => [instance, true])
         },
         updateResult(result, newResult) {
             result.result = newResult
