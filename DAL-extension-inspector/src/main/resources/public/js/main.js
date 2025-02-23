@@ -56,12 +56,13 @@ class WSSession {
 const dalInstance = (name) => {
     return {
         result: {
-            root: 'root',
+            root: '',
             error: '',
             result: '',
             inspect: ''
         },
         active: 'root',
+        code: '',
         name: name
     }
 }
@@ -69,12 +70,17 @@ const dalInstance = (name) => {
 const appData = () => {
     return {
         dalInstanceNames: [],
+        // TODO to map
         dalInstances: [dalInstance('Try It!')],
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
-        exchange(message) {
+        async exchange(message) {
             if (message.instances)
                 this.dalInstanceNames = message.instances.map(instance => [instance, true])
+            if (message.request) {
+                // TODO check switch
+                await this.request(message.request)
+            }
         },
         updateResult(result, newResult) {
             result.result = newResult
@@ -84,6 +90,24 @@ const appData = () => {
                 result.active = 'result'
             else
                 result.active = 'root'
+        },
+        async request(dalName) {
+            const response = await fetch('/api/request?name=' + dalName, {
+                method: 'GET'
+            })
+            const code = await response.text()
+            if(code && code !== '') {
+                let newDalInstance = dalInstance(dalName);
+                newDalInstance.code = code
+                this.dalInstances.push(newDalInstance)
+                this.$nextTick(() => {
+                    Array.from(document.querySelectorAll('.code-editor'))
+                        .filter(editor => editor.getAttribute('name') === dalName)
+                        .forEach(editor => {
+                            editor.dispatchEvent(new Event('code-update'))
+                        })
+                })
+            }
         },
         async execute(dalName, code) {
             const response = await fetch('/api/execute?name=' + dalName, {
@@ -100,40 +124,35 @@ const appData = () => {
 
 const tab = () => {
     return {
-        headersContainer() {
-            return this.$root.querySelector('.tab-headers')
+        nodeContainer(selectors) {
+            return this.$root.querySelector(selectors)
         },
 
         init() {
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     mutation.addedNodes.forEach(node => {
-                        if (node.classList.contains('tab-header')) {
-                            node.addEventListener('click', () => {
-                                this.switchTab(node.getAttribute('target'));
-                            });
-                        }
+                        if (node.classList.contains('tab-header'))
+                            node.addEventListener('click', () => this.switchTab(node.getAttribute('target')));
                     });
                 });
             });
 
-            observer.observe(this.headersContainer(), {childList: true});
+            observer.observe(this.nodeContainer('.tab-headers'), {childList: true});
 
-            Array.from(this.headersContainer().children).forEach(header => {
-                header.addEventListener('click', () => {
-                    this.switchTab(header.getAttribute('target'));
-                });
+            Array.from(this.nodeContainer('.tab-headers').children).forEach(header => {
+                header.addEventListener('click', () => this.switchTab(header.getAttribute('target')));
             });
         },
 
         switchTab(tab) {
-            const toggleActive = (nodeContainer) => {
-                Array.from(nodeContainer.children).forEach(content => {
+            const toggleActive = (container) => {
+                Array.from(container.children).forEach(content => {
                     content.classList.toggle('active', content.getAttribute('target') === tab);
                 });
             }
-            toggleActive(this.$root.querySelector('.tab-contents'))
-            toggleActive(this.headersContainer())
+            toggleActive(this.nodeContainer('.tab-headers'))
+            toggleActive(this.nodeContainer('.tab-contents'))
         }
     };
 }

@@ -34,4 +34,18 @@ public class MainPage {
             }
         });
     }
+
+    public TryPage WorkBench(String name) {
+        return remotes.switchTo(new Target<TryPage>() {
+            @Override
+            public TryPage create() {
+                return new TryPage(panel.byCss(format(".tab-content[target='%s']", name)));
+            }
+
+            @Override
+            public void navigateTo() {
+                panel.byCss(".work-bench-headers").byText(name).click();
+            }
+        });
+    }
 }

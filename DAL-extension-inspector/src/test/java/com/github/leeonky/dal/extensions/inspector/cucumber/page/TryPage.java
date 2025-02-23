@@ -16,11 +16,15 @@ public class TryPage {
     }
 
     public StringSetter DAL() {
-        return value -> panel.byPlaceholder("DAL expression").fillIn(value);
+        return value -> Editor().fillIn(value);
+    }
+
+    public Panel Editor() {
+        return panel.byPlaceholder("DAL expression");
     }
 
     public StringSetter appendDAL() {
-        return value -> panel.byPlaceholder("DAL expression").typeIn(value);
+        return value -> Editor().typeIn(value);
     }
 
     public OutputPage Root() {

@@ -27,10 +27,10 @@ import static java.util.Objects.requireNonNull;
 public class Inspector {
     private static Inspector inspector = null;
     private final Javalin javalin;
-    private CountDownLatch serverReadyLatch;
+    private final CountDownLatch serverReadyLatch;
     private final Set<DAL> instances = new LinkedHashSet<>();
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
-    private DAL defaultDal = DAL.create(InspectorExtension.class);
+    private final DAL defaultDal = DAL.create(InspectorExtension.class);
     private static Supplier<Object> defaultInput = () -> null;
 
     public Inspector() {
@@ -66,7 +66,9 @@ public class Inspector {
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
         requireNonNull(javalin.jettyServer()).setServerPort(10081);
         javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
-        javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.body())));
+//        TODO execute by name
+        javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.queryParam("name"), ctx.body())));
+        javalin.get("/api/request", ctx -> ctx.html(request(ctx.queryParam("name"))));
         javalin.ws("/ws/exchange", ws -> {
             ws.onConnect(ctx -> {
                 clientConnections.put(ctx.getSessionId(), ctx);
@@ -78,18 +80,73 @@ public class Inspector {
         Suppressor.run(serverReadyLatch::await);
     }
 
-    private String execute(String code) {
-        Map<String, String> response = new HashMap<>();
-        Object inputObject = Inspector.defaultInput.get();
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = defaultDal.getRuntimeContextBuilder().build(inputObject);
-        try {
-            response.put("root", runtimeContext.wrap(inputObject).dumpAll());
-            response.put("inspect", defaultDal.compileSingle(code, runtimeContext).inspect());
-            response.put("result", runtimeContext.wrap(defaultDal.evaluate(inputObject, code)).dumpAll());
-        } catch (InterpreterException e) {
-            response.put("error", e.show(code) + "\n\n" + e.getMessage());
+    public static class DalInstance {
+        private final Object input;
+        private final boolean running = true;
+        private final DAL dal;
+        private final String code;
+
+        public DalInstance(Object input, DAL dal, String code) {
+            this.input = input;
+            this.dal = dal;
+            this.code = code;
         }
-        return ObjectWriter.serialize(response);
+    }
+
+    private final Map<String, DalInstance> dalInstances = new ConcurrentHashMap<>();
+
+    public void inspectInner(DAL dal, Object input, String code) {
+//        TODO  stack over flow
+//        lock inspect by name
+//        check mode
+        DalInstance dalInstance = new DalInstance(input, dal, code);
+        dalInstances.put(dal.getName(), dalInstance);
+        for (WsContext wsContext : clientConnections.values()) {
+            wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
+                put("request", dal.getName());
+            }}));
+        }
+
+//        TODO use sempahore to wait for the result
+        while (dalInstance.running)
+            Suppressor.run(() -> Thread.sleep(20));
+    }
+
+    public static void inspect(DAL dal, Object input, String code) {
+        inspector.inspectInner(dal, input, code);
+    }
+
+    private String request(String name) {
+        return dalInstances.get(name).code;
+    }
+
+    private String execute(String name, String code) {
+        if (name.equals("Try It!")) {
+            Map<String, String> response = new HashMap<>();
+            Object inputObject = Inspector.defaultInput.get();
+            RuntimeContextBuilder.DALRuntimeContext runtimeContext = defaultDal.getRuntimeContextBuilder().build(inputObject);
+            try {
+                response.put("root", runtimeContext.wrap(inputObject).dumpAll());
+                response.put("inspect", defaultDal.compileSingle(code, runtimeContext).inspect());
+                response.put("result", runtimeContext.wrap(defaultDal.evaluate(inputObject, code)).dumpAll());
+            } catch (InterpreterException e) {
+                response.put("error", e.show(code) + "\n\n" + e.getMessage());
+            }
+            return ObjectWriter.serialize(response);
+        } else {
+            DalInstance dalInstance = dalInstances.get(name);
+            Map<String, String> response = new HashMap<>();
+            Object inputObject = dalInstance.input;
+            RuntimeContextBuilder.DALRuntimeContext runtimeContext = dalInstance.dal.getRuntimeContextBuilder().build(inputObject);
+            try {
+                response.put("root", runtimeContext.wrap(inputObject).dumpAll());
+                response.put("inspect", dalInstance.dal.compileSingle(code, runtimeContext).inspect());
+                response.put("result", runtimeContext.wrap(dalInstance.dal.evaluate(inputObject, code)).dumpAll());
+            } catch (InterpreterException e) {
+                response.put("error", e.show(code) + "\n\n" + e.getMessage());
+            }
+            return ObjectWriter.serialize(response);
+        }
     }
 
     public static void register(DAL dal) {

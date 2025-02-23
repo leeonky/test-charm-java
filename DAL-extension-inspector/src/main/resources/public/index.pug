@@ -5,7 +5,6 @@ html(lang="en")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title DAL inspector
     link(rel='stylesheet' href='css/styles.css')
-    script(src='js/jquery-3.6.0.min.js')
     script(defer src='js/alpine-3.10.3.js')
     script(src='js/main.js')
   body.text-color.background-color.font-normal(x-data='appData' )
@@ -25,23 +24,23 @@ html(lang="en")
 
     .work-benches
       .tab(x-data='tab()' x-init='switchTab("Try It!")')
-        .tab-headers
+        .tab-headers.work-bench-headers
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-header(:target='dalIns.name' x-text='dalIns.name')
         .tab-contents
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-content(:target='dalIns.name')
-              .work-bench
-                textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
-                  @code-update='updateResult(dalIns, await execute(dalIns.name, $event.detail))')
-                .tab(x-data='tab()' x-effect='switchTab(dalIns.active)')
-                  .tab-headers
-                    template(x-for="outputTab in outputTabs" :key='outputTab')
-                      .tab-header(:target='outputTab' x-text='outputTab.charAt(0).toUpperCase() + outputTab.slice(1);')
-                  .tab-contents
-                    template(x-for="outputTab in outputTabs" :key='outputTab')
-                      .tab-content(:target='outputTab')
-                        pre(x-text='dalIns.result[outputTab]')
+              textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression' :name='dalIns.name'
+                //TODO refactor
+                @code-update='updateResult(dalIns, await execute(dalIns.name, dalIns.code))' x-model='dalIns.code')
+              .tab(x-data='tab()' x-effect='switchTab(dalIns.active)')
+                .tab-headers
+                  template(x-for="outputTab in outputTabs" :key='outputTab')
+                    .tab-header(:target='outputTab' x-text='outputTab.charAt(0).toUpperCase() + outputTab.slice(1);')
+                .tab-contents
+                  template(x-for="outputTab in outputTabs" :key='outputTab')
+                    .tab-content(:target='outputTab')
+                      pre(x-text='dalIns.result[outputTab]')
 
 //-         .buttons
 //-           button.resume(id='resume') Resume

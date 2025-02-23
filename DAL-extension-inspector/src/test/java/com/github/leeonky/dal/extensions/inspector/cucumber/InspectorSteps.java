@@ -56,7 +56,7 @@ public class InspectorSteps {
 
     @Given("created DAL {string} with inspector extended")
     public void createdDALInsWithInspectorExtended(String name) {
-        DAL.create(name);
+        testContext.createDAL(name);
     }
 
     @When("given default input value:")
@@ -72,6 +72,26 @@ public class InspectorSteps {
         } catch (InterpreterException e) {
             throw new AssertionError("\n" + e.show(expression) + "\n\n" + e.getMessage());
         }
+    }
+
+    @And("the {string} following input:")
+    public void theInsFollowingInput(String dalIns, String inputJson) {
+        testContext.addInput(dalIns, inputJson);
+    }
+
+    @When("use DAL {string} to evaluating the following:")
+    public void useDALInsToEvaluatingTheFollowing(String dalIns, String code) {
+//        try {
+//            Thread.sleep(4000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+        testContext.evaluate(dalIns, code);
+    }
+
+    @Then("{string} test still run after {float}s")
+    public void insTestStillRunAfterS(String dalIns, float second) {
+        testContext.shouldShowTheFollowingError(dalIns, second);
     }
 
     //    @SneakyThrows

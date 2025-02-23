@@ -53,9 +53,54 @@ Feature: exchange
         }
         """
 
-#  Rule: inspect active, web server started and launch page
-#    Background:
-#      When launch inspector web server
-#
-#    Scenario: inspect will suspend, web page will catch the code and result
-#      When evaluating the following:
+  Rule: launch page and inspect active
+    Background:
+      When launch inspector web server
+      And launch inspector web page
+
+    Scenario: inspect will suspend, web page will catch the code and result
+      Given created DAL 'Ins1' with inspector extended
+      And you should see:
+      """
+      ::eventually : { instances: [Ins1] }
+      """
+      And the 'Ins1' following input:
+        """
+        {
+          "message": "hello"
+        }
+        """
+      When use DAL 'Ins1' to evaluating the following:
+        """
+        message::inspect
+        """
+      Then 'Ins1' test still run after 1s
+      And you should see:
+        """
+        WorkBench[Ins1]: {
+          ::eventually: {
+            Editor: ```
+                    {}
+                    ```
+            Current: { type: Result }
+                   : ```
+                     java.lang.String
+                     <hello>
+                     ```
+          }
+
+          Root: ```
+                java.lang.String
+                <hello>
+                ```
+
+          Error: ''
+
+          Inspect: '{}'
+       }
+       """
+
+# muli DAL with same name
+# release
+# auto release by button
+# auto release by uncheck

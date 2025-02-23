@@ -20,6 +20,8 @@ public class SeleniumWebElement {
     }
 
     public String getText() {
+        if (element.getTagName().equals("textarea"))
+            return element.getAttribute("value");
         return element.getText();
     }
 
