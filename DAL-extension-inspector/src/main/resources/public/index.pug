@@ -24,31 +24,24 @@ html(lang="en")
                 span(x-text="name")
 
     .work-benches
-      .tab(x-data='tab()')
+      .tab(x-data='tab()' x-init='switchTab("Try It!")')
         .tab-headers
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
-            .tab-header.active(:target='dalIns.name' x-text='dalIns.name')
+            .tab-header(:target='dalIns.name' x-text='dalIns.name')
         .tab-contents
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
-            .tab-content.active(:target='dalIns.name')
+            .tab-content(:target='dalIns.name')
               .work-bench
                 textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression'
                   @code-update='updateResult(dalIns, await execute(dalIns.name, $event.detail))')
                 .tab(x-data='tab()' x-effect='switchTab(dalIns.active)')
                   .tab-headers
-                    .tab-header(target='root') Root
-                    .tab-header(target='error') Error
-                    .tab-header(target='result') Result
-                    .tab-header(target='inspect') Inspect
+                    template(x-for="outputTab in outputTabs" :key='outputTab')
+                      .tab-header(:target='outputTab' x-text='outputTab.charAt(0).toUpperCase() + outputTab.slice(1);')
                   .tab-contents
-                    .tab-content(target='root')
-                      pre(x-text='dalIns.result.root')
-                    .tab-content(target='error')
-                      pre(x-text='dalIns.result.error')
-                    .tab-content(target='result')
-                      pre(x-text='dalIns.result.result')
-                    .tab-content(target='inspect')
-                      pre(x-text='dalIns.result.inspect')
+                    template(x-for="outputTab in outputTabs" :key='outputTab')
+                      .tab-content(:target='outputTab')
+                        pre(x-text='dalIns.result[outputTab]')
 
 //-         .buttons
 //-           button.resume(id='resume') Resume

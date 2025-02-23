@@ -71,8 +71,8 @@ const appData = () => {
         dalInstanceNames: [],
         dalInstances: [dalInstance('Try It!')],
         exchangeSession: null,
+        outputTabs: ['root', 'result', 'error', 'inspect'],
         exchange(message) {
-            console.log(this.dalInstances)
             if (message.instances)
                 this.dalInstanceNames = message.instances.map(instance => [instance, true])
         },
@@ -100,22 +100,40 @@ const appData = () => {
 
 const tab = () => {
     return {
+        headersContainer() {
+            return this.$root.querySelector('.tab-headers')
+        },
+
         init() {
-            Array.from(this.$root.querySelector('.tab-headers').children).forEach(header => {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.classList.contains('tab-header')) {
+                            node.addEventListener('click', () => {
+                                this.switchTab(node.getAttribute('target'));
+                            });
+                        }
+                    });
+                });
+            });
+
+            observer.observe(this.headersContainer(), {childList: true});
+
+            Array.from(this.headersContainer().children).forEach(header => {
                 header.addEventListener('click', () => {
                     this.switchTab(header.getAttribute('target'));
                 });
             });
         },
-        switchTab(target) {
-            Array.from(this.$root.querySelector('.tab-contents').children).forEach(content => {
-                content.classList.remove('active');
-            });
-            Array.from(this.$root.querySelector('.tab-headers').children).forEach(content => {
-                content.classList.remove('active');
-            });
-            this.$root.querySelector(`.tab-content[target="${target}"]`).classList.add('active');
-            this.$root.querySelector(`.tab-header[target="${target}"]`).classList.add('active');
+
+        switchTab(tab) {
+            const toggleActive = (nodeContainer) => {
+                Array.from(nodeContainer.children).forEach(content => {
+                    content.classList.toggle('active', content.getAttribute('target') === tab);
+                });
+            }
+            toggleActive(this.$root.querySelector('.tab-contents'))
+            toggleActive(this.headersContainer())
         }
     };
 }

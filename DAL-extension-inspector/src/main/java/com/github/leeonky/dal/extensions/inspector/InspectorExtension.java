@@ -8,7 +8,6 @@ public class InspectorExtension implements Extension {
     public void extend(DAL dal) {
         Inspector.launch();
         Inspector.register(dal);
-        System.out.println("add dal = " + dal.getName());
 //        Inspector.getInstances().add(dal);
 //        dal.getRuntimeContextBuilder()
 //                .registerErrorHook((input, code, error) -> Inspector.inspector().inspectViaMode(dal, input, code))
