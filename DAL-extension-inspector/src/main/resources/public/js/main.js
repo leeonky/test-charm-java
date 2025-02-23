@@ -69,14 +69,13 @@ const dalInstance = (name) => {
 
 const appData = () => {
     return {
-        dalInstanceNames: [],
-        // TODO to map
+        dalInstanceNames: {},
         dalInstances: [dalInstance('Try It!')],
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
         async exchange(message) {
             if (message.instances)
-                this.dalInstanceNames = message.instances.map(instance => [instance, true])
+                message.instances.forEach(e => this.dalInstanceNames[e] = true)
             if (message.request) {
                 // TODO check switch
                 await this.request(message.request)
@@ -91,21 +90,15 @@ const appData = () => {
             result.active = result.result.error ? 'error' : (result.result.result ? 'result' : 'root');
         },
         async request(dalName) {
-            const response = await fetch('/api/request?name=' + dalName, {
-                method: 'GET'
-            })
+            const response = await fetch('/api/request?name=' + dalName, { method: 'GET' })
             const code = await response.text()
             if(code && code !== '') {
                 let newDalInstance = dalInstance(dalName);
                 newDalInstance.code = code
                 this.dalInstances.push(newDalInstance)
-                this.$nextTick(() => {
-                    Array.from(document.querySelectorAll('.code-editor'))
+                this.$nextTick(() => Array.from(document.querySelectorAll('.code-editor'))
                         .filter(editor => editor.getAttribute('name') === dalName)
-                        .forEach(editor => {
-                            editor.dispatchEvent(new Event('code-update'))
-                        })
-                })
+                        .forEach(editor => editor.dispatchEvent(new Event('code-update'))))
             }
         },
         async execute(dalName, code) {
@@ -128,28 +121,21 @@ const tab = () => {
         },
 
         init() {
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    mutation.addedNodes.forEach(node => {
-                        if (node.classList.contains('tab-header'))
-                            node.addEventListener('click', () => this.switchTab(node.getAttribute('target')));
-                    });
-                });
-            });
+            const observer = new MutationObserver((mutations) => mutations.forEach((mutation) =>
+                  mutation.addedNodes.forEach(node => {
+                      if (node.classList.contains('tab-header'))
+                          node.addEventListener('click', () => this.switchTab(node.getAttribute('target')));
+                  })));
 
             observer.observe(this.nodeContainer('.tab-headers'), {childList: true});
 
-            Array.from(this.nodeContainer('.tab-headers').children).forEach(header => {
-                header.addEventListener('click', () => this.switchTab(header.getAttribute('target')));
-            });
+            Array.from(this.nodeContainer('.tab-headers').children).forEach(header =>
+                header.addEventListener('click', () => this.switchTab(header.getAttribute('target'))));
         },
 
         switchTab(tab) {
-            const toggleActive = (container) => {
-                Array.from(container.children).forEach(content => {
-                    content.classList.toggle('active', content.getAttribute('target') === tab);
-                });
-            }
+            const toggleActive = (container) => Array.from(container.children).forEach(content =>
+                content.classList.toggle('active', content.getAttribute('target') === tab));
             toggleActive(this.nodeContainer('.tab-headers'))
             toggleActive(this.nodeContainer('.tab-contents'))
         }
@@ -162,11 +148,7 @@ const codeEditor = () => {
             let debounceTimer = null
             this.$el.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    this.$el.dispatchEvent(new CustomEvent('code-update', {
-                        detail: this.$el.value
-                    }))
-                }, 500);
+                debounceTimer = setTimeout(() => this.$el.dispatchEvent(new CustomEvent('code-update')), 500);
                 this.$el.style.height = 'auto';
                 if (this.$el.scrollHeight > this.$el.clientHeight) {
                     this.$el.style.height = this.$el.scrollHeight + 'px';

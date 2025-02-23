@@ -54,16 +54,16 @@ Feature: exchange
         """
 
   Rule: launch page and inspect active
-    Background:
+    Background: Given DAL Ins1
       When launch inspector web server
       And launch inspector web page
-
-    Scenario: inspect will suspend, web page will catch the code and result
-      Given created DAL 'Ins1' with inspector extended
+      And created DAL 'Ins1' with inspector extended
       And you should see:
       """
       ::eventually : { instances: [Ins1] }
       """
+
+    Scenario: inspect will suspend, web page will catch the code and result
       And the 'Ins1' following input:
         """
         {
@@ -99,6 +99,21 @@ Feature: exchange
           Inspect: '{}'
        }
        """
+
+#    Scenario: inspect will not suspend, when skip inspect on web page
+#      When you:
+#        """
+#        skip: [Ins1]
+#        """
+#      And use DAL 'Ins1' to evaluating the following:
+#        """
+#        message::inspect
+#        """
+#      Then DAL 'Ins1' test finished with the following result
+#        """
+#        java.lang.String
+#        <hello>
+#        """
 
 # muli DAL with same name
 # release

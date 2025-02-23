@@ -18,6 +18,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
 
+import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 
 public class InspectorSteps {
@@ -86,6 +87,11 @@ public class InspectorSteps {
 
     @Then("{string} test still run after {float}s")
     public void insTestStillRunAfterS(String dalIns, float second) {
-        testContext.shouldShowTheFollowingError(dalIns, second);
+        testContext.shouldStillRunningAfter(dalIns, second);
+    }
+
+    @Then("DAL {string} test finished with the following result")
+    public void dalInsTestFinishedWithTheFollowingResult(String dalIns, String result) {
+        expect(testContext.resultOf(dalIns)).use(dal).should(result);
     }
 }

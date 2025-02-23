@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -10,10 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 
 public class TestContext {
     private final Map<String, Executor> executors = new HashMap<>();
+    private final DAL dal = DAL.create(InspectorExtension.class);
 
     public void addInput(String dalIns, String inputJson) {
         executors.get(dalIns).setInput(json(inputJson));
@@ -27,8 +31,16 @@ public class TestContext {
         executors.put(name, new Executor(DAL.create(name)));
     }
 
-    public void shouldShowTheFollowingError(String dalIns, float second) {
+    public void shouldStillRunningAfter(String dalIns, float second) {
         executors.get(dalIns).shouldStillRunningAfter((int) (second * 1000));
+    }
+
+    public Object resultOf(String dalIns) {
+        Executor executor = executors.get(dalIns);
+        await().ignoreExceptions().untilAsserted(() -> assertThat(executor.running).isFalse());
+        if (executor.throwing != null)
+            return executor.throwing;
+        return executor.result;
     }
 
     public static class Executor {
@@ -38,10 +50,11 @@ public class TestContext {
 
         @Getter
         private String lastEvaluating;
-        private Throwable lastThrow;
+        private Throwable throwing;
         private boolean running;
         private Instant startedAt;
         private Thread thread;
+        private Object result;
 
         private Executor(DAL dal) {
             this.dal = dal;
@@ -53,9 +66,9 @@ public class TestContext {
             startedAt = Instant.now();
             thread = new Thread(() -> {
                 try {
-                    dal.evaluate(input, code);
+                    result = dal.evaluate(input, code);
                 } catch (Throwable e) {
-                    lastThrow = e;
+                    throwing = e;
                 } finally {
                     running = false;
                 }
