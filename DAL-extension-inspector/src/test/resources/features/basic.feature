@@ -21,11 +21,11 @@ Feature: basic
         """
       When you:
         """
-        TryIt.DAL: message
+        WorkBench[Try It!].DAL: message
         """
       Then you should see:
         """
-        TryIt::eventually: {
+        WorkBench[Try It!]::eventually: {
           Current: { type: Result }
                  : ```
                    java.lang.String
@@ -35,7 +35,7 @@ Feature: basic
         """
       And you should see:
         """
-        TryIt: {
+        WorkBench[Try It!]: {
           Root: ```
                 {
                     message: java.lang.String <hello>
@@ -49,11 +49,11 @@ Feature: basic
         """
       When you:
         """
-        TryIt.appendDAL: '= world'
+        WorkBench[Try It!].appendDAL: '= world'
         """
       Then you should see:
         """
-        TryIt::eventually: {
+        WorkBench[Try It!]::eventually: {
           Current: { type: Error }
                  : ```
                    message= world
@@ -70,7 +70,7 @@ Feature: basic
         """
       And you should see:
         """
-        TryIt: {
+        WorkBench[Try It!]: {
           Root: ```
                 {
                     message: java.lang.String <hello>

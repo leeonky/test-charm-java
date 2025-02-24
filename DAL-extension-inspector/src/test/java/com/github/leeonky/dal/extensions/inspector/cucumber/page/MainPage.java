@@ -6,7 +6,7 @@ import static java.lang.String.format;
 
 public class MainPage {
     private final Panel panel;
-    private final PageContainer<Object> remotes = new PageContainer();
+    private final PageContainer<WorkbenchPage> remotes = new PageContainer<>();
 
     public MainPage(SeleniumWebDriver driver) {
         driver.open("http://host.docker.internal:10081");
@@ -21,25 +21,11 @@ public class MainPage {
         return panel.allByCss(".instance-monitors .switch");
     }
 
-    public TryPage TryIt() {
-        return remotes.switchTo(new Target<TryPage>() {
+    public WorkbenchPage WorkBench(String name) {
+        return remotes.switchTo(new Target<WorkbenchPage>() {
             @Override
-            public TryPage create() {
-                return new TryPage(panel.byCss(format(".tab-content[target='%s']", "Try It!")));
-            }
-
-            @Override
-            public void navigateTo() {
-                panel.byText("Try It!").click();
-            }
-        });
-    }
-
-    public TryPage WorkBench(String name) {
-        return remotes.switchTo(new Target<TryPage>() {
-            @Override
-            public TryPage create() {
-                return new TryPage(panel.byCss(format(".tab-content[target='%s']", name)));
+            public WorkbenchPage create() {
+                return new WorkbenchPage(panel.byCss(format(".tab-content[target='%s']", name)));
             }
 
             @Override

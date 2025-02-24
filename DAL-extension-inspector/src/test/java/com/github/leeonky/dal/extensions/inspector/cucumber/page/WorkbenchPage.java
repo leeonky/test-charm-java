@@ -2,7 +2,7 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import static java.lang.String.format;
 
-public class TryPage {
+public class WorkbenchPage {
     private final Panel panel;
     private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
         @Override
@@ -11,7 +11,7 @@ public class TryPage {
         }
     };
 
-    public TryPage(Panel panel) {
+    public WorkbenchPage(Panel panel) {
         this.panel = panel;
     }
 
