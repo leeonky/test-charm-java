@@ -13,6 +13,7 @@ public class InputField implements StringSetter {
     }
 
     public String value() {
-        return panel.attribute("value");
+//        TODO refactor
+        return panel.byXpath("self::textarea | self::input | .//textarea | .//input").attribute("value");
     }
 }

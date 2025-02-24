@@ -11,7 +11,10 @@ Feature: exchange
       Then you should see:
         """
         ::eventually : {
-          instances: [Ins1 Ins2]
+//        TODO refactor
+          Monitors=  | value |
+               Ins1: | on   |
+               Ins2: | on   |
         }
         """
 
@@ -22,7 +25,9 @@ Feature: exchange
       Then you should see:
         """
         ::eventually : {
-          instances: [Ins1 Ins2]
+          Monitors=  | value |
+               Ins1: | on   |
+               Ins2: | on   |
         }
         """
 
@@ -39,7 +44,9 @@ Feature: exchange
       Then you should see:
         """
         ::eventually : {
-          instances: [Ins1 Ins2]
+          Monitors=  | value |
+               Ins1: | on   |
+               Ins2: | on   |
         }
         """
 
@@ -49,7 +56,9 @@ Feature: exchange
       Then you should see:
         """
         ::eventually : {
-          instances: [Ins1 Ins2]
+          Monitors=  | value |
+               Ins1: | on   |
+               Ins2: | on   |
         }
         """
 
@@ -60,7 +69,7 @@ Feature: exchange
       And created DAL 'Ins1' with inspector extended
       And you should see:
       """
-      ::eventually : { instances: [Ins1] }
+      ::eventually : { Monitors[Ins1].value: on }
       """
 
     Scenario: inspect will suspend, web page will catch the code and result

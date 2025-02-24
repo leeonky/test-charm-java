@@ -1,7 +1,10 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.lang.String.format;
 
 public class MainPage {
@@ -17,8 +20,13 @@ public class MainPage {
         return panel.byCss(".main-title");
     }
 
-    public List<Panel> instances() {
-        return panel.allByCss(".instance-monitors .switch");
+//    public List<Panel> instances() {
+//        return panel.allByCss(".instance-monitors .switch");
+//    }
+
+    public Map<String, InputField> Monitors() {
+        return panel.allByCss(".instance-monitors .switch").stream().collect(Collectors.toMap(
+                Panel::text, InputField::new, notAllowParallelReduce(), LinkedHashMap::new));
     }
 
     public WorkbenchPage WorkBench(String name) {

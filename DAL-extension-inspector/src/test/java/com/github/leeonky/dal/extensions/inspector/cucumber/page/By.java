@@ -17,7 +17,7 @@ public class By {
         return value;
     }
 
-    public static final String XPATH = "xpath", CSS = "css";
+    public static final String XPATH = "xpath", CSS = "css", TAG = "tag";
 
     @Override
     public String toString() {

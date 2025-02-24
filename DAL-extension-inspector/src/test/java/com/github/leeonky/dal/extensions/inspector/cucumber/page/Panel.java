@@ -40,6 +40,14 @@ public class Panel {
         return byXpath(String.format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text));
     }
 
+    public Panel byTag(String tag) {
+        return by(new By(By.TAG, tag));
+    }
+
+    public List<Panel> allByTag(String tag) {
+        return allBy(new By(By.TAG, tag));
+    }
+
     public String attribute(String name) {
         return element.getAttribute(name);
     }
