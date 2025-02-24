@@ -4,6 +4,8 @@ import static java.lang.String.format;
 
 public class WorkbenchPage {
     private final Panel panel;
+
+    //TODO tab control PageContainer
     private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
         @Override
         public OutputPage getCurrent() {
@@ -15,17 +17,14 @@ public class WorkbenchPage {
         this.panel = panel;
     }
 
-    public StringSetter DAL() {
-        return value -> Editor().fillIn(value);
+    public InputField DAL() {
+        return new InputField(panel.byPlaceholder("DAL expression"));
     }
 
-    public Panel Editor() {
-        return panel.byPlaceholder("DAL expression");
-    }
-
-    public StringSetter appendDAL() {
-        return value -> Editor().typeIn(value);
-    }
+//    public Map<String, InputField> Execute() {
+//        return panel.allByXpath("//*[@placeholder]").stream().collect(Collectors.toMap(
+//                p -> p.attribute("placeholder"), InputField::new, notAllowParallelReduce(), LinkedHashMap::new));
+//    }
 
     public OutputPage Root() {
         return switchTo("Root");

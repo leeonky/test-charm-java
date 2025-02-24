@@ -79,9 +79,10 @@ Feature: exchange
         """
         WorkBench[Ins1]: {
           ::eventually: {
-            Editor: ```
-                    {}
-                    ```
+            DAL.value: ```
+                       {}
+                       ```
+
             Current: { type: Result }
                    : ```
                      java.lang.String

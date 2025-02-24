@@ -28,12 +28,20 @@ public class Panel {
         return by(new By(By.XPATH, xpath));
     }
 
+    public List<Panel> allByXpath(String xpath) {
+        return allBy(new By(By.XPATH, xpath));
+    }
+
     public Panel byPlaceholder(String dalExpression) {
         return byXpath(String.format(".//*[@placeholder='%s']", dalExpression));
     }
 
     public Panel byText(String text) {
         return byXpath(String.format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text));
+    }
+
+    public String attribute(String name) {
+        return element.getAttribute(name);
     }
 
     public List<Panel> allByCss(String css) {

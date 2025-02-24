@@ -37,4 +37,8 @@ public class SeleniumWebElement {
         return element.findElements(driver.getBy(by)).stream()
                 .map(element -> new SeleniumWebElement(driver, element)).collect(toList());
     }
+
+    public String getAttribute(String name) {
+        return element.getAttribute(name);
+    }
 }

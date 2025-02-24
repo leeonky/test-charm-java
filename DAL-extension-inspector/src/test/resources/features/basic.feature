@@ -49,7 +49,7 @@ Feature: basic
         """
       When you:
         """
-        WorkBench[Try It!].appendDAL: '= world'
+        WorkBench[Try It!].DAL: '= world'
         """
       Then you should see:
         """
