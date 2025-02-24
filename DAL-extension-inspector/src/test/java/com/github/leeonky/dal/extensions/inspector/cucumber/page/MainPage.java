@@ -20,10 +20,6 @@ public class MainPage {
         return panel.byCss(".main-title");
     }
 
-//    public List<Panel> instances() {
-//        return panel.allByCss(".instance-monitors .switch");
-//    }
-
     public Map<String, InputField> Monitors() {
         return panel.allByCss(".instance-monitors .switch").stream().collect(Collectors.toMap(
                 Panel::text, InputField::new, notAllowParallelReduce(), LinkedHashMap::new));

@@ -16,11 +16,11 @@ html(lang="en")
         .flex.align-center.gap-10
           span Remote:
           .instance-monitors
-            template(x-for="(active, name) in dalInstanceNames" :key='name')
+            template(x-for="item in dalInstanceNames" :key='item.name')
               label.switch
-                input(type="checkbox" hidden=true x-model="active")
+                input(type="checkbox" hidden=true x-model="item.active" @change="exchange")
                 span.custom-checkbox
-                span(x-text="name")
+                span(x-text="item.name")
 
     .work-benches
       .tab(x-data='tab()' x-init='switchTab("Try It!")')

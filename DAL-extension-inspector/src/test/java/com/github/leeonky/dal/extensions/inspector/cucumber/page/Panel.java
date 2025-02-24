@@ -7,7 +7,7 @@ import static com.github.leeonky.util.function.Extension.not;
 import static org.awaitility.Awaitility.await;
 
 public class Panel {
-    private final SeleniumWebElement element;
+    public final SeleniumWebElement element;
 
     public Panel(SeleniumWebElement element) {
         this.element = element;

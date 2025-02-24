@@ -29,7 +29,9 @@ public class Inspector {
     private final Javalin javalin;
     private final CountDownLatch serverReadyLatch;
     private final Set<DAL> instances = new LinkedHashSet<>();
+    //   TODO refactor
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> clientMonitors = new ConcurrentHashMap<>();
     private final Map<String, DalInstance> dalInstances = new ConcurrentHashMap<>();
     private static Supplier<Object> defaultInput = () -> null;
 
@@ -69,6 +71,7 @@ public class Inspector {
         requireNonNull(javalin.jettyServer()).setServerPort(10081);
         javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
         javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.queryParam("name"), ctx.body())));
+        javalin.post("/api/exchange", ctx -> exchange(ctx.queryParam("session"), ctx.body()));
         javalin.get("/api/request", ctx -> ctx.html(request(ctx.queryParam("name"))));
         javalin.ws("/ws/exchange", ws -> {
             ws.onConnect(ctx -> {
@@ -79,6 +82,12 @@ public class Inspector {
         });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
+    }
+
+    private void exchange(String session, String body) {
+        if (clientConnections.containsKey(session)) {
+            clientMonitors.put(session, Arrays.stream(body.trim().split("\\n")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toSet()));
+        }
     }
 
     public static class DalInstance {
@@ -114,15 +123,22 @@ public class Inspector {
 //        check mode
         DalInstance dalInstance = new DalInstance(() -> input, dal, code);
         dalInstances.put(dal.getName(), dalInstance);
-        for (WsContext wsContext : clientConnections.values()) {
-            wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
-                put("request", dal.getName());
-            }}));
-        }
+
+//        TODO refactor
+        List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
+                .map(o -> clientConnections.get(o.getKey()))
+                .collect(Collectors.toList());
+        if (!monitored.isEmpty()) {
+            for (WsContext wsContext : monitored) {
+                wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
+                    put("request", dal.getName());
+                }}));
+            }
 
 //        TODO use sempahore to wait for the result
-        while (dalInstance.running)
-            Suppressor.run(() -> Thread.sleep(20));
+            while (dalInstance.running)
+                Suppressor.run(() -> Thread.sleep(20));
+        }
     }
 
     public static void inspect(DAL dal, Object input, String code) {
@@ -130,6 +146,7 @@ public class Inspector {
     }
 
     private String request(String name) {
+//       TODO reject other request
         return dalInstances.get(name).code;
     }
 
@@ -149,8 +166,9 @@ public class Inspector {
     }
 
     private void sendInstances(WsContext ctx) {
-        ctx.send(ObjectWriter.serialize(new HashMap<String, Iterable<String>>() {{
+        ctx.send(ObjectWriter.serialize(new HashMap<String, Object>() {{
             put("instances", instances.stream().map(DAL::getName).collect(Collectors.toSet()));
+            put("session", ctx.getSessionId());
         }}));
     }
 

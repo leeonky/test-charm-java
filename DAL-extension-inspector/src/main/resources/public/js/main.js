@@ -69,17 +69,26 @@ const dalInstance = (name) => {
 
 const appData = () => {
     return {
-        dalInstanceNames: {},
+        session: '',
+        dalInstanceNames: [],
         dalInstances: [dalInstance('Try It!')],
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
-        async exchange(message) {
-            if (message.instances)
-                message.instances.forEach(e => this.dalInstanceNames[e] = true)
-            if (message.request) {
-                // TODO check switch
-                await this.request(message.request)
+        async handleExchange(message) {
+            if (message.instances) {
+//            TODO refactor
+                message.instances.filter(e => !this.dalInstanceNames.find(i => i.name === e))
+                  .forEach(e => this.dalInstanceNames.push({name: e, active: true}))
+                await this.exchange()
             }
+            if (message.request) {
+//            TODO refactor
+                const dalInstanceName = this.dalInstanceNames.find(e => e.name === message.request)
+                if(dalInstanceName && dalInstanceName.active)
+                    await this.request(message.request)
+            }
+            if(message.session)
+                this.session = message.session
         },
         async updateResult(result) {
             const response = await fetch('/api/execute?name=' + result.name, {
@@ -108,8 +117,16 @@ const appData = () => {
             })
             return xmlToJson(await response.text())
         },
+        async exchange() {
+            console.log(this.dalInstanceNames)
+            if(this.session)
+              return await fetch('/api/exchange?session=' + this.session, {
+                  method: 'POST',
+                  body: this.dalInstanceNames.filter(e => e.active).map(e => e.name).join('\n')
+              })
+        },
         init() {
-            this.exchangeSession = new WSSession('/ws/exchange', this.exchange.bind(this))
+            this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this))
         }
     }
 };

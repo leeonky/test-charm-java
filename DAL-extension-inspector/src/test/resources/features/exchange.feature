@@ -110,20 +110,27 @@ Feature: exchange
        }
        """
 
-#    Scenario: inspect will not suspend, when skip inspect on web page
-#      When you:
-#        """
-#        skip: [Ins1]
-#        """
-#      And use DAL 'Ins1' to evaluating the following:
-#        """
-#        message::inspect
-#        """
-#      Then DAL 'Ins1' test finished with the following result
-#        """
-#        java.lang.String
-#        <hello>
-#        """
+    Scenario: inspect will not suspend, when skip inspect on web page
+      Given the 'Ins1' following input:
+        """
+        {
+          "message": "hello"
+        }
+        """
+      When you:
+        """
+        Monitors[Ins1]: false
+        """
+      And use DAL 'Ins1' to evaluating the following:
+        """
+        message::inspect
+        """
+      Then DAL 'Ins1' test finished with the following result
+        """
+        = ```
+          hello
+          ```
+        """
 
 # muli DAL with same name
 # release

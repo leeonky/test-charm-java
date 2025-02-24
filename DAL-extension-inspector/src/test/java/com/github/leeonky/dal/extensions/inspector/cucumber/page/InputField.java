@@ -9,7 +9,11 @@ public class InputField implements StringSetter {
 
     @Override
     public void assign(String value) {
-        panel.typeIn(value);
+        if (panel.element.element.getAttribute("class").contains("switch")) {
+            if (!value.equals(value()))
+                panel.click();
+        } else
+            panel.byXpath("self::textarea | self::input | .//textarea | .//input").typeIn(value);
     }
 
     public String value() {
