@@ -217,7 +217,60 @@ Feature: exchange
         | AUTO   |
         | FORCED |
 
+  Rule: release suspend test
+    Background: Given FORCED mode DAL Ins1
+      When launch inspector web server
+      And launch inspector web page
+      And created DAL 'Ins1' with inspector extended
+      Given Inspector in "FORCED" mode
+      And you should see:
+      """
+      ::eventually : { Monitors[Ins1].value: on }
+      """
+      Given the 'Ins1' following input:
+        """
+        {
+          "message": "hello"
+        }
+        """
+
+    Scenario: release ::inspect from current workbench and test got result
+      Given use DAL 'Ins1' to evaluating the following:
+        """
+        message::inspect
+        """
+      When you:
+        """
+        Release[Ins1]
+        """
+      Then DAL 'Ins1' test finished with the following result
+        """
+        = ```
+          hello
+          ```
+        """
+
+    Scenario: release failed test from current workbench and test got result
+      Given use DAL 'Ins1' to evaluating the following:
+        """
+        message= world
+        """
+      When you:
+        """
+        Release[Ins1]
+        """
+      Then DAL 'Ins1' test finished with the following result
+        """
+        message= ```
+                 Expected to be equal to: java.lang.String
+                 <world>
+                  ^
+                 Actual: java.lang.String
+                 <hello>
+                  ^
+                 ```
+        """
+
+
 # muli DAL with same name
-# release
-# auto release by button
 # auto release by uncheck

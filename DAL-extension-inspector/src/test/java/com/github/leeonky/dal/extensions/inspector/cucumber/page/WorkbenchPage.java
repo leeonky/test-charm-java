@@ -26,11 +26,6 @@ public class WorkbenchPage {
         return new InputField(panel.byPlaceholder("DAL expression"));
     }
 
-//    public Map<String, InputField> Execute() {
-//        return panel.allByXpath("//*[@placeholder]").stream().collect(Collectors.toMap(
-//                p -> p.attribute("placeholder"), InputField::new, notAllowParallelReduce(), LinkedHashMap::new));
-//    }
-
     public OutputPage Root() {
         return switchTo("Root");
     }
@@ -68,5 +63,9 @@ public class WorkbenchPage {
                 return current.isType(type);
             }
         });
+    }
+
+    public void Release() {
+        panel.byCss(".release").click();
     }
 }

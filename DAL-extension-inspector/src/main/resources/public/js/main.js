@@ -106,7 +106,7 @@ const appData = () => {
             if(code && code !== '') {
                 let newDalInstance = dalInstance(dalName);
                 newDalInstance.code = code
-                this.dalInstances.push(newDalInstance)
+                this.dalInstances.splice(this.dalInstances.length - 1, 0, newDalInstance)
 //                TODO should use ref
                 this.$nextTick(() => Array.from(document.querySelectorAll('.code-editor'))
                         .filter(editor => editor.getAttribute('name') === dalName)
@@ -130,6 +130,9 @@ const appData = () => {
                   method: 'POST',
                   body: this.dalInstanceNames.filter(e => e.active).map(e => e.name).join('\n')
               })
+        },
+        async release(dalName) {
+            const response = await fetch('/api/release?name=' + dalName, { method: 'POST' })
         },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this))

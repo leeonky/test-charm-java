@@ -48,4 +48,8 @@ public class MainPage {
             }
         });
     }
+
+    public void Release(String workbenchName) {
+        WorkBench(workbenchName).Release();
+    }
 }

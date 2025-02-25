@@ -12,10 +12,10 @@ html(lang="en")
       div
         h1.main-title.text-deep DAL inspector
         p.font-large inspect / debug DAL expression
-      .flex.align-center.gap-20.controls.text-dark
+      .flex.align-center.gap-20.text-dark.margin-bottom.margin-right
         .flex.align-center.gap-10
           span Remote:
-          .instance-monitors
+          .flex.align-center.gap-10.instance-monitors
             template(x-for="item in dalInstanceNames" :key='item.name')
               label.switch
                 input(type="checkbox" hidden=true x-model="item.active" @change="exchange")
@@ -26,14 +26,16 @@ html(lang="en")
       .tab(x-data='tab()' x-init='switchTab("Try It!")' x-effect='switchTab(activeInstance)')
         .tab-headers.work-bench-headers
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
-            .tab-header(:target='dalIns.name' x-text='dalIns.name')
+            .tab-header.work-bench-header(:target='dalIns.name' x-text='dalIns.name')
         .tab-contents.work-bench-contents
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-content(:target='dalIns.name')
               textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression' :name='dalIns.name'
-                @code-update='updateResult(dalIns)' x-model='dalIns.code')
-              .tab(x-data='tab()' x-effect='switchTab(dalIns.active)')
+                @code-update='updateResult(dalIns)' x-model='dalIns.code' :class='`code-editor-${dalIns.active}`')
+              .tab.code-results(x-data='tab()' x-effect='switchTab(dalIns.active)')
                 .tab-headers
+                  .controls
+                    button.btn-sm.release(@click='release(dalIns.name)')
                   template(x-for="outputTab in outputTabs" :key='outputTab')
                     .tab-header(:target='outputTab' x-text='outputTab.charAt(0).toUpperCase() + outputTab.slice(1);')
                 .tab-contents

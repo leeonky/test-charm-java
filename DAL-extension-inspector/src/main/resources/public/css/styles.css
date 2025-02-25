@@ -36,6 +36,14 @@ body {
     align-items: flex-end;
 }
 
+.margin-bottom {
+  margin-bottom: 10px;
+}
+
+.margin-right {
+  margin-right: 10px;
+}
+
 .font-normal {
     font-size: 14px;
 }
@@ -89,6 +97,7 @@ body {
     transform: rotate(45deg);
 }
 
+/*
 button {
     display: flex;
     align-items: center;
@@ -143,6 +152,7 @@ button.resume:disabled::after {
     width: 8px;
     height: 16px;
 }
+*/
 
 .code-editor {
     font-family: inherit !important;
@@ -155,6 +165,26 @@ button.resume:disabled::after {
     border-radius: 4px;
     resize: none;
     overflow-y: hidden;
+}
+
+.code-editor-editing {
+}
+
+.code-editor-result {
+    background-color: #f0fff0;
+}
+
+.code-editor-error {
+    background-color: #fff0f0;
+}
+
+.tab-content[target='error'] {
+    color: #8B0000;
+}
+
+.code-results {
+    border: 1px solid #d1d9e6;
+    border-radius: 4px;
 }
 
 /* ---------- tabs ------------*/
@@ -195,6 +225,58 @@ button.resume:disabled::after {
     display: block;
 }
 
+.controls {
+  padding-top: 4px;
+  padding-right: 30px;
+  padding-left: 10px;
+}
+
+/*----------- button ------------*/
+button:active {
+    transform: translateY(1px);
+}
+
+.btn-sm {
+    width: 25px;
+    height: 25px;
+}
+
+button.release {
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #4CAF50;
+    border-radius: 12%;
+}
+
+button.release:hover {
+    background-color: #2C9F20;
+}
+
+button.release::after {
+    content: '';
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='none' stroke='%23FFFFFF' stroke-width='2' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 3.5l6 4.5-6 4.5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    display: block;
+    width: 50%;
+    height: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+.work-bench-header[target='Try It!'] {
+    margin-left: auto;
+    margin-right: 0px;
+}
 
 /* ----------
 

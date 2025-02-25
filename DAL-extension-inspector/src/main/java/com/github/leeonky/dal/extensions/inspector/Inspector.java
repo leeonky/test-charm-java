@@ -73,6 +73,7 @@ public class Inspector {
         javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
         javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.queryParam("name"), ctx.body())));
         javalin.post("/api/exchange", ctx -> exchange(ctx.queryParam("session"), ctx.body()));
+        javalin.post("/api/release", ctx -> release(ctx.queryParam("name")));
         javalin.get("/api/request", ctx -> ctx.html(request(ctx.queryParam("name"))));
         javalin.ws("/ws/exchange", ws -> {
             ws.onConnect(ctx -> {
@@ -83,6 +84,12 @@ public class Inspector {
         });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
+    }
+
+    private void release(String name) {
+        DalInstance remove = dalInstances.remove(name);
+        if (remove != null)
+            remove.release();
     }
 
     public static void setDefaultMode(Mode mode) {
@@ -97,7 +104,7 @@ public class Inspector {
 
     public static class DalInstance {
         private final Supplier<Object> input;
-        private final boolean running = true;
+        private boolean running = true;
         private final DAL dal;
         private final String code;
 
@@ -125,6 +132,10 @@ public class Inspector {
             //        TODO use sempahore to wait for the result
             while (running)
                 Suppressor.run(() -> Thread.sleep(20));
+        }
+
+        public void release() {
+            running = false;
         }
     }
 
