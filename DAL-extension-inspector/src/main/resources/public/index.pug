@@ -43,6 +43,3 @@ html(lang="en")
                   template(x-for="outputTab in outputTabs" :key='outputTab')
                     .tab-content(:target='outputTab')
                       pre(x-text='dalIns.result[outputTab]')
-
-//-         .buttons
-//-           button.resume(id='resume') Resume
