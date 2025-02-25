@@ -74,6 +74,7 @@ public class Inspector {
         javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.queryParam("name"), ctx.body())));
         javalin.post("/api/exchange", ctx -> exchange(ctx.queryParam("session"), ctx.body()));
         javalin.post("/api/release", ctx -> release(ctx.queryParam("name")));
+        javalin.post("/api/release-all", ctx -> releaseAll());
         javalin.get("/api/request", ctx -> ctx.html(request(ctx.queryParam("name"))));
         javalin.ws("/ws/exchange", ws -> {
             ws.onConnect(ctx -> {
@@ -84,6 +85,11 @@ public class Inspector {
         });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
+    }
+
+    private void releaseAll() {
+        for (String instanceName : new ArrayList<>(dalInstances.keySet()))
+            release(instanceName);
     }
 
     private void release(String name) {

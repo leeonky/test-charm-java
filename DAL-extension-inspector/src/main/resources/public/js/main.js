@@ -123,8 +123,13 @@ const appData = () => {
             })
             return xmlToJson(await response.text())
         },
-        async exchange() {
-            console.log(this.dalInstanceNames)
+        async exchange(dalName) {
+//            TODO refactor
+            const dalInstanceName = this.dalInstanceNames.filter(e => e.name===dalName);
+            if(dalInstanceName) {
+                if(!dalInstanceName.active)
+                    this.release(dalName)
+            }
             if(this.session)
               return await fetch('/api/exchange?session=' + this.session, {
                   method: 'POST',
@@ -133,6 +138,9 @@ const appData = () => {
         },
         async release(dalName) {
             const response = await fetch('/api/release?name=' + dalName, { method: 'POST' })
+        },
+        async releaseAll() {
+            const response = await fetch('/api/release-all', { method: 'POST' })
         },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this))

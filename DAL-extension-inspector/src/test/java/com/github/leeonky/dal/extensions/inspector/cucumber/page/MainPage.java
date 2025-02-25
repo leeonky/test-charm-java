@@ -52,4 +52,8 @@ public class MainPage {
     public void Release(String workbenchName) {
         WorkBench(workbenchName).Release();
     }
+
+    public void ReleaseAll() {
+        panel.byCss(".release.release-all").click();
+    }
 }

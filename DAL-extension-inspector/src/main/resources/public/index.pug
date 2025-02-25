@@ -13,12 +13,13 @@ html(lang="en")
         h1.main-title.text-deep DAL inspector
         p.font-large inspect / debug DAL expression
       .flex.align-center.gap-20.text-dark.margin-bottom.margin-right
+        button.btn-sm-long.release.release-all(@click='releaseAll()')
         .flex.align-center.gap-10
           span Remote:
           .flex.align-center.gap-10.instance-monitors
             template(x-for="item in dalInstanceNames" :key='item.name')
               label.switch
-                input(type="checkbox" hidden=true x-model="item.active" @change="exchange")
+                input(type="checkbox" hidden=true x-model="item.active" @change="exchange(item.name)")
                 span.custom-checkbox
                 span(x-text="item.name")
 

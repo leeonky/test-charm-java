@@ -271,6 +271,42 @@ Feature: exchange
                  ```
         """
 
+    Scenario: release suspend from remote instance checkbox
+      Given use DAL 'Ins1' to evaluating the following:
+        """
+        message::inspect
+        """
+      When you:
+        """
+        Monitors[Ins1]: false
+        """
+      Then DAL 'Ins1' test finished with the following result
+        """
+        = ```
+          hello
+          ```
+        """
+
+    Scenario: release all suspend by release all
+      Given use DAL 'Ins1' to evaluating the following:
+        """
+        message= world
+        """
+      When you:
+        """
+        ReleaseAll
+        """
+      Then DAL 'Ins1' test finished with the following result
+        """
+        message= ```
+                 Expected to be equal to: java.lang.String
+                 <world>
+                  ^
+                 Actual: java.lang.String
+                 <hello>
+                  ^
+                 ```
+        """
 
 # muli DAL with same name
 # auto release by uncheck
