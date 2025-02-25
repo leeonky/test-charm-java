@@ -129,6 +129,8 @@ public class Inspector {
     }
 
     public void inspectInner(DAL dal, Object input, String code) {
+        if (isRecursive())
+            return;
 //        TODO  stack over flow
 //        lock inspect by name
 //        check mode
@@ -224,6 +226,13 @@ public class Inspector {
 
     public enum Mode {
         DISABLED, FORCED, AUTO
+    }
+
+    private boolean isRecursive() {
+        for (StackTraceElement stack : Thread.currentThread().getStackTrace())
+            if (DalInstance.class.getName().equals(stack.getClassName()))
+                return true;
+        return false;
     }
 
     public static void main(String[] args) {

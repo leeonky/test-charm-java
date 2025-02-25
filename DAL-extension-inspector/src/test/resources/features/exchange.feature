@@ -72,7 +72,7 @@ Feature: exchange
       ::eventually : { Monitors[Ins1].value: on }
       """
 
-    Scenario Outline: inspect will suspend, web page will catch the code and result in both AUTO and FORCE mode
+    Scenario Outline: ::inspect will suspend, web page will catch the code and result in both AUTO and FORCE mode
       Given Inspector in "<mode>" mode
       And the 'Ins1' following input:
         """
@@ -121,7 +121,7 @@ Feature: exchange
         | AUTO   |
         | FORCED |
 
-    Scenario: inspect will not suspend, when skip inspect on web page in AUTO mode
+    Scenario: ::inspect will not suspend, when skip inspect on web page in AUTO mode
       Given Inspector in "AUTO" mode
       Given the 'Ins1' following input:
         """
@@ -150,7 +150,7 @@ Feature: exchange
         }
         """
 
-    Scenario: inspect will still suspend, when skip inspect on web page in FORCED mode
+    Scenario: ::inspect will still suspend, when skip inspect on web page in FORCED mode
       Given Inspector in "FORCED" mode
       Given the 'Ins1' following input:
         """
@@ -167,6 +167,55 @@ Feature: exchange
         message::inspect
         """
       Then 'Ins1' test still run after 1s
+
+    Scenario Outline: failed test will suspend, web page will catch the code and result in both AUTO and FORCE mode
+      Given Inspector in "<mode>" mode
+      When use DAL 'Ins1' to evaluating the following:
+        """
+        1=2
+        """
+      Then 'Ins1' test still run after 1s
+      And you should see:
+        """
+        WorkBench.Current: {
+          name: 'Ins1'
+        }
+        """
+      And you should see:
+        """
+        WorkBench[Ins1]: {
+          ::eventually: {
+            DAL.value: ```
+                       1=2
+                       ```
+
+            Current: { type: Error }
+                   : ```
+                     1=2
+                       ^
+
+                     Expected to be equal to: java.lang.Integer
+                     <2>
+                      ^
+                     Actual: java.lang.Integer
+                     <1>
+                      ^
+                     ```
+          }
+
+          Root: ```
+                null
+                ```
+
+          Result: ''
+
+          Inspect: '1= 2'
+       }
+       """
+      Examples:
+        | mode   |
+        | AUTO   |
+        | FORCED |
 
 # muli DAL with same name
 # release

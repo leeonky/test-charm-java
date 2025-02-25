@@ -9,7 +9,7 @@ public class InspectorExtension implements Extension {
         Inspector.launch();
         Inspector.register(dal);
         dal.getRuntimeContextBuilder()
-//                .registerErrorHook((input, code, error) -> Inspector.inspect(dal, input, code))
+                .registerErrorHook((input, code, error) -> Inspector.inspect(dal, input, code))
                 .registerMetaProperty("inspect", metaData -> {
                     Object input = metaData.data().instance();
                     Inspector.inspect(dal, input, "{}");
