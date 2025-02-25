@@ -122,6 +122,7 @@ Feature: exchange
         | FORCED |
 
     Scenario: inspect will not suspend, when skip inspect on web page in AUTO mode
+      Given Inspector in "AUTO" mode
       Given the 'Ins1' following input:
         """
         {
@@ -150,6 +151,7 @@ Feature: exchange
         """
 
     Scenario: inspect will still suspend, when skip inspect on web page in FORCED mode
+      Given Inspector in "FORCED" mode
       Given the 'Ins1' following input:
         """
         {

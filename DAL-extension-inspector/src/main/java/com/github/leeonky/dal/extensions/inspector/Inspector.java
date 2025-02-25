@@ -107,7 +107,7 @@ public class Inspector {
             this.code = code;
         }
 
-        private String execute(String code) {
+        public String execute(String code) {
             Map<String, String> response = new HashMap<>();
             Object inputObject = input.get();
             RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(inputObject);
@@ -120,29 +120,49 @@ public class Inspector {
             }
             return ObjectWriter.serialize(response);
         }
+
+        public void hold() {
+            //        TODO use sempahore to wait for the result
+            while (running)
+                Suppressor.run(() -> Thread.sleep(20));
+        }
     }
 
     public void inspectInner(DAL dal, Object input, String code) {
 //        TODO  stack over flow
 //        lock inspect by name
 //        check mode
-        DalInstance dalInstance = new DalInstance(() -> input, dal, code);
-        dalInstances.put(dal.getName(), dalInstance);
+        if (currentMode() == Mode.FORCED) {
+            DalInstance dalInstance = new DalInstance(() -> input, dal, code);
+            dalInstances.put(dal.getName(), dalInstance);
 
-//        TODO refactor
-        List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
-                .map(o -> clientConnections.get(o.getKey()))
-                .collect(Collectors.toList());
-        if (!monitored.isEmpty()) {
+            List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
+                    .map(o -> clientConnections.get(o.getKey()))
+                    .collect(Collectors.toList());
             for (WsContext wsContext : monitored) {
                 wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
                     put("request", dal.getName());
                 }}));
             }
 
-//        TODO use sempahore to wait for the result
-            while (dalInstance.running)
-                Suppressor.run(() -> Thread.sleep(20));
+            dalInstance.hold();
+
+        } else {
+//        TODO refactor
+            List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
+                    .map(o -> clientConnections.get(o.getKey()))
+                    .collect(Collectors.toList());
+            if (!monitored.isEmpty()) {
+                DalInstance dalInstance = new DalInstance(() -> input, dal, code);
+                dalInstances.put(dal.getName(), dalInstance);
+                for (WsContext wsContext : monitored) {
+                    wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
+                        put("request", dal.getName());
+                    }}));
+                }
+
+                dalInstance.hold();
+            }
         }
     }
 
@@ -198,11 +218,15 @@ public class Inspector {
         defaultInput = supplier;
     }
 
-    public static void main(String[] args) {
-        launch();
+    public static Mode currentMode() {
+        return mode;
     }
 
     public enum Mode {
         DISABLED, FORCED, AUTO
+    }
+
+    public static void main(String[] args) {
+        launch();
     }
 }
