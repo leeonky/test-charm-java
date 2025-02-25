@@ -26,6 +26,7 @@ import static java.util.Objects.requireNonNull;
 
 public class Inspector {
     private static Inspector inspector = null;
+    private static Mode mode = Mode.DISABLED;
     private final Javalin javalin;
     private final CountDownLatch serverReadyLatch;
     private final Set<DAL> instances = new LinkedHashSet<>();
@@ -82,6 +83,10 @@ public class Inspector {
         });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
+    }
+
+    public static void setDefaultMode(Mode mode) {
+        Inspector.mode = mode;
     }
 
     private void exchange(String session, String body) {
@@ -195,5 +200,9 @@ public class Inspector {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    public enum Mode {
+        DISABLED, FORCED, AUTO
     }
 }

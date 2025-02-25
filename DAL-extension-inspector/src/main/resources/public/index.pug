@@ -23,11 +23,11 @@ html(lang="en")
                 span(x-text="item.name")
 
     .work-benches
-      .tab(x-data='tab()' x-init='switchTab("Try It!")')
+      .tab(x-data='tab()' x-init='switchTab("Try It!")' x-effect='switchTab(activeInstance)')
         .tab-headers.work-bench-headers
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-header(:target='dalIns.name' x-text='dalIns.name')
-        .tab-contents
+        .tab-contents.work-bench-contents
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-content(:target='dalIns.name')
               textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression' :name='dalIns.name'

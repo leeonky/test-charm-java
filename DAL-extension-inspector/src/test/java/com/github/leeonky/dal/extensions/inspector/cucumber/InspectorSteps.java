@@ -94,4 +94,9 @@ public class InspectorSteps {
     public void dalInsTestFinishedWithTheFollowingResult(String dalIns, String result) {
         expect(testContext.resultOf(dalIns)).use(dal).should(result);
     }
+
+    @Given("Inspector in {string} mode")
+    public void inspectorInAUTOMode(String mode) {
+        Inspector.setDefaultMode(Inspector.Mode.valueOf(mode));
+    }
 }

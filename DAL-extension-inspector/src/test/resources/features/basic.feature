@@ -11,6 +11,12 @@ Feature: basic
       """
       title: 'DAL inspector'
       """
+      And you should see:
+        """
+        WorkBench.Current: {
+          name: 'Try It!'
+        }
+        """
 
     Scenario: execute expression and get result or error
       When given default input value:

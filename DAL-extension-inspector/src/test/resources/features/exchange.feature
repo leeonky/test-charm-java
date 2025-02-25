@@ -72,7 +72,8 @@ Feature: exchange
       ::eventually : { Monitors[Ins1].value: on }
       """
 
-    Scenario: inspect will suspend, web page will catch the code and result
+    Scenario Outline: inspect will suspend, web page will catch the code and result in both AUTO and FORCE mode
+      Given Inspector in "<mode>" mode
       And the 'Ins1' following input:
         """
         {
@@ -84,6 +85,12 @@ Feature: exchange
         message::inspect
         """
       Then 'Ins1' test still run after 1s
+      And you should see:
+        """
+        WorkBench.Current: {
+          name: 'Ins1'
+        }
+        """
       And you should see:
         """
         WorkBench[Ins1]: {
@@ -109,8 +116,12 @@ Feature: exchange
           Inspect: '{}'
        }
        """
+      Examples:
+        | mode   |
+        | AUTO   |
+        | FORCED |
 
-    Scenario: inspect will not suspend, when skip inspect on web page
+    Scenario: inspect will not suspend, when skip inspect on web page in AUTO mode
       Given the 'Ins1' following input:
         """
         {
@@ -131,6 +142,29 @@ Feature: exchange
           hello
           ```
         """
+      And you should see:
+        """
+        WorkBench.Current: {
+          name: 'Try It!'
+        }
+        """
+
+    Scenario: inspect will still suspend, when skip inspect on web page in FORCED mode
+      Given the 'Ins1' following input:
+        """
+        {
+          "message": "hello"
+        }
+        """
+      When you:
+        """
+        Monitors[Ins1]: false
+        """
+      And use DAL 'Ins1' to evaluating the following:
+        """
+        message::inspect
+        """
+      Then 'Ins1' test still run after 1s
 
 # muli DAL with same name
 # release

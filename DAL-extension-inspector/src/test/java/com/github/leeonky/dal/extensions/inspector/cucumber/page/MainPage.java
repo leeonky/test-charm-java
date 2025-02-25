@@ -9,7 +9,14 @@ import static java.lang.String.format;
 
 public class MainPage {
     private final Panel panel;
-    private final PageContainer<WorkbenchPage> remotes = new PageContainer<>();
+
+    //TODO tab control PageContainer
+//            TODO support dynamic tabs
+    private final PageContainer<WorkbenchPage> remotes = new PageContainer<WorkbenchPage>() {
+        public WorkbenchPage getCurrent() {
+            return new WorkbenchPage(panel.byCss(".work-bench-contents > .tab-content.active"), panel.byCss(".work-bench-headers > .tab-header.active").text());
+        }
+    };
 
     public MainPage(SeleniumWebDriver driver) {
         driver.open("http://host.docker.internal:10081");
@@ -26,10 +33,13 @@ public class MainPage {
     }
 
     public WorkbenchPage WorkBench(String name) {
+        if ("Current".contains(name))
+            return remotes.getCurrent();
+
         return remotes.switchTo(new Target<WorkbenchPage>() {
             @Override
             public WorkbenchPage create() {
-                return new WorkbenchPage(panel.byCss(format(".tab-content[target='%s']", name)));
+                return new WorkbenchPage(panel.byCss(format(".tab-content[target='%s']", name)), name);
             }
 
             @Override

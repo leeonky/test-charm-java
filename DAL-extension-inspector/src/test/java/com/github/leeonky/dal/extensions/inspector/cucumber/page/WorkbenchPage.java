@@ -1,9 +1,13 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
+import lombok.Getter;
+
 import static java.lang.String.format;
 
 public class WorkbenchPage {
     private final Panel panel;
+    @Getter
+    private final String name;
 
     //TODO tab control PageContainer
     private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
@@ -13,8 +17,9 @@ public class WorkbenchPage {
         }
     };
 
-    public WorkbenchPage(Panel panel) {
+    public WorkbenchPage(Panel panel, String name) {
         this.panel = panel;
+        this.name = name;
     }
 
     public InputField DAL() {

@@ -72,6 +72,7 @@ const appData = () => {
         session: '',
         dalInstanceNames: [],
         dalInstances: [dalInstance('Try It!')],
+        activeInstance: null,
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
         async handleExchange(message) {
@@ -96,6 +97,7 @@ const appData = () => {
                 body: result.code
             })
             result.result = xmlToJson(await response.text())
+//            TODO use ref switchtab
             result.active = result.result.error ? 'error' : (result.result.result ? 'result' : 'root');
         },
         async request(dalName) {
@@ -105,9 +107,13 @@ const appData = () => {
                 let newDalInstance = dalInstance(dalName);
                 newDalInstance.code = code
                 this.dalInstances.push(newDalInstance)
+//                TODO should use ref
                 this.$nextTick(() => Array.from(document.querySelectorAll('.code-editor'))
                         .filter(editor => editor.getAttribute('name') === dalName)
-                        .forEach(editor => editor.dispatchEvent(new Event('code-update'))))
+                        .forEach(editor => {
+                            editor.dispatchEvent(new Event('code-update'))
+                            this.activeInstance = dalName
+                        }))
             }
         },
         async execute(dalName, code) {
@@ -127,6 +133,9 @@ const appData = () => {
         },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this))
+
+//            TODO use ref switchtab
+            this.$nextTick(() => this.activeInstance = 'Try It!')
         }
     }
 };
