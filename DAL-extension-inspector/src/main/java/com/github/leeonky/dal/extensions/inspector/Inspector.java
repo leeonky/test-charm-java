@@ -21,12 +21,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 
 public class Inspector {
     private static Inspector inspector = null;
-    private static Mode mode = Mode.DISABLED;
+    private static Mode mode = null;
     private final Javalin javalin;
     private final CountDownLatch serverReadyLatch;
     private final Set<DAL> instances = new LinkedHashSet<>();
@@ -135,9 +137,13 @@ public class Inspector {
         }
 
         public void hold() {
+//            TODO use logger
+            System.err.println("Waiting for inspector response");
             //        TODO use sempahore to wait for the result
             while (running)
                 Suppressor.run(() -> Thread.sleep(20));
+//            TODO use logger
+            System.err.println("inspector released");
         }
 
         public void release() {
@@ -148,7 +154,6 @@ public class Inspector {
     public void inspectInner(DAL dal, Object input, String code) {
         if (isRecursive())
             return;
-//        TODO  stack over flow
 //        lock inspect by name
 //        check mode
         if (currentMode() == Mode.FORCED) {
@@ -186,7 +191,8 @@ public class Inspector {
     }
 
     public static void inspect(DAL dal, Object input, String code) {
-        inspector.inspectInner(dal, input, code);
+        if (currentMode() != Mode.DISABLED)
+            inspector.inspectInner(dal, input, code);
     }
 
     private String request(String name) {
@@ -238,7 +244,10 @@ public class Inspector {
     }
 
     public static Mode currentMode() {
-        return mode;
+        return getFirstPresent(() -> ofNullable(mode),
+                () -> ofNullable(System.getenv("DAL_INSPECTOR_MODE")).map(Mode::valueOf),
+                () -> ofNullable(System.getProperty("dal.inspector.mode")).map(Mode::valueOf))
+                .orElse(Mode.DISABLED);
     }
 
     public enum Mode {
