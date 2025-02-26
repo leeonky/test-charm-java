@@ -27,7 +27,9 @@ html(lang="en")
       .tab(x-data='tab()' x-init='switchTab("Try It!")' x-effect='switchTab(activeInstance)')
         .tab-headers.work-bench-headers
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
-            .tab-header.work-bench-header(:target='dalIns.name' x-text='dalIns.name')
+            .tab-header.work-bench-header.flex.align-center(:target='dalIns.name')
+              .session-state.margin-right(:class='{"connected": dalIns.connected}' x-show='dalIns.name != "Try It!"')
+              span(x-text='dalIns.name')
         .tab-contents.work-bench-contents
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-content(:target='dalIns.name')

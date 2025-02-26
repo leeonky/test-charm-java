@@ -14,7 +14,7 @@ public class MainPage {
 //            TODO support dynamic tabs
     private final PageContainer<WorkbenchPage> remotes = new PageContainer<WorkbenchPage>() {
         public WorkbenchPage getCurrent() {
-            return new WorkbenchPage(panel.byCss(".work-bench-contents > .tab-content.active"), panel.byCss(".work-bench-headers > .tab-header.active").text());
+            return new WorkbenchPage(panel.byCss(".work-bench-contents > .tab-content.active"), panel.byCss(".work-bench-headers > .tab-header.active"));
         }
     };
 
@@ -39,7 +39,7 @@ public class MainPage {
         return remotes.switchTo(new Target<WorkbenchPage>() {
             @Override
             public WorkbenchPage create() {
-                return new WorkbenchPage(panel.byCss(format(".tab-content[target='%s']", name)), name);
+                return new WorkbenchPage(panel.byCss(format(".tab-content[target='%s']", name)), panel.byCss(format(".tab-header[target='%s']", name)));
             }
 
             @Override

@@ -7,19 +7,19 @@ import static java.lang.String.format;
 public class WorkbenchPage {
     private final Panel panel;
     @Getter
-    private final String name;
+    private final Panel header;
 
     //TODO tab control PageContainer
     private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
         @Override
         public OutputPage getCurrent() {
-            return new OutputPage(panel.byCss(".tab-content.active"), panel.byCss(".tab-header.active").text());
+            return new OutputPage(panel.byCss(".tab-content.active"), panel.byCss(".tab-header.active"));
         }
     };
 
-    public WorkbenchPage(Panel panel, String name) {
+    public WorkbenchPage(Panel panel, Panel header) {
         this.panel = panel;
-        this.name = name;
+        this.header = header;
     }
 
     public InputField DAL() {
@@ -50,7 +50,7 @@ public class WorkbenchPage {
         return outputs.switchTo(new Target<OutputPage>() {
             @Override
             public OutputPage create() {
-                return new OutputPage(panel.byCss(format(".tab-content[target='%s']", type.toLowerCase())), type);
+                return new OutputPage(panel.byCss(format(".tab-content[target='%s']", type.toLowerCase())), panel.byCss(format(".tab-header[target='%s']", type.toLowerCase())));
             }
 
             @Override
@@ -67,5 +67,9 @@ public class WorkbenchPage {
 
     public void Release() {
         panel.byCss(".release").click();
+    }
+
+    public boolean isConnected() {
+        return !header.allByCss(".session-state.connected").isEmpty();
     }
 }

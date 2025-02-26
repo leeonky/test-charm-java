@@ -87,8 +87,11 @@ Feature: exchange
       Then 'Ins1' test still run after 1s
       And you should see:
         """
-        WorkBench.Current: {
-          name: 'Ins1'
+        WorkBench::eventually: {
+          Current: {
+            header: 'Ins1'
+            connected: true
+          }
         }
         """
       And you should see:
@@ -99,7 +102,7 @@ Feature: exchange
                        {}
                        ```
 
-            Current: { type: Result }
+            Current: { header: Result }
                    : ```
                      java.lang.String
                      <hello>
@@ -145,9 +148,7 @@ Feature: exchange
         """
       And you should see:
         """
-        WorkBench.Current: {
-          name: 'Try It!'
-        }
+        WorkBench.Current.header: 'Try It!'
         """
 
     Scenario: ::inspect will still suspend, when skip inspect on web page in FORCED mode
@@ -177,9 +178,7 @@ Feature: exchange
       Then 'Ins1' test still run after 1s
       And you should see:
         """
-        WorkBench.Current: {
-          name: 'Ins1'
-        }
+        WorkBench.Current.header: Ins1
         """
       And you should see:
         """
@@ -189,7 +188,7 @@ Feature: exchange
                        1=2
                        ```
 
-            Current: { type: Error }
+            Current: { header: Error }
                    : ```
                      1=2
                        ^
@@ -315,9 +314,8 @@ Feature: exchange
         """
       And you:
         """
-        WorkBench.Current: {
-          name: 'Ins1'
-        }
+        WorkBench.Current.header: 'Ins1'
+
         ReleaseAll
         """
       When use DAL 'Ins1' to evaluating the following:
@@ -326,9 +324,7 @@ Feature: exchange
         """
       Then you should see:
         """
-        WorkBench.Current: {
-          name: 'Ins1'
-        }
+        WorkBench.Current.header: Ins1
         """
       And you should see:
         """
@@ -338,7 +334,7 @@ Feature: exchange
                        {}
                        ```
 
-            Current: { type: Result }
+            Current: { header: Result }
                    : ```
                      java.lang.String
                      <hello>

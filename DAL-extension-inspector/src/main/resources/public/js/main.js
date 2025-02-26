@@ -63,7 +63,8 @@ const dalInstance = (name, code) => {
         },
         active: 'root',
         code: code,
-        name: name
+        name: name,
+        connected: true
     }
 }
 

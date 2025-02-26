@@ -1,22 +1,26 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
+import lombok.Getter;
+
 import java.util.Objects;
 
 public class OutputPage {
     private final Panel panel;
-    private final String type;
 
-    public OutputPage(Panel panel, String type) {
+    @Getter
+    private final Panel header;
+
+    public OutputPage(Panel panel, Panel header) {
         this.panel = panel;
-        this.type = type;
+        this.header = header;
     }
 
     public boolean isType(String type) {
-        return Objects.equals(this.type, type);
+        return Objects.equals(getType(), type);
     }
 
-    public String getType() {
-        return type;
+    private String getType() {
+        return header.text();
     }
 
     @Override
