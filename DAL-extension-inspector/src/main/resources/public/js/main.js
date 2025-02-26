@@ -91,6 +91,8 @@ const appData = () => {
             }
             if(message.session)
                 this.session = message.session
+            if(message.running)
+                message.running.forEach(e => this.request(e))
         },
         async updateResult(dalInstance) {
             this.$el.classList.remove('result')

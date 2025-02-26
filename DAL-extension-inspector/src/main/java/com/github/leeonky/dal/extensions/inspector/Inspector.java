@@ -227,6 +227,7 @@ public class Inspector {
         ctx.send(ObjectWriter.serialize(new HashMap<String, Object>() {{
             put("instances", instances.stream().map(DAL::getName).collect(Collectors.toSet()));
             put("session", ctx.getSessionId());
+            put("running", dalInstances.entrySet().stream().filter(e -> e.getValue().running).map(Entry::getKey).collect(Collectors.toSet()));
         }}));
     }
 

@@ -31,7 +31,26 @@ Feature: exchange
         }
         """
 
-  Rule: inspect not active, launch opened and start web server
+    Scenario: attach exist suspended test when open new page
+      Given Inspector in "FORCED" mode
+      And created DAL 'Ins1' with inspector extended
+      And use DAL 'Ins1' to evaluating the following:
+        """
+        1=2
+        """
+      When launch inspector web page
+      Then you should see:
+        """
+        WorkBench::eventually: {
+          Current: {
+            header: 'Ins1'
+            connected: true
+            DAL.value: '1=2'
+          }
+        }
+        """
+
+  Rule: inspect not active, page opened and start web server
     Background:
       Given launch inspector web server
       And launch inspector web page
