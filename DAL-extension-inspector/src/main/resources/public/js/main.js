@@ -138,15 +138,15 @@ const appData = () => {
               })
         },
         async release(dalName) {
-            const response = await fetch('/api/release?name=' + dalName, { method: 'POST' })
+            fetch('/api/release?name=' + dalName, { method: 'POST' })
+            document.querySelectorAll('.session-state.connected[name=' + dalName + ']').forEach(e => e.classList.remove('connected'))
         },
         async releaseAll() {
-            const response = await fetch('/api/release-all', { method: 'POST' })
+            await fetch('/api/release-all', { method: 'POST' })
+            document.querySelectorAll('.session-state.connected').forEach(e => e.classList.remove('connected'))
         },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this))
-
-//            TODO use ref switchtab
             this.$nextTick(() => this.activeInstance = 'Try It!')
         }
     }

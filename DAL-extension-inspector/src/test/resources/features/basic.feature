@@ -13,9 +13,7 @@ Feature: basic
       """
       And you should see:
         """
-        WorkBench.Current: {
-          name: 'Try It!'
-        }
+        WorkBench.Current.header: 'Try It!'
         """
 
     Scenario: execute expression and get result or error
@@ -32,7 +30,7 @@ Feature: basic
       Then you should see:
         """
         WorkBench[Try It!]::eventually: {
-          Current: { type: Result }
+          Current: { header: Result }
                  : ```
                    java.lang.String
                    <hello>
@@ -60,7 +58,7 @@ Feature: basic
       Then you should see:
         """
         WorkBench[Try It!]::eventually: {
-          Current: { type: Error }
+          Current: { header: Error }
                  : ```
                    message= world
                             ^

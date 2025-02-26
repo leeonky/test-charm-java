@@ -248,6 +248,10 @@ Feature: exchange
           hello
           ```
         """
+      And you should see:
+        """
+        WorkBench.Current.connected: false
+        """
 
     Scenario: release failed test from current workbench and test got result
       Given use DAL 'Ins1' to evaluating the following:
@@ -306,6 +310,10 @@ Feature: exchange
                   ^
                  ```
         """
+      And you should see:
+        """
+        WorkBench.Current.connected: false
+        """
 
     Scenario: inspect same DAL twice should reuse workbench
       Given use DAL 'Ins1' to evaluating the following:
@@ -324,7 +332,10 @@ Feature: exchange
         """
       Then you should see:
         """
-        WorkBench.Current.header: Ins1
+        WorkBench.Current::eventually: {
+          header: Ins1
+          connected: true
+        }
         """
       And you should see:
         """

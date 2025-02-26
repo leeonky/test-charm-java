@@ -28,7 +28,7 @@ html(lang="en")
         .tab-headers.work-bench-headers
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-header.work-bench-header.flex.align-center(:target='dalIns.name')
-              .session-state.margin-right(:class='{"connected": dalIns.connected}' x-show='dalIns.name != "Try It!"')
+              .session-state.margin-right(:class='{"connected": dalIns.connected}' x-show='dalIns.name != "Try It!"' :name='dalIns.name')
               span(x-text='dalIns.name')
         .tab-contents.work-bench-contents
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
