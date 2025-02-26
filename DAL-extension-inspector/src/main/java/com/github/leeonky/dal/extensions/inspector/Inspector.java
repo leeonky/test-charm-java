@@ -66,12 +66,12 @@ public class Inspector {
         });
 
         JavalinRenderer.register((filePath, model, context) ->
-                pugConfiguration.renderTemplate(pugConfiguration.getTemplate("public/" + filePath), model), ".pug", ".PNG", ".Png");
+                pugConfiguration.renderTemplate(pugConfiguration.getTemplate("public" + filePath), model), ".pug", ".PNG", ".Png");
 
         serverReadyLatch = new CountDownLatch(1);
         javalin = Javalin.create(config -> config.addStaticFiles("/public", Location.CLASSPATH))
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
-        requireNonNull(javalin.jettyServer()).setServerPort(10081);
+        requireNonNull(javalin.jettyServer()).setServerPort(getServerPort());
         javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
         javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.queryParam("name"), ctx.body())));
         javalin.post("/api/exchange", ctx -> exchange(ctx.queryParam("session"), ctx.body()));
@@ -87,6 +87,14 @@ public class Inspector {
         });
         javalin.start();
         Suppressor.run(serverReadyLatch::await);
+    }
+
+    private static int getServerPort() {
+
+        return getFirstPresent(() -> ofNullable(System.getenv("DAL_INSPECTOR_PORT")),
+                () -> ofNullable(System.getProperty("dal.inspector.port")))
+                .map(Integer::parseInt)
+                .orElse(10082);
     }
 
     private void releaseAll() {

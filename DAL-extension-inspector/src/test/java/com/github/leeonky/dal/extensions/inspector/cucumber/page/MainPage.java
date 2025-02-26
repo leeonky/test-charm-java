@@ -19,7 +19,7 @@ public class MainPage {
     };
 
     public MainPage(SeleniumWebDriver driver) {
-        driver.open("http://host.docker.internal:10081");
+        driver.open("http://host.docker.internal:10082");
         panel = new Panel(driver.findAll(new By("css", "body")).get(0));
     }
 
