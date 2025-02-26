@@ -308,5 +308,53 @@ Feature: exchange
                  ```
         """
 
+    Scenario: inspect same DAL twice should reuse workbench
+      Given use DAL 'Ins1' to evaluating the following:
+        """
+        ::inspect
+        """
+      And you:
+        """
+        WorkBench.Current: {
+          name: 'Ins1'
+        }
+        ReleaseAll
+        """
+      When use DAL 'Ins1' to evaluating the following:
+        """
+        message::inspect
+        """
+      Then you should see:
+        """
+        WorkBench.Current: {
+          name: 'Ins1'
+        }
+        """
+      And you should see:
+        """
+        WorkBench[Ins1]: {
+          ::eventually: {
+            DAL.value: ```
+                       {}
+                       ```
+
+            Current: { type: Result }
+                   : ```
+                     java.lang.String
+                     <hello>
+                     ```
+          }
+
+          Root: ```
+                java.lang.String
+                <hello>
+                ```
+
+          Error: ''
+
+          Inspect: '{}'
+       }
+       """
+
+# show inspect state
 # muli DAL with same name
-# auto release by uncheck

@@ -53,7 +53,7 @@ class WSSession {
     }
 }
 
-const dalInstance = (name) => {
+const dalInstance = (name, code) => {
     return {
         result: {
             root: '',
@@ -62,7 +62,7 @@ const dalInstance = (name) => {
             inspect: ''
         },
         active: 'root',
-        code: '',
+        code: code,
         name: name
     }
 }
@@ -71,7 +71,7 @@ const appData = () => {
     return {
         session: '',
         dalInstanceNames: [],
-        dalInstances: [dalInstance('Try It!')],
+        dalInstances: [dalInstance('Try It!', '')],
         activeInstance: null,
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
@@ -104,8 +104,8 @@ const appData = () => {
             const response = await fetch('/api/request?name=' + dalName, { method: 'GET' })
             const code = await response.text()
             if(code && code !== '') {
-                let newDalInstance = dalInstance(dalName);
-                newDalInstance.code = code
+                let newDalInstance = dalInstance(dalName, code);
+                this.dalInstances = this.dalInstances.filter(e => e.name !== dalName)
                 this.dalInstances.splice(this.dalInstances.length - 1, 0, newDalInstance)
 //                TODO should use ref
                 this.$nextTick(() => Array.from(document.querySelectorAll('.code-editor'))
