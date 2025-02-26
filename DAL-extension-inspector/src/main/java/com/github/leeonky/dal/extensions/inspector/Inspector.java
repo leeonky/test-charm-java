@@ -115,6 +115,13 @@ public class Inspector {
     private void exchange(String session, String body) {
         if (clientConnections.containsKey(session)) {
             clientMonitors.put(session, Arrays.stream(body.trim().split("\\n")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toSet()));
+
+            for (DalInstance dalInstance : dalInstances.values()) {
+                if (dalInstance.running)
+                    clientConnections.get(session).send(ObjectWriter.serialize(new HashMap<String, String>() {{
+                        put("request", dalInstance.dal.getName());
+                    }}));
+            }
         }
     }
 
@@ -168,10 +175,11 @@ public class Inspector {
             DalInstance dalInstance = new DalInstance(() -> input, dal, code);
             dalInstances.put(dal.getName(), dalInstance);
 
-            List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
-                    .map(o -> clientConnections.get(o.getKey()))
-                    .collect(Collectors.toList());
-            for (WsContext wsContext : monitored) {
+//            List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
+//                    .map(o -> clientConnections.get(o.getKey()))
+//                    .collect(Collectors.toList());
+//            TODO check monitor flag
+            for (WsContext wsContext : clientConnections.values()) {
                 wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
                     put("request", dal.getName());
                 }}));
@@ -227,7 +235,6 @@ public class Inspector {
         ctx.send(ObjectWriter.serialize(new HashMap<String, Object>() {{
             put("instances", instances.stream().map(DAL::getName).collect(Collectors.toSet()));
             put("session", ctx.getSessionId());
-            put("running", dalInstances.entrySet().stream().filter(e -> e.getValue().running).map(Entry::getKey).collect(Collectors.toSet()));
         }}));
     }
 

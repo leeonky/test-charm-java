@@ -59,7 +59,6 @@ Feature: exchange
     Scenario: show all DAL instance name on page
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
-      When launch inspector web server
       Then you should see:
         """
         ::eventually : {
@@ -382,5 +381,53 @@ Feature: exchange
        }
        """
 
-# show inspect state
+  Rule: concurrent during server and open page
+    Background: Given FORCED mode DAL Ins1
+      Given Inspector in "FORCED" mode
+
+    Scenario: inspect then launch web page,
+      Given created DAL 'Ins1' with inspector extended
+      When use DAL 'Ins1' to evaluating the following:
+        """
+        ::inspect
+        """
+      And launch inspector web page
+      Then you should see:
+        """
+        WorkBench::eventually: {
+          Current: {
+            header: Ins1
+            connected: true
+
+            DAL.value: ```
+                       {}
+                       ```
+          }
+        }
+        """
+
+    Scenario: web page pre-opened; then inspect
+      Given launch inspector web server
+      And launch inspector web page
+      And shutdown web server
+      When created DAL 'Ins1' with inspector extended
+      And use DAL 'Ins1' to evaluating the following:
+        """
+        ::inspect
+        """
+      Then you should see:
+        """
+        WorkBench::eventually: {
+          Current: {
+            header: Ins1
+            connected: true
+
+            DAL.value: ```
+                       {}
+                       ```
+          }
+        }
+        """
+
+
 # muli DAL with same name

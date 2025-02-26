@@ -77,6 +77,8 @@ const appData = () => {
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
         async handleExchange(message) {
+            if(message.session)
+                this.session = message.session
             if (message.instances) {
 //            TODO refactor
                 message.instances.filter(e => !this.dalInstanceNames.find(i => i.name === e))
@@ -89,10 +91,6 @@ const appData = () => {
                 if(dalInstanceName && dalInstanceName.active)
                     await this.request(message.request)
             }
-            if(message.session)
-                this.session = message.session
-            if(message.running)
-                message.running.forEach(e => this.request(e))
         },
         async updateResult(dalInstance) {
             this.$el.classList.remove('result')
@@ -102,11 +100,13 @@ const appData = () => {
                 method: 'POST',
                 body: dalInstance.code
             })
-            this.$el.classList.remove('editing')
-            dalInstance.result = xmlToJson(await response.text())
-//            TODO use ref switchtab
-            dalInstance.active = dalInstance.result.error ? 'error' : (dalInstance.result.result ? 'result' : 'root');
-            this.$el.classList.add(dalInstance.active)
+            if(response.ok) {
+              this.$el.classList.remove('editing')
+              dalInstance.result = xmlToJson(await response.text())
+  //            TODO use ref switchtab
+              dalInstance.active = dalInstance.result.error ? 'error' : (dalInstance.result.result ? 'result' : 'root');
+              this.$el.classList.add(dalInstance.active)
+            }
         },
         async request(dalName) {
             const response = await fetch('/api/request?name=' + dalName, { method: 'GET' })
@@ -133,7 +133,7 @@ const appData = () => {
         },
         async exchange(dalName) {
 //            TODO refactor
-            const dalInstanceName = this.dalInstanceNames.filter(e => e.name===dalName);
+            const dalInstanceName = this.dalInstanceNames.find(e => e.name===dalName);
             if(dalInstanceName) {
                 if(!dalInstanceName.active)
                     this.release(dalName)
