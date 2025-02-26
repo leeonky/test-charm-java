@@ -34,7 +34,7 @@ html(lang="en")
           template(x-for="dalIns in dalInstances" :key='dalIns.name')
             .tab-content(:target='dalIns.name')
               textarea.code-editor(x-data='codeEditor()' placeholder='DAL expression' :name='dalIns.name'
-                @code-update='updateResult(dalIns)' x-model='dalIns.code' :class='`code-editor-${dalIns.active}`')
+                @code-update='updateResult(dalIns)' x-model='dalIns.code')
               .tab.code-results(x-data='tab()' x-effect='switchTab(dalIns.active)')
                 .tab-headers
                   .controls

@@ -31,7 +31,7 @@ public class DAL {
     private final String name;
 
     public DAL() {
-        this.name = String.valueOf(hashCode());
+        name = String.valueOf(hashCode());
     }
 
     public static synchronized DAL getInstance() {

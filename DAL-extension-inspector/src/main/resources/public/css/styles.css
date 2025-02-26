@@ -110,14 +110,15 @@ body {
     overflow-y: hidden;
 }
 
-.code-editor-editing {
+.code-editor.editing {
+    background-color: #ffffA0;
 }
 
-.code-editor-result {
+.code-editor.result {
     background-color: #f0fff0;
 }
 
-.code-editor-error {
+.code-editor.error {
     background-color: #fff0f0;
 }
 

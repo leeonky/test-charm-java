@@ -13,7 +13,7 @@ import static java.util.Optional.of;
 
 public class DALHelper {
     public DAL dal() {
-        DAL dal = new DAL().extend();
+        DAL dal = new DAL("JFactory").extend();
         overrideOptEqual(dal);
         overrideOptMatch(dal);
         implementPropertyAssignment(dal);

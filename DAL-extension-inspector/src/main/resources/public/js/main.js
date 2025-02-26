@@ -92,14 +92,19 @@ const appData = () => {
             if(message.session)
                 this.session = message.session
         },
-        async updateResult(result) {
-            const response = await fetch('/api/execute?name=' + result.name, {
+        async updateResult(dalInstance) {
+            this.$el.classList.remove('result')
+            this.$el.classList.remove('error')
+            this.$el.classList.add('editing')
+            const response = await fetch('/api/execute?name=' + dalInstance.name, {
                 method: 'POST',
-                body: result.code
+                body: dalInstance.code
             })
-            result.result = xmlToJson(await response.text())
+            this.$el.classList.remove('editing')
+            dalInstance.result = xmlToJson(await response.text())
 //            TODO use ref switchtab
-            result.active = result.result.error ? 'error' : (result.result.result ? 'result' : 'root');
+            dalInstance.active = dalInstance.result.error ? 'error' : (dalInstance.result.result ? 'result' : 'root');
+            this.$el.classList.add(dalInstance.active)
         },
         async request(dalName) {
             const response = await fetch('/api/request?name=' + dalName, { method: 'GET' })
