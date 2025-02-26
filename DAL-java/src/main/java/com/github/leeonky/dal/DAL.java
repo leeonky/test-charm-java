@@ -25,9 +25,7 @@ public class DAL {
     private final Compiler compiler = new Compiler();
     private final RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
     private static final ThreadLocal<DAL> instance = new ThreadLocal<>();
-    private static final ThreadLocal<Map<String, DAL>> instances = new ThreadLocal<Map<String, DAL>>() {{
-        set(new HashMap<>());
-    }};
+    private static final ThreadLocal<Map<String, DAL>> instances = new ThreadLocal<>();
     private final String name;
 
     public DAL() {
@@ -56,7 +54,12 @@ public class DAL {
     }
 
     public static synchronized DAL getInstance(String name) {
-        return instances.get().computeIfAbsent(name, DAL::create);
+        Map<String, DAL> dalMaps = instances.get();
+        if (dalMaps == null) {
+            dalMaps = new HashMap<>();
+            instances.set(dalMaps);
+        }
+        return dalMaps.computeIfAbsent(name, DAL::create);
     }
 
     public static DAL create(String name, Class<?>... exceptExtensions) {
