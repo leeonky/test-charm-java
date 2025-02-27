@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>DAL inspector</title>
+    <link rel="stylesheet" href="css/styles.css"/>
+    <script defer src="js/alpine-3.10.3.js"></script>
+    <script src="js/main.js"></script>
+</head>
+<body class="text-color background-color font-normal" x-data="appData">
+<div class="flex space-between align-bottom">
+    <div>
+        <h1 class="main-title text-deep">DAL inspector</h1>
+        <p class="font-large">inspect / debug DAL expression</p>
+    </div>
+    <div class="flex align-center gap-20 text-dark margin-bottom margin-right">
+        <button class="btn-sm-long release release-all" @click="releaseAll()"></button>
+        <div class="flex align-center gap-10">
+            <span>Remote:</span>
+            <div class="flex align-center gap-10 instance-monitors">
+                <template x-for="item in dalInstanceNames" :key="item.name">
+                    <label class="switch">
+                        <input type="checkbox" hidden x-model="item.active" @change="exchange(item.name)"/>
+                        <span class="custom-checkbox"></span>
+                        <span x-text="item.name"></span>
+                    </label>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="work-benches">
+    <div class="tab" x-data="tab()" x-init='switchTab("Try It!")' x-effect="switchTab(activeInstance)">
+        <div class="tab-headers work-bench-headers">
+            <template x-for="dalIns in dalInstances" :key="dalIns.name">
+                <div class="tab-header work-bench-header flex align-center" :target="dalIns.name">
+                    <div class="session-state margin-right" :class='{"connected": dalIns.connected}'
+                         x-show='dalIns.name != "Try It!"' :name="dalIns.name"></div>
+                    <span x-text="dalIns.name"></span>
+                </div>
+            </template>
+        </div>
+        <div class="tab-contents work-bench-contents">
+            <template x-for="dalIns in dalInstances" :key="dalIns.name">
+                <div class="tab-content" :target="dalIns.name">
+                    <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression" :name="dalIns.name"
+                              @code-update="updateResult(dalIns)" x-model="dalIns.code"
+                              :class='{"disconnected": dalIns.name != "Try It!" &amp;&amp; !dalIns.connected}'></textarea>
+                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.active)">
+                        <div class="tab-headers">
+                            <div class="controls">
+                                <button class="btn-sm release" @click="release(dalIns.name)"></button>
+                            </div>
+                            <template x-for="outputTab in outputTabs" :key="outputTab">
+                                <div class="tab-header" :target="outputTab"
+                                     x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>
+                            </template>
+                        </div>
+                        <div class="tab-contents">
+                            <template x-for="outputTab in outputTabs" :key="outputTab">
+                                <div class="tab-content" :target="outputTab">
+                                    <pre x-text="dalIns.result[outputTab]"></pre>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+</body>
+</html>

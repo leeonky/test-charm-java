@@ -4,17 +4,10 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.Suppressor;
-import de.neuland.pug4j.PugConfiguration;
-import de.neuland.pug4j.template.TemplateLoader;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
-import io.javalin.plugin.rendering.JavalinRenderer;
 import io.javalin.websocket.WsContext;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -22,7 +15,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
-import static java.lang.Thread.currentThread;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
@@ -42,38 +34,10 @@ public class Inspector {
         DalInstance defaultInstance = new DalInstance(() -> defaultInput.get(), DAL.create(InspectorExtension.class), "");
         defaultInstance.running = false;
         dalInstances.put("Try It!", defaultInstance);
-
-        PugConfiguration pugConfiguration = new PugConfiguration();
-        pugConfiguration.setTemplateLoader(new TemplateLoader() {
-            @Override
-            public long getLastModified(String name) throws IOException {
-                return -1;
-            }
-
-            @Override
-            public Reader getReader(String name) throws IOException {
-                return new InputStreamReader(requireNonNull(currentThread().getContextClassLoader().getResourceAsStream(name)),
-                        StandardCharsets.UTF_8);
-            }
-
-            @Override
-            public String getExtension() {
-                return "pug";
-            }
-
-            @Override
-            public String getBase() {
-                return "";
-            }
-        });
-
-        JavalinRenderer.register((filePath, model, context) ->
-                pugConfiguration.renderTemplate(pugConfiguration.getTemplate("public" + filePath), model), ".pug", ".PNG", ".Png");
-
         javalin = Javalin.create(config -> config.addStaticFiles("/public", Location.CLASSPATH))
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
         requireNonNull(javalin.jettyServer()).setServerPort(getServerPort());
-        javalin.get("/", ctx -> ctx.render("/index.pug", Collections.emptyMap()));
+        javalin.get("/", ctx -> ctx.redirect("/index.html"));
         javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.queryParam("name"), ctx.body())));
         javalin.post("/api/exchange", ctx -> exchange(ctx.queryParam("session"), ctx.body()));
         javalin.post("/api/release", ctx -> release(ctx.queryParam("name")));
