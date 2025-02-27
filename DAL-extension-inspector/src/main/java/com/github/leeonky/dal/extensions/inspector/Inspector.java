@@ -155,9 +155,9 @@ public class Inspector {
         }
     }
 
-    public void inspectInner(DAL dal, Object input, String code) {
+    public boolean inspectInner(DAL dal, Object input, String code) {
         if (isRecursive())
-            return;
+            return false;
 //        lock inspect by name
 //        check mode
         if (currentMode() == Mode.FORCED) {
@@ -193,11 +193,13 @@ public class Inspector {
                 dalInstance.hold();
             }
         }
+        return false;
     }
 
-    public static void inspect(DAL dal, Object input, String code) {
+    public static boolean inspect(DAL dal, Object input, String code) {
         if (currentMode() != Mode.DISABLED)
-            inspector.inspectInner(dal, input, code);
+            return inspector.inspectInner(dal, input, code);
+        return false;
     }
 
     private String request(String name) {

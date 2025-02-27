@@ -29,9 +29,10 @@ public class DALTest {
 
         dal.getRuntimeContextBuilder().registerErrorHook((i, code, e) -> {
             ((DALTest) i).isCalled = true;
-            assertThat(i).isSameAs(DALTest.this);
+            assertThat(i).isSameAs(this);
             assertEquals("Error", e.getMessage());
             assertEquals("throwError", code);
+            return false;
         });
 
         assertThrows(Throwable.class, () -> dal.evaluate(this, "throwError"));
@@ -45,13 +46,26 @@ public class DALTest {
 
         dal.getRuntimeContextBuilder().registerErrorHook((i, code, e) -> {
             ((DALTest) i).isCalled = true;
-            assertThat(i).isSameAs(DALTest.this);
+            assertThat(i).isSameAs(this);
             assertEquals("Error", e.getMessage());
             assertEquals("throwError", code);
+            return false;
         });
 
         assertThrows(Throwable.class, () -> dal.evaluateAll(this, "throwError"));
         assertThat(isCalled).isTrue();
+    }
+
+    @Test
+    void ignore_error_in_hander() {
+        DAL dal = new DAL();
+
+        dal.getRuntimeContextBuilder().registerErrorHook((i, code, e) -> {
+            return true;
+        });
+
+        assertThat((Object) dal.evaluate(this, "throwError")).isNull();
+        assertThat(dal.evaluateAll(this, "throwError")).isEmpty();
     }
 
     public void throwError() {

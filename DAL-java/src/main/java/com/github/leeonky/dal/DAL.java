@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.Classes.subTypesOf;
 import static com.github.leeonky.util.function.Extension.not;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Stream.concat;
 
 public class DAL {
@@ -85,8 +86,9 @@ public class DAL {
                     .map(node -> (T) node.evaluate(runtimeContext))
                     .collect(Collectors.toList());
         } catch (Throwable e) {
-            runtimeContext.hookError(expressions, e);
-            throw e;
+            if (!runtimeContext.hookError(expressions, e))
+                throw e;
+            return emptyList();
         }
     }
 
@@ -104,8 +106,9 @@ public class DAL {
         try {
             return (T) compileSingle(expression, runtimeContext).evaluate(runtimeContext);
         } catch (Throwable e) {
-            runtimeContext.hookError(expression, e);
-            throw e;
+            if (!runtimeContext.hookError(expression, e))
+                throw e;
+            return null;
         }
     }
 

@@ -61,8 +61,7 @@ public class RuntimeContextBuilder {
     //    private final
     private int maxDumpingLineSize = 2000;
     private int maxDumpingObjectSize = 255;
-    private ErrorHook errorHook = (i, code, e) -> {
-    };
+    private ErrorHook errorHook = (i, code, e) -> false;
     private final Map<Class<?>, Map<Object, Function<MetaData, Object>>> localMetaProperties
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
@@ -501,8 +500,8 @@ public class RuntimeContextBuilder {
             return maxDumpingObjectSize;
         }
 
-        public void hookError(String expression, Throwable error) {
-            errorHook.handle(getThis().instance(), expression, error);
+        public boolean hookError(String expression, Throwable error) {
+            return errorHook.handle(getThis().instance(), expression, error);
         }
 
         public Object invokeMetaProperty(MetaData metaData) {
