@@ -209,11 +209,16 @@ button:active {
     justify-content: center;
     overflow: hidden;
     border-radius: 12%;
+    background-color: #f3f4f6;
+}
+
+.control-button:hover {
+    background-color: #d1d9e6;
 }
 
 .control-button::after {
     content: '';
-    background-repeat: repeat;
+    background-repeat: no-repeat;
     background-position: left;
     display: block;
     width: 50%;
@@ -224,28 +229,16 @@ button:active {
     transform: translate(-50%, -50%);
 }
 
-button.run {
-    background-color: #4CAF50;
-}
-
-button.run:hover {
-    background-color: #2C9F20;
-}
-
 button.run::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='none' stroke='%23FFFFFF' stroke-width='2' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 3.5l6 4.5-6 4.5z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='%23FFA726' viewBox='0 0 24 24' stroke='%23FFA726' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M13 10V3L4 14h7v7l9-11h-7z' /%3E%3C/svg%3E");
 }
 
-button.release {
-    background-color: #DF4C4C;
-}
-
-button.release:hover {
-    background-color: #BF2C2C;
+button.pass::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='%234CAF50' stroke='%234CAF50' stroke-width='2' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 3.5l6 4.5-6 4.5z'/%3E%3C/svg%3E");
 }
 
 button.release::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='none' stroke='%23FFFFFF' stroke-width='2' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='%23DF4C4C' stroke='%23DF4C4C' stroke-width='2' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12'/%3E%3C/svg%3E");
 }
 
 .work-bench-header[target='Try It!'] {

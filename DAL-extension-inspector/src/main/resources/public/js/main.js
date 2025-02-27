@@ -146,6 +146,8 @@ const appData = () => {
                     body: this.dalInstanceNames.filter(e => e.active).map(e => e.name).join('\n')
                 })
         },
+        async pass(dalName) {
+        },
         async release(dalName) {
             fetch('/api/release?name=' + dalName, {method: 'POST'})
             this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance => dalInstance.connected = false)

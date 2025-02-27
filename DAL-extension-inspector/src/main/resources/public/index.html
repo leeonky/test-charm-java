@@ -54,8 +54,10 @@
                         <div class="tab-headers">
                             <div class="controls">
                                 <button class="control-button btn-sm run" @click="updateResult(dalIns)"></button>
-                                <button class="control-button btn-sm release" @click="release(dalIns.name)"
-                                        x-show='dalIns.name != "Try It!"'></button>
+                                <button class="control-button btn-sm release"
+                                        @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'></button>
+                                <button class="control-button btn-sm pass"
+                                        @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'></button>
                             </div>
                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                 <div class="tab-header" :target="outputTab"
