@@ -38,7 +38,7 @@ class WSSession {
             };
 
             this.socket.onclose = event => {
-                if(clearHandler)
+                if (clearHandler)
                     clearHandler()
 //                console.log("WebSocket closed")
                 setTimeout(() => {
@@ -79,18 +79,18 @@ const appData = () => {
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
         async handleExchange(message) {
-            if(message.session)
+            if (message.session)
                 this.session = message.session
             if (message.instances) {
 //            TODO refactor
                 message.instances.filter(e => !this.dalInstanceNames.find(i => i.name === e))
-                  .forEach(e => this.dalInstanceNames.push({name: e, active: true}))
+                    .forEach(e => this.dalInstanceNames.push({name: e, active: true}))
                 await this.exchange()
             }
             if (message.request) {
 //            TODO refactor
                 const dalInstanceName = this.dalInstanceNames.find(e => e.name === message.request)
-                if(dalInstanceName && dalInstanceName.active)
+                if (dalInstanceName && dalInstanceName.active)
                     await this.request(message.request)
             }
         },
@@ -102,28 +102,28 @@ const appData = () => {
                 method: 'POST',
                 body: dalInstance.code
             })
-            if(response.ok) {
-              this.$el.classList.remove('editing')
-              dalInstance.result = xmlToJson(await response.text())
-  //            TODO use ref switchtab
-              dalInstance.active = dalInstance.result.error ? 'error' : (dalInstance.result.result ? 'result' : 'root');
-              this.$el.classList.add(dalInstance.active)
+            if (response.ok) {
+                this.$el.classList.remove('editing')
+                dalInstance.result = xmlToJson(await response.text())
+                //            TODO use ref switchtab
+                dalInstance.active = dalInstance.result.error ? 'error' : (dalInstance.result.result ? 'result' : 'root');
+                this.$el.classList.add(dalInstance.active)
             }
         },
         async request(dalName) {
-            const response = await fetch('/api/request?name=' + dalName, { method: 'GET' })
+            const response = await fetch('/api/request?name=' + dalName, {method: 'GET'})
             const code = await response.text()
-            if(code && code !== '') {
+            if (code && code !== '') {
                 let newDalInstance = dalInstance(dalName, code);
                 this.dalInstances = this.dalInstances.filter(e => e.name !== dalName)
                 this.dalInstances.splice(this.dalInstances.length - 1, 0, newDalInstance)
 //                TODO should use ref
                 this.$nextTick(() => Array.from(document.querySelectorAll('.code-editor'))
-                        .filter(editor => editor.getAttribute('name') === dalName)
-                        .forEach(editor => {
-                            editor.dispatchEvent(new Event('code-update'))
-                            this.activeInstance = dalName
-                        }))
+                    .filter(editor => editor.getAttribute('name') === dalName)
+                    .forEach(editor => {
+                        editor.dispatchEvent(new Event('code-update'))
+                        this.activeInstance = dalName
+                    }))
             }
         },
         async execute(dalName, code) {
@@ -135,23 +135,23 @@ const appData = () => {
         },
         async exchange(dalName) {
 //            TODO refactor
-            const dalInstanceName = this.dalInstanceNames.find(e => e.name===dalName);
-            if(dalInstanceName) {
-                if(!dalInstanceName.active)
+            const dalInstanceName = this.dalInstanceNames.find(e => e.name === dalName);
+            if (dalInstanceName) {
+                if (!dalInstanceName.active)
                     this.release(dalName)
             }
-            if(this.session)
-              return await fetch('/api/exchange?session=' + this.session, {
-                  method: 'POST',
-                  body: this.dalInstanceNames.filter(e => e.active).map(e => e.name).join('\n')
-              })
+            if (this.session)
+                return await fetch('/api/exchange?session=' + this.session, {
+                    method: 'POST',
+                    body: this.dalInstanceNames.filter(e => e.active).map(e => e.name).join('\n')
+                })
         },
         async release(dalName) {
-            fetch('/api/release?name=' + dalName, { method: 'POST' })
-            this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance=> dalInstance.connected = false)
+            fetch('/api/release?name=' + dalName, {method: 'POST'})
+            this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance => dalInstance.connected = false)
         },
         async releaseAll() {
-            fetch('/api/release-all', { method: 'POST' })
+            fetch('/api/release-all', {method: 'POST'})
             this.clearStates();
         },
         init() {
@@ -159,7 +159,7 @@ const appData = () => {
             this.$nextTick(() => this.activeInstance = 'Try It!')
         },
         clearStates() {
-            this.dalInstances.forEach(dalInstance=> dalInstance.connected = false)
+            this.dalInstances.forEach(dalInstance => dalInstance.connected = false)
         }
     }
 };
@@ -172,18 +172,18 @@ const tab = () => {
 
         init() {
             const observer = new MutationObserver((mutations) => mutations.forEach((mutation) =>
-                  mutation.addedNodes.forEach(node => {
+                mutation.addedNodes.forEach(node => {
 //            TODO refactor
-                      if (node.classList.contains('tab-header'))
-                          node.addEventListener('click', () => this.switchTab(node.getAttribute('target')));
-                  })));
+                    if (node.classList.contains('tab-header'))
+                        node.addEventListener('click', () => this.switchTab(node.getAttribute('target')));
+                })));
 
             observer.observe(this.nodeContainer('.tab-headers'), {childList: true});
 
 //            TODO refactor
             Array.from(this.nodeContainer('.tab-headers').children).forEach(header => {
                 if (header.classList.contains('tab-header'))
-                  header.addEventListener('click', () => this.switchTab(header.getAttribute('target')))
+                    header.addEventListener('click', () => this.switchTab(header.getAttribute('target')))
             });
         },
 
@@ -198,16 +198,23 @@ const tab = () => {
 
 const codeEditor = () => {
     return {
+        adjustHeight() {
+            this.$el.style.height = 'auto'
+            if (this.$el.scrollHeight > this.$el.clientHeight)
+                this.$el.style.height = this.$el.scrollHeight + 'px'
+        },
+
         init() {
             let debounceTimer = null
             this.$el.addEventListener('input', () => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => this.$el.dispatchEvent(new CustomEvent('code-update')), 500);
-                this.$el.style.height = 'auto';
-                if (this.$el.scrollHeight > this.$el.clientHeight) {
-                    this.$el.style.height = this.$el.scrollHeight + 'px';
-                }
+                this.adjustHeight()
             })
+
+            const modelKey = this.$el.getAttribute('x-model');
+            if (modelKey)
+                this.$watch(modelKey, () => this.adjustHeight());
         }
     }
 }
