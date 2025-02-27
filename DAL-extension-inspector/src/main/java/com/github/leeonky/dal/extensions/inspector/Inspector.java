@@ -77,9 +77,11 @@ public class Inspector {
     }
 
     private void release(String name) {
-        DalInstance remove = dalInstances.remove(name);
-        if (remove != null)
-            remove.release();
+        if (!name.equals("Try It!")) {
+            DalInstance remove = dalInstances.remove(name);
+            if (remove != null)
+                remove.release();
+        }
     }
 
     public static void setDefaultMode(Mode mode) {

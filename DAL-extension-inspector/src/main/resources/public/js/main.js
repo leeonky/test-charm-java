@@ -173,14 +173,18 @@ const tab = () => {
         init() {
             const observer = new MutationObserver((mutations) => mutations.forEach((mutation) =>
                   mutation.addedNodes.forEach(node => {
+//            TODO refactor
                       if (node.classList.contains('tab-header'))
                           node.addEventListener('click', () => this.switchTab(node.getAttribute('target')));
                   })));
 
             observer.observe(this.nodeContainer('.tab-headers'), {childList: true});
 
-            Array.from(this.nodeContainer('.tab-headers').children).forEach(header =>
-                header.addEventListener('click', () => this.switchTab(header.getAttribute('target'))));
+//            TODO refactor
+            Array.from(this.nodeContainer('.tab-headers').children).forEach(header => {
+                if (header.classList.contains('tab-header'))
+                  header.addEventListener('click', () => this.switchTab(header.getAttribute('target')))
+            });
         },
 
         switchTab(tab) {

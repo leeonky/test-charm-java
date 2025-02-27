@@ -115,7 +115,7 @@ body {
 }
 
 .code-editor.disconnected {
-    background-color: #A0A0A0 !important;
+    background-color: #E0E0E0 !important;
     color: #666666 !important;
 }
 
@@ -195,7 +195,7 @@ button:active {
     height: 25px;
 }
 
-button.release {
+.control-button {
     border: none;
     padding: 10px;
     cursor: pointer;
@@ -204,17 +204,11 @@ button.release {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    background-color: #4CAF50;
     border-radius: 12%;
 }
 
-button.release:hover {
-    background-color: #2C9F20;
-}
-
-button.release::after {
+.control-button::after {
     content: '';
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='none' stroke='%23FFFFFF' stroke-width='2' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 3.5l6 4.5-6 4.5z'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-position: left;
     display: block;
@@ -224,6 +218,30 @@ button.release::after {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+}
+
+button.run {
+    background-color: #4CAF50;
+}
+
+button.run:hover {
+    background-color: #2C9F20;
+}
+
+button.run::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='none' stroke='%23FFFFFF' stroke-width='2' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 3.5l6 4.5-6 4.5z'/%3E%3C/svg%3E");
+}
+
+button.release {
+    background-color: #DF4C4C;
+}
+
+button.release:hover {
+    background-color: #BF2C2C;
+}
+
+button.release::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='none' stroke='%23FFFFFF' stroke-width='2' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12'/%3E%3C/svg%3E");
 }
 
 .work-bench-header[target='Try It!'] {

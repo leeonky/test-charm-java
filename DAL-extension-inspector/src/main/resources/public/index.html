@@ -15,7 +15,10 @@
         <p class="font-large">inspect / debug DAL expression</p>
     </div>
     <div class="flex align-center gap-20 text-dark margin-bottom margin-right">
-        <button class="btn-sm-long release release-all" @click="releaseAll()"></button>
+        <div class="flex align-center gap-10">
+            <span>Stop all</span>
+            <button class="control-button btn-sm release release-all" @click="releaseAll()"></button>
+        </div>
         <div class="flex align-center gap-10">
             <span>Remote:</span>
             <div class="flex align-center gap-10 instance-monitors">
@@ -50,7 +53,9 @@
                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.active)">
                         <div class="tab-headers">
                             <div class="controls">
-                                <button class="btn-sm release" @click="release(dalIns.name)"></button>
+                                <button class="control-button btn-sm run" @click="updateResult(dalIns)"></button>
+                                <button class="control-button btn-sm release" @click="release(dalIns.name)"
+                                        x-show='dalIns.name != "Try It!"'></button>
                             </div>
                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                 <div class="tab-header" :target="outputTab"
