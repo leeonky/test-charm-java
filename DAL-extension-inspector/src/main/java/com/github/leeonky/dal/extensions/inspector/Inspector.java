@@ -8,6 +8,8 @@ import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.websocket.WsContext;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -124,13 +126,26 @@ public class Inspector {
         }
 
         public void hold() {
-//            TODO use logger
-            System.err.println("Waiting for inspector response");
+            System.err.println("Waiting for DAL inspector release...");
+            try {
+                Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+
+                System.err.println("\tDal inspector running at:");
+
+                while (interfaces.hasMoreElements()) {
+                    Enumeration<InetAddress> inetAddresses = interfaces.nextElement().getInetAddresses();
+                    while (inetAddresses.hasMoreElements()) {
+                        InetAddress address = inetAddresses.nextElement();
+                        System.err.printf("\t\thttp://%s:%d%n", address.getHostAddress(), getServerPort());
+                    }
+                }
+            } catch (Exception ignore) {
+            }
             //        TODO use sempahore to wait for the result
             while (running)
                 Suppressor.run(() -> Thread.sleep(20));
 //            TODO use logger
-            System.err.println("inspector released");
+            System.err.println("DAL inspector released");
         }
 
         public void release() {
