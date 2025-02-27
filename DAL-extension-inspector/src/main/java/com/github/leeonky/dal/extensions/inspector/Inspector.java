@@ -30,7 +30,7 @@ public class Inspector {
     private static Inspector inspector = null;
     private static Mode mode = null;
     private final Javalin javalin;
-    private final CountDownLatch serverReadyLatch;
+    private final CountDownLatch serverReadyLatch = new CountDownLatch(1);
     private final Set<DAL> instances = new LinkedHashSet<>();
     //   TODO refactor
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
@@ -39,7 +39,9 @@ public class Inspector {
     private static Supplier<Object> defaultInput = () -> null;
 
     public Inspector() {
-        dalInstances.put("Try It!", new DalInstance(() -> defaultInput.get(), DAL.create(InspectorExtension.class), ""));
+        DalInstance defaultInstance = new DalInstance(() -> defaultInput.get(), DAL.create(InspectorExtension.class), "");
+        defaultInstance.running = false;
+        dalInstances.put("Try It!", defaultInstance);
 
         PugConfiguration pugConfiguration = new PugConfiguration();
         pugConfiguration.setTemplateLoader(new TemplateLoader() {
@@ -68,7 +70,6 @@ public class Inspector {
         JavalinRenderer.register((filePath, model, context) ->
                 pugConfiguration.renderTemplate(pugConfiguration.getTemplate("public" + filePath), model), ".pug", ".PNG", ".Png");
 
-        serverReadyLatch = new CountDownLatch(1);
         javalin = Javalin.create(config -> config.addStaticFiles("/public", Location.CLASSPATH))
                 .events(event -> event.serverStarted(serverReadyLatch::countDown));
         requireNonNull(javalin.jettyServer()).setServerPort(getServerPort());
@@ -86,6 +87,9 @@ public class Inspector {
             ws.onClose(ctx -> clientConnections.remove(ctx.getSessionId()));
         });
         javalin.start();
+    }
+
+    private void waitForReady() {
         Suppressor.run(serverReadyLatch::await);
     }
 
@@ -95,6 +99,10 @@ public class Inspector {
                 () -> ofNullable(System.getProperty("dal.inspector.port")))
                 .map(Integer::parseInt)
                 .orElse(10082);
+    }
+
+    public static void ready() {
+        inspector.waitForReady();
     }
 
     private void releaseAll() {

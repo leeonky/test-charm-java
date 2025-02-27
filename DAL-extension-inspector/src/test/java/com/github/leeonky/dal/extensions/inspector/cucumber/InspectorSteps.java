@@ -43,6 +43,7 @@ public class InspectorSteps {
     @When("launch inspector web server")
     public void launchInspectorWebServer() {
         Inspector.launch();
+        Inspector.ready();
     }
 
     @And("launch inspector web page")

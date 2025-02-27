@@ -114,6 +114,11 @@ body {
     background-color: #ffffA0;
 }
 
+.code-editor.disconnected {
+    background-color: #A0A0A0 !important;
+    color: #666666 !important;
+}
+
 .code-editor.result {
     background-color: #f0fff0;
 }

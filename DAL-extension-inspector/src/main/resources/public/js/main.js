@@ -26,23 +26,25 @@ function xmlToJson(xmlStr) {
 }
 
 class WSSession {
-    constructor(path, handler) {
+    constructor(path, handler, clearHandler) {
         const setupWebSocket = () => {
             this.socket = new WebSocket((window.location.protocol === "https:" ? "wss:" : "ws:")
                 + "//" + window.location.host + path);
             this.socket.onopen = () => console.log("WebSocket connection established");
 
             this.socket.onerror = err => {
-                console.error("WebSocket encountered an error");
+//                console.error("WebSocket encountered an error");
                 this.socket.close()
             };
 
             this.socket.onclose = event => {
-                console.log("WebSocket closed")
+                if(clearHandler)
+                    clearHandler()
+//                console.log("WebSocket closed")
                 setTimeout(() => {
-                    console.log("Re-setup WebSocket connection")
+//                    console.log("Re-setup WebSocket connection")
                     setupWebSocket()
-                }, 500);
+                }, 50);
             };
 
             this.socket.onmessage = event => {
@@ -146,15 +148,18 @@ const appData = () => {
         },
         async release(dalName) {
             fetch('/api/release?name=' + dalName, { method: 'POST' })
-            document.querySelectorAll('.session-state.connected[name=' + dalName + ']').forEach(e => e.classList.remove('connected'))
+            this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance=> dalInstance.connected = false)
         },
         async releaseAll() {
-            await fetch('/api/release-all', { method: 'POST' })
-            document.querySelectorAll('.session-state.connected').forEach(e => e.classList.remove('connected'))
+            fetch('/api/release-all', { method: 'POST' })
+            this.clearStates();
         },
         init() {
-            this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this))
+            this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this), this.clearStates.bind(this))
             this.$nextTick(() => this.activeInstance = 'Try It!')
+        },
+        clearStates() {
+            this.dalInstances.forEach(dalInstance=> dalInstance.connected = false)
         }
     }
 };

@@ -429,5 +429,26 @@ Feature: exchange
         }
         """
 
+  Rule: clear/disconnected
+    Background: workbench connected
+      Given Inspector in "FORCED" mode
+      And launch inspector web server
+      And launch inspector web page
+      And created DAL 'Ins1' with inspector extended
+      And use DAL 'Ins1' to evaluating the following:
+        """
+        ::inspect
+        """
+      And you should see:
+        """
+        WorkBench::eventually: { Current.connected: true }
+        """
+
+    Scenario: should clear connected when disconnected
+      When shutdown web server
+      Then you should see:
+        """
+        WorkBench::eventually: { Current.connected: false }
+        """
 
 # muli DAL with same name
