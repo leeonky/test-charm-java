@@ -381,6 +381,25 @@ Feature: exchange
        }
        """
 
+    Scenario: pass failed test from current workbench and got default result
+      Given use DAL 'Ins1' to evaluating the following:
+        """
+        message= world
+        """
+      When you:
+        """
+        Pass[Ins1]
+        """
+      Then DAL 'Ins1' test finished with the following result
+        """
+        = null
+        """
+      And you should see:
+        """
+        WorkBench::eventually: { Current.connected: false }
+        """
+
+
   Rule: concurrent during server and open page
     Background: Given FORCED mode DAL Ins1
       Given Inspector in "FORCED" mode

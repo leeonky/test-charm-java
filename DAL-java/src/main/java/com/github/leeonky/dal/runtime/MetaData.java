@@ -15,11 +15,13 @@ import static java.lang.String.format;
 public class MetaData extends RuntimeData {
     private Throwable error;
     private RuntimeException originalException;
+    private DALNode inputNode;
     private final Object name;
     protected Data data;
 
     public MetaData(DALNode inputNode, Object symbolName, DALRuntimeContext runtimeContext) {
         super(null, runtimeContext);
+        this.inputNode = inputNode;
         name = symbolName;
         setData(() -> inputNode.evaluateData(runtimeContext()));
     }

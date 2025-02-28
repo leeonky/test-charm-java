@@ -147,9 +147,13 @@ const appData = () => {
                 })
         },
         async pass(dalName) {
+            fetch('/api/pass?name=' + dalName, {method: 'POST'})
+//            TODO refactor
+            this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance => dalInstance.connected = false)
         },
         async release(dalName) {
             fetch('/api/release?name=' + dalName, {method: 'POST'})
+//            TODO refactor
             this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance => dalInstance.connected = false)
         },
         async releaseAll() {

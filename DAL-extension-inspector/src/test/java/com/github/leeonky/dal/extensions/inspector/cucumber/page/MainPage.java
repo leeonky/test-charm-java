@@ -13,6 +13,7 @@ public class MainPage {
     //TODO tab control PageContainer
 //            TODO support dynamic tabs
     private final PageContainer<WorkbenchPage> remotes = new PageContainer<WorkbenchPage>() {
+        @Override
         public WorkbenchPage getCurrent() {
             return new WorkbenchPage(panel.byCss(".work-bench-contents > .tab-content.active"), panel.byCss(".work-bench-headers > .tab-header.active"));
         }
@@ -51,6 +52,10 @@ public class MainPage {
 
     public void Release(String workbenchName) {
         WorkBench(workbenchName).Release();
+    }
+
+    public void Pass(String workbenchName) {
+        WorkBench(workbenchName).Pass();
     }
 
     public void ReleaseAll() {

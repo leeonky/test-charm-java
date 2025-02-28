@@ -42,6 +42,7 @@ public class Inspector {
         javalin.get("/", ctx -> ctx.redirect("/index.html"));
         javalin.post("/api/execute", ctx -> ctx.html(execute(ctx.queryParam("name"), ctx.body())));
         javalin.post("/api/exchange", ctx -> exchange(ctx.queryParam("session"), ctx.body()));
+        javalin.post("/api/pass", ctx -> pass(ctx.queryParam("name")));
         javalin.post("/api/release", ctx -> release(ctx.queryParam("name")));
         javalin.post("/api/release-all", ctx -> releaseAll());
         javalin.get("/api/request", ctx -> ctx.html(request(ctx.queryParam("name"))));
@@ -53,6 +54,14 @@ public class Inspector {
             ws.onClose(ctx -> clientConnections.remove(ctx.getSessionId()));
         });
         javalin.start();
+    }
+
+    private void pass(String name) {
+        if (!name.equals("Try It!")) {
+            DalInstance remove = dalInstances.remove(name);
+            if (remove != null)
+                remove.pass();
+        }
     }
 
     private void waitForReady() {
@@ -104,6 +113,7 @@ public class Inspector {
     public static class DalInstance {
         private final Supplier<Object> input;
         private boolean running = true;
+        private boolean pass = false;
         private final DAL dal;
         private final String code;
 
@@ -127,7 +137,7 @@ public class Inspector {
             return ObjectWriter.serialize(response);
         }
 
-        public void hold() {
+        public boolean hold() {
             System.err.println("Waiting for DAL inspector release...");
             try {
                 Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -147,11 +157,17 @@ public class Inspector {
             while (running)
                 Suppressor.run(() -> Thread.sleep(20));
 //            TODO use logger
-            System.err.println("DAL inspector released");
+            System.err.println("DAL inspector released with pass: " + pass);
+            return pass;
         }
 
         public void release() {
             running = false;
+        }
+
+        public void pass() {
+            pass = true;
+            release();
         }
     }
 
@@ -174,7 +190,7 @@ public class Inspector {
                 }}));
             }
 
-            dalInstance.hold();
+            return dalInstance.hold();
 
         } else {
 //        TODO refactor
@@ -189,11 +205,10 @@ public class Inspector {
                         put("request", dal.getName());
                     }}));
                 }
-
-                dalInstance.hold();
+                return dalInstance.hold();
             }
+            return false;
         }
-        return false;
     }
 
     public static boolean inspect(DAL dal, Object input, String code) {

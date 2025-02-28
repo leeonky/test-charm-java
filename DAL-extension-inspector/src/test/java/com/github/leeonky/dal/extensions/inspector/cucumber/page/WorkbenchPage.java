@@ -72,4 +72,8 @@ public class WorkbenchPage {
     public boolean isConnected() {
         return !header.allByCss(".session-state.connected").isEmpty();
     }
+
+    public void Pass() {
+        panel.byCss(".pass").click();
+    }
 }
