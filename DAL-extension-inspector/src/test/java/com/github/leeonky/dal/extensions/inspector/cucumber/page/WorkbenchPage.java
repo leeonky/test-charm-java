@@ -13,7 +13,11 @@ public class WorkbenchPage {
     private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
         @Override
         public OutputPage getCurrent() {
-            return new OutputPage(panel.byCss(".tab-content.active"), panel.byCss(".tab-header.active"));
+            try {
+                return new OutputPage(panel.allByCss(".tab-content.active").get(0), panel.allByCss(".tab-header.active").get(0));
+            } catch (Exception ignore) {
+                return null;
+            }
         }
     };
 
@@ -75,5 +79,9 @@ public class WorkbenchPage {
 
     public void Pass() {
         panel.byCss(".pass").click();
+    }
+
+    public void execute() {
+        panel.byCss(".run").click();
     }
 }

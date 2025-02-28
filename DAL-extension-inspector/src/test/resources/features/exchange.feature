@@ -166,7 +166,7 @@ Feature: exchange
         """
       And you should see:
         """
-        WorkBench.Current.header: 'Try It!'
+        WorkBench::eventually: { Current.header: 'Try It!' }
         """
 
     Scenario: ::inspect will still suspend, when skip inspect on web page in FORCED mode
@@ -399,7 +399,6 @@ Feature: exchange
         WorkBench::eventually: { Current.connected: false }
         """
 
-
   Rule: concurrent during server and open page
     Background: Given FORCED mode DAL Ins1
       Given Inspector in "FORCED" mode
@@ -467,7 +466,15 @@ Feature: exchange
       When shutdown web server
       Then you should see:
         """
-        WorkBench::eventually: { Current.connected: false }
+        WorkBench::eventually: {
+          Current: {
+
+  #        TODO refactor
+            DAL.classes= [... error ...]
+
+            connected: false
+          }
+        }
         """
 
 # muli DAL with same name

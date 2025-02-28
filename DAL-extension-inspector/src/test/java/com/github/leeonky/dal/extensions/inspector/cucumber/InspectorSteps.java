@@ -13,6 +13,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.SneakyThrows;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -99,5 +100,12 @@ public class InspectorSteps {
     @Given("Inspector in {string} mode")
     public void inspectorInAUTOMode(String mode) {
         Inspector.setDefaultMode(Inspector.Mode.valueOf(mode));
+    }
+
+    @SneakyThrows
+    @Then("you should see after {int}s:")
+    public void youShouldSeeAfterS(int seconds, String expression) {
+        Thread.sleep(seconds * 1000L);
+        you(expression);
     }
 }

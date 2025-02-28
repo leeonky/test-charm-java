@@ -15,7 +15,7 @@
         <p class="font-small">inspect / debug DAL expression</p>
     </div>
     <div class="flex align-center gap-20 text-dark margin-bottom margin-right">
-        <label class="switch">
+        <label class="auto-execute switch">
             <input type="checkbox" hidden x-model="autoExecute"/>
             <span class="custom-checkbox"></span>
             <span>Auto Execute</span>
@@ -52,11 +52,13 @@
                 <div class="tab-content" :target="dalIns.name">
                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression" :name="dalIns.name"
                               @code-update="autoExecute && updateResult(dalIns)" x-model="dalIns.code"
+                              :id="dalIns.name"
                               :class='{"disconnected": dalIns.name != "Try It!" &amp;&amp; !dalIns.connected}'></textarea>
                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.active)">
                         <div class="tab-headers">
                             <div class="controls">
-                                <button class="control-button btn-sm run" @click="updateResult(dalIns)"
+                                <button class="control-button btn-sm run"
+                                        @click="updateResult(dalIns, document.getElementById(dalIns.name))"
                                         title="Execute"></button>
                                 <button class="control-button btn-sm release"
                                         @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'

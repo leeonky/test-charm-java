@@ -95,20 +95,21 @@ const appData = () => {
                     await this.request(message.request)
             }
         },
-        async updateResult(dalInstance) {
-            this.$el.classList.remove('result')
-            this.$el.classList.remove('error')
-            this.$el.classList.add('editing')
+        async updateResult(dalInstance, e) {
+            const editor = e ? e : this.$el
+            editor.classList.remove('result')
+            editor.classList.remove('error')
+            editor.classList.add('editing')
             const response = await fetch('/api/execute?name=' + dalInstance.name, {
                 method: 'POST',
                 body: dalInstance.code
             })
             if (response.ok) {
-                this.$el.classList.remove('editing')
+                editor.classList.remove('editing')
                 dalInstance.result = xmlToJson(await response.text())
                 //            TODO use ref switchtab
                 dalInstance.active = dalInstance.result.error ? 'error' : (dalInstance.result.result ? 'result' : 'root');
-                this.$el.classList.add(dalInstance.active)
+                editor.classList.add(dalInstance.active)
             }
         },
         async request(dalName) {

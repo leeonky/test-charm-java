@@ -20,4 +20,8 @@ public class InputField implements StringSetter {
 //        TODO refactor
         return panel.byXpath("self::textarea | self::input | .//textarea | .//input").attribute("value");
     }
+
+    public String[] classes() {
+        return panel.element.element.getAttribute("class").split(" ");
+    }
 }

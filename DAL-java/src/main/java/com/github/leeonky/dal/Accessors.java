@@ -8,7 +8,7 @@ public class Accessors {
     private final String expression;
     private static boolean dumpInput = true;
     private DAL dal;
-    private static Supplier<DAL> dalFactory = DAL::getInstance;
+    private static Supplier<DAL> dalFactory = () -> DAL.getInstance("AssertD");
 
     public static void setDalFactory(Supplier<DAL> dalFactory) {
         Accessors.dalFactory = dalFactory;

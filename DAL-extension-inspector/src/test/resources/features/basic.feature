@@ -16,7 +16,7 @@ Feature: basic
         WorkBench.Current.header: 'Try It!'
         """
 
-    Scenario: execute expression and get result or error
+    Scenario: auto execute expression and get result or error
       When given default input value:
         """
         {
@@ -30,11 +30,16 @@ Feature: basic
       Then you should see:
         """
         WorkBench[Try It!]::eventually: {
-          Current: { header: Result }
-                 : ```
-                   java.lang.String
-                   <hello>
-                   ```
+
+#        TODO refactor
+          DAL.classes= [... result ...]
+
+          Current: {
+            header: Result
+          } : ```
+             java.lang.String
+             <hello>
+             ```
         }
         """
       And you should see:
@@ -58,6 +63,10 @@ Feature: basic
       Then you should see:
         """
         WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.classes= [... error ...]
+
           Current: { header: Error }
                  : ```
                    message= world
@@ -85,6 +94,77 @@ Feature: basic
 
           Inspect: ```
                    message= 'world'
+                   ```
+        }
+        """
+
+    Scenario: manual execute expression and get result or error
+      When given default input value:
+        """
+        {
+          "message": "hello"
+        }
+        """
+      When you:
+        """
+        AutoExecute: false
+        WorkBench[Try It!].DAL: message
+        """
+      Then you should see after 1s:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.classes= [code-editor]
+
+          Result: ''
+        }
+        """
+      When you:
+        """
+          WorkBench[Try It!].execute
+        """
+      Then you should see:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.classes= [... result ...]
+
+          Current: {
+            header: Result
+          } : ```
+             java.lang.String
+             <hello>
+             ```
+        }
+        """
+      When you:
+        """
+        WorkBench[Try It!].DAL: '= world'
+        """
+      When you:
+        """
+          WorkBench[Try It!].execute
+        """
+      Then you should see:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.classes= [... error ...]
+
+          Current: { header: Error }
+                 : ```
+                   message= world
+                            ^
+
+                   Expected to be equal to: java.lang.String
+                   <world>
+                    ^
+                   Actual: java.lang.String
+                   <hello>
+                    ^
                    ```
         }
         """

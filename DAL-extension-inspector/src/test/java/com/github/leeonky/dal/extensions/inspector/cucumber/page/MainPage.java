@@ -33,6 +33,10 @@ public class MainPage {
                 Panel::text, InputField::new, notAllowParallelReduce(), LinkedHashMap::new));
     }
 
+    public InputField AutoExecute() {
+        return new InputField(panel.byCss(".auto-execute.switch"));
+    }
+
     public WorkbenchPage WorkBench(String name) {
         if ("Current".contains(name))
             return remotes.getCurrent();
