@@ -73,6 +73,7 @@ const dalInstance = (name, code) => {
 const appData = () => {
     return {
         session: '',
+        autoExecute: true,
         dalInstanceNames: [],
         dalInstances: [dalInstance('Try It!', '')],
         activeInstance: null,

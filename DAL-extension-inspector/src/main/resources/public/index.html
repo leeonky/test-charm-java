@@ -11,14 +11,15 @@
 <body class="text-color background-color font-normal" x-data="appData">
 <div class="flex space-between align-bottom">
     <div>
-        <h1 class="main-title text-deep">DAL inspector</h1>
-        <p class="font-large">inspect / debug DAL expression</p>
+        <h1 class="main-title text-deep margin-right">DAL inspector</h1>
+        <p class="font-small">inspect / debug DAL expression</p>
     </div>
     <div class="flex align-center gap-20 text-dark margin-bottom margin-right">
-        <div class="flex align-center gap-10">
-            <span>Stop all</span>
-            <button class="control-button btn-sm release release-all" @click="releaseAll()"></button>
-        </div>
+        <label class="switch">
+            <input type="checkbox" hidden x-model="autoExecute"/>
+            <span class="custom-checkbox"></span>
+            <span>Auto Execute</span>
+        </label>
         <div class="flex align-center gap-10">
             <span>Remote:</span>
             <div class="flex align-center gap-10 instance-monitors">
@@ -31,6 +32,8 @@
                 </template>
             </div>
         </div>
+        <button class="control-button btn-sm release release-all" @click="releaseAll()"
+                title="Release all suspend"></button>
     </div>
 </div>
 <div class="work-benches">
@@ -48,16 +51,19 @@
             <template x-for="dalIns in dalInstances" :key="dalIns.name">
                 <div class="tab-content" :target="dalIns.name">
                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression" :name="dalIns.name"
-                              @code-update="updateResult(dalIns)" x-model="dalIns.code"
+                              @code-update="autoExecute && updateResult(dalIns)" x-model="dalIns.code"
                               :class='{"disconnected": dalIns.name != "Try It!" &amp;&amp; !dalIns.connected}'></textarea>
                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.active)">
                         <div class="tab-headers">
                             <div class="controls">
-                                <button class="control-button btn-sm run" @click="updateResult(dalIns)"></button>
+                                <button class="control-button btn-sm run" @click="updateResult(dalIns)"
+                                        title="Execute"></button>
                                 <button class="control-button btn-sm release"
-                                        @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'></button>
+                                        @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                        title="Release suspend"></button>
                                 <button class="control-button btn-sm pass"
-                                        @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'></button>
+                                        @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                        title="Pass Test"></button>
                             </div>
                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                 <div class="tab-header" :target="outputTab"

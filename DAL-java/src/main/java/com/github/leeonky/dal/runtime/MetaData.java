@@ -126,4 +126,8 @@ public class MetaData extends RuntimeData {
             throw originalException;
         return data;
     }
+
+    public DALNode inputNode() {
+        return inputNode;
+    }
 }
