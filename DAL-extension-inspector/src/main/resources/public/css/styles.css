@@ -108,6 +108,8 @@ body {
     border-radius: 4px;
     resize: none;
     overflow-y: hidden;
+    white-space: pre;
+    overflow-x: auto;
 }
 
 .code-editor.editing {
@@ -255,4 +257,10 @@ button.release::after {
 
 .session-state.connected {
     background-color: #4CAF50;
+}
+
+.tab-content>pre {
+    border: 1px solid #ffffff;
+    white-space: pre;
+    overflow-x: auto;
 }
