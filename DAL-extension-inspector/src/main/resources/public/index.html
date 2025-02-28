@@ -50,23 +50,23 @@
         <div class="tab-contents work-bench-contents">
             <template x-for="dalIns in dalInstances" :key="dalIns.name">
                 <div class="tab-content" :target="dalIns.name">
-                    <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression" :name="dalIns.name"
-                              @code-update="autoExecute && updateResult(dalIns)" x-model="dalIns.code"
-                              :id="dalIns.name"
-                              :class='{"disconnected": dalIns.name != "Try It!" &amp;&amp; !dalIns.connected}'></textarea>
+                    <div class="controls">
+                        <button class="control-button btn-sm run"
+                                @click="dalIns.run()"
+                                title="Execute"></button>
+                        <button class="control-button btn-sm release"
+                                @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                title="Release suspend"></button>
+                        <button class="control-button btn-sm pass"
+                                @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                title="Pass Test"></button>
+                    </div>
+
+                    <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
+                              @code-update="autoExecute && dalIns.run()" x-model="dalIns.code"
+                              :id="dalIns.name" :class='dalIns.editorStatus()'></textarea>
                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.active)">
                         <div class="tab-headers">
-                            <div class="controls">
-                                <button class="control-button btn-sm run"
-                                        @click="updateResult(dalIns, document.getElementById(dalIns.name))"
-                                        title="Execute"></button>
-                                <button class="control-button btn-sm release"
-                                        @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'
-                                        title="Release suspend"></button>
-                                <button class="control-button btn-sm pass"
-                                        @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
-                                        title="Pass Test"></button>
-                            </div>
                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                 <div class="tab-header" :target="outputTab"
                                      x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>

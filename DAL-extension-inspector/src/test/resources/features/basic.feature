@@ -168,3 +168,20 @@ Feature: basic
                    ```
         }
         """
+
+    Scenario: editor in editing state
+      When shutdown web server
+      And you:
+        """
+        WorkBench[Try It!].DAL: message
+        """
+      Then you should see:
+        """
+        WorkBench::eventually: {
+          Current: {
+
+  #        TODO refactor
+            DAL.classes= [... executing ...]
+          }
+        }
+        """

@@ -63,10 +63,31 @@ const dalInstance = (name, code) => {
             result: '',
             inspect: ''
         },
-        active: 'root',
+        active: '',
         code: code,
         name: name,
-        connected: true
+        __executing: false,
+        connected: true,
+
+        async run() {
+            this.__executing = true
+            const response = await fetch('/api/execute?name=' + this.name, {
+                method: 'POST',
+                body: this.code
+            })
+            if (response.ok) {
+                this.__executing = false
+                this.result = xmlToJson(await response.text())
+                this.active = this.result.error ? 'error' : (this.result.result ? 'result' : 'root');
+            }
+        },
+        editorStatus() {
+            if (this.__executing)
+                return "executing"
+            if (this.name != "Try It!" && !this.connected)
+                return "disconnected"
+            return this.active
+        }
     }
 }
 
@@ -95,23 +116,6 @@ const appData = () => {
                     await this.request(message.request)
             }
         },
-        async updateResult(dalInstance, e) {
-            const editor = e ? e : this.$el
-            editor.classList.remove('result')
-            editor.classList.remove('error')
-            editor.classList.add('editing')
-            const response = await fetch('/api/execute?name=' + dalInstance.name, {
-                method: 'POST',
-                body: dalInstance.code
-            })
-            if (response.ok) {
-                editor.classList.remove('editing')
-                dalInstance.result = xmlToJson(await response.text())
-                //            TODO use ref switchtab
-                dalInstance.active = dalInstance.result.error ? 'error' : (dalInstance.result.result ? 'result' : 'root');
-                editor.classList.add(dalInstance.active)
-            }
-        },
         async request(dalName) {
             const response = await fetch('/api/request?name=' + dalName, {method: 'GET'})
             const code = await response.text()
@@ -121,19 +125,12 @@ const appData = () => {
                 this.dalInstances.splice(this.dalInstances.length - 1, 0, newDalInstance)
 //                TODO should use ref
                 this.$nextTick(() => Array.from(document.querySelectorAll('.code-editor'))
-                    .filter(editor => editor.getAttribute('name') === dalName)
+                    .filter(editor => editor.getAttribute('id') === dalName)
                     .forEach(editor => {
                         editor.dispatchEvent(new Event('code-update'))
                         this.activeInstance = dalName
                     }))
             }
-        },
-        async execute(dalName, code) {
-            const response = await fetch('/api/execute?name=' + dalName, {
-                method: 'POST',
-                body: code
-            })
-            return xmlToJson(await response.text())
         },
         async exchange(dalName) {
 //            TODO refactor

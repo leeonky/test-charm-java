@@ -112,7 +112,7 @@ body {
     overflow-x: auto;
 }
 
-.code-editor.editing {
+.code-editor.executing {
     background-color: #ffffA0;
 }
 

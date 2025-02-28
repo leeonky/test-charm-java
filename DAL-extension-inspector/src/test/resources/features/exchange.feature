@@ -470,7 +470,7 @@ Feature: exchange
           Current: {
 
   #        TODO refactor
-            DAL.classes= [... error ...]
+            DAL.classes= [... disconnected ...]
 
             connected: false
           }
