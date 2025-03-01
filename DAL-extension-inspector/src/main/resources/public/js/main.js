@@ -31,32 +31,20 @@ class WSSession {
             this.socket = new WebSocket((window.location.protocol === "https:" ? "wss:" : "ws:")
                 + "//" + window.location.host + path);
             this.socket.onopen = () => console.log("WebSocket connection established");
-
-            this.socket.onerror = err => {
-//                console.error("WebSocket encountered an error");
-                this.socket.close()
-            };
-
+            this.socket.onerror = err => { this.socket.close() };
             this.socket.onclose = event => {
                 if (clearHandler)
                     clearHandler()
-//                console.log("WebSocket closed")
-                setTimeout(() => {
-//                    console.log("Re-setup WebSocket connection")
-                    setupWebSocket()
-                }, 50);
+                setTimeout(() => { setupWebSocket() }, 50);
             };
-
-            this.socket.onmessage = event => {
-                handler(xmlToJson(event.data))
-            };
+            this.socket.onmessage = event => { handler(xmlToJson(event.data)) };
         }
         setupWebSocket()
     }
 }
 
 const dalInstance = (name, code) => {
-    return {
+    return Alpine.reactive({
         result: {
             root: '',
             error: '',
@@ -88,7 +76,7 @@ const dalInstance = (name, code) => {
                 return "disconnected"
             return this.active
         }
-    }
+    })
 }
 
 const appData = () => {
@@ -119,17 +107,12 @@ const appData = () => {
         async request(dalName) {
             const response = await fetch('/api/request?name=' + dalName, {method: 'GET'})
             const code = await response.text()
-            if (code && code !== '') {
+            if (code) {
                 let newDalInstance = dalInstance(dalName, code);
                 this.dalInstances = this.dalInstances.filter(e => e.name !== dalName)
                 this.dalInstances.splice(this.dalInstances.length - 1, 0, newDalInstance)
-//                TODO should use ref
-                this.$nextTick(() => Array.from(document.querySelectorAll('.code-editor'))
-                    .filter(editor => editor.getAttribute('id') === dalName)
-                    .forEach(editor => {
-                        editor.dispatchEvent(new Event('code-update'))
-                        this.activeInstance = dalName
-                    }))
+                await newDalInstance.run()
+                this.activeInstance = dalName;
             }
         },
         async exchange(dalName) {
