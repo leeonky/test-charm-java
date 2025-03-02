@@ -259,7 +259,7 @@ button.release::after {
     background-color: #4CAF50;
 }
 
-.tab-content>pre {
+.tab-content > pre {
     border: 1px solid #ffffff;
     white-space: pre;
     overflow-x: auto;

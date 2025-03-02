@@ -23,11 +23,11 @@
         <div class="flex align-center gap-10">
             <span>Remote:</span>
             <div class="flex align-center gap-10 instance-monitors">
-                <template x-for="item in dalInstanceNames" :key="item.name">
+                <template x-for="dalConfig in dalMonitorConfigs" :key="dalConfig.name">
                     <label class="switch">
-                        <input type="checkbox" hidden x-model="item.active" @change="exchange(item.name)"/>
+                        <input type="checkbox" hidden x-model="dalConfig.active" @change="exchange(dalConfig.name)"/>
                         <span class="custom-checkbox"></span>
-                        <span x-text="item.name"></span>
+                        <span x-text="dalConfig.name"></span>
                     </label>
                 </template>
             </div>
@@ -64,7 +64,7 @@
 
                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
                               @code-update="autoExecute && dalIns.run()" x-model="dalIns.code"
-                              :id="dalIns.name" :class='dalIns.editorStatus()'></textarea>
+                              :class='dalIns.editorStatus()'></textarea>
                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.active)">
                         <div class="tab-headers">
                             <template x-for="outputTab in outputTabs" :key="outputTab">

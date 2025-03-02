@@ -31,19 +31,25 @@ class WSSession {
             this.socket = new WebSocket((window.location.protocol === "https:" ? "wss:" : "ws:")
                 + "//" + window.location.host + path);
             this.socket.onopen = () => console.log("WebSocket connection established");
-            this.socket.onerror = err => { this.socket.close() };
+            this.socket.onerror = err => {
+                this.socket.close()
+            };
             this.socket.onclose = event => {
                 if (clearHandler)
                     clearHandler()
-                setTimeout(() => { setupWebSocket() }, 50);
+                setTimeout(() => {
+                    setupWebSocket()
+                }, 50);
             };
-            this.socket.onmessage = event => { handler(xmlToJson(event.data)) };
+            this.socket.onmessage = event => {
+                handler(xmlToJson(event.data))
+            };
         }
         setupWebSocket()
     }
 }
 
-const dalInstance = (name, code) => {
+const dalInstance = (name) => {
     return Alpine.reactive({
         result: {
             root: '',
@@ -52,7 +58,7 @@ const dalInstance = (name, code) => {
             inspect: ''
         },
         active: '',
-        code: code,
+        code: '',
         name: name,
         __executing: false,
         connected: true,
@@ -75,6 +81,10 @@ const dalInstance = (name, code) => {
             if (this.name != "Try It!" && !this.connected)
                 return "disconnected"
             return this.active
+        },
+        attach(code) {
+            this.code = code
+            this.connected = true
         }
     })
 }
@@ -83,24 +93,27 @@ const appData = () => {
     return {
         session: '',
         autoExecute: true,
-        dalInstanceNames: [],
-        dalInstances: [dalInstance('Try It!', '')],
+        dalMonitorConfigs: [],
+        dalInstances: [dalInstance('Try It!')],
         activeInstance: null,
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
+        disconnectByName(dalName) {
+            this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance => dalInstance.connected = false)
+        },
         async handleExchange(message) {
             if (message.session)
                 this.session = message.session
             if (message.instances) {
 //            TODO refactor
-                message.instances.filter(e => !this.dalInstanceNames.find(i => i.name === e))
-                    .forEach(e => this.dalInstanceNames.push({name: e, active: true}))
+                message.instances.filter(e => !this.dalMonitorConfigs.find(i => i.name === e))
+                    .forEach(e => this.dalMonitorConfigs.push({name: e, active: true}))
                 await this.exchange()
             }
             if (message.request) {
 //            TODO refactor
-                const dalInstanceName = this.dalInstanceNames.find(e => e.name === message.request)
-                if (dalInstanceName && dalInstanceName.active)
+                const dalConfig = this.dalMonitorConfigs.find(e => e.name === message.request)
+                if (dalConfig && dalConfig.active)
                     await this.request(message.request)
             }
         },
@@ -108,35 +121,35 @@ const appData = () => {
             const response = await fetch('/api/request?name=' + dalName, {method: 'GET'})
             const code = await response.text()
             if (code) {
-                let newDalInstance = dalInstance(dalName, code);
-                this.dalInstances = this.dalInstances.filter(e => e.name !== dalName)
-                this.dalInstances.splice(this.dalInstances.length - 1, 0, newDalInstance)
-                await newDalInstance.run()
+                let target = this.dalInstances.find(e => e.name === dalName)
+                if(!target) {
+                    target = dalInstance(dalName);
+                    this.dalInstances = this.dalInstances.filter(e => e.name !== dalName)
+                    this.dalInstances.splice(this.dalInstances.length - 1, 0, target)
+                }
+                target.attach(code)
+                await target.run()
                 this.activeInstance = dalName;
             }
         },
         async exchange(dalName) {
 //            TODO refactor
-            const dalInstanceName = this.dalInstanceNames.find(e => e.name === dalName);
-            if (dalInstanceName) {
-                if (!dalInstanceName.active)
-                    this.release(dalName)
-            }
+            const dalConfig = this.dalMonitorConfigs.find(e => e.name === dalName);
+            if (dalConfig && !dalConfig.active)
+                    await this.release(dalName)
             if (this.session)
                 return await fetch('/api/exchange?session=' + this.session, {
                     method: 'POST',
-                    body: this.dalInstanceNames.filter(e => e.active).map(e => e.name).join('\n')
+                    body: this.dalMonitorConfigs.filter(e => e.active).map(e => e.name).join('\n')
                 })
         },
         async pass(dalName) {
             fetch('/api/pass?name=' + dalName, {method: 'POST'})
-//            TODO refactor
-            this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance => dalInstance.connected = false)
+            this.disconnectByName(dalName)
         },
         async release(dalName) {
             fetch('/api/release?name=' + dalName, {method: 'POST'})
-//            TODO refactor
-            this.dalInstances.filter(e => e.name === dalName).forEach(dalInstance => dalInstance.connected = false)
+            this.disconnectByName(dalName)
         },
         async releaseAll() {
             fetch('/api/release-all', {method: 'POST'})
