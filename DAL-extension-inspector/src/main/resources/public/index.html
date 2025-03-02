@@ -63,9 +63,9 @@
                     </div>
 
                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
-                              @code-update="autoExecute && dalIns.run()" x-model="dalIns.code"
+                              @code-update="autoExecute && dalIns.run()" x-model="dalIns.workspace().code"
                               :class='dalIns.editorStatus()'></textarea>
-                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.active)">
+                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.workspace().active)">
                         <div class="tab-headers">
                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                 <div class="tab-header" :target="outputTab"

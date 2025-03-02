@@ -57,22 +57,33 @@ const dalInstance = (name) => {
             result: '',
             inspect: ''
         },
-        active: '',
-        code: '',
+        workspaces: [{
+            result: {
+                root: '',
+                error: '',
+                result: '',
+                inspect: ''
+            },
+            active: '',
+            code: ''
+        }],
+        activeWorkspace: 0,
         name: name,
         __executing: false,
         connected: true,
-
+        workspace() {
+            return this.workspaces[this.activeWorkspace]
+        },
         async run() {
             this.__executing = true
             const response = await fetch('/api/execute?name=' + this.name, {
                 method: 'POST',
-                body: this.code
+                body: this.workspace().code
             })
             if (response.ok) {
                 this.__executing = false
                 this.result = xmlToJson(await response.text())
-                this.active = this.result.error ? 'error' : (this.result.result ? 'result' : 'root');
+                this.workspace().active = this.result.error ? 'error' : (this.result.result ? 'result' : 'root');
             }
         },
         editorStatus() {
@@ -80,10 +91,10 @@ const dalInstance = (name) => {
                 return "executing"
             if (this.name != "Try It!" && !this.connected)
                 return "disconnected"
-            return this.active
+            return this.workspace().active
         },
         attach(code) {
-            this.code = code
+            this.workspaces[0].code = code;
             this.connected = true
         }
     })
