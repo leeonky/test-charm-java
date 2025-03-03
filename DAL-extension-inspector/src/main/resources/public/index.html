@@ -62,20 +62,34 @@
                                 title="Pass Test"></button>
                     </div>
 
-                    <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
-                              @code-update="autoExecute && dalIns.run()" x-model="dalIns.workspace().code"
-                              :class='dalIns.editorStatus()'></textarea>
-                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(dalIns.workspace().active)">
+                    <div class="tab" x-data="tab()" x-effect="switchTab(dalIns.activeWorkspace + '')"
+                         x-init="$nextTick(() => dalIns.activeWorkspace = 0)">
                         <div class="tab-headers">
-                            <template x-for="outputTab in outputTabs" :key="outputTab">
-                                <div class="tab-header" :target="outputTab"
-                                     x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>
+                            <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
+                                <div class="tab-header" :target="index"></div>
                             </template>
                         </div>
                         <div class="tab-contents">
-                            <template x-for="outputTab in outputTabs" :key="outputTab">
-                                <div class="tab-content" :target="outputTab">
-                                    <pre x-text="dalIns.workspace().result[outputTab]"></pre>
+                            <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
+                                <div class="tab-content" :target="index">
+                                    <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
+                                              @code-update="autoExecute && dalIns.run()" x-model="workspace.code"
+                                              :class='dalIns.editorStatus()'></textarea>
+                                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)">
+                                        <div class="tab-headers">
+                                            <template x-for="outputTab in outputTabs" :key="outputTab">
+                                                <div class="tab-header" :target="outputTab"
+                                                     x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>
+                                            </template>
+                                        </div>
+                                        <div class="tab-contents">
+                                            <template x-for="outputTab in outputTabs" :key="outputTab">
+                                                <div class="tab-content" :target="outputTab">
+                                                    <pre x-text="workspace.result[outputTab]"></pre>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
                         </div>

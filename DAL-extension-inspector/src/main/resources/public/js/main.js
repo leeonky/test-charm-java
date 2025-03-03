@@ -65,7 +65,7 @@ const dalInstance = (name) => {
                 this.active = result.error ? 'error' : (result.result ? 'result' : 'root');
             }
         }],
-        activeWorkspace: 0,
+        activeWorkspace: null,
         name: name,
         __executing: false,
         connected: true,
@@ -74,14 +74,16 @@ const dalInstance = (name) => {
         },
         async run() {
             this.__executing = true
-            const workspace = this.workspace();
-            const response = await fetch('/api/execute?name=' + this.name, {
-                method: 'POST',
-                body: workspace.code
-            })
-            if (response.ok) {
-                this.__executing = false
-                workspace.setResult(xmlToJson(await response.text()))
+            const workspace = this.workspace() || this.workspaces[0];
+            if (workspace) {
+                const response = await fetch('/api/execute?name=' + this.name, {
+                    method: 'POST',
+                    body: workspace.code
+                })
+                if (response.ok) {
+                    this.__executing = false
+                    workspace.setResult(xmlToJson(await response.text()))
+                }
             }
         },
         editorStatus() {
@@ -89,10 +91,12 @@ const dalInstance = (name) => {
                 return "executing"
             if (this.name != "Try It!" && !this.connected)
                 return "disconnected"
-            return this.workspace().active
+            if (this.workspace() != null)
+                return this.workspace().active
+            return null;
         },
         attach(code) {
-            this.workspaces[0].code = code;
+            this.workspaces[0].code = code
             this.connected = true
         }
     })
@@ -138,7 +142,8 @@ const appData = () => {
                 }
                 target.attach(code)
                 await target.run()
-                this.activeInstance = dalName;
+                this.activeInstance = dalName
+                this.activeWorkspace = 0
             }
         },
         async exchange(dalName) {

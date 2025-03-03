@@ -10,11 +10,11 @@ public class WorkbenchPage {
     private final Panel header;
 
     //TODO tab control PageContainer
-    private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
+    private final PageContainer<WorkspacePage> outputs = new PageContainer<WorkspacePage>() {
         @Override
-        public OutputPage getCurrent() {
+        public WorkspacePage getCurrent() {
             try {
-                return new OutputPage(panel.allByCss(".tab-content.active").get(0), panel.allByCss(".tab-header.active").get(0));
+                return new WorkspacePage(panel.allByCss(".tab-content.active").get(0), panel.allByCss(".tab-header.active").get(0));
             } catch (Exception ignore) {
                 return null;
             }
@@ -31,40 +31,40 @@ public class WorkbenchPage {
     }
 
     public OutputPage Root() {
-        return switchTo("Root");
+        return outputs.getCurrent().Root();
     }
 
     public OutputPage Error() {
-        return switchTo("Error");
+        return outputs.getCurrent().Error();
     }
 
     public OutputPage Result() {
-        return switchTo("Result");
+        return outputs.getCurrent().Result();
     }
 
     public OutputPage Inspect() {
-        return switchTo("Inspect");
+        return outputs.getCurrent().Inspect();
     }
 
     public OutputPage Current() {
-        return outputs.getCurrent();
+        return outputs.getCurrent().Current();
     }
 
-    private OutputPage switchTo(String type) {
-        return outputs.switchTo(new Target<OutputPage>() {
+    private WorkspacePage switchTo(String target) {
+        return outputs.switchTo(new Target<WorkspacePage>() {
             @Override
-            public OutputPage create() {
-                return new OutputPage(panel.byCss(format(".tab-content[target='%s']", type.toLowerCase())), panel.byCss(format(".tab-header[target='%s']", type.toLowerCase())));
+            public WorkspacePage create() {
+                return new WorkspacePage(panel.byCss(format(".tab-content[target='%s']", target)), panel.byCss(format(".tab-header[target='%s']", target)));
             }
 
             @Override
             public void navigateTo() {
-                panel.byText(type).click();
+                panel.byText(target).click();
             }
 
             @Override
-            public boolean matches(OutputPage current) {
-                return current.isType(type);
+            public boolean matches(WorkspacePage current) {
+                return current.isTarget(target);
             }
         });
     }

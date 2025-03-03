@@ -16,11 +16,7 @@ public class OutputPage {
     }
 
     public boolean isType(String type) {
-        return Objects.equals(getType(), type);
-    }
-
-    private String getType() {
-        return header.text();
+        return Objects.equals(header.text(), type);
     }
 
     @Override

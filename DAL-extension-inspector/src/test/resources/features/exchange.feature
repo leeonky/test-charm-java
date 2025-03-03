@@ -139,8 +139,8 @@ Feature: exchange
        """
       Examples:
         | mode   |
-        | AUTO   |
         | FORCED |
+        | AUTO   |
 
     Scenario: ::inspect will not suspend, when skip inspect on web page in AUTO mode
       Given Inspector in "AUTO" mode
