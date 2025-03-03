@@ -50,23 +50,12 @@
         <div class="tab-contents work-bench-contents">
             <template x-for="dalIns in dalInstances" :key="dalIns.name">
                 <div class="tab-content" :target="dalIns.name">
-                    <div class="controls">
-                        <button class="control-button btn-sm run"
-                                @click="dalIns.run()"
-                                title="Execute"></button>
-                        <button class="control-button btn-sm release"
-                                @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'
-                                title="Release suspend"></button>
-                        <button class="control-button btn-sm pass"
-                                @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
-                                title="Pass Test"></button>
-                    </div>
 
                     <div class="tab" x-data="tab()" x-effect="switchTab(dalIns.activeWorkspace + '')"
                          x-init="$nextTick(() => dalIns.activeWorkspace = 0)">
-                        <div class="tab-headers">
+                        <div class="tab-headers" x-show="dalIns.workspaces.length > 1">
                             <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
-                                <div class="tab-header" :target="index"></div>
+                                <div class="tab-header" :target="index" x-text="index"></div>
                             </template>
                         </div>
                         <div class="tab-contents">
@@ -77,6 +66,20 @@
                                               :class='dalIns.editorStatus()'></textarea>
                                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)">
                                         <div class="tab-headers">
+                                            <div class="controls">
+                                                <button class="control-button btn-sm run"
+                                                        @click="dalIns.run()"
+                                                        title="Execute"></button>
+                                                <button class="control-button btn-sm release"
+                                                        @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                                        title="Release suspend"></button>
+                                                <button class="control-button btn-sm pass"
+                                                        @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                                        title="Pass Test"></button>
+                                                <button class="control-button btn-sm new"
+                                                        @click="duplicateWorkspace(dalIns.name)"
+                                                        title="New workspace"></button>
+                                            </div>
                                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                                 <div class="tab-header" :target="outputTab"
                                                      x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>

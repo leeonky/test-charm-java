@@ -478,3 +478,8 @@ Feature: exchange
         """
 
 # muli DAL with same name
+
+#  create workspace
+#  remove workspace
+#  execute in new workspace
+#  TODO execute in workspace (move run to workspace)

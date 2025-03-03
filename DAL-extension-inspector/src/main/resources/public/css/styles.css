@@ -243,6 +243,10 @@ button.release::after {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='%23DF4C4C' stroke='%23DF4C4C' stroke-width='2' viewBox='0 0 16 16'%3E%3Crect x='2' y='2' width='12' height='12'/%3E%3C/svg%3E");
 }
 
+button.new::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60%' height='60%' fill='none' stroke='%2348005E' stroke-width='2' viewBox='0 0 16 16'%3E%3Cline x1='2' y1='8' x2='14' y2='8'/%3E%3Cline x1='8' y1='2' x2='8' y2='14'/%3E%3C/svg%3E");
+}
+
 .work-bench-header[target='Try It!'] {
     margin-left: auto;
     margin-right: 0px;
