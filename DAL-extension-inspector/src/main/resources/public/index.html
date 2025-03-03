@@ -37,7 +37,7 @@
     </div>
 </div>
 <div class="work-benches">
-    <div class="tab" x-data="tab()" x-init='switchTab("Try It!")' x-effect="switchTab(activeInstance)">
+    <div class="tab" x-data="tab()" x-effect="switchTab(activeInstance)">
         <div class="tab-headers work-bench-headers">
             <template x-for="dalIns in dalInstances" :key="dalIns.name">
                 <div class="tab-header work-bench-header flex align-center" :target="dalIns.name">
@@ -75,7 +75,7 @@
                         <div class="tab-contents">
                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                 <div class="tab-content" :target="outputTab">
-                                    <pre x-text="dalIns.result[outputTab]"></pre>
+                                    <pre x-text="dalIns.workspace().result[outputTab]"></pre>
                                 </div>
                             </template>
                         </div>

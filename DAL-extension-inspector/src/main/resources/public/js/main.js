@@ -51,12 +51,6 @@ class WSSession {
 
 const dalInstance = (name) => {
     return Alpine.reactive({
-        result: {
-            root: '',
-            error: '',
-            result: '',
-            inspect: ''
-        },
         workspaces: [{
             result: {
                 root: '',
@@ -65,7 +59,11 @@ const dalInstance = (name) => {
                 inspect: ''
             },
             active: '',
-            code: ''
+            code: '',
+            setResult(result) {
+                this.result = result;
+                this.active = result.error ? 'error' : (result.result ? 'result' : 'root');
+            }
         }],
         activeWorkspace: 0,
         name: name,
@@ -76,14 +74,14 @@ const dalInstance = (name) => {
         },
         async run() {
             this.__executing = true
+            const workspace = this.workspace();
             const response = await fetch('/api/execute?name=' + this.name, {
                 method: 'POST',
-                body: this.workspace().code
+                body: workspace.code
             })
             if (response.ok) {
                 this.__executing = false
-                this.result = xmlToJson(await response.text())
-                this.workspace().active = this.result.error ? 'error' : (this.result.result ? 'result' : 'root');
+                workspace.setResult(xmlToJson(await response.text()))
             }
         },
         editorStatus() {
