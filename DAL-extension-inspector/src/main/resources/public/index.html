@@ -62,13 +62,13 @@
                             <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
                                 <div class="tab-content" :target="index">
                                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
-                                              @code-update="autoExecute && dalIns.run()" x-model="workspace.code"
-                                              :class='dalIns.editorStatus()'></textarea>
+                                              @code-update="autoExecute && workspace.run()" x-model="workspace.code"
+                                              :class='workspace.editorStatus(dalIns.connected)'></textarea>
                                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)">
                                         <div class="tab-headers">
                                             <div class="controls">
                                                 <button class="control-button btn-sm run"
-                                                        @click="dalIns.run()"
+                                                        @click="workspace.run()"
                                                         title="Execute"></button>
                                                 <button class="control-button btn-sm release"
                                                         @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'

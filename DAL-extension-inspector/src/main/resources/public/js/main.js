@@ -48,8 +48,8 @@ class WSSession {
         setupWebSocket()
     }
 }
-const workspace = (code) => {
-    return {
+const workspace = (code, name) => {
+    return Alpine.reactive({
         result: {
             root: '',
             error: '',
@@ -61,49 +61,43 @@ const workspace = (code) => {
         setResult(result) {
             this.result = result;
             this.active = result.error ? 'error' : (result.result ? 'result' : 'root');
-        }
-    }
+        },
+        __executing: false,
+
+        async run() {
+            this.__executing = true
+            const response = await fetch('/api/execute?name=' + name, {
+                method: 'POST',
+                body: this.code
+            })
+            if (response.ok) {
+                this.__executing = false
+                this.setResult(xmlToJson(await response.text()))
+            }
+        },
+        editorStatus(connected) {
+            if (this.__executing)
+                return "executing"
+            if (this.name != "Try It!" && !connected)
+                return "disconnected"
+            return this.active
+        },
+    })
 }
 
 const dalInstance = (name) => {
-    return Alpine.reactive({
-        workspaces: [workspace('')],
+    return {
+        workspaces: [workspace('', name)],
         activeWorkspace: null,
         name: name,
         __executing: false,
         connected: true,
-//        TODO inline
-        workspace() {
-            return this.workspaces[this.activeWorkspace]
-        },
-        async run() {
-            this.__executing = true
-            const workspace = this.workspace() || this.workspaces[0];
-            if (workspace) {
-                const response = await fetch('/api/execute?name=' + this.name, {
-                    method: 'POST',
-                    body: workspace.code
-                })
-                if (response.ok) {
-                    this.__executing = false
-                    workspace.setResult(xmlToJson(await response.text()))
-                }
-            }
-        },
-        editorStatus() {
-            if (this.__executing)
-                return "executing"
-            if (this.name != "Try It!" && !this.connected)
-                return "disconnected"
-            if (this.workspace() != null)
-                return this.workspace().active
-            return null;
-        },
-        attach(code) {
+        async attach(code) {
             this.workspaces[0].code = code
             this.connected = true
+            await this.workspaces[0].run()
         }
-    })
+    }
 }
 
 const appData = () => {
@@ -144,8 +138,7 @@ const appData = () => {
                     this.dalInstances = this.dalInstances.filter(e => e.name !== dalName)
                     this.dalInstances.splice(this.dalInstances.length - 1, 0, target)
                 }
-                target.attach(code)
-                await target.run()
+                await target.attach(code)
                 this.activeInstance = dalName
                 this.activeWorkspace = 0
             }
