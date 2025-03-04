@@ -48,7 +48,7 @@ class WSSession {
         setupWebSocket()
     }
 }
-const workspace = (code, name) => {
+const newWorkspace = (code, name) => {
     return Alpine.reactive({
         result: {
             root: '',
@@ -57,7 +57,7 @@ const workspace = (code, name) => {
             inspect: ''
         },
         active: '',
-        code: '',
+        code: code,
         setResult(result) {
             this.result = result;
             this.active = result.error ? 'error' : (result.result ? 'result' : 'root');
@@ -87,7 +87,7 @@ const workspace = (code, name) => {
 
 const dalInstance = (name) => {
     return {
-        workspaces: [workspace('', name)],
+        workspaces: [newWorkspace('', name)],
         activeWorkspace: null,
         name: name,
         __executing: false,
@@ -96,6 +96,13 @@ const dalInstance = (name) => {
             this.workspaces[0].code = code
             this.connected = true
             await this.workspaces[0].run()
+        },
+        duplicateWorkspace(workspace) {
+          const index = this.workspaces.indexOf(workspace)
+          const copy = newWorkspace(workspace.code, name)
+          this.workspaces.splice(index + 1, 0, copy)
+          this.activeWorkspace = index
+          this.activeWorkspace += 1
         }
     }
 }
@@ -165,9 +172,6 @@ const appData = () => {
         async releaseAll() {
             fetch('/api/release-all', {method: 'POST'})
             this.clearStates();
-        },
-        duplicateWorkspace() {
-
         },
         init() {
             this.exchangeSession = new WSSession('/ws/exchange', this.handleExchange.bind(this), this.clearStates.bind(this))

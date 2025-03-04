@@ -53,12 +53,12 @@
 
                     <div class="tab" x-data="tab()" x-effect="switchTab(dalIns.activeWorkspace + '')"
                          x-init="$nextTick(() => dalIns.activeWorkspace = 0)">
-                        <div class="tab-headers" x-show="dalIns.workspaces.length > 1">
+                        <div class="tab-headers workspace-headers" x-show="dalIns.workspaces.length > 1">
                             <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
                                 <div class="tab-header" :target="index" x-text="index"></div>
                             </template>
                         </div>
-                        <div class="tab-contents">
+                        <div class="tab-contents workspace-contents">
                             <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
                                 <div class="tab-content" :target="index">
                                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
@@ -77,7 +77,7 @@
                                                         @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
                                                         title="Pass Test"></button>
                                                 <button class="control-button btn-sm new"
-                                                        @click="duplicateWorkspace(dalIns.name)"
+                                                        @click="dalIns.duplicateWorkspace(workspace)"
                                                         title="New workspace"></button>
                                             </div>
                                             <template x-for="outputTab in outputTabs" :key="outputTab">

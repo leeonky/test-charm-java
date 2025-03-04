@@ -16,7 +16,9 @@ public class WorkspacePage {
         @Override
         public OutputPage getCurrent() {
             try {
-                return new OutputPage(panel.allByCss(".tab-content.active").get(0), panel.allByCss(".tab-header.active").get(0));
+                return new OutputPage(
+                        panel.allByCss(".tab-content.active").get(0),
+                        panel.allByCss(".tab-header.active").get(0));
             } catch (Exception ignore) {
                 return null;
             }
@@ -73,5 +75,9 @@ public class WorkspacePage {
                 return current.isType(type);
             }
         });
+    }
+
+    public void newWorkspace() {
+        panel.byCss(".new").click();
     }
 }

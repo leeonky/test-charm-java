@@ -15,7 +15,8 @@ public class MainPage {
     private final PageContainer<WorkbenchPage> remotes = new PageContainer<WorkbenchPage>() {
         @Override
         public WorkbenchPage getCurrent() {
-            return new WorkbenchPage(panel.byCss(".work-bench-contents > .tab-content.active"), panel.byCss(".work-bench-headers > .tab-header.active"));
+            return new WorkbenchPage(panel.byCss(".work-bench-contents > .tab-content.active"),
+                    panel.byCss(".work-bench-headers > .tab-header.active"));
         }
     };
 

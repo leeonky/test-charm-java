@@ -14,7 +14,9 @@ public class WorkbenchPage {
         @Override
         public WorkspacePage getCurrent() {
             try {
-                return new WorkspacePage(panel.allByCss(".tab-content.active").get(0), panel.allByCss(".tab-header.active").get(0));
+                return new WorkspacePage(
+                        panel.allByCss(".workspace-contents > .tab-content.active").get(0),
+                        panel.allByCss(".workspace-headers > .tab-header.active").get(0));
             } catch (Exception ignore) {
                 return null;
             }
@@ -50,7 +52,9 @@ public class WorkbenchPage {
         return outputs.getCurrent().Current();
     }
 
-    private WorkspacePage switchTo(String target) {
+    public WorkspacePage Workspace(String target) {
+        if (target.equals("Current"))
+            return outputs.getCurrent();
         return outputs.switchTo(new Target<WorkspacePage>() {
             @Override
             public WorkspacePage create() {
@@ -83,5 +87,9 @@ public class WorkbenchPage {
 
     public void execute() {
         panel.byCss(".run").click();
+    }
+
+    public void newWorkspace() {
+        panel.byCss(".new").click();
     }
 }
