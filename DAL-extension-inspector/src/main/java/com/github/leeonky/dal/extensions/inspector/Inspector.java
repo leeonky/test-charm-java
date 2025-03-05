@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -276,7 +277,7 @@ public class Inspector {
                 return new HashMap<String, Object>() {{
                     put("property", property);
                     put("type", "BINARY");
-                    put("url", "/attachments?name=" + dal.getName() + "&index=" + index);
+                    put("url", "/attachments?name=" + dal.getName() + "&index=" + index + "&tm=" + Instant.now().getEpochSecond());
                 }};
             }
         }

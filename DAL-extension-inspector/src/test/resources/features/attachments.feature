@@ -69,7 +69,7 @@ Feature: attachments
             '{}': {
               <<image.attribute[src] download.attribute[href]>> is URL: {
                 path: '/attachments'
-                query: 'name=Ins1&index=0'
+                query: /name=Ins1&index=0.*/
               }
             }
       }
