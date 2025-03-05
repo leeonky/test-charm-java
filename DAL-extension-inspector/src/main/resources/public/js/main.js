@@ -55,7 +55,8 @@ const Workspace = (code, name) => {
             root: '',
             error: '',
             result: '',
-            inspect: ''
+            inspect: '',
+            watches: []
         },
         active: '',
         code: code,

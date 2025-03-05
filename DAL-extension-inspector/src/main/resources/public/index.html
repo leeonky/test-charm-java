@@ -90,6 +90,7 @@
                                                 <div class="tab-header" :target="outputTab"
                                                      x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>
                                             </template>
+                                            <div class="tab-header" target="Watches">Watches</div>
                                         </div>
                                         <div class="tab-contents">
                                             <template x-for="outputTab in outputTabs" :key="outputTab">
@@ -97,9 +98,20 @@
                                                     <pre x-text="workspace.result[outputTab]"></pre>
                                                 </div>
                                             </template>
+                                            <div class="tab-content" target="Watches">
+                                                <template x-for="watch in workspace.result.watches"
+                                                          :key="watch.property">
+                                                    <div class="watches-item">
+                                                        <span class="watches-item-name" x-text="watch.property"></span>
+                                                        <span>:</span>
+                                                        <pre class="watches-item-content padding-left"
+                                                             x-text="watch.value"></pre>
+                                                        <hr>
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                             </template>
                         </div>
                     </div>

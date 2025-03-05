@@ -23,4 +23,8 @@ public class OutputPage {
     public String toString() {
         return panel.text();
     }
+
+    public Panel getContent() {
+        return panel;
+    }
 }

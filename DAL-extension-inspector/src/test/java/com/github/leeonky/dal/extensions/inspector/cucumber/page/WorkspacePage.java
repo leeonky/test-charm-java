@@ -50,6 +50,11 @@ public class WorkspacePage {
         return switchTo("Inspect");
     }
 
+    public WatchesPage Watches() {
+        OutputPage outputPage = switchTo("Watches");
+        return new WatchesPage(outputPage.getContent());
+    }
+
     public OutputPage Current() {
         return outputs.getCurrent();
     }

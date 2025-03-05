@@ -48,6 +48,10 @@ public class WorkbenchPage {
         return outputs.getCurrent().Inspect();
     }
 
+    public WatchesPage Watches() {
+        return outputs.getCurrent().Watches();
+    }
+
     public OutputPage Current() {
         return outputs.getCurrent().Current();
     }

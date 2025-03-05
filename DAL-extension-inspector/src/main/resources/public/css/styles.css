@@ -44,6 +44,10 @@ body {
     margin-right: 10px;
 }
 
+.padding-left {
+    margin-left: 10px;
+}
+
 .font-normal {
     font-size: 14px;
 }

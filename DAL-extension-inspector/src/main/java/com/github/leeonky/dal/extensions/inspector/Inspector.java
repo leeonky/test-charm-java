@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.Suppressor;
 import io.javalin.Javalin;
@@ -33,7 +33,7 @@ public class Inspector {
     private static Supplier<Object> defaultInput = () -> null;
 
     public Inspector() {
-        DalInstance defaultInstance = new DalInstance(() -> defaultInput.get(), DAL.create(InspectorExtension.class), "");
+        DalInstance defaultInstance = new DalInstance(() -> defaultInput.get(), DAL.create("Try It!", InspectorExtension.class), "");
         defaultInstance.running = false;
         dalInstances.put("Try It!", defaultInstance);
         javalin = Javalin.create(config -> config.addStaticFiles("/public", Location.CLASSPATH))
@@ -54,6 +54,16 @@ public class Inspector {
             ws.onClose(ctx -> clientConnections.remove(ctx.getSessionId()));
         });
         javalin.start();
+    }
+
+    public static void watch(DAL dal, DALRuntimeContext dalRuntimeContext, String property, Object value) {
+        if (inspector != null)
+            inspector.watchInner(dal, dalRuntimeContext, property, value);
+    }
+
+    private void watchInner(DAL dal, DALRuntimeContext dalRuntimeContext, String property, Object value) {
+        if (inspector.calledFromInspector())
+            dalInstances.get(dal.getName()).watch(dalRuntimeContext, property, value);
     }
 
     private void pass(String name) {
@@ -116,6 +126,7 @@ public class Inspector {
         private boolean pass = false;
         private final DAL dal;
         private final String code;
+        private final List<Watch> watches = new ArrayList<>();
 
         public DalInstance(Supplier<Object> input, DAL dal, String code) {
             this.input = input;
@@ -124,9 +135,10 @@ public class Inspector {
         }
 
         public String execute(String code) {
-            Map<String, String> response = new HashMap<>();
+            watches.clear();
+            Map<String, Object> response = new HashMap<>();
             Object inputObject = input.get();
-            RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(inputObject);
+            DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(inputObject);
             try {
                 response.put("root", runtimeContext.wrap(inputObject).dumpAll());
                 response.put("inspect", dal.compileSingle(code, runtimeContext).inspect());
@@ -134,6 +146,7 @@ public class Inspector {
             } catch (InterpreterException e) {
                 response.put("error", e.show(code) + "\n\n" + e.getMessage());
             }
+            response.put("watches", watches.stream().map(Watch::collect).collect(Collectors.toList()));
             return ObjectWriter.serialize(response);
         }
 
@@ -169,10 +182,33 @@ public class Inspector {
             pass = true;
             release();
         }
+
+        public void watch(DALRuntimeContext dalRuntimeContext, String property, Object value) {
+            watches.add(new Watch(dalRuntimeContext, property, value));
+        }
+
+
+        public class Watch {
+            private final String property;
+            private final String value;
+
+            public Watch(DALRuntimeContext runtimeContext, String property, Object value) {
+                this.property = property;
+                this.value = runtimeContext.wrap(value).dumpAll();
+            }
+
+            public Map<String, Object> collect() {
+                return new HashMap<String, Object>() {{
+                    put("property", property);
+                    put("type", "DEFAULT");
+                    put("value", value);
+                }};
+            }
+        }
     }
 
     public boolean inspectInner(DAL dal, Object input, String code) {
-        if (isRecursive())
+        if (calledFromInspector())
             return false;
 //        lock inspect by name
 //        check mode
@@ -276,7 +312,7 @@ public class Inspector {
         DISABLED, FORCED, AUTO
     }
 
-    private boolean isRecursive() {
+    private boolean calledFromInspector() {
         for (StackTraceElement stack : Thread.currentThread().getStackTrace())
             if (DalInstance.class.getName().equals(stack.getClassName()))
                 return true;
