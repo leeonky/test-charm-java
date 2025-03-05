@@ -104,8 +104,17 @@
                                                     <div class="watches-item">
                                                         <span class="watches-item-name" x-text="watch.property"></span>
                                                         <span>:</span>
-                                                        <pre class="watches-item-content padding-left"
-                                                             x-text="watch.value"></pre>
+                                                        <div class="watches-item-content padding-left">
+                                                            <template x-if="watch.type === 'DEFAULT'">
+                                                                <pre x-text="watch.value"></pre>
+                                                            </template>
+                                                            <template x-if="watch.type === 'BINARY'">
+                                                                <div>
+                                                                    <a :href="watch.url">download</a>
+                                                                    <img :src="watch.url" target="_blank">
+                                                                </div>
+                                                            </template>
+                                                        </div>
                                                         <hr>
                                                     </div>
                                                 </template>

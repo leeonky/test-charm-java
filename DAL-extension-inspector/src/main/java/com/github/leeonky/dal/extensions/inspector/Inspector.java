@@ -1,13 +1,18 @@
 package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.Suppressor;
 import io.javalin.Javalin;
+import io.javalin.http.Context;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.websocket.WsContext;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.*;
@@ -17,6 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
+import static java.net.URLConnection.guessContentTypeFromStream;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
@@ -46,6 +52,7 @@ public class Inspector {
         javalin.post("/api/release", ctx -> release(ctx.queryParam("name")));
         javalin.post("/api/release-all", ctx -> releaseAll());
         javalin.get("/api/request", ctx -> ctx.html(request(ctx.queryParam("name"))));
+        javalin.get("/attachments", ctx -> responseAttachment(ctx.queryParam("name"), Integer.parseInt(ctx.queryParam("index")), ctx));
         javalin.ws("/ws/exchange", ws -> {
             ws.onConnect(ctx -> {
                 clientConnections.put(ctx.getSessionId(), ctx);
@@ -56,14 +63,28 @@ public class Inspector {
         javalin.start();
     }
 
-    public static void watch(DAL dal, DALRuntimeContext dalRuntimeContext, String property, Object value) {
-        if (inspector != null)
-            inspector.watchInner(dal, dalRuntimeContext, property, value);
+    private void responseAttachment(String name, int index, Context ctx) {
+        DalInstance dalInstance = dalInstances.get(name);
+        if (dalInstance != null) {
+            Watch watch = dalInstance.watches.get(index);
+            if (watch instanceof DalInstance.BinaryWatch) {
+                DalInstance.BinaryWatch binaryWatch = (DalInstance.BinaryWatch) watch;
+                String contentType = Suppressor.get(() -> guessContentTypeFromStream(
+                        new ByteArrayInputStream(binaryWatch.binary())));
+                ctx.contentType(contentType == null ? "application/octet-stream" : contentType);
+                ctx.result(binaryWatch.binary());
+            }
+        }
     }
 
-    private void watchInner(DAL dal, DALRuntimeContext dalRuntimeContext, String property, Object value) {
+    public static void watch(DAL dal, String property, Data value) {
+        if (inspector != null)
+            inspector.watchInner(dal, property, value);
+    }
+
+    private void watchInner(DAL dal, String property, Data value) {
         if (inspector.calledFromInspector())
-            dalInstances.get(dal.getName()).watch(dalRuntimeContext, property, value);
+            dalInstances.get(dal.getName()).watch(property, value);
     }
 
     private void pass(String name) {
@@ -183,25 +204,79 @@ public class Inspector {
             release();
         }
 
-        public void watch(DALRuntimeContext dalRuntimeContext, String property, Object value) {
-            watches.add(new Watch(dalRuntimeContext, property, value));
+        private byte[] getBytes(Data data) {
+            if (data.instance() instanceof byte[])
+                return (byte[]) data.instance();
+            if (data.instance() instanceof InputStream) {
+                InputStream stream = (InputStream) data.instance();
+                return Suppressor.get(() -> {
+                    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                        int size;
+                        byte[] data1 = new byte[1024];
+                        while ((size = stream.read(data1, 0, data1.length)) != -1)
+                            buffer.write(data1, 0, size);
+                        return buffer.toByteArray();
+                    }
+                });
+            }
+            if (data.instance() instanceof Byte[]) {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                data.list().values().forEach(b -> stream.write((byte) b));
+                return stream.toByteArray();
+            }
+            return null;
+        }
+
+        public void watch(String property, Data value) {
+            byte[] bytes = getBytes(value);
+            if (bytes != null) {
+                watches.add(new BinaryWatch(property, bytes));
+            } else
+                watches.add(new DefaultWatch(property, value));
         }
 
 
-        public class Watch {
+        public class DefaultWatch implements Watch {
             private final String property;
             private final String value;
 
-            public Watch(DALRuntimeContext runtimeContext, String property, Object value) {
+            public DefaultWatch(String property, Data value) {
                 this.property = property;
-                this.value = runtimeContext.wrap(value).dumpAll();
+                this.value = value.dumpAll();
             }
 
+            @Override
             public Map<String, Object> collect() {
                 return new HashMap<String, Object>() {{
                     put("property", property);
                     put("type", "DEFAULT");
                     put("value", value);
+                }};
+            }
+        }
+
+        private class BinaryWatch implements Watch {
+            private final String property;
+            private final int index;
+            private final byte[] binary;
+
+            public BinaryWatch(String property, byte[] value) {
+                this.property = property;
+                index = watches.size();
+                binary = new byte[value.length];
+                System.arraycopy(value, 0, binary, 0, value.length);
+            }
+
+            public byte[] binary() {
+                return binary;
+            }
+
+            @Override
+            public Map<String, Object> collect() {
+                return new HashMap<String, Object>() {{
+                    put("property", property);
+                    put("type", "BINARY");
+                    put("url", "/attachments?name=" + dal.getName() + "&index=" + index);
                 }};
             }
         }
@@ -321,5 +396,9 @@ public class Inspector {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    interface Watch {
+        Map<String, Object> collect();
     }
 }

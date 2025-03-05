@@ -19,8 +19,8 @@ public class TestContext {
     private final Map<String, Executor> executors = new HashMap<>();
     private final DAL dal = DAL.create(InspectorExtension.class);
 
-    public void addInput(String dalIns, String inputJson) {
-        executors.get(dalIns).setInput(json(inputJson));
+    public void addInput(String dalIns, Object data) {
+        executors.get(dalIns).setInput(data);
     }
 
     public void evaluate(String dalIns, String code) {

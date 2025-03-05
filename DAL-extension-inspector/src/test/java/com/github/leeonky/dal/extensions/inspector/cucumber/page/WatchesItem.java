@@ -11,4 +11,12 @@ public class WatchesItem {
     public String toString() {
         return panel.byCss(".watches-item-content").text();
     }
+
+    public Panel image() {
+        return panel.byCss("img");
+    }
+
+    public Panel download() {
+        return panel.byCss("a");
+    }
 }

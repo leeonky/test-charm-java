@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.extensions.basic.binary.util.HexFormatter;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
@@ -79,7 +80,7 @@ public class InspectorSteps {
 
     @And("the {string} following input:")
     public void theInsFollowingInput(String dalIns, String inputJson) {
-        testContext.addInput(dalIns, inputJson);
+        testContext.addInput(dalIns, json(inputJson));
     }
 
     @When("use DAL {string} to evaluating the following:")
@@ -107,5 +108,10 @@ public class InspectorSteps {
     public void youShouldSeeAfterS(int seconds, String expression) {
         Thread.sleep(seconds * 1000L);
         you(expression);
+    }
+
+    @Given("the {string} binary input:")
+    public void theInsBinaryInput(String dalIns, String binary) {
+        testContext.addInput(dalIns, new HexFormatter().format(binary, null));
     }
 }

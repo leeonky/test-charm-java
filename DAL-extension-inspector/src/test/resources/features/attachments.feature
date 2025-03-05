@@ -3,20 +3,20 @@ Feature: attachments
   Background:
     Given launch inspector web server
     And  launch inspector web page
-
-  Scenario: support watch
     Given Inspector in "FORCED" mode
     Given created DAL 'Ins1' with inspector extended
-    And the 'Ins1' following input:
-    """
-        {
-          "string": "hello"
-        }
-        """
+
+  Scenario: support watch
+    Given the 'Ins1' following input:
+      """
+      {
+        "string": "hello"
+      }
+      """
     And use DAL 'Ins1' to evaluating the following:
-        """
-        ::inspect
-        """
+      """
+      ::inspect
+      """
     When you:
       """
       WorkBench::await[Ins1]: { DAL: '.string::watch' }
@@ -24,7 +24,7 @@ Feature: attachments
       """
     Then you should see:
       """
-      WorkBench[Ins1]::eventually: {
+      WorkBench[Ins1]: {
         Root: ```
               {
                   string: java.lang.String <hello>
@@ -48,3 +48,38 @@ Feature: attachments
         }
       }
       """
+
+  Scenario: support watch binary as image
+    Given the 'Ins1' binary input:
+      """
+      FF D8
+      """
+    And use DAL 'Ins1' to evaluating the following:
+      """
+      ::inspect
+      """
+    When you:
+      """
+      WorkBench::await[Ins1]: { DAL: '::watch' }
+      WorkBench[Ins1].execute
+      """
+    Then you should see:
+      """
+      WorkBench[Ins1].Watches= {
+            '{}': {
+              <<image.attribute[src] download.attribute[href]>> is URL: {
+                path: '/attachments'
+                query: 'name=Ins1&index=0'
+              }
+            }
+      }
+      """
+    And "http://www.a.com:10082/attachments?name=Ins1&index=0" should response:
+    """
+    : {
+      code: 200
+      body: ``` HEX
+            FF D8
+            ```
+    }
+    """

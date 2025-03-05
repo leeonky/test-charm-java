@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.toList;
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
     private final Evaluator evaluator = new Evaluator();
-    private String baseUrl = null;
+    private String baseUrl = "";
     private Request request = new Request();
     private Response response;
     private HttpURLConnection connection;

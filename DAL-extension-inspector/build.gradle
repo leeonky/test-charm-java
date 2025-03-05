@@ -4,6 +4,7 @@ dependencies {
     testImplementation 'org.slf4j:slf4j-simple:1.7.31'
     testImplementation 'org.slf4j:slf4j-api:1.8.0-beta4'
     testImplementation project(':DAL-extension-basic')
+    testImplementation project(':RESTful-cucumber')
     testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
     testImplementation "org.awaitility:awaitility:4.0.2"
 }

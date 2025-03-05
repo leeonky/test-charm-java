@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 
 public class InspectorToolExtension implements Extension {
@@ -8,9 +9,9 @@ public class InspectorToolExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("watch", metaData -> {
-                    Object instance = metaData.data().instance();
-                    Inspector.watch(dal, metaData.runtimeContext(), metaData.inputNode().inspect(), instance);
-                    return instance;
+                    Data data = metaData.data();
+                    Inspector.watch(dal, metaData.inputNode().inspect(), data);
+                    return data.instance();
                 });
     }
 }
