@@ -35,7 +35,7 @@ public class HexDumper implements Dumper {
     }
 
     private static String toChar(byte c) {
-        return format("%c", Character.isValidCodePoint(c) ? c : '.');
+        return format("%c", Character.isValidCodePoint(c) && !Character.isISOControl(c) ? c : '.');
     }
 
     private static void appendPlaceholders(int lineCount, StringBuilder builder, int length) {

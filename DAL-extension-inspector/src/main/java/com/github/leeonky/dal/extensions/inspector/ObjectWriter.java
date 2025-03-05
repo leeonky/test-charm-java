@@ -37,7 +37,7 @@ class ObjectWriter {
             for (Object e : ((Iterable<?>) data))
                 appendEntry(parent, "__item", e);
         else
-            parent.appendChild(doc.createTextNode(String.valueOf(String.valueOf(data))));
+            parent.appendChild(doc.createTextNode(String.valueOf(data)));
     }
 
     public static String serialize(Object data) {
