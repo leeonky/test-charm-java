@@ -18,7 +18,7 @@
         <label class="auto-execute switch">
             <input type="checkbox" hidden x-model="autoExecute"/>
             <span class="custom-checkbox"></span>
-            <span>Auto Execute</span>
+            <span>Auto</span>
         </label>
         <div class="flex align-center gap-10">
             <span>Remote:</span>
@@ -55,7 +55,7 @@
                          x-init="$nextTick(() => dalIns.activeWorkspace = 0)">
                         <div class="tab-headers workspace-headers" x-show="dalIns.workspaces.length > 1">
                             <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
-                                <div class="tab-header" :target="index" x-text="index"></div>
+                                <div class="tab-header flex" :target="index" x-text="index"></div>
                             </template>
                         </div>
                         <div class="tab-contents workspace-contents">
@@ -66,7 +66,7 @@
                                               :class='workspace.editorStatus(dalIns.connected)'></textarea>
                                     <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)">
                                         <div class="tab-headers">
-                                            <div class="controls">
+                                            <div class="controls flex">
                                                 <button class="control-button btn-sm run"
                                                         @click="workspace.run()"
                                                         title="Execute"></button>
@@ -76,9 +76,15 @@
                                                 <button class="control-button btn-sm pass"
                                                         @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
                                                         title="Pass Test"></button>
-                                                <button class="control-button btn-sm new"
-                                                        @click="dalIns.duplicateWorkspace(workspace)"
-                                                        title="New workspace"></button>
+                                                <div class="flex">
+                                                    <button class="control-button btn-sm new"
+                                                            @click="dalIns.duplicateWorkspace(workspace)"
+                                                            title="New workspace"></button>
+                                                    <button class="control-button btn-sm dismiss"
+                                                            @click="dalIns.dismiss(workspace)"
+                                                            x-show='workspace.closable'
+                                                            title="Remove workspace"></button>
+                                                </div>
                                             </div>
                                             <template x-for="outputTab in outputTabs" :key="outputTab">
                                                 <div class="tab-header" :target="outputTab"

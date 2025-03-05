@@ -1,6 +1,6 @@
 Feature: workspace
 
-  Scenario: copy new workspace with exist code
+  Background:
     Given Inspector in "FORCED" mode
     Given launch inspector web server
     Given launch inspector web page
@@ -13,6 +13,8 @@ Feature: workspace
       """
       ::inspect
       """
+
+  Scenario: copy new workspace with exist code
     When you:
       """
       WorkBench::await[Ins1].newWorkspace
@@ -126,4 +128,17 @@ Feature: workspace
 
           Inspect: ''
       }
+      """
+# remove
+    When you:
+      """
+      WorkBench[Ins1].Workspace[1].dismiss
+      """
+    Then you should see:
+      """
+      WorkBench[Ins1]::eventually: {
+        Workspace.Current.header: '0'
+      }
+      WorkBench[Ins1].Workspace[0].DAL.value: '{}'
+      WorkBench[Ins1].Workspace[1].DAL.value: '{}= hello'
       """

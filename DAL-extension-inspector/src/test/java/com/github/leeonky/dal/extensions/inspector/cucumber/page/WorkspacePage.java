@@ -80,4 +80,8 @@ public class WorkspacePage {
     public void newWorkspace() {
         panel.byCss(".new").click();
     }
+
+    public void dismiss() {
+        panel.byCss(".dismiss").click();
+    }
 }

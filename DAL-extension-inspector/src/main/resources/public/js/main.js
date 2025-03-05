@@ -48,7 +48,8 @@ class WSSession {
         setupWebSocket()
     }
 }
-const newWorkspace = (code, name) => {
+
+const Workspace = (code, name) => {
     return Alpine.reactive({
         result: {
             root: '',
@@ -58,12 +59,12 @@ const newWorkspace = (code, name) => {
         },
         active: '',
         code: code,
+        closable: false,
         setResult(result) {
             this.result = result;
             this.active = result.error ? 'error' : (result.result ? 'result' : 'root');
         },
         __executing: false,
-
         async run() {
             this.__executing = true
             const response = await fetch('/api/execute?name=' + name, {
@@ -85,24 +86,31 @@ const newWorkspace = (code, name) => {
     })
 }
 
-const dalInstance = (name) => {
+const DalInstance = (name) => {
     return {
-        workspaces: [newWorkspace('', name)],
+        workspaces: [Workspace('', name)],
         activeWorkspace: null,
         name: name,
-        __executing: false,
         connected: true,
         async attach(code) {
             this.workspaces[0].code = code
             this.connected = true
             await this.workspaces[0].run()
         },
+        syncWorkspaceIndex(workspace) {
+          this.activeWorkspace = this.workspaces.indexOf(workspace)
+        },
         duplicateWorkspace(workspace) {
-          const index = this.workspaces.indexOf(workspace)
-          const copy = newWorkspace(workspace.code, name)
-          this.workspaces.splice(index + 1, 0, copy)
-          this.activeWorkspace = index
+          this.syncWorkspaceIndex(workspace)
+          const newWorkspace = Workspace(workspace.code, name)
+          newWorkspace.closable = true
+          this.workspaces.splice(this.activeWorkspace + 1, 0, newWorkspace)
           this.activeWorkspace += 1
+        },
+        dismiss(workspace) {
+          this.syncWorkspaceIndex(workspace)
+          this.workspaces.splice(this.activeWorkspace, 1)
+          this.activeWorkspace -= 1
         }
     }
 }
@@ -112,7 +120,7 @@ const appData = () => {
         session: '',
         autoExecute: true,
         dalMonitorConfigs: [],
-        dalInstances: [dalInstance('Try It!')],
+        dalInstances: [DalInstance('Try It!')],
         activeInstance: null,
         exchangeSession: null,
         outputTabs: ['root', 'result', 'error', 'inspect'],
@@ -141,7 +149,7 @@ const appData = () => {
             if (code) {
                 let target = this.dalInstances.find(e => e.name === dalName)
                 if(!target) {
-                    target = dalInstance(dalName);
+                    target = DalInstance(dalName);
                     this.dalInstances = this.dalInstances.filter(e => e.name !== dalName)
                     this.dalInstances.splice(this.dalInstances.length - 1, 0, target)
                 }
