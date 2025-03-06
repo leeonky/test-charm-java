@@ -108,7 +108,6 @@ Feature: async
       Given the following java class:
       """
       public class Data {
-        private Instant time = Instant.now();
         private int i = 0;
 
         public int getInt() {
@@ -317,4 +316,86 @@ Feature: async
       Then the following should pass:
       """
       ::await.int= 100
+      """
+
+    Scenario: default timeout is waiting time when set null to default timeout
+      Given the following java class:
+      """
+      public class Data {
+        public Data() {
+          Retryer.setDefaultTimeout(0);
+        }
+        private int i = 1;
+
+        public int getInt() throws Exception {
+            Thread.sleep(100);
+            i++;
+            Thread.sleep(100);
+            i++;
+            return 100;
+        }
+
+        public int getInt2() {
+            return i;
+        }
+      }
+      """
+      Then the following should pass:
+      """
+      : {
+        ::await(0.1s).int::throw: {...}
+
+        int2= 2
+      }
+      """
+
+    Scenario: default timeout is waiting time when default timeout less than waiting time
+      Given the following java class:
+      """
+      public class Data {
+        public Data() {
+          Retryer.setDefaultTimeout(10);
+        }
+        private int i = 1;
+
+        public int getInt() throws Exception {
+            Thread.sleep(100);
+            i++;
+            Thread.sleep(100);
+            i++;
+            return 100;
+        }
+
+        public int getInt2() {
+            return i;
+        }
+      }
+      """
+      Then the following should pass:
+      """
+      : {
+        ::await(0.14s).int::throw: {...}
+
+        int2= 2
+      }
+      """
+
+    Scenario: default timeout more than waiting time
+      Given the following java class:
+      """
+      public class Data {
+        public Data() {
+          Retryer.setDefaultTimeout(300);
+        }
+        public int getInt() throws Exception {
+            Thread.sleep(200);
+            return 100;
+        }
+      }
+      """
+      Then the following should pass:
+      """
+      : {
+        ::await(0.1s).int= 100
+      }
       """

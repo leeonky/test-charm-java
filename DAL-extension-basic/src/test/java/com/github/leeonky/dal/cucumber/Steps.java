@@ -5,6 +5,7 @@ import com.github.leeonky.dal.extensions.basic.Diff;
 import com.github.leeonky.dal.extensions.basic.sftp.util.SFtp;
 import com.github.leeonky.dal.extensions.basic.sync.Await;
 import com.github.leeonky.dal.extensions.basic.sync.Eventually;
+import com.github.leeonky.dal.extensions.basic.sync.Retryer;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.JavaCompiler;
@@ -30,7 +31,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +64,7 @@ public class Steps {
         javaCompiler = JAVA_COMPILER_POOL.take();
         Eventually.setDefaultWaitingTime(5000);
         Await.setDefaultWaitingTime(5000);
+        Retryer.setDefaultTimeout(36000 * 1000);
     }
 
     @SneakyThrows
@@ -272,7 +274,7 @@ public class Steps {
     @SneakyThrows
     @Given("the following java class:")
     public void theFollowingJavaClass(String code) {
-        input = javaCompiler.compileToClasses(Arrays.asList(
+        input = javaCompiler.compileToClasses(Collections.singletonList(
                 "import com.github.leeonky.dal.*;\n" +
                         "import com.github.leeonky.dal.type.*;\n" +
                         "import com.github.leeonky.util.*;\n" +

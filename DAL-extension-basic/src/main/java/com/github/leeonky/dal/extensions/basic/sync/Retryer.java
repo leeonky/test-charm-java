@@ -4,9 +4,12 @@ import com.github.leeonky.util.Suppressor;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 public class Retryer {
+    private static int defaultTimeout = 0;
     private final int waitingTime;
     private final int interval;
 
@@ -15,12 +18,23 @@ public class Retryer {
         this.interval = interval;
     }
 
+    public static void setDefaultTimeout(int ms) {
+        defaultTimeout = ms;
+    }
+
+    public static int defaultTimeout() {
+        return defaultTimeout;
+    }
+
     public <T> T get(Supplier<T> s) throws Throwable {
         Throwable exception;
         Instant start = Instant.now();
         do {
             try {
-                return s.get();
+                return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime, defaultTimeout),
+                        java.util.concurrent.TimeUnit.MILLISECONDS);
+            } catch (ExecutionException e) {
+                exception = e.getCause();
             } catch (Throwable e) {
                 exception = e;
             }
