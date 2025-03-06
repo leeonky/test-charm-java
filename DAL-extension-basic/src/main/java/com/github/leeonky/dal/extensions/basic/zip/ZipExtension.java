@@ -7,9 +7,12 @@ import com.github.leeonky.dal.extensions.basic.zip.util.ZipNodeDumper;
 import com.github.leeonky.dal.extensions.basic.zip.util.ZipNodeJavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.TextAttribute;
+import com.github.leeonky.dal.runtime.TextFormatter;
 
 import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAll;
 import static com.github.leeonky.dal.extensions.basic.file.util.FileGroup.register;
+import static com.github.leeonky.dal.extensions.basic.zip.Methods.gzip;
 
 @SuppressWarnings("unused")
 public class ZipExtension implements Extension {
@@ -24,7 +27,16 @@ public class ZipExtension implements Extension {
                 .registerPropertyAccessor(ZipBinary.ZipNode.class, new ZipNodeJavaClassPropertyAccessor())
                 .registerDumper(ZipBinary.class, data -> ZIP_BINARY_DUMPER)
                 .registerDumper(ZipBinary.ZipNode.class, data -> ZIP_NODE_DUMPER)
-        ;
+                .registerTextFormatter("GZIP", new TextFormatter<Object, byte[]>() {
+                    @Override
+                    protected byte[] format(Object content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
+                        if (content instanceof byte[]) {
+                            return gzip((byte[]) content);
+                        } else if (content instanceof String)
+                            return gzip((String) content);
+                        throw new IllegalArgumentException("Unsupported type for GZIP: " + content.getClass());
+                    }
+                });
 
         register("zip", inputStream -> new ZipBinary(readAll(inputStream)));
         register("ZIP", inputStream -> new ZipBinary(readAll(inputStream)));
