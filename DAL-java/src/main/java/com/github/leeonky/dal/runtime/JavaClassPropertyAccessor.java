@@ -3,7 +3,6 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.NoSuchAccessorException;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -26,7 +25,7 @@ public class JavaClassPropertyAccessor<T> implements PropertyAccessor<T> {
     }
 
     @Override
-    public Set<Object> getPropertyNames(T instance) {
-        return new LinkedHashSet<>(beanClass.getPropertyReaders().keySet());
+    public Set<?> getPropertyNames(T instance) {
+        return beanClass.getPropertyReaders().keySet();
     }
 }

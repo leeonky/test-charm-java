@@ -1,7 +1,10 @@
 package com.github.leeonky.dal.extensions.basic.zip;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.basic.zip.util.*;
+import com.github.leeonky.dal.extensions.basic.zip.util.ZipBinary;
+import com.github.leeonky.dal.extensions.basic.zip.util.ZipBinaryDumper;
+import com.github.leeonky.dal.extensions.basic.zip.util.ZipNodeDumper;
+import com.github.leeonky.dal.extensions.basic.zip.util.ZipNodeJavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
@@ -18,7 +21,6 @@ public class ZipExtension implements Extension {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
         runtimeContextBuilder.registerStaticMethodExtension(Methods.class)
                 .registerImplicitData(ZipBinary.ZipNode.class, ZipBinary.ZipNode::open)
-                .registerPropertyAccessor(ZipBinary.class, new ZipBinaryJavaClassPropertyAccessor())
                 .registerPropertyAccessor(ZipBinary.ZipNode.class, new ZipNodeJavaClassPropertyAccessor())
                 .registerDumper(ZipBinary.class, data -> ZIP_BINARY_DUMPER)
                 .registerDumper(ZipBinary.ZipNode.class, data -> ZIP_NODE_DUMPER)

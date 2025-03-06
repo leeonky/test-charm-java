@@ -5,6 +5,7 @@ import com.github.leeonky.dal.runtime.*;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
@@ -17,13 +18,28 @@ public class Types implements Extension {
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
         builder.registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
-                .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(builder))
                 .registerDALCollectionFactory(Iterable.class, IterableDALCollection::new)
                 .registerDALCollectionFactory(Collection.class, CollectionDALCollection::new)
-                .registerPropertyAccessor(Callable.class, new CallableJavaClassPropertyAccessor())
                 .registerDALCollectionFactory(Stream.class, (stream) ->
                         new IterableDALCollection<Object>(stream::iterator))
                 .registerDALCollectionFactory(DALCollection.class, instance -> instance)
-                .registerDataRemark(DataRemarkParameterAcceptor.class, RemarkData::acceptRemarkAsParameter);
+                .registerDataRemark(DataRemarkParameterAcceptor.class, RemarkData::acceptRemarkAsParameter)
+                .registerPropertyAccessor(ProxyObject.class, new PropertyAccessor<ProxyObject>() {
+                    @Override
+                    public Object getValue(ProxyObject proxyObject, Object property) {
+                        return proxyObject.getValue(property);
+                    }
+
+                    @Override
+                    public Set<?> getPropertyNames(ProxyObject proxyObject) {
+                        return proxyObject.getPropertyNames();
+                    }
+
+                    @Override
+                    public boolean isNull(ProxyObject proxyObject) {
+                        return proxyObject.isNull();
+                    }
+                })
+        ;
     }
 }

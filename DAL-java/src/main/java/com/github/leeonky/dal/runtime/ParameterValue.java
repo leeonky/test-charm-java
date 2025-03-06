@@ -7,7 +7,7 @@ import java.lang.reflect.Parameter;
 
 import static com.github.leeonky.util.NumberType.boxedClass;
 
-class ParameterValue {
+public class ParameterValue {
     private final Parameter parameter;
     private final Object value;
 

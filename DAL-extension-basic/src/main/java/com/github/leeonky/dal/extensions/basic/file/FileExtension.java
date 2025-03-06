@@ -1,7 +1,10 @@
 package com.github.leeonky.dal.extensions.basic.file;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.basic.file.util.*;
+import com.github.leeonky.dal.extensions.basic.file.util.FileDALCollectionFactory;
+import com.github.leeonky.dal.extensions.basic.file.util.FileJavaClassPropertyAccessor;
+import com.github.leeonky.dal.extensions.basic.file.util.ToString;
+import com.github.leeonky.dal.extensions.basic.file.util.Util;
 import com.github.leeonky.dal.runtime.Extension;
 
 import java.io.File;
@@ -20,7 +23,6 @@ public class FileExtension implements Extension {
                 .registerImplicitData(File.class, file -> get(() -> new FileInputStream(file)))
                 .registerDALCollectionFactory(File.class, new FileDALCollectionFactory())
                 .registerPropertyAccessor(File.class, new FileJavaClassPropertyAccessor())
-                .registerPropertyAccessor(FileGroup.class, new FileGroupJavaClassPropertyAccessor())
                 .registerDumper(File.class, data -> ((File) data.instance()).isDirectory()
                         ? Util.FILE_DIR_DUMPER : Util.FILE_FILE_DUMPER);
         dal.getRuntimeContextBuilder().getConverter()

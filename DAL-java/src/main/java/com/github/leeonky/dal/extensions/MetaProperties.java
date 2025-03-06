@@ -41,32 +41,17 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty("throw", MetaProperties::throw_)
                 .registerMetaProperty("object", MetaProperties::object_)
                 .registerMetaProperty("keys", MetaProperties::keys)
-                .registerPropertyAccessor(OriginalJavaObject.class, new PropertyAccessor<OriginalJavaObject>() {
-                    @Override
-                    public Object getValue(OriginalJavaObject javaObject, Object property) {
-                        return javaObject.getValue(property);
-                    }
-
-                    @Override
-                    public Set<Object> getPropertyNames(OriginalJavaObject javaObject) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isNull(OriginalJavaObject instance) {
-                        return false;
-                    }
-                })
         ;
     }
 
-    static class OriginalJavaObject {
+    static class OriginalJavaObject implements ProxyObject {
         private final Data data;
 
         public OriginalJavaObject(Data data) {
             this.data = data;
         }
 
+        @Override
         public Object getValue(Object property) {
             try {
                 Object instance = data.instance();
@@ -74,6 +59,11 @@ public class MetaProperties implements Extension {
             } catch (NoSuchAccessorException ignore) {
                 return data.getValue(property).instance();
             }
+        }
+
+        @Override
+        public Set<?> getPropertyNames() {
+            return BeanClass.createFrom(data.instance()).getPropertyReaders().keySet();
         }
     }
 }

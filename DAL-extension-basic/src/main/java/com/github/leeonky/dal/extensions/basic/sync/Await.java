@@ -2,6 +2,7 @@ package com.github.leeonky.dal.extensions.basic.sync;
 
 import com.github.leeonky.dal.extensions.basic.TimeUtil;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.ProxyObject;
 import com.github.leeonky.util.Suppressor;
 
 import java.time.Duration;
@@ -9,7 +10,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.function.Function;
 
-public class Await {
+public class Await implements ProxyObject {
     private static int defaultWaitingTime = 5000;
     private final Data data;
     private final int interval;
@@ -54,7 +55,13 @@ public class Await {
         return new Await(data, TimeUtil.parseTime(s), waitingTime);
     }
 
-    public Set<Object> fieldNames() {
+    @Override
+    public Object getValue(Object property) {
+        return Suppressor.get(() -> await(data -> data.getValue(property).instance()));
+    }
+
+    @Override
+    public Set<?> getPropertyNames() {
         return data.fieldNames();
     }
 }

@@ -6,8 +6,6 @@ import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Suppressor;
 
-import java.util.Set;
-
 public class AwaitExtension implements Extension {
     @Override
     public void extend(DAL dal) {
@@ -31,18 +29,7 @@ public class AwaitExtension implements Extension {
                 })
                 .registerMetaProperty(Await.class, "every", metaData ->
                         (DataRemarkParameterAcceptor<Await>) s -> ((Await) metaData.data().instance()).interval(s))
-                .registerPropertyAccessor(Await.class, new PropertyAccessor<Await>() {
-
-                    @Override
-                    public Object getValue(Await await, Object property) {
-                        return Suppressor.get(() -> await.await(data -> data.getValue(property).instance()));
-                    }
-
-                    @Override
-                    public Set<Object> getPropertyNames(Await await) {
-                        return await.fieldNames();
-                    }
-                });
+        ;
     }
 
     private static abstract class AwaitVerification implements Operation {

@@ -14,7 +14,7 @@ public class PathJavaClassPropertyAccessor extends JavaClassPropertyAccessor<Pat
     }
 
     @Override
-    public Set<Object> getPropertyNames(Path path) {
+    public Set<?> getPropertyNames(Path path) {
         File file = path.toFile();
         return file.isDirectory() ? Util.listFileNames(file) : super.getPropertyNames(path);
     }

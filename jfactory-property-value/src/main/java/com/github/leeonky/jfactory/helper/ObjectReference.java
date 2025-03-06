@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory.helper;
 
+import com.github.leeonky.dal.runtime.ProxyObject;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,7 +11,7 @@ import static com.github.leeonky.jfactory.helper.ObjectReference.RawType.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
-public class ObjectReference {
+public class ObjectReference implements ProxyObject {
     private final LinkedHashMap<String, ObjectReference> fields = new LinkedHashMap<>();
     private final LinkedHashMap<Integer, ObjectReference> elements = new LinkedHashMap<>();
     private Object value;
@@ -89,6 +91,13 @@ public class ObjectReference {
     public void clear() {
         fields.clear();
         elements.clear();
+    }
+
+    @Override
+    public Object getValue(Object property) {
+        if (property.equals("_"))
+            return new LegacyTraitSetter(this);
+        return add((String) property);
     }
 
     public enum RawType {

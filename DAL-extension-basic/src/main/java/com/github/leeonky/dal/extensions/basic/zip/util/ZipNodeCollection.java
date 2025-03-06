@@ -1,12 +1,13 @@
 package com.github.leeonky.dal.extensions.basic.zip.util;
 
+import com.github.leeonky.dal.runtime.ProxyObject;
 import com.github.leeonky.util.InvocationException;
 
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 
-public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode> {
+public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode>, ProxyObject {
     protected final Map<String, ZipBinary.ZipNode> children = new LinkedHashMap<>();
 
     public Set<String> list() {
@@ -36,9 +37,19 @@ public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode> {
 
     public void addNode(LinkedList<String> path, ZipEntry zipEntry, byte[] bytes) {
         String name = path.pop();
-        if (path.size() == 0)
+        if (path.isEmpty())
             children.put(name, new ZipBinary.ZipNode(zipEntry, name, bytes));
         else
             children.get(name).addNode(path, zipEntry, bytes);
+    }
+
+    @Override
+    public Set<?> getPropertyNames() {
+        return list();
+    }
+
+    @Override
+    public Object getValue(Object property) {
+        return getSub((String) property);
     }
 }

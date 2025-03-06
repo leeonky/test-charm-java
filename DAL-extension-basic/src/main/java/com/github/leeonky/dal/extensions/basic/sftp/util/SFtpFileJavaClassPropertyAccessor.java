@@ -19,7 +19,7 @@ public class SFtpFileJavaClassPropertyAccessor extends JavaClassPropertyAccessor
     }
 
     @Override
-    public Set<Object> getPropertyNames(SFtpFile sFtpFile) {
+    public Set<?> getPropertyNames(SFtpFile sFtpFile) {
         return sFtpFile.isDir() ? sFtpFile.ls().stream().map(SFtpFile::name)
                 .collect(toCollection(LinkedHashSet::new)) : super.getPropertyNames(sFtpFile);
     }

@@ -78,7 +78,7 @@ public class Actual {
                 || Verification.errorLog(value.errorMessage(property, actual.instance()));
     }
 
-    public Stream<Object> fieldNames() {
+    public Stream<?> fieldNames() {
         return actual.fieldNames().stream();
     }
 

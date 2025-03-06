@@ -1,10 +1,17 @@
 package com.github.leeonky.jfactory.helper;
 
+import com.github.leeonky.dal.runtime.ProxyObject;
+
 import java.util.ArrayList;
 
 import static java.util.Collections.emptyMap;
 
-public class Specs extends ArrayList<Specs.SpecData> {
+public class Specs extends ArrayList<Specs.SpecData> implements ProxyObject {
+
+    @Override
+    public Object getValue(Object property) {
+        return addData((String) property).getData();
+    }
 
     public static class SpecData {
         private final String traitSpec;

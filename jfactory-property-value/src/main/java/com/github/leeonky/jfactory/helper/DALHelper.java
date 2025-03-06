@@ -5,10 +5,8 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static com.github.leeonky.jfactory.helper.ObjectReference.RawType.*;
-import static java.util.Collections.emptySet;
 import static java.util.Optional.of;
 
 public class DALHelper {
@@ -16,9 +14,7 @@ public class DALHelper {
         DAL dal = new DAL("JFactory").extend();
         overrideOptEqual(dal);
         overrideOptMatch(dal);
-        implementPropertyAssignment(dal);
         implementListElementAssignment(dal);
-        implementCollectionSpec(dal);
         implementTraitSpec(dal);
         implementForceCreation(dal);
 
@@ -26,20 +22,6 @@ public class DALHelper {
                 dumpingBuffer.dump(dumpingBuffer.getRuntimeContext()
                         .wrap(((ObjectReference) data.instance()).value())));
         return dal;
-    }
-
-    private void implementCollectionSpec(DAL dal) {
-        dal.getRuntimeContextBuilder().registerPropertyAccessor(Specs.class, new PropertyAccessor<Specs>() {
-            @Override
-            public Object getValue(Specs specs, Object property) {
-                return specs.addData((String) property).getData();
-            }
-
-            @Override
-            public Set<Object> getPropertyNames(Specs instance) {
-                return emptySet();
-            }
-        });
     }
 
     private void implementForceCreation(DAL dal) {
@@ -64,22 +46,6 @@ public class DALHelper {
                         return reference.getElement(position);
                     }
                 });
-    }
-
-    private void implementPropertyAssignment(DAL dal) {
-        dal.getRuntimeContextBuilder().registerPropertyAccessor(ObjectReference.class, new PropertyAccessor<ObjectReference>() {
-            @Override
-            public Object getValue(ObjectReference builder, Object property) {
-                if (property.equals("_"))
-                    return new LegacyTraitSetter(builder);
-                return builder.add((String) property);
-            }
-
-            @Override
-            public Set<Object> getPropertyNames(ObjectReference instance) {
-                return emptySet();
-            }
-        });
     }
 
     private void overrideOptMatch(DAL dal) {

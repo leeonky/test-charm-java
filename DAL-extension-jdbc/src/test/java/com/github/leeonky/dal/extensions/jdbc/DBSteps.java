@@ -64,7 +64,7 @@ public class DBSteps {
 
     @And("define to to upper name method on products row")
     public void defineToToUpperNameMethodOnProductsRow() {
-        builder.tableStrategy("products").registerRowMethod("upperName", row -> ((String) row.column("name")).toUpperCase());
+        builder.tableStrategy("products").registerRowMethod("upperName", row -> ((String) row.value("name")).toUpperCase());
     }
 
     @When("define to to hasMany skus method on products row")

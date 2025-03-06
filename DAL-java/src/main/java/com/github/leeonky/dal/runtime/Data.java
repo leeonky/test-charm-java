@@ -31,7 +31,7 @@ public class Data {
         return instance;
     }
 
-    public Set<Object> fieldNames() {
+    public Set<?> fieldNames() {
         return context.findPropertyReaderNames(instance);
     }
 
@@ -138,7 +138,7 @@ public class Data {
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {
         List<InstanceCurryingMethod> methods = context.methodToCurrying(named(instance.getClass()), property).stream()
-                .map(method -> createCurryingMethod(instance, method, context.getConverter())).collect(toList());
+                .map(method -> createCurryingMethod(instance, method, context.getConverter(), context)).collect(toList());
         if (!methods.isEmpty())
             return of(new CurryingMethodGroup(methods, null));
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));

@@ -39,7 +39,7 @@ public class MapDumper implements Dumper.Cacheable {
         return String.valueOf(o);
     }
 
-    protected Set<Object> getFieldNames(Data data) {
+    protected Set<?> getFieldNames(Data data) {
         return data.fieldNames();
     }
 

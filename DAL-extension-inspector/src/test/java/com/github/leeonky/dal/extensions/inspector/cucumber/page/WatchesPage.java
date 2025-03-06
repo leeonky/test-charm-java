@@ -1,13 +1,13 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
-import com.github.leeonky.extensions.dal.DALObject;
+import com.github.leeonky.dal.runtime.ProxyObject;
 
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class WatchesPage implements DALObject {
+public class WatchesPage implements ProxyObject {
     private final Panel panel;
 
     public WatchesPage(Panel panel) {

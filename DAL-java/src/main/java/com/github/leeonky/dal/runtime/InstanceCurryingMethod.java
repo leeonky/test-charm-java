@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Converter;
 
 import java.lang.reflect.Method;
@@ -14,16 +15,18 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-class InstanceCurryingMethod implements CurryingMethod {
+public class InstanceCurryingMethod implements CurryingMethod {
     protected final Object instance;
     protected final Method method;
     protected final Converter converter;
+    protected final DALRuntimeContext context;
     protected final List<ParameterValue> parameterValues = new ArrayList<>();
 
-    protected InstanceCurryingMethod(Object instance, Method method, Converter converter) {
+    protected InstanceCurryingMethod(Object instance, Method method, Converter converter, DALRuntimeContext context) {
         this.method = method;
         this.instance = instance;
         this.converter = converter;
+        this.context = context;
     }
 
     @Override
@@ -44,13 +47,13 @@ class InstanceCurryingMethod implements CurryingMethod {
 
     @Override
     protected InstanceCurryingMethod clone() {
-        return new InstanceCurryingMethod(instance, method, converter);
+        return new InstanceCurryingMethod(instance, method, converter, context);
     }
 
     private String parameterInfo() {
         List<String> parameters = Arrays.stream(method.getParameters()).map(Parameter::toString).collect(toList());
         int argPosition = parameterValues.size() + parameterOffset();
-        if (parameters.size() > 0)
+        if (!parameters.isEmpty())
             parameters.set(argPosition, "> " + parameters.get(argPosition));
         return parameters.stream().collect(joining(",\n", format("%s.%s(\n", method.getDeclaringClass().getName(),
                 method.getName()), "\n)"));
@@ -83,8 +86,8 @@ class InstanceCurryingMethod implements CurryingMethod {
     }
 
     @Override
-    public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
-        BiFunction<Object, List<Object>, List<Object>> rangeFactory = runtimeContextBuilder.fetchCurryingMethodArgRange(method);
+    public Set<Object> fetchArgRange() {
+        BiFunction<Object, List<Object>, List<Object>> rangeFactory = context.fetchCurryingMethodArgRange(method);
         if (rangeFactory != null)
             return new LinkedHashSet<>(rangeFactory.apply(instance, parameterValues.stream()
                     .map(parameterValue -> parameterValue.getArg(converter)).collect(toList())));

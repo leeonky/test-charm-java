@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
+import com.github.leeonky.dal.runtime.ProxyObject;
 import com.github.leeonky.util.Suppressor;
 
 import java.sql.Connection;
@@ -9,7 +10,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
-public class DataBase implements AutoCloseable {
+public class DataBase implements AutoCloseable, ProxyObject {
     public final Connection connection;
     public final DataBaseBuilder builder;
     public Set<String> queriedTables = new LinkedHashSet<>();
@@ -19,7 +20,7 @@ public class DataBase implements AutoCloseable {
         this.builder = builder;
     }
 
-    public Collection<String> allTableNames() {
+    public Set<String> allTableNames() {
         return new LinkedHashSet<String>() {{
             addAll(builder.tablesProvider().apply(Suppressor.get(connection::createStatement)));
             addAll(queriedTables);
@@ -38,6 +39,16 @@ public class DataBase implements AutoCloseable {
     @Override
     public void close() throws Exception {
         connection.close();
+    }
+
+    @Override
+    public Object getValue(Object property) {
+        return table((String) property);
+    }
+
+    @Override
+    public Set<?> getPropertyNames() {
+        return allTableNames();
     }
 
     public class Table<T extends Table<T>> implements Iterable<Row<T>>, CanWhere<T> {
@@ -115,7 +126,7 @@ public class DataBase implements AutoCloseable {
         }
     }
 
-    public class Row<T extends Table<T>> {
+    public class Row<T extends Table<T>> implements ProxyObject {
         protected final T table;
         protected Map<String, Object> data;
 
@@ -124,7 +135,7 @@ public class DataBase implements AutoCloseable {
             this.data = data;
         }
 
-        public Object column(String column) {
+        public Object value(String column) {
             if (data().containsKey(column))
                 return data().get(column);
             return builder.callRowMethod(this, column);
@@ -160,6 +171,21 @@ public class DataBase implements AutoCloseable {
 
         public T table() {
             return table;
+        }
+
+        @Override
+        public Object getValue(Object property) {
+            return value((String) property);
+        }
+
+        @Override
+        public Set<?> getPropertyNames() {
+            return columns();
+        }
+
+        @Override
+        public boolean isNull() {
+            return empty();
         }
     }
 
@@ -240,7 +266,7 @@ public class DataBase implements AutoCloseable {
             super(linkedTable.row, linkedTable.name(), linkedTable.query().on(null));
             this.thoughTable = thoughTable;
             referencedColumn = linkedTable.query().linkColumn() == null ?
-                    "" + builder.resolveReferencedColumn(linkedTable, thoughTable) : linkedTable.query().linkColumn();
+                    builder.resolveReferencedColumn(linkedTable, thoughTable) : linkedTable.query().linkColumn();
         }
 
         public LinkedThroughTable(LinkedTable thoughTable, String referencedColumn,

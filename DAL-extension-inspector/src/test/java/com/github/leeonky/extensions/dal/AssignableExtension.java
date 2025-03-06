@@ -3,11 +3,8 @@ package com.github.leeonky.extensions.dal;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.SingleSetter;
 import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
-
-import java.util.Set;
 
 import static com.github.leeonky.util.BeanClass.cast;
 
@@ -40,17 +37,5 @@ public class AssignableExtension implements Extension {
                             setter.assign(expected.instance());
                             return PHONY_CHECKER;
                         }));
-
-        dal.getRuntimeContextBuilder().registerPropertyAccessor(DALObject.class, new PropertyAccessor<DALObject>() {
-            @Override
-            public Object getValue(DALObject instance, Object property) {
-                return instance.getValue(property);
-            }
-
-            @Override
-            public Set<Object> getPropertyNames(DALObject instance) {
-                return instance.getPropertyNames();
-            }
-        });
     }
 }

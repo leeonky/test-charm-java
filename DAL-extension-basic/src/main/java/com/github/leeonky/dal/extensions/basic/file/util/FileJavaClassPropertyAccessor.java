@@ -13,7 +13,7 @@ public class FileJavaClassPropertyAccessor extends JavaClassPropertyAccessor<Fil
     }
 
     @Override
-    public Set<Object> getPropertyNames(File file) {
+    public Set<?> getPropertyNames(File file) {
         return file.isDirectory() ? Util.listFileNames(file) : super.getPropertyNames(file);
     }
 

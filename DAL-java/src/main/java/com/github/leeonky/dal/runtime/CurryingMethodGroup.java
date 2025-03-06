@@ -63,9 +63,8 @@ class CurryingMethodGroup implements CurryingMethod {
     }
 
     @Override
-    public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
-        return queryResolvedMethod().map(method ->
-                method.fetchArgRange(runtimeContextBuilder)).orElseGet(Collections::emptySet);
+    public Set<Object> fetchArgRange() {
+        return queryResolvedMethod().map(InstanceCurryingMethod::fetchArgRange).orElseGet(Collections::emptySet);
     }
 
     private Optional<InstanceCurryingMethod> queryResolvedMethod() {

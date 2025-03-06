@@ -1,19 +1,14 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.jdbc.DataBase.Row;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.MapDumper;
-import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.stream.StreamSupport.stream;
@@ -32,48 +27,9 @@ public class JDBCExtension implements Extension {
                 .registerMetaProperty(DataBase.Row.class, "hasOne", MetaProperties::hasOne)
                 .registerMetaProperty(Association.class, "through", MetaProperties::through)
 
-                .registerPropertyAccessor(DataBase.class, new DataBaseJavaClassPropertyAccessor())
-                .registerPropertyAccessor(Row.class, new RowJavaClassPropertyAccessor())
                 .registerDumper(DataBase.Table.class, data -> new TableDumper())
                 .registerDumper(DataBase.class, data -> new DataBaseDumper())
         ;
-    }
-
-    private static class RowJavaClassPropertyAccessor extends JavaClassPropertyAccessor<Row> {
-        public RowJavaClassPropertyAccessor() {
-            super(BeanClass.create(Row.class));
-        }
-
-        @Override
-        public Set<Object> getPropertyNames(Row row) {
-            return new LinkedHashSet<>(row.columns());
-        }
-
-        @Override
-        public Object getValue(Row row, Object property) {
-            return row.column((String) property);
-        }
-
-        @Override
-        public boolean isNull(Row row) {
-            return row.empty();
-        }
-    }
-
-    private static class DataBaseJavaClassPropertyAccessor extends JavaClassPropertyAccessor<DataBase> {
-        public DataBaseJavaClassPropertyAccessor() {
-            super(BeanClass.create(DataBase.class));
-        }
-
-        @Override
-        public Set<Object> getPropertyNames(DataBase dataBase) {
-            return new LinkedHashSet<>(dataBase.allTableNames());
-        }
-
-        @Override
-        public Object getValue(DataBase dataBase, Object property) {
-            return dataBase.table((String) property);
-        }
     }
 
     private static class TableDumper implements Dumper {

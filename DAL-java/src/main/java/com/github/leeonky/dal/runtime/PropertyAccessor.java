@@ -12,7 +12,7 @@ public interface PropertyAccessor<T> {
 
     Object getValue(T instance, Object property);
 
-    Set<Object> getPropertyNames(T instance);
+    Set<?> getPropertyNames(T instance);
 
     default boolean isNull(T instance) {
         return Objects.equals(instance, null);

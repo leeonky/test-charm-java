@@ -58,7 +58,7 @@ public class Util {
         throw new InvocationException(new FileNotFoundException(format("File or File Group <%s> not found", name)));
     }
 
-    public static Set<Object> listFileNames(File file) {
+    public static Set<String> listFileNames(File file) {
         return listFile(file).stream().map(File::getName).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

@@ -341,7 +341,7 @@ public class RuntimeContextBuilder {
             return Optional.ofNullable(valueConstructors.get(type));
         }
 
-        public Set<Object> findPropertyReaderNames(Object instance) {
+        public Set<?> findPropertyReaderNames(Object instance) {
             return getObjectPropertyAccessor(instance).getPropertyNames(instance);
         }
 
@@ -533,6 +533,10 @@ public class RuntimeContextBuilder {
 
         public PrintStream warningOutput() {
             return warning;
+        }
+
+        public BiFunction<Object, List<Object>, List<Object>> fetchCurryingMethodArgRange(Method method) {
+            return curryingMethodArgRanges.get(method);
         }
     }
 }

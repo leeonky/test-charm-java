@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.NumberType;
 
@@ -10,13 +11,13 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.Suppressor.get;
 
 class StaticCurryingMethod extends InstanceCurryingMethod {
-    public StaticCurryingMethod(Object instance, Method method, Converter converter) {
-        super(instance, method, converter);
+    public StaticCurryingMethod(Object instance, Method method, Converter converter, DALRuntimeContext context) {
+        super(instance, method, converter, context);
     }
 
     @Override
     protected InstanceCurryingMethod clone() {
-        return new StaticCurryingMethod(instance, method, converter);
+        return new StaticCurryingMethod(instance, method, converter, context);
     }
 
     @Override

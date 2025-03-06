@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.basic.file.util;
 
 import com.github.leeonky.dal.runtime.PartialObject;
+import com.github.leeonky.dal.runtime.ProxyObject;
 import com.github.leeonky.util.Suppressor;
 
 import java.io.InputStream;
@@ -10,7 +11,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
 
-public abstract class FileGroup<T> implements PartialObject, Iterable<T> {
+public abstract class FileGroup<T> implements PartialObject, Iterable<T>, ProxyObject {
     protected static final Map<String, Function<InputStream, Object>> fileExtensions = new HashMap<>();
     protected final String name;
 
@@ -31,25 +32,9 @@ public abstract class FileGroup<T> implements PartialObject, Iterable<T> {
         return String.format("%s.%s", name, fileExtension);
     }
 
-    public Object getFile(Object extensionName) {
-        T subFile = createSubFile(fileName(extensionName));
-        Function<InputStream, Object> handler = fileExtensions.get(extensionName);
-        if (handler != null)
-            return Suppressor.get(() -> {
-                try (InputStream open = open(subFile)) {
-                    return handler.apply(open);
-                }
-            });
-        return subFile;
-    }
-
     protected abstract InputStream open(T subFile);
 
     protected abstract T createSubFile(String fileName);
-
-    public Set<String> list() {
-        return listFileNameWithOrder().map(s -> s.substring(name.length() + 1)).collect(toCollection(LinkedHashSet::new));
-    }
 
     protected abstract Stream<String> listFileName();
 
@@ -60,5 +45,32 @@ public abstract class FileGroup<T> implements PartialObject, Iterable<T> {
 
     private Stream<String> listFileNameWithOrder() {
         return listFileName().sorted();
+    }
+
+    public Object getFile(Object property) {
+        T subFile = createSubFile(fileName(property));
+        Function<InputStream, Object> handler = fileExtensions.get(property);
+        if (handler != null)
+            return Suppressor.get(() -> {
+                try (InputStream open = open(subFile)) {
+                    return handler.apply(open);
+                }
+            });
+        return subFile;
+    }
+
+    public Set<String> list() {
+        return listFileNameWithOrder().map(s -> s.substring(name.length() + 1))
+                .collect(toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public Object getValue(Object property) {
+        return getFile(property);
+    }
+
+    @Override
+    public Set<?> getPropertyNames() {
+        return list();
     }
 }
