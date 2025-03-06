@@ -109,24 +109,23 @@ Feature: async
       """
       public class Data {
         private Instant time = Instant.now();
+        private int i = 0;
 
         public int getInt() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1 )
-            return 100;
-           return -1;
+           return i++;
         }
       }
       """
       When evaluate by:
       """
-      ::eventually::in(1.5s)::every(2s): {
+      ::eventually::in(1s)::every(0.5s): {
         int: 100
       }
       """
       Then failed with the message:
       """
 
-      ::eventually::in(1.5s)::every(2s): {
+      ::eventually::in(1s)::every(0.5s): {
         int: 100
              ^
       }
@@ -135,11 +134,11 @@ Feature: async
       <100>
        ^
       Actual: java.lang.Integer
-      <-1>
+      <2>
        ^
 
       The root value was: #package#Data {
-          int: java.lang.Integer <-1>
+          int: java.lang.Integer <3>
       }
       """
 
@@ -264,40 +263,41 @@ Feature: async
     Scenario: set interval in DAL
       Given the following java class:
       """
-      public class DataList {
-        public static class Data {
-          public int i,j;
-        }
+      public class Data {
         private Instant time = Instant.now();
+        private int i = 0;
 
-        public List<Data> getList() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1) {
-            Data d1 = new Data();
-            d1.i = 1;
-            d1.j = 100;
-            Data d2 = new Data();
-            d2.i = 2;
-            d2.j = 200;
-            return Arrays.asList(d1, d2);
-          }
-          return Arrays.asList();
+        public int getInt() {
+           i++;
+           throw new java.lang.RuntimeException();
+        }
+        public int getInt2() {
+          return i;
         }
       }
       """
       When evaluate by:
       """
-      ::await(1.5s)::every(2s): {list::filter!: {i=1}}
+      ::await(1s)::every(0.5s).int: 100
       """
       Then failed with the message:
       """
 
-      ::await(1.5s)::every(2s): {list::filter!: {i=1}}
-                                             ^
+      ::await(1s)::every(0.5s).int: 100
+                               ^
 
-      Filtered result is empty, try again
+      Get property `int` failed, property can be:
+        1. public field
+        2. public getter
+        3. public no args method
+        4. Map key value
+        5. customized type getter
+        6. static method extension
+      com.github.leeonky.dal.runtime.PropertyAccessException: com.github.leeonky.util.InvocationException: java.lang.RuntimeException
 
-      The root value was: #package#DataList {
-          list: []
+      The root value was: #package#Data {
+          int2: java.lang.Integer <3>,
+          int: *throw* com.github.leeonky.dal.runtime.PropertyAccessException: com.github.leeonky.util.InvocationException: java.lang.RuntimeException
       }
       """
 

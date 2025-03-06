@@ -5,8 +5,6 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ProxyObject;
 import com.github.leeonky.util.Suppressor;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -30,21 +28,8 @@ public class Await implements ProxyObject {
         Await.defaultWaitingTime = ms;
     }
 
-    public <T> T await(Function<Data, T> supplier) throws Exception {
-        Exception exception;
-        int times = waitingTime / interval;
-        Instant now = Instant.now();
-        do {
-            times--;
-            try {
-                return supplier.apply(data);
-            } catch (Exception e) {
-                exception = e;
-                if (times > 0)
-                    Suppressor.run(() -> Thread.sleep(interval));
-            }
-        } while (times > 0 && Duration.between(now, Instant.now()).toMillis() < waitingTime);
-        throw exception;
+    public <T> T await(Function<Data, T> supplier) throws Throwable {
+        return new Retryer(waitingTime, interval).get(() -> supplier.apply(data));
     }
 
     public Await within(String s) {

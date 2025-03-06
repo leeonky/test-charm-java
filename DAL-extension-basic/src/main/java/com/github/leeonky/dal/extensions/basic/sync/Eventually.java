@@ -4,10 +4,6 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.extensions.basic.TimeUtil;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.util.Suppressor;
-
-import java.time.Duration;
-import java.time.Instant;
 
 public class Eventually {
     private static int defaultWaitingTime = 5000;
@@ -29,21 +25,8 @@ public class Eventually {
         Eventually.defaultWaitingTime = defaultWaitingTime;
     }
 
-    public Data verify(DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
-        RuntimeException exception;
-        int times = waitingTime / interval;
-        Instant now = Instant.now();
-        do {
-            times--;
-            try {
-                return context.calculate(data, operator, v2);
-            } catch (RuntimeException e) {
-                exception = e;
-                if (times > 0)
-                    Suppressor.run(() -> Thread.sleep(interval));
-            }
-        } while (times > 0 && Duration.between(now, Instant.now()).toMillis() < waitingTime);
-        throw exception;
+    public Data verify(DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) throws Throwable {
+        return new Retryer(waitingTime, interval).get(() -> context.calculate(data, operator, v2));
     }
 
     public Eventually within(String s) {
