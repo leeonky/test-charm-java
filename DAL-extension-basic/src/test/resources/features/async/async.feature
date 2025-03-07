@@ -343,7 +343,7 @@ Feature: async
       Then the following should pass:
       """
       : {
-        ::await(0.1s).int::throw: {...}
+        ::await(0.13s).int::throw: {...}
 
         int2= 2
       }

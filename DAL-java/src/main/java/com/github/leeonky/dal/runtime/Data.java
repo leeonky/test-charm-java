@@ -32,24 +32,24 @@ public class Data {
     }
 
     public Set<?> fieldNames() {
-        return context.findPropertyReaderNames(instance);
+        return context.findPropertyReaderNames(instance());
     }
 
     public boolean isList() {
-        return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
+        return context.isRegisteredList(instance()) || (instance() != null && instance().getClass().isArray());
     }
 
     public DataList list() {
         if (list == null) {
             if (!isList())
                 throw new java.lang.RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
-            list = new DataList(context.createCollection(instance));
+            list = new DataList(context.createCollection(instance()));
         }
         return list;
     }
 
     public boolean isNull() {
-        return context.isNull(instance);
+        return context.isNull(instance());
     }
 
     public Data getValue(List<Object> propertyChain) {
@@ -105,11 +105,11 @@ public class Data {
     }
 
     public Data convert(Class<?> target) {
-        return new Data(context.getConverter().convert(target, instance), context, schemaType);
+        return new Data(context.getConverter().convert(target, instance()), context, schemaType);
     }
 
     public Data map(Function<Object, Object> mapper) {
-        return new Data(mapper.apply(instance), context, schemaType);
+        return new Data(mapper.apply(instance()), context, schemaType);
     }
 
     public Data filter(String prefix) {
@@ -133,7 +133,7 @@ public class Data {
     }
 
     public Optional<CurryingMethod> currying(Object property) {
-        return currying(instance, property);
+        return currying(instance(), property);
     }
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {

@@ -94,3 +94,22 @@ Feature: meta ::throw
     """
     ::throw.message= Error
     """
+
+#  Scenario: should raise interpreter exception first when input code is not valid
+#    Given the following input code:
+#    """
+#    throw new java.lang.RuntimeException("Error");
+#    """
+#    When expect run by the following code:
+#    """
+#    ::throw invalid
+#    """
+#    Then assert error with the message:
+#    """
+#    ::throw invalid
+#            ^
+#
+#    more than one expression
+#
+#    The root value was: InputCode return value was *dump throw* java.lang.RuntimeException: java.lang.RuntimeException: Error
+#    """
