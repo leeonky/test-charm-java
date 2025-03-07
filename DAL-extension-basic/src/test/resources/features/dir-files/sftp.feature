@@ -113,14 +113,12 @@ Feature: sftp
 
   Rule: dump
 
-    @ci-skip
     Scenario: dump root empty dir
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
       sftp user@www.s.com:/tmp/work/test/sftp/
       """
 
-    @ci-skip
     Scenario: dump root dir with one file
       Given a file "/tmp/work/test/sftp/file1.txt"
       """
@@ -128,7 +126,7 @@ Feature: sftp
       """
       And set file attribute "/tmp/work/test/sftp/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x root root 2022-10-09T06:47:01Z
       """
       Then sftp "/tmp/work/test/sftp/" should dump:
       """
@@ -136,7 +134,6 @@ Feature: sftp
       -rwxr-xr-x root root     10 2022-10-09T06:47:01Z file1.txt
       """
 
-    @ci-skip
     Scenario: dump root file
       Given a file "/tmp/work/test/sftp/file1.txt"
       """
@@ -144,7 +141,7 @@ Feature: sftp
       """
       And set file attribute "/tmp/work/test/sftp/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x root root 2022-10-09T06:47:01Z
       """
       Then sftp "/tmp/work/test/sftp/file1.txt" should dump:
       """
@@ -152,7 +149,6 @@ Feature: sftp
       -rwxr-xr-x root root     10 2022-10-09T06:47:01Z file1.txt
       """
 
-    @ci-skip
     Scenario: dump folder
       Given root folder "/tmp/work/test/sftp/dir"
       Given a file "/tmp/work/test/sftp/dir/file1.txt"
@@ -161,7 +157,7 @@ Feature: sftp
       """
       And set file attribute "/tmp/work/test/sftp/dir/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x root root 2022-10-09T06:47:01Z
       """
       Given a file "/tmp/work/test/sftp/dir/file2.txt"
       """
@@ -169,7 +165,7 @@ Feature: sftp
       """
       And set file attribute "/tmp/work/test/sftp/dir/file2.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:11Z
+      rwxr-xr-x root root 2022-10-09T06:47:11Z
       """
       Given root folder "/tmp/work/test/sftp/dir2"
       Then sftp "/tmp/work/test/sftp/" should dump:

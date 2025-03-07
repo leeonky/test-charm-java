@@ -176,14 +176,12 @@ Feature: dir/file with java path
 
   Rule: dump
 
-    @ci-skip
     Scenario: dump empty dir
       Then java.io.path "/tmp/work/test/dir" should dump:
       """
       java.nio.Path /tmp/work/test/dir/
       """
 
-    @ci-skip
     Scenario: dump file
       Given a file "/tmp/work/test/dir/file1.txt"
       """
@@ -191,15 +189,14 @@ Feature: dir/file with java path
       """
       And set file attribute "/tmp/work/test/dir/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x root root 2022-10-09T06:47:01Z
       """
       Then java.io.path "/tmp/work/test/dir/file1.txt" should dump:
       """
       java.nio.Path
-      rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
+      rwxr-xr-x root root      6 2022-10-09T06:47:01Z file1.txt
       """
 
-    @ci-skip
     Scenario: dump folder with file
       Given root folder "/tmp/work/test/dir/sub"
       Given a file "/tmp/work/test/dir/sub/file1.txt"
@@ -208,7 +205,7 @@ Feature: dir/file with java path
       """
       And set file attribute "/tmp/work/test/dir/sub/file1.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:01Z
+      rwxr-xr-x root root 2022-10-09T06:47:01Z
       """
       Given a file "/tmp/work/test/dir/sub/file2.txt"
       """
@@ -216,14 +213,14 @@ Feature: dir/file with java path
       """
       And set file attribute "/tmp/work/test/dir/sub/file2.txt"
       """
-      rwxr-xr-x wheel leeonky 2022-10-09T06:47:11Z
+      rwxr-xr-x root root 2022-10-09T06:47:11Z
       """
       Given root folder "/tmp/work/test/dir/sub2"
       Then java.io.path "/tmp/work/test/dir" should dump:
       """
       java.nio.Path /tmp/work/test/dir/
       sub/
-          rwxr-xr-x wheel leeonky      6 2022-10-09T06:47:01Z file1.txt
-          rwxr-xr-x wheel leeonky      5 2022-10-09T06:47:11Z file2.txt
+          rwxr-xr-x root root      6 2022-10-09T06:47:01Z file1.txt
+          rwxr-xr-x root root      5 2022-10-09T06:47:11Z file2.txt
       sub2/
       """

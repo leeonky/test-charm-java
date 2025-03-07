@@ -184,6 +184,7 @@ public class Steps {
         Path path = Paths.get(pathStr);
         Files.setLastModifiedTime(path, FileTime.from(Instant.parse(attributes[3])));
         Files.setPosixFilePermissions(path, PosixFilePermissions.fromString(attributes[0]));
+        Runtime.getRuntime().exec("sudo chown " + attributes[1] + ":" + attributes[2] + " " + path).waitFor();
     }
 
     @Then("java.io.path {string} should dump:")
