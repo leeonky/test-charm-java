@@ -55,11 +55,11 @@ public class HexDumper implements Dumper {
     }
 
     public static byte[] getBytes(Data data) {
-        if (data.instance() instanceof byte[])
+        if (data.instanceOf(byte[].class))
             return (byte[]) data.instance();
-        if (data.instance() instanceof InputStream)
+        if (data.instanceOf(InputStream.class))
             return readAllAndClose((InputStream) data.instance());
-        if (data.instance() instanceof Byte[]) {
+        if (data.instanceOf(Byte[].class)) {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             data.list().values().forEach(b -> stream.write((byte) b));
             return stream.toByteArray();

@@ -36,7 +36,7 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v2.instance() instanceof ExpectationFactory;
+                return v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
@@ -52,7 +52,7 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v2.instance() instanceof ExpectationFactory;
+                return v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
@@ -68,7 +68,7 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v1.instance() instanceof String || v2.instance() instanceof String;
+                return v1.instanceOf(String.class) || v2.instanceOf(String.class);
             }
 
             @Override
@@ -84,7 +84,7 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v1.instance() instanceof Number && v2.instance() instanceof Number;
+                return v1.instanceOf(Number.class) && v2.instanceOf(Number.class);
             }
 
             @Override

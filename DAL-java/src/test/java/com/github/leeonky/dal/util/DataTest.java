@@ -120,7 +120,7 @@ class DataTest {
         @Test
         void should_raise_error_when_index_out_of_range() {
             assertThrows(PropertyAccessException.class, () ->
-                    runtimeContextBuilder.build(null).wrap(new String[0]).getValue(0));
+                    runtimeContextBuilder.build(null).wrap(new String[0]).getValue(0).instance());
         }
 
         @Test
@@ -158,7 +158,7 @@ class DataTest {
 
     @Nested
     class DumpData {
-        private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
+        private final RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
 
         @Test
         void dump_null_value() {
@@ -168,7 +168,7 @@ class DataTest {
 
     @Nested
     class CurringMethodArgs {
-        private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
+        private final RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
 
         @Test
         void return_null_when_property_is_not_string() {
@@ -203,7 +203,7 @@ class DataTest {
 
     @Nested
     class StaticCurringMethodArgs {
-        private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder()
+        private final RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder()
                 .registerStaticMethodExtension(StaticMethod.class).build(null);
 
         @Test

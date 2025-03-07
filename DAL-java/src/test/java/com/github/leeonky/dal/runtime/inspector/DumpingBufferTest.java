@@ -24,7 +24,7 @@ class DumpingBufferTest {
         builder.registerDumper(Bean.class, d -> new BeanDumper());
         RuntimeContextBuilder.DALRuntimeContext context = builder.build(null);
 
-        assertThat(context.wrap(new Bean()).dumpValue()).isEqualTo("*dump throw* java.lang.RuntimeException: dump error");
-        assertThat(context.wrap(new Bean()).dumpAll()).isEqualTo("*dump throw* java.lang.RuntimeException: dump error");
+        assertThat(context.wrap(new Bean()).dumpValue()).isEqualTo("*throw* java.lang.RuntimeException: dump error");
+        assertThat(context.wrap(new Bean()).dumpAll()).isEqualTo("*throw* java.lang.RuntimeException: dump error");
     }
 }

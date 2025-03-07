@@ -90,7 +90,7 @@ public class ObjectScopeNode extends DALNode {
     }
 
     private Object convertFiled(Data data, Object obj) {
-        return data.instance() instanceof CurryingMethod ?
+        return data.instanceOf(CurryingMethod.class) ?
                 ((CurryingMethod) data.instance()).convertToArgType(obj) : obj;
     }
 

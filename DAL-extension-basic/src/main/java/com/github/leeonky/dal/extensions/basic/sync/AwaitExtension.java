@@ -35,7 +35,7 @@ public class AwaitExtension implements Extension {
     private static abstract class AwaitVerification implements Operation {
         @Override
         public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-            return v1.instance() instanceof Await && v2.instance() instanceof ExpectationFactory;
+            return v1.instanceOf(Await.class) && v2.instanceOf(ExpectationFactory.class);
         }
     }
 }

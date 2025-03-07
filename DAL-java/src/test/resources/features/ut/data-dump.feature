@@ -345,7 +345,7 @@ Feature: dump-data
     """
     #package#Data {
         value: java.lang.Integer <2>,
-        error: *throw* com.github.leeonky.dal.runtime.PropertyAccessException: com.github.leeonky.util.InvocationException: java.lang.RuntimeException: error
+        error: *throw* com.github.leeonky.dal.runtime.PropertyAccessException: java.lang.RuntimeException: error
     }
     """
 
@@ -447,10 +447,10 @@ Feature: dump-data
                   Expected to be equal to: java.lang.String
                                            ^
                   <>
-                  Actual: *dump throw* java.lang.RuntimeException: Error
+                  Actual: *throw* java.lang.RuntimeException: Error
                           ^
 
-                  The root value was: *dump throw* java.lang.RuntimeException: Error
+                  The root value was: *throw* java.lang.RuntimeException: Error
                   ```
     """
 

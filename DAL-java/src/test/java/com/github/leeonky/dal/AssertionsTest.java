@@ -48,8 +48,7 @@ public class AssertionsTest {
             assertThatThrownBy(() -> expectRun(() -> {
                 throw new RuntimeException("Error");
             }).is(BeanSchema.class))
-                    .hasMessageContaining("Input code got exception: java.lang.RuntimeException")
-                    .hasMessageContaining("Error");
+                    .hasMessageContaining("java.lang.RuntimeException: Error");
         }
 
         @Test

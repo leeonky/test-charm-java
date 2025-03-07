@@ -52,7 +52,7 @@ public class DALHelper {
         dal.getRuntimeContextBuilder().registerOperator(Operators.MATCH, new Operation() {
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
-                return v1.instance() instanceof ObjectReference && v2.instance() instanceof ExpectationFactory;
+                return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
@@ -68,9 +68,9 @@ public class DALHelper {
         });
         dal.getRuntimeContextBuilder().checkerSetForMatching()
                 .register((expected, actual) -> {
-                    if (actual.instance() instanceof LegacyTraitSetter)
+                    if (actual.instanceOf(LegacyTraitSetter.class))
                         return of(new OverrideVerificationOptChecker<>(LegacyTraitSetter::addTraitSpec));
-                    return actual.instance() instanceof ObjectReference
+                    return actual.instanceOf(ObjectReference.class)
                             ? of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty();
                 });
     }
@@ -79,7 +79,7 @@ public class DALHelper {
         dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation() {
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
-                return v1.instance() instanceof ObjectReference && v2.instance() instanceof ExpectationFactory;
+                return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
@@ -96,7 +96,7 @@ public class DALHelper {
             }
         });
         dal.getRuntimeContextBuilder().checkerSetForEqualing()
-                .register((expected, actual) -> actual.instance() instanceof ObjectReference
+                .register((expected, actual) -> actual.instanceOf(ObjectReference.class)
                         ? of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty());
     }
 }

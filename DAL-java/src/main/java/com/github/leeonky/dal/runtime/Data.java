@@ -2,7 +2,10 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.util.InvocationException;
+import com.github.leeonky.util.ThrowingSupplier;
 
+import java.lang.RuntimeException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -18,17 +21,41 @@ import static java.util.stream.Collectors.toList;
 public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
-    private final Object instance;
+    private final ThrowingSupplier<?> supplier;
+    private Object instance;
+    private boolean resolved = false;
     private DataList list;
+    private RuntimeException error;
+    private Function<PropertyAccessException, RuntimeException> errorMapper = e -> e;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
-        this.instance = instance;
-        this.schemaType = schemaType;
+        this(() -> instance, context, schemaType);
+    }
+
+    public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
+        this.supplier = supplier;
         this.context = context;
+        this.schemaType = schemaType;
+    }
+
+    public Data mapError(Function<PropertyAccessException, RuntimeException> mapper) {
+        errorMapper = mapper;
+        return this;
     }
 
     public Object instance() {
-        return instance;
+        if (error != null)
+            throw error;
+        if (resolved)
+            return instance;
+        try {
+            resolved = true;
+            return instance = supplier.get();
+        } catch (PropertyAccessException e) {
+            throw error = errorMapper.apply(e);
+        } catch (Throwable e) {
+            throw error = errorMapper.apply(new PropertyAccessException(e.getMessage(), e));
+        }
     }
 
     public Set<?> fieldNames() {
@@ -58,26 +85,36 @@ public class Data {
     }
 
     public Data getValue(Object propertyChain) {
-        try {
-            List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
-            if (chain.size() == 1 && chain.get(0).equals(propertyChain))
-                return new Data(getPropertyValue(propertyChain), context, propertySchema(propertyChain));
-            return getValue(chain);
-        } catch (IndexOutOfBoundsException ex) {
-            throw new PropertyAccessException(ex.getMessage(), ex);
-        } catch (ListMappingElementAccessException ex) {
-            throw new PropertyAccessException(ex.toDalError(0).getMessage(),
-                    ex.propertyAccessException().getCause());
-        } catch (Exception e) {
-            throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
-                            "  1. public field\n" +
-                            "  2. public getter\n" +
-                            "  3. public no args method\n" +
-                            "  4. Map key value\n" +
-                            "  5. customized type getter\n" +
-                            "  6. static method extension\n%s%s",
-                    propertyChain, e.getMessage(), listMappingMessage(this, propertyChain)), e);
+        List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
+        if (chain.size() == 1 && chain.get(0).equals(propertyChain)) {
+            ThrowingSupplier<?> supplier = () -> {
+                try {
+                    return getPropertyValue(propertyChain);
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new PropertyAccessException(ex.getMessage(), ex);
+                } catch (ListMappingElementAccessException ex) {
+                    throw new PropertyAccessException(ex.toDalError(0).getMessage(),
+                            ex.propertyAccessException().getCause());
+                } catch (InvocationException e) {
+                    throw buildPropertyAccessException(propertyChain, e, e.getCause());
+                } catch (Exception e) {
+                    throw buildPropertyAccessException(propertyChain, e, e);
+                }
+            };
+            return new Data(supplier, context, propertySchema(propertyChain));
         }
+        return getValue(chain);
+    }
+
+    private PropertyAccessException buildPropertyAccessException(Object propertyChain, Exception e, Throwable cause) {
+        return new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
+                        "  1. public field\n" +
+                        "  2. public getter\n" +
+                        "  3. public method\n" +
+                        "  4. Map key value\n" +
+                        "  5. customized type getter\n" +
+                        "  6. static method extension\n%s%s",
+                propertyChain, e.getMessage(), listMappingMessage(this, propertyChain)), cause);
     }
 
     private String listMappingMessage(Data data, Object symbol) {
@@ -142,6 +179,14 @@ public class Data {
         if (!methods.isEmpty())
             return of(new CurryingMethodGroup(methods, null));
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
+    }
+
+    public boolean instanceOf(Class<?> type) {
+        try {
+            return type.isInstance(instance());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {

@@ -80,7 +80,7 @@ public class ListExtension implements Extension {
 
         @Override
         public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-            return v1.instance() instanceof Filterable;
+            return v1.instanceOf(Filterable.class);
         }
 
         @Override

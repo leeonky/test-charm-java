@@ -24,7 +24,7 @@ public class EventuallyExtension implements Extension {
     private static class EventuallyVerification implements Operation {
         @Override
         public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-            return v1.instance() instanceof Eventually;
+            return v1.instanceOf(Eventually.class);
         }
 
         @Override

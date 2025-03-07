@@ -44,7 +44,7 @@ public class MapDumper implements Dumper.Cacheable {
     }
 
     protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
-        if (!(data.instance() instanceof Map))
+        if (!(data.instanceOf(Map.class)))
             dumpingBuffer.append(Classes.getClassName(data.instance())).appendThen(" ");
     }
 }

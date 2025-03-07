@@ -2,56 +2,35 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.util.InvocationException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2RuntimeException;
 import static java.lang.String.format;
 
 public class MetaData extends RuntimeData {
-    private Throwable error;
-    private RuntimeException originalException;
     private DALNode inputNode;
     private final Object name;
-    protected Data data;
+//    protected Data data;
 
     public MetaData(DALNode inputNode, Object symbolName, DALRuntimeContext runtimeContext) {
-        super(null, runtimeContext);
+        super(inputNode.evaluateData(runtimeContext), runtimeContext);
         this.inputNode = inputNode;
         name = symbolName;
-        setData(() -> inputNode.evaluateData(runtimeContext()));
+//        setData(() -> inputNode.evaluateData(runtimeContext));
     }
 
-    private MetaData(DALRuntimeContext runtimeContext,
-                     Data data, Throwable error, RuntimeException originalException, String name) {
-        super(null, runtimeContext);
+    private MetaData(DALRuntimeContext runtimeContext, Data data, String name) {
+        super(data, runtimeContext);
         this.name = name;
-        this.error = error;
-        this.originalException = originalException;
-        this.data = data;
+//        this.data = data;
     }
 
-    private void setData(Supplier<Data> supplier) {
-        try {
-            data = supplier.get();
-        } catch (RuntimeException e) {
-            if (!(e.getCause() instanceof InvocationException))
-                throw e;
-            originalException = e;
-            error = e.getCause().getCause();
-            data = runtimeContext.wrap(null);
-        }
-    }
-
-    public Throwable catchError() {
-        Throwable throwable = error;
-        error = null;
-        return throwable;
-    }
+//    private void setData(Supplier<Data> supplier) {
+//        data = supplier.get();
+//    }
 
     private final List<Class<?>> callTypes = new ArrayList<>();
 
@@ -61,26 +40,27 @@ public class MetaData extends RuntimeData {
                 .apply(this);
     }
 
-    public Object callSuper(Supplier<Object> supplier) {
-        setData(() -> {
-            Object newData = supplier.get();
-            checkType(newData);
-            return runtimeContext.wrap(newData);
-        });
-        return callSuper();
-    }
+//    public Object callSuper(Supplier<Object> supplier) {
+//        setData(() -> {
+//            Object newData = supplier.get();
+//            checkType(newData);
+//            return runtimeContext.wrap(newData);
+//        });
+//        return callSuper();
+//    }
 
     public Object callGlobal() {
         return runtimeContext().fetchGlobalMetaFunction(this).apply(this);
     }
 
-    public Object callGlobal(Supplier<Object> supplier) {
-        setData(() -> runtimeContext.wrap(supplier.get()));
-        return callGlobal();
-    }
+//    TODO
+//    public Object callGlobal(Supplier<Object> supplier) {
+//        setData(() -> runtimeContext.wrap(supplier.get()));
+//        return callGlobal();
+//    }
 
     private MetaData newMeta(String name) {
-        return new MetaData(runtimeContext, data, error, originalException, name);
+        return new MetaData(runtimeContext, data, name);
     }
 
     public Object callMeta(String another) {
@@ -88,11 +68,12 @@ public class MetaData extends RuntimeData {
         return runtimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
     }
 
-    public Object callMeta(String another, Supplier<Object> supplier) {
-        MetaData metaData = newMeta(another);
-        metaData.setData(() -> runtimeContext.wrap(supplier.get()));
-        return runtimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
-    }
+//    TODO
+//    public Object callMeta(String another, Supplier<Object> supplier) {
+//        MetaData metaData = newMeta(another);
+//        metaData.setData(() -> runtimeContext.wrap(supplier.get()));
+//        return runtimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
+//    }
 
     private void checkType(Object data) {
         Class<?> expect = this.data.instance().getClass();
@@ -113,19 +94,17 @@ public class MetaData extends RuntimeData {
     }
 
     public boolean isInstance(Class<?> type) {
-        return type.isInstance(data.instance());
+        return data.instanceOf(type);
     }
 
     public Object name() {
         return name;
     }
 
-    @Override
-    public Data data() {
-        if (error != null)
-            throw originalException;
-        return data;
-    }
+//    @Override
+//    public Data data() {
+//        return data;
+//    }
 
     public DALNode inputNode() {
         return inputNode;

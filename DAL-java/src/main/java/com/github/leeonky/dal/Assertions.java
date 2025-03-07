@@ -4,7 +4,6 @@ import com.github.leeonky.dal.ast.node.ConstValueNode;
 import com.github.leeonky.dal.ast.node.InputNode;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
-import com.github.leeonky.dal.runtime.InputException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.runtime.schema.Verification;
@@ -58,7 +57,8 @@ public class Assertions {
     public Assertions should(String prefix, String verification) {
         String fullCode = prefix + verification;
         try {
-            return execute(() -> getDal().evaluate(inputCode, fullCode, schema));
+            getDal().evaluate(inputCode, fullCode, schema);
+            return this;
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
@@ -73,17 +73,6 @@ public class Assertions {
         return dal;
     }
 
-    private Assertions execute(Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (InputException e) {
-            String detailMessage = "\n" + e.getMessage();
-            detailMessage += "\n\nInput code got exception: " + getDal().getRuntimeContextBuilder().build(null).wrap(e.getInputClause()).dumpAll();
-            throw new AssertionError(detailMessage);
-        }
-        return this;
-    }
-
     public void exact(String verification) {
         should("=", verification);
     }
@@ -92,12 +81,14 @@ public class Assertions {
         should(":", verification);
     }
 
+    @SuppressWarnings("unchecked")
     public Assertions is(Class<?> schema) {
         RuntimeContextBuilder.DALRuntimeContext context = getDal().getRuntimeContextBuilder().build(inputCode, schema);
         try {
             this.schema = schema;
-            return execute(() -> Verification.expect(new Expect(create((Class) schema), null))
-                    .verify(context, actual(context.getThis())));
+            Verification.expect(new Expect(create((Class) schema), null))
+                    .verify(context, actual(context.getThis()));
+            return this;
         } catch (IllegalTypeException e) {
             String detailMessage = "\n" + e.getMessage();
             if (dumpInput)
@@ -114,7 +105,8 @@ public class Assertions {
     }
 
     public Assertions isEqualTo(Object expect) {
-        return execute(() -> expression(InputNode.INPUT_NODE, Factory.equal(), new ConstValueNode(expect))
-                .evaluate(getDal().getRuntimeContextBuilder().build(inputCode)));
+        expression(InputNode.INPUT_NODE, Factory.equal(), new ConstValueNode(expect))
+                .evaluate(getDal().getRuntimeContextBuilder().build(inputCode));
+        return this;
     }
 }

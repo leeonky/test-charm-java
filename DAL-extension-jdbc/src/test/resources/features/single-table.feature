@@ -102,7 +102,7 @@ Feature: assert db as data via jdbc
                   Get property `notExist` failed, property can be:
                     1. public field
                     2. public getter
-                    3. public no args method
+                    3. public method
                     4. Map key value
                     5. customized type getter
                     6. static method extension

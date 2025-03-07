@@ -51,7 +51,7 @@ public class DumpingBuffer {
         try {
             runtimeContext.fetchDumper(data).dump(data, this);
         } catch (Exception e) {
-            append("*dump throw* " + e);
+            append("*throw* " + e);
         }
         return this;
     }
@@ -61,7 +61,7 @@ public class DumpingBuffer {
         try {
             runtimeContext.fetchDumper(data).dumpValue(data, this);
         } catch (Exception e) {
-            append("*dump throw* " + e);
+            append("*throw* " + e);
         }
         return this;
     }

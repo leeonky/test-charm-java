@@ -288,15 +288,15 @@ Feature: async
       Get property `int` failed, property can be:
         1. public field
         2. public getter
-        3. public no args method
+        3. public method
         4. Map key value
         5. customized type getter
         6. static method extension
-      com.github.leeonky.dal.runtime.PropertyAccessException: com.github.leeonky.util.InvocationException: java.lang.RuntimeException
+      com.github.leeonky.dal.runtime.PropertyAccessException: java.lang.RuntimeException
 
       The root value was: #package#Data {
           int2: java.lang.Integer <3>,
-          int: *throw* com.github.leeonky.dal.runtime.PropertyAccessException: com.github.leeonky.util.InvocationException: java.lang.RuntimeException
+          int: *throw* com.github.leeonky.dal.runtime.PropertyAccessException: java.lang.RuntimeException
       }
       """
 

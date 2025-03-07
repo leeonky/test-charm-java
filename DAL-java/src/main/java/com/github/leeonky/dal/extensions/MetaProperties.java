@@ -1,8 +1,10 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.NoSuchAccessorException;
 
 import java.util.Set;
@@ -20,10 +22,21 @@ public class MetaProperties implements Extension {
     }
 
     private static Object throw_(MetaData metaData) {
-        Throwable error = metaData.catchError();
-        if (error == null)
+        try {
+            metaData.data().instance();
             throw new AssertionError("Expecting an error to be thrown, but nothing was thrown");
-        return error;
+        } catch (PropertyAccessException | InvocationException e) {
+            return e.getCause();
+        } catch (RuntimeException e) {
+            Throwable cause = e.getCause();
+            if (cause == null)
+                return e;
+            if (cause instanceof InvocationException)
+                return cause.getCause();
+            return cause;
+        } catch (Exception e) {
+            return e;
+        }
     }
 
     private static Object object_(MetaData metaData) {

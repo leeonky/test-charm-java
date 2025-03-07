@@ -72,9 +72,9 @@ public class Calculator {
     }
 
     private static boolean isTrue(Data value) {
-        if (value.instance() instanceof Boolean)
+        if (value.instanceOf(Boolean.class))
             return (boolean) value.instance();
-        if (value.instance() instanceof Number)
+        if (value.instanceOf(Number.class))
             return numberType.compare(0, (Number) value.instance()) != 0;
         return !value.isNull();
     }

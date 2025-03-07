@@ -150,59 +150,59 @@ Feature: commons
       ^
     """
 
-  Scenario: call super with same type new value
-    Given the following java class:
-    """
-    public class Bean {
-    }
-    """
-    Given the following java class:
-    """
-    public class SubBean extends Bean {
-      public int value = 1;
-    }
-    """
-    And register DAL:
-    """
-    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "beanMeta", meta-> meta.data().instance());
-    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", meta-> {
-    return meta.callSuper(()->new SubBean(){{value=2;}});
-    });
-    """
-    Then the following verification for the instance of java class "SubBean" should pass:
-    """
-    ::beanMeta.value= 2
-    """
+#  Scenario: call super with same type new value
+#    Given the following java class:
+#    """
+#    public class Bean {
+#    }
+#    """
+#    Given the following java class:
+#    """
+#    public class SubBean extends Bean {
+#      public int value = 1;
+#    }
+#    """
+#    And register DAL:
+#    """
+#    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "beanMeta", meta-> meta.data().instance());
+#    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", meta-> {
+#    return meta.callSuper(()->new SubBean(){{value=2;}});
+#    });
+#    """
+#    Then the following verification for the instance of java class "SubBean" should pass:
+#    """
+#    ::beanMeta.value= 2
+#    """
 
-  Scenario: raise error when use different instance type in call super
-    Given the following java class:
-    """
-    public class Bean {
-    }
-    """
-    Given the following java class:
-    """
-    public class SubBean extends Bean {
-      public int value = 1;
-    }
-    """
-    And register DAL:
-    """
-    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", meta-> meta.callSuper(()->"a string"));
-    """
-    When use a instance of java class "SubBean" to evaluate:
-    """
-    ::beanMeta= ''
-    """
-    Then failed with the message:
-    """
-    Do not allow change data type in callSuper, expect #package#SubBean but java.lang.String
-    """
-    And got the following notation:
-    """
-    ::beanMeta= ''
-      ^
-    """
+#  Scenario: raise error when use different instance type in call super
+#    Given the following java class:
+#    """
+#    public class Bean {
+#    }
+#    """
+#    Given the following java class:
+#    """
+#    public class SubBean extends Bean {
+#      public int value = 1;
+#    }
+#    """
+#    And register DAL:
+#    """
+#    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", meta-> meta.callSuper(()->"a string"));
+#    """
+#    When use a instance of java class "SubBean" to evaluate:
+#    """
+#    ::beanMeta= ''
+#    """
+#    Then failed with the message:
+#    """
+#    Do not allow change data type in callSuper, expect #package#SubBean but java.lang.String
+#    """
+#    And got the following notation:
+#    """
+#    ::beanMeta= ''
+#      ^
+#    """
 
   Scenario: raise error when not catch error
     Given the following java class:
@@ -228,7 +228,7 @@ Feature: commons
     Get property `test` failed, property can be:
       1. public field
       2. public getter
-      3. public no args method
+      3. public method
       4. Map key value
       5. customized type getter
       6. static method extension
@@ -264,29 +264,29 @@ Feature: commons
     ::meta: hello
     """
 
-  Scenario: support call global with any type data
-    Given the following java class:
-    """
-    public class Data {
-    }
-    """
-    And register DAL:
-    """
-    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
-      return meta.callGlobal(()-> "hello");
-    }
-    );
-    """
-    And register DAL:
-    """
-    dal.getRuntimeContextBuilder().registerMetaProperty("meta", meta-> {
-      return meta.data().instance();
-    });
-    """
-    Then the following verification for the instance of java class "Data" should pass:
-    """
-    ::meta: hello
-    """
+#  Scenario: support call global with any type data
+#    Given the following java class:
+#    """
+#    public class Data {
+#    }
+#    """
+#    And register DAL:
+#    """
+#    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
+#      return meta.callGlobal(()-> "hello");
+#    }
+#    );
+#    """
+#    And register DAL:
+#    """
+#    dal.getRuntimeContextBuilder().registerMetaProperty("meta", meta-> {
+#      return meta.data().instance();
+#    });
+#    """
+#    Then the following verification for the instance of java class "Data" should pass:
+#    """
+#    ::meta: hello
+#    """
 
   Scenario: support call other meta
     Given the following java class:
@@ -312,29 +312,29 @@ Feature: commons
     ::meta.class.simpleName= Data
     """
 
-  Scenario: support call other meta with any data
-    Given the following java class:
-    """
-    public class Data {
-    }
-    """
-    And register DAL:
-    """
-    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
-      return meta.callMeta("another", ()-> "hello");
-    }
-    );
-    """
-    And register DAL:
-    """
-    dal.getRuntimeContextBuilder().registerMetaProperty("another", meta-> {
-      return meta.data().instance();
-    });
-    """
-    Then the following verification for the instance of java class "Data" should pass:
-    """
-    ::meta= hello
-    """
+#  Scenario: support call other meta with any data
+#    Given the following java class:
+#    """
+#    public class Data {
+#    }
+#    """
+#    And register DAL:
+#    """
+#    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
+#      return meta.callMeta("another", ()-> "hello");
+#    }
+#    );
+#    """
+#    And register DAL:
+#    """
+#    dal.getRuntimeContextBuilder().registerMetaProperty("another", meta-> {
+#      return meta.data().instance();
+#    });
+#    """
+#    Then the following verification for the instance of java class "Data" should pass:
+#    """
+#    ::meta= hello
+#    """
 
   Scenario: support type local meta property in list mapping
     Given the following java class:

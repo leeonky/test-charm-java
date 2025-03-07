@@ -19,8 +19,8 @@ public class MatchesChecker implements Checker {
 
     @Override
     public boolean failed(CheckingContext checkingContext) {
-        if (checkingContext.getExpected().instance() instanceof BigDecimal
-                && checkingContext.getActual().instance() instanceof BigDecimal)
+        if (checkingContext.getExpected().instanceOf(BigDecimal.class)
+                && checkingContext.getActual().instanceOf(BigDecimal.class))
             return ((BigDecimal) checkingContext.getExpected().instance())
                     .compareTo((BigDecimal) checkingContext.getActual().instance()) != 0;
         return Checker.super.failed(checkingContext);

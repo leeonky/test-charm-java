@@ -37,7 +37,7 @@ public class RegexNode extends DALNode {
 
             @Override
             public Data equalTo() {
-                if (actual.instance() instanceof String) {
+                if (actual.instanceOf(String.class)) {
                     if (pattern.matcher((String) actual.instance()).matches())
                         return actual;
                     throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual.instance()), getPositionBegin());

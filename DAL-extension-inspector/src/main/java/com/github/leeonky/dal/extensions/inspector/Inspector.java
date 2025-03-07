@@ -206,9 +206,9 @@ public class Inspector {
         }
 
         private byte[] getBytes(Data data) {
-            if (data.instance() instanceof byte[])
+            if (data.instanceOf(byte[].class))
                 return (byte[]) data.instance();
-            if (data.instance() instanceof InputStream) {
+            if (data.instanceOf(InputStream.class)) {
                 InputStream stream = (InputStream) data.instance();
                 return Suppressor.get(() -> {
                     try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
@@ -220,7 +220,7 @@ public class Inspector {
                     }
                 });
             }
-            if (data.instance() instanceof Byte[]) {
+            if (data.instanceOf(Byte[].class)) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 data.list().values().forEach(b -> stream.write((byte) b));
                 return stream.toByteArray();

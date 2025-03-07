@@ -47,8 +47,5 @@ Feature: expect - run
     """
     Then assert error with the message:
     """
-
-    Error
-
-    Input code got exception: java.lang.RuntimeException {
+    java.lang.RuntimeException: Error
     """

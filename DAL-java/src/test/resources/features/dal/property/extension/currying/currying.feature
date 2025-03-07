@@ -97,7 +97,7 @@ Feature: currying function
     Get property `upperCase` failed, property can be:
       1. public field
       2. public getter
-      3. public no args method
+      3. public method
       4. Map key value
       5. customized type getter
       6. static method extension
@@ -241,7 +241,7 @@ Feature: currying function
     Get property `str` failed, property can be:
       1. public field
       2. public getter
-      3. public no args method
+      3. public method
       4. Map key value
       5. customized type getter
       6. static method extension

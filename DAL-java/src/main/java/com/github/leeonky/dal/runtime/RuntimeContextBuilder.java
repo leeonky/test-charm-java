@@ -294,8 +294,6 @@ public class RuntimeContextBuilder {
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
-        private final Data inputValue;
-        private final Throwable inputError;
 
         public Features features() {
             return features;
@@ -305,26 +303,11 @@ public class RuntimeContextBuilder {
             BeanClass<?> rootSchema = null;
             if (schema != null)
                 rootSchema = BeanClass.create(schema);
-            Data value;
-            Throwable error;
-            try {
-                value = wrap(supplier.get(), rootSchema);
-                error = null;
-            } catch (Throwable e) {
-                value = wrap(null);
-                error = e;
-            }
-            inputError = error;
-            inputValue = value;
+            stack.push(wrap(supplier, rootSchema));
             partialPropertyStacks = new HashMap<>();
         }
 
         public Data getThis() {
-            if (stack.isEmpty()) {
-                if (inputError != null)
-                    throw new InputException(inputError);
-                return inputValue;
-            }
             return stack.getFirst();
         }
 
@@ -360,6 +343,7 @@ public class RuntimeContextBuilder {
             try {
                 return propertyAccessor.getValueByData(data, property);
             } catch (InvalidPropertyException e) {
+//                TODO resolve throw exception
                 return data.currying(property).orElseThrow(() -> e).resolve();
             } catch (InvocationException e) {
                 throw e;
@@ -381,6 +365,7 @@ public class RuntimeContextBuilder {
             return converter;
         }
 
+        //        TODO check use supplier
         public Data wrap(Object instance) {
             return wrap(instance, null);
         }
@@ -393,6 +378,10 @@ public class RuntimeContextBuilder {
         }
 
         public Data wrap(Object instance, BeanClass<?> schemaType) {
+            return new Data(instance, this, SchemaType.create(schemaType));
+        }
+
+        public Data wrap(ThrowingSupplier<?> instance, BeanClass<?> schemaType) {
             return new Data(instance, this, SchemaType.create(schemaType));
         }
 
