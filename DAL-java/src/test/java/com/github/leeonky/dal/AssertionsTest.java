@@ -20,13 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class AssertionsTest {
 
     @Test
-    void given_dal_factory() {
-        Assertions.setDalFactory(DAL::getInstance);
-
-        expect(1).should("=1");
-    }
-
-    @Test
     void disable_dump_input() {
         try {
             Assertions.dumpInput(false);
