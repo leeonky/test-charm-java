@@ -3,8 +3,8 @@ package com.github.leeonky.util;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import static com.github.leeonky.util.Sneaky.execute;
 import static com.github.leeonky.util.StringUtil.unCapitalize;
-import static com.github.leeonky.util.Suppressor.get;
 
 class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReader<T> {
     private static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
@@ -24,7 +24,7 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
 
     @Override
     public Object getValue(T instance) {
-        return get(() -> method.invoke(instance));
+        return execute(() -> method.invoke(instance));
     }
 
     @Override

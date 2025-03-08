@@ -24,15 +24,8 @@ public class MapDumper implements Dumper.Cacheable {
     }
 
     protected void dumpField(Data data, Object field, DumpingBuffer context) {
-        Data value;
         context.append(key(field)).append(": ");
-        try {
-            value = data.getValue(field);
-        } catch (Exception e) {
-            context.append("*throw* " + e);
-            return;
-        }
-        context.dumpValue(value);
+        context.dumpValue(data.getValue(field));
     }
 
     protected String key(Object o) {

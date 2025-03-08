@@ -5,8 +5,6 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.inspector.Dumper;
-import com.github.leeonky.dal.runtime.inspector.DumperFactory;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.MapDumper;
 import com.github.leeonky.jfactory.JFactory;
@@ -30,25 +28,18 @@ public class JFactoryExtension implements Extension {
                         return new HashSet<>(jFactory.specNames());
                     }
                 });
-        runtimeContextBuilder.registerDumper(JFactory.class, new DumperFactory() {
+        runtimeContextBuilder.registerDumper(JFactory.class, data -> new MapDumper() {
             @Override
-            public Dumper apply(Data data) {
-                return new MapDumper() {
-                    @Override
-                    protected void dumpField(Data data, Object field, DumpingBuffer context) {
-                        Data value;
-                        try {
-                            value = data.getValue(field);
-                            if (value.list().size() != 0) {
-                                context.append(key(field)).append(": ");
-                                context.dumpValue(value);
-                            }
-                        } catch (Exception e) {
-                            context.append(key(field)).append(": ");
-                            context.append("*throw* " + e);
-                        }
+            protected void dumpField(Data data, Object field, DumpingBuffer context) {
+                try {
+                    Data value = data.getValue(field);
+                    if (value.list().size() != 0) {
+                        context.append(key(field)).append(": ");
+                        context.dumpValue(value);
                     }
-                };
+                } catch (Throwable e) {
+                    context.append(key(field)).append(": ").append(e);
+                }
             }
         });
     }

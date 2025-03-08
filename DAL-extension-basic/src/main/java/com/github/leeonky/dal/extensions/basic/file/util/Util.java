@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.extensions.basic.file.util;
 
 import com.github.leeonky.dal.runtime.inspector.Dumper;
-import com.github.leeonky.util.InvocationException;
+import com.github.leeonky.util.Sneaky;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -55,7 +55,7 @@ public class Util {
         String[] list = file.list();
         if (list != null && stream(list).anyMatch(f -> f.startsWith(name + ".")))
             return new IOFileFileGroup(file, name);
-        throw new InvocationException(new FileNotFoundException(format("File or File Group <%s> not found", name)));
+        return Sneaky.sneakyThrow(new FileNotFoundException(format("File or File Group <%s> not found", name)));
     }
 
     public static Set<String> listFileNames(File file) {

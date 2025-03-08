@@ -2,7 +2,6 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
-import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.ThrowingSupplier;
 
 import java.lang.RuntimeException;
@@ -53,6 +52,8 @@ public class Data {
             return instance = supplier.get();
         } catch (PropertyAccessException e) {
             throw error = errorMapper.apply(e);
+        } catch (UserRuntimeException e) {
+            throw error = errorMapper.apply(new PropertyAccessException(e.getCause().getMessage(), e));
         } catch (Throwable e) {
             throw error = errorMapper.apply(new PropertyAccessException(e.getMessage(), e));
         }
@@ -95,10 +96,10 @@ public class Data {
                 } catch (ListMappingElementAccessException ex) {
                     throw new PropertyAccessException(ex.toDalError(0).getMessage(),
                             ex.propertyAccessException().getCause());
-                } catch (InvocationException e) {
-                    throw buildPropertyAccessException(propertyChain, e, e.getCause());
+                } catch (UserRuntimeException e) {
+                    throw buildPropertyAccessException(propertyChain, e, e.getCause().toString());
                 } catch (Exception e) {
-                    throw buildPropertyAccessException(propertyChain, e, e);
+                    throw buildPropertyAccessException(propertyChain, e, e.getMessage());
                 }
             };
             return new Data(supplier, context, propertySchema(propertyChain));
@@ -106,7 +107,7 @@ public class Data {
         return getValue(chain);
     }
 
-    private PropertyAccessException buildPropertyAccessException(Object propertyChain, Exception e, Throwable cause) {
+    private PropertyAccessException buildPropertyAccessException(Object propertyChain, Throwable cause, String message) {
         return new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
                         "  1. public field\n" +
                         "  2. public getter\n" +
@@ -114,7 +115,7 @@ public class Data {
                         "  4. Map key value\n" +
                         "  5. customized type getter\n" +
                         "  6. static method extension\n%s%s",
-                propertyChain, e.getMessage(), listMappingMessage(this, propertyChain)), cause);
+                propertyChain, message, listMappingMessage(this, propertyChain)), cause);
     }
 
     private String listMappingMessage(Data data, Object symbol) {

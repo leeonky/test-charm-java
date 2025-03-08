@@ -4,12 +4,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
 
+import static com.github.leeonky.util.Sneaky.execute;
 import static com.github.leeonky.util.StringUtil.unCapitalize;
-import static com.github.leeonky.util.Suppressor.run;
 
 class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWriter<T> {
     private static final int SETTER_PREFIX_LENGTH = 3;
-    private final BiConsumer<T, Object> SETTER = (bean, value) -> run(() -> method.invoke(bean, tryConvert(value)));
+    private final BiConsumer<T, Object> SETTER = (bean, value) -> execute(() -> method.invoke(bean, tryConvert(value)));
     private String name;
 
     MethodPropertyWriter(BeanClass<T> beanClass, Method method) {

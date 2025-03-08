@@ -292,11 +292,11 @@ Feature: async
         4. Map key value
         5. customized type getter
         6. static method extension
-      com.github.leeonky.dal.runtime.PropertyAccessException: java.lang.RuntimeException
+      java.lang.RuntimeException
 
       The root value was: #package#Data {
           int2: java.lang.Integer <3>,
-          int: *throw* com.github.leeonky.dal.runtime.PropertyAccessException: java.lang.RuntimeException
+          int: *throw* java.lang.RuntimeException
       }
       """
 

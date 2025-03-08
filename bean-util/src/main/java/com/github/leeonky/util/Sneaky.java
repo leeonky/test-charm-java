@@ -11,6 +11,13 @@ public class Sneaky {
         }
     }
 
+    public static void run(ThrowingRunnable runnable) {
+        get(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
     public static <T> T execute(ThrowingSupplier<T> supplier) {
         try {
             return supplier.get();
@@ -21,15 +28,15 @@ public class Sneaky {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <E extends Throwable, T> T sneakyThrow(Throwable throwable) throws E {
-        throw (E) throwable;
-    }
-
-    public static void run(ThrowingRunnable runnable) {
-        get(() -> {
+    public static void executeVoid(ThrowingRunnable runnable) {
+        execute(() -> {
             runnable.run();
             return null;
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <E extends Throwable, T> T sneakyThrow(Throwable throwable) throws E {
+        throw (E) throwable;
     }
 }

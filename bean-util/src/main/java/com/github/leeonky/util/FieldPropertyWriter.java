@@ -4,10 +4,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 
-import static com.github.leeonky.util.Suppressor.run;
+import static com.github.leeonky.util.Sneaky.executeVoid;
 
 class FieldPropertyWriter<T> extends FieldPropertyAccessor<T> implements PropertyWriter<T> {
-    private final BiConsumer<T, Object> SETTER = (bean, value) -> run(() -> field.set(bean, tryConvert(value)));
+    private final BiConsumer<T, Object> SETTER = (bean, value) -> executeVoid(() -> field.set(bean, tryConvert(value)));
 
     FieldPropertyWriter(BeanClass<T> beanClass, Field field) {
         super(beanClass, field);

@@ -1,15 +1,15 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.NoSuchAccessorException;
+import com.github.leeonky.util.Sneaky;
 
 import java.util.Set;
 
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
+import static com.github.leeonky.dal.runtime.RuntimeException.extractException;
 import static java.lang.String.format;
 
 @Order(BUILD_IN)
@@ -25,17 +25,8 @@ public class MetaProperties implements Extension {
         try {
             metaData.data().instance();
             throw new AssertionError("Expecting an error to be thrown, but nothing was thrown");
-        } catch (PropertyAccessException | InvocationException e) {
-            return e.getCause();
-        } catch (RuntimeException e) {
-            Throwable cause = e.getCause();
-            if (cause == null)
-                return e;
-            if (cause instanceof InvocationException)
-                return cause.getCause();
-            return cause;
         } catch (Exception e) {
-            return e;
+            return Sneaky.get(() -> extractException(e).orElseThrow(() -> e));
         }
     }
 

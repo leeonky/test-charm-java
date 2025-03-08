@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Classes.newInstance;
-import static com.github.leeonky.util.Suppressor.run;
+import static com.github.leeonky.util.Sneaky.execute;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
     private final Class<? extends Spec<T>> specClass;
@@ -40,7 +40,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private void registerTraits() {
         Stream.of(specClass.getMethods())
                 .filter(this::isTraitMethod)
-                .forEach(method -> spec(getTraitName(method), instance -> run(() ->
+                .forEach(method -> spec(getTraitName(method), instance -> execute(() ->
                         method.invoke(instance.spec(), convertParams(method, instance.traitParams())))));
     }
 

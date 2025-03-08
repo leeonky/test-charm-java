@@ -303,7 +303,13 @@ public class RuntimeContextBuilder {
             BeanClass<?> rootSchema = null;
             if (schema != null)
                 rootSchema = BeanClass.create(schema);
-            stack.push(wrap(supplier, rootSchema));
+            stack.push(wrap(() -> {
+                try {
+                    return supplier.get();
+                } catch (Exception e) {
+                    throw new UserRuntimeException(e);
+                }
+            }, rootSchema));
             partialPropertyStacks = new HashMap<>();
         }
 
@@ -343,12 +349,15 @@ public class RuntimeContextBuilder {
             try {
                 return propertyAccessor.getValueByData(data, property);
             } catch (InvalidPropertyException e) {
-//                TODO resolve throw exception
-                return data.currying(property).orElseThrow(() -> e).resolve();
-            } catch (InvocationException e) {
-                throw e;
+                try {
+                    return data.currying(property).orElseThrow(() -> e).resolve();
+                } catch (InvalidPropertyException e1) {
+                    throw e1;
+                } catch (Exception e1) {
+                    throw new UserRuntimeException(e1);
+                }
             } catch (Exception e) {
-                throw new InvocationException(e);
+                throw new UserRuntimeException(e);
             }
         }
 

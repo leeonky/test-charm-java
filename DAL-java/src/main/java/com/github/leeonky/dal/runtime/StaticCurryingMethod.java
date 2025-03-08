@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.util.Suppressor.get;
+import static com.github.leeonky.util.Sneaky.execute;
 
 class StaticCurryingMethod extends InstanceCurryingMethod {
     public StaticCurryingMethod(Object instance, Method method, Converter converter, DALRuntimeContext context) {
@@ -27,7 +27,7 @@ class StaticCurryingMethod extends InstanceCurryingMethod {
 
     @Override
     public Object resolve() {
-        return get(() -> method.invoke(null, parameterValues.stream().map(parameterValue -> parameterValue.getArg(converter))
+        return execute(() -> method.invoke(null, parameterValues.stream().map(parameterValue -> parameterValue.getArg(converter))
                 .collect(Collectors.toCollection(() -> new ArrayList<Object>() {{
                     add(instance);
                 }})).toArray()));

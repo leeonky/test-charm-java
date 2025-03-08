@@ -47,4 +47,12 @@ class SneakyTest {
             throw new InvocationTargetException(exception);
         }))).isEqualTo(exception);
     }
+
+    @Test
+    void execute_void_should_catch_InvocationTargetException_and_rethrow() {
+        Exception exception = new Exception();
+        assertThat(assertThrows(Exception.class, () -> Sneaky.executeVoid(() -> {
+            throw new InvocationTargetException(exception);
+        }))).isEqualTo(exception);
+    }
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import static com.github.leeonky.dal.runtime.RuntimeException.extractException;
 import static java.lang.String.format;
 import static java.util.Collections.nCopies;
 
@@ -50,8 +51,8 @@ public class DumpingBuffer {
         checkCount();
         try {
             runtimeContext.fetchDumper(data).dump(data, this);
-        } catch (Exception e) {
-            append("*throw* " + e);
+        } catch (Throwable e) {
+            append(e);
         }
         return this;
     }
@@ -60,8 +61,8 @@ public class DumpingBuffer {
         checkCount();
         try {
             runtimeContext.fetchDumper(data).dumpValue(data, this);
-        } catch (Exception e) {
-            append("*throw* " + e);
+        } catch (Throwable e) {
+            append(e);
         }
         return this;
     }
@@ -110,6 +111,10 @@ public class DumpingBuffer {
     public DumpingBuffer append(String s) {
         length = lineBuffer.append(takeSplits(), s).length();
         return this;
+    }
+
+    public DumpingBuffer append(Throwable e) {
+        return append("*throw* " + extractException(e).orElse(e));
     }
 
     public String content() {

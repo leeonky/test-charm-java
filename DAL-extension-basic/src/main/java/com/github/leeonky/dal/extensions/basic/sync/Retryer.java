@@ -8,6 +8,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.runtime.RuntimeException.extractException;
+
 public class Retryer {
     private static int defaultTimeout = 0;
     private final int waitingTime;
@@ -39,7 +41,7 @@ public class Retryer {
                 exception = e;
             }
         } while (timeout(start) && sleep());
-        throw exception;
+        throw extractException(exception).orElse(exception);
     }
 
     private boolean timeout(Instant now) {

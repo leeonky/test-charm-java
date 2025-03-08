@@ -1,11 +1,12 @@
 package com.github.leeonky.dal.extensions.basic.zip.util;
 
 import com.github.leeonky.dal.runtime.ProxyObject;
-import com.github.leeonky.util.InvocationException;
 
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.zip.ZipEntry;
+
+import static com.github.leeonky.util.Sneaky.sneakyThrow;
 
 public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode>, ProxyObject {
     protected final Map<String, ZipBinary.ZipNode> children = new LinkedHashMap<>();
@@ -22,7 +23,7 @@ public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode>, 
     public ZipBinary.ZipNode createSub(String fileName) {
         ZipBinary.ZipNode zipNode = children.get(fileName);
         if (zipNode == null)
-            throw new InvocationException(new FileNotFoundException(String.format("File `%s` not exist", fileName)));
+            return sneakyThrow(new FileNotFoundException(String.format("File `%s` not exist", fileName)));
         return zipNode;
     }
 
@@ -32,7 +33,7 @@ public abstract class ZipNodeCollection implements Iterable<ZipBinary.ZipNode>, 
             return zipNode;
         if (list().stream().anyMatch(f -> f.startsWith(name + ".")))
             return new ZipFileFileGroup(this, name);
-        throw new InvocationException(new FileNotFoundException(String.format("File or File Group <%s> not found", name)));
+        return sneakyThrow(new FileNotFoundException(String.format("File or File Group <%s> not found", name)));
     }
 
     public void addNode(LinkedList<String> path, ZipEntry zipEntry, byte[] bytes) {

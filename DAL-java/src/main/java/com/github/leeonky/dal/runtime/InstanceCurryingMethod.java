@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-import static com.github.leeonky.util.Suppressor.get;
+import static com.github.leeonky.util.Sneaky.execute;
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.joining;
@@ -81,7 +81,7 @@ public class InstanceCurryingMethod implements CurryingMethod {
 
     @Override
     public Object resolve() {
-        return get(() -> method.invoke(instance, parameterValues.stream().map(parameterValue ->
+        return execute(() -> method.invoke(instance, parameterValues.stream().map(parameterValue ->
                 parameterValue.getArg(converter)).collect(toList()).toArray()));
     }
 
