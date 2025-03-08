@@ -2,6 +2,7 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.InvocationTargetException;
 
+@Deprecated
 public class Suppressor {
     public static <T> T get(ThrowingSupplier<T> supplier) {
         try {
