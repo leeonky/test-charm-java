@@ -8,7 +8,7 @@ public class PropertyAccessException extends java.lang.RuntimeException {
         this.message = message;
     }
 
-    public RuntimeException toDalError(String prefix, int position) {
-        return new RuntimeException(prefix + message, position, getCause());
+    public DalRuntimeException toDalError(String prefix, int position) {
+        return new DalRuntimeException(prefix + message, position, getCause());
     }
 }

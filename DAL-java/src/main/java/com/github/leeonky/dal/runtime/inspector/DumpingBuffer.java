@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import static com.github.leeonky.dal.runtime.RuntimeException.extractException;
+import static com.github.leeonky.dal.runtime.DalException.extractException;
 import static java.lang.String.format;
 import static java.util.Collections.nCopies;
 

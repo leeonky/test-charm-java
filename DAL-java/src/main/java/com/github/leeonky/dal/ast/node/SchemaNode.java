@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.runtime.ConstructorViaSchema;
+import com.github.leeonky.dal.runtime.DalRuntimeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.RuntimeException;
 
 public class SchemaNode extends DALNode {
     private final String schema;
@@ -13,7 +13,7 @@ public class SchemaNode extends DALNode {
 
     public ConstructorViaSchema getValueConstructorViaSchema(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.searchValueConstructor(schema).orElseThrow(() ->
-                new RuntimeException("Schema '" + schema + "' not registered", getPositionBegin()));
+                new DalRuntimeException("Schema '" + schema + "' not registered", getPositionBegin()));
     }
 
     @Override

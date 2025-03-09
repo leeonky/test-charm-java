@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.interpreter.InterpreterException;
 
@@ -16,7 +15,7 @@ public class MetaSymbolNode extends SymbolNode {
         } catch (InterpreterException | ExpressionException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), getPositionBegin(), e);
+            throw new DalRuntimeException(e.getMessage(), getPositionBegin(), e);
         }
     }
 }

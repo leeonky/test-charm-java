@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.runtime.RuntimeException.extractException;
+import static com.github.leeonky.dal.runtime.DalException.extractException;
 
 public class Retryer {
     private static int defaultTimeout = 0;

@@ -10,7 +10,7 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
         try {
             return supplier.get();
         } catch (Exception e) {
-            throw exception(expression -> new RuntimeException(e.getMessage(), expression.left().getOperandPosition(), e));
+            throw exception(expression -> new DalRuntimeException(e.getMessage(), expression.left().getOperandPosition(), e));
         }
     }
 
@@ -18,7 +18,7 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
         try {
             return supplier.get();
         } catch (Exception e) {
-            throw exception(expression -> new RuntimeException(e.getMessage(), expression.right().getOperandPosition(), e));
+            throw exception(expression -> new DalRuntimeException(e.getMessage(), expression.right().getOperandPosition(), e));
         }
     }
 
@@ -38,14 +38,14 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
     }
 
     public static ExpressionException illegalOperationRuntimeException(String message) {
-        return exception(expression -> new RuntimeException(message, expression.operator().getPosition()));
+        return exception(expression -> new DalRuntimeException(message, expression.operator().getPosition()));
     }
 
     public static ExpressionException illegalOp2RuntimeException(String message) {
-        return exception(expression -> new RuntimeException(message, expression.right().getOperandPosition()));
+        return exception(expression -> new DalRuntimeException(message, expression.right().getOperandPosition()));
     }
 
     public static ExpressionException illegalOp1RuntimeException(String message) {
-        return exception(expression -> new RuntimeException(message, expression.left().getOperandPosition()));
+        return exception(expression -> new DalRuntimeException(message, expression.left().getOperandPosition()));
     }
 }

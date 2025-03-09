@@ -2,8 +2,8 @@ package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.DalRuntimeException;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.util.BeanClass;
@@ -143,11 +143,11 @@ public class VerifyValueInSchema extends Base {
                 .registerSchema(MissingTypeArg.class)
                 .registerSchema(MissingTypeArgButGivenValue.class);
 
-        assertThrows(RuntimeException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
+        assertThrows(DalRuntimeException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArg"));
 
-        assertThrows(RuntimeException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
+        assertThrows(DalRuntimeException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArgButGivenValue"));
     }

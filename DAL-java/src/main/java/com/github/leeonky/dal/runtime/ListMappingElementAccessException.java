@@ -10,7 +10,7 @@ public class ListMappingElementAccessException extends java.lang.RuntimeExceptio
         this.exception = exception;
     }
 
-    public RuntimeException toDalError(int position) {
+    public DalRuntimeException toDalError(int position) {
         return exception.toDalError(String.format("Mapping element[%d]:\n", index()), position);
     }
 

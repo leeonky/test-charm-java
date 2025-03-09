@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public class SchemaComposeNode extends DALNode {
                     verifyAndConvertAsSchemaType(context, schemaNode, input)).collect(toList());
             return context.wrap(instanceBySchema.get(instanceBySchema.size() - 1), schemas.get(0).inspect(), isList);
         } catch (IllegalStateException e) {
-            throw new RuntimeException(e.getMessage(), getPositionBegin());
+            throw new DalRuntimeException(e.getMessage(), getPositionBegin());
         }
     }
 
@@ -47,7 +46,7 @@ public class SchemaComposeNode extends DALNode {
                 collection.collect();
                 return collection;
             } catch (InfiniteCollectionException e) {
-                throw new RuntimeException("Not supported for infinite collection", getPositionBegin());
+                throw new DalRuntimeException("Not supported for infinite collection", getPositionBegin());
             }
         else
             return convertViaSchema(context, schemaNode, inputData, input.inspect());

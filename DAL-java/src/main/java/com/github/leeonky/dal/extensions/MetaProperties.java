@@ -8,8 +8,8 @@ import com.github.leeonky.util.Sneaky;
 
 import java.util.Set;
 
+import static com.github.leeonky.dal.runtime.DalException.extractException;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
-import static com.github.leeonky.dal.runtime.RuntimeException.extractException;
 import static java.lang.String.format;
 
 @Order(BUILD_IN)

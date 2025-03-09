@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.CollectionDALCollection;
+import com.github.leeonky.dal.runtime.DalRuntimeException;
 import com.github.leeonky.dal.runtime.IterableDALCollection;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.spec.Base;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -130,7 +130,7 @@ class PropertyNodeTest {
                     .registerStaticMethodExtension(SameStaticBeanMethods.class)
                     .build(new Bean());
 
-            assertThrows(RuntimeException.class, () -> Base.createPropertyNode(INPUT_NODE, "getInt")
+            assertThrows(DalRuntimeException.class, () -> Base.createPropertyNode(INPUT_NODE, "getInt")
                     .evaluate(DALRuntimeContext));
         }
     }

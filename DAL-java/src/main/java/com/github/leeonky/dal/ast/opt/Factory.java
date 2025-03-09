@@ -5,7 +5,6 @@ import com.github.leeonky.dal.ast.node.ExecutableNode;
 import com.github.leeonky.dal.ast.node.SchemaComposeNode;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Notation;
 
@@ -69,7 +68,7 @@ public class Factory {
                 try {
                     return expression.left().evaluateData(context).execute(() -> expression.right().evaluate(context));
                 } catch (IllegalStateException e) {
-                    throw new RuntimeException(e.getMessage(), getPosition());
+                    throw new DalRuntimeException(e.getMessage(), getPosition());
                 }
             }
         };
