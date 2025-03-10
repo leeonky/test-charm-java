@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.sync;
 
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -49,7 +49,7 @@ public class Retryer {
     }
 
     private boolean sleep() {
-        Suppressor.run(() -> Thread.sleep(interval));
+        Sneaky.run(() -> Thread.sleep(interval));
         return true;
     }
 

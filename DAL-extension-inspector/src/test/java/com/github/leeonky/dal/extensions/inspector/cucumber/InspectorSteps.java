@@ -7,7 +7,7 @@ import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.SeleniumWebDriver;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -29,7 +29,7 @@ public class InspectorSteps {
     private final DAL dal = DAL.create(InspectorExtension.class);
 
     private final SeleniumWebDriver seleniumWebDriver = new SeleniumWebDriver(() ->
-            Suppressor.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
+            Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
 
     @After
     public void close() {

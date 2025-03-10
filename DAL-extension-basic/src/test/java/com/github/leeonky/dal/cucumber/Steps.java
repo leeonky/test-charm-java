@@ -10,7 +10,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.JavaCompiler;
 import com.github.leeonky.util.JavaCompilerPool;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -133,7 +133,7 @@ public class Steps {
     @SneakyThrows
     public void zipFile(String fileName, DataTable files) {
         try (ZipFile zipFile = new ZipFile(fileName)) {
-            files.asLists().stream().map(list -> list.get(0)).forEach(fileNameInZip -> Suppressor.run(() -> {
+            files.asLists().stream().map(list -> list.get(0)).forEach(fileNameInZip -> Sneaky.run(() -> {
                 File file = new File(fileNameInZip);
                 if (file.isDirectory())
                     zipFile.addFolder(file);

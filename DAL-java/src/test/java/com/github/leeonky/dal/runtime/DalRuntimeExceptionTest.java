@@ -18,11 +18,11 @@ class DalRuntimeExceptionTest {
 
     @Test
     void no_message_has_cause_show_cause_message() {
-        assertThat(new DalRuntimeException(new Exception("hello")).getMessage()).isEqualTo("hello");
+        assertThat(new DalRuntimeException(new Exception("hello")).getMessage()).isEqualTo("java.lang.Exception: hello");
     }
 
     @Test
     void has_message_and_cause_show_message_first_and_show_cause_type_and_message_in_new_line() {
-        assertThat(new DalRuntimeException("error", new Exception("hello")).getMessage()).isEqualTo("error\nhello");
+        assertThat(new DalRuntimeException("error", new Exception("hello")).getMessage()).isEqualTo("error\njava.lang.Exception: hello");
     }
 }

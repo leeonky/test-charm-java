@@ -3,7 +3,7 @@ package com.github.leeonky.dal.extensions.basic.sync;
 import com.github.leeonky.dal.extensions.basic.TimeUtil;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ProxyObject;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -42,7 +42,7 @@ public class Await implements ProxyObject {
 
     @Override
     public Object getValue(Object property) {
-        return Suppressor.get(() -> await(data -> data.getValue(property).instance()));
+        return Sneaky.get(() -> await(data1 -> data1.getValue(property).instance()));
     }
 
     @Override

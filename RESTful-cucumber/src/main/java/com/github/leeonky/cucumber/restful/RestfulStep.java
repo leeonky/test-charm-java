@@ -5,9 +5,7 @@ import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONAr
 import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONObject;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.cucumber.Table;
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyReader;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.*;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
@@ -112,7 +110,7 @@ public class RestfulStep {
     }
 
     public void postForm(String path, Map<String, ?> params) throws IOException, URISyntaxException {
-        requestAndResponse("POST", path, connection -> Suppressor.run(() -> {
+        requestAndResponse("POST", path, connection -> Sneaky.run(() -> {
             connection.setDoOutput(true);
             String boundary = UUID.randomUUID().toString();
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
@@ -322,12 +320,12 @@ public class RestfulStep {
     }
 
     private void appendEntry(HttpStream httpStream, String key, String value, String boundary) {
-        httpStream.bound(boundary, () -> Suppressor.get(() -> key.startsWith("@") ?
+        httpStream.bound(boundary, () -> Sneaky.get(() -> key.startsWith("@") ?
                 httpStream.appendFile(key, request.files.get(value)) : httpStream.appendField(key, value)));
     }
 
     private void buildRequestBody(HttpURLConnection connection, String contentType, byte[] bytes) {
-        Suppressor.run(() -> {
+        Sneaky.run(() -> {
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", contentType == null ? String.valueOf(request.headers.getOrDefault("Content-Type", "application/json")) : contentType);
             connection.getOutputStream().write(bytes);
@@ -455,8 +453,8 @@ public class RestfulStep {
 
         public Response(HttpURLConnection connection) {
             raw = connection;
-            code = Suppressor.get(connection::getResponseCode);
-            InputStream stream = Suppressor.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
+            code = Sneaky.get(connection::getResponseCode);
+            InputStream stream = Sneaky.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
             body = stream == null ? null : readAllAndClose(stream);
         }
 
@@ -469,7 +467,7 @@ public class RestfulStep {
         public String fileName() {
             String header = raw.getHeaderField("Content-Disposition");
             Matcher matcher = Pattern.compile(".*filename=\"(.*)\".*").matcher(header);
-            return Suppressor.get(() -> URLDecoder.decode(matcher.matches() ? matcher.group(1) : header, UTF_8.name()));
+            return Sneaky.get(() -> URLDecoder.decode(matcher.matches() ? matcher.group(1) : header, UTF_8.name()));
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.extensions.basic.sftp.util;
 
 import com.github.leeonky.dal.extensions.basic.file.util.Util;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import com.jcraft.jsch.*;
 
 import java.nio.file.Paths;
@@ -24,7 +24,7 @@ public class SFtp extends SFtpFile {
         this.user = user;
         this.password = password;
         this.path = path;
-        channel = Suppressor.get(this::getChannelSftp);
+        channel = Sneaky.get(this::getChannelSftp);
     }
 
     private ChannelSftp getChannelSftp() throws JSchException {
@@ -55,13 +55,13 @@ public class SFtp extends SFtpFile {
 
     @Override
     public boolean isDir() {
-        return Suppressor.get(() -> channel.lstat(path)).isDir();
+        return Sneaky.get(() -> channel.lstat(path)).isDir();
     }
 
     @Override
     public String attribute() {
         String name = Paths.get(path).getFileName().toString();
-        return attribute(Suppressor.get(() ->
+        return attribute(Sneaky.get(() ->
                         ((Vector<ChannelSftp.LsEntry>) channel.ls(Paths.get(path).getParent().toString()))).stream()
                 .filter(e -> e.getFilename().equals(name)).findFirst().orElseThrow(IllegalStateException::new));
     }
@@ -81,7 +81,7 @@ public class SFtp extends SFtpFile {
 
     public void close() {
         channel.exit();
-        Suppressor.run(() -> channel.getSession().disconnect());
+        Sneaky.run(() -> channel.getSession().disconnect());
     }
 
     public static class SubSFtpFile extends SFtpFile {

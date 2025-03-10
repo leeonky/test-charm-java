@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.util.Suppressor.get;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -50,7 +49,7 @@ public class Classes {
                 return ((JarURLConnection) resource.openConnection()).getJarFile().stream()
                         .map(jarEntry -> jarEntry.getName().replace('/', '.'))
                         .filter(name -> name.endsWith(".class") && name.startsWith(packageName))
-                        .map(name -> Suppressor.get(() -> Class.forName(name.substring(0, name.length() - 6))))
+                        .map(name -> Sneaky.get(() -> Class.forName(name.substring(0, name.length() - 6))))
                         .collect(toList());
             else {
                 InputStream stream = resource.openStream();
@@ -67,7 +66,7 @@ public class Classes {
     }
 
     private static Class<?> toClass(String className, String packageName) {
-        return get(() -> Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.'))));
+        return Sneaky.get(() -> Class.forName(packageName + "." + className.substring(0, className.lastIndexOf('.'))));
     }
 
     public static <T> List<Class<? extends T>> subTypesOf(Class<T> superClass, String packageName) {
@@ -89,7 +88,7 @@ public class Classes {
 
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(Class<T> type, Object... args) {
-        return get(() -> (T) chooseConstructor(type, args).newInstance(args));
+        return Sneaky.get(() -> (T) chooseConstructor(type, args).newInstance(args));
     }
 
     private static <T> Constructor<?> chooseConstructor(Class<T> type, Object[] args) {

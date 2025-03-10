@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.zip.util;
 
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import static java.util.Arrays.stream;
 public class ZipBinary extends ZipNodeCollection {
 
     public ZipBinary(byte[] data) {
-        Suppressor.run(() -> unzipToMemory(data).forEach((entry, bytes) ->
+        Sneaky.run(() -> unzipToMemory(data).forEach((entry, bytes) ->
                 addNode(stream(entry.getName().split("/")).filter(s -> !s.isEmpty())
                         .collect(Collectors.toCollection(LinkedList::new)), entry, bytes)));
     }

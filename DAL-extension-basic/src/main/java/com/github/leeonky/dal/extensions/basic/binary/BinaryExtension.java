@@ -8,7 +8,7 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaArrayDALCollectionFactory;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -23,12 +23,12 @@ public class BinaryExtension implements Extension {
         try {
             return readAll(stream);
         } finally {
-            Suppressor.run(stream::close);
+            Sneaky.run(stream::close);
         }
     }
 
     public static byte[] readAll(InputStream stream) {
-        return Suppressor.get(() -> {
+        return Sneaky.get(() -> {
             try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
                 int size;
                 byte[] data = new byte[1024];

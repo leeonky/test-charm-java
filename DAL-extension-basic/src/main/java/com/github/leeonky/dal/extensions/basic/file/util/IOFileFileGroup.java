@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.file.util;
 
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +20,7 @@ public class IOFileFileGroup extends FileGroup<File> {
 
     @Override
     protected FileInputStream open(File subFile) {
-        return Suppressor.get(() -> new FileInputStream(subFile));
+        return Sneaky.get(() -> new FileInputStream(subFile));
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.zip;
 
 import com.github.leeonky.dal.extensions.basic.zip.util.ZipBinary;
-import com.github.leeonky.util.Suppressor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +8,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
+import static com.github.leeonky.util.Sneaky.get;
 
 public class Methods {
     public static ZipBinary unzip(byte[] data) {
@@ -16,7 +16,7 @@ public class Methods {
     }
 
     public static byte[] gzip(byte[] data) {
-        return Suppressor.get(() -> {
+        return get(() -> {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try (GZIPOutputStream gzipOut = new GZIPOutputStream(outputStream)) {
                 gzipOut.write(data);
@@ -26,7 +26,7 @@ public class Methods {
     }
 
     public static byte[] ungzip(byte[] data) {
-        return Suppressor.get(() -> readAllAndClose(new GZIPInputStream(new ByteArrayInputStream(data))));
+        return get(() -> readAllAndClose(new GZIPInputStream(new ByteArrayInputStream(data))));
     }
 
     public static byte[] gzip(String data) {

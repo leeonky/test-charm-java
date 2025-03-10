@@ -47,30 +47,29 @@ public class DalException extends InterpreterException {
 
     @Override
     public String getMessage() {
-        String message = super.getMessage();
+        return buildMessage(this, super.getMessage());
+    }
+
+    @Override
+    public String toString() {
+        return getMessage();
+    }
+
+    public static DalException toDalError(Throwable e, int positionBegin) {
+        return new DalException(positionBegin, e);
+    }
+
+    public static String buildMessage(Throwable e, String message) {
         if (message != null && !message.isEmpty()) {
-            Throwable cause = getCause();
+            Throwable cause = e.getCause();
             if (cause != null)
-                return message + "\n" + cause.getMessage();
+                return message + "\n" + cause;
             return message;
         }
-        Throwable cause = getCause();
+        Throwable cause = e.getCause();
         if (cause != null)
-            return cause.getMessage();
-
-        return getClass().getName();
-
-//        TODO merge message and cause message
-
-//        String message = super.getMessage();
-//        if (message != null) {
-//            return message;
-//        }
-//        Throwable cause = getCause();
-//        if (cause != null)
-//            return cause.getMessage();
-//        return getClass().getName();
-
+            return cause.toString();
+        return e.getClass().getName();
     }
 
     public static Object handleException(Throwable error) {

@@ -14,7 +14,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.util.Suppressor.get;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
@@ -42,7 +41,7 @@ public class Util {
     }
 
     public static String attribute(Path path) {
-        PosixFileAttributes posixFileAttributes = get(() -> Files.readAttributes(path, PosixFileAttributes.class));
+        PosixFileAttributes posixFileAttributes = Sneaky.get(() -> Files.readAttributes(path, PosixFileAttributes.class));
         return format("%s %s %s %6s %s %s", PosixFilePermissions.toString(posixFileAttributes.permissions()),
                 posixFileAttributes.group(), posixFileAttributes.owner(), formatFileSize(path.toFile().length()),
                 posixFileAttributes.lastModifiedTime(), path.getFileName().toString());

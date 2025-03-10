@@ -66,7 +66,7 @@ Feature: customized list
       """
       Then failed with the message:
       """
-      Error
+      java.lang.RuntimeException: Error
       """
       And got the following notation:
       """
@@ -82,7 +82,7 @@ Feature: customized list
       """
       Then failed with the message:
       """
-      Error
+      java.lang.RuntimeException: Error
       """
       And got the following notation:
       """
@@ -96,7 +96,7 @@ Feature: customized list
       """
       Then failed with the message:
       """
-      Error
+      java.lang.RuntimeException: Error
       """
       And got the following notation:
       """
@@ -112,7 +112,7 @@ Feature: customized list
       """
       Then failed with the message:
       """
-      Error
+      java.lang.RuntimeException: Error
       """
       And got the following notation:
       """

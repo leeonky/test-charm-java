@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.extensions.jdbc.DataBase.Table;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
+import com.github.leeonky.util.ThrowingSupplier;
 import org.javalite.common.Inflector;
 
 import java.sql.Connection;
@@ -29,7 +30,7 @@ public class DataBaseBuilder {
     }
 
     public DataBaseBuilder sqlTablesProvider(String sql) {
-        tableQuery = statement -> Suppressor.get(() -> {
+        tableQuery = statement -> Sneaky.get((ThrowingSupplier<LinkedHashSet<String>>) () -> {
             ResultSet resultSet = statement.executeQuery(sql);
             return new LinkedHashSet<String>() {{
                 while (resultSet.next())

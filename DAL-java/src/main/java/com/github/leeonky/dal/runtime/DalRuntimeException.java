@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
+import static com.github.leeonky.dal.runtime.DalException.buildMessage;
+
 public class DalRuntimeException extends RuntimeException {
     public DalRuntimeException(String message) {
         this(message, null);
@@ -19,21 +21,15 @@ public class DalRuntimeException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        String message = super.getMessage();
-        if (message != null) {
-            Throwable cause = getCause();
-            if (cause != null)
-                return message + "\n" + cause.getMessage();
-            return message;
-        }
-        Throwable cause = getCause();
-        if (cause != null)
-            return cause.getMessage();
+        return buildMessage(this, super.getMessage());
+    }
 
-        return getClass().getName();
+    @Override
+    public String toString() {
+        return getMessage();
     }
 
     public DalException toDalError(int positionBegin) {
-        return new DalException(positionBegin, this);
+        return DalException.toDalError(this, positionBegin);
     }
 }

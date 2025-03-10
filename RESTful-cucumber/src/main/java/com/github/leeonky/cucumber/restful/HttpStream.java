@@ -1,6 +1,6 @@
 package com.github.leeonky.cucumber.restful;
 
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import com.github.leeonky.util.ThrowingRunnable;
 
 import java.io.OutputStream;
@@ -33,27 +33,27 @@ class HttpStream {
     }
 
     public void close(String boundary) {
-        Suppressor.run(append("--" + boundary + "--").crlf().outputStream::close);
+        Sneaky.run(append("--" + boundary + "--").crlf().outputStream::close);
     }
 
     public void bound(String boundary, ThrowingRunnable bound) {
         append("--" + boundary).crlf();
-        Suppressor.run(bound);
+        Sneaky.run(bound);
         crlf();
     }
 
     private HttpStream append(String content) {
-        Suppressor.run(() -> outputStream.write(content.getBytes(charset)));
+        Sneaky.run(() -> outputStream.write(content.getBytes(charset)));
         return this;
     }
 
     private HttpStream append(byte[] content) {
-        Suppressor.run(() -> outputStream.write(content));
+        Sneaky.run(() -> outputStream.write(content));
         return this;
     }
 
     private HttpStream crlf() {
-        Suppressor.run(() -> outputStream.write("\r\n".getBytes(charset)));
+        Sneaky.run(() -> outputStream.write("\r\n".getBytes(charset)));
         return this;
     }
 }

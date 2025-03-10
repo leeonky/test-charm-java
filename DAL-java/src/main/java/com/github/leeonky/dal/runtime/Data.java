@@ -66,7 +66,7 @@ public class Data {
     public DataList list() {
         if (list == null) {
             if (!isList())
-                throw new java.lang.RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
+                throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
             list = new DataList(context.createCollection(instance()));
         }
         return list;
@@ -88,22 +88,26 @@ public class Data {
                 try {
                     return isList() ? fetchFromList(propertyChain) : context.getPropertyValue(this, propertyChain);
                 } catch (IndexOutOfBoundsException ex) {
-                    throw new DalRuntimeException(ex);
+                    throw new DalRuntimeException(ex.getMessage());
                 } catch (ListMappingElementAccessException ex) {
-                    throw new DalRuntimeException(ex.mappingIndexMessage(), ex.exception());
+                    throw ex;
                 } catch (Throwable e) {
-                    throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
-                            "  1. public field\n" +
-                            "  2. public getter\n" +
-                            "  3. public method\n" +
-                            "  4. Map key value\n" +
-                            "  5. customized type getter\n" +
-                            "  6. static method extension", propertyChain), e);
+                    throw buildExceptionWithComments(propertyChain, e);
                 }
             };
             return new Data(supplier, context, propertySchema(propertyChain));
         }
         return getValue(chain);
+    }
+
+    private static DalRuntimeException buildExceptionWithComments(Object propertyChain, Throwable e) {
+        return new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
+                "  1. public field\n" +
+                "  2. public getter\n" +
+                "  3. public method\n" +
+                "  4. Map key value\n" +
+                "  5. customized type getter\n" +
+                "  6. static method extension", propertyChain), e);
     }
 
     private Object fetchFromList(Object property) {

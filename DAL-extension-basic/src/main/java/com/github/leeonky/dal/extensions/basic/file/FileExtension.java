@@ -6,11 +6,10 @@ import com.github.leeonky.dal.extensions.basic.file.util.FileJavaClassPropertyAc
 import com.github.leeonky.dal.extensions.basic.file.util.ToString;
 import com.github.leeonky.dal.extensions.basic.file.util.Util;
 import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.util.Sneaky;
 
 import java.io.File;
 import java.io.FileInputStream;
-
-import static com.github.leeonky.util.Suppressor.get;
 
 @SuppressWarnings("unused")
 public class FileExtension implements Extension {
@@ -20,7 +19,7 @@ public class FileExtension implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerStaticMethodExtension(ToString.class)
                 .registerStaticMethodExtension(Methods.class)
-                .registerImplicitData(File.class, file -> get(() -> new FileInputStream(file)))
+                .registerImplicitData(File.class, file -> Sneaky.get(() -> new FileInputStream(file)))
                 .registerDALCollectionFactory(File.class, new FileDALCollectionFactory())
                 .registerPropertyAccessor(File.class, new FileJavaClassPropertyAccessor())
                 .registerDumper(File.class, data -> ((File) data.instance()).isDirectory()

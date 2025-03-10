@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.inspector;
 
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -13,11 +13,11 @@ import java.io.StringWriter;
 import java.util.Map;
 
 class ObjectWriter {
-    private final Document doc = Suppressor.get(DocumentBuilderFactory.newInstance()::newDocumentBuilder).newDocument();
+    private final Document doc = Sneaky.get(DocumentBuilderFactory.newInstance()::newDocumentBuilder).newDocument();
 
     private String xmlString() {
         StringWriter writer = new StringWriter();
-        Suppressor.run(() -> Suppressor.get(TransformerFactory.newInstance()::newTransformer)
+        Sneaky.run(() -> Sneaky.get(TransformerFactory.newInstance()::newTransformer)
                 .transform(new DOMSource(doc), new StreamResult(writer)));
         return writer.getBuffer().toString();
     }

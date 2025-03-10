@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
+import com.github.leeonky.dal.runtime.DalRuntimeException;
 import com.github.leeonky.dal.runtime.ProxyObject;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -22,7 +23,7 @@ public class DataBase implements AutoCloseable, ProxyObject {
 
     public Set<String> allTableNames() {
         return new LinkedHashSet<String>() {{
-            addAll(builder.tablesProvider().apply(Suppressor.get(connection::createStatement)));
+            addAll(builder.tablesProvider().apply(Sneaky.get(connection::createStatement)));
             addAll(queriedTables);
         }};
     }
@@ -33,7 +34,7 @@ public class DataBase implements AutoCloseable, ProxyObject {
     }
 
     public String getUrl() {
-        return Suppressor.get(() -> connection.getMetaData().getURL());
+        return Sneaky.get(() -> connection.getMetaData().getURL());
     }
 
     @Override
@@ -70,7 +71,7 @@ public class DataBase implements AutoCloseable, ProxyObject {
 
         @Override
         public Iterator<DataBase.Row<T>> iterator() {
-            return Suppressor.get(() -> query(query()));
+            return Sneaky.get(() -> query(query()));
         }
 
         @SuppressWarnings("unchecked")
@@ -90,12 +91,12 @@ public class DataBase implements AutoCloseable, ProxyObject {
 
                 @Override
                 public boolean hasNext() {
-                    return Suppressor.get(resultSet::next);
+                    return Sneaky.get(resultSet::next);
                 }
 
                 @Override
                 public DataBase.Row<T> next() {
-                    return Suppressor.get(this::getRow);
+                    return Sneaky.get(this::getRow);
                 }
 
                 @SuppressWarnings("unchecked")
@@ -228,7 +229,7 @@ public class DataBase implements AutoCloseable, ProxyObject {
                 if (iterator.hasNext()) {
                     DataBase.Row<LinkedTable> row = iterator.next();
                     if (iterator.hasNext())
-                        throw new RuntimeException("Result set has multiple records");
+                        throw new DalRuntimeException("Result set has multiple records");
                     return row.data();
                 }
                 return null;

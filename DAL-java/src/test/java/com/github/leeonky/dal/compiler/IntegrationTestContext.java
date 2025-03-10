@@ -14,12 +14,11 @@ import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.JavaCompiler;
 import com.github.leeonky.util.JavaCompilerPool;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.RuntimeException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
@@ -105,23 +104,23 @@ public class IntegrationTestContext {
             propertyAccessors.forEach((type, accessor) -> {
                 Class<?> beanType = classes.stream().filter(c -> c.getSimpleName().equals(type)).findFirst().get();
                 Class<?> accessorType = classes.stream().filter(c -> c.getSimpleName().equals(accessor)).findFirst().get();
-                Suppressor.run(() -> dal.getRuntimeContextBuilder().registerPropertyAccessor(beanType,
+                Sneaky.run(() -> dal.getRuntimeContextBuilder().registerPropertyAccessor(beanType,
                         (PropertyAccessor) accessorType.newInstance()));
             });
             dALCollectionFactories.forEach((type, factory) -> {
                 Class<?> beanType = classes.stream().filter(c -> c.getSimpleName().equals(type)).findFirst().get();
                 Class<?> factoryType = classes.stream().filter(c -> c.getSimpleName().equals(factory)).findFirst().get();
-                Suppressor.run(() -> dal.getRuntimeContextBuilder()
+                Sneaky.run(() -> dal.getRuntimeContextBuilder()
                         .registerDALCollectionFactory(beanType, (DALCollectionFactory) factoryType.newInstance())
                 );
             });
             textFormatters.forEach((formatter, name) -> {
                 Class<?> formatterClass = classes.stream().filter(c -> c.getSimpleName().equals(name)).findFirst().get();
                 dal.getRuntimeContextBuilder().registerTextFormatter(formatter,
-                        (TextFormatter) Suppressor.get(formatterClass::newInstance));
+                        (TextFormatter) Sneaky.get(formatterClass::newInstance));
             });
             classes.stream().filter(t -> t.getSimpleName().equals("_DALRegister")).forEach(r ->
-                    ((Consumer) Suppressor.get(() -> r.newInstance())).accept(dal));
+                    ((Consumer) Sneaky.get(() -> r.newInstance())).accept(dal));
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
             exception = e;
@@ -410,7 +409,7 @@ public class IntegrationTestContext {
                 "        }\n" +
                 "    }", inputCode);
 
-        return ((Supplier<Assertions>) Suppressor.get(() ->
+        return ((Supplier<Assertions>) Sneaky.get(() ->
                 javaCompiler.compileToClasses(asList(assertionCode)).get(0).newInstance())).get();
     }
 

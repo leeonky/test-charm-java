@@ -1,7 +1,5 @@
 package com.github.leeonky.util;
 
-import com.github.leeonky.util.Suppressor;
-
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.IntStream;
@@ -18,10 +16,10 @@ public class JavaCompilerPool {
     }
 
     public JavaCompiler take() {
-        return new JavaCompiler(generatePackage, Suppressor.get(workspaces::takeFirst));
+        return new JavaCompiler(generatePackage, Sneaky.get(workspaces::takeFirst));
     }
 
     public void giveBack(JavaCompiler compiler) {
-        Suppressor.run(() -> workspaces.putLast(compiler.getId()));
+        Sneaky.run(() -> workspaces.putLast(compiler.getId()));
     }
 }

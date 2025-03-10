@@ -2,7 +2,7 @@ package com.github.leeonky.dal.extensions.basic.file.util;
 
 import com.github.leeonky.dal.runtime.PartialObject;
 import com.github.leeonky.dal.runtime.ProxyObject;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 
 import java.io.InputStream;
 import java.util.*;
@@ -51,11 +51,11 @@ public abstract class FileGroup<T> implements PartialObject, Iterable<T>, ProxyO
         T subFile = createSubFile(fileName(property));
         Function<InputStream, Object> handler = fileExtensions.get(property);
         if (handler != null)
-            return Suppressor.get(() -> {
-                try (InputStream open = open(subFile)) {
-                    return handler.apply(open);
-                }
-            });
+            return Sneaky.get(() -> {
+                    try (InputStream open = open(subFile)) {
+                        return handler.apply(open);
+                    }
+                });
         return subFile;
     }
 

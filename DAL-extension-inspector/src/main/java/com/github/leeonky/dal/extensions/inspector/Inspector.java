@@ -4,7 +4,7 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.staticfiles.Location;
@@ -70,7 +70,7 @@ public class Inspector {
             Watch watch = dalInstance.watches.get(index);
             if (watch instanceof DalInstance.BinaryWatch) {
                 DalInstance.BinaryWatch binaryWatch = (DalInstance.BinaryWatch) watch;
-                String contentType = Suppressor.get(() -> guessContentTypeFromStream(
+                String contentType = Sneaky.get(() -> guessContentTypeFromStream(
                         new ByteArrayInputStream(binaryWatch.binary())));
                 ctx.contentType(contentType == null ? "application/octet-stream" : contentType);
                 ctx.result(binaryWatch.binary());
@@ -97,7 +97,7 @@ public class Inspector {
     }
 
     private void waitForReady() {
-        Suppressor.run(serverReadyLatch::await);
+        Sneaky.run(serverReadyLatch::await);
     }
 
     private static int getServerPort() {
@@ -190,7 +190,7 @@ public class Inspector {
             }
             //        TODO use sempahore to wait for the result
             while (running)
-                Suppressor.run(() -> Thread.sleep(20));
+                Sneaky.run(() -> Thread.sleep(20));
 //            TODO use logger
             System.err.println("DAL inspector released with pass: " + pass);
             return pass;
@@ -210,15 +210,15 @@ public class Inspector {
                 return (byte[]) data.instance();
             if (data.instanceOf(InputStream.class)) {
                 InputStream stream = (InputStream) data.instance();
-                return Suppressor.get(() -> {
-                    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-                        int size;
-                        byte[] data1 = new byte[1024];
-                        while ((size = stream.read(data1, 0, data1.length)) != -1)
-                            buffer.write(data1, 0, size);
-                        return buffer.toByteArray();
-                    }
-                });
+                return Sneaky.get(() -> {
+                            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                                int size;
+                                byte[] data1 = new byte[1024];
+                                while ((size = stream.read(data1, 0, data1.length)) != -1)
+                                    buffer.write(data1, 0, size);
+                                return buffer.toByteArray();
+                            }
+                        });
             }
             if (data.instanceOf(Byte[].class)) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();

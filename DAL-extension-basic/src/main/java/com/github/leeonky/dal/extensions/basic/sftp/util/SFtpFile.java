@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.sftp.util;
 
-import com.github.leeonky.util.Suppressor;
+import com.github.leeonky.util.Sneaky;
 import com.jcraft.jsch.ChannelSftp;
 
 import java.io.InputStream;
@@ -18,13 +18,13 @@ public abstract class SFtpFile {
     protected abstract String fullName();
 
     public InputStream download() {
-        return Suppressor.get(() -> channel().get(fullName()));
+        return Sneaky.get(() -> channel().get(fullName()));
     }
 
     public abstract boolean isDir();
 
     public List<SFtpFile> ls() {
-        return Suppressor.get(() -> (Vector<ChannelSftp.LsEntry>) channel().ls(fullName())).stream()
+        return Sneaky.get(() -> (Vector<ChannelSftp.LsEntry>) channel().ls(fullName())).stream()
                 .filter(entry -> !entry.getFilename().equals("."))
                 .filter(entry -> !entry.getFilename().equals(".."))
                 .sorted(Comparator.<ChannelSftp.LsEntry, Boolean>comparing(e -> e.getAttrs().isDir())
