@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
@@ -149,9 +150,18 @@ public class Inspector {
         private final DAL dal;
         private final String code;
         private final List<Watch> watches = new ArrayList<>();
+        private final Data inputData;
 
         public DalInstance(Supplier<Object> input, DAL dal, String code) {
             this.input = input;
+            this.dal = dal;
+            this.code = code;
+            inputData = null;
+        }
+
+        public DalInstance(Data inputData, DAL dal, String code) {
+            input = inputData::instance;
+            this.inputData = inputData;
             this.dal = dal;
             this.code = code;
         }
@@ -159,12 +169,12 @@ public class Inspector {
         public String execute(String code) {
             watches.clear();
             Map<String, Object> response = new HashMap<>();
-            Object inputObject = input.get();
-            DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(inputObject);
+            DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input::get, null);
             try {
-                response.put("root", runtimeContext.wrap(inputObject).dumpAll());
-                response.put("inspect", dal.compileSingle(code, runtimeContext).inspect());
-                response.put("result", runtimeContext.wrap(dal.evaluate(inputObject, code)).dumpAll());
+                response.put("root", runtimeContext.wrap(input::get, null).dumpAll());
+                DALNode dalNode = dal.compileSingle(code, runtimeContext);
+                response.put("inspect", dalNode.inspect());
+                response.put("result", dalNode.evaluateData(runtimeContext).dumpAll());
             } catch (InterpreterException e) {
                 response.put("error", e.show(code) + "\n\n" + e.getMessage());
             }
@@ -211,14 +221,14 @@ public class Inspector {
             if (data.instanceOf(InputStream.class)) {
                 InputStream stream = (InputStream) data.instance();
                 return Sneaky.get(() -> {
-                            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-                                int size;
-                                byte[] data1 = new byte[1024];
-                                while ((size = stream.read(data1, 0, data1.length)) != -1)
-                                    buffer.write(data1, 0, size);
-                                return buffer.toByteArray();
-                            }
-                        });
+                    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                        int size;
+                        byte[] data1 = new byte[1024];
+                        while ((size = stream.read(data1, 0, data1.length)) != -1)
+                            buffer.write(data1, 0, size);
+                        return buffer.toByteArray();
+                    }
+                });
             }
             if (data.instanceOf(Byte[].class)) {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -283,13 +293,13 @@ public class Inspector {
         }
     }
 
-    public boolean inspectInner(DAL dal, Object input, String code) {
+    public boolean inspectInner(DAL dal, Data input, String code) {
         if (calledFromInspector())
             return false;
 //        lock inspect by name
 //        check mode
         if (currentMode() == Mode.FORCED) {
-            DalInstance dalInstance = new DalInstance(() -> input, dal, code);
+            DalInstance dalInstance = new DalInstance(input, dal, code);
             dalInstances.put(dal.getName(), dalInstance);
 
 //            List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
@@ -310,7 +320,7 @@ public class Inspector {
                     .map(o -> clientConnections.get(o.getKey()))
                     .collect(Collectors.toList());
             if (!monitored.isEmpty()) {
-                DalInstance dalInstance = new DalInstance(() -> input, dal, code);
+                DalInstance dalInstance = new DalInstance(input, dal, code);
                 dalInstances.put(dal.getName(), dalInstance);
                 for (WsContext wsContext : monitored) {
                     wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
@@ -323,7 +333,7 @@ public class Inspector {
         }
     }
 
-    public static boolean inspect(DAL dal, Object input, String code) {
+    public static boolean inspect(DAL dal, Data input, String code) {
         if (currentMode() != Mode.DISABLED)
             return inspector.inspectInner(dal, input, code);
         return false;

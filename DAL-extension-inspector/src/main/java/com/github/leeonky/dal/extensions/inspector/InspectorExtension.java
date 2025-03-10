@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 
 public class InspectorExtension implements Extension {
@@ -11,9 +12,9 @@ public class InspectorExtension implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerErrorHook((input, code, error) -> Inspector.inspect(dal, input, code))
                 .registerMetaProperty("inspect", metaData -> {
-                    Object input = metaData.data().instance();
-                    Inspector.inspect(dal, input, "{}");
-                    return input;
+                    Data data = metaData.data();
+                    Inspector.inspect(dal, data, "{}");
+                    return data.instance();
                 });
     }
 }

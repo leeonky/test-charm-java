@@ -496,7 +496,7 @@ public class RuntimeContextBuilder {
         }
 
         public boolean hookError(String expression, Throwable error) {
-            return errorHook.handle(getThis().instance(), expression, error);
+            return errorHook.handle(getThis(), expression, error);
         }
 
         public Object invokeMetaProperty(MetaData metaData) {

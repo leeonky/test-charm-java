@@ -27,9 +27,9 @@ public class DALTest {
         DAL dal = new DAL();
         isCalled = false;
 
-        dal.getRuntimeContextBuilder().registerErrorHook((i, code, e) -> {
-            ((DALTest) i).isCalled = true;
-            assertThat(i).isSameAs(this);
+        dal.getRuntimeContextBuilder().registerErrorHook((data, code, e) -> {
+            ((DALTest) data.instance()).isCalled = true;
+            assertThat(data.instance()).isSameAs(this);
             assertEquals("Error", e.getMessage());
             assertEquals("throwError", code);
             return false;
@@ -44,9 +44,9 @@ public class DALTest {
         DAL dal = new DAL();
         isCalled = false;
 
-        dal.getRuntimeContextBuilder().registerErrorHook((i, code, e) -> {
-            ((DALTest) i).isCalled = true;
-            assertThat(i).isSameAs(this);
+        dal.getRuntimeContextBuilder().registerErrorHook((data, code, e) -> {
+            ((DALTest) data.instance()).isCalled = true;
+            assertThat(data.instance()).isSameAs(this);
             assertEquals("Error", e.getMessage());
             assertEquals("throwError", code);
             return false;
