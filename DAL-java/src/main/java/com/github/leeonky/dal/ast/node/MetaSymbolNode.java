@@ -15,7 +15,7 @@ public class MetaSymbolNode extends SymbolNode {
         } catch (InterpreterException | ExpressionException e) {
             throw e;
         } catch (Exception e) {
-            throw new DalRuntimeException(e.getMessage(), getPositionBegin(), e);
+            throw new DalException(getPositionBegin(), e);
         }
     }
 }

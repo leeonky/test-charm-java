@@ -4,7 +4,10 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.ExecutableNode;
 import com.github.leeonky.dal.ast.node.SchemaComposeNode;
 import com.github.leeonky.dal.compiler.Notations;
-import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.ExclamationData;
+import com.github.leeonky.dal.runtime.Operators;
+import com.github.leeonky.dal.runtime.RemarkData;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Notation;
 
@@ -65,11 +68,7 @@ public class Factory {
         return new DALOperator(Precedence.WHICH, Notations.Operators.WHICH.getLabel(), true, Operators.NA) {
             @Override
             public Object calculate(DALExpression expression, DALRuntimeContext context) {
-                try {
-                    return expression.left().evaluateData(context).execute(() -> expression.right().evaluate(context));
-                } catch (IllegalStateException e) {
-                    throw new DalRuntimeException(e.getMessage(), getPosition());
-                }
+                return expression.left().evaluateData(context).execute(() -> expression.right().evaluate(context));
             }
         };
     }

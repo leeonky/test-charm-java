@@ -178,7 +178,8 @@ public class ListScopeNode extends DALNode {
                         clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                                 new SymbolNode(elementIndex, BRACKET))).evaluate(context);
                         break;
-                    } catch (AssertionFailure | DalRuntimeException ignore) {
+//                        TODO test should which exception ignore which exception not ignore
+                    } catch (DalException ignore) {
                     }
                 }
             } catch (AssertionFailure exception) {

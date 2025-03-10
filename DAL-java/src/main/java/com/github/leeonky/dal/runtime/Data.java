@@ -2,9 +2,9 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.util.Sneaky;
 import com.github.leeonky.util.ThrowingSupplier;
 
-import java.lang.RuntimeException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -24,8 +24,8 @@ public class Data {
     private Object instance;
     private boolean resolved = false;
     private DataList list;
-    private RuntimeException error;
-    private Function<PropertyAccessException, RuntimeException> errorMapper = e -> e;
+    private Throwable error;
+    private Function<Throwable, Throwable> errorMapper = e -> e;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
         this(() -> instance, context, schemaType);
@@ -37,25 +37,21 @@ public class Data {
         this.schemaType = schemaType;
     }
 
-    public Data mapError(Function<PropertyAccessException, RuntimeException> mapper) {
+    public Data mapError(Function<Throwable, Throwable> mapper) {
         errorMapper = mapper;
         return this;
     }
 
     public Object instance() {
         if (error != null)
-            throw error;
+            return Sneaky.sneakyThrow(error);
         if (resolved)
             return instance;
         try {
             resolved = true;
             return instance = supplier.get();
-        } catch (PropertyAccessException e) {
-            throw error = errorMapper.apply(e);
-        } catch (UserRuntimeException e) {
-            throw error = errorMapper.apply(new PropertyAccessException(e.getCause().getMessage(), e));
         } catch (Throwable e) {
-            throw error = errorMapper.apply(new PropertyAccessException(e.getMessage(), e));
+            return Sneaky.sneakyThrow(error = errorMapper.apply(e));
         }
     }
 
@@ -90,41 +86,24 @@ public class Data {
         if (chain.size() == 1 && chain.get(0).equals(propertyChain)) {
             ThrowingSupplier<?> supplier = () -> {
                 try {
-                    return getPropertyValue(propertyChain);
+                    return isList() ? fetchFromList(propertyChain) : context.getPropertyValue(this, propertyChain);
                 } catch (IndexOutOfBoundsException ex) {
-                    throw new PropertyAccessException(ex.getMessage(), ex);
+                    throw new DalRuntimeException(ex);
                 } catch (ListMappingElementAccessException ex) {
-                    throw new PropertyAccessException(ex.toDalError(0).getMessage(),
-                            ex.propertyAccessException().getCause());
-                } catch (UserRuntimeException e) {
-                    throw buildPropertyAccessException(propertyChain, e, e.getCause().toString());
-                } catch (Exception e) {
-                    throw buildPropertyAccessException(propertyChain, e, e.getMessage());
+                    throw new DalRuntimeException(ex.mappingIndexMessage(), ex.exception());
+                } catch (Throwable e) {
+                    throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
+                            "  1. public field\n" +
+                            "  2. public getter\n" +
+                            "  3. public method\n" +
+                            "  4. Map key value\n" +
+                            "  5. customized type getter\n" +
+                            "  6. static method extension", propertyChain), e);
                 }
             };
             return new Data(supplier, context, propertySchema(propertyChain));
         }
         return getValue(chain);
-    }
-
-    private PropertyAccessException buildPropertyAccessException(Object propertyChain, Throwable cause, String message) {
-        return new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
-                        "  1. public field\n" +
-                        "  2. public getter\n" +
-                        "  3. public method\n" +
-                        "  4. Map key value\n" +
-                        "  5. customized type getter\n" +
-                        "  6. static method extension\n%s%s",
-                propertyChain, message, listMappingMessage(this, propertyChain)), cause);
-    }
-
-    private String listMappingMessage(Data data, Object symbol) {
-        return data.isList() ? format("\nImplicit list mapping is not allowed in current version of DAL, use `%s[]` instead or specify index in []",
-                symbol) : "";
-    }
-
-    private Object getPropertyValue(Object property) {
-        return isList() ? fetchFromList(property) : context.getPropertyValue(this, property);
     }
 
     private Object fetchFromList(Object property) {

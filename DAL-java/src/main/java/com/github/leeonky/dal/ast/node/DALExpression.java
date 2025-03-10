@@ -4,7 +4,7 @@ import com.github.leeonky.dal.ast.node.table.RowHeader;
 import com.github.leeonky.dal.ast.node.table.RowType;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.AssertionFailure;
-import com.github.leeonky.dal.runtime.DalRuntimeException;
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ExpressionException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -62,7 +62,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
         } catch (AssertionError error) {
             throw new AssertionFailure(error.getMessage(), right().getPositionBegin());
         } catch (Exception e) {
-            throw new DalRuntimeException(e.getMessage(), operator().getPosition(), e);
+            throw new DalException(operator().getPosition(), e);
         }
     }
 

@@ -345,19 +345,16 @@ public class RuntimeContextBuilder {
         }
 
         public Object getPropertyValue(Data data, Object property) {
-            PropertyAccessor<Object> propertyAccessor = getObjectPropertyAccessor(data.instance());
             try {
-                return propertyAccessor.getValueByData(data, property);
+                return getObjectPropertyAccessor(data.instance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
                 try {
                     return data.currying(property).orElseThrow(() -> e).resolve();
-                } catch (InvalidPropertyException e1) {
-                    throw e1;
-                } catch (Exception e1) {
-                    throw new UserRuntimeException(e1);
+                } catch (Throwable e1) {
+                    return DalException.handleException(e1);
                 }
-            } catch (Exception e) {
-                throw new UserRuntimeException(e);
+            } catch (Throwable e) {
+                return DalException.handleException(e);
             }
         }
 

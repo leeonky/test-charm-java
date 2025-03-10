@@ -24,6 +24,14 @@ public class DalException extends InterpreterException {
         this.cause = cause;
     }
 
+    public DalException(int position, Throwable cause) {
+        this(null, position, Position.Type.CHAR, cause);
+    }
+
+    public DalException(int position, Position.Type type, Throwable cause) {
+        this(null, position, type, cause);
+    }
+
     public static Optional<Throwable> extractException(Throwable e) {
         if (e instanceof UserRuntimeException)
             return Optional.ofNullable(e.getCause());
@@ -35,5 +43,39 @@ public class DalException extends InterpreterException {
     @Override
     public Throwable getCause() {
         return cause;
+    }
+
+    @Override
+    public String getMessage() {
+        String message = super.getMessage();
+        if (message != null && !message.isEmpty()) {
+            Throwable cause = getCause();
+            if (cause != null)
+                return message + "\n" + cause.getMessage();
+            return message;
+        }
+        Throwable cause = getCause();
+        if (cause != null)
+            return cause.getMessage();
+
+        return getClass().getName();
+
+//        TODO merge message and cause message
+
+//        String message = super.getMessage();
+//        if (message != null) {
+//            return message;
+//        }
+//        Throwable cause = getCause();
+//        if (cause != null)
+//            return cause.getMessage();
+//        return getClass().getName();
+
+    }
+
+    public static Object handleException(Throwable error) {
+        if (error instanceof DalRuntimeException)
+            throw (DalRuntimeException) error;
+        throw new UserRuntimeException(error);
     }
 }

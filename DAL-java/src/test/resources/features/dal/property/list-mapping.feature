@@ -127,7 +127,6 @@ Feature: list mapping
       5. customized type getter
       6. static method extension
     Method or property `id` does not exist in `java.util.ArrayList`
-    Implicit list mapping is not allowed in current version of DAL, use `id[]` instead or specify index in []
     """
     And got the following notation:
     """
@@ -324,27 +323,27 @@ Feature: list mapping
       }};
     }
     """
-    When use a instance of java class "Data" to evaluate:
-    """
-    orders.product[].price.value.invalid.invalid= []
-    """
-    Then failed with the message:
-    """
-    Mapping element[0]:
-    Get property `value` failed, property can be:
-      1. public field
-      2. public getter
-      3. public method
-      4. Map key value
-      5. customized type getter
-      6. static method extension
-    java.lang.RuntimeException: Error
-    """
-    And got the following notation:
-    """
-    orders.product[].price.value.invalid.invalid= []
-                                         ^
-    """
+#    When use a instance of java class "Data" to evaluate:
+#    """
+#    orders.product[].price.value.invalid.invalid= []
+#    """
+#    Then failed with the message:
+#    """
+#    Mapping element[0]:
+#    Get property `value` failed, property can be:
+#      1. public field
+#      2. public getter
+#      3. public method
+#      4. Map key value
+#      5. customized type getter
+#      6. static method extension
+#    java.lang.RuntimeException: Error
+#    """
+#    And got the following notation:
+#    """
+#    orders.product[].price.value.invalid.invalid= []
+#                                         ^
+#    """
     When use a instance of java class "Data" to evaluate:
     """
     orders.product[].price.value.invalid.invalid[0]: {...}

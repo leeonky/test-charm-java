@@ -31,24 +31,20 @@ public class SchemaComposeNode extends DALNode {
             List<Object> instanceBySchema = schemas.stream().map(schemaNode ->
                     verifyAndConvertAsSchemaType(context, schemaNode, input)).collect(toList());
             return context.wrap(instanceBySchema.get(instanceBySchema.size() - 1), schemas.get(0).inspect(), isList);
-        } catch (IllegalStateException e) {
-            throw new DalRuntimeException(e.getMessage(), getPositionBegin());
+        } catch (DalRuntimeException e) {
+            throw e.toDalError(getPositionBegin());
         }
     }
 
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
         Data inputData = input.evaluateData(context);
-        if (isList)
-            try {
-                DALCollection<Object> collection = opt1(inputData::list).wraps().map((index, data) ->
-                        convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index)));
-                //get size to avoid lazy mode, should verify element with schema
-                collection.collect();
-                return collection;
-            } catch (InfiniteCollectionException e) {
-                throw new DalRuntimeException("Not supported for infinite collection", getPositionBegin());
-            }
-        else
+        if (isList) {
+            DALCollection<Object> collection = opt1(inputData::list).wraps().map((index, data) ->
+                    convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index)));
+            //get size to avoid lazy mode, should verify element with schema
+            collection.collect();
+            return collection;
+        } else
             return convertViaSchema(context, schemaNode, inputData, input.inspect());
     }
 

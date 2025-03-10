@@ -1012,7 +1012,6 @@ Feature: list
         5. customized type getter
         6. static method extension
       Not support negative index in infinite collection
-      Implicit list mapping is not allowed in current version of DAL, use `-1[]` instead or specify index in []
       """
       And got the following notation:
       """

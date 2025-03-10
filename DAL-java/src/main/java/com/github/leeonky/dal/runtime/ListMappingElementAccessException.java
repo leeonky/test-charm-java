@@ -2,23 +2,27 @@ package com.github.leeonky.dal.runtime;
 
 public class ListMappingElementAccessException extends java.lang.RuntimeException {
     private final int index;
-    private final PropertyAccessException exception;
+    private Throwable exception;
 
-    public ListMappingElementAccessException(int index, PropertyAccessException exception) {
+    public ListMappingElementAccessException(int index, Throwable exception) {
         super();
         this.index = index;
         this.exception = exception;
     }
 
-    public DalRuntimeException toDalError(int position) {
-        return exception.toDalError(String.format("Mapping element[%d]:\n", index()), position);
+    //TODO refactor
+    @Deprecated
+    public DalException toDalError(int position) {
+        return new DalException(mappingIndexMessage(), position, exception);
     }
 
-    public PropertyAccessException propertyAccessException() {
+    @Deprecated
+    public String mappingIndexMessage() {
+        return String.format("Mapping element[%d]:", index);
+    }
+
+    public Throwable exception() {
         return exception;
     }
 
-    public int index() {
-        return index;
-    }
 }

@@ -197,7 +197,6 @@ Feature: dir/file with java File
       5. customized type getter
       6. static method extension
     java.io.FileNotFoundException: File or File Group <un-exist> not found
-    Implicit list mapping is not allowed in current version of DAL, use `un-exist[]` instead
     """
 
   Scenario: raise error when file not exist with file group
@@ -227,7 +226,6 @@ Feature: dir/file with java File
       5. customized type getter
       6. static method extension
     java.io.FileNotFoundException: File `file.not-exist` not exist
-    Implicit list mapping is not allowed in current version of DAL, use `not-exist[]` instead
     """
 
   Scenario: return file object when extension not registered

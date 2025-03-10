@@ -86,7 +86,6 @@ Feature: zip file
       5. customized type getter
       6. static method extension
     java.io.FileNotFoundException: File or File Group <not-exist.txt> not found
-    Implicit list mapping is not allowed in current version of DAL, use `not-exist.txt[]` instead
     """
 
   Scenario: verify all files in zip
@@ -220,7 +219,6 @@ Feature: zip file
       5. customized type getter
       6. static method extension
     java.io.FileNotFoundException: File `file.json` not exist
-    Implicit list mapping is not allowed in current version of DAL, use `json[]` instead
     """
     Then java.io.File "/tmp/work/test/dir/file.zip" should failed:
     """
@@ -244,7 +242,6 @@ Feature: zip file
       5. customized type getter
       6. static method extension
     java.io.FileNotFoundException: File `file.json` not exist
-    Implicit list mapping is not allowed in current version of DAL, use `json[]` instead
     """
 
   Scenario: nested zip files

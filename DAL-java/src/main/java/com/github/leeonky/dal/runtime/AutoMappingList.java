@@ -7,10 +7,8 @@ public class AutoMappingList extends DALCollection.Decorated<Object> {
         super(list.map((index, data) -> {
             try {
                 return mapper.apply(data);
-            } catch (PropertyAccessException e) {
-                throw new ListMappingElementAccessException(index, e);
             } catch (Exception e) {
-                throw new ListMappingElementAccessException(index, new PropertyAccessException(e.getMessage(), e));
+                throw new ListMappingElementAccessException(index, e);
             }
         }));
     }

@@ -26,7 +26,7 @@ public class TextBlockAttributeListNode extends DALNode {
             TextFormatter eachFormatter = attributeNode.extractTextFormatter(context);
             if (!context.getConverter().supported(accept, eachFormatter.acceptType()))
                 throw new DalRuntimeException(format("Invalid text formatter, expect a formatter which accept %s but %s",
-                        accept.getName(), eachFormatter.acceptType().getName()), attributeNode.getPositionBegin());
+                        accept.getName(), eachFormatter.acceptType().getName())).toDalError(attributeNode.getPositionBegin());
             accept = eachFormatter.returnType();
             textFormatter = textFormatter.merge(eachFormatter);
         }

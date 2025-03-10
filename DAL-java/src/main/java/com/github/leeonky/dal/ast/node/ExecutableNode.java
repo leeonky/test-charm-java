@@ -14,7 +14,7 @@ public interface ExecutableNode extends Node<RuntimeContextBuilder.DALRuntimeCon
     default Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = left.evaluateData(context);
         if (opt1(data::isNull))
-            throw new DalRuntimeException("Instance is null", getOperandPosition());
+            throw new DalRuntimeException("Instance is null").toDalError(getOperandPosition());
         return getValue(data, context);
     }
 }

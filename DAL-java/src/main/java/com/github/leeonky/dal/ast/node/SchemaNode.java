@@ -13,7 +13,7 @@ public class SchemaNode extends DALNode {
 
     public ConstructorViaSchema getValueConstructorViaSchema(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.searchValueConstructor(schema).orElseThrow(() ->
-                new DalRuntimeException("Schema '" + schema + "' not registered", getPositionBegin()));
+                new DalRuntimeException("Schema '" + schema + "' not registered").toDalError(getPositionBegin()));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.PartialObject;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
@@ -27,7 +28,7 @@ public class SymbolNode extends DALNode implements ExecutableNode {
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         if (data.instanceOf(PartialObject.class))
             context.appendPartialPropertyReference(data, symbol);
-        Data value = data.getValue(symbol).mapError(e -> e.toDalError("", getPositionBegin()));
+        Data value = data.getValue(symbol).mapError(e -> new DalException(getPositionBegin(), e));
         if (value.instanceOf(PartialObject.class))
             context.initPartialPropertyStack(data, symbol, value);
         return value;
