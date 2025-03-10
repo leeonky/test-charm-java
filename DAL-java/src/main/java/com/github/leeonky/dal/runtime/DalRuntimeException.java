@@ -28,8 +28,4 @@ public class DalRuntimeException extends RuntimeException {
     public String toString() {
         return getMessage();
     }
-
-    public DalException toDalError(int positionBegin) {
-        return DalException.locateError(this, positionBegin);
-    }
 }

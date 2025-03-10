@@ -69,7 +69,11 @@ public class DalException extends InterpreterException {
         return e.getClass().getName();
     }
 
-    public static DalException locateError(Throwable e, int positionBegin) {
+    public static RuntimeException locateError(Throwable e, int positionBegin) {
+        if (e instanceof InterpreterException || e instanceof ExpressionException)
+            return (RuntimeException) e;
+        if (e instanceof AssertionError)
+            return new AssertionFailure(e.getMessage(), positionBegin);
         return new DalException(positionBegin, e);
     }
 

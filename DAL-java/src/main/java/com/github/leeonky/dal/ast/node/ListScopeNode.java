@@ -17,6 +17,7 @@ import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
+import static com.github.leeonky.dal.runtime.DalException.locateError;
 import static com.github.leeonky.dal.runtime.ExpressionException.exception;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static com.github.leeonky.util.Zipped.zip;
@@ -110,7 +111,7 @@ public class ListScopeNode extends DALNode {
                     return list.wrap().execute(() -> type == Type.CONTAINS ? verifyContainElement(context, list, actual)
                             : verifyCorrespondingElement(context, getVerificationExpressions(list, actual)));
                 } catch (ListMappingElementAccessException e) {
-                    throw exception(expression -> e.toDalError(expression.left().getOperandPosition()));
+                    throw exception(expression -> locateError(e, expression.left().getOperandPosition()));
                 }
             }
 

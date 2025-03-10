@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import java.util.List;
 import java.util.stream.Collector;
 
+import static com.github.leeonky.dal.runtime.DalException.locateError;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -32,7 +33,7 @@ public class SchemaComposeNode extends DALNode {
                     verifyAndConvertAsSchemaType(context, schemaNode, input)).collect(toList());
             return context.wrap(instanceBySchema.get(instanceBySchema.size() - 1), schemas.get(0).inspect(), isList);
         } catch (DalRuntimeException e) {
-            throw e.toDalError(getPositionBegin());
+            throw locateError(e, getPositionBegin());
         }
     }
 

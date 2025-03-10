@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.MetaData;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import static com.github.leeonky.dal.runtime.DalException.locateError;
 
@@ -15,20 +16,9 @@ public class MetaSymbolNode extends SymbolNode {
         return context.wrap(() -> {
             try {
                 return context.invokeMetaProperty(new MetaData(left, getRootSymbolName(), context));
-            } catch (InterpreterException | ExpressionException e) {
-                throw e;
-            } catch (AssertionError e) {
-                throw new AssertionFailure(e.getMessage(), getPositionBegin());
-            } catch (Exception e) {
-                throw new DalException(getPositionBegin(), e);
+            } catch (Throwable e) {
+                throw locateError(e, getPositionBegin());
             }
-        }, null).mapError(e -> {
-            if (e instanceof AssertionError) {
-                throw new AssertionFailure(e.getMessage(), getPositionBegin());
-            }
-            if (e instanceof InterruptedException || e instanceof ExpressionException)
-                return e;
-            return locateError(e, getPositionBegin());
-        });
+        }, null).mapError(e -> locateError(e, getPositionBegin()));
     }
 }

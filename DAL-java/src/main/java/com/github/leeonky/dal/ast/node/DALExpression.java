@@ -3,17 +3,16 @@ package com.github.leeonky.dal.ast.node;
 import com.github.leeonky.dal.ast.node.table.RowHeader;
 import com.github.leeonky.dal.ast.node.table.RowType;
 import com.github.leeonky.dal.ast.opt.DALOperator;
-import com.github.leeonky.dal.runtime.AssertionFailure;
-import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ExpressionException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Expression;
-import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static com.github.leeonky.dal.runtime.DalException.locateError;
 
 public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator>,
         ExecutableNode {
@@ -59,26 +58,12 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
                     .mapError(e -> {
                         if (e instanceof ExpressionException)
                             return ((ExpressionException) e).rethrow(this);
-                        return e;
+                        return locateError(e, right().getPositionBegin());
                     });
-        } catch (InterpreterException e) {
-            throw e;
         } catch (ExpressionException ex) {
             throw ex.rethrow(this);
-        } catch (AssertionError error) {
-            throw new AssertionFailure(error.getMessage(), right().getPositionBegin());
-        } catch (Exception e) {
-            throw new DalException(operator().getPosition(), e);
-        }
-    }
-
-    @Override
-    @Deprecated
-    public Object evaluate(DALRuntimeContext context) {
-        try {
-            return evaluateData(context).instance();
-        } catch (ExpressionException ex) {
-            throw ex.rethrow(this);
+        } catch (Throwable e) {
+            throw locateError(e, right().getPositionBegin());
         }
     }
 
