@@ -1,14 +1,18 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALExpression;
+import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+//TODO check all exception
 public abstract class ExpressionException extends java.lang.RuntimeException {
     public static <T> T opt1(Supplier<T> supplier) {
         try {
             return supplier.get();
+        } catch (InterpreterException e) {
+            throw e;
         } catch (Exception e) {
             throw exception(expression -> new DalException(expression.left().getOperandPosition(), e));
         }

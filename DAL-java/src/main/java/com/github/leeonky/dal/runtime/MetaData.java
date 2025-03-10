@@ -13,24 +13,17 @@ import static java.lang.String.format;
 public class MetaData extends RuntimeData {
     private DALNode inputNode;
     private final Object name;
-//    protected Data data;
 
     public MetaData(DALNode inputNode, Object symbolName, DALRuntimeContext runtimeContext) {
         super(inputNode.evaluateData(runtimeContext), runtimeContext);
         this.inputNode = inputNode;
         name = symbolName;
-//        setData(() -> inputNode.evaluateData(runtimeContext));
     }
 
     private MetaData(DALRuntimeContext runtimeContext, Data data, String name) {
         super(data, runtimeContext);
         this.name = name;
-//        this.data = data;
     }
-
-//    private void setData(Supplier<Data> supplier) {
-//        data = supplier.get();
-//    }
 
     private final List<Class<?>> callTypes = new ArrayList<>();
 
@@ -100,11 +93,6 @@ public class MetaData extends RuntimeData {
     public Object name() {
         return name;
     }
-
-//    @Override
-//    public Data data() {
-//        return data;
-//    }
 
     public DALNode inputNode() {
         return inputNode;

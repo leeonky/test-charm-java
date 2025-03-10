@@ -3,6 +3,7 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.UserRuntimeException;
 import org.junit.jupiter.api.Test;
 
 import static com.github.leeonky.dal.Assertions.expect;
@@ -17,7 +18,7 @@ public class MetaThrowTest {
         builder.registerPropertyAccessor(Bean.class, new JavaClassPropertyAccessor<Bean>(create(Bean.class)) {
             @Override
             public Object getValueByData(Data data, Object property) {
-                throw new java.lang.RuntimeException("hello");
+                throw new UserRuntimeException(new java.lang.RuntimeException("hello"));
             }
         });
 

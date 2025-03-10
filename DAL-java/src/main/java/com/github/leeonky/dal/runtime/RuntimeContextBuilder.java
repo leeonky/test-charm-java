@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2RuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperationRuntimeException;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
@@ -351,10 +352,10 @@ public class RuntimeContextBuilder {
                 try {
                     return data.currying(property).orElseThrow(() -> e).resolve();
                 } catch (Throwable e1) {
-                    return DalException.handleException(e1);
+                    return throwUserRuntimeException(e1);
                 }
             } catch (Throwable e) {
-                return DalException.handleException(e);
+                return throwUserRuntimeException(e);
             }
         }
 
@@ -372,10 +373,12 @@ public class RuntimeContextBuilder {
         }
 
         //        TODO check use supplier
+        @Deprecated
         public Data wrap(Object instance) {
             return wrap(instance, null);
         }
 
+        @Deprecated
         public Data wrap(Object instance, String schema, boolean isList) {
             BeanClass<?> schemaType = schemas.get(schema);
             if (isList && schemaType != null)
@@ -383,6 +386,7 @@ public class RuntimeContextBuilder {
             return wrap(instance, schemaType);
         }
 
+        @Deprecated
         public Data wrap(Object instance, BeanClass<?> schemaType) {
             return new Data(instance, this, SchemaType.create(schemaType));
         }
@@ -500,7 +504,11 @@ public class RuntimeContextBuilder {
         }
 
         public Object invokeMetaProperty(MetaData metaData) {
-            return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
+            try {
+                return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
+            } catch (Throwable e) {
+                return throwUserRuntimeException(e);
+            }
         }
 
         public Data invokeDataRemark(RemarkData remarkData) {

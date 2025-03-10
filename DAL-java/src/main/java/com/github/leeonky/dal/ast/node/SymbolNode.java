@@ -7,7 +7,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.leeonky.dal.runtime.DalException.toDalError;
+import static com.github.leeonky.dal.runtime.DalException.locateError;
 import static java.lang.String.format;
 
 public class SymbolNode extends DALNode implements ExecutableNode {
@@ -28,7 +28,7 @@ public class SymbolNode extends DALNode implements ExecutableNode {
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         if (data.instanceOf(PartialObject.class))
             context.appendPartialPropertyReference(data, symbol);
-        Data value = data.getValue(symbol).mapError(e -> toDalError(e, getPositionBegin()));
+        Data value = data.getValue(symbol).mapError(e -> locateError(e, getPositionBegin()));
         if (value.instanceOf(PartialObject.class))
             context.initPartialPropertyStack(data, symbol, value);
         return value;

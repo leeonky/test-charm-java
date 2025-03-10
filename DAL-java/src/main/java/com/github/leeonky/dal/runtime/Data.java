@@ -27,6 +27,7 @@ public class Data {
     private Throwable error;
     private Function<Throwable, Throwable> errorMapper = e -> e;
 
+    @Deprecated
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
         this(() -> instance, context, schemaType);
     }

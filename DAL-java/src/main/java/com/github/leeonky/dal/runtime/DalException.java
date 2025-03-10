@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.util.Sneaky;
 
 import java.util.Optional;
 
@@ -55,10 +56,6 @@ public class DalException extends InterpreterException {
         return getMessage();
     }
 
-    public static DalException toDalError(Throwable e, int positionBegin) {
-        return new DalException(positionBegin, e);
-    }
-
     public static String buildMessage(Throwable e, String message) {
         if (message != null && !message.isEmpty()) {
             Throwable cause = e.getCause();
@@ -72,9 +69,17 @@ public class DalException extends InterpreterException {
         return e.getClass().getName();
     }
 
-    public static Object handleException(Throwable error) {
-        if (error instanceof DalRuntimeException)
-            throw (DalRuntimeException) error;
+    public static DalException locateError(Throwable e, int positionBegin) {
+        return new DalException(positionBegin, e);
+    }
+
+    public static Object throwUserRuntimeException(Throwable error) {
+        if (error instanceof DalRuntimeException
+                || error instanceof UserRuntimeException
+                || error instanceof AssertionError
+                || error instanceof ExpressionException
+                || error instanceof InterpreterException)
+            return Sneaky.sneakyThrow(error);
         throw new UserRuntimeException(error);
     }
 }

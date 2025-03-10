@@ -30,6 +30,6 @@ public class DalRuntimeException extends RuntimeException {
     }
 
     public DalException toDalError(int positionBegin) {
-        return DalException.toDalError(this, positionBegin);
+        return DalException.locateError(this, positionBegin);
     }
 }

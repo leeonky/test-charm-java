@@ -53,8 +53,14 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
 
     @Override
     public Data evaluateData(DALRuntimeContext context) {
+//        TODO lazy mode
         try {
-            return operator.calculateData(this, context);
+            return operator.calculateData(this, context)
+                    .mapError(e -> {
+                        if (e instanceof ExpressionException)
+                            return ((ExpressionException) e).rethrow(this);
+                        return e;
+                    });
         } catch (InterpreterException e) {
             throw e;
         } catch (ExpressionException ex) {
@@ -63,6 +69,16 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
             throw new AssertionFailure(error.getMessage(), right().getPositionBegin());
         } catch (Exception e) {
             throw new DalException(operator().getPosition(), e);
+        }
+    }
+
+    @Override
+    @Deprecated
+    public Object evaluate(DALRuntimeContext context) {
+        try {
+            return evaluateData(context).instance();
+        } catch (ExpressionException ex) {
+            throw ex.rethrow(this);
         }
     }
 
