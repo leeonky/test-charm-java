@@ -32,7 +32,7 @@ Feature: expect - run
     <100>
      ^
 
-    The root value was: InputCode return value was java.lang.Integer
+    The root value was: java.lang.Integer
     <100>
     """
 

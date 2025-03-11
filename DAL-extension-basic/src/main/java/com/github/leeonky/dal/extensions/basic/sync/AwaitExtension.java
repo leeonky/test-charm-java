@@ -16,15 +16,15 @@ public class AwaitExtension implements Extension {
                 .registerOperator(Operators.MATCH, new AwaitVerification() {
                     @Override
                     public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                        return Sneaky.get(() -> ((Await) v1.instance()).await((data) ->
-                                                ((ExpectationFactory) v2.instance()).create(operator, data).matches()));
+                        return Sneaky.get(() -> ((Await) v1.instance()).await(data ->
+                                ((ExpectationFactory) v2.instance()).create(operator, data).matches().resolve()));
                     }
                 })
                 .registerOperator(Operators.EQUAL, new AwaitVerification() {
                     @Override
                     public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                         return Sneaky.get(() -> ((Await) v1.instance()).await(data ->
-                                                ((ExpectationFactory) v2.instance()).create(operator, data).equalTo()));
+                                ((ExpectationFactory) v2.instance()).create(operator, data).equalTo().resolve()));
                     }
                 })
                 .registerMetaProperty(Await.class, "every", metaData ->

@@ -6,7 +6,6 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
-import com.github.leeonky.util.ConvertException;
 
 import java.io.InputStream;
 import java.util.Optional;
@@ -30,7 +29,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
     @Override
     public Data transformExpected(Data expected, DALRuntimeContext context) {
-        return context.wrap(HexDumper.getBytes(expected));
+        return expected.map(HexDumper::extractBytes);
     }
 
     public static class Equals extends HexChecker implements CheckerType.Equals {
@@ -38,7 +37,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return context.wrap(HexDumper.getBytes(actual));
+            return actual.map(HexDumper::extractBytes);
         }
     }
 
@@ -47,19 +46,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return context.wrap(HexDumper.getBytes(convert(actual)));
-        }
-
-        private Data convert(Data actual) {
-            try {
-                return actual.convert(byte[].class);
-            } catch (ConvertException _ignore) {
-                try {
-                    return actual.convert(Byte[].class);
-                } catch (ConvertException _ignore2) {
-                    return actual.convert(InputStream.class);
-                }
-            }
+            return actual.convert(byte[].class, InputStream.class, Byte[].class).map(HexDumper::extractBytes);
         }
     }
 }

@@ -388,11 +388,15 @@ public class RuntimeContextBuilder {
 
         @Deprecated
         public Data wrap(Object instance, BeanClass<?> schemaType) {
-            return new Data(instance, this, SchemaType.create(schemaType));
+            return new Data(() -> instance, this, SchemaType.create(schemaType));
         }
 
         public Data wrap(ThrowingSupplier<?> instance, BeanClass<?> schemaType) {
             return new Data(instance, this, SchemaType.create(schemaType));
+        }
+
+        public Data wrap(ThrowingSupplier<?> instance) {
+            return wrap(instance, null);
         }
 
         public Optional<Result> takeUserDefinedLiteral(String token) {

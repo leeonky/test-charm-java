@@ -2,6 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.util.ConvertException;
 import com.github.leeonky.util.Sneaky;
 import com.github.leeonky.util.ThrowingSupplier;
 
@@ -27,13 +28,8 @@ public class Data {
     private Throwable error;
     private Function<Throwable, Throwable> errorMapper = e -> e;
 
-    @Deprecated
-    public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
-        this(() -> instance, context, schemaType);
-    }
-
     public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
-        this.supplier = supplier;
+        this.supplier = Objects.requireNonNull(supplier);
         this.context = context;
         this.schemaType = schemaType;
     }
@@ -126,20 +122,32 @@ public class Data {
         return schemaType.firstFieldFromAlias(alias);
     }
 
-    public Data convert(Class<?> target) {
-        return new Data(context.getConverter().convert(target, instance()), context, schemaType);
+    public Data convert(Class<?>... targets) {
+        return map(object -> {
+            ConvertException e = null;
+            for (Class<?> target : targets) {
+                try {
+                    return context.getConverter().convert(target, object);
+                } catch (ConvertException convertException) {
+                    e = convertException;
+                }
+            }
+            throw e;
+        });
     }
 
     public Data map(Function<Object, Object> mapper) {
-        return new Data(mapper.apply(instance()), context, schemaType);
+        return new Data(() -> mapper.apply(instance()), context, schemaType);
     }
 
     public Data filter(String prefix) {
-        FilteredObject filteredObject = new FilteredObject();
-        fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
-                .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
-                        filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
-        return new Data(filteredObject, context, schemaType);
+        return new Data(() -> {
+            FilteredObject filteredObject = new FilteredObject();
+            fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
+                    .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
+                            filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
+            return filteredObject;
+        }, context, schemaType);
     }
 
     public String dumpAll() {
@@ -174,6 +182,11 @@ public class Data {
         }
     }
 
+    public Data resolve() {
+        instance();
+        return this;
+    }
+
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 
@@ -183,11 +196,11 @@ public class Data {
         }
 
         public DALCollection<Data> wraps() {
-            return map((index, e) -> new Data(e, context, schemaType.access(index)));
+            return map((index, e) -> new Data(() -> e, context, schemaType.access(index)));
         }
 
         public Data listMap(Object property) {
-            return new Data(listMap(data -> data.getValue(property).instance()), context, propertySchema(property));
+            return new Data(() -> listMap(data -> data.getValue(property).instance()), context, propertySchema(property));
         }
 
         public AutoMappingList listMap(Function<Data, Object> mapper) {
@@ -213,7 +226,7 @@ public class Data {
         }
 
         public Data wrap() {
-            return new Data(this, context, schemaType);
+            return new Data(() -> this, context, schemaType);
         }
     }
 }

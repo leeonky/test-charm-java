@@ -169,7 +169,6 @@ public class ListScopeNode extends DALNode {
     private Data verifyContainElement(DALRuntimeContext context, Data.DataList list, Data actual) {
         Iterator<Integer> iterator = list.indexes().iterator();
         List<Clause<DALNode>> expected = trimFirstEllipsis();
-        Data result = context.wrap(null);
         for (int clauseIndex = 0; clauseIndex < expected.size(); clauseIndex++) {
             Clause<DALNode> clause = expected.get(clauseIndex);
             try {
@@ -187,7 +186,7 @@ public class ListScopeNode extends DALNode {
                 throw style == Style.LIST ? exception : new RowAssertionFailure(clauseIndex, exception);
             }
         }
-        return result;
+        return actual;
     }
 
     private int getElementIndex(Clause<DALNode> clause, Iterator<Integer> iterator, Data actual) {
@@ -202,7 +201,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private Data verifyCorrespondingElement(DALRuntimeContext context, List<DALNode> expressions) {
-        Data result = context.wrap(null);
+        Data result = context.wrap(() -> null);
         if (style != Style.LIST)
             for (int index = 0; index < expressions.size(); index++)
                 try {

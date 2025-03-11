@@ -66,7 +66,7 @@ public class Actual {
             return Verification.errorLog("Can not convert null field `%s` to %s, " +
                     "use @AllowNull to verify nullable field", property, inspect);
         try {
-            actual.convert(type.getType());
+            actual.convert(type.getType()).resolve();
             return true;
         } catch (Exception ignore) {
             return Verification.errorLog("Can not convert field `%s` (%s: %s) to %s", property,

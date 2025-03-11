@@ -53,7 +53,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
                 Checker checker = context.fetchMatchingChecker(expected, actual);
                 return checker.verify(new CheckingContext(expected, actual,
                         opt2(() -> checker.transformExpected(expected, context)),
-                        opt1(() -> checker.transformActual(actual, expected, context))));
+                        opt1(() -> checker.transformActualAndCheck(actual, expected, context)))).resolve();
             }
 
             @Override
@@ -61,7 +61,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
                 Checker checker = context.fetchEqualsChecker(expected, actual);
                 return checker.verify(new CheckingContext(expected, actual,
                         opt2(() -> checker.transformExpected(expected, context)),
-                        opt1(() -> checker.transformActual(actual, expected, context))));
+                        opt1(() -> checker.transformActualAndCheck(actual, expected, context)))).resolve();
             }
 
             @Override

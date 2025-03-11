@@ -49,9 +49,9 @@ class DataTest {
             }
         });
 
-        assertTrue(runtimeContextBuilder.build(null).wrap(new AlwaysNull()).isNull());
-        assertTrue(runtimeContextBuilder.build(null).wrap(null).isNull());
-        assertFalse(runtimeContextBuilder.build(null).wrap(new Object()).isNull());
+        assertTrue(runtimeContextBuilder.build(null).wrap(() -> new AlwaysNull()).isNull());
+        assertTrue(runtimeContextBuilder.build(null).wrap(() -> null).isNull());
+        assertFalse(runtimeContextBuilder.build(null).wrap(() -> new Object()).isNull());
     }
 
     private static class AlwaysNull {
@@ -140,19 +140,19 @@ class DataTest {
 
         @Test
         void support_get_value_via_field_alias() {
-            assertThat(new Data(new HashMap<String, Object>() {{
+            assertThat(new Data(() -> new HashMap<String, Object>() {{
                 put("age", 100);
             }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class)))
                     .getValue("aliasOfAge").instance()).isEqualTo(100);
         }
 
         private void assertDataAccess(Object object, Object expected, Object... properties) {
-            assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(asList(properties)).instance())
+            assertThat(runtimeContextBuilder.build(null).wrap(() -> object).getValue(asList(properties)).instance())
                     .isEqualTo(expected);
         }
 
         private void assertListSize(Object object, int size) {
-            assertThat(runtimeContextBuilder.build(null).wrap(object).list().size()).isEqualTo(size);
+            assertThat(runtimeContextBuilder.build(null).wrap(() -> object).list().size()).isEqualTo(size);
         }
     }
 
@@ -162,7 +162,7 @@ class DataTest {
 
         @Test
         void dump_null_value() {
-            assertThat(build.wrap(null).dumpValue()).isEqualTo("null");
+            assertThat(build.wrap(() -> null).dumpValue()).isEqualTo("null");
         }
     }
 
@@ -172,21 +172,21 @@ class DataTest {
 
         @Test
         void return_null_when_property_is_not_string() {
-            Data data = build.wrap(new Object());
+            Data data = build.wrap(() -> new Object());
 
             assertThat(data.currying(1)).isEmpty();
         }
 
         @Test
         void return_currying_method_with_property() {
-            Data data = build.wrap(new Currying());
+            Data data = build.wrap(() -> new Currying());
 
             assertThat(data.currying("currying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
-            Data data = build.wrap(new Currying());
+            Data data = build.wrap(() -> new Currying());
             CurryingMethod currying = data.currying("currying2").get();
 
             assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
@@ -194,7 +194,7 @@ class DataTest {
 
         @Test
         void should_choose_min_parameter_size_method() {
-            Data data = build.wrap(new Currying());
+            Data data = build.wrap(() -> new Currying());
             CurryingMethod currying = data.currying("overrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
@@ -208,14 +208,14 @@ class DataTest {
 
         @Test
         void return_currying_method_with_property() {
-            Data data = build.wrap(new Currying());
+            Data data = build.wrap(() -> new Currying());
 
             assertThat(data.currying("staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void return_currying_method_with_property_in_super_instance_type() {
-            Data data = build.wrap(new Currying());
+            Data data = build.wrap(() -> new Currying());
 
             assertThat(data.currying("baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
         }
@@ -230,7 +230,7 @@ class DataTest {
 
         @Test
         void should_choose_min_parameter_size_method() {
-            Data data = build.wrap(new Currying());
+            Data data = build.wrap(() -> new Currying());
             CurryingMethod currying = data.currying("staticOverrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
@@ -238,7 +238,7 @@ class DataTest {
 
         @Test
         void use_same_instance_type_first_when_more_than_one_candidate() {
-            Data data = build.wrap(new Currying());
+            Data data = build.wrap(() -> new Currying());
             CurryingMethod currying = data.currying("baseCurrying").get();
 
             assertThat(currying.call("a").resolve()).isEqualTo("A");

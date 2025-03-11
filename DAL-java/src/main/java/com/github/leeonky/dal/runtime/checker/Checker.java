@@ -1,7 +1,9 @@
 package com.github.leeonky.dal.runtime.checker;
 
+import com.github.leeonky.dal.runtime.DalRuntimeException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.util.ConvertException;
 
 import java.util.function.Function;
 
@@ -32,6 +34,14 @@ public interface Checker {
 
     default Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
         return actual;
+    }
+
+    default Data transformActualAndCheck(Data actual, Data expected, DALRuntimeContext context) {
+        try {
+            return transformActual(actual, expected, context).resolve();
+        } catch (ConvertException e) {
+            throw new DalRuntimeException(e.getMessage());
+        }
     }
 
     default Data transformExpected(Data expected, DALRuntimeContext context) {

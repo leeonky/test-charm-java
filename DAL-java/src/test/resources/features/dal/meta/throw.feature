@@ -111,5 +111,5 @@ Feature: meta ::throw
 
     more than one expression
 
-    The root value was: InputCode return value was *throw* java.lang.RuntimeException: java.lang.RuntimeException: Error
+    The root value was: *throw* java.lang.RuntimeException: Error
     """
