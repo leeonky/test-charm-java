@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.checker.Checker;
@@ -507,12 +508,10 @@ public class RuntimeContextBuilder {
             return errorHook.handle(getThis(), expression, error);
         }
 
-        public Object invokeMetaProperty(MetaData metaData) {
-            try {
-                return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
-            } catch (Throwable e) {
-                return throwUserRuntimeException(e);
-            }
+        public Data invokeMetaProperty(DALNode inputNode, Data inputData, Object symbolName) {
+            MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
+            Function<MetaData, Object> metaFunction = fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData));
+            return wrap(() -> metaFunction.apply(metaData)).mapError(DalException::buildUserRuntimeException);
         }
 
         public Data invokeDataRemark(RemarkData remarkData) {

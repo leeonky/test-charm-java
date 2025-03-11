@@ -14,8 +14,8 @@ public class MetaData extends RuntimeData {
     private DALNode inputNode;
     private final Object name;
 
-    public MetaData(DALNode inputNode, Object symbolName, DALRuntimeContext runtimeContext) {
-        super(inputNode.evaluateData(runtimeContext), runtimeContext);
+    public MetaData(DALNode inputNode, Data inputData, Object symbolName, DALRuntimeContext runtimeContext) {
+        super(inputData, runtimeContext);
         this.inputNode = inputNode;
         name = symbolName;
     }

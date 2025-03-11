@@ -200,10 +200,10 @@ public class Data {
         }
 
         public Data listMap(Object property) {
-            return new Data(() -> listMap(data -> data.getValue(property).instance()), context, propertySchema(property));
+            return new Data(() -> listMap(data -> data.getValue(property)), context, propertySchema(property));
         }
 
-        public AutoMappingList listMap(Function<Data, Object> mapper) {
+        public AutoMappingList listMap(Function<Data, Data> mapper) {
             return new AutoMappingList(mapper, wraps());
         }
 

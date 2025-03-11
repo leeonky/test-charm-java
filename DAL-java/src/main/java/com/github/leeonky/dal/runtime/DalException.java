@@ -78,12 +78,16 @@ public class DalException extends InterpreterException {
     }
 
     public static Object throwUserRuntimeException(Throwable error) {
+        return Sneaky.sneakyThrow(buildUserRuntimeException(error));
+    }
+
+    public static Throwable buildUserRuntimeException(Throwable error) {
         if (error instanceof DalRuntimeException
                 || error instanceof UserRuntimeException
                 || error instanceof AssertionError
                 || error instanceof ExpressionException
                 || error instanceof InterpreterException)
-            return Sneaky.sneakyThrow(error);
-        throw new UserRuntimeException(error);
+            return error;
+        return new UserRuntimeException(error);
     }
 }
