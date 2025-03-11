@@ -6,8 +6,6 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Order;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
-import com.github.leeonky.dal.type.InputCode;
-import com.github.leeonky.dal.type.InputValue;
 
 import java.lang.reflect.Type;
 import java.time.*;
@@ -22,8 +20,6 @@ import static com.github.leeonky.dal.runtime.inspector.Dumper.VALUE_DUMPER;
 @SuppressWarnings("used")
 public class Dumpers implements Extension {
     private static final StackTraceDumper STACK_TRACE_DUMPER = new StackTraceDumper();
-    private static final InputValueDumper INPUT_VALUE_DUMPER = new InputValueDumper();
-    private static final InputCodeDumper INPUT_CODE_DUMPER = new InputCodeDumper();
 
     @Override
     public void extend(DAL dal) {
@@ -33,8 +29,6 @@ public class Dumpers implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerDumper(CharSequence.class, data -> STRING_DUMPER)
                 .registerDumper(StackTraceElement[].class, data -> STACK_TRACE_DUMPER)
-                .registerDumper(InputValue.class, data -> INPUT_VALUE_DUMPER)
-                .registerDumper(InputCode.class, data -> INPUT_CODE_DUMPER)
         ;
     }
 
@@ -49,28 +43,6 @@ public class Dumpers implements Extension {
         public void dump(Data data, DumpingBuffer dumpingBuffer) {
             DumpingBuffer sub = dumpingBuffer.indent();
             data.list().values().forEach(s -> sub.newLine().append("at " + s.toString()));
-        }
-    }
-
-    private static class InputValueDumper implements Dumper {
-
-        @Override
-        public void dump(Data data, DumpingBuffer dumpingBuffer) {
-            dumpingBuffer.dump(dumpingBuffer.getRuntimeContext().wrap(((InputValue<?>) data.instance()).get()));
-        }
-    }
-
-    private static class InputCodeDumper implements Dumper {
-
-        @Override
-        public void dump(Data data, DumpingBuffer dumpingBuffer) {
-            dumpingBuffer.append("InputCode return value was ");
-            InputCode<?> inputCode = (InputCode<?>) data.instance();
-            try {
-                dumpingBuffer.dump(dumpingBuffer.getRuntimeContext().wrap(inputCode.get()));
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 }

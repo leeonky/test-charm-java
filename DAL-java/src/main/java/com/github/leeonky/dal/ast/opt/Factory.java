@@ -115,12 +115,12 @@ public class Factory {
 
     public interface ExpressionContextData extends BiFunction<DALExpression, DALRuntimeContext, Data> {
         static ExpressionContextData adapt(SupplierSupplierData operation) {
-            return (expression, context) -> context.wrap(operation.apply(() -> expression.left().evaluateData(context),
-                    () -> expression.right().evaluateData(context)).instance());
+            return (expression, context) -> operation.apply(() -> expression.left().evaluateData(context),
+                    () -> expression.right().evaluateData(context));
         }
 
         static ExpressionContextData adapt(DataDataObject operation) {
-            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context)));
+            return (expression, context) -> context.wrap(() -> operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context)));
         }
 
         static ExpressionContextData adapt(DataOptDataContextData operation) {
@@ -133,7 +133,7 @@ public class Factory {
         }
 
         static ExpressionContextData adapt(DataObject operation) {
-            return (expression, context) -> context.wrap(operation.apply(expression.right().evaluate(context)));
+            return (expression, context) -> context.wrap(() -> operation.apply(expression.right().evaluate(context)));
         }
 
         interface SupplierSupplierData extends BiFunction<Supplier<Data>, Supplier<Data>, Data> {

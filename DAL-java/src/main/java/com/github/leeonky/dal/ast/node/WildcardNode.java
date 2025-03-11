@@ -18,6 +18,6 @@ public class WildcardNode extends DALNode {
 
     @Override
     public Data verify(DALOperator operator, DALNode actual, DALRuntimeContext context) {
-        return context.wrap(true);
+        return context.data(true);
     }
 }

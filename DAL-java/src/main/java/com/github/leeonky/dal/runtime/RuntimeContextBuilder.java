@@ -400,6 +400,10 @@ public class RuntimeContextBuilder {
             return wrap(instance, null);
         }
 
+        public Data data(Object instance) {
+            return wrap(() -> instance, null);
+        }
+
         public Optional<Result> takeUserDefinedLiteral(String token) {
             return userDefinedLiterals.stream().map(userLiteralRule -> userLiteralRule.compile(token))
                     .filter(Result::hasResult)

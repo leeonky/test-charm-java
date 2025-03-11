@@ -22,7 +22,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
 
     @Override
     public Data transformExpected(Data expected, DALRuntimeContext context) {
-        return context.wrap(expected.instance().toString());
+        return expected.map(Object::toString);
     }
 
     @Override
@@ -40,7 +40,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return context.wrap(actual.instance().toString());
+            return actual.map(Object::toString);
         }
     }
 
