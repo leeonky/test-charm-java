@@ -8,7 +8,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.runtime.schema.Verification;
 import com.github.leeonky.dal.type.InputCode;
-import com.github.leeonky.dal.type.InputValue;
 import com.github.leeonky.interpreter.InterpreterException;
 
 import java.lang.reflect.Array;
@@ -43,7 +42,7 @@ public class Assertions {
     }
 
     public static Assertions expect(Object input) {
-        return new Assertions((InputValue<Object>) () -> input);
+        return new Assertions(() -> input);
     }
 
     public static Assertions expectRun(InputCode<Object> supplier) {

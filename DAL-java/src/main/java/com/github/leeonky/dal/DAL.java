@@ -7,7 +7,6 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.type.InputCode;
-import com.github.leeonky.dal.type.InputValue;
 import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.interpreter.SourceCode;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -29,16 +28,19 @@ public class DAL {
     private static final ThreadLocal<Map<String, DAL>> instances = new ThreadLocal<>();
     private final String name;
 
+    @Deprecated
     public DAL() {
         name = String.valueOf(hashCode());
     }
 
+    @Deprecated
     public static synchronized DAL getInstance() {
         if (instance.get() == null)
             instance.set(create());
         return instance.get();
     }
 
+    @Deprecated
     public static DAL create(Class<?>... exceptExtensions) {
         Iterator<DALFactory> iterator = ServiceLoader.load(DALFactory.class).iterator();
         if (iterator.hasNext())
@@ -75,7 +77,7 @@ public class DAL {
     }
 
     public <T> List<T> evaluateAll(Object input, String expressions) {
-        return evaluateAll((InputValue<Object>) () -> input, expressions);
+        return evaluateAll(() -> input, expressions);
     }
 
     @SuppressWarnings("unchecked")
@@ -93,7 +95,7 @@ public class DAL {
     }
 
     public <T> T evaluate(Object input, String expression) {
-        return evaluate((InputValue<Object>) () -> input, expression);
+        return evaluate(() -> input, expression);
     }
 
     public <T> T evaluate(InputCode<Object> input, String expression) {

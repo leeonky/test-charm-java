@@ -73,7 +73,7 @@ public class Operators implements Extension {
 
             @Override
             public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return context.wrap(String.valueOf(v1.instance()) + v2.instance());
+                return context.wrap(() -> String.valueOf(v1.instance()) + v2.instance());
             }
         });
     }
@@ -89,7 +89,7 @@ public class Operators implements Extension {
 
             @Override
             public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return context.wrap(action.apply(context.getNumberType(), (Number) v1.instance(),
+                return context.wrap(() -> action.apply(context.getNumberType(), (Number) v1.instance(),
                         (Number) v2.instance()));
             }
         });

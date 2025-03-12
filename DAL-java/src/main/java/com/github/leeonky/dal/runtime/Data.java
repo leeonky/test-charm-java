@@ -225,6 +225,7 @@ public class Data {
             return this;
         }
 
+        @Deprecated
         public Data wrap() {
             return new Data(() -> this, context, schemaType);
         }

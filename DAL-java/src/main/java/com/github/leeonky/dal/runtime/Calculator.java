@@ -91,16 +91,27 @@ public class Calculator {
     }
 
     public static Data negate(Data data, DALRuntimeContext context) {
-        Object value = data.instance();
-        if (value instanceof Number)
-            return context.wrap(context.getNumberType().negate((Number) value));
-        if (data.isList())
-            return sortList(data, reverseOrder());
-        throw illegalOperationRuntimeException(format("Operand should be number or list but '%s'", getClassName(value)));
+        return data.map(value -> {
+            if (value instanceof Number)
+                return context.getNumberType().negate((Number) value);
+            if (data.isList())
+                return sortList(data, reverseOrder());
+            throw illegalOperationRuntimeException(format("Operand should be number or list but '%s'", getClassName(value)));
+        });
     }
 
     @SuppressWarnings("unchecked")
-    private static Data sortList(Data data, Comparator<?> comparator) {
+    private static Data.DataList sortList(Data data, Comparator<?> comparator) {
+
+        try {
+            return data.list().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator));
+        } catch (InfiniteCollectionException e) {
+            throw illegalOperationRuntimeException("Can not sort infinite collection");
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Data sortListBk(Data data, Comparator<?> comparator) {
         try {
             return data.list().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator)).wrap();
         } catch (InfiniteCollectionException e) {
@@ -111,7 +122,7 @@ public class Calculator {
     public static Data positive(Data data, DALRuntimeContext context) {
         Object value = data.instance();
         if (data.isList())
-            return sortList(data, naturalOrder());
+            return sortListBk(data, naturalOrder());
         throw illegalOp2RuntimeException(format("Operand should be list but '%s'", getClassName(value)));
     }
 
