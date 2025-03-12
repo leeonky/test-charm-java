@@ -41,8 +41,12 @@ public class Operators implements Extension {
 
             @Override
             public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                ((ExpectationFactory) v2.instance()).create(operator, v1).matches();
-                return v1;
+                Data result = ((ExpectationFactory) v2.instance()).create(operator, v1).matches();
+                return v1.map(e -> {
+                    // resolve verification result first then return left value
+                    result.resolve();
+                    return e;
+                });
             }
         });
     }
@@ -57,8 +61,12 @@ public class Operators implements Extension {
 
             @Override
             public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                ((ExpectationFactory) v2.instance()).create(operator, v1).equalTo();
-                return v1;
+                Data result = ((ExpectationFactory) v2.instance()).create(operator, v1).equalTo();
+                return v1.map(e -> {
+                    // resolve verification result first then return left value
+                    result.resolve();
+                    return e;
+                });
             }
         });
     }
