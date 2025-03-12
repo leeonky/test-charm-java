@@ -96,7 +96,7 @@ public class Calculator {
                 return context.getNumberType().negate((Number) value);
             if (data.isList())
                 return sortList(data, reverseOrder());
-            throw illegalOperationRuntimeException(format("Operand should be number or list but '%s'", getClassName(value)));
+            throw illegalOp2RuntimeException(format("Operand should be number or list but '%s'", getClassName(value)));
         });
     }
 
@@ -110,20 +110,12 @@ public class Calculator {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static Data sortListBk(Data data, Comparator<?> comparator) {
-        try {
-            return data.list().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator)).wrap();
-        } catch (InfiniteCollectionException e) {
-            throw illegalOperationRuntimeException("Can not sort infinite collection");
-        }
-    }
-
     public static Data positive(Data data, DALRuntimeContext context) {
-        Object value = data.instance();
-        if (data.isList())
-            return sortListBk(data, naturalOrder());
-        throw illegalOp2RuntimeException(format("Operand should be list but '%s'", getClassName(value)));
+        return data.map(value -> {
+            if (data.isList())
+                return sortList(data, naturalOrder());
+            throw illegalOp2RuntimeException(format("Operand should be list but '%s'", getClassName(value)));
+        });
     }
 
     public static Data less(Data left, DALOperator opt, Data right, DALRuntimeContext context) {

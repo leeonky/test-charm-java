@@ -44,3 +44,8 @@ Feature: negative
     """
     Operand should be number or list but 'java.lang.String'
     """
+    And got the following notation:
+    """
+    (-'a')
+      ^
+    """

@@ -40,3 +40,8 @@ Feature: positive
     """
     Operand should be list but 'java.lang.String'
     """
+    And got the following notation:
+    """
+    (+'a')
+      ^
+    """
