@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2RuntimeException;
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static java.lang.String.format;
 
 public class MetaData extends RuntimeData {
@@ -28,7 +28,7 @@ public class MetaData extends RuntimeData {
     private final List<Class<?>> callTypes = new ArrayList<>();
 
     public Object callSuper() {
-        return runtimeContext().fetchSuperMetaFunction(this).orElseThrow(() -> illegalOp2RuntimeException(format(
+        return runtimeContext().fetchSuperMetaFunction(this).orElseThrow(() -> illegalOp2(format(
                         "Local meta property `%s` has no super in type %s", name, callTypes.get(callTypes.size() - 1).getName())))
                 .apply(this);
     }
@@ -74,7 +74,7 @@ public class MetaData extends RuntimeData {
         if (actual.isAnonymousClass())
             actual = actual.getSuperclass();
         if (!actual.equals(expect))
-            throw illegalOp2RuntimeException(format("Do not allow change data type in callSuper, expect %s but %s",
+            throw illegalOp2(format("Do not allow change data type in callSuper, expect %s but %s",
                     expect.getName(), actual.getName()));
     }
 

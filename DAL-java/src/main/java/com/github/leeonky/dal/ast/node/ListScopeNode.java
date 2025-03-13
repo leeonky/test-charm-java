@@ -205,7 +205,7 @@ public class ListScopeNode extends DALNode {
         if (style != Style.LIST)
             for (int index = 0; index < expressions.size(); index++)
                 try {
-                    result = expressions.get(index).evaluateData(context);
+                    result = expressions.get(index).evaluateData(context).resolve();
                 } catch (DifferentCellSize differentCellSize) {
                     throw new RowAssertionFailure(index, differentCellSize);
                 } catch (DalException dalException) {
@@ -215,7 +215,7 @@ public class ListScopeNode extends DALNode {
                 }
         else {
             for (DALNode expression : expressions)
-                result = expression.evaluateData(context);
+                result = expression.evaluateData(context).resolve();
         }
         return result;
     }

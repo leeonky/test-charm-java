@@ -67,8 +67,8 @@ public class Factory {
     public static DALOperator which() {
         return new DALOperator(Precedence.WHICH, Notations.Operators.WHICH.getLabel(), true, Operators.NA) {
             @Override
-            public Object calculate(DALExpression expression, DALRuntimeContext context) {
-                return expression.left().evaluateData(context).execute(() -> expression.right().evaluate(context));
+            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+                return expression.left().evaluateData(context).execute(() -> expression.right().evaluateData(context));
             }
         };
     }

@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.runtime.DalException.extractException;
@@ -28,20 +29,20 @@ public class Retryer {
         return defaultTimeout;
     }
 
-    public <T> T get(Supplier<T> s) throws Throwable {
+    public <T> T get(Supplier<T> s) {
         Throwable exception;
         Instant start = Instant.now();
         do {
             try {
                 return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime, defaultTimeout),
-                        java.util.concurrent.TimeUnit.MILLISECONDS);
+                        TimeUnit.MILLISECONDS);
             } catch (ExecutionException e) {
                 exception = e.getCause();
             } catch (Throwable e) {
                 exception = e;
             }
         } while (timeout(start) && sleep());
-        throw extractException(exception).orElse(exception);
+        return Sneaky.sneakyThrow(extractException(exception).orElse(exception));
     }
 
     private boolean timeout(Instant now) {

@@ -1,12 +1,14 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.DalRuntimeException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.Node;
 
 import static com.github.leeonky.dal.runtime.DalException.locateError;
-import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
+import static com.github.leeonky.dal.runtime.ExpressionException.exception;
 
 public interface ExecutableNode extends Node<RuntimeContextBuilder.DALRuntimeContext, DALNode> {
 
@@ -14,8 +16,21 @@ public interface ExecutableNode extends Node<RuntimeContextBuilder.DALRuntimeCon
 
     default Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = left.evaluateData(context);
-        if (opt1(data::isNull))
-            throw locateError(new DalRuntimeException("Instance is null"), getOperandPosition());
+        data.peek(e -> {
+            if (context.isNull(e))
+                throw locateError(new DalRuntimeException("Instance is null"), getOperandPosition());
+        }).mapError(e -> {
+            if (e instanceof InterpreterException) {
+                return e;
+            }
+            return exception(expression -> new DalException(expression.left().getOperandPosition(), e));
+        });
         return getValue(data, context);
+
+//        return context.wrap(() -> {
+//            if (opt1(data::isNull))
+//                throw locateError(new DalRuntimeException("Instance is null"), getOperandPosition());
+//            return getValue(data, context).instance();
+//        });
     }
 }

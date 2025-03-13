@@ -2,11 +2,13 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.ConvertException;
 import com.github.leeonky.util.Sneaky;
 import com.github.leeonky.util.ThrowingSupplier;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -27,11 +29,21 @@ public class Data {
     private DataList list;
     private Throwable error;
     private Function<Throwable, Throwable> errorMapper = e -> e;
+    private final List<Consumer<Object>> consumers = new ArrayList<>();
+    private final boolean isListMapping;
 
     public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
         this.supplier = Objects.requireNonNull(supplier);
         this.context = context;
         this.schemaType = schemaType;
+        isListMapping = false;
+    }
+
+    public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType, boolean isListMapping) {
+        this.supplier = Objects.requireNonNull(supplier);
+        this.context = context;
+        this.schemaType = schemaType;
+        this.isListMapping = isListMapping;
     }
 
     public Data mapError(Function<Throwable, Throwable> mapper) {
@@ -45,8 +57,11 @@ public class Data {
         if (resolved)
             return instance;
         try {
+            instance = supplier.get();
             resolved = true;
-            return instance = supplier.get();
+            for (Consumer<Object> f : consumers)
+                f.accept(instance);
+            return instance;
         } catch (Throwable e) {
             return Sneaky.sneakyThrow(error = errorMapper.apply(e));
         }
@@ -57,7 +72,8 @@ public class Data {
     }
 
     public boolean isList() {
-        return context.isRegisteredList(instance()) || (instance() != null && instance().getClass().isArray());
+        Object instance = instance();
+        return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
     public DataList list() {
@@ -86,13 +102,19 @@ public class Data {
                     return isList() ? fetchFromList(propertyChain) : context.getPropertyValue(this, propertyChain);
                 } catch (IndexOutOfBoundsException ex) {
                     throw new DalRuntimeException(ex.getMessage());
-                } catch (ListMappingElementAccessException ex) {
+                } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
                     throw ex;
                 } catch (Throwable e) {
                     throw buildExceptionWithComments(propertyChain, e);
                 }
             };
-            return new Data(supplier, context, propertySchema(propertyChain));
+            boolean isSubListMapping;
+            if (isListMapping) {
+                isSubListMapping = propertyChain instanceof String;
+            } else {
+                isSubListMapping = false;
+            }
+            return new Data(supplier, context, propertySchema(propertyChain, isSubListMapping), isSubListMapping);
         }
         return getValue(chain);
     }
@@ -112,10 +134,8 @@ public class Data {
                 list().getByIndex((int) property);
     }
 
-    private SchemaType propertySchema(Object property) {
-        if (isList() && property instanceof String)
-            return schemaType.mappingAccess(property);
-        return schemaType.access(property);
+    public SchemaType propertySchema(Object property, boolean isListMapping) {
+        return isListMapping ? schemaType.mappingAccess(property) : schemaType.access(property);
     }
 
     public Object firstFieldFromAlias(Object alias) {
@@ -174,6 +194,7 @@ public class Data {
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
+    @Deprecated
     public boolean instanceOf(Class<?> type) {
         try {
             return type.isInstance(instance());
@@ -187,6 +208,14 @@ public class Data {
         return this;
     }
 
+    public Data peek(Consumer<Object> consumer) {
+        if (resolved)
+            consumer.accept(instance);
+        else
+            consumers.add(consumer);
+        return this;
+    }
+
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 
@@ -197,10 +226,6 @@ public class Data {
 
         public DALCollection<Data> wraps() {
             return map((index, e) -> new Data(() -> e, context, schemaType.access(index)));
-        }
-
-        public Data listMap(Object property) {
-            return new Data(() -> listMap(data -> data.getValue(property)), context, propertySchema(property));
         }
 
         public AutoMappingList listMap(Function<Data, Data> mapper) {

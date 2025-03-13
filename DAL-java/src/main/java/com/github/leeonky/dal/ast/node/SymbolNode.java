@@ -26,11 +26,19 @@ public class SymbolNode extends DALNode implements ExecutableNode {
 
     @Override
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
-        if (data.instanceOf(PartialObject.class))
-            context.appendPartialPropertyReference(data, symbol);
+//        if (data.instanceOf(PartialObject.class))
+//            context.appendPartialPropertyReference(data, symbol);
+        data.peek(e -> {
+            if (e instanceof PartialObject)
+                context.appendPartialPropertyReference(data, symbol);
+        });
         Data value = data.getValue(symbol).mapError(e -> locateError(e, getPositionBegin()));
-        if (value.instanceOf(PartialObject.class))
-            context.initPartialPropertyStack(data, symbol, value);
+        value.peek(e -> {
+            if (e instanceof PartialObject)
+                context.initPartialPropertyStack(data, symbol, value);
+        });
+//        if (value.instanceOf(PartialObject.class))
+//            context.initPartialPropertyStack(data, symbol, value);
         return value;
     }
 

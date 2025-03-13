@@ -25,8 +25,9 @@ public class Eventually {
         Eventually.defaultWaitingTime = defaultWaitingTime;
     }
 
-    public Data verify(DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) throws Throwable {
-        return new Retryer(waitingTime, interval).get(() -> context.calculate(data, operator, v2));
+    public Data verify(DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+        return context.wrap(() -> new Retryer(waitingTime, interval)
+                .get(() -> context.calculate(data, operator, v2).instance()));
     }
 
     public Eventually within(String s) {

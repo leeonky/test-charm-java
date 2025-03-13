@@ -28,25 +28,29 @@ public class SchemaComposeNode extends DALNode {
     }
 
     public Data verify(DALNode input, DALRuntimeContext context) {
-        try {
-            List<Object> instanceBySchema = schemas.stream().map(schemaNode ->
-                    verifyAndConvertAsSchemaType(context, schemaNode, input)).collect(toList());
-            return context.wrap(instanceBySchema.get(instanceBySchema.size() - 1), schemas.get(0).inspect(), isList);
-        } catch (DalRuntimeException e) {
-            throw locateError(e, getPositionBegin());
-        }
+        Data inputData = input.evaluateData(context);
+        String inspect = input.inspect();
+        return context.wrap(() -> {
+            try {
+                List<Object> instanceBySchema = schemas.stream().map(schemaNode ->
+                        verifyAndConvertAsSchemaType(context, schemaNode, inspect, inputData)).collect(toList());
+                return instanceBySchema.get(instanceBySchema.size() - 1);
+            } catch (DalRuntimeException e) {
+                throw locateError(e, getPositionBegin());
+            }
+        }, schemas.get(0).inspect(), isList);
     }
 
-    private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
-        Data inputData = input.evaluateData(context);
+    private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode,
+                                                String inputInspect, Data inputData) {
         if (isList) {
             DALCollection<Object> collection = opt1(inputData::list).wraps().map((index, data) ->
-                    convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index)));
+                    convertViaSchema(context, schemaNode, data, format("%s[%d]", inputInspect, index)));
             //get size to avoid lazy mode, should verify element with schema
             collection.collect();
             return collection;
         } else
-            return convertViaSchema(context, schemaNode, inputData, input.inspect());
+            return convertViaSchema(context, schemaNode, inputData, inputInspect);
     }
 
     private Object convertViaSchema(DALRuntimeContext context, SchemaNode schemaNode, Data element, String input) {

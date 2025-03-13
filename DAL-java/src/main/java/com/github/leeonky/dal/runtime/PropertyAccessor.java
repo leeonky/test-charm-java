@@ -6,7 +6,6 @@ import java.util.Set;
 public interface PropertyAccessor<T> {
 
     @SuppressWarnings("unchecked")
-    @Deprecated
     default Object getValueByData(Data data, Object property) {
         return getValue((T) data.instance(), property);
     }

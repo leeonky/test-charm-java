@@ -49,8 +49,10 @@ public interface Checker {
     }
 
     default Data verify(CheckingContext checkingContext) {
-        if (failed(checkingContext))
-            throw new AssertionError(message(checkingContext));
-        return checkingContext.getOriginalActual();
+        return checkingContext.getOriginalActual().map(a -> {
+            if (failed(checkingContext))
+                throw new AssertionError(message(checkingContext));
+            return a;
+        });
     }
 }

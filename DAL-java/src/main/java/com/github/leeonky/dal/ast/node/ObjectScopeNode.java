@@ -49,7 +49,7 @@ public class ObjectScopeNode extends DALNode {
                 return actual.execute(() -> {
                     Data result = context.wrap(() -> null);
                     for (DALNode expression : verificationExpressions)
-                        result = expression.evaluateData(context);
+                        result = expression.evaluateData(context).resolve();
                     return result;
                 });
             }
@@ -61,7 +61,7 @@ public class ObjectScopeNode extends DALNode {
                 Data execute = actual.execute(() -> {
                     Data result = context.wrap(() -> null);
                     for (DALNode expression : verificationExpressions)
-                        result = expression.evaluateData(context);
+                        result = expression.evaluateData(context).resolve();
                     return result;
                 });
                 Set<Object> dataFields = collectUnexpectedFields(actual, context);

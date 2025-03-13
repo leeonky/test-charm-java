@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2RuntimeException;
-import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperationRuntimeException;
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.util.Classes.getClassName;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
@@ -23,12 +23,12 @@ public class Calculator {
         Object instance1 = v1.instance();
         Object instance2 = v2.instance();
         if (instance1 == null || instance2 == null)
-            throw illegalOperationRuntimeException(format("Can not compare [%s] and [%s]", instance1, instance2));
+            throw illegalOperation(format("Can not compare [%s] and [%s]", instance1, instance2));
         if (instance1 instanceof Number && instance2 instanceof Number)
             return context.getNumberType().compare((Number) instance1, (Number) instance2);
         if (instance1 instanceof String && instance2 instanceof String)
             return ((String) instance1).compareTo((String) instance2);
-        throw illegalOperationRuntimeException(format("Can not compare [%s: %s] and [%s: %s]",
+        throw illegalOperation(format("Can not compare [%s: %s] and [%s: %s]",
                 getClassName(instance1), instance1, getClassName(instance2), instance2));
     }
 
@@ -46,7 +46,7 @@ public class Calculator {
         try {
             return v2.list().collect();
         } catch (InfiniteCollectionException ignore) {
-            throw illegalOperationRuntimeException("Invalid operation, operand " + index + " is infinite collection");
+            throw illegalOperation("Invalid operation, operand " + index + " is infinite collection");
         }
     }
 
@@ -86,7 +86,7 @@ public class Calculator {
 
     public static Object not(Object v) {
         if (!(v instanceof Boolean))
-            throw illegalOperationRuntimeException("Operand" + " should be boolean but '" + getClassName(v) + "'");
+            throw illegalOperation("Operand" + " should be boolean but '" + getClassName(v) + "'");
         return !(boolean) v;
     }
 
@@ -96,7 +96,7 @@ public class Calculator {
                 return context.getNumberType().negate((Number) value);
             if (data.isList())
                 return sortList(data, reverseOrder());
-            throw illegalOp2RuntimeException(format("Operand should be number or list but '%s'", getClassName(value)));
+            throw illegalOp2(format("Operand should be number or list but '%s'", getClassName(value)));
         });
     }
 
@@ -106,7 +106,7 @@ public class Calculator {
         try {
             return data.list().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator));
         } catch (InfiniteCollectionException e) {
-            throw illegalOperationRuntimeException("Can not sort infinite collection");
+            throw illegalOperation("Can not sort infinite collection");
         }
     }
 
@@ -114,24 +114,24 @@ public class Calculator {
         return data.map(value -> {
             if (data.isList())
                 return sortList(data, naturalOrder());
-            throw illegalOp2RuntimeException(format("Operand should be list but '%s'", getClassName(value)));
+            throw illegalOp2(format("Operand should be list but '%s'", getClassName(value)));
         });
     }
 
     public static Data less(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(compare(left, right, context) < 0);
+        return context.wrap(() -> compare(left, right, context) < 0);
     }
 
     public static Data greaterOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(compare(left, right, context) >= 0);
+        return context.wrap(() -> compare(left, right, context) >= 0);
     }
 
     public static Data lessOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(compare(left, right, context) <= 0);
+        return context.wrap(() -> compare(left, right, context) <= 0);
     }
 
     public static Data greater(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(compare(left, right, context) > 0);
+        return context.wrap(() -> compare(left, right, context) > 0);
     }
 
     public static boolean notEqual(Data left, Data right) {

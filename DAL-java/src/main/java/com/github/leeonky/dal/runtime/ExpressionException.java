@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 //TODO check all exception
 public abstract class ExpressionException extends java.lang.RuntimeException {
+    @Deprecated
     public static <T> T opt1(Supplier<T> supplier) {
         try {
             return supplier.get();
@@ -18,6 +19,7 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
         }
     }
 
+    @Deprecated
     public static <T> T opt2(Supplier<T> supplier) {
         try {
             return supplier.get();
@@ -41,15 +43,15 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
         };
     }
 
-    public static ExpressionException illegalOperationRuntimeException(String message) {
+    public static ExpressionException illegalOperation(String message) {
         return exception(expression -> new DalException(message, expression.operator().getPosition()));
     }
 
-    public static ExpressionException illegalOp2RuntimeException(String message) {
+    public static ExpressionException illegalOp2(String message) {
         return exception(expression -> new DalException(message, expression.right().getOperandPosition()));
     }
 
-    public static ExpressionException illegalOp1RuntimeException(String message) {
+    public static ExpressionException illegalOp1(String message) {
         return exception(expression -> new DalException(message, expression.left().getOperandPosition()));
     }
 }

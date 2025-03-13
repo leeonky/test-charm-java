@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
-import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2RuntimeException;
-import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperationRuntimeException;
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.Classes.getClassName;
@@ -388,6 +388,14 @@ public class RuntimeContextBuilder {
         }
 
         @Deprecated
+        public Data wrap(ThrowingSupplier<?> instance, String schema, boolean isList) {
+            BeanClass<?> schemaType = schemas.get(schema);
+            if (isList && schemaType != null)
+                schemaType = BeanClass.create(Array.newInstance(schemaType.getType(), 0).getClass());
+            return wrap(instance, schemaType);
+        }
+
+        @Deprecated
         public Data wrap(Object instance, BeanClass<?> schemaType) {
             return new Data(() -> instance, this, SchemaType.create(schemaType));
         }
@@ -447,7 +455,7 @@ public class RuntimeContextBuilder {
 
         public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
             return metaProperties.computeIfAbsent(metaData.name(), k -> {
-                throw illegalOp2RuntimeException(format("Meta property `%s` not found", metaData.name()));
+                throw illegalOp2(format("Meta property `%s` not found", metaData.name()));
             });
         }
 
@@ -513,32 +521,39 @@ public class RuntimeContextBuilder {
         }
 
         public Data invokeMetaProperty(DALNode inputNode, Data inputData, Object symbolName) {
-            MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
-            Function<MetaData, Object> metaFunction = fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData));
-            return wrap(() -> metaFunction.apply(metaData)).mapError(DalException::buildUserRuntimeException);
+            return wrap(() -> {
+                MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
+                return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
+            }).mapError(DalException::buildUserRuntimeException);
         }
 
         public Data invokeDataRemark(RemarkData remarkData) {
-            Object instance = remarkData.data().instance();
-            return remarks.tryGetData(instance)
-                    .orElseThrow(() -> illegalOperationRuntimeException("Not implement operator () of " + Classes.getClassName(instance)))
-                    .apply(remarkData);
+            return wrap(() -> {
+                Object instance = remarkData.data().instance();
+                return remarks.tryGetData(instance)
+                        .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
+                        .apply(remarkData).instance();
+            });
         }
 
         public Data invokeExclamations(ExclamationData exclamationData) {
-            Object instance = exclamationData.data().instance();
-            return exclamations.tryGetData(instance)
-                    .orElseThrow(() -> illegalOp2RuntimeException(format("Not implement operator %s of %s",
-                            exclamationData.label(), Classes.getClassName(instance))))
-                    .apply(exclamationData);
+            return wrap(() -> {
+                Object instance = exclamationData.data().instance();
+                return exclamations.tryGetData(instance)
+                        .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
+                                exclamationData.label(), Classes.getClassName(instance))))
+                        .apply(exclamationData).instance();
+            });
         }
 
         public Data calculate(Data v1, DALOperator opt, Data v2) {
-            for (Operation operation : operations.get(opt.overrideType()))
-                if (operation.match(v1, opt, v2, this))
-                    return operation.operate(v1, opt, v2, this);
-            throw illegalOperationRuntimeException(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
-                    getClassName(v1.instance()), getClassName(v2.instance())));
+            return wrap(() -> {
+                for (Operation operation : operations.get(opt.overrideType()))
+                    if (operation.match(v1, opt, v2, this))
+                        return operation.operate(v1, opt, v2, this).instance();
+                throw illegalOperation(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
+                        getClassName(v1.instance()), getClassName(v2.instance())));
+            });
         }
 
         public PrintStream warningOutput() {

@@ -28,7 +28,7 @@ public class Await implements ProxyObject {
         Await.defaultWaitingTime = ms;
     }
 
-    public <T> T await(Function<Data, T> supplier) throws Throwable {
+    public <T> T await(Function<Data, T> supplier) {
         return new Retryer(waitingTime, interval).get(() -> supplier.apply(data));
     }
 
