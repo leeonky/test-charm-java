@@ -67,15 +67,21 @@ public class Data {
         }
     }
 
+    //    TODO lazy
+    @Deprecated
     public Set<?> fieldNames() {
         return context.findPropertyReaderNames(instance());
     }
 
+    //    TODO lazy
+    @Deprecated
     public boolean isList() {
         Object instance = instance();
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
+    //    TODO lazy
+    @Deprecated
     public DataList list() {
         if (list == null) {
             if (!isList())
@@ -85,6 +91,8 @@ public class Data {
         return list;
     }
 
+    //    TODO lazy
+    @Deprecated
     public boolean isNull() {
         return context.isNull(instance());
     }
@@ -156,6 +164,8 @@ public class Data {
         });
     }
 
+    //    use lazy in mapper
+    @Deprecated
     public Data map(Function<Object, Object> mapper) {
         return new Data(() -> mapper.apply(instance()), context, schemaType);
     }
@@ -170,10 +180,13 @@ public class Data {
         }, context, schemaType);
     }
 
+    //TODO move to lazy obj
+    @Deprecated
     public String dumpAll() {
         return DumpingBuffer.rootContext(context).dump(this).content();
     }
 
+    //TODO move to lazy obj
     public String dumpValue() {
         return DumpingBuffer.rootContext(context).dumpValue(this).content();
     }
@@ -182,10 +195,14 @@ public class Data {
         return context.pushAndExecute(this, supplier);
     }
 
+    //TODO move to lazy obj
+    @Deprecated
     public Optional<CurryingMethod> currying(Object property) {
         return currying(instance(), property);
     }
 
+    //TODO move to lazy obj
+    @Deprecated
     private Optional<CurryingMethod> currying(Object instance, Object property) {
         List<InstanceCurryingMethod> methods = context.methodToCurrying(named(instance.getClass()), property).stream()
                 .map(method -> createCurryingMethod(instance, method, context.getConverter(), context)).collect(toList());
@@ -194,6 +211,7 @@ public class Data {
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
+    //TODO move to lazy obj
     @Deprecated
     public boolean instanceOf(Class<?> type) {
         try {

@@ -19,7 +19,7 @@ import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public Data evaluateData(DALRuntimeContext context) {
-        return context.wrap(evaluate(context));
+        return context.wrap(() -> evaluate(context));
     }
 
     @Override
