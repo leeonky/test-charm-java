@@ -21,16 +21,35 @@ import static java.util.stream.Collectors.toList;
 
 //TODO use generic
 public class Data {
+    public class Resolved {
+        public Resolved() {
+            try {
+                instance = supplier.get();
+                for (Consumer<Object> f : consumers)
+                    f.accept(instance);
+            } catch (Throwable e) {
+                error = errorMapper.apply(e);
+            }
+        }
+
+        private Object instance;
+        private Throwable error;
+
+        public Object value() {
+            if (error != null)
+                return Sneaky.sneakyThrow(error);
+            return instance;
+        }
+    }
+
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final ThrowingSupplier<?> supplier;
-    private Object instance;
-    private boolean resolved = false;
     private DataList list;
-    private Throwable error;
     private Function<Throwable, Throwable> errorMapper = e -> e;
     private final List<Consumer<Object>> consumers = new ArrayList<>();
     private final boolean isListMapping;
+    private Resolved resolved;
 
     public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
         this.supplier = Objects.requireNonNull(supplier);
@@ -52,19 +71,9 @@ public class Data {
     }
 
     public Object instance() {
-        if (error != null)
-            return Sneaky.sneakyThrow(error);
-        if (resolved)
-            return instance;
-        try {
-            instance = supplier.get();
-            resolved = true;
-            for (Consumer<Object> f : consumers)
-                f.accept(instance);
-            return instance;
-        } catch (Throwable e) {
-            return Sneaky.sneakyThrow(error = errorMapper.apply(e));
-        }
+        if (resolved != null)
+            return resolved.value();
+        return (resolved = new Resolved()).value();
     }
 
     //    TODO lazy
@@ -226,9 +235,11 @@ public class Data {
         return this;
     }
 
+    //    TODO use resolved as args
+    @Deprecated
     public Data peek(Consumer<Object> consumer) {
-        if (resolved)
-            consumer.accept(instance);
+        if (resolved != null)
+            consumer.accept(resolved.instance);
         else
             consumers.add(consumer);
         return this;
