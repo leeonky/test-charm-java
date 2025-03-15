@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Order;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
@@ -40,9 +40,9 @@ public class Dumpers implements Extension {
     private static class StackTraceDumper implements Dumper {
 
         @Override
-        public void dump(Data data, DumpingBuffer dumpingBuffer) {
+        public void dump(Resolved data, DumpingBuffer dumpingBuffer) {
             DumpingBuffer sub = dumpingBuffer.indent();
-            data.list().values().forEach(s -> sub.newLine().append("at " + s.toString()));
+            data.asList().forEach(s -> sub.newLine().append("at " + s.value().toString()));
         }
     }
 }

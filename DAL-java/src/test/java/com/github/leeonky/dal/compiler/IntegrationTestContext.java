@@ -6,6 +6,7 @@ import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.ValueDumper;
 import com.github.leeonky.interpreter.InterpreterException;
@@ -366,7 +367,7 @@ public class IntegrationTestContext {
                 })
                 .registerDumper(Empty.class, data -> new ValueDumper() {
                     @Override
-                    protected void inspectValue(Data data, DumpingBuffer dumpingBuffer) {
+                    protected void inspectValue(Resolved data, DumpingBuffer dumpingBuffer) {
                     }
                 });
     }

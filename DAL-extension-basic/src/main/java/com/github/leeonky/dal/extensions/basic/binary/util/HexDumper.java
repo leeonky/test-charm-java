@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.basic.binary.util;
 
-import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
@@ -70,7 +70,7 @@ public class HexDumper implements Dumper {
 
 
     @Override
-    public void dump(Data data, DumpingBuffer context) {
-        context.append(dumpByteArray(extractBytes(data.instance())));
+    public void dump(Resolved data, DumpingBuffer context) {
+        context.append(dumpByteArray(extractBytes(data.value())));
     }
 }

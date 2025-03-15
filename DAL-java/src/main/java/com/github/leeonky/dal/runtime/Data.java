@@ -36,8 +36,9 @@ public class Data {
             this.instance = instance;
         }
 
-        public Object value() {
-            return instance;
+        @SuppressWarnings("unchecked")
+        public <T> T value() {
+            return (T) instance;
         }
 
         public boolean isNull() {
@@ -59,6 +60,26 @@ public class Data {
 
         public void eachSubData(Consumer<Data> consumer) {
             asList().wraps().forEach(e -> consumer.accept(e.value()));
+        }
+
+        public boolean instanceOf(Class<?> type) {
+            return type.isInstance(instance);
+        }
+
+        public Data getValue(Object field) {
+            return Data.this.getValue(field);
+        }
+
+        public Set<?> fieldNames() {
+            return context.findPropertyReaderNames(instance);
+        }
+
+        public Data repack() {
+            return Data.this;
+        }
+
+        boolean isEnum() {
+            return value() != null && value().getClass().isEnum();
         }
     }
 

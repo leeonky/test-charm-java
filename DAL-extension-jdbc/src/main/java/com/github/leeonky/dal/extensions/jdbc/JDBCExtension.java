@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
@@ -35,7 +35,7 @@ public class JDBCExtension implements Extension {
     private static class TableDumper implements Dumper {
 
         @Override
-        public void dump(Data data, DumpingBuffer dumpingBuffer) {
+        public void dump(Resolved data, DumpingBuffer dumpingBuffer) {
             List<List<String>> tableData = getData(data);
             if (tableData.isEmpty())
                 dumpingBuffer.append("[]");
@@ -49,9 +49,9 @@ public class JDBCExtension implements Extension {
             }
         }
 
-        private List<List<String>> getData(Data data) {
+        private List<List<String>> getData(Resolved data) {
             List<List<String>> tableData = new ArrayList<>();
-            stream(((DataBase.Table<?>) data.instance()).spliterator(), false).limit(100).forEach(row -> {
+            stream(((DataBase.Table<?>) data.value()).spliterator(), false).limit(100).forEach(row -> {
                 if (tableData.isEmpty())
                     tableData.add(new ArrayList<>(row.columns()));
                 tableData.add(row.data().values().stream().map(String::valueOf).collect(Collectors.toList()));
@@ -72,13 +72,13 @@ public class JDBCExtension implements Extension {
     private static class DataBaseDumper extends MapDumper {
 
         @Override
-        protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
-            DataBase dataBase = (DataBase) data.instance();
+        protected void dumpType(Resolved data, DumpingBuffer dumpingBuffer) {
+            DataBase dataBase = (DataBase) data.value();
             dumpingBuffer.append("DataBase[").append(dataBase.getUrl()).append("] ");
         }
 
         @Override
-        protected void dumpField(Data data, Object field, DumpingBuffer context) {
+        protected void dumpField(Resolved data, Object field, DumpingBuffer context) {
             DataBase.Table<?> table = (DataBase.Table<?>) data.getValue(field).instance();
             if (table.iterator().hasNext())
                 context.append(key(field)).append(":").dumpValue(data.getValue(field));

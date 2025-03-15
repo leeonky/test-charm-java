@@ -19,8 +19,7 @@ public class DALHelper {
         implementForceCreation(dal);
 
         dal.getRuntimeContextBuilder().registerDumper(ObjectReference.class, _ignore -> (data, dumpingBuffer) ->
-                dumpingBuffer.dump(dumpingBuffer.getRuntimeContext()
-                        .wrap(((ObjectReference) data.instance()).value())));
+                dumpingBuffer.dump(data.getValue("value")));
         return dal;
     }
 

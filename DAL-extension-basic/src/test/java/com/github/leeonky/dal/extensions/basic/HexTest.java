@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HexTest {
 
     private byte[] parseToByteArray(String hexInText) {
-        return (byte[]) new HexFormatter().format(hexInText, null);
+        return new HexFormatter().format(hexInText, null);
     }
 
     @Nested
@@ -62,7 +62,7 @@ class HexTest {
         private String parseAndDump(String hexInText) {
             RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
             DumpingBuffer dumpingBuffer = DumpingBuffer.rootContext(context);
-            new HexDumper().dumpValue(context.wrap(parseToByteArray(hexInText)), dumpingBuffer);
+            new HexDumper().dumpValue(context.wrap(parseToByteArray(hexInText)).resolved(), dumpingBuffer);
             return dumpingBuffer.content();
         }
 
