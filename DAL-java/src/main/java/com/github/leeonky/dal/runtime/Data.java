@@ -69,13 +69,15 @@ public class Data {
     }
 
     public Data onError(Function<Throwable, Throwable> mapper) {
-        errorMapper = mapper;
+        errorMapper = errorMapper.andThen(mapper);
         return this;
     }
 
     public Object instance() {
-        if (error != null)
-            return sneakyThrow(error);
+        return error != null ? sneakyThrow(error) : resolved().value();
+    }
+
+    public Resolved resolved() {
         if (resolved == null) {
             try {
                 resolved = new Resolved(supplier.get(), context);
@@ -84,7 +86,7 @@ public class Data {
             }
             handlers.accept(resolved);
         }
-        return resolved.value();
+        return resolved;
     }
 
     //    TODO lazy
@@ -250,15 +252,10 @@ public class Data {
     };
 
     public Data peek(Consumer<Resolved> peek) {
-        if (resolved != null) {
+        if (resolved != null)
             peek.accept(resolved);
-        } else {
-            Consumer<Resolved> last = handlers;
-            handlers = r -> {
-                last.accept(r);
-                peek.accept(r);
-            };
-        }
+        else
+            handlers = handlers.andThen(peek);
         return this;
     }
 

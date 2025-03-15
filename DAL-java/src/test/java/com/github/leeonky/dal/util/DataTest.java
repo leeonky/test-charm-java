@@ -315,6 +315,32 @@ class DataTest {
         }
 
         @Test
+        void nested_map_error_when_resolve_error() {
+//            f()
+//              throw e
+//            try
+//              try
+//                v=f()
+//              catch e
+//                throw mapError(e)
+//              print1 v
+//            catch e
+//              throw mapError2(e)
+//            print2 v
+            Exception e = new Exception();
+            Data data = context.wrap(() -> {
+                throw e;
+            });
+            data.onError(throwable -> new RuntimeException("1", throwable))
+                    .onError(throwable1 -> new RuntimeException("2", throwable1));
+
+            Exception actual = assertThrows(Exception.class, data::instance);
+            assertThat(actual).isInstanceOf(RuntimeException.class).hasMessage("2");
+            assertThat(actual.getCause()).isInstanceOf(RuntimeException.class).hasMessage("1");
+            assertThat(actual.getCause().getCause()).isSameAs(e);
+        }
+
+        @Test
         void should_only_map_once_when_resolve_error() {
 //            f()
 //              throw e
