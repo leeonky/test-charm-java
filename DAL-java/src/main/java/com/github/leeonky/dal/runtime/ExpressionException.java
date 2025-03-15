@@ -4,7 +4,10 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import static com.github.leeonky.dal.runtime.DalException.locateError;
 
 //TODO check all exception
 public abstract class ExpressionException extends java.lang.RuntimeException {
@@ -19,6 +22,10 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
         }
     }
 
+    public static Predicate<Data.Resolved> testOpt1(Predicate<Data.Resolved> test) {
+        return r -> opt1(() -> test.test(r));
+    }
+
     @Deprecated
     public static <T> T opt2(Supplier<T> supplier) {
         try {
@@ -26,6 +33,10 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
         } catch (Exception e) {
             throw exception(expression -> new DalException(expression.right().getOperandPosition(), e));
         }
+    }
+
+    public static Supplier<Throwable> locatedError(String message, int position) {
+        return () -> locateError(new DalRuntimeException(message), position);
     }
 
     public java.lang.RuntimeException rethrow(DALExpression expression) {

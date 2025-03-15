@@ -4,32 +4,43 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.ConvertException;
-import com.github.leeonky.util.Sneaky;
 import com.github.leeonky.util.ThrowingSupplier;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.util.Classes.named;
+import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 //TODO use generic
 public class Data {
-    public class Resolved {
+    public static class Resolved {
         private final Object instance;
+        private final DALRuntimeContext context;
 
-        public Resolved(Object instance) {
+        public Resolved(Object instance, DALRuntimeContext context) {
             this.instance = instance;
+            this.context = context;
         }
 
         public Object value() {
             return instance;
+        }
+
+        public boolean isNull() {
+            return context.isNull(instance);
+        }
+
+        public static Predicate<Resolved> instanceOf(Class<?> type) {
+            return r -> type.isInstance(r.value());
         }
     }
 
@@ -64,14 +75,14 @@ public class Data {
 
     public Object instance() {
         if (error != null)
-            return Sneaky.sneakyThrow(error);
+            return sneakyThrow(error);
         if (resolved == null) {
             try {
-                resolved = new Resolved(supplier.get());
-                handlers.accept(resolved);
+                resolved = new Resolved(supplier.get(), context);
             } catch (Throwable e) {
-                Sneaky.sneakyThrow(error = errorMapper.apply(e));
+                sneakyThrow(error = errorMapper.apply(e));
             }
+            handlers.accept(resolved);
         }
         return resolved.value();
     }
@@ -249,6 +260,34 @@ public class Data {
             };
         }
         return this;
+    }
+
+    public ConditionalAction when(Predicate<Resolved> condition) {
+        return new ConditionalAction(condition);
+    }
+
+    public class ConditionalAction {
+        private final Predicate<Resolved> condition;
+
+        public ConditionalAction(Predicate<Resolved> condition) {
+            this.condition = condition;
+        }
+
+        public Data then(Consumer<Resolved> then) {
+            peek(r -> {
+                if (condition.test(r))
+                    then.accept(r);
+            });
+            return Data.this;
+        }
+
+        public Data thenThrow(Supplier<Throwable> supplier) {
+            peek(r -> {
+                if (condition.test(r))
+                    sneakyThrow(supplier.get());
+            });
+            return Data.this;
+        }
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
