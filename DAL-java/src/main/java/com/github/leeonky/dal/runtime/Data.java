@@ -262,6 +262,10 @@ public class Data {
         return this;
     }
 
+    public Data trigger(Data another) {
+        return peek(r -> another.resolve());
+    }
+
     public ConditionalAction when(Predicate<Resolved> condition) {
         return new ConditionalAction(condition);
     }
