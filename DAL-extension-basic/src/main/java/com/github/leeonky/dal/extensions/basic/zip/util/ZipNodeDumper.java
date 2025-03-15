@@ -11,7 +11,7 @@ public class ZipNodeDumper implements Dumper {
         ZipBinary.ZipNode node = (ZipBinary.ZipNode) data.instance();
         if (node.isDirectory()) {
             DumpingBuffer sub = context.append(node.name()).append("/").indent();
-            data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
+            data.resolved().eachSubData(subFile -> sub.newLine().dumpValue(subFile));
         } else if (node.name().toLowerCase().endsWith(".zip"))
             context.append(node.name()).indent().dumpValue(data.getValue("unzip"));
         else

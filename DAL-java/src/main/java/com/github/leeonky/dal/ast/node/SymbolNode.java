@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.github.leeonky.dal.runtime.DalException.locateError;
-import static com.github.leeonky.dal.runtime.Data.Resolved.instanceOf;
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
 import static java.lang.String.format;
 
 public class SymbolNode extends DALNode implements ExecutableNode {

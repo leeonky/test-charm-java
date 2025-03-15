@@ -22,13 +22,18 @@ import static java.util.stream.Collectors.toList;
 
 //TODO use generic
 public class Data {
-    public static class Resolved {
-        private final Object instance;
-        private final DALRuntimeContext context;
+    public static class ResolvedMethods {
+        public static Predicate<Resolved> instanceOf(Class<?> type) {
+            return r -> type.isInstance(r.value());
+        }
+    }
 
-        public Resolved(Object instance, DALRuntimeContext context) {
+    public class Resolved {
+        private final Object instance;
+        private DataList list;
+
+        public Resolved(Object instance) {
             this.instance = instance;
-            this.context = context;
         }
 
         public Object value() {
@@ -39,8 +44,21 @@ public class Data {
             return context.isNull(instance);
         }
 
-        public static Predicate<Resolved> instanceOf(Class<?> type) {
-            return r -> type.isInstance(r.value());
+        public boolean isList() {
+            return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
+        }
+
+        public DataList asList() {
+            if (list == null) {
+                if (!isList())
+                    throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
+                list = new DataList(context.createCollection(instance));
+            }
+            return list;
+        }
+
+        public void eachSubData(Consumer<Data> consumer) {
+            asList().wraps().forEach(e -> consumer.accept(e.value()));
         }
     }
 
@@ -80,7 +98,7 @@ public class Data {
     public Resolved resolved() {
         if (resolved == null) {
             try {
-                resolved = new Resolved(supplier.get(), context);
+                resolved = new Resolved(supplier.get());
             } catch (Throwable e) {
                 sneakyThrow(error = errorMapper.apply(e));
             }
@@ -98,8 +116,7 @@ public class Data {
     //    TODO lazy
     @Deprecated
     public boolean isList() {
-        Object instance = instance();
-        return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
+        return resolved().isList();
     }
 
     //    TODO lazy
@@ -308,7 +325,7 @@ public class Data {
         }
 
         public DataList sort(Comparator<Data> comparator) {
-            if (comparator != NOP_COMPARATOR) {
+            if (comparator != NOP_COMPARATOR)
                 return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
                         .sorted(comparator).map(Data::instance).collect(toList())) {
                     @Override
@@ -321,7 +338,6 @@ public class Data {
                         return DataList.this.infinite();
                     }
                 });
-            }
             return this;
         }
 
