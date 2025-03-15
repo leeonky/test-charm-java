@@ -524,7 +524,7 @@ public class RuntimeContextBuilder {
             return wrap(() -> {
                 MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
                 return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
-            }).mapError(DalException::buildUserRuntimeException);
+            }).onError(DalException::buildUserRuntimeException);
         }
 
         public Data invokeDataRemark(RemarkData remarkData) {

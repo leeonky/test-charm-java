@@ -22,22 +22,13 @@ import static java.util.stream.Collectors.toList;
 //TODO use generic
 public class Data {
     public class Resolved {
-        public Resolved() {
-            try {
-                instance = supplier.get();
-                for (Consumer<Object> f : consumers)
-                    f.accept(instance);
-            } catch (Throwable e) {
-                error = errorMapper.apply(e);
-            }
+        private final Object instance;
+
+        public Resolved(Object instance) {
+            this.instance = instance;
         }
 
-        private Object instance;
-        private Throwable error;
-
         public Object value() {
-            if (error != null)
-                return Sneaky.sneakyThrow(error);
             return instance;
         }
     }
@@ -47,9 +38,10 @@ public class Data {
     private final ThrowingSupplier<?> supplier;
     private DataList list;
     private Function<Throwable, Throwable> errorMapper = e -> e;
-    private final List<Consumer<Object>> consumers = new ArrayList<>();
     private final boolean isListMapping;
     private Resolved resolved;
+
+    private Throwable error;
 
     public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
         this.supplier = Objects.requireNonNull(supplier);
@@ -65,15 +57,23 @@ public class Data {
         this.isListMapping = isListMapping;
     }
 
-    public Data mapError(Function<Throwable, Throwable> mapper) {
+    public Data onError(Function<Throwable, Throwable> mapper) {
         errorMapper = mapper;
         return this;
     }
 
     public Object instance() {
-        if (resolved != null)
-            return resolved.value();
-        return (resolved = new Resolved()).value();
+        if (error != null)
+            return Sneaky.sneakyThrow(error);
+        if (resolved == null) {
+            try {
+                resolved = new Resolved(supplier.get());
+                handlers.accept(resolved);
+            } catch (Throwable e) {
+                Sneaky.sneakyThrow(error = errorMapper.apply(e));
+            }
+        }
+        return resolved.value();
     }
 
     //    TODO lazy
@@ -235,13 +235,19 @@ public class Data {
         return this;
     }
 
-    //    TODO use resolved as args
-    @Deprecated
-    public Data peek(Consumer<Object> consumer) {
-        if (resolved != null)
-            consumer.accept(resolved.instance);
-        else
-            consumers.add(consumer);
+    private Consumer<Resolved> handlers = r -> {
+    };
+
+    public Data peek(Consumer<Resolved> peek) {
+        if (resolved != null) {
+            peek.accept(resolved);
+        } else {
+            Consumer<Resolved> last = handlers;
+            handlers = r -> {
+                last.accept(r);
+                peek.accept(r);
+            };
+        }
         return this;
     }
 

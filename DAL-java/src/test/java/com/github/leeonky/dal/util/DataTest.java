@@ -245,6 +245,157 @@ class DataTest {
         }
     }
 
+    @Nested
+    class Lazy {
+        private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
+
+        private int i = 0;
+
+        @Test
+        void should_resolved_value_when_get_value() {
+//            f()
+//              return result
+//            v = f()
+//            print v
+            Data data = context.wrap(() -> i += 1);
+
+            assertThat(i).isEqualTo(0);
+            assertThat(data.instance()).isEqualTo(1);
+            assertThat(i).isEqualTo(1);
+        }
+
+        @Test
+        void should_resolve_only_once_when_get_value_multiple_times() {
+//            f()
+//              return result
+//            v = f()
+//            print v
+//            print v
+
+            Data data = context.wrap(() -> i += 1);
+            assertThat(data.instance()).isEqualTo(1);
+            assertThat(data.instance()).isEqualTo(1);
+        }
+
+        @Test
+        void should_throw_error_when_resolve_error() {
+//            f()
+//              throw e
+
+//            v = f() //throw
+//            print v
+
+            Exception e = new Exception();
+            Data data = context.wrap(() -> {
+                throw e;
+            });
+
+            assertThat(assertThrows(Exception.class, data::instance))
+                    .isSameAs(e);
+        }
+
+        @Test
+        void map_error_when_resolve_error() {
+//            f()
+//              throw e
+//            try
+//              v=f()
+//            catch e
+//              throw mapError(e)
+//            print v
+            Exception e = new Exception();
+            Data data = context.wrap(() -> {
+                throw e;
+            });
+            data.onError(RuntimeException::new);
+
+            assertThat(assertThrows(Exception.class, data::instance))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasCause(e);
+        }
+
+        @Test
+        void should_only_map_once_when_resolve_error() {
+//            f()
+//              throw e
+//            try
+//              v=f()
+//            catch e
+//              throw mapError(e)
+//            print v
+//            print v
+
+            Exception e = new Exception();
+            Data data = context.wrap(() -> {
+                throw e;
+            });
+            data.onError(throwable -> {
+                i++;
+                return new RuntimeException(throwable);
+            });
+
+            assertThat(assertThrows(Exception.class, data::instance))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasCause(e);
+
+            assertThat(assertThrows(Exception.class, data::instance))
+                    .isInstanceOf(RuntimeException.class)
+                    .hasCause(e);
+
+            assertThat(i).isEqualTo(1);
+        }
+
+        @Test
+        void peek_before_resolve() {
+//            f()
+//              return result
+//            v = f()
+//            process(v)
+//            print v
+            Data data = context.wrap(() -> new StringBuilder().append(i += 1));
+
+            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek"));
+
+            assertThat(data.instance().toString()).isEqualTo("1-peek");
+        }
+
+        @Test
+        void peek_twice_before_resolve() {
+//            f()
+//              return result
+//            v = f()
+//            process1(v)
+//            process2(v)
+//            print v
+            Data data = context.wrap(() -> new StringBuilder().append(i += 1));
+
+            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek1"));
+            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek2"));
+
+            assertThat(data.instance().toString()).isEqualTo("1-peek1-peek2");
+        }
+
+        @Test
+        void should_call_handler_at_once_when_instance_has_already_resolved() {
+//            f()
+//              return result
+//            v = f()
+//            process1(v)
+//            print v
+//            process2(v)
+//            print v
+            Data data = context.wrap(() -> new StringBuilder().append(i += 1));
+
+            data.peek(resolved -> assertThat(resolved.value().toString()).isEqualTo("1"));
+            Object instance = data.instance();
+            assertThat(instance.toString()).isEqualTo("1");
+
+            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek1"));
+
+            assertThat(instance.toString()).isEqualTo("1-peek1");
+        }
+    }
+
     public static class BaseCurrying {
 
     }

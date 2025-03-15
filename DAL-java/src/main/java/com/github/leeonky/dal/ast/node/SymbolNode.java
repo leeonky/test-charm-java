@@ -29,12 +29,12 @@ public class SymbolNode extends DALNode implements ExecutableNode {
 //        if (data.instanceOf(PartialObject.class))
 //            context.appendPartialPropertyReference(data, symbol);
         data.peek(e -> {
-            if (e instanceof PartialObject)
+            if (e.value() instanceof PartialObject)
                 context.appendPartialPropertyReference(data, symbol);
         });
-        Data value = data.getValue(symbol).mapError(e -> locateError(e, getPositionBegin()));
+        Data value = data.getValue(symbol).onError(e -> locateError(e, getPositionBegin()));
         value.peek(e -> {
-            if (e instanceof PartialObject)
+            if (e.value() instanceof PartialObject)
                 context.initPartialPropertyStack(data, symbol, value);
         });
 //        if (value.instanceOf(PartialObject.class))

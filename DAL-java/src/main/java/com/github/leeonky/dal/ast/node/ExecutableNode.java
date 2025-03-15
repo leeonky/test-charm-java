@@ -17,20 +17,14 @@ public interface ExecutableNode extends Node<RuntimeContextBuilder.DALRuntimeCon
     default Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = left.evaluateData(context);
         data.peek(e -> {
-            if (context.isNull(e))
+            if (context.isNull(e.value()))
                 throw locateError(new DalRuntimeException("Instance is null"), getOperandPosition());
-        }).mapError(e -> {
+        }).onError(e -> {
             if (e instanceof InterpreterException) {
                 return e;
             }
             return exception(expression -> new DalException(expression.left().getOperandPosition(), e));
         });
         return getValue(data, context);
-
-//        return context.wrap(() -> {
-//            if (opt1(data::isNull))
-//                throw locateError(new DalRuntimeException("Instance is null"), getOperandPosition());
-//            return getValue(data, context).instance();
-//        });
     }
 }

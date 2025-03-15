@@ -13,6 +13,6 @@ public class MetaSymbolNode extends SymbolNode {
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         return context.invokeMetaProperty(left, left.evaluateData(context), getRootSymbolName())
-                .mapError(e -> locateError(e, getPositionBegin()));
+                .onError(e -> locateError(e, getPositionBegin()));
     }
 }
