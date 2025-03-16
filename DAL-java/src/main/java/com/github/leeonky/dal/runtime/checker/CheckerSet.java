@@ -54,7 +54,7 @@ public class CheckerSet {
     }
 
     public static Checker defaultMatching(Data expected, Data actual) {
-        if (expected.isNull())
+        if (expected.resolved().isNull())
             return Checker.MATCH_NULL_CHECKER;
         return Checker.MATCHES_CHECKER;
     }

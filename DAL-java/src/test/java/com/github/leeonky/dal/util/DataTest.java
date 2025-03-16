@@ -49,9 +49,9 @@ class DataTest {
             }
         });
 
-        assertTrue(runtimeContextBuilder.build(null).wrap(() -> new AlwaysNull()).isNull());
-        assertTrue(runtimeContextBuilder.build(null).wrap(() -> null).isNull());
-        assertFalse(runtimeContextBuilder.build(null).wrap(() -> new Object()).isNull());
+        assertTrue(runtimeContextBuilder.build(null).wrap(() -> new AlwaysNull()).resolved().isNull());
+        assertTrue(runtimeContextBuilder.build(null).wrap(() -> null).resolved().isNull());
+        assertFalse(runtimeContextBuilder.build(null).wrap(() -> new Object()).resolved().isNull());
     }
 
     private static class AlwaysNull {

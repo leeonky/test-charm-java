@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.opt.DALOperator;
+import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.NumberType;
 
@@ -9,8 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
-import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
+import static com.github.leeonky.dal.runtime.ExpressionException.*;
 import static com.github.leeonky.util.Classes.getClassName;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.String.format;
@@ -36,8 +36,8 @@ public class Calculator {
     public static boolean equals(Data v1, Data v2) {
         if (v1.instance() == v2.instance())
             return true;
-        if (ExpressionException.opt2(v2::isNull))
-            return ExpressionException.opt1(v1::isNull);
+        if (opt2(v2.get(Resolved::isNull)))
+            return opt1(v1.get(Resolved::isNull));
         if (v2.isList() && v1.isList())
             return collect(v2, "2").equals(collect(v1, "1"));
         return Objects.equals(v1.instance(), v2.instance());
@@ -73,7 +73,7 @@ public class Calculator {
     }
 
     private static boolean isTrue(Data value) {
-        Data.Resolved resolved = value.resolved();
+        Resolved resolved = value.resolved();
         return getFirstPresent(() -> resolved.cast(Boolean.class),
                 () -> resolved.cast(Number.class).map(number -> numberType.compare(0, number) != 0)
         ).orElseGet(() -> !resolved.isNull());

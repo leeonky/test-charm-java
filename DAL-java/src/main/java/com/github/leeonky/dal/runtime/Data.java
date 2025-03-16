@@ -21,7 +21,6 @@ import static java.lang.String.format;
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.toList;
 
-//TODO use generic
 public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
@@ -91,12 +90,6 @@ public class Data {
             list = new DataList(context.createCollection(instance()));
         }
         return list;
-    }
-
-    //    TODO lazy
-    @Deprecated
-    public boolean isNull() {
-        return resolved().isNull();
     }
 
     public Data getValue(List<Object> propertyChain) {
@@ -170,6 +163,10 @@ public class Data {
     @Deprecated
     public Data map(Function<Object, Object> mapper) {
         return new Data(() -> mapper.apply(instance()), context, schemaType);
+    }
+
+    public <T> Supplier<T> get(Function<Resolved, T> mapper) {
+        return () -> mapper.apply(resolved());
     }
 
     public Data filter(String prefix) {
