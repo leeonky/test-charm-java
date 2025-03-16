@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.*;
 
 import java.util.Optional;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
 import static com.github.leeonky.jfactory.helper.ObjectReference.RawType.*;
 import static java.util.Optional.of;
 
@@ -51,7 +52,7 @@ public class DALHelper {
         dal.getRuntimeContextBuilder().registerOperator(Operators.MATCH, new Operation() {
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
-                return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
+                return v1.probeIf(instanceOf(ObjectReference.class)) && v2.probeIf(instanceOf(ExpectationFactory.class));
             }
 
             @Override
@@ -67,9 +68,9 @@ public class DALHelper {
         });
         dal.getRuntimeContextBuilder().checkerSetForMatching()
                 .register((expected, actual) -> {
-                    if (actual.instanceOf(LegacyTraitSetter.class))
+                    if (actual.probeIf(instanceOf(LegacyTraitSetter.class)))
                         return of(new OverrideVerificationOptChecker<>(LegacyTraitSetter::addTraitSpec));
-                    return actual.instanceOf(ObjectReference.class)
+                    return actual.probeIf(instanceOf(ObjectReference.class))
                             ? of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty();
                 });
     }
@@ -78,7 +79,7 @@ public class DALHelper {
         dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation() {
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
-                return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
+                return v1.probeIf(instanceOf(ObjectReference.class)) && v2.probeIf(instanceOf(ExpectationFactory.class));
             }
 
             @Override
@@ -95,7 +96,7 @@ public class DALHelper {
             }
         });
         dal.getRuntimeContextBuilder().checkerSetForEqualing()
-                .register((expected, actual) -> actual.instanceOf(ObjectReference.class)
+                .register((expected, actual) -> actual.probeIf(instanceOf(ObjectReference.class))
                         ? of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty());
     }
 }

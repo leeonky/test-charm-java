@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static java.lang.String.format;
 
@@ -87,7 +88,7 @@ public class MetaData extends RuntimeData {
     }
 
     public boolean isInstance(Class<?> type) {
-        return data.instanceOf(type);
+        return data.probeIf(instanceOf(type));
     }
 
     public Object name() {

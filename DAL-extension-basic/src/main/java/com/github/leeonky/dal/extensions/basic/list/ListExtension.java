@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -79,7 +80,7 @@ public class ListExtension implements Extension {
 
         @Override
         public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-            return v1.instanceOf(Filterable.class);
+            return v1.probeIf(instanceOf(Filterable.class));
         }
 
         @Override

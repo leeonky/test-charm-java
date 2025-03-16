@@ -5,6 +5,8 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
+
 public class EventuallyExtension implements Extension {
 
     @Override
@@ -23,7 +25,7 @@ public class EventuallyExtension implements Extension {
     private static class EventuallyVerification implements Operation {
         @Override
         public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-            return v1.instanceOf(Eventually.class);
+            return v1.probeIf(instanceOf(Eventually.class));
         }
 
         @Override

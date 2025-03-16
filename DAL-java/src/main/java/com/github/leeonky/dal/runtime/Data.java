@@ -22,67 +22,6 @@ import static java.util.stream.Collectors.toList;
 
 //TODO use generic
 public class Data {
-    public static class ResolvedMethods {
-        public static Predicate<Resolved> instanceOf(Class<?> type) {
-            return r -> type.isInstance(r.value());
-        }
-    }
-
-    public class Resolved {
-        private final Object instance;
-        private DataList list;
-
-        public Resolved(Object instance) {
-            this.instance = instance;
-        }
-
-        @SuppressWarnings("unchecked")
-        public <T> T value() {
-            return (T) instance;
-        }
-
-        public boolean isNull() {
-            return context.isNull(instance);
-        }
-
-        public boolean isList() {
-            return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
-        }
-
-        public DataList asList() {
-            if (list == null) {
-                if (!isList())
-                    throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
-                list = new DataList(context.createCollection(instance));
-            }
-            return list;
-        }
-
-        public void eachSubData(Consumer<Data> consumer) {
-            asList().wraps().forEach(e -> consumer.accept(e.value()));
-        }
-
-        public boolean instanceOf(Class<?> type) {
-            return type.isInstance(instance);
-        }
-
-        public Data getValue(Object field) {
-            return Data.this.getValue(field);
-        }
-
-        public Set<?> fieldNames() {
-            return context.findPropertyReaderNames(instance);
-        }
-
-        public Data repack() {
-            return Data.this;
-        }
-
-        boolean isEnum() {
-            return value() != null && value().getClass().isEnum();
-        }
-    }
-
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final ThrowingSupplier<?> supplier;
@@ -113,10 +52,12 @@ public class Data {
     }
 
     public Object instance() {
-        return error != null ? sneakyThrow(error) : resolved().value();
+        return resolved().value();
     }
 
     public Resolved resolved() {
+        if (error != null)
+            return sneakyThrow(error);
         if (resolved == null) {
             try {
                 resolved = new Resolved(supplier.get());
@@ -154,7 +95,7 @@ public class Data {
     //    TODO lazy
     @Deprecated
     public boolean isNull() {
-        return context.isNull(instance());
+        return resolved().isNull();
     }
 
     public Data getValue(List<Object> propertyChain) {
@@ -274,11 +215,19 @@ public class Data {
     //TODO move to lazy obj
     @Deprecated
     public boolean instanceOf(Class<?> type) {
+        return probeIf(ResolvedMethods.instanceOf(type));
+    }
+
+    public <T> T probe(Function<Resolved, T> mapper, T defaultValue) {
         try {
-            return type.isInstance(instance());
-        } catch (Exception e) {
-            return false;
+            return mapper.apply(resolved());
+        } catch (Throwable e) {
+            return defaultValue;
         }
+    }
+
+    public boolean probeIf(Predicate<Resolved> mapper) {
+        return probe(mapper::test, false);
     }
 
     public Data resolve() {
@@ -365,6 +314,67 @@ public class Data {
         @Deprecated
         public Data wrap() {
             return new Data(() -> this, context, schemaType);
+        }
+    }
+
+    public class Resolved {
+        private final Object instance;
+        private DataList list;
+
+        public Resolved(Object instance) {
+            this.instance = instance;
+        }
+
+        @SuppressWarnings("unchecked")
+        public <T> T value() {
+            return (T) instance;
+        }
+
+        public boolean isNull() {
+            return context.isNull(instance);
+        }
+
+        public boolean isList() {
+            return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
+        }
+
+        public DataList asList() {
+            if (list == null) {
+                if (!isList())
+                    throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
+                list = new DataList(context.createCollection(instance));
+            }
+            return list;
+        }
+
+        public void eachSubData(Consumer<Data> consumer) {
+            asList().wraps().forEach(e -> consumer.accept(e.value()));
+        }
+
+        public boolean instanceOf(Class<?> type) {
+            return type.isInstance(instance);
+        }
+
+        public Data getValue(Object field) {
+            return Data.this.getValue(field);
+        }
+
+        public Set<?> fieldNames() {
+            return context.findPropertyReaderNames(instance);
+        }
+
+        public Data repack() {
+            return Data.this;
+        }
+
+        boolean isEnum() {
+            return value() != null && value().getClass().isEnum();
+        }
+    }
+
+    public static class ResolvedMethods {
+        public static Predicate<Resolved> instanceOf(Class<?> type) {
+            return r -> type.isInstance(r.value());
         }
     }
 }
