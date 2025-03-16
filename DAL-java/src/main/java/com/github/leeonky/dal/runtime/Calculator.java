@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.util.Classes.getClassName;
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;
@@ -72,11 +73,10 @@ public class Calculator {
     }
 
     private static boolean isTrue(Data value) {
-        if (value.instanceOf(Boolean.class))
-            return (boolean) value.instance();
-        if (value.instanceOf(Number.class))
-            return numberType.compare(0, (Number) value.instance()) != 0;
-        return !value.isNull();
+        Data.Resolved resolved = value.resolved();
+        return getFirstPresent(() -> resolved.cast(Boolean.class),
+                () -> resolved.cast(Number.class).map(number -> numberType.compare(0, number) != 0)
+        ).orElseGet(() -> !resolved.isNull());
     }
 
     public static Data or(Supplier<Data> s1, Supplier<Data> s2) {

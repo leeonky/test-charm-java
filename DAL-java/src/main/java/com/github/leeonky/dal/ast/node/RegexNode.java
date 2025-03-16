@@ -7,6 +7,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.regex.Pattern;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 import static java.lang.String.format;
@@ -37,12 +38,11 @@ public class RegexNode extends DALNode {
 
             @Override
             public Data equalTo() {
-                if (actual.instanceOf(String.class)) {
-                    if (pattern.matcher((String) actual.instance()).matches())
-                        return actual;
-                    throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual.instance()), getPositionBegin());
-                }
-                throw illegalOperation("Operator = before regex need a string input value");
+                String str = actual.probe(cast(String.class))
+                        .orElseThrow(() -> illegalOperation("Operator = before regex need a string input value"));
+                if (pattern.matcher(str).matches())
+                    return actual;
+                throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual.instance()), getPositionBegin());
             }
 
             @Override

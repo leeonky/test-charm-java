@@ -3,6 +3,7 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.ConvertException;
 import com.github.leeonky.util.ThrowingSupplier;
 
@@ -17,7 +18,7 @@ import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod
 import static com.github.leeonky.util.Classes.named;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
-import static java.util.Optional.of;
+import static java.util.Optional.*;
 import static java.util.stream.Collectors.toList;
 
 //TODO use generic
@@ -212,17 +213,19 @@ public class Data {
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
-    //TODO move to lazy obj
-    @Deprecated
-    public boolean instanceOf(Class<?> type) {
-        return probeIf(ResolvedMethods.instanceOf(type));
-    }
-
     public <T> T probe(Function<Resolved, T> mapper, T defaultValue) {
         try {
             return mapper.apply(resolved());
         } catch (Throwable e) {
             return defaultValue;
+        }
+    }
+
+    public <T> Optional<T> probe(Function<Resolved, T> mapper) {
+        try {
+            return ofNullable(mapper.apply(resolved()));
+        } catch (Throwable e) {
+            return empty();
         }
     }
 
@@ -370,11 +373,19 @@ public class Data {
         boolean isEnum() {
             return value() != null && value().getClass().isEnum();
         }
+
+        public <T> Optional<T> cast(Class<T> type) {
+            return BeanClass.cast(instance, type);
+        }
     }
 
     public static class ResolvedMethods {
         public static Predicate<Resolved> instanceOf(Class<?> type) {
             return r -> type.isInstance(r.value());
+        }
+
+        public static <T> Function<Resolved, T> cast(Class<T> type) {
+            return r -> type.cast(r.value());
         }
     }
 }

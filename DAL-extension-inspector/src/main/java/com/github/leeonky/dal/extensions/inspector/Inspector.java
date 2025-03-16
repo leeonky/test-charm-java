@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.net.URLConnection.guessContentTypeFromStream;
 import static java.util.Objects.requireNonNull;
@@ -216,26 +217,24 @@ public class Inspector {
         }
 
         private byte[] getBytes(Data data) {
-            if (data.instanceOf(byte[].class))
-                return (byte[]) data.instance();
-            if (data.instanceOf(InputStream.class)) {
-                InputStream stream = (InputStream) data.instance();
-                return Sneaky.get(() -> {
-                    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-                        int size;
-                        byte[] data1 = new byte[1024];
-                        while ((size = stream.read(data1, 0, data1.length)) != -1)
-                            buffer.write(data1, 0, size);
-                        return buffer.toByteArray();
-                    }
-                });
-            }
-            if (data.instanceOf(Byte[].class)) {
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                data.list().values().forEach(b -> stream.write((byte) b));
-                return stream.toByteArray();
-            }
-            return null;
+            return getFirstPresent(
+                    () -> data.probe(cast(byte[].class)),
+                    () -> data.probe(cast(InputStream.class)).map(stream -> Sneaky.get(() -> {
+                        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                            int size;
+                            byte[] data1 = new byte[1024];
+                            while ((size = stream.read(data1, 0, data1.length)) != -1)
+                                buffer.write(data1, 0, size);
+                            return buffer.toByteArray();
+                        }
+                    })),
+                    () -> data.probe(cast(Byte[].class)).map(bytes -> {
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        for (Byte b : bytes)
+                            stream.write(b);
+                        return stream.toByteArray();
+                    })
+            ).orElse(null);
         }
 
         public void watch(String property, Data value) {

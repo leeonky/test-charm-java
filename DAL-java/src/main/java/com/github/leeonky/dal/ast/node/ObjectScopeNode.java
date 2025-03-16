@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
 import static com.github.leeonky.dal.runtime.ExpressionException.exception;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static java.lang.String.format;
@@ -90,8 +91,7 @@ public class ObjectScopeNode extends DALNode {
     }
 
     private Object convertFiled(Data data, Object obj) {
-        return data.instanceOf(CurryingMethod.class) ?
-                ((CurryingMethod) data.instance()).convertToArgType(obj) : obj;
+        return data.probe(cast(CurryingMethod.class)).map(curryingMethod -> curryingMethod.convertToArgType(obj)).orElse(obj);
     }
 
     @Override

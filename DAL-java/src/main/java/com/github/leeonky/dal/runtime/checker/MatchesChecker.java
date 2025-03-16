@@ -5,6 +5,8 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.math.BigDecimal;
 
+import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
+
 public class MatchesChecker implements Checker {
 
     @Override
@@ -19,10 +21,9 @@ public class MatchesChecker implements Checker {
 
     @Override
     public boolean failed(CheckingContext checkingContext) {
-        if (checkingContext.getExpected().instanceOf(BigDecimal.class)
-                && checkingContext.getActual().instanceOf(BigDecimal.class))
-            return ((BigDecimal) checkingContext.getExpected().instance())
-                    .compareTo((BigDecimal) checkingContext.getActual().instance()) != 0;
-        return Checker.super.failed(checkingContext);
+        return checkingContext.getExpected().probe(cast(BigDecimal.class)).flatMap(number1 ->
+                        checkingContext.getActual().probe(cast(BigDecimal.class)).map(number2 ->
+                                number1.compareTo(number2) != 0))
+                .orElseGet(() -> Checker.super.failed(checkingContext));
     }
 }
