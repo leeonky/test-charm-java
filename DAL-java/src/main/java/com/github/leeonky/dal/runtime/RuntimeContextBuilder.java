@@ -27,17 +27,20 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.Classes.getClassName;
+import static com.github.leeonky.util.Classes.named;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -351,7 +354,7 @@ public class RuntimeContextBuilder {
                 return getObjectPropertyAccessor(data.instance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
                 try {
-                    return data.currying(property).orElseThrow(() -> e).resolve();
+                    return currying(data.instance(), property).orElseThrow(() -> e).resolve();
                 } catch (Throwable e1) {
                     return throwUserRuntimeException(e1);
                 }
@@ -562,6 +565,14 @@ public class RuntimeContextBuilder {
 
         public BiFunction<Object, List<Object>, List<Object>> fetchCurryingMethodArgRange(Method method) {
             return curryingMethodArgRanges.get(method);
+        }
+
+        public Optional<CurryingMethod> currying(Object instance, Object property) {
+            List<InstanceCurryingMethod> methods = methodToCurrying(named(instance.getClass()), property).stream()
+                    .map(method -> createCurryingMethod(instance, method, getConverter(), this)).collect(toList());
+            if (!methods.isEmpty())
+                return of(new CurryingMethodGroup(methods, null));
+            return getImplicitObject(instance).flatMap(obj -> currying(obj, property));
         }
     }
 }

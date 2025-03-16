@@ -14,11 +14,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
-import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
-import static com.github.leeonky.util.Classes.named;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
-import static java.util.Optional.*;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public class Data {
@@ -192,22 +191,6 @@ public class Data {
 
     public <T> T execute(Supplier<T> supplier) {
         return context.pushAndExecute(this, supplier);
-    }
-
-    //TODO move to lazy obj
-    @Deprecated
-    public Optional<CurryingMethod> currying(Object property) {
-        return currying(instance(), property);
-    }
-
-    //TODO move to lazy obj
-    @Deprecated
-    private Optional<CurryingMethod> currying(Object instance, Object property) {
-        List<InstanceCurryingMethod> methods = context.methodToCurrying(named(instance.getClass()), property).stream()
-                .map(method -> createCurryingMethod(instance, method, context.getConverter(), context)).collect(toList());
-        if (!methods.isEmpty())
-            return of(new CurryingMethodGroup(methods, null));
-        return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
     public <T> T probe(Function<Resolved, T> mapper, T defaultValue) {

@@ -8,7 +8,6 @@ import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.Converter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -28,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataTest {
-    private final Converter converter = Converter.getInstance();
 
     @Test
     void check_null_for_customer_schema() {
@@ -49,9 +47,9 @@ class DataTest {
             }
         });
 
-        assertTrue(runtimeContextBuilder.build(null).wrap(() -> new AlwaysNull()).resolved().isNull());
+        assertTrue(runtimeContextBuilder.build(null).wrap(AlwaysNull::new).resolved().isNull());
         assertTrue(runtimeContextBuilder.build(null).wrap(() -> null).resolved().isNull());
-        assertFalse(runtimeContextBuilder.build(null).wrap(() -> new Object()).resolved().isNull());
+        assertFalse(runtimeContextBuilder.build(null).wrap(Object::new).resolved().isNull());
     }
 
     private static class AlwaysNull {
@@ -168,34 +166,34 @@ class DataTest {
 
     @Nested
     class CurringMethodArgs {
-        private final RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
+        private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
 
         @Test
         void return_null_when_property_is_not_string() {
-            Data data = build.wrap(() -> new Object());
+            Data data = context.wrap(Object::new);
 
-            assertThat(data.currying(1)).isEmpty();
+            assertThat(context.currying(data.instance(), 1)).isEmpty();
         }
 
         @Test
         void return_currying_method_with_property() {
-            Data data = build.wrap(() -> new Currying());
+            Data data = context.wrap(Currying::new);
 
-            assertThat(data.currying("currying1").get().call("hello").resolve()).isEqualTo("hello");
+            assertThat(context.currying(data.instance(), "currying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
-            Data data = build.wrap(() -> new Currying());
-            CurryingMethod currying = data.currying("currying2").get();
+            Data data = context.wrap(Currying::new);
+            CurryingMethod currying = context.currying(data.instance(), "currying2").get();
 
             assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
         void should_choose_min_parameter_size_method() {
-            Data data = build.wrap(() -> new Currying());
-            CurryingMethod currying = data.currying("overrideMethod").get();
+            Data data = context.wrap(Currying::new);
+            CurryingMethod currying = context.currying(data.instance(), "overrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
@@ -203,43 +201,43 @@ class DataTest {
 
     @Nested
     class StaticCurringMethodArgs {
-        private final RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder()
+        private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder()
                 .registerStaticMethodExtension(StaticMethod.class).build(null);
 
         @Test
         void return_currying_method_with_property() {
-            Data data = build.wrap(() -> new Currying());
+            Data data = context.wrap(Currying::new);
 
-            assertThat(data.currying("staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
+            assertThat(context.currying(data.instance(), "staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void return_currying_method_with_property_in_super_instance_type() {
-            Data data = build.wrap(() -> new Currying());
+            Data data = context.wrap(Currying::new);
 
-            assertThat(data.currying("baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
+            assertThat(context.currying(data.instance(), "baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
-            Data data = build.wrap(new Currying());
-            CurryingMethod currying = data.currying("staticCurrying2").get();
+            Data data = context.wrap(new Currying());
+            CurryingMethod currying = context.currying(data.instance(), "staticCurrying2").get();
 
             assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
         void should_choose_min_parameter_size_method() {
-            Data data = build.wrap(() -> new Currying());
-            CurryingMethod currying = data.currying("staticOverrideMethod").get();
+            Data data = context.wrap(() -> new Currying());
+            CurryingMethod currying = context.currying(data.instance(), "staticOverrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
 
         @Test
         void use_same_instance_type_first_when_more_than_one_candidate() {
-            Data data = build.wrap(() -> new Currying());
-            CurryingMethod currying = data.currying("baseCurrying").get();
+            Data data = context.wrap(Currying::new);
+            CurryingMethod currying = context.currying(data.instance(), "baseCurrying").get();
 
             assertThat(currying.call("a").resolve()).isEqualTo("A");
         }
