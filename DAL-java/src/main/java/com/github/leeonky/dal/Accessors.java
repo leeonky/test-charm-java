@@ -39,7 +39,7 @@ public class Accessors {
             String detailMessage = "\n" + e.show(expression, 0) + "\n\n" + e.getMessage();
             if (dumpInput)
                 detailMessage += "\n\nThe root value was: "
-                        + dal.getRuntimeContextBuilder().build(null).wrap(input).dumpAll();
+                        + dal.getRuntimeContextBuilder().build(null).wrap(input).dump();
             throw new RuntimeException(detailMessage, e);
         }
     }

@@ -174,7 +174,7 @@ public class Steps {
     public void javaIoFileShouldDump(String path, String content) {
         DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
 
-        assertThat(runtimeContext.wrap(new File(path)).dumpAll()).isEqualTo(content);
+        assertThat(runtimeContext.wrap(new File(path)).dump()).isEqualTo(content);
     }
 
     @SneakyThrows
@@ -191,7 +191,7 @@ public class Steps {
     public void javaIoPathShouldDump(String path, String content) {
         DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
 
-        assertThat(runtimeContext.wrap(Paths.get(path)).dumpAll()).isEqualTo(content);
+        assertThat(runtimeContext.wrap(Paths.get(path)).dump()).isEqualTo(content);
     }
 
     @Then("sftp {string} should dump:")
@@ -200,7 +200,7 @@ public class Steps {
         if (sFtp != null)
             sFtp.close();
         sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
-        assertThat(runtimeContext.wrap(sFtp).dumpAll()).isEqualTo(content);
+        assertThat(runtimeContext.wrap(sFtp).dump()).isEqualTo(content);
     }
 
     @SneakyThrows
@@ -208,7 +208,7 @@ public class Steps {
     public void zipFileShouldDump(String path, String content) {
         DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
 
-        assertThat(runtimeContext.wrap(unzip(Files.readAllBytes(Paths.get(path)))).dumpAll()).isEqualTo(content);
+        assertThat(runtimeContext.wrap(unzip(Files.readAllBytes(Paths.get(path)))).dump()).isEqualTo(content);
     }
 
     @After

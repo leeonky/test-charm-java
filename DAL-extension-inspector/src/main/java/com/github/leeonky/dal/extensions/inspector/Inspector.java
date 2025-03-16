@@ -172,10 +172,10 @@ public class Inspector {
             Map<String, Object> response = new HashMap<>();
             DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input::get, null);
             try {
-                response.put("root", runtimeContext.wrap(input::get, null).dumpAll());
+                response.put("root", runtimeContext.wrap(input::get, null).dump());
                 DALNode dalNode = dal.compileSingle(code, runtimeContext);
                 response.put("inspect", dalNode.inspect());
-                response.put("result", dalNode.evaluateData(runtimeContext).resolve().dumpAll());
+                response.put("result", dalNode.evaluateData(runtimeContext).resolve().dump());
             } catch (InterpreterException e) {
                 response.put("error", e.show(code) + "\n\n" + e.getMessage());
             }
@@ -252,7 +252,7 @@ public class Inspector {
 
             public DefaultWatch(String property, Data value) {
                 this.property = property;
-                this.value = value.dumpAll();
+                this.value = value.dump();
             }
 
             @Override

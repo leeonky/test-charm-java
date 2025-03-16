@@ -24,7 +24,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
     @Override
     public String message(CheckingContext context) {
-        return new Diff(getType(), context.getExpected().dumpAll(), context.getActual().dumpAll()).detail();
+        return new Diff(getType(), context.getExpected().dump(), context.getActual().dump()).detail();
     }
 
     @Override

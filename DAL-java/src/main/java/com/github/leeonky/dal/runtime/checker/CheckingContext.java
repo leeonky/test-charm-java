@@ -35,19 +35,19 @@ public class CheckingContext {
 
     public String messageMatch() {
         return verificationMessage("Expected to match: ", actual.instance() == originalActual.instance() ? ""
-                : " converted from: " + originalActual.dumpAll());
+                : " converted from: " + originalActual.dump());
     }
 
     public String verificationMessage(String prefix, String actualPostfix) {
-        String actual = this.actual.dumpAll() + actualPostfix;
-        String expected = this.expected.dumpAll();
+        String actual = this.actual.dump() + actualPostfix;
+        String expected = this.expected.dump();
         int position = TextUtil.differentPosition(expected, actual);
         return new StringWithPosition(actual).position(position)
                 .result(new StringWithPosition(expected).position(position).result(prefix) + "\nActual: ");
     }
 
     public String cannotCompare() {
-        return format("Cannot compare between %s\nand %s", actual.dumpAll(), expected.dumpAll());
+        return format("Cannot compare between %s\nand %s", actual.dump(), expected.dump());
     }
 
     public Data getExpected() {

@@ -33,7 +33,7 @@ public class RegexNode extends DALNode {
                 if (pattern.matcher(converted).matches())
                     return actual;
                 throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s> converted from: %s", pattern,
-                        converted, actual.dumpAll()), getPositionBegin());
+                        converted, actual.dump()), getPositionBegin());
             }
 
             @Override

@@ -85,7 +85,7 @@ public class Data {
     public DataList list() {
         if (list == null) {
             if (!isList())
-                throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
+                throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
             list = new DataList(context.createCollection(instance()));
         }
         return list;
@@ -178,13 +178,10 @@ public class Data {
         }, context, schemaType);
     }
 
-    //TODO move to lazy obj
-    @Deprecated
-    public String dumpAll() {
+    public String dump() {
         return DumpingBuffer.rootContext(context).dump(this).content();
     }
 
-    //TODO move to lazy obj
     public String dumpValue() {
         return DumpingBuffer.rootContext(context).dumpValue(this).content();
     }
@@ -324,7 +321,7 @@ public class Data {
         public DataList asList() {
             if (list == null) {
                 if (!isList())
-                    throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
+                    throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
                 list = new DataList(context.createCollection(instance));
             }
             return list;

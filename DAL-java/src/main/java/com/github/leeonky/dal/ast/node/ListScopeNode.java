@@ -91,7 +91,7 @@ public class ListScopeNode extends DALNode {
 
     private AssertionFailure differentSizeException(List<Clause<DALNode>> usefulInputClauses, Data actual, int index) {
         String message = format("Unexpected list size\nExpected: <%d>\nActual: <%d>\nActual list: %s",
-                usefulInputClauses.size(), index, actual.dumpAll());
+                usefulInputClauses.size(), index, actual.dump());
         return style == Style.ROW ? new DifferentCellSize(message, getPositionBegin())
                 : new AssertionFailure(message, getPositionBegin());
     }
@@ -192,7 +192,7 @@ public class ListScopeNode extends DALNode {
     private int getElementIndex(Clause<DALNode> clause, Iterator<Integer> iterator, Data actual) {
         if (iterator.hasNext())
             return iterator.next();
-        throw new AssertionFailure("No such element in list: " + actual.dumpAll(),
+        throw new AssertionFailure("No such element in list: " + actual.dump(),
                 clause.expression(INPUT_NODE).getOperandPosition());
     }
 

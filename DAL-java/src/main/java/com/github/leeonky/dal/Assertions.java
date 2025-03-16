@@ -61,7 +61,7 @@ public class Assertions {
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
+                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dump();
             throw new AssertionError(detailMessage);
         }
     }
@@ -91,7 +91,7 @@ public class Assertions {
         } catch (IllegalTypeException e) {
             String detailMessage = "\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
+                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dump();
             throw new AssertionError(detailMessage);
         }
     }

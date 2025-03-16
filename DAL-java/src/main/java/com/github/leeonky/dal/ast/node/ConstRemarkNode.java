@@ -29,6 +29,6 @@ public class ConstRemarkNode extends DALNode {
         if (Objects.equals(leftValue.instance(), rightValue.instance()))
             return leftValue;
         throw locateError(new DalRuntimeException(String.format("Incorrect const remark, const value was %s\nbut remark %s was %s",
-                leftValue.dumpAll(), remarkNode.inspect(), rightValue.dumpAll())), remarkNode.getPositionBegin());
+                leftValue.dump(), remarkNode.inspect(), rightValue.dump())), remarkNode.getPositionBegin());
     }
 }
