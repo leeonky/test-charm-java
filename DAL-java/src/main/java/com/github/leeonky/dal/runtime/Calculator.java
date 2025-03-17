@@ -90,31 +90,26 @@ public class Calculator {
         return !(boolean) v;
     }
 
-    public static Data negate(Data data, DALRuntimeContext context) {
-        return data.map(value -> {
-            if (value instanceof Number)
-                return context.getNumberType().negate((Number) value);
-            if (data.isList())
-                return sortList(data, reverseOrder());
-            throw illegalOp2(format("Operand should be number or list but '%s'", getClassName(value)));
-        });
+    public static Data negate(Data input, DALRuntimeContext context) {
+        return input.map(data -> data.isList() ? sortList(data, reverseOrder())
+                : data.cast(Number.class).map(context.getNumberType()::negate).orElseThrow(() ->
+                illegalOp2(format("Operand should be number or list but '%s'", getClassName(data.value())))));
     }
 
     @SuppressWarnings("unchecked")
-    private static Data.DataList sortList(Data data, Comparator<?> comparator) {
-
+    private static Data.DataList sortList(Resolved resolved, Comparator<?> comparator) {
         try {
-            return data.list().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator));
+            return resolved.asList().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator));
         } catch (InfiniteCollectionException e) {
             throw illegalOperation("Can not sort infinite collection");
         }
     }
 
     public static Data positive(Data data, DALRuntimeContext context) {
-        return data.map(value -> {
+        return data.map(resolved -> {
             if (data.isList())
-                return sortList(data, naturalOrder());
-            throw illegalOp2(format("Operand should be list but '%s'", getClassName(value)));
+                return sortList(data.resolved(), naturalOrder());
+            throw illegalOp2(format("Operand should be list but '%s'", getClassName(resolved.value())));
         });
     }
 

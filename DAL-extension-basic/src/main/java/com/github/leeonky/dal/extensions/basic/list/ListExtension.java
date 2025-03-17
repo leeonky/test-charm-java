@@ -21,9 +21,9 @@ public class ListExtension implements Extension {
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())
                 .registerExclamation(Filterable.class, runtimeData -> runtimeData.data().map(
-                        instance -> ((Filterable) instance).requireNotEmpty()))
+                        data -> ((Filterable) data.value()).requireNotEmpty()))
                 .registerDataRemark(Filterable.class, remarkData -> remarkData.data().map(
-                        instance -> ((Filterable) instance).require(parseInt(remarkData.remark()))));
+                        data -> ((Filterable) data.value()).require(parseInt(remarkData.remark()))));
     }
 
     public static class Filterable {

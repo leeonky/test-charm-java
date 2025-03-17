@@ -45,7 +45,7 @@ Feature: data remark
     Scenario Outline: <position> property <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->((Bean)i).value+rd.remark()));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->((Bean)i.value()).value+rd.remark()));
       """
       Then the following verification for the instance of java class "BeanRef" should pass:
       """

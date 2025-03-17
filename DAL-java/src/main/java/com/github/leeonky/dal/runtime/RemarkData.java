@@ -15,6 +15,6 @@ public class RemarkData extends RuntimeData {
     }
 
     public Data acceptRemarkAsParameter() {
-        return data().map(acceptor -> ((DataRemarkParameterAcceptor) acceptor).apply(remark()));
+        return data().map(Data.Resolved::<DataRemarkParameterAcceptor<?>>value, acceptor -> acceptor.apply(remark()));
     }
 }

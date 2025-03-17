@@ -149,7 +149,7 @@ public class Data {
             ConvertException e = null;
             for (Class<?> target : targets) {
                 try {
-                    return context.getConverter().convert(target, object);
+                    return context.getConverter().convert(target, object.value());
                 } catch (ConvertException convertException) {
                     e = convertException;
                 }
@@ -158,10 +158,12 @@ public class Data {
         });
     }
 
-    //    use lazy in mapper
-    @Deprecated
-    public Data map(Function<Object, Object> mapper) {
-        return new Data(() -> mapper.apply(instance()), context, schemaType);
+    public Data map(Function<Resolved, Object> mapper) {
+        return new Data(() -> mapper.apply(resolved()), context, schemaType);
+    }
+
+    public <T, R> Data map(Function<Resolved, T> getter, Function<T, R> mapper) {
+        return new Data(() -> mapper.apply(getter.apply(resolved())), context, schemaType);
     }
 
     public <T> Supplier<T> get(Function<Resolved, T> mapper) {
@@ -363,6 +365,10 @@ public class Data {
 
         public static <T> Function<Resolved, T> cast(Class<T> type) {
             return r -> type.cast(r.value());
+        }
+
+        public static <T> Function<Resolved, Object> value(Function<T, Object> mapper) {
+            return r -> mapper.apply(r.value());
         }
     }
 }

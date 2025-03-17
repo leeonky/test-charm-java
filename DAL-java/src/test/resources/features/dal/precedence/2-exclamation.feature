@@ -42,7 +42,7 @@ Feature: exclamation
     Scenario Outline: <position> property <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->((Bean)i).value.toUpperCase()));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->((Bean)i.value()).value.toUpperCase()));
       """
       Then the following verification for the instance of java class "BeanRef" should pass:
       """

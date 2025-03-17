@@ -3,11 +3,12 @@ package com.github.leeonky.dal.extensions.basic.binary.util;
 import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.util.Sneaky;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.String.format;
 
 public class HexDumper implements Dumper {
@@ -54,23 +55,30 @@ public class HexDumper implements Dumper {
         }
     }
 
-    public static byte[] extractBytes(Object obj) {
-        if (obj instanceof byte[])
-            return (byte[]) obj;
-        if (obj instanceof InputStream)
-            return readAllAndClose((InputStream) obj);
-        if (obj instanceof Byte[]) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            for (Byte b : (Byte[]) obj)
-                stream.write(b);
-            return stream.toByteArray();
-        }
-        throw new IllegalArgumentException(obj + " is not binary type");
+    public static byte[] extractBytes(Resolved obj) {
+        return getFirstPresent(
+                () -> obj.cast(byte[].class),
+                () -> obj.cast(InputStream.class).map(stream -> Sneaky.get(() -> {
+                    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                        int size;
+                        byte[] buffer = new byte[1024];
+                        while ((size = stream.read(buffer, 0, buffer.length)) != -1)
+                            outputStream.write(buffer, 0, size);
+                        return outputStream.toByteArray();
+                    }
+                })),
+                () -> obj.cast(Byte[].class).map(bytes -> {
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            for (Byte b : bytes)
+                                stream.write(b);
+                            return stream.toByteArray();
+                        }
+                )).orElseThrow(() -> new IllegalArgumentException(obj.value() + " is not binary type")); //
     }
 
 
     @Override
     public void dump(Resolved data, DumpingBuffer context) {
-        context.append(dumpByteArray(extractBytes(data.value())));
+        context.append(dumpByteArray(extractBytes(data)));
     }
 }

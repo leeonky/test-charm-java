@@ -31,8 +31,8 @@ Feature: row header
 
     When register DAL:
     """
-    dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->((Bean)i).value+rd.remark()));
-    dal.getRuntimeContextBuilder().registerExclamation(String.class, rd-> rd.data().map(s->((String)s).toUpperCase()));
+    dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->((Bean)i.value()).value+rd.remark()));
+    dal.getRuntimeContextBuilder().registerExclamation(String.class, rd-> rd.data().map(s->((String)s.value()).toUpperCase()));
     """
     Then the following verification for the instance of java class "Beans" should pass:
     """
@@ -54,8 +54,8 @@ Feature: row header
   Scenario: support data remark and exclamation and schema in row header 2
     When register DAL:
     """
-    dal.getRuntimeContextBuilder().registerExclamation(String.class, rd-> rd.data().map(s->((String)s).toUpperCase()));
-    dal.getRuntimeContextBuilder().registerDataRemark(String.class, rd-> rd.data().map(i->i+rd.remark()));
+    dal.getRuntimeContextBuilder().registerExclamation(String.class, rd-> rd.data().map(s->((String)s.value()).toUpperCase()));
+    dal.getRuntimeContextBuilder().registerDataRemark(String.class, rd-> rd.data().map(i->i.value()+rd.remark()));
     """
     Then the following verification for the instance of java class "Beans" should pass:
     """
