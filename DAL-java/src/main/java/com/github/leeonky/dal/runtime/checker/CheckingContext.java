@@ -26,7 +26,7 @@ public class CheckingContext {
     }
 
     public boolean objectNotEquals() {
-        return !Calculator.equals(actual, expected);
+        return !Calculator.equals(actual.resolved(), expected.resolved());
     }
 
     public String messageEqualTo() {

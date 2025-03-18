@@ -68,7 +68,7 @@ class EmptyTableRowType extends RowType {
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
                                              Comparator<Data> comparator) {
-        return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE)
+        return actual.resolved().isList() ? new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE)
                 : new ObjectScopeNode(Collections.emptyList());
     }
 }
@@ -94,7 +94,7 @@ class SpecifyIndexRowType extends RowType {
                                              Comparator<Data> comparator) {
         List<DALNode> rowNodes = rowClauses.map(rowClause -> rowClause.expression(null))
                 .collect(toList());
-        if (actual.isList())
+        if (actual.resolved().isList())
             return new ListScopeNode(rowNodes, ListScopeNode.Type.FIRST_N_ITEMS, comparator, ListScopeNode.Style.TABLE);
         return new ObjectScopeNode(rowNodes);
     }

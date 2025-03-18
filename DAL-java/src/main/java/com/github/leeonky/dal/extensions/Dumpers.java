@@ -42,7 +42,7 @@ public class Dumpers implements Extension {
         @Override
         public void dump(Resolved data, DumpingBuffer dumpingBuffer) {
             DumpingBuffer sub = dumpingBuffer.indent();
-            data.asList().forEach(s -> sub.newLine().append("at " + s.value().toString()));
+            data.list().forEach(s -> sub.newLine().append("at " + s.value().toString()));
         }
     }
 }

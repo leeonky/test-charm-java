@@ -55,10 +55,10 @@ Feature: comparison
     <op2>
     """
     Examples:
-      | op1  | opt | op2  | message                           |
-      | null | >   | null | Can not compare [null] and [null] |
-      | null | >   | 1    | Can not compare [null] and [1]    |
-      | 1    | >   | null | Can not compare [1] and [null]    |
+      | op1  | opt | op2  | message                                           |
+      | null | >   | null | Can not compare [null] and [null]                 |
+      | null | >   | 1    | Can not compare [null] and [java.lang.Integer: 1] |
+      | 1    | >   | null | Can not compare [java.lang.Integer: 1] and [null] |
 
   Scenario: raise error when not supported
     When evaluate by:

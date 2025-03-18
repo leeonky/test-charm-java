@@ -14,56 +14,46 @@ import static com.github.leeonky.dal.runtime.ExpressionException.*;
 import static com.github.leeonky.util.Classes.getClassName;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.String.format;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.reverseOrder;
+import static java.util.Comparator.*;
 
 public class Calculator {
     private static final NumberType numberType = new NumberType();
 
     private static int compare(Data v1, Data v2, DALRuntimeContext context) {
-        Object instance1 = v1.instance();
-        Object instance2 = v2.instance();
-        if (instance1 == null || instance2 == null)
-            throw illegalOperation(format("Can not compare [%s] and [%s]", instance1, instance2));
-        if (instance1 instanceof Number && instance2 instanceof Number)
-            return context.getNumberType().compare((Number) instance1, (Number) instance2);
-        if (instance1 instanceof String && instance2 instanceof String)
-            return ((String) instance1).compareTo((String) instance2);
-        throw illegalOperation(format("Can not compare [%s: %s] and [%s: %s]",
-                getClassName(instance1), instance1, getClassName(instance2), instance2));
+        Resolved resolved1 = v1.resolved();
+        Resolved resolved2 = v2.resolved();
+        return getFirstPresent(() -> resolved1.cast(Number.class).flatMap(number1 -> resolved2.cast(Number.class).map(number2 ->
+                        context.getNumberType().compare(number1, number2))),
+                () -> resolved1.cast(String.class).flatMap(str1 -> resolved2.cast(String.class).map(str1::compareTo)))
+                .orElseThrow(() -> illegalOperation(format("Can not compare %s and %s", dump(resolved1), dump(resolved2))));
     }
 
-    public static boolean equals(Data v1, Data v2) {
-        if (v1.instance() == v2.instance())
-            return true;
-        if (opt2(v2.get(Resolved::isNull)))
-            return opt1(v1.get(Resolved::isNull));
-        if (v2.isList() && v1.isList())
-            return collect(v2, "2").equals(collect(v1, "1"));
-        return Objects.equals(v1.instance(), v2.instance());
+    private static String dump(Object instance) {
+        return instance == null ? "[null]" : String.format("[%s: %s]", getClassName(instance), instance);
     }
 
-    private static List<Object> collect(Data v2, String index) {
+    private static String dump(Resolved resolved) {
+        Object value = resolved.value();
+        return value == null ? "[null]" : String.format("[%s: %s]", getClassName(value), value);
+    }
+
+    public static boolean equals(Resolved resolved1, Resolved resolved2) {
+        return resolved1.value() == resolved2.value()
+                || opt2(resolved2::isNull) && opt1(resolved1::isNull)
+                || resolved2.castList().flatMap(l2 -> resolved1.castList().map(l1 ->
+                        collect(resolved2, "2").equals(collect(resolved1, "1"))))
+                .orElseGet(() -> Objects.equals(resolved1.value(), resolved2.value()));
+    }
+
+    private static List<Object> collect(Resolved resolved, String index) {
         try {
-            return v2.list().collect();
+            return resolved.list().collect();
         } catch (InfiniteCollectionException ignore) {
             throw illegalOperation("Invalid operation, operand " + index + " is infinite collection");
         }
     }
 
-    public static Data plus(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
-        return context.calculate(v1, opt, v2);
-    }
-
-    public static Data subtract(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
-        return context.calculate(v1, opt, v2);
-    }
-
-    public static Data multiply(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
-        return context.calculate(v1, opt, v2);
-    }
-
-    public static Data divide(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
+    public static Data arithmetic(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
         return context.calculate(v1, opt, v2);
     }
 
@@ -91,26 +81,19 @@ public class Calculator {
     }
 
     public static Data negate(Data input, DALRuntimeContext context) {
-        return input.map(data -> data.isList() ? sortList(data, reverseOrder())
-                : data.cast(Number.class).map(context.getNumberType()::negate).orElseThrow(() ->
-                illegalOp2(format("Operand should be number or list but '%s'", getClassName(data.value())))));
+        return input.map(data -> data.castList().map(l -> sortList(l, reverseOrder()))
+                .orElseGet(() -> data.cast(Number.class).map(context.getNumberType()::negate)
+                        .orElseThrow(() -> illegalOp2(format("Operand should be number or list but '%s'", getClassName(data.value()))))));
     }
 
     @SuppressWarnings("unchecked")
-    private static Data.DataList sortList(Resolved resolved, Comparator<?> comparator) {
-        try {
-            return resolved.asList().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator));
-        } catch (InfiniteCollectionException e) {
-            throw illegalOperation("Can not sort infinite collection");
-        }
+    private static Object sortList(Data.DataList list, Comparator<?> comparator) {
+        return list.sort(comparing(Data::instance, (Comparator<Object>) comparator));
     }
 
-    public static Data positive(Data data, DALRuntimeContext context) {
-        return data.map(resolved -> {
-            if (data.isList())
-                return sortList(data.resolved(), naturalOrder());
-            throw illegalOp2(format("Operand should be list but '%s'", getClassName(resolved.value())));
-        });
+    public static Data positive(Data input, DALRuntimeContext context) {
+        return input.map(data -> data.castList().map(l -> sortList(l, naturalOrder()))
+                .orElseThrow(() -> illegalOp2(format("Operand should be list but '%s'", getClassName(data.value())))));
     }
 
     public static Data less(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
@@ -130,6 +113,6 @@ public class Calculator {
     }
 
     public static boolean notEqual(Data left, Data right) {
-        return !equals(left, right);
+        return !equals(left.resolved(), right.resolved());
     }
 }

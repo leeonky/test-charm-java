@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
@@ -278,18 +279,22 @@ public class Data {
 
         public DataList sort(Comparator<Data> comparator) {
             if (comparator != NOP_COMPARATOR)
-                return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
-                        .sorted(comparator).map(Data::instance).collect(toList())) {
-                    @Override
-                    public int firstIndex() {
-                        return DataList.this.firstIndex();
-                    }
+                try {
+                    return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
+                            .sorted(comparator).map(Data::instance).collect(toList())) {
+                        @Override
+                        public int firstIndex() {
+                            return DataList.this.firstIndex();
+                        }
 
-                    @Override
-                    public boolean infinite() {
-                        return DataList.this.infinite();
-                    }
-                });
+                        @Override
+                        public boolean infinite() {
+                            return DataList.this.infinite();
+                        }
+                    });
+                } catch (InfiniteCollectionException e) {
+                    throw illegalOperation("Can not sort infinite collection");
+                }
             return this;
         }
 
@@ -320,17 +325,18 @@ public class Data {
             return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
         }
 
-        public DataList asList() {
-            if (list == null) {
-                if (!isList())
-                    throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
+        public DataList list() {
+            return castList().orElseThrow(() -> new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim())));
+        }
+
+        public Optional<DataList> castList() {
+            if (list == null && isList())
                 list = new DataList(context.createCollection(instance));
-            }
-            return list;
+            return ofNullable(list);
         }
 
         public void eachSubData(Consumer<Data> consumer) {
-            asList().wraps().forEach(e -> consumer.accept(e.value()));
+            list().wraps().forEach(e -> consumer.accept(e.value()));
         }
 
         public boolean instanceOf(Class<?> type) {
@@ -359,16 +365,13 @@ public class Data {
     }
 
     public static class ResolvedMethods {
+
         public static Predicate<Resolved> instanceOf(Class<?> type) {
             return r -> type.isInstance(r.value());
         }
 
         public static <T> Function<Resolved, T> cast(Class<T> type) {
             return r -> type.cast(r.value());
-        }
-
-        public static <T> Function<Resolved, Object> value(Function<T, Object> mapper) {
-            return r -> mapper.apply(r.value());
         }
     }
 }
