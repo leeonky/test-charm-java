@@ -201,9 +201,9 @@ public class Data {
         }
     }
 
-    public <T> Optional<T> probe(Function<Resolved, T> mapper) {
+    public <T> Optional<T> probe(Function<Resolved, Optional<T>> mapper) {
         try {
-            return ofNullable(mapper.apply(resolved()));
+            return mapper.apply(resolved());
         } catch (Throwable e) {
             return empty();
         }
@@ -370,8 +370,8 @@ public class Data {
             return r -> type.isInstance(r.value());
         }
 
-        public static <T> Function<Resolved, T> cast(Class<T> type) {
-            return r -> type.cast(r.value());
+        public static <T> Function<Resolved, Optional<T>> cast(Class<T> type) {
+            return r -> BeanClass.cast(r.value(), type);
         }
     }
 }
