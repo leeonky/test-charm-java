@@ -38,7 +38,7 @@ public class ListExtension implements Extension {
         }
 
         protected DALCollection<Object> filterList(DALOperator operator, Data v2, DALRuntimeContext context) {
-            return opt1(data::list).wraps().filter(element -> {
+            return opt1(data.resolved()::list).wraps().filter(element -> {
                 try {
                     context.calculate(element, operator, v2).resolve();
                     return true;

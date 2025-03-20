@@ -26,11 +26,9 @@ public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final ThrowingSupplier<?> supplier;
-    private DataList list;
     private Function<Throwable, Throwable> errorMapper = e -> e;
     private final boolean isListMapping;
     private Resolved resolved;
-
     private Throwable error;
 
     public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
@@ -68,29 +66,6 @@ public class Data {
             handlers.accept(resolved);
         }
         return resolved;
-    }
-
-    //    TODO lazy
-    @Deprecated
-    public Set<?> fieldNames() {
-        return context.findPropertyReaderNames(instance());
-    }
-
-    //    TODO lazy
-    @Deprecated
-    public boolean isList() {
-        return resolved().isList();
-    }
-
-    //    TODO lazy
-    @Deprecated
-    public DataList list() {
-        if (list == null) {
-            if (!isList())
-                throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
-            list = new DataList(context.createCollection(instance()));
-        }
-        return list;
     }
 
     public Data getValue(List<Object> propertyChain) {
@@ -145,7 +120,7 @@ public class Data {
     public Data filter(String prefix) {
         return new Data(() -> {
             FilteredObject filteredObject = new FilteredObject();
-            fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
+            resolved().fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                     .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
                             filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
             return filteredObject;
@@ -267,11 +242,6 @@ public class Data {
                     throw illegalOperation("Can not sort infinite collection");
                 }
             return this;
-        }
-
-        @Deprecated
-        public Data wrap() {
-            return new Data(() -> this, context, schemaType);
         }
     }
 

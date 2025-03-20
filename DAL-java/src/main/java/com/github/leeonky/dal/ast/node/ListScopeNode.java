@@ -107,9 +107,10 @@ public class ListScopeNode extends DALNode {
             @Override
             public Data equalTo() {
                 try {
-                    Data.DataList list = opt1(actual::list).sort(comparator);
-                    return list.wrap().execute(() -> type == Type.CONTAINS ? verifyContainElement(context, list, actual)
-                            : verifyCorrespondingElement(context, getVerificationExpressions(list, actual)));
+                    Data sorted = actual.map(r -> opt1(r::list).sort(comparator)).resolve();
+                    return sorted.execute(() -> type == Type.CONTAINS ?
+                            verifyContainElement(context, sorted.resolved().list(), actual)
+                            : verifyCorrespondingElement(context, getVerificationExpressions(sorted.resolved().list(), actual)));
                 } catch (ListMappingElementAccessException e) {
                     throw exception(expression -> locateError(e, expression.left().getOperandPosition()));
                 }

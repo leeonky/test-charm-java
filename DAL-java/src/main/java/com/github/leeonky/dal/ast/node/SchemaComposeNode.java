@@ -44,7 +44,7 @@ public class SchemaComposeNode extends DALNode {
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode,
                                                 String inputInspect, Data inputData) {
         if (isList) {
-            DALCollection<Object> collection = opt1(inputData::list).wraps().map((index, data) ->
+            DALCollection<Object> collection = opt1(inputData.resolved()::list).wraps().map((index, data) ->
                     convertViaSchema(context, schemaNode, data, format("%s[%d]", inputInspect, index)));
             //get size to avoid lazy mode, should verify element with schema
             collection.collect();

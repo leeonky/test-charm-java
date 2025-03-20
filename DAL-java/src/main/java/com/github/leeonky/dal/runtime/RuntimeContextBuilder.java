@@ -388,8 +388,8 @@ public class RuntimeContextBuilder {
             return new Data(() -> instance, this, SchemaType.create(schemaType));
         }
 
-        public Data wrap(ThrowingSupplier<?> instance, BeanClass<?> schemaType) {
-            return new Data(instance, this, SchemaType.create(schemaType));
+        public Data wrap(ThrowingSupplier<?> supplier, BeanClass<?> schemaType) {
+            return new Data(supplier, this, SchemaType.create(schemaType));
         }
 
         public Data wrap(ThrowingSupplier<?> instance) {

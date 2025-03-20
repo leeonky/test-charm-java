@@ -52,7 +52,8 @@ class VerifySchema extends Base {
             }
         });
 
-        dal.getRuntimeContextBuilder().registerSchema("Bean", (data, context) -> data.fieldNames() == PROPERTY_NAMES);
+        dal.getRuntimeContextBuilder().registerSchema("Bean", (data, context) ->
+                data.resolved().fieldNames() == PROPERTY_NAMES);
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean which .f1='mocked return value of f1'");
         assertPass(null, "= null");

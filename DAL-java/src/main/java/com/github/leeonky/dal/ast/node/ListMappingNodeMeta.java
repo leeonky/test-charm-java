@@ -12,7 +12,7 @@ public class ListMappingNodeMeta extends ListMappingNode {
 
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.wrap(() -> opt2(left.evaluateData(context)::list).autoMapping(item ->
+        return context.wrap(() -> opt2(left.evaluateData(context).resolved()::list).autoMapping(item ->
                 context.invokeMetaProperty(left, item, getRootSymbolName())));
     }
 }
