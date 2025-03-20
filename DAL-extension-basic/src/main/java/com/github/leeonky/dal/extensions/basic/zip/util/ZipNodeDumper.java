@@ -13,7 +13,7 @@ public class ZipNodeDumper implements Dumper {
             DumpingBuffer sub = context.append(node.name()).append("/").indent();
             data.eachSubData(subFile -> sub.newLine().dumpValue(subFile));
         } else if (node.name().toLowerCase().endsWith(".zip"))
-            context.append(node.name()).indent().dumpValue(data.getValue("unzip"));
+            context.append(node.name()).indent().dumpValue(data.getValueData("unzip"));
         else
             context.append(String.format("%s %6s %s", node.lastModifiedTime(), node.getSize(), node.name()));
     }

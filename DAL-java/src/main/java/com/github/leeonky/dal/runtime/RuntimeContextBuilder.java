@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
-import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
@@ -339,7 +338,7 @@ public class RuntimeContextBuilder {
             return getObjectPropertyAccessor(instance).getPropertyNames(instance);
         }
 
-        private PropertyAccessor<Object> getObjectPropertyAccessor(Object instance) {
+        public PropertyAccessor<Object> getObjectPropertyAccessor(Object instance) {
             return propertyAccessors.tryGetData(instance)
                     .orElseGet(() -> new JavaClassPropertyAccessor<>(BeanClass.createFrom(instance)));
         }
@@ -347,20 +346,6 @@ public class RuntimeContextBuilder {
         public Boolean isNull(Object instance) {
             return propertyAccessors.tryGetData(instance).map(f -> f.isNull(instance))
                     .orElseGet(() -> Objects.equals(instance, null));
-        }
-
-        public Object getPropertyValue(Data data, Object property) {
-            try {
-                return getObjectPropertyAccessor(data.instance()).getValueByData(data, property);
-            } catch (InvalidPropertyException e) {
-                try {
-                    return currying(data.instance(), property).orElseThrow(() -> e).resolve();
-                } catch (Throwable e1) {
-                    return throwUserRuntimeException(e1);
-                }
-            } catch (Throwable e) {
-                return throwUserRuntimeException(e);
-            }
         }
 
         public DALCollection<Object> createCollection(Object instance) {

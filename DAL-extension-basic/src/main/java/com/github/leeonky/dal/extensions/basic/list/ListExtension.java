@@ -16,7 +16,7 @@ public class ListExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("top", metaData -> (Callable<Integer, DALCollection<Object>>)
-                        size -> opt1(metaData.data()::list).limit(size))
+                        size -> opt1(metaData.data().resolved()::list).limit(size))
                 .registerMetaProperty("filter", metaData -> new Filterable(metaData.data()))
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())

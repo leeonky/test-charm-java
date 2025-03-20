@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
+import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
@@ -100,41 +101,11 @@ public class Data {
     public Data getValue(Object propertyChain) {
         List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
         if (chain.size() == 1 && chain.get(0).equals(propertyChain)) {
-            ThrowingSupplier<?> supplier = () -> {
-                try {
-                    return isList() ? fetchFromList(propertyChain) : context.getPropertyValue(this, propertyChain);
-                } catch (IndexOutOfBoundsException ex) {
-                    throw new DalRuntimeException(ex.getMessage());
-                } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
-                    throw ex;
-                } catch (Throwable e) {
-                    throw buildExceptionWithComments(propertyChain, e);
-                }
-            };
-            boolean isSubListMapping;
-            if (isListMapping) {
-                isSubListMapping = propertyChain instanceof String;
-            } else {
-                isSubListMapping = false;
-            }
-            return new Data(supplier, context, propertySchema(propertyChain, isSubListMapping), isSubListMapping);
+            boolean isSubListMapping = isListMapping && propertyChain instanceof String;
+            return new Data(() -> resolved().getValue(propertyChain), context,
+                    propertySchema(propertyChain, isSubListMapping), isSubListMapping);
         }
         return getValue(chain);
-    }
-
-    private static DalRuntimeException buildExceptionWithComments(Object propertyChain, Throwable e) {
-        return new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
-                "  1. public field\n" +
-                "  2. public getter\n" +
-                "  3. public method\n" +
-                "  4. Map key value\n" +
-                "  5. customized type getter\n" +
-                "  6. static method extension", propertyChain), e);
-    }
-
-    private Object fetchFromList(Object property) {
-        return property instanceof String ? context.getPropertyValue(this, property) :
-                list().getByIndex((int) property);
     }
 
     public SchemaType propertySchema(Object property, boolean isListMapping) {
@@ -273,7 +244,7 @@ public class Data {
             return map((index, e) -> new Data(() -> e, context, schemaType.access(index)));
         }
 
-        public AutoMappingList listMap(Function<Data, Data> mapper) {
+        public AutoMappingList autoMapping(Function<Data, Data> mapper) {
             return new AutoMappingList(mapper, wraps());
         }
 
@@ -343,7 +314,7 @@ public class Data {
             return type.isInstance(instance);
         }
 
-        public Data getValue(Object field) {
+        public Data getValueData(Object field) {
             return Data.this.getValue(field);
         }
 
@@ -361,6 +332,36 @@ public class Data {
 
         public <T> Optional<T> cast(Class<T> type) {
             return BeanClass.cast(instance, type);
+        }
+
+        public Object getValue(Object propertyChain) {
+            try {
+                if (isList() && !(propertyChain instanceof String))
+                    return list().getByIndex((int) propertyChain);
+                try {
+                    return context.getObjectPropertyAccessor(value()).getValueByData(this, propertyChain);
+                } catch (InvalidPropertyException e) {
+                    try {
+                        return context.currying(value(), propertyChain).orElseThrow(() -> e).resolve();
+                    } catch (Throwable e1) {
+                        return throwUserRuntimeException(e1);
+                    }
+                } catch (Throwable e) {
+                    return throwUserRuntimeException(e);
+                }
+            } catch (IndexOutOfBoundsException ex) {
+                throw new DalRuntimeException(ex.getMessage());
+            } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
+                throw ex;
+            } catch (Throwable e) {
+                throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
+                        "  1. public field\n" +
+                        "  2. public getter\n" +
+                        "  3. public method\n" +
+                        "  4. Map key value\n" +
+                        "  5. customized type getter\n" +
+                        "  6. static method extension", propertyChain), e);
+            }
         }
     }
 

@@ -25,7 +25,7 @@ public class MapDumper implements Dumper.Cacheable {
 
     protected void dumpField(Resolved data, Object field, DumpingBuffer context) {
         context.append(key(field)).append(": ");
-        context.dumpValue(data.getValue(field));
+        context.dumpValue(data.getValueData(field));
     }
 
     protected String key(Object o) {

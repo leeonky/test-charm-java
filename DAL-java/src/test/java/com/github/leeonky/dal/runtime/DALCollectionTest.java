@@ -99,7 +99,7 @@ class DALCollectionTest {
                         .registerDALCollectionFactory(Collection.class, CollectionDALCollection::new);
                 RuntimeContextBuilder.DALRuntimeContext context = builder.build((Object) null);
 
-                Data.DataList collection = context.wrap(asList(1, 2, 3)).list();
+                Data.DataList collection = context.wrap(asList(1, 2, 3)).resolved().list();
 
                 expect(collection.filter(i -> (int) i == 2)).should("values= [2]");
             }
@@ -116,7 +116,7 @@ class DALCollectionTest {
                         });
                 RuntimeContextBuilder.DALRuntimeContext context = builder.build((Object) null);
 
-                Data.DataList collection = context.wrap(asList(1, 2, 3)).list();
+                Data.DataList collection = context.wrap(asList(1, 2, 3)).resolved().list();
 
                 expect(collection.filter(i -> (int) i == 2)).should(": { values= [2] firstIndex: 1}");
             }

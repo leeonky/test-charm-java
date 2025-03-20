@@ -33,7 +33,7 @@ public class JFactoryExtension implements Extension {
             @Override
             protected void dumpField(Resolved data, Object field, DumpingBuffer context) {
                 try {
-                    Data value = data.getValue(field);
+                    Data value = data.getValueData(field);
                     if (value.resolved().list().size() != 0) {
                         context.append(key(field)).append(": ");
                         context.dumpValue(value);

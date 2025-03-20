@@ -79,9 +79,9 @@ public class JDBCExtension implements Extension {
 
         @Override
         protected void dumpField(Resolved data, Object field, DumpingBuffer context) {
-            DataBase.Table<?> table = (DataBase.Table<?>) data.getValue(field).instance();
+            DataBase.Table<?> table = (DataBase.Table<?>) data.getValueData(field).instance();
             if (table.iterator().hasNext())
-                context.append(key(field)).append(":").dumpValue(data.getValue(field));
+                context.append(key(field)).append(":").dumpValue(data.getValueData(field));
         }
     }
 }

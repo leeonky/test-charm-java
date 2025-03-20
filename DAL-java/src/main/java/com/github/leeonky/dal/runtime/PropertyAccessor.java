@@ -5,9 +5,8 @@ import java.util.Set;
 
 public interface PropertyAccessor<T> {
 
-    @SuppressWarnings("unchecked")
-    default Object getValueByData(Data data, Object property) {
-        return getValue((T) data.instance(), property);
+    default Object getValueByData(Data.Resolved data, Object property) {
+        return getValue(data.value(), property);
     }
 
     Object getValue(T instance, Object property);
