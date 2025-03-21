@@ -361,31 +361,12 @@ public class RuntimeContextBuilder {
             return converter;
         }
 
-        //        TODO check use supplier
-        @Deprecated
-        public Data wrap(Object instance) {
-            return wrap(instance, null);
-        }
-
-        @Deprecated
-        public Data wrap(Object instance, String schema, boolean isList) {
-            BeanClass<?> schemaType = schemas.get(schema);
-            if (isList && schemaType != null)
-                schemaType = BeanClass.create(Array.newInstance(schemaType.getType(), 0).getClass());
-            return wrap(instance, schemaType);
-        }
-
         @Deprecated
         public Data wrap(ThrowingSupplier<?> instance, String schema, boolean isList) {
             BeanClass<?> schemaType = schemas.get(schema);
             if (isList && schemaType != null)
                 schemaType = BeanClass.create(Array.newInstance(schemaType.getType(), 0).getClass());
             return wrap(instance, schemaType);
-        }
-
-        @Deprecated
-        public Data wrap(Object instance, BeanClass<?> schemaType) {
-            return new Data(() -> instance, this, SchemaType.create(schemaType));
         }
 
         public Data wrap(ThrowingSupplier<?> supplier, BeanClass<?> schemaType) {

@@ -78,7 +78,7 @@ public class DBSteps {
 
     @Then("dumped data base should:")
     public void dumpedDataBaseShould(String expression) {
-        expect(DAL.getInstance().getRuntimeContextBuilder().build(null).wrap(builder.connect(connection)).dumpValue())
+        expect(DAL.getInstance().getRuntimeContextBuilder().build(builder.connect(connection)).getThis().dumpValue())
                 .should(expression);
     }
 }

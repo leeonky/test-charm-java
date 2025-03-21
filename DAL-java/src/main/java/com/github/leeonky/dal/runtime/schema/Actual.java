@@ -122,7 +122,7 @@ public class Actual {
     public boolean equalsExpect(Object expect, DALRuntimeContext runtimeContext) {
         return Objects.equals(expect, actual.instance()) ||
                 Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
-                        runtimeContext.wrap(expect).dump(), actual.dump()));
+                        runtimeContext.data(expect).dump(), actual.dump()));
     }
 
     public void verifySchema(Schema expect) {

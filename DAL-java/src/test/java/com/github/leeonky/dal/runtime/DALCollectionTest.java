@@ -97,9 +97,9 @@ class DALCollectionTest {
                 RuntimeContextBuilder builder = new RuntimeContextBuilder()
                         .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                         .registerDALCollectionFactory(Collection.class, CollectionDALCollection::new);
-                RuntimeContextBuilder.DALRuntimeContext context = builder.build((Object) null);
+                RuntimeContextBuilder.DALRuntimeContext context = builder.build(asList(1, 2, 3));
 
-                Data.DataList collection = context.wrap(asList(1, 2, 3)).resolved().list();
+                Data.DataList collection = context.getThis().resolved().list();
 
                 expect(collection.filter(i -> (int) i == 2)).should("values= [2]");
             }
@@ -114,9 +114,9 @@ class DALCollectionTest {
                                 return 1;
                             }
                         });
-                RuntimeContextBuilder.DALRuntimeContext context = builder.build((Object) null);
+                RuntimeContextBuilder.DALRuntimeContext context = builder.build(asList(1, 2, 3));
 
-                Data.DataList collection = context.wrap(asList(1, 2, 3)).resolved().list();
+                Data.DataList collection = context.getThis().resolved().list();
 
                 expect(collection.filter(i -> (int) i == 2)).should(": { values= [2] firstIndex: 1}");
             }

@@ -36,6 +36,6 @@ public class Steps {
 
     @Then("dumped jfactoy should be:")
     public void dumped_jfactoy_should_be(String docString) {
-        expect(DAL.getInstance().getRuntimeContextBuilder().build(null).wrap(jFactory).dump()).should(docString);
+        expect(DAL.getInstance().getRuntimeContextBuilder().build(jFactory).getThis().dump()).should(docString);
     }
 }

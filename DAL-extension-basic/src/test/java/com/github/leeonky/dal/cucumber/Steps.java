@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipOutputStream;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static com.github.leeonky.dal.DAL.dal;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 import static com.github.leeonky.dal.extensions.basic.zip.Methods.unzip;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -172,9 +173,9 @@ public class Steps {
 
     @Then("java.io.File {string} should dump:")
     public void javaIoFileShouldDump(String path, String content) {
-        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+        DALRuntimeContext runtimeContext = dal().getRuntimeContextBuilder().build(new File(path));
 
-        assertThat(runtimeContext.wrap(new File(path)).dump()).isEqualTo(content);
+        assertThat(runtimeContext.getThis().dump()).isEqualTo(content);
     }
 
     @SneakyThrows
@@ -189,26 +190,26 @@ public class Steps {
 
     @Then("java.io.path {string} should dump:")
     public void javaIoPathShouldDump(String path, String content) {
-        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+        DALRuntimeContext runtimeContext = dal().getRuntimeContextBuilder().build(Paths.get(path));
 
-        assertThat(runtimeContext.wrap(Paths.get(path)).dump()).isEqualTo(content);
+        assertThat(runtimeContext.getThis().dump()).isEqualTo(content);
     }
 
     @Then("sftp {string} should dump:")
     public void sftpShouldDump(String path, String content) {
-        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
         if (sFtp != null)
             sFtp.close();
         sFtp = new SFtp(sshConfig.get("host"), sshConfig.get("port"), sshConfig.get("user"), sshConfig.get("password"), path);
-        assertThat(runtimeContext.wrap(sFtp).dump()).isEqualTo(content);
+        DALRuntimeContext runtimeContext = dal().getRuntimeContextBuilder().build(sFtp);
+        assertThat(runtimeContext.getThis().dump()).isEqualTo(content);
     }
 
     @SneakyThrows
     @Then("zip file {string} should dump:")
     public void zipFileShouldDump(String path, String content) {
-        DALRuntimeContext runtimeContext = DAL.getInstance().getRuntimeContextBuilder().build(null);
+        DALRuntimeContext runtimeContext = dal().getRuntimeContextBuilder().build(unzip(Files.readAllBytes(Paths.get(path))));
 
-        assertThat(runtimeContext.wrap(unzip(Files.readAllBytes(Paths.get(path)))).dump()).isEqualTo(content);
+        assertThat(runtimeContext.getThis().dump()).isEqualTo(content);
     }
 
     @After

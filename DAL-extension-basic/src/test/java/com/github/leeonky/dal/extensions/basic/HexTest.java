@@ -60,9 +60,9 @@ class HexTest {
         }
 
         private String parseAndDump(String hexInText) {
-            RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
+            RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(parseToByteArray(hexInText));
             DumpingBuffer dumpingBuffer = DumpingBuffer.rootContext(context);
-            new HexDumper().dumpValue(context.wrap(parseToByteArray(hexInText)).resolved(), dumpingBuffer);
+            new HexDumper().dumpValue(context.getThis().resolved(), dumpingBuffer);
             return dumpingBuffer.content();
         }
 

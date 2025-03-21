@@ -309,17 +309,16 @@ public class IntegrationTestContext {
 
     @SneakyThrows
     public void verifyDumpedData(String verification) {
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input);
 
-        String dump = runtimeContext.wrap(input).dumpValue();
-        assertThat(dump).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(runtimeContext.getThis().dumpValue()).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     public void verifyDumpedData(String verification, int maxCount) {
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
         builder.setMaxDumpingLineSize(maxCount);
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = builder.build(null);
-        String dump = runtimeContext.wrap(input).dumpValue();
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = builder.build(input);
+        String dump = runtimeContext.getThis().dumpValue();
         assertThat(dump).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
     }
 

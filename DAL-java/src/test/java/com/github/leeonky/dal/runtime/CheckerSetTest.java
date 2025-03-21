@@ -13,7 +13,6 @@ import static org.mockito.Mockito.mock;
 
 class CheckerSetTest {
     private final CheckerSet checkerSet = new CheckerSet(null);
-    private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
     private final Checker checker = mock(Checker.class);
 
     @Test
@@ -22,7 +21,11 @@ class CheckerSetTest {
         checkerSet.register(String.class, String.class, this::failed);
         checkerSet.register(String.class, this::failed);
 
-        assertThat(checkerSet.fetch(context.wrap("any"), context.wrap("any"))).isEqualTo(checker);
+        assertThat(checkerSet.fetch(data("any"), data("any"))).isEqualTo(checker);
+    }
+
+    private Data data(Object obj) {
+        return new RuntimeContextBuilder().build(obj).getThis();
     }
 
     @Test
@@ -31,7 +34,7 @@ class CheckerSetTest {
         checkerSet.register(String.class, String.class, (d1, d2) -> of(checker));
         checkerSet.register(String.class, this::failed);
 
-        assertThat(checkerSet.fetch(context.wrap("string"), context.wrap("string"))).isEqualTo(checker);
+        assertThat(checkerSet.fetch(data("string"), data("string"))).isEqualTo(checker);
     }
 
     @Test
@@ -40,7 +43,7 @@ class CheckerSetTest {
         checkerSet.register(String.class, String.class, (d1, d2) -> empty());
         checkerSet.register(String.class, (d1, d2) -> of(checker));
 
-        assertThat(checkerSet.fetch(context.wrap("string"), context.wrap("string"))).isEqualTo(checker);
+        assertThat(checkerSet.fetch(data("string"), data("string"))).isEqualTo(checker);
     }
 
     private Optional<Checker> failed(Data d1, Data d2) {

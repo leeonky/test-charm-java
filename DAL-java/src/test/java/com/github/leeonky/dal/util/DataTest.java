@@ -4,6 +4,7 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.cucumber.JSONArrayDALCollectionFactory;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.dal.type.Partial;
@@ -118,7 +119,7 @@ class DataTest {
         @Test
         void should_raise_error_when_index_out_of_range() {
             assertThrows(DalRuntimeException.class, () ->
-                    runtimeContextBuilder.build(null).wrap(new String[0]).getValue(0).instance());
+                    runtimeContextBuilder.build(new String[0]).getThis().getValue(0).instance());
         }
 
         @Test
@@ -156,7 +157,7 @@ class DataTest {
 
     @Nested
     class DumpData {
-        private final RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
+        private final DALRuntimeContext build = new RuntimeContextBuilder().build(null);
 
         @Test
         void dump_null_value() {
@@ -166,7 +167,7 @@ class DataTest {
 
     @Nested
     class CurringMethodArgs {
-        private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
+        private final DALRuntimeContext context = new RuntimeContextBuilder().build(null);
 
         @Test
         void return_null_when_property_is_not_string() {
@@ -201,43 +202,36 @@ class DataTest {
 
     @Nested
     class StaticCurringMethodArgs {
-        private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder()
-                .registerStaticMethodExtension(StaticMethod.class).build(null);
+        private final DALRuntimeContext context = new RuntimeContextBuilder()
+                .registerStaticMethodExtension(StaticMethod.class).build(new Currying());
 
         @Test
         void return_currying_method_with_property() {
-            Data data = context.wrap(Currying::new);
-
-            assertThat(context.currying(data.instance(), "staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
+            assertThat(context.currying(context.getThis().resolved().value(), "staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void return_currying_method_with_property_in_super_instance_type() {
-            Data data = context.wrap(Currying::new);
-
-            assertThat(context.currying(data.instance(), "baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
+            assertThat(context.currying(context.getThis().resolved().value(), "baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
-            Data data = context.wrap(new Currying());
-            CurryingMethod currying = context.currying(data.instance(), "staticCurrying2").get();
+            CurryingMethod currying = context.currying(context.getThis().resolved().value(), "staticCurrying2").get();
 
             assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
         void should_choose_min_parameter_size_method() {
-            Data data = context.wrap(() -> new Currying());
-            CurryingMethod currying = context.currying(data.instance(), "staticOverrideMethod").get();
+            CurryingMethod currying = context.currying(context.getThis().resolved().value(), "staticOverrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
 
         @Test
         void use_same_instance_type_first_when_more_than_one_candidate() {
-            Data data = context.wrap(Currying::new);
-            CurryingMethod currying = context.currying(data.instance(), "baseCurrying").get();
+            CurryingMethod currying = context.currying(context.getThis().resolved().value(), "baseCurrying").get();
 
             assertThat(currying.call("a").resolve()).isEqualTo("A");
         }
@@ -245,7 +239,7 @@ class DataTest {
 
     @Nested
     class Lazy {
-        private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
+        private final DALRuntimeContext context = new RuntimeContextBuilder().build(null);
 
         private int i = 0;
 
