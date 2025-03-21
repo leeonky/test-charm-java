@@ -306,8 +306,8 @@ Feature: group
     {
       "a": 1,
       "b": 2,
-      "c": 3,
-      "d": 4
+      "c": 30,
+      "d": 40
     }
     """
     When evaluate by:
@@ -316,7 +316,7 @@ Feature: group
     """
     Then the result should:
     """
-    : 2
+    : [1 2]
     """
     When evaluate by:
     """
@@ -324,7 +324,7 @@ Feature: group
     """
     Then the result should:
     """
-    : 6
+    : [[1+30 1+40] [2+30 2+40]]
     """
 
   Scenario: which / is after group
@@ -342,7 +342,7 @@ Feature: group
     """
     Then the result should:
     """
-    : '2'
+    : ['1' '2']
     """
     Then the following verification should pass:
     """

@@ -33,10 +33,9 @@ public class DAL {
         name = String.valueOf(hashCode());
     }
 
-    @Deprecated
     public static synchronized DAL getInstance() {
         if (instance.get() == null)
-            instance.set(create());
+            instance.set(create("Default"));
         return instance.get();
     }
 

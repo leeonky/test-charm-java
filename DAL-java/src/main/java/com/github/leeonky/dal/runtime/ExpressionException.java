@@ -11,7 +11,6 @@ import static com.github.leeonky.dal.runtime.DalException.locateError;
 
 //TODO check all exception
 public abstract class ExpressionException extends java.lang.RuntimeException {
-    @Deprecated
     public static <T> T opt1(Supplier<T> supplier) {
         try {
             return supplier.get();
@@ -26,7 +25,6 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
         return r -> opt1(() -> test.test(r));
     }
 
-    @Deprecated
     public static <T> T opt2(Supplier<T> supplier) {
         try {
             return supplier.get();
