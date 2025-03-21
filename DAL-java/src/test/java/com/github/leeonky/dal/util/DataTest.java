@@ -9,6 +9,7 @@ import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.ThrowingSupplier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -48,9 +49,9 @@ class DataTest {
             }
         });
 
-        assertTrue(runtimeContextBuilder.build(null).wrap(AlwaysNull::new).resolved().isNull());
-        assertTrue(runtimeContextBuilder.build(null).wrap(() -> null).resolved().isNull());
-        assertFalse(runtimeContextBuilder.build(null).wrap(Object::new).resolved().isNull());
+        assertTrue(runtimeContextBuilder.build(AlwaysNull::new).getThis().resolved().isNull());
+        assertTrue(runtimeContextBuilder.build(() -> null).getThis().resolved().isNull());
+        assertFalse(runtimeContextBuilder.build(Object::new).getThis().resolved().isNull());
     }
 
     private static class AlwaysNull {
@@ -146,22 +147,21 @@ class DataTest {
         }
 
         private void assertDataAccess(Object object, Object expected, Object... properties) {
-            assertThat(runtimeContextBuilder.build(null).wrap(() -> object).getValue(asList(properties)).instance())
+            assertThat(runtimeContextBuilder.build(object).getThis().getValue(asList(properties)).instance())
                     .isEqualTo(expected);
         }
 
         private void assertListSize(Object object, int size) {
-            assertThat(runtimeContextBuilder.build(null).wrap(() -> object).resolved().list().size()).isEqualTo(size);
+            assertThat(runtimeContextBuilder.build(object).getThis().resolved().list().size()).isEqualTo(size);
         }
     }
 
     @Nested
     class DumpData {
-        private final DALRuntimeContext build = new RuntimeContextBuilder().build(null);
 
         @Test
         void dump_null_value() {
-            assertThat(build.wrap(() -> null).dumpValue()).isEqualTo("null");
+            assertThat(new RuntimeContextBuilder().build(() -> null).getThis().dumpValue()).isEqualTo("null");
         }
     }
 
@@ -171,21 +171,21 @@ class DataTest {
 
         @Test
         void return_null_when_property_is_not_string() {
-            Data data = context.wrap(Object::new);
+            Data data = data(Object::new);
 
             assertThat(context.currying(data.instance(), 1)).isEmpty();
         }
 
         @Test
         void return_currying_method_with_property() {
-            Data data = context.wrap(Currying::new);
+            Data data = data(Currying::new);
 
             assertThat(context.currying(data.instance(), "currying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
-            Data data = context.wrap(Currying::new);
+            Data data = data(Currying::new);
             CurryingMethod currying = context.currying(data.instance(), "currying2").get();
 
             assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
@@ -193,10 +193,14 @@ class DataTest {
 
         @Test
         void should_choose_min_parameter_size_method() {
-            Data data = context.wrap(Currying::new);
+            Data data = data(Currying::new);
             CurryingMethod currying = context.currying(data.instance(), "overrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
+        }
+
+        private Data data(ThrowingSupplier<Object> supplier) {
+            return new RuntimeContextBuilder().build(supplier::get).getThis();
         }
     }
 
@@ -249,7 +253,7 @@ class DataTest {
 //              return result
 //            v = f()
 //            print v
-            Data data = context.wrap(() -> i += 1);
+            Data data = data(() -> i += 1);
 
             assertThat(i).isEqualTo(0);
             assertThat(data.instance()).isEqualTo(1);
@@ -264,7 +268,7 @@ class DataTest {
 //            print v
 //            print v
 
-            Data data = context.wrap(() -> i += 1);
+            Data data = data(() -> i += 1);
             assertThat(data.instance()).isEqualTo(1);
             assertThat(data.instance()).isEqualTo(1);
         }
@@ -278,9 +282,7 @@ class DataTest {
 //            print v
 
             Exception e = new Exception();
-            Data data = context.wrap(() -> {
-                throw e;
-            });
+            Data data = errorData(e);
 
             assertThat(assertThrows(Exception.class, data::instance))
                     .isSameAs(e);
@@ -296,9 +298,7 @@ class DataTest {
 //              throw mapError(e)
 //            print v
             Exception e = new Exception();
-            Data data = context.wrap(() -> {
-                throw e;
-            });
+            Data data = errorData(e);
             data.onError(RuntimeException::new);
 
             assertThat(assertThrows(Exception.class, data::instance))
@@ -320,9 +320,7 @@ class DataTest {
 //              throw mapError2(e)
 //            print2 v
             Exception e = new Exception();
-            Data data = context.wrap(() -> {
-                throw e;
-            });
+            Data data = errorData(e);
             data.onError(throwable -> new RuntimeException("1", throwable))
                     .onError(throwable1 -> new RuntimeException("2", throwable1));
 
@@ -330,6 +328,12 @@ class DataTest {
             assertThat(actual).isInstanceOf(RuntimeException.class).hasMessage("2");
             assertThat(actual.getCause()).isInstanceOf(RuntimeException.class).hasMessage("1");
             assertThat(actual.getCause().getCause()).isSameAs(e);
+        }
+
+        private Data errorData(Exception e) {
+            return new Data(() -> {
+                throw e;
+            }, context, SchemaType.create(null));
         }
 
         @Test
@@ -344,9 +348,7 @@ class DataTest {
 //            print v
 
             Exception e = new Exception();
-            Data data = context.wrap(() -> {
-                throw e;
-            });
+            Data data = errorData(e);
             data.onError(throwable -> {
                 i++;
                 return new RuntimeException(throwable);
@@ -370,11 +372,15 @@ class DataTest {
 //            v = f()
 //            process(v)
 //            print v
-            Data data = context.wrap(() -> new StringBuilder().append(i += 1));
+            Data data = data(() -> new StringBuilder().append(i += 1));
 
             data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek"));
 
             assertThat(data.instance().toString()).isEqualTo("1-peek");
+        }
+
+        private Data data(ThrowingSupplier<Object> supplier) {
+            return new RuntimeContextBuilder().build(supplier::get).getThis();
         }
 
         @Test
@@ -385,7 +391,7 @@ class DataTest {
 //            process1(v)
 //            process2(v)
 //            print v
-            Data data = context.wrap(() -> new StringBuilder().append(i += 1));
+            Data data = data(() -> new StringBuilder().append(i += 1));
 
             data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek1"));
             data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek2"));
@@ -402,7 +408,7 @@ class DataTest {
 //            print v
 //            process2(v)
 //            print v
-            Data data = context.wrap(() -> new StringBuilder().append(i += 1));
+            Data data = data(() -> new StringBuilder().append(i += 1));
 
             data.peek(resolved -> assertThat(resolved.value().toString()).isEqualTo("1"));
             Object instance = data.instance();
