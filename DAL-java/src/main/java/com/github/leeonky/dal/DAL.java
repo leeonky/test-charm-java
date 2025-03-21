@@ -3,6 +3,7 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.Notations;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -33,10 +34,9 @@ public class DAL {
         name = String.valueOf(hashCode());
     }
 
+    @Deprecated
     public static synchronized DAL getInstance() {
-        if (instance.get() == null)
-            instance.set(create("Default"));
-        return instance.get();
+        return dal();
     }
 
     @Deprecated
@@ -47,6 +47,12 @@ public class DAL {
         return new DAL().extend(exceptExtensions);
     }
 
+    public static DAL dal() {
+        if (instance.get() == null)
+            instance.set(create("Default"));
+        return instance.get();
+    }
+
     public DAL(String name) {
         this.name = name;
     }
@@ -55,7 +61,7 @@ public class DAL {
         return name;
     }
 
-    public static synchronized DAL getInstance(String name) {
+    public static synchronized DAL dal(String name) {
         Map<String, DAL> dalMaps = instances.get();
         if (dalMaps == null) {
             dalMaps = new HashMap<>();
@@ -111,6 +117,19 @@ public class DAL {
                 throw e;
             return null;
         }
+    }
+
+    public Data evaluateData(Object input, String expression) {
+        return evaluateData(() -> input, expression, null);
+    }
+
+    public Data evaluateData(InputCode<Object> input, String expression) {
+        return evaluateData(input, expression, null);
+    }
+
+    public Data evaluateData(InputCode<Object> input, String expression, Class<?> rootSchema) {
+        return compileSingle(expression, runtimeContextBuilder.build(input, rootSchema))
+                .evaluateData(runtimeContextBuilder.build(input, rootSchema));
     }
 
     public DALNode compileSingle(String expression, DALRuntimeContext runtimeContext) {

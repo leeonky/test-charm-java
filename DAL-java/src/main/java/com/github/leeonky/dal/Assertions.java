@@ -21,7 +21,7 @@ public class Assertions {
     private final InputCode<Object> inputCode;
     public static boolean dumpInput = true;
     private DAL dal;
-    private static Supplier<DAL> dalFactory = () -> DAL.getInstance("AssertD");
+    private static Supplier<DAL> dalFactory = () -> DAL.dal("AssertD");
     private Class<?> schema;
 
     public static void setDalFactory(Supplier<DAL> dalFactory) {
