@@ -29,7 +29,7 @@ Feature: data remark
     """
     And register DAL:
     """
-    dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->((Bean)i.value()).value+rd.remark()));
+    dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> ((Bean)rd.data().resolved().value()).value+rd.remark());
     """
     When the following verification for the instance of java class "Beans" should pass:
     """
@@ -103,8 +103,8 @@ Feature: data remark
     When register DAL:
     """
     dal.getRuntimeContextBuilder()
-      .registerDataRemark(Map.class, rd-> rd.data().map(m->((Map)m.value()).get(rd.remark())))
-      .registerDataRemark(String.class, rd-> rd.data().map(m->m.value()+rd.remark()));
+      .registerDataRemark(Map.class, rd-> ((Map)rd.data().resolved().value()).get(rd.remark()))
+      .registerDataRemark(String.class, rd-> rd.data().resolved().value()+rd.remark());
     """
     And the following json:
     """
@@ -127,7 +127,7 @@ Feature: data remark
     When register DAL:
     """
     dal.getRuntimeContextBuilder()
-      .registerDataRemark(Map.class, rd-> rd.data().map(m->((Map)m.value()).get(rd.remark())));
+      .registerDataRemark(Map.class, rd-> ((Map)rd.data().resolved().value()).get(rd.remark()));
     """
     And the following json:
     """

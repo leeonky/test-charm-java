@@ -51,8 +51,8 @@ public class RuntimeContextBuilder {
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
     private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
-    private final ClassKeyMap<Function<RemarkData, Data>> remarks = new ClassKeyMap<>();
-    private final ClassKeyMap<Function<RuntimeData, Data>> exclamations = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RemarkData, Object>> remarks = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RuntimeData, Object>> exclamations = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
@@ -260,12 +260,12 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data> action) {
+    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Object> action) {
         remarks.put(type, action);
         return this;
     }
 
-    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Data> action) {
+    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Object> action) {
         exclamations.put(type, action);
         return this;
     }
@@ -501,7 +501,7 @@ public class RuntimeContextBuilder {
                 Object instance = remarkData.data().instance();
                 return remarks.tryGetData(instance)
                         .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
-                        .apply(remarkData).instance();
+                        .apply(remarkData);
             });
         }
 
@@ -511,7 +511,7 @@ public class RuntimeContextBuilder {
                 return exclamations.tryGetData(instance)
                         .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
                                 exclamationData.label(), Classes.getClassName(instance))))
-                        .apply(exclamationData).instance();
+                        .apply(exclamationData);
             });
         }
 

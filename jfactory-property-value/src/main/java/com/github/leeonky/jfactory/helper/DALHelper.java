@@ -27,14 +27,14 @@ public class DALHelper {
     private void implementForceCreation(DAL dal) {
         dal.getRuntimeContextBuilder().registerExclamation(ObjectReference.class, runtimeData -> {
             ((ObjectReference) runtimeData.data().instance()).intently();
-            return runtimeData.data();
+            return runtimeData.data().instance();
         });
     }
 
     private void implementTraitSpec(DAL dal) {
         dal.getRuntimeContextBuilder().registerDataRemark(ObjectReference.class, remarkData -> {
             ((ObjectReference) remarkData.data().instance()).addTraitSpec(remarkData.remark());
-            return remarkData.data();
+            return remarkData.data().instance();
         });
     }
 
