@@ -3,12 +3,14 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.ast.node.ConstValueNode;
 import com.github.leeonky.dal.ast.node.InputNode;
 import com.github.leeonky.dal.ast.opt.Factory;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.runtime.schema.Verification;
 import com.github.leeonky.dal.type.InputCode;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.util.ThrowingSupplier;
 
 import java.lang.reflect.Array;
 import java.util.function.Supplier;
@@ -45,8 +47,8 @@ public class Assertions {
         return new Assertions(() -> input);
     }
 
-    public static Assertions expectRun(InputCode<Object> supplier) {
-        return new Assertions(supplier);
+    public static Assertions expectRun(ThrowingSupplier<Object> supplier) {
+        return new Assertions(supplier::get);
     }
 
     public Assertions should(String dalExpression) {
@@ -61,7 +63,7 @@ public class Assertions {
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dump();
+                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(inputCode).getThis().dump();
             throw new AssertionError(detailMessage);
         }
     }
@@ -83,6 +85,7 @@ public class Assertions {
     @SuppressWarnings("unchecked")
     public Assertions is(Class<?> schema) {
         RuntimeContextBuilder.DALRuntimeContext context = getDal().getRuntimeContextBuilder().build(inputCode, schema);
+        Data input = context.getThis();
         try {
             this.schema = schema;
             Verification.expect(new Expect(create((Class) schema), null))
@@ -91,7 +94,7 @@ public class Assertions {
         } catch (IllegalTypeException e) {
             String detailMessage = "\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(null).wrap(inputCode).dump();
+                detailMessage += "\n\nThe root value was: " + input.dump();
             throw new AssertionError(detailMessage);
         }
     }

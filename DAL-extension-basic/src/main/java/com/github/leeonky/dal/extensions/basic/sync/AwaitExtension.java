@@ -16,16 +16,16 @@ public class AwaitExtension implements Extension {
                         ((Await) remarkData.data().resolved().value()).within(remarkData.remark()))
                 .registerOperator(Operators.MATCH, new AwaitVerification() {
                     @Override
-                    public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                        return context.wrap(() -> ((Await) v1.instance()).await(data ->
-                                ((ExpectationFactory) v2.instance()).create(operator, data).matches().instance()));
+                    public Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+                        return ((Await) v1.instance()).await(data ->
+                                ((ExpectationFactory) v2.instance()).create(operator, data).matches().instance());
                     }
                 })
                 .registerOperator(Operators.EQUAL, new AwaitVerification() {
                     @Override
-                    public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                        return context.wrap(() -> ((Await) v1.instance()).await(data ->
-                                ((ExpectationFactory) v2.instance()).create(operator, data).equalTo().instance()));
+                    public Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+                        return ((Await) v1.instance()).await(data ->
+                                ((ExpectationFactory) v2.instance()).create(operator, data).equalTo().instance());
                     }
                 })
                 .registerMetaProperty(Await.class, "every", metaData ->

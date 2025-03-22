@@ -62,7 +62,6 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
     private final CheckerSet checkerSetForEqualing = new CheckerSet(CheckerSet::defaultEqualing);
-    //    private final
     private int maxDumpingLineSize = 2000;
     private int maxDumpingObjectSize = 255;
     private ErrorHook errorHook = (i, code, e) -> false;
@@ -307,7 +306,7 @@ public class RuntimeContextBuilder {
             BeanClass<?> rootSchema = null;
             if (schema != null)
                 rootSchema = BeanClass.create(schema);
-            stack.push(wrap(() -> {
+            stack.push(data(() -> {
                 try {
                     return supplier.get();
                 } catch (Exception e) {
@@ -361,24 +360,23 @@ public class RuntimeContextBuilder {
             return converter;
         }
 
-        @Deprecated
-        public Data wrap(ThrowingSupplier<?> instance, String schema, boolean isList) {
+        public Data data(ThrowingSupplier<?> instance, String schema, boolean isList) {
             BeanClass<?> schemaType = schemas.get(schema);
             if (isList && schemaType != null)
                 schemaType = BeanClass.create(Array.newInstance(schemaType.getType(), 0).getClass());
-            return wrap(instance, schemaType);
+            return data(instance, schemaType);
         }
 
-        public Data wrap(ThrowingSupplier<?> supplier, BeanClass<?> schemaType) {
-            return new Data(supplier, this, SchemaType.create(schemaType));
+        public Data data(ThrowingSupplier<?> supplier, BeanClass<?> schemaType) {
+            return new Data(supplier == null ? () -> null : supplier, this, SchemaType.create(schemaType));
         }
 
-        public Data wrap(ThrowingSupplier<?> instance) {
-            return wrap(instance, null);
+        public Data data(ThrowingSupplier<?> instance) {
+            return data(instance, null);
         }
 
         public Data data(Object instance) {
-            return wrap(() -> instance, null);
+            return data(() -> instance, null);
         }
 
         public Optional<Result> takeUserDefinedLiteral(String token) {
@@ -490,36 +488,32 @@ public class RuntimeContextBuilder {
         }
 
         public Data invokeMetaProperty(DALNode inputNode, Data inputData, Object symbolName) {
-            return wrap(() -> {
+            return data(() -> {
                 MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
                 return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
             }).onError(DalException::buildUserRuntimeException);
         }
 
-        public Data invokeDataRemark(RemarkData remarkData) {
-            return wrap(() -> {
-                Object instance = remarkData.data().instance();
-                return remarks.tryGetData(instance)
-                        .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
-                        .apply(remarkData);
-            });
+        public Object invokeDataRemark(RemarkData remarkData) {
+            Object instance = remarkData.data().instance();
+            return remarks.tryGetData(instance)
+                    .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
+                    .apply(remarkData);
         }
 
-        public Data invokeExclamations(ExclamationData exclamationData) {
-            return wrap(() -> {
-                Object instance = exclamationData.data().instance();
-                return exclamations.tryGetData(instance)
-                        .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
-                                exclamationData.label(), Classes.getClassName(instance))))
-                        .apply(exclamationData);
-            });
+        public Object invokeExclamations(ExclamationData exclamationData) {
+            Object instance = exclamationData.data().instance();
+            return exclamations.tryGetData(instance)
+                    .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
+                            exclamationData.label(), Classes.getClassName(instance))))
+                    .apply(exclamationData);
         }
 
         public Data calculate(Data v1, DALOperator opt, Data v2) {
-            return wrap(() -> {
+            return data(() -> {
                 for (Operation operation : operations.get(opt.overrideType()))
                     if (operation.match(v1, opt, v2, this))
-                        return operation.operate(v1, opt, v2, this).instance();
+                        return operation.operate(v1, opt, v2, this);
                 throw illegalOperation(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
                         getClassName(v1.instance()), getClassName(v2.instance())));
             });

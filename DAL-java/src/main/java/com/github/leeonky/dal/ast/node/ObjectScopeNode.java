@@ -49,7 +49,7 @@ public class ObjectScopeNode extends DALNode {
                 if (opt1(actual.get(Resolved::isNull)))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 return actual.execute(() -> {
-                    Data result = context.wrap(() -> null);
+                    Data result = context.data(null);
                     for (DALNode expression : verificationExpressions)
                         result = expression.evaluateData(context).resolve();
                     return result;
@@ -61,7 +61,7 @@ public class ObjectScopeNode extends DALNode {
                 if (opt1(actual.get(Resolved::isNull)))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 Data execute = actual.execute(() -> {
-                    Data result = context.wrap(() -> null);
+                    Data result = context.data(null);
                     for (DALNode expression : verificationExpressions)
                         result = expression.evaluateData(context).resolve();
                     return result;

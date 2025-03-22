@@ -13,5 +13,11 @@ public interface Operation {
      */
     boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context);
 
-    Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context);
+    default Data operateData(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+        return context.data(() -> operate(v1, operator, v2, context));
+    }
+
+    default Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+        return operateData(v1, operator, v2, context).instance();
+    }
 }

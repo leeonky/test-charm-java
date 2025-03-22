@@ -93,20 +93,20 @@ public class Calculator {
                 .orElseThrow(() -> illegalOp2(format("Operand should be list but '%s'", getClassName(data.value())))));
     }
 
-    public static Data less(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(() -> compare(pair(left.resolved(), right.resolved()), context) < 0);
+    public static Object less(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+        return compare(pair(left.resolved(), right.resolved()), context) < 0;
     }
 
-    public static Data greaterOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(() -> compare(pair(left.resolved(), right.resolved()), context) >= 0);
+    public static Object greaterOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+        return compare(pair(left.resolved(), right.resolved()), context) >= 0;
     }
 
-    public static Data lessOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(() -> compare(pair(left.resolved(), right.resolved()), context) <= 0);
+    public static Object lessOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+        return compare(pair(left.resolved(), right.resolved()), context) <= 0;
     }
 
-    public static Data greater(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
-        return context.wrap(() -> compare(pair(left.resolved(), right.resolved()), context) > 0);
+    public static Object greater(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+        return compare(pair(left.resolved(), right.resolved()), context) > 0;
     }
 
     public static boolean notEqual(Data left, Data right) {

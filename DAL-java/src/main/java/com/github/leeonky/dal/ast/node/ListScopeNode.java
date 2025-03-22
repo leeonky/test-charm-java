@@ -202,7 +202,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private Data verifyCorrespondingElement(DALRuntimeContext context, List<DALNode> expressions) {
-        Data result = context.wrap(() -> null);
+        Data result = context.data(null);
         if (style != Style.LIST)
             for (int index = 0; index < expressions.size(); index++)
                 try {

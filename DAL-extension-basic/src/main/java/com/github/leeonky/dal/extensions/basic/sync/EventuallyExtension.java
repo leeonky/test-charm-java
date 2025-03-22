@@ -29,7 +29,7 @@ public class EventuallyExtension implements Extension {
         }
 
         @Override
-        public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+        public Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
             return ((Eventually) v1.instance()).verify(operator, v2, context);
         }
     }

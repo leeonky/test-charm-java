@@ -33,8 +33,8 @@ public class ListExtension implements Extension {
             this.data = data;
         }
 
-        public Data filter(DALOperator operator, Data v2, DALRuntimeContext context) {
-            return data.map(ignore -> filterList(operator, v2, context));
+        public DALCollection<Object> filter(DALOperator operator, Data v2, DALRuntimeContext context) {
+            return filterList(operator, v2, context);
         }
 
         protected DALCollection<Object> filterList(DALOperator operator, Data v2, DALRuntimeContext context) {
@@ -84,7 +84,7 @@ public class ListExtension implements Extension {
         }
 
         @Override
-        public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+        public Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
             return ((Filterable) v1.instance()).filter(operator, v2, context);
         }
     }

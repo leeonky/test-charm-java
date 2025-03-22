@@ -172,7 +172,7 @@ public class Inspector {
             Map<String, Object> response = new HashMap<>();
             DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input::get, null);
             try {
-                response.put("root", runtimeContext.wrap(input::get, null).dump());
+                response.put("root", runtimeContext.data(input::get, null).dump());
                 DALNode dalNode = dal.compileSingle(code, runtimeContext);
                 response.put("inspect", dalNode.inspect());
                 response.put("result", dalNode.evaluateData(runtimeContext).resolve().dump());

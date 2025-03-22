@@ -41,7 +41,7 @@ public class Operators implements Extension {
             }
 
             @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+            public Data operateData(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return v1.trigger(((ExpectationFactory) v2.instance()).create(operator, v1).matches());
             }
         });
@@ -56,7 +56,7 @@ public class Operators implements Extension {
             }
 
             @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+            public Data operateData(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return v1.trigger(((ExpectationFactory) v2.instance()).create(operator, v1).equalTo());
             }
         });
@@ -71,8 +71,8 @@ public class Operators implements Extension {
             }
 
             @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return context.wrap(() -> String.valueOf(v1.instance()) + v2.instance());
+            public Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+                return String.valueOf(v1.instance()) + v2.instance();
             }
         });
     }
@@ -87,9 +87,8 @@ public class Operators implements Extension {
             }
 
             @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return context.wrap(() -> action.apply(context.getNumberType(), (Number) v1.instance(),
-                        (Number) v2.instance()));
+            public Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+                return action.apply(context.getNumberType(), (Number) v1.instance(), (Number) v2.instance());
             }
         });
     }

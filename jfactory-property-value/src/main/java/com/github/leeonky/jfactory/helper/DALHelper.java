@@ -56,7 +56,7 @@ public class DALHelper {
             }
 
             @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data operateData(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 if (type == ExpectationFactory.Type.OBJECT)
@@ -83,7 +83,7 @@ public class DALHelper {
             }
 
             @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data operateData(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 ObjectReference objectReference = (ObjectReference) v1.instance();
