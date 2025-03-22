@@ -113,3 +113,41 @@ Feature: meta ::throw
 
     The root value was: *throw* java.lang.RuntimeException: Error
     """
+
+  Scenario: catch exception in alias
+    Given the following java class:
+    """
+    public class Data {
+      public Container container() {
+        return new Container();
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class Container {
+      public Test test() {
+        return new Test();
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class Test {
+      public void run() {
+        throw new UserRuntimeException(new java.lang.IndexOutOfBoundsException());
+      }
+    }
+    """
+    And the following schema class:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "run", field = "container.test.run"),
+    })
+    public class DataSchema implements Schema {
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    is DataSchema which run::throw.class.simpleName=  IndexOutOfBoundsException
+    """
