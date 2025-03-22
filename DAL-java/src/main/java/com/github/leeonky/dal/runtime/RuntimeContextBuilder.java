@@ -47,6 +47,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
     private final ClassKeyMap<DALCollectionFactory<Object, Object>> dALCollectionFactories = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<Object, Comparable<?>>> customSorters = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
@@ -271,6 +272,12 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerOperator(Operators operator, Operation operation) {
         operations.computeIfAbsent(operator, o -> new LinkedList<>()).addFirst(operation);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerCustomSorter(Class<T> type, Function<T, Comparable<?>> sorter) {
+        customSorters.put(type, (Function<Object, Comparable<?>>) sorter);
         return this;
     }
 
@@ -533,6 +540,11 @@ public class RuntimeContextBuilder {
             if (!methods.isEmpty())
                 return of(new CurryingMethodGroup(methods, null));
             return getImplicitObject(instance).flatMap(obj -> currying(obj, property));
+        }
+
+        @SuppressWarnings("unchecked")
+        public Comparable<?> transformComparable(Object object) {
+            return customSorters.tryGetData(object).map(f -> f.apply(object)).orElseGet(() -> (Comparable) object);
         }
     }
 }

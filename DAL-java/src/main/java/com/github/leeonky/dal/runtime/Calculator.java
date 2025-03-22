@@ -72,24 +72,24 @@ public class Calculator {
     }
 
     public static Object not(Object v) {
-        if (!(v instanceof Boolean))
-            throw illegalOperation("Operand" + " should be boolean but '" + getClassName(v) + "'");
-        return !(boolean) v;
+        if (v instanceof Boolean)
+            return !(boolean) v;
+        throw illegalOperation("Operand" + " should be boolean but '" + getClassName(v) + "'");
     }
 
     public static Data negate(Data input, DALRuntimeContext context) {
-        return input.map(data -> data.castList().map(l -> sortList(l, reverseOrder()))
+        return input.map(data -> data.castList().map(l -> sortList(l, reverseOrder(), context))
                 .orElseGet(() -> data.cast(Number.class).map(context.getNumberType()::negate)
                         .orElseThrow(() -> illegalOp2(format("Operand should be number or list but '%s'", getClassName(data.value()))))));
     }
 
     @SuppressWarnings("unchecked")
-    private static Object sortList(Data.DataList list, Comparator<?> comparator) {
-        return list.sort(comparing(Data::instance, (Comparator<Object>) comparator));
+    private static Object sortList(Data.DataList list, Comparator<?> comparator, DALRuntimeContext context) {
+        return list.sort(comparing(data -> context.transformComparable(data.instance()), (Comparator<Object>) comparator));
     }
 
     public static Data positive(Data input, DALRuntimeContext context) {
-        return input.map(data -> data.castList().map(l -> sortList(l, naturalOrder()))
+        return input.map(data -> data.castList().map(l -> sortList(l, naturalOrder(), context))
                 .orElseThrow(() -> illegalOp2(format("Operand should be list but '%s'", getClassName(data.value())))));
     }
 

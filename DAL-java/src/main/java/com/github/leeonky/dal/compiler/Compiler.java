@@ -171,8 +171,8 @@ public class Compiler {
                                 .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING)))
                         .concatAll(objectVerificationClauseChain(Operators.VERIFICATION_OPERATORS, SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
                         .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_BRACES)).as(ObjectScopeNode::new)))));
-        SORTED_LIST = oneOf(Notations.Operators.PLUS.before(pureList(ListScopeNode.NatureOrder::new)),
-                Notations.Operators.SUBTRACTION.before(pureList(ListScopeNode.ReverseOrder::new)));
+        SORTED_LIST = oneOf(Notations.Operators.PLUS.before(pureList(ListScopeNode::sortedNaturalOrder)),
+                Notations.Operators.SUBTRACTION.before(pureList(ListScopeNode::sortedReverseOrder)));
         LIST = oneOf(pureList(ListScopeNode::new), SORTED_LIST);
         TABLE = oneOf(Notations.TRANSPOSE_MARK.with(EMPTY_TRANSPOSED_HEAD.with(transposeTable())),
                 positionNode(Notations.COLUMN_SPLITTER.before(Notations.TRANSPOSE_MARK.before(Notations.COLUMN_SPLITTER.before(tableLine(ROW_PREFIX)

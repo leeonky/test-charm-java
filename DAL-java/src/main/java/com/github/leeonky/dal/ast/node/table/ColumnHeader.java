@@ -38,7 +38,7 @@ public class ColumnHeader extends DALNode {
     }
 
     public Comparator<Data> comparator(DALRuntimeContext context) {
-        return sort.comparator(data -> data.execute(() -> property.evaluate(context)));
+        return sort.comparator(data -> data.execute(() -> context.transformComparable(property.evaluate(context))));
     }
 
     public static Comparator<ColumnHeader> bySequence() {

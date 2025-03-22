@@ -107,7 +107,7 @@ public class ListScopeNode extends DALNode {
             @Override
             public Data equalTo() {
                 try {
-                    Data sorted = actual.map(r -> opt1(r::list).sort(comparator)).resolve();
+                    Data sorted = actual.map(r -> opt1(r::list).sort(getComparator(context))).resolve();
                     return sorted.execute(() -> type == Type.CONTAINS ?
                             verifyContainElement(context, sorted.resolved().list(), actual)
                             : verifyCorrespondingElement(context, getVerificationExpressions(sorted.resolved().list(), actual)));
@@ -121,6 +121,10 @@ public class ListScopeNode extends DALNode {
                 return ExpectationFactory.Type.LIST;
             }
         };
+    }
+
+    protected Comparator<Data> getComparator(DALRuntimeContext context) {
+        return comparator;
     }
 
     //    TODO tobe refactored
@@ -233,30 +237,29 @@ public class ListScopeNode extends DALNode {
         LIST, TABLE, ROW
     }
 
-    public static class NatureOrder extends ListScopeNode {
 
-        @SuppressWarnings("unchecked")
-        public NatureOrder(List<Clause<DALNode>> clauses) {
-            super(clauses, Comparator.comparing(Data::instance, (Comparator) naturalOrder()), Style.LIST);
-        }
+    private static ListScopeNode sorted(List<Clause<DALNode>> clauses, Comparator<?> comparator, String sortOpt) {
+        return new ListScopeNode(clauses, null, Style.LIST) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Comparator<Data> getComparator(DALRuntimeContext context) {
+                return Comparator.comparing((Data data) -> context.transformComparable(data.instance()),
+                        (Comparator<Object>) comparator);
+            }
 
-        @Override
-        public String inspect() {
-            return "+" + super.inspect();
-        }
+            @Override
+            public String inspect() {
+                return sortOpt + super.inspect();
+            }
+        };
     }
 
-    public static class ReverseOrder extends ListScopeNode {
+    public static ListScopeNode sortedNaturalOrder(List<Clause<DALNode>> clauses) {
+        return sorted(clauses, naturalOrder(), "+");
+    }
 
-        @SuppressWarnings("unchecked")
-        public ReverseOrder(List<Clause<DALNode>> clauses) {
-            super(clauses, Comparator.comparing(Data::instance, (Comparator) reverseOrder()), Style.LIST);
-        }
-
-        @Override
-        public String inspect() {
-            return "-" + super.inspect();
-        }
+    public static ListScopeNode sortedReverseOrder(List<Clause<DALNode>> clauses) {
+        return sorted(clauses, reverseOrder(), "-");
     }
 
     static class DifferentCellSize extends AssertionFailure {

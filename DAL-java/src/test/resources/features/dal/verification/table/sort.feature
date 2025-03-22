@@ -98,3 +98,35 @@ Feature: sort
     | = 'John' | = 10 |
     | = 'Tom' | = 10 |
     """
+
+  Scenario: support custom sorter
+    Given the following java class:
+      """
+      public class Data {
+        public List<Integer> list = Arrays.asList(1, 2);
+      }
+      """
+    And register DAL:
+      """
+      dal.getRuntimeContextBuilder()
+        .registerCustomSorter(Integer.class, i-> -1*(int)i);
+      """
+    Then the following verification for the instance of java class "Data" should pass:
+      """
+      list: | +intValue |
+            | 2         |
+            | 1         |
+      """
+    And the following verification for the instance of java class "Data" should pass:
+      """
+      (+list)= [2 1]
+      """
+    And the following verification for the instance of java class "Data" should pass:
+      """
+      list= +[2 1]
+      """
+    And the following verification for the instance of java class "Data" should pass:
+      """
+      list= -[1 2]
+      """
+
