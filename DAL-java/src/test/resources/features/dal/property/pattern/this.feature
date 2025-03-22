@@ -118,3 +118,30 @@ Feature: this
     """
     = 2
     """
+
+  Scenario: null {} is null
+    Given the following json:
+    """
+    null
+    """
+    Then the following verification should pass:
+    """
+    {}= null
+    """
+    When evaluate by:
+    """
+    {}= 1
+    """
+    Then failed with the message:
+    """
+    Expected to be equal to: java.lang.Integer
+                             ^
+    <1>
+    Actual: null
+            ^
+    """
+    And got the following notation:
+    """
+    {}= 1
+        ^
+    """
