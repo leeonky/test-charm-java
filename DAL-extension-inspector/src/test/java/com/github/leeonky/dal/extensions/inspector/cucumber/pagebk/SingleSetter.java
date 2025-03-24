@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.page;
+package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
 import com.github.leeonky.util.BeanClass;
 

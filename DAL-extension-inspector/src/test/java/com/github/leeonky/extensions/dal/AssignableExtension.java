@@ -1,7 +1,7 @@
 package com.github.leeonky.extensions.dal;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.inspector.cucumber.page.SingleSetter;
+import com.github.leeonky.dal.extensions.inspector.cucumber.pagebk.SingleSetter;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;

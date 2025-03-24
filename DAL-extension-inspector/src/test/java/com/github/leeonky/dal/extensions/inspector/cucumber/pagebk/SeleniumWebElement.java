@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.page;
+package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
 import org.openqa.selenium.WebElement;
 
@@ -6,6 +6,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+@Deprecated
 public class SeleniumWebElement {
     protected final SeleniumWebDriver driver;
     protected final WebElement element;

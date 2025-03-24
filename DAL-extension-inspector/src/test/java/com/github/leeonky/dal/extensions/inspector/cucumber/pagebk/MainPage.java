@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.page;
+package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.lang.String.format;
 
+@Deprecated
 public class MainPage {
     private final Panel panel;
 

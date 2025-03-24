@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.page;
+package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.util.function.Extension.not;
 import static org.awaitility.Awaitility.await;
 
+@Deprecated
 public class Panel {
     public final SeleniumWebElement element;
 
