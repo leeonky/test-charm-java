@@ -8,7 +8,7 @@ import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.lang.String.format;
 
 @Deprecated
-public class MainPage {
+public class MainPageBk {
     private final Panel panel;
 
     //TODO tab control PageContainer
@@ -21,7 +21,7 @@ public class MainPage {
         }
     };
 
-    public MainPage(SeleniumWebDriver driver) {
+    public MainPageBk(SeleniumWebDriver driver) {
         driver.open("http://host.docker.internal:10082");
         panel = new Panel(driver.findAll(new By("css", "body")).get(0));
     }

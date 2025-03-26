@@ -4,7 +4,8 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.extensions.basic.binary.util.HexFormatter;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
-import com.github.leeonky.dal.extensions.inspector.cucumber.pagebk.MainPage;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
+import com.github.leeonky.dal.extensions.inspector.cucumber.pagebk.MainPageBk;
 import com.github.leeonky.dal.extensions.inspector.cucumber.pagebk.SeleniumWebDriver;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.Sneaky;
@@ -15,6 +16,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
+import org.openqa.selenium.By;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -25,6 +27,7 @@ import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
 
 public class InspectorSteps {
     private TestContext testContext;
+    private MainPageBk mainPageBk;
     private MainPage mainPage;
     private final DAL dal = DAL.create(InspectorExtension.class);
 
@@ -50,7 +53,8 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        mainPage = new MainPage(seleniumWebDriver);
+        mainPageBk = new MainPageBk(seleniumWebDriver);
+        mainPage = new MainPage(new InspectorElement(seleniumWebDriver.getWebDriver().findElement(By.cssSelector("body"))));
     }
 
     @And("shutdown web server")
@@ -70,9 +74,10 @@ public class InspectorSteps {
 
     @When("you:")
     @Then("you should see:")
+    @Deprecated
     public void you(String expression) {
         try {
-            dal.evaluateAll(mainPage, expression);
+            dal.evaluateAll(mainPageBk, expression);
         } catch (InterpreterException e) {
             throw new AssertionError("\n" + e.show(expression) + "\n\n" + e.getMessage());
         }
@@ -113,5 +118,15 @@ public class InspectorSteps {
     @Given("the {string} binary input:")
     public void theInsBinaryInput(String dalIns, String binary) {
         testContext.addInput(dalIns, new HexFormatter().format(binary, null));
+    }
+
+    @Then("you should see2:")
+    @Then("you2:")
+    public void youShouldSee(String expression) {
+        try {
+            dal.evaluateAll(mainPage, expression);
+        } catch (InterpreterException e) {
+            throw new AssertionError("\n" + e.show(expression) + "\n\n" + e.getMessage());
+        }
     }
 }

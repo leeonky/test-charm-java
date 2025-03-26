@@ -15,7 +15,7 @@ public class SeleniumWebDriver {
         this.driverFactory = Objects.requireNonNull(driverFactory);
     }
 
-    protected WebDriver getWebDriver() {
+    public WebDriver getWebDriver() {
         if (webDriver == null)
             webDriver = driverFactory.get();
         return webDriver;
