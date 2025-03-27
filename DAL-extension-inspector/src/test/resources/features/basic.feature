@@ -11,7 +11,7 @@ Feature: basic
         """
         title: 'DAL inspector'
         """
-      And you should see:
+      And you should see2:
         """
         WorkBench.Current.header: 'Try It!'
         """

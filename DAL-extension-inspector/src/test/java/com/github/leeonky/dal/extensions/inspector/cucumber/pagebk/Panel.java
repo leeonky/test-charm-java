@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
-import com.github.leeonky.dal.extensions.inspector.cucumber.page.By;
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.By;
 
 import java.util.List;
 import java.util.stream.Collectors;

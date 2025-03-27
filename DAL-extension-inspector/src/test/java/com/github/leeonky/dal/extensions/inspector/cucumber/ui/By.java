@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.page;
+package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
 
 public class By {
     protected String type;
@@ -11,6 +11,10 @@ public class By {
 
     public static By css(String css) {
         return new By(CSS, css);
+    }
+
+    public static By xpath(String xpath) {
+        return new By(XPATH, xpath);
     }
 
     public String type() {

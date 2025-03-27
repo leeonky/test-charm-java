@@ -1,20 +1,22 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Pages;
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Target;
 import lombok.Getter;
 
 import static java.lang.String.format;
 
-public class WorkbenchPage {
+public class WorkbenchPageBk {
     private final Panel panel;
     @Getter
     private final Panel header;
 
     //TODO tab control PageContainer
-    private final PageContainer<WorkspacePage> outputs = new PageContainer<WorkspacePage>() {
+    private final Pages<WorkspacePageBk> outputs = new Pages<WorkspacePageBk>() {
         @Override
-        public WorkspacePage getCurrent() {
+        public WorkspacePageBk getCurrent() {
             try {
-                return new WorkspacePage(
+                return new WorkspacePageBk(
                         panel.allByCss(".workspace-contents > .tab-content.active").get(0),
                         panel.allByCss(".workspace-headers > .tab-header.active").get(0));
             } catch (Exception ignore) {
@@ -23,7 +25,7 @@ public class WorkbenchPage {
         }
     };
 
-    public WorkbenchPage(Panel panel, Panel header) {
+    public WorkbenchPageBk(Panel panel, Panel header) {
         this.panel = panel;
         this.header = header;
     }
@@ -56,13 +58,13 @@ public class WorkbenchPage {
         return outputs.getCurrent().Current();
     }
 
-    public WorkspacePage Workspace(String target) {
+    public WorkspacePageBk Workspace(String target) {
         if (target.equals("Current"))
             return outputs.getCurrent();
-        return outputs.switchTo(new Target<WorkspacePage>() {
+        return outputs.switchTo(new Target<WorkspacePageBk>() {
             @Override
-            public WorkspacePage create() {
-                return new WorkspacePage(panel.byCss(format(".tab-content[target='%s']", target)), panel.byCss(format(".tab-header[target='%s']", target)));
+            public WorkspacePageBk create() {
+                return new WorkspacePageBk(panel.byCss(format(".tab-content[target='%s']", target)), panel.byCss(format(".tab-header[target='%s']", target)));
             }
 
             @Override
@@ -71,7 +73,7 @@ public class WorkbenchPage {
             }
 
             @Override
-            public boolean matches(WorkspacePage current) {
+            public boolean matches(WorkspacePageBk current) {
                 return current.isTarget(target);
             }
         });

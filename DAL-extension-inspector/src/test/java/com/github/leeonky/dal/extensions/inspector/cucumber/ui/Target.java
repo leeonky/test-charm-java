@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
+package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
 
 public interface Target<P> {
     void navigateTo();

@@ -50,7 +50,6 @@
         <div class="tab-contents work-bench-contents">
             <template x-for="dalIns in dalInstances" :key="dalIns.name">
                 <div class="tab-content" :target="dalIns.name">
-
                     <div class="tab" x-data="tab()" x-effect="switchTab(dalIns.activeWorkspace + '')"
                          x-init="$nextTick(() => dalIns.activeWorkspace = 0)">
                         <div class="tab-headers workspace-headers" x-show="dalIns.workspaces.length > 1">

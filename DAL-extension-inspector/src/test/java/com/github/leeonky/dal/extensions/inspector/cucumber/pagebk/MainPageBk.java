@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
-import com.github.leeonky.dal.extensions.inspector.cucumber.page.By;
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.By;
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Pages;
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Target;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,10 +17,10 @@ public class MainPageBk {
 
     //TODO tab control PageContainer
 //            TODO support dynamic tabs
-    private final PageContainer<WorkbenchPage> remotes = new PageContainer<WorkbenchPage>() {
+    private final Pages<WorkbenchPageBk> remotes = new Pages<WorkbenchPageBk>() {
         @Override
-        public WorkbenchPage getCurrent() {
-            return new WorkbenchPage(panel.byCss(".work-bench-contents > .tab-content.active"),
+        public WorkbenchPageBk getCurrent() {
+            return new WorkbenchPageBk(panel.byCss(".work-bench-contents > .tab-content.active"),
                     panel.byCss(".work-bench-headers > .tab-header.active"));
         }
     };
@@ -41,14 +43,14 @@ public class MainPageBk {
         return new InputField(panel.byCss(".auto-execute.switch"));
     }
 
-    public WorkbenchPage WorkBench(String name) {
+    public WorkbenchPageBk WorkBench(String name) {
         if ("Current".contains(name))
             return remotes.getCurrent();
 
-        return remotes.switchTo(new Target<WorkbenchPage>() {
+        return remotes.switchTo(new Target<WorkbenchPageBk>() {
             @Override
-            public WorkbenchPage create() {
-                return new WorkbenchPage(panel.byCss(format(".tab-content[target='%s']", name)), panel.byCss(format(".tab-header[target='%s']", name)));
+            public WorkbenchPageBk create() {
+                return new WorkbenchPageBk(panel.byCss(format(".tab-content[target='%s']", name)), panel.byCss(format(".tab-header[target='%s']", name)));
             }
 
             @Override

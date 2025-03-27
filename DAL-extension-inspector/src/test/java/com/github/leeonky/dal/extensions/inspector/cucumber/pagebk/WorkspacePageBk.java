@@ -1,18 +1,20 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Pages;
+import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Target;
 import lombok.Getter;
 
 import java.util.Objects;
 
 import static java.lang.String.format;
 
-public class WorkspacePage {
+public class WorkspacePageBk {
     private final Panel panel;
     @Getter
     private final Panel header;
 
     //TODO tab control PageContainer
-    private final PageContainer<OutputPage> outputs = new PageContainer<OutputPage>() {
+    private final Pages<OutputPage> outputs = new Pages<OutputPage>() {
         @Override
         public OutputPage getCurrent() {
             try {
@@ -25,7 +27,7 @@ public class WorkspacePage {
         }
     };
 
-    public WorkspacePage(Panel panel, Panel header) {
+    public WorkspacePageBk(Panel panel, Panel header) {
         this.panel = panel;
         this.header = header;
     }

@@ -1,6 +1,6 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
+package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
 
-public class PageContainer<P> {
+public class Pages<P> {
     protected P current = null;
 
     public P getCurrent() {
