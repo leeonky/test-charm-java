@@ -34,13 +34,13 @@ public class MainPageBk {
         return panel.byCss(".main-title");
     }
 
-    public Map<String, InputField> Monitors() {
+    public Map<String, InputFieldBk> Monitors() {
         return panel.allByCss(".instance-monitors .switch").stream().collect(Collectors.toMap(
-                Panel::text, InputField::new, notAllowParallelReduce(), LinkedHashMap::new));
+                Panel::text, InputFieldBk::new, notAllowParallelReduce(), LinkedHashMap::new));
     }
 
-    public InputField AutoExecute() {
-        return new InputField(panel.byCss(".auto-execute.switch"));
+    public InputFieldBk AutoExecute() {
+        return new InputFieldBk(panel.byCss(".auto-execute.switch"));
     }
 
     public WorkbenchPageBk WorkBench(String name) {

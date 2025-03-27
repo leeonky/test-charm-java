@@ -14,4 +14,8 @@ public class WorkbenchPage extends Page<InspectorElement> {
     public InspectorElement getHeader() {
         return header;
     }
+
+    public InspectorElement DAL() {
+        return element.byPlaceholder("DAL expression");
+    }
 }

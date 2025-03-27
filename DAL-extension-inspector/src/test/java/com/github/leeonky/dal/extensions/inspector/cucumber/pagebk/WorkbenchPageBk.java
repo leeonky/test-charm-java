@@ -30,8 +30,8 @@ public class WorkbenchPageBk {
         this.header = header;
     }
 
-    public InputField DAL() {
-        return new InputField(panel.byPlaceholder("DAL expression"));
+    public InputFieldBk DAL() {
+        return new InputFieldBk(panel.byPlaceholder("DAL expression"));
     }
 
     public OutputPage Root() {

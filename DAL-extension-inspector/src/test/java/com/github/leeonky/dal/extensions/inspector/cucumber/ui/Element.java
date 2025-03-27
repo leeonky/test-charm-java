@@ -7,6 +7,7 @@ import java.util.List;
 import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
 import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.xpath;
 import static com.github.leeonky.util.function.Extension.not;
+import static java.lang.String.format;
 import static org.awaitility.Awaitility.await;
 
 public interface Element<T extends Element<T, E>, E> {
@@ -27,7 +28,11 @@ public interface Element<T extends Element<T, E>, E> {
     }
 
     default T byText(String text) {
-        return by(xpath(String.format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text)));
+        return by(xpath(format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", text, text)));
+    }
+
+    default T byPlaceholder(String placeholder) {
+        return byXpath(format(".//*[@placeholder='%s']", placeholder));
     }
 
     default T by(By by) {
@@ -38,7 +43,21 @@ public interface Element<T extends Element<T, E>, E> {
         return list.get(0);
     }
 
+    String getTag();
+
     String getText();
 
-    void click();
+    T click();
+
+    T typeIn(String value);
+
+    T clear();
+
+    default T fillIn(String value) {
+        return clear().typeIn(value);
+    }
+
+    default boolean isInput() {
+        return false;
+    }
 }

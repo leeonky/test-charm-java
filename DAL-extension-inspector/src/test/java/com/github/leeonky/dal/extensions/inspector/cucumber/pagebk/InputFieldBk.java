@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
-public class InputField implements StringSetter {
+public class InputFieldBk implements StringSetter {
     private final Panel panel;
 
-    public InputField(Panel panel) {
+    public InputFieldBk(Panel panel) {
         this.panel = panel;
     }
 

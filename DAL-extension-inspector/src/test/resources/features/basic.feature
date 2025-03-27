@@ -16,88 +16,88 @@ Feature: basic
         WorkBench.Current.header: 'Try It!'
         """
 
-#    Scenario: auto execute expression and get result or error
-#      When given default input value:
-#        """
-#        {
-#          "message": "hello"
-#        }
-#        """
-#      When you:
-#        """
-#        WorkBench[Try It!].DAL: message
-#        """
-#      Then you should see:
-#        """
-#        WorkBench[Try It!]::eventually: {
-#
-##        TODO refactor
-#          DAL.classes= [... result ...]
-#
-#          Current: {
-#            header: Result
-#          } : ```
-#             java.lang.String
-#             <hello>
-#             ```
-#        }
-#        """
-#      And you should see:
-#        """
-#        WorkBench[Try It!]: {
-#          Root: ```
-#                {
-#                    message: java.lang.String <hello>
-#                }
-#                ```
-#
-#          Error: ''
-#
-#          Inspect: message
-#        }
-#        """
-#      When you:
-#        """
-#        WorkBench[Try It!].DAL: '= world'
-#        """
-#      Then you should see:
-#        """
-#        WorkBench[Try It!]::eventually: {
-#
-##        TODO refactor
-#          DAL.classes= [... error ...]
-#
-#          Current: { header: Error }
-#                 : ```
-#                   message= world
-#                            ^
-#
-#                   Expected to be equal to: java.lang.String
-#                   <world>
-#                    ^
-#                   Actual: java.lang.String
-#                   <hello>
-#                    ^
-#                   ```
-#        }
-#        """
-#      And you should see:
-#        """
-#        WorkBench[Try It!]: {
-#          Root: ```
-#                {
-#                    message: java.lang.String <hello>
-#                }
-#                ```
-#
-#          Result: ''
-#
-#          Inspect: ```
-#                   message= 'world'
-#                   ```
-#        }
-#        """
-#
+    Scenario: auto execute expression and get result or error
+      When given default input value:
+        """
+        {
+          "message": "hello"
+        }
+        """
+      When you2:
+        """
+        WorkBench[Try It!].DAL: message
+        """
+      Then you should see:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.classes= [... result ...]
+
+          Current: {
+            header: Result
+          } : ```
+             java.lang.String
+             <hello>
+             ```
+        }
+        """
+      And you should see:
+        """
+        WorkBench[Try It!]: {
+          Root: ```
+                {
+                    message: java.lang.String <hello>
+                }
+                ```
+
+          Error: ''
+
+          Inspect: message
+        }
+        """
+      When you:
+        """
+        WorkBench[Try It!].DAL: '= world'
+        """
+      Then you should see:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.classes= [... error ...]
+
+          Current: { header: Error }
+                 : ```
+                   message= world
+                            ^
+
+                   Expected to be equal to: java.lang.String
+                   <world>
+                    ^
+                   Actual: java.lang.String
+                   <hello>
+                    ^
+                   ```
+        }
+        """
+      And you should see:
+        """
+        WorkBench[Try It!]: {
+          Root: ```
+                {
+                    message: java.lang.String <hello>
+                }
+                ```
+
+          Result: ''
+
+          Inspect: ```
+                   message= 'world'
+                   ```
+        }
+        """
+
 #    Scenario: manual execute expression and get result or error
 #      When given default input value:
 #        """

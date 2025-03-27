@@ -1,14 +1,12 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
 
-import org.openqa.selenium.WebElement;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class SeleniumElement<T extends SeleniumElement<T, E>, E> implements Element<T, E> {
-    protected final WebElement element;
+public abstract class SeleniumElement<T extends SeleniumElement<T, E>, E> implements WebElement<T, E> {
+    protected final org.openqa.selenium.WebElement element;
 
-    public SeleniumElement(WebElement element) {
+    public SeleniumElement(org.openqa.selenium.WebElement element) {
         this.element = element;
     }
 
@@ -18,8 +16,29 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, E>, E> implem
     }
 
     @Override
-    public void click() {
+    public String getTag() {
+        return element.getTagName();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T click() {
         element.click();
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T typeIn(String value) {
+        element.sendKeys(value);
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T clear() {
+        element.clear();
+        return (T) this;
     }
 
     @SuppressWarnings("unchecked")
