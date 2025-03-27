@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.By;
 import org.openqa.selenium.WebDriver;
 
 import java.util.List;

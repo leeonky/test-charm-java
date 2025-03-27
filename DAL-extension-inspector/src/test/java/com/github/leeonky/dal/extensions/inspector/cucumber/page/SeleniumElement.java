@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
@@ -21,6 +20,17 @@ public class SeleniumElement<D extends SeleniumElement<D, E>, E> implements Elem
     @SuppressWarnings("unchecked")
     @Override
     public List<D> findElements(By by) {
-        return element.findElements(by).stream().map(e -> newInstance((E) e)).collect(Collectors.toList());
+        return element.findElements(seleniumBy(by)).stream().map(e -> newInstance((E) e)).collect(Collectors.toList());
+    }
+
+    private static org.openqa.selenium.By seleniumBy(By by) {
+        switch (by.type()) {
+            case "css":
+                return org.openqa.selenium.By.cssSelector(by.value());
+            case "text":
+                return org.openqa.selenium.By.xpath(".//*[text()='" + by.value() + "']");
+            default:
+                throw new UnsupportedOperationException("Unsupported by type: " + by.type());
+        }
     }
 }

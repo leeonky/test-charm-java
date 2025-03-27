@@ -1,19 +1,23 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
+package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 public class By {
     protected String type;
-    protected Object value;
+    protected String value;
 
-    public By(String type, Object value) {
+    public By(String type, String value) {
         this.type = type;
         this.value = value;
+    }
+
+    public static By css(String css) {
+        return new By(CSS, css);
     }
 
     public String type() {
         return type;
     }
 
-    public Object value() {
+    public String value() {
         return value;
     }
 
