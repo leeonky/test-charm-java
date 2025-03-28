@@ -1,21 +1,14 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
-import com.github.leeonky.dal.extensions.inspector.cucumber.InspectorElement;
-import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Page;
+import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
 
-public class WorkbenchPage extends Page<InspectorElement> {
-    private final InspectorElement header;
+public class WorkbenchPage extends Tab {
 
-    public WorkbenchPage(InspectorElement element, InspectorElement header) {
-        super(element);
-        this.header = header;
+    public WorkbenchPage(Element header, Element element) {
+        super(header, element);
     }
 
-    public InspectorElement getHeader() {
-        return header;
-    }
-
-    public InspectorElement DAL() {
+    public Element DAL() {
         return element.byPlaceholder("DAL expression");
     }
 }

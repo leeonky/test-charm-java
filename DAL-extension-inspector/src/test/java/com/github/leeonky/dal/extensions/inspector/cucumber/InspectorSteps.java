@@ -54,7 +54,7 @@ public class InspectorSteps {
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
         mainPageBk = new MainPageBk(seleniumWebDriver);
-        mainPage = new MainPage(new InspectorElement(seleniumWebDriver.getWebDriver().findElement(By.cssSelector("body"))));
+        mainPage = new MainPage(new Element(seleniumWebDriver.getWebDriver().findElement(By.cssSelector("body"))));
     }
 
     @And("shutdown web server")
