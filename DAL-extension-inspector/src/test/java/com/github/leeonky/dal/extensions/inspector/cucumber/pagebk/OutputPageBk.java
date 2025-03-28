@@ -4,13 +4,13 @@ import lombok.Getter;
 
 import java.util.Objects;
 
-public class OutputPage {
+public class OutputPageBk {
     private final Panel panel;
 
     @Getter
     private final Panel header;
 
-    public OutputPage(Panel panel, Panel header) {
+    public OutputPageBk(Panel panel, Panel header) {
         this.panel = panel;
         this.header = header;
     }

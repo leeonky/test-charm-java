@@ -59,4 +59,10 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, E>, E> implem
                 throw new UnsupportedOperationException("Unsupported by type: " + by.type());
         }
     }
+
+    @Override
+    public Object attribute(String name) {
+        String value = element.getAttribute(name);
+        return name.equals("class") ? value.split(" ") : value;
+    }
 }

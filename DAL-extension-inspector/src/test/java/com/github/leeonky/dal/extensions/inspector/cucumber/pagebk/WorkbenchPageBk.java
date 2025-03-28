@@ -34,19 +34,19 @@ public class WorkbenchPageBk {
         return new InputFieldBk(panel.byPlaceholder("DAL expression"));
     }
 
-    public OutputPage Root() {
+    public OutputPageBk Root() {
         return outputs.getCurrent().Root();
     }
 
-    public OutputPage Error() {
+    public OutputPageBk Error() {
         return outputs.getCurrent().Error();
     }
 
-    public OutputPage Result() {
+    public OutputPageBk Result() {
         return outputs.getCurrent().Result();
     }
 
-    public OutputPage Inspect() {
+    public OutputPageBk Inspect() {
         return outputs.getCurrent().Inspect();
     }
 
@@ -54,7 +54,7 @@ public class WorkbenchPageBk {
         return outputs.getCurrent().Watches();
     }
 
-    public OutputPage Current() {
+    public OutputPageBk Current() {
         return outputs.getCurrent().Current();
     }
 

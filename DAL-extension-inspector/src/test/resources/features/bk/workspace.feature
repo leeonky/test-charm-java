@@ -50,7 +50,7 @@ Feature: workspace
       }
 
       WorkBench[Ins1].Workspace[1]::eventually: {
-          Current: null
+          Current.header: Root
       }
 
       WorkBench[Ins1].Workspace[1]::eventually: {

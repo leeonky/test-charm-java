@@ -14,11 +14,11 @@ public class WorkspacePageBk {
     private final Panel header;
 
     //TODO tab control PageContainer
-    private final Pages<OutputPage> outputs = new Pages<OutputPage>() {
+    private final Pages<OutputPageBk> outputs = new Pages<OutputPageBk>() {
         @Override
-        public OutputPage getCurrent() {
+        public OutputPageBk getCurrent() {
             try {
-                return new OutputPage(
+                return new OutputPageBk(
                         panel.allByCss(".tab-content.active").get(0),
                         panel.allByCss(".tab-header.active").get(0));
             } catch (Exception ignore) {
@@ -36,28 +36,28 @@ public class WorkspacePageBk {
         return new InputFieldBk(panel.byPlaceholder("DAL expression"));
     }
 
-    public OutputPage Root() {
+    public OutputPageBk Root() {
         return switchTo("Root");
     }
 
-    public OutputPage Error() {
+    public OutputPageBk Error() {
         return switchTo("Error");
     }
 
-    public OutputPage Result() {
+    public OutputPageBk Result() {
         return switchTo("Result");
     }
 
-    public OutputPage Inspect() {
+    public OutputPageBk Inspect() {
         return switchTo("Inspect");
     }
 
     public WatchesPage Watches() {
-        OutputPage outputPage = switchTo("Watches");
+        OutputPageBk outputPage = switchTo("Watches");
         return new WatchesPage(outputPage.getContent());
     }
 
-    public OutputPage Current() {
+    public OutputPageBk Current() {
         return outputs.getCurrent();
     }
 
@@ -65,11 +65,11 @@ public class WorkspacePageBk {
         return Objects.equals(header.text(), type);
     }
 
-    private OutputPage switchTo(String type) {
-        return outputs.switchTo(new Target<OutputPage>() {
+    private OutputPageBk switchTo(String type) {
+        return outputs.switchTo(new Target<OutputPageBk>() {
             @Override
-            public OutputPage create() {
-                return new OutputPage(panel.byCss(format(".tab-content[target='%s']", type.toLowerCase())), panel.byCss(format(".tab-header[target='%s']", type.toLowerCase())));
+            public OutputPageBk create() {
+                return new OutputPageBk(panel.byCss(format(".tab-content[target='%s']", type.toLowerCase())), panel.byCss(format(".tab-header[target='%s']", type.toLowerCase())));
             }
 
             @Override
@@ -78,7 +78,7 @@ public class WorkspacePageBk {
             }
 
             @Override
-            public boolean matches(OutputPage current) {
+            public boolean matches(OutputPageBk current) {
                 return current.isType(type);
             }
         });

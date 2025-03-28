@@ -63,7 +63,8 @@
                                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
                                               @code-update="autoExecute && workspace.run()" x-model="workspace.code"
                                               :class='workspace.editorStatus(dalIns.connected)'></textarea>
-                                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)">
+                                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)"
+                                         x-init="$nextTick(() => switchTab('root'))">
                                         <div class="tab-headers">
                                             <div class="controls flex">
                                                 <button class="control-button btn-sm run"
