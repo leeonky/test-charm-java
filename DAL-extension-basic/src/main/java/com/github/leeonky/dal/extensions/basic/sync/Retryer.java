@@ -6,10 +6,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.runtime.DalException.extractException;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class Retryer {
     private static int defaultTimeout = 0;
@@ -34,15 +33,14 @@ public class Retryer {
         Instant start = Instant.now();
         do {
             try {
-                return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime, defaultTimeout),
-                        TimeUnit.MILLISECONDS);
+                return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime, defaultTimeout), MILLISECONDS);
             } catch (ExecutionException e) {
                 exception = e.getCause();
             } catch (Throwable e) {
                 exception = e;
             }
         } while (timeout(start) && sleep());
-        return Sneaky.sneakyThrow(extractException(exception).orElse(exception));
+        return Sneaky.sneakyThrow(exception);
     }
 
     private boolean timeout(Instant now) {

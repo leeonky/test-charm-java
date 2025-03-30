@@ -8,6 +8,8 @@ import com.github.leeonky.util.Sneaky;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.github.leeonky.dal.runtime.DalException.extractException;
+
 public class Await implements ProxyObject {
     private static int defaultWaitingTime = 5000;
     private final Data data;
@@ -29,7 +31,11 @@ public class Await implements ProxyObject {
     }
 
     public <T> T await(Function<Data, T> supplier) {
-        return new Retryer(waitingTime, interval).get(() -> supplier.apply(data));
+        try {
+            return new Retryer(waitingTime, interval).get(() -> supplier.apply(data));
+        } catch (Throwable e) {
+            return Sneaky.sneakyThrow(extractException(e).orElse(e));
+        }
     }
 
     public Await within(String s) {
