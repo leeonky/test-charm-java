@@ -36,97 +36,95 @@
                 title="Release all suspend"></button>
     </div>
 </div>
-<div class="work-benches">
-    <div class="tab" x-data="tab()" x-effect="switchTab(activeInstance)">
-        <div class="tab-headers work-bench-headers">
-            <template x-for="dalIns in dalInstances" :key="dalIns.name">
-                <div class="tab-header work-bench-header flex align-center" :target="dalIns.name">
-                    <div class="session-state margin-right" :class='{"connected": dalIns.connected}'
-                         x-show='dalIns.name != "Try It!"' :name="dalIns.name"></div>
-                    <span x-text="dalIns.name"></span>
-                </div>
-            </template>
-        </div>
-        <div class="tab-contents work-bench-contents">
-            <template x-for="dalIns in dalInstances" :key="dalIns.name">
-                <div class="tab-content" :target="dalIns.name">
-                    <div class="tab" x-data="tab()" x-effect="switchTab(dalIns.activeWorkspace + '')"
-                         x-init="$nextTick(() => dalIns.activeWorkspace = 0)">
-                        <div class="tab-headers workspace-headers" x-show="dalIns.workspaces.length > 1">
-                            <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
-                                <div class="tab-header flex" :target="index" x-text="index"></div>
-                            </template>
-                        </div>
-                        <div class="tab-contents workspace-contents">
-                            <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
-                                <div class="tab-content" :target="index">
+<div class="tab workbenches" x-data="tab()" x-effect="switchTab(activeInstance)">
+    <div class="tab-headers work-bench-headers">
+        <template x-for="dalIns in dalInstances" :key="dalIns.name">
+            <div class="tab-header work-bench-header flex align-center" :target="dalIns.name">
+                <div class="session-state margin-right" :class='{"connected": dalIns.connected}'
+                     x-show='dalIns.name != "Try It!"' :name="dalIns.name"></div>
+                <span x-text="dalIns.name"></span>
+            </div>
+        </template>
+    </div>
+    <div class="tab-contents work-bench-contents">
+        <template x-for="dalIns in dalInstances" :key="dalIns.name">
+            <div class="tab-content" :target="dalIns.name">
+                <div class="tab workspaces" x-data="tab()" x-effect="switchTab(dalIns.activeWorkspace + '')"
+                     x-init="$nextTick(() => dalIns.activeWorkspace = 0)">
+                    <div class="tab-headers workspace-headers" x-show="dalIns.workspaces.length > 1">
+                        <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
+                            <div class="tab-header flex" :target="index" x-text="index"></div>
+                        </template>
+                    </div>
+                    <div class="tab-contents workspace-contents">
+                        <template x-for="(workspace, index) in dalIns.workspaces" :key="index">
+                            <div class="tab-content" :target="index">
                                     <textarea class="code-editor" x-data="codeEditor()" placeholder="DAL expression"
                                               @code-update="autoExecute && workspace.run()" x-model="workspace.code"
                                               :class='workspace.editorStatus(dalIns.connected)'></textarea>
-                                    <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)"
-                                         x-init="$nextTick(() => switchTab('root'))">
-                                        <div class="tab-headers">
-                                            <div class="controls flex">
-                                                <button class="control-button btn-sm run"
-                                                        @click="workspace.run()"
-                                                        title="Execute"></button>
-                                                <button class="control-button btn-sm release"
-                                                        @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'
-                                                        title="Release suspend"></button>
-                                                <button class="control-button btn-sm pass"
-                                                        @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
-                                                        title="Pass Test"></button>
-                                                <div class="flex">
-                                                    <button class="control-button btn-sm new"
-                                                            @click="dalIns.duplicateWorkspace(workspace)"
-                                                            title="New workspace"></button>
-                                                    <button class="control-button btn-sm dismiss"
-                                                            @click="dalIns.dismiss(workspace)"
-                                                            x-show='workspace.closable'
-                                                            title="Remove workspace"></button>
-                                                </div>
+                                <div class="tab code-results" x-data="tab()" x-effect="switchTab(workspace.active)"
+                                     x-init="$nextTick(() => switchTab('root'))">
+                                    <div class="tab-headers">
+                                        <div class="controls flex">
+                                            <button class="control-button btn-sm run"
+                                                    @click="workspace.run()"
+                                                    title="Execute"></button>
+                                            <button class="control-button btn-sm release"
+                                                    @click="release(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                                    title="Release suspend"></button>
+                                            <button class="control-button btn-sm pass"
+                                                    @click="pass(dalIns.name)" x-show='dalIns.name != "Try It!"'
+                                                    title="Pass Test"></button>
+                                            <div class="flex">
+                                                <button class="control-button btn-sm new"
+                                                        @click="dalIns.duplicateWorkspace(workspace)"
+                                                        title="New workspace"></button>
+                                                <button class="control-button btn-sm dismiss"
+                                                        @click="dalIns.dismiss(workspace)"
+                                                        x-show='workspace.closable'
+                                                        title="Remove workspace"></button>
                                             </div>
-                                            <template x-for="outputTab in outputTabs" :key="outputTab">
-                                                <div class="tab-header" :target="outputTab"
-                                                     x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>
-                                            </template>
-                                            <div class="tab-header" target="Watches">Watches</div>
                                         </div>
-                                        <div class="tab-contents">
-                                            <template x-for="outputTab in outputTabs" :key="outputTab">
-                                                <div class="tab-content" :target="outputTab">
-                                                    <pre x-text="workspace.result[outputTab]"></pre>
+                                        <template x-for="outputTab in outputTabs" :key="outputTab">
+                                            <div class="tab-header" :target="outputTab"
+                                                 x-text="outputTab.charAt(0).toUpperCase() + outputTab.slice(1);"></div>
+                                        </template>
+                                        <div class="tab-header" target="Watches">Watches</div>
+                                    </div>
+                                    <div class="tab-contents">
+                                        <template x-for="outputTab in outputTabs" :key="outputTab">
+                                            <div class="tab-content" :target="outputTab">
+                                                <pre x-text="workspace.result[outputTab]"></pre>
+                                            </div>
+                                        </template>
+                                        <div class="tab-content" target="Watches">
+                                            <template x-for="watch in workspace.result.watches"
+                                                      :key="watch.property">
+                                                <div class="watches-item">
+                                                    <span class="watches-item-name" x-text="watch.property"></span>
+                                                    <span>:</span>
+                                                    <div class="watches-item-content padding-left">
+                                                        <template x-if="watch.type === 'DEFAULT'">
+                                                            <pre x-text="watch.value"></pre>
+                                                        </template>
+                                                        <template x-if="watch.type === 'BINARY'">
+                                                            <div>
+                                                                <a :href="watch.url" target="_blank">download</a>
+                                                                <img :src="watch.url">
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                    <hr>
                                                 </div>
                                             </template>
-                                            <div class="tab-content" target="Watches">
-                                                <template x-for="watch in workspace.result.watches"
-                                                          :key="watch.property">
-                                                    <div class="watches-item">
-                                                        <span class="watches-item-name" x-text="watch.property"></span>
-                                                        <span>:</span>
-                                                        <div class="watches-item-content padding-left">
-                                                            <template x-if="watch.type === 'DEFAULT'">
-                                                                <pre x-text="watch.value"></pre>
-                                                            </template>
-                                                            <template x-if="watch.type === 'BINARY'">
-                                                                <div>
-                                                                    <a :href="watch.url" target="_blank">download</a>
-                                                                    <img :src="watch.url">
-                                                                </div>
-                                                            </template>
-                                                        </div>
-                                                        <hr>
-                                                    </div>
-                                                </template>
-                                            </div>
                                         </div>
                                     </div>
-                            </template>
-                        </div>
+                                </div>
+                        </template>
                     </div>
                 </div>
-            </template>
-        </div>
+            </div>
+        </template>
     </div>
 </div>
 </body>

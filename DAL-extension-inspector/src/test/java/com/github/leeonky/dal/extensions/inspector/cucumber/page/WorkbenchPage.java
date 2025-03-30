@@ -8,7 +8,7 @@ public class WorkbenchPage extends Tab {
 
     public WorkbenchPage(Element header, Element element) {
         super(header, element);
-        workspaces = new Tabs<WorkspacePage, Element>(element) {
+        workspaces = new Tabs<WorkspacePage, Element>(element.byCss(".workspaces")) {
         };
     }
 

@@ -6,4 +6,9 @@ public class Page<T extends Element<T, ?>> {
     public Page(T element) {
         this.element = element;
     }
+
+    @Override
+    public String toString() {
+        return element.getText();
+    }
 }

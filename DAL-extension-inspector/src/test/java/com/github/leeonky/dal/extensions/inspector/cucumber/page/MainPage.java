@@ -9,7 +9,7 @@ public class MainPage extends Page<Element> {
 
     public MainPage(Element element) {
         super(element);
-        tabs = new Tabs<WorkbenchPage, Element>(element) {
+        tabs = new Tabs<WorkbenchPage, Element>(element.byCss(".workbenches")) {
         };
     }
 

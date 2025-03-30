@@ -16,8 +16,9 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
         tabs = new Pages<T>() {
             @Override
             public T getCurrent() {
-                return createTab(Tabs.this.element.byXpath(".//div[" + containsClass("tab-header") + " and " + containsClass("active") + " and not(ancestor::div[" + containsClass("tab-content") + "])]"),
-                        Tabs.this.element.byXpath(".//div[" + containsClass("tab-content") + " and  " + containsClass("active") + " and not(ancestor::div[" + containsClass("tab-content") + "])]"));
+                return createTab(Tabs.this.element.byXpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]"),
+                        Tabs.this.element.byXpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]")
+                );
             }
         };
     }

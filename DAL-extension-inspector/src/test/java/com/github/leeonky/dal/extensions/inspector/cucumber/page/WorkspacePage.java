@@ -7,7 +7,7 @@ public class WorkspacePage extends Tab {
 
     public WorkspacePage(Element header, Element element) {
         super(header, element);
-        outputs = new Tabs<OutputPage, Element>(element) {
+        outputs = new Tabs<OutputPage, Element>(element.byCss(".code-results")) {
         };
     }
 
