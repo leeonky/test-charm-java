@@ -42,9 +42,9 @@ Feature: basic
              ```
         }
         """
-      And you should see:
+      And you should see2:
         """
-        WorkBench[Try It!]: {
+        WorkBench[Try It!].Output: {
           Root: ```
                 {
                     message: java.lang.String <hello>
@@ -56,16 +56,16 @@ Feature: basic
           Inspect: message
         }
         """
-      When you:
+      When you2:
         """
         WorkBench[Try It!].DAL: '= world'
         """
-      Then you should see:
+      Then you should see2:
         """
         WorkBench[Try It!]::eventually: {
 
 #        TODO refactor
-          DAL.classes= [... error ...]
+          DAL.@class= [... error ...]
 
           Current: { header: Error }
                  : ```
@@ -81,9 +81,9 @@ Feature: basic
                    ```
         }
         """
-      And you should see:
+      And you should see2:
         """
-        WorkBench[Try It!]: {
+        WorkBench[Try It!].Output: {
           Root: ```
                 {
                     message: java.lang.String <hello>

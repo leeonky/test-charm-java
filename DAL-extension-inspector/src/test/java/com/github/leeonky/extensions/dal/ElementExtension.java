@@ -16,7 +16,7 @@ public class ElementExtension implements Extension {
         dal.getRuntimeContextBuilder()
                 .checkerSetForMatching().register((expected, actual) -> actual.resolved().cast(Element.class).map(e -> {
                     if (e.isInput()) {
-                        e.fillIn((String) expected.convert(String.class).instance());
+                        e.typeIn((String) expected.convert(String.class).instance());
                         return PHONY_CHECKER;
                     }
                     return null;

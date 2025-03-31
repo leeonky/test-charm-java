@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
+import com.github.leeonky.dal.extensions.inspector.cucumber.Tabs;
 import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Page;
 
 public class MainPage extends Page<Element> {

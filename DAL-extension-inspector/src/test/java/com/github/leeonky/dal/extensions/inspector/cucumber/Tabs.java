@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.page;
+package com.github.leeonky.dal.extensions.inspector.cucumber;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Page;
@@ -34,11 +34,11 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
         return "contains(concat(' ', normalize-space(@class), ' '), ' " + singleClassName + " ')";
     }
 
-    T getCurrent() {
+    public T getCurrent() {
         return tabs.getCurrent();
     }
 
-    T switchTo(String name) {
+    public T switchTo(String name) {
         return tabs.switchTo(new Target<T>() {
             @Override
             public T create() {
@@ -48,7 +48,7 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
 
             @Override
             public void navigateTo() {
-                element.byCss(".work-bench-headers").byText(name).click();
+                element.byCss(format(".tab-header[target='%s']", name)).click();
             }
         });
     }

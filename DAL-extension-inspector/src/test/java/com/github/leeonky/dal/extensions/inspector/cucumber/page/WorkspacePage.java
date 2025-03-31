@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
+import com.github.leeonky.dal.extensions.inspector.cucumber.Tab;
+import com.github.leeonky.dal.extensions.inspector.cucumber.Tabs;
 
 public class WorkspacePage extends Tab {
     private final Tabs<OutputPage, Element> outputs;
@@ -13,5 +15,9 @@ public class WorkspacePage extends Tab {
 
     public OutputPage Current() {
         return outputs.getCurrent();
+    }
+
+    public OutputPage Output(String name) {
+        return outputs.switchTo(name);
     }
 }
