@@ -10,8 +10,8 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.websocket.WsContext;
+import org.apache.tika.Tika;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
-import static java.net.URLConnection.guessContentTypeFromStream;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
@@ -71,9 +70,9 @@ public class Inspector {
         if (dalInstance != null) {
             Watch watch = dalInstance.watches.get(index);
             if (watch instanceof DalInstance.BinaryWatch) {
+
                 DalInstance.BinaryWatch binaryWatch = (DalInstance.BinaryWatch) watch;
-                String contentType = Sneaky.get(() -> guessContentTypeFromStream(
-                        new ByteArrayInputStream(binaryWatch.binary())));
+                String contentType = Sneaky.get(() -> new Tika().detect(binaryWatch.binary()));
                 ctx.contentType(contentType == null ? "application/octet-stream" : contentType);
                 ctx.result(binaryWatch.binary());
             }

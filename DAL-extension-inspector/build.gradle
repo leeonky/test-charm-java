@@ -1,6 +1,7 @@
 dependencies {
     implementation project(':DAL-java')
     implementation 'io.javalin:javalin:4.6.8'
+    implementation("org.apache.tika:tika-core:1.28.5")
     testImplementation 'org.slf4j:slf4j-simple:1.8.0-beta4'
     testImplementation 'org.slf4j:slf4j-api:1.8.0-beta4'
     testImplementation project(':DAL-extension-basic')

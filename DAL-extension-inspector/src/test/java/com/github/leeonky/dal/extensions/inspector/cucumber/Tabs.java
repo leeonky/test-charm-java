@@ -18,9 +18,7 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
         tabs = new Pages<T>() {
             @Override
             public T getCurrent() {
-                return createTab(Tabs.this.region.findBy(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")),
-                        Tabs.this.region.findBy(xpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]"))
-                );
+                return Tabs.this.getCurrent();
             }
         };
     }
@@ -37,7 +35,12 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
     }
 
     public T getCurrent() {
-        return tabs.getCurrent();
+        try {
+            return createTab(Tabs.this.region.findAllBy(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")).get(0),
+                    Tabs.this.region.findAllBy(xpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]")).get(0));
+        } catch (Exception ignore) {
+            return null;
+        }
     }
 
     public T switchTo(String name) {

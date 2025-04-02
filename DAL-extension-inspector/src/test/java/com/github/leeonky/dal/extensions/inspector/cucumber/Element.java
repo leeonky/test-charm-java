@@ -3,6 +3,7 @@ package com.github.leeonky.dal.extensions.inspector.cucumber;
 import com.github.leeonky.dal.extensions.inspector.cucumber.ui.SeleniumElement;
 import org.openqa.selenium.WebElement;
 
+import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
 import static java.util.Arrays.binarySearch;
 
 public class Element extends SeleniumElement<Element> {
@@ -23,6 +24,13 @@ public class Element extends SeleniumElement<Element> {
             return this;
         } else
             return super.typeIn(value);
+    }
+
+    @Override
+    public Object value() {
+        if (isCheckedBox())
+            return findBy(css("input")).attribute("value");
+        return super.value();
     }
 
     private boolean isCheckedBox() {

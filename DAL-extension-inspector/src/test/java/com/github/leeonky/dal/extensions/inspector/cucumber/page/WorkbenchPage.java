@@ -32,4 +32,24 @@ public class WorkbenchPage extends Tab {
     public void execute() {
         workspaces.getCurrent().execute();
     }
+
+    public boolean isConnected() {
+        return !getHeader().findAllBy(css(".session-state.connected")).isEmpty();
+    }
+
+    public void Release() {
+        region.findBy(css(".release")).click();
+    }
+
+    public void Pass() {
+        region.findBy(css(".pass")).click();
+    }
+
+    public void newWorkspace() {
+        region.findBy(css(".new")).click();
+    }
+
+    public WorkspacePage Workspace(String target) {
+        return target.equals("Current") ? workspaces.getCurrent() : workspaces.switchTo(target);
+    }
 }
