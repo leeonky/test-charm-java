@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.pagebk;
 
-public class WatchesItem {
+public class WatchesItemBk {
     private final Panel panel;
 
-    public WatchesItem(Panel panel) {
+    public WatchesItemBk(Panel panel) {
         this.panel = panel;
     }
 

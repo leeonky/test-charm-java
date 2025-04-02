@@ -50,7 +50,7 @@ public class WorkbenchPageBk {
         return outputs.getCurrent().Inspect();
     }
 
-    public WatchesPage Watches() {
+    public WatchesPageBk Watches() {
         return outputs.getCurrent().Watches();
     }
 

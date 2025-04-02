@@ -14,6 +14,10 @@ public class MainPage extends Page<Element> {
         };
     }
 
+    public Element AutoExecute() {
+        return element.byCss(".auto-execute.switch");
+    }
+
     public Element title() {
         return element.byCss(".main-title");
     }

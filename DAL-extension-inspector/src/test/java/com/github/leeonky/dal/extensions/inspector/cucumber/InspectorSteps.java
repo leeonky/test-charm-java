@@ -54,7 +54,7 @@ public class InspectorSteps {
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
         mainPageBk = new MainPageBk(seleniumWebDriver);
-        mainPage = new MainPage(new Element(seleniumWebDriver.getWebDriver().findElement(By.cssSelector("body"))));
+        mainPage = new MainPage(new Element(seleniumWebDriver.getWebDriver().findElement(By.tagName("html"))).byCss("body"));
     }
 
     @And("shutdown web server")
@@ -128,5 +128,12 @@ public class InspectorSteps {
         } catch (InterpreterException e) {
             throw new AssertionError("\n" + e.show(expression) + "\n\n" + e.getMessage());
         }
+    }
+
+    @SneakyThrows
+    @Then("you should see2 after {int}s:")
+    public void youShouldSee2AfterS(int seconds, String expression) {
+        Thread.sleep(seconds * 1000L);
+        youShouldSee(expression);
     }
 }

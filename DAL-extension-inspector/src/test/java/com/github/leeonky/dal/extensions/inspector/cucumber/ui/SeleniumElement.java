@@ -1,9 +1,14 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public abstract class SeleniumElement<T extends SeleniumElement<T, E>, E> implements WebElement<T, E> {
+import static java.lang.String.format;
+import static org.openqa.selenium.By.cssSelector;
+import static org.openqa.selenium.By.xpath;
+
+public abstract class SeleniumElement<T extends SeleniumElement<T>>
+        extends ElementState<T, org.openqa.selenium.WebElement>
+        implements WebElement<T, org.openqa.selenium.WebElement> {
     protected final org.openqa.selenium.WebElement element;
 
     public SeleniumElement(org.openqa.selenium.WebElement element) {
@@ -11,7 +16,7 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, E>, E> implem
     }
 
     @Override
-    public String getText() {
+    public String text() {
         return element.getText();
     }
 
@@ -41,28 +46,28 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, E>, E> implem
         return (T) this;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<T> findElements(By by) {
-        return element.findElements(seleniumBy(by)).stream().map(e -> newInstance((E) e)).collect(Collectors.toList());
+    public List<org.openqa.selenium.WebElement> findElements(By by) {
+        return element.findElements(seleniumBy(by));
     }
 
     private static org.openqa.selenium.By seleniumBy(By by) {
         switch (by.type()) {
             case "css":
-                return org.openqa.selenium.By.cssSelector(by.value());
+                return cssSelector(by.value());
             case "text":
-                return org.openqa.selenium.By.xpath(".//*[text()='" + by.value() + "']");
+                return xpath(format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value()));
             case "xpath":
-                return org.openqa.selenium.By.xpath(by.value());
+                return xpath(by.value());
+            case "placeholder":
+                return xpath(format(".//*[@placeholder='%s']", by.value()));
             default:
                 throw new UnsupportedOperationException("Unsupported by type: " + by.type());
         }
     }
 
     @Override
-    public Object attribute(String name) {
-        String value = element.getAttribute(name);
-        return name.equals("class") ? value.split(" ") : value;
+    public String attributeValue(String name) {
+        return element.getAttribute(name);
     }
 }

@@ -1,11 +1,23 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
 
-public interface WebElement<T extends SeleniumElement<T, E>, E> extends Element<T, E> {
+public interface WebElement<T extends WebElement<T, E>, E> extends Element<T, E> {
     @Override
     default boolean isInput() {
         String tag = getTag().toLowerCase();
         return tag.equals("textarea") || tag.equals("input");
     }
 
-    Object attribute(String name);
+    default Object attribute(String name) {
+        String value = attributeValue(name);
+        return name.equals("class") ? value.split(" ") : value;
+    }
+
+    String attributeValue(String name);
+
+    @Override
+    default Object value() {
+        if (isInput())
+            return attribute("value");
+        return Element.super.value();
+    }
 }

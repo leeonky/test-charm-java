@@ -98,90 +98,90 @@ Feature: basic
         }
         """
 
-#    Scenario: manual execute expression and get result or error
-#      When given default input value:
-#        """
-#        {
-#          "message": "hello"
-#        }
-#        """
-#      When you:
-#        """
-#        AutoExecute: false
-#        WorkBench[Try It!].DAL: message
-#        """
-#      Then you should see after 1s:
-#        """
-#        WorkBench[Try It!]::eventually: {
-#
-##        TODO refactor
-#          DAL.classes= [code-editor]
-#
-#          Result: ''
-#        }
-#        """
-#      When you:
-#        """
-#          WorkBench[Try It!].execute
-#        """
-#      Then you should see:
-#        """
-#        WorkBench[Try It!]::eventually: {
-#
-##        TODO refactor
-#          DAL.classes= [... result ...]
-#
-#          Current: {
-#            header: Result
-#          } : ```
-#             java.lang.String
-#             <hello>
-#             ```
-#        }
-#        """
-#      When you:
-#        """
-#        WorkBench[Try It!].DAL: '= world'
-#        """
-#      When you:
-#        """
-#          WorkBench[Try It!].execute
-#        """
-#      Then you should see:
-#        """
-#        WorkBench[Try It!]::eventually: {
-#
-##        TODO refactor
-#          DAL.classes= [... error ...]
-#
-#          Current: { header: Error }
-#                 : ```
-#                   message= world
-#                            ^
-#
-#                   Expected to be equal to: java.lang.String
-#                   <world>
-#                    ^
-#                   Actual: java.lang.String
-#                   <hello>
-#                    ^
-#                   ```
-#        }
-#        """
-#
-#    Scenario: editor in editing state
-#      When shutdown web server
-#      And you:
-#        """
-#        WorkBench[Try It!].DAL: message
-#        """
-#      Then you should see:
-#        """
-#        WorkBench::eventually: {
-#          Current: {
-#
-#  #        TODO refactor
-#            DAL.classes= [... executing ...]
-#          }
-#        }
-#        """
+    Scenario: manual execute expression and get result or error
+      When given default input value:
+        """
+        {
+          "message": "hello"
+        }
+        """
+      When you2:
+        """
+        AutoExecute: false
+        WorkBench[Try It!].DAL: message
+        """
+      Then you should see2 after 1s:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.@class= [code-editor]
+
+          Output.Result: ''
+        }
+        """
+      When you2:
+        """
+          WorkBench[Try It!].execute
+        """
+      Then you should see2:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.@class= [... result ...]
+
+          Current: {
+            header: Result
+          } : ```
+             java.lang.String
+             <hello>
+             ```
+        }
+        """
+      When you2:
+        """
+        WorkBench[Try It!].DAL: '= world'
+        """
+      When you2:
+        """
+          WorkBench[Try It!].execute
+        """
+      Then you should see2:
+        """
+        WorkBench[Try It!]::eventually: {
+
+#        TODO refactor
+          DAL.@class= [... error ...]
+
+          Current: { header: Error }
+                 : ```
+                   message= world
+                            ^
+
+                   Expected to be equal to: java.lang.String
+                   <world>
+                    ^
+                   Actual: java.lang.String
+                   <hello>
+                    ^
+                   ```
+        }
+        """
+
+    Scenario: editor in editing state
+      When shutdown web server
+      And you2:
+        """
+        WorkBench[Try It!].DAL: message
+        """
+      Then you should see2:
+        """
+        WorkBench::eventually: {
+          Current: {
+
+  #        TODO refactor
+            DAL.@class= [... executing ...]
+          }
+        }
+        """

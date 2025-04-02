@@ -25,4 +25,8 @@ public class WorkbenchPage extends Tab {
     public OutputPage Output(String name) {
         return workspaces.getCurrent().Output(name);
     }
+
+    public void execute() {
+        workspaces.getCurrent().execute();
+    }
 }

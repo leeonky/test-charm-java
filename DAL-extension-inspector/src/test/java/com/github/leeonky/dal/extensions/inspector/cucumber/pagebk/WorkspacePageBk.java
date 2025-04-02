@@ -52,9 +52,9 @@ public class WorkspacePageBk {
         return switchTo("Inspect");
     }
 
-    public WatchesPage Watches() {
+    public WatchesPageBk Watches() {
         OutputPageBk outputPage = switchTo("Watches");
-        return new WatchesPage(outputPage.getContent());
+        return new WatchesPageBk(outputPage.getContent());
     }
 
     public OutputPageBk Current() {

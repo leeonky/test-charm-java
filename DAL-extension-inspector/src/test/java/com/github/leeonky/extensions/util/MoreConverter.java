@@ -9,6 +9,6 @@ public class MoreConverter implements ConverterExtension {
     @Override
     public void extend(Converter converter) {
         converter.addTypeConverter(Panel.class, String.class, Panel::text);
-        converter.addTypeConverter(Element.class, String.class, Element::getText);
+        converter.addTypeConverter(Element.class, String.class, Element::text);
     }
 }

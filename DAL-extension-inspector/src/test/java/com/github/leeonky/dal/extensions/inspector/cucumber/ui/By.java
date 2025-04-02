@@ -17,6 +17,10 @@ public class By {
         return new By(XPATH, xpath);
     }
 
+    public static By text(String xpath) {
+        return new By(TEXT, xpath);
+    }
+
     public String type() {
         return type;
     }
@@ -25,10 +29,10 @@ public class By {
         return value;
     }
 
-    public static final String XPATH = "xpath", CSS = "css", TAG = "tag";
+    public static final String XPATH = "xpath", CSS = "css", TAG = "tag", TEXT = "text", PLACEHOLDER = "placeholder";
 
     @Override
     public String toString() {
-        return String.format("by %s:%s", type, value);
+        return String.format("%s{%s}", type, value);
     }
 }

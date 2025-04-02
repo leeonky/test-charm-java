@@ -9,6 +9,6 @@ public class Page<T extends Element<T, ?>> {
 
     @Override
     public String toString() {
-        return element.getText();
+        return element.text();
     }
 }

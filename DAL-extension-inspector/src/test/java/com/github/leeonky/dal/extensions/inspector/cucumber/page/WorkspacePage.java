@@ -10,6 +10,13 @@ public class WorkspacePage extends Tab {
     public WorkspacePage(Element header, Element element) {
         super(header, element);
         outputs = new Tabs<OutputPage, Element>(element.byCss(".code-results")) {
+
+            @Override
+            protected OutputPage createTab(Element header, Element tab) {
+                if (header.text().equals("Watches"))
+                    return new WatchesPage(header, tab);
+                return new OutputPage(header, tab);
+            }
         };
     }
 
@@ -19,5 +26,9 @@ public class WorkspacePage extends Tab {
 
     public OutputPage Output(String name) {
         return outputs.switchTo(name);
+    }
+
+    public void execute() {
+        element.byCss(".run").click();
     }
 }

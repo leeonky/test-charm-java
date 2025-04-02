@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class WatchesPage implements ProxyObject {
+public class WatchesPageBk implements ProxyObject {
     private final Panel panel;
 
-    public WatchesPage(Panel panel) {
+    public WatchesPageBk(Panel panel) {
         this.panel = panel;
     }
 
@@ -19,9 +19,9 @@ public class WatchesPage implements ProxyObject {
     }
 
     @Override
-    public WatchesItem getValue(Object property) {
+    public WatchesItemBk getValue(Object property) {
         return watches().stream().filter(panel -> property.equals(panel.byCss(".watches-item-name").text()))
-                .map(WatchesItem::new)
+                .map(WatchesItemBk::new)
                 .findFirst().orElse(null);
     }
 
