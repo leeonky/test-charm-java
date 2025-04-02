@@ -6,6 +6,8 @@ import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Pages;
 import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Target;
 import com.github.leeonky.util.BeanClass;
 
+import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.xpath;
 import static java.lang.String.format;
 
 public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
@@ -16,8 +18,8 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
         tabs = new Pages<T>() {
             @Override
             public T getCurrent() {
-                return createTab(Tabs.this.element.byXpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]"),
-                        Tabs.this.element.byXpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]")
+                return createTab(Tabs.this.region.findBy(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")),
+                        Tabs.this.region.findBy(xpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]"))
                 );
             }
         };
@@ -42,13 +44,13 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Page<E> {
         return tabs.switchTo(new Target<T>() {
             @Override
             public T create() {
-                return createTab(element.byCss(format(".tab-header[target='%s']", name)),
-                        element.byCss(format(".tab-content[target='%s']", name)));
+                return createTab(region.findBy(css(format(".tab-header[target='%s']", name))),
+                        region.findBy(css(format(".tab-content[target='%s']", name))));
             }
 
             @Override
             public void navigateTo() {
-                element.byCss(format(".tab-header[target='%s']", name)).click();
+                region.findBy(css(format(".tab-header[target='%s']", name))).click();
             }
         });
     }

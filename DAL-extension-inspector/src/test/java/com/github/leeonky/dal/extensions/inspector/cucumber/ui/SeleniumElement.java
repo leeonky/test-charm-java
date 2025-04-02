@@ -62,7 +62,7 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
             case "placeholder":
                 return xpath(format(".//*[@placeholder='%s']", by.value()));
             default:
-                throw new UnsupportedOperationException("Unsupported by type: " + by.type());
+                throw new UnsupportedOperationException("Unsupported find type: " + by.type());
         }
     }
 

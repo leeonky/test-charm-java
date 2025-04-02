@@ -3,6 +3,8 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Page;
 
+import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+
 public class WatchesItem extends Page<Element> {
     public WatchesItem(Element element) {
         super(element);
@@ -10,14 +12,14 @@ public class WatchesItem extends Page<Element> {
 
     @Override
     public String toString() {
-        return element.byCss(".watches-item-content").text();
+        return region.findBy(css(".watches-item-content")).text();
     }
 
     public Element image() {
-        return element.byCss("img");
+        return region.findBy(css("img"));
     }
 
     public Element download() {
-        return element.byCss("a");
+        return region.findBy(css("a"));
     }
 }

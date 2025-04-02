@@ -16,19 +16,19 @@ public class WatchesPage extends OutputPage implements ProxyObject {
     }
 
     public List<Element> watches() {
-        return element.allBy(css(".watches-item"));
+        return region.findAllBy(css(".watches-item"));
     }
 
     @Override
     public WatchesItem getValue(Object property) {
-        return watches().stream().filter(panel -> property.equals(panel.byCss(".watches-item-name").text()))
+        return watches().stream().filter(panel -> property.equals(panel.findBy(css(".watches-item-name")).text()))
                 .map(WatchesItem::new)
                 .findFirst().orElse(null);
     }
 
     @Override
     public Set<Object> getPropertyNames() {
-        return watches().stream().map(panel -> (Object) panel.byCss(".watches-item-name").text())
+        return watches().stream().map(panel -> (Object) panel.findBy(css(".watches-item-name")).text())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

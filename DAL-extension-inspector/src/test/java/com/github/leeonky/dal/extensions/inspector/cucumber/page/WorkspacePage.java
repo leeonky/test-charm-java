@@ -4,12 +4,14 @@ import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.Tab;
 import com.github.leeonky.dal.extensions.inspector.cucumber.Tabs;
 
+import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+
 public class WorkspacePage extends Tab {
     private final Tabs<OutputPage, Element> outputs;
 
     public WorkspacePage(Element header, Element element) {
         super(header, element);
-        outputs = new Tabs<OutputPage, Element>(element.byCss(".code-results")) {
+        outputs = new Tabs<OutputPage, Element>(element.findBy(css(".code-results"))) {
 
             @Override
             protected OutputPage createTab(Element header, Element tab) {
@@ -29,6 +31,6 @@ public class WorkspacePage extends Tab {
     }
 
     public void execute() {
-        element.byCss(".run").click();
+        region.findBy(css(".run")).click();
     }
 }

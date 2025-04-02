@@ -21,6 +21,10 @@ public class By {
         return new By(TEXT, xpath);
     }
 
+    public static By placeholder(String placeholder) {
+        return new By(PLACEHOLDER, placeholder);
+    }
+
     public String type() {
         return type;
     }

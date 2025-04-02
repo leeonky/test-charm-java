@@ -1,14 +1,14 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
 
 public class Page<T extends Element<T, ?>> {
-    protected final T element;
+    protected final T region;
 
-    public Page(T element) {
-        this.element = element;
+    public Page(T region) {
+        this.region = region;
     }
 
     @Override
     public String toString() {
-        return element.text();
+        return region.text();
     }
 }

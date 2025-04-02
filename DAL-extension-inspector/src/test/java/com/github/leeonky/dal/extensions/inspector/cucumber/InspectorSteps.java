@@ -24,6 +24,7 @@ import java.net.URL;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
+import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
 
 public class InspectorSteps {
     private TestContext testContext;
@@ -54,7 +55,7 @@ public class InspectorSteps {
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
         mainPageBk = new MainPageBk(seleniumWebDriver);
-        mainPage = new MainPage(new Element(seleniumWebDriver.getWebDriver().findElement(By.tagName("html"))).byCss("body"));
+        mainPage = new MainPage(new Element(seleniumWebDriver.getWebDriver().findElement(By.tagName("html"))).findBy(css("body")));
     }
 
     @And("shutdown web server")

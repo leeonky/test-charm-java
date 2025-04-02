@@ -4,22 +4,24 @@ import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.Tabs;
 import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Page;
 
+import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+
 public class MainPage extends Page<Element> {
 
     private final Tabs<WorkbenchPage, Element> tabs;
 
     public MainPage(Element element) {
         super(element);
-        tabs = new Tabs<WorkbenchPage, Element>(element.byCss(".workbenches")) {
+        tabs = new Tabs<WorkbenchPage, Element>(element.findBy(css(".workbenches"))) {
         };
     }
 
     public Element AutoExecute() {
-        return element.byCss(".auto-execute.switch");
+        return region.findBy(css(".auto-execute.switch"));
     }
 
     public Element title() {
-        return element.byCss(".main-title");
+        return region.findBy(css(".main-title"));
     }
 
     public WorkbenchPage WorkBench(String name) {
