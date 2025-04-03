@@ -1,9 +1,9 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber;
+package com.github.leeonky.dal.extensions.inspector.cucumber.page.e;
 
-import com.github.leeonky.dal.extensions.inspector.cucumber.ui.SeleniumElement;
+import com.github.leeonky.dal.uiat.SeleniumElement;
 import org.openqa.selenium.WebElement;
 
-import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+import static com.github.leeonky.dal.uiat.By.css;
 import static java.util.Arrays.binarySearch;
 
 public class Element extends SeleniumElement<Element> {

@@ -8,7 +8,7 @@ Feature: exchange
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
       When launch inspector web page
-      Then you should see2:
+      Then you should see:
         """
         ::eventually : {
 //        TODO refactor
@@ -22,7 +22,7 @@ Feature: exchange
       When launch inspector web page
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
-      Then you should see2:
+      Then you should see:
         """
         ::eventually : {
           Monitors=  | value |
@@ -39,7 +39,7 @@ Feature: exchange
         1=2
         """
       When launch inspector web page
-      Then you should see2:
+      Then you should see:
         """
         WorkBench::eventually: {
           Current: {
@@ -59,7 +59,7 @@ Feature: exchange
     Scenario: show all DAL instance name on page
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
-      Then you should see2:
+      Then you should see:
         """
         ::eventually : {
           Monitors=  | value |
@@ -71,7 +71,7 @@ Feature: exchange
     Scenario: update instance names on page when create more DAL instance with inspector extension
       Given created DAL 'Ins1' with inspector extended
       And created DAL 'Ins2' with inspector extended
-      Then you should see2:
+      Then you should see:
         """
         ::eventually : {
           Monitors=  | value |
@@ -85,7 +85,7 @@ Feature: exchange
       When launch inspector web server
       And launch inspector web page
       And created DAL 'Ins1' with inspector extended
-      And you should see2:
+      And you should see:
       """
       ::eventually : { Monitors[Ins1].value: on }
       """
@@ -103,7 +103,7 @@ Feature: exchange
         message::inspect
         """
       Then 'Ins1' test still run after 1s
-      And you should see2:
+      And you should see:
         """
         WorkBench::eventually: {
           Current: {
@@ -112,7 +112,7 @@ Feature: exchange
           }
         }
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench[Ins1]: {
           ::eventually: {
@@ -151,7 +151,7 @@ Feature: exchange
           "message": "hello"
         }
         """
-      When you2:
+      When you:
         """
         Monitors[Ins1]: false
         """
@@ -165,7 +165,7 @@ Feature: exchange
           hello
           ```
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench::eventually: { Current.header: 'Try It!' }
         """
@@ -178,7 +178,7 @@ Feature: exchange
           "message": "hello"
         }
         """
-      When you2:
+      When you:
         """
         Monitors[Ins1]: false
         """
@@ -195,11 +195,11 @@ Feature: exchange
         1=2
         """
       Then 'Ins1' test still run after 1s
-      And you should see2:
+      And you should see:
         """
         WorkBench.Current.header: Ins1
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench[Ins1]: {
           ::eventually: {
@@ -220,7 +220,6 @@ Feature: exchange
                       ^
                      ```
           }
-
           Output: {
             Root: ```
                   null
@@ -243,7 +242,7 @@ Feature: exchange
       And launch inspector web page
       And created DAL 'Ins1' with inspector extended
       Given Inspector in "FORCED" mode
-      And you should see2:
+      And you should see:
       """
       ::eventually : { Monitors[Ins1].value: on }
       """
@@ -259,7 +258,7 @@ Feature: exchange
         """
         message::inspect
         """
-      When you2:
+      When you:
         """
         Release[Ins1]
         """
@@ -269,7 +268,7 @@ Feature: exchange
           hello
           ```
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench.Current.connected: false
         """
@@ -279,7 +278,7 @@ Feature: exchange
         """
         message= world
         """
-      When you2:
+      When you:
         """
         Release[Ins1]
         """
@@ -300,7 +299,7 @@ Feature: exchange
         """
         message::inspect
         """
-      When you2:
+      When you:
         """
         Monitors[Ins1]: false
         """
@@ -316,7 +315,7 @@ Feature: exchange
         """
         message= world
         """
-      When you2:
+      When you:
         """
         ReleaseAll
         """
@@ -331,7 +330,7 @@ Feature: exchange
                   ^
                  ```
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench.Current.connected: false
         """
@@ -341,7 +340,7 @@ Feature: exchange
         """
         ::inspect
         """
-      And you2:
+      And you:
         """
         WorkBench.Current.header: 'Ins1'
 
@@ -351,14 +350,14 @@ Feature: exchange
         """
         message::inspect
         """
-      Then you should see2:
+      Then you should see:
         """
         WorkBench.Current::eventually: {
           header: Ins1
           connected: true
         }
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench[Ins1]: {
           ::eventually: {
@@ -372,7 +371,6 @@ Feature: exchange
                      <hello>
                      ```
           }
-
           Output: {
             Root: ```
                   java.lang.String
@@ -391,7 +389,7 @@ Feature: exchange
         """
         message= world
         """
-      When you2:
+      When you:
         """
         Pass[Ins1]
         """
@@ -399,7 +397,7 @@ Feature: exchange
         """
         = null
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench::eventually: { Current.connected: false }
         """
@@ -415,7 +413,7 @@ Feature: exchange
         ::inspect
         """
       And launch inspector web page
-      Then you should see2:
+      Then you should see:
         """
         WorkBench::eventually: {
           Current: {
@@ -438,7 +436,7 @@ Feature: exchange
         """
         ::inspect
         """
-      Then you should see2:
+      Then you should see:
         """
         WorkBench::eventually: {
           Current: {
@@ -462,21 +460,18 @@ Feature: exchange
         """
         ::inspect
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench::eventually: { Current.connected: true }
         """
 
     Scenario: should clear connected when disconnected
       When shutdown web server
-      Then you should see2:
+      Then you should see:
         """
         WorkBench::eventually: {
           Current: {
-
-  #        TODO refactor
             DAL.@class= [... disconnected ...]
-
             connected: false
           }
         }

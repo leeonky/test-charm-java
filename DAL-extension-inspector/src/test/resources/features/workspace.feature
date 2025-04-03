@@ -15,11 +15,11 @@ Feature: workspace
       """
 
   Scenario: copy new workspace with exist code
-    When you2:
+    When you:
       """
       WorkBench::await[Ins1].newWorkspace
       """
-    Then you should see2:
+    Then you should see:
       """
       WorkBench[Ins1]::eventually: {
         Workspace.Current.header: '1'
@@ -71,11 +71,11 @@ Feature: workspace
       }
       """
 # execute in new space
-    When you2:
+    When you:
       """
       WorkBench[Ins1].Workspace[1].DAL: '= hello'
       """
-    Then you should see2:
+    Then you should see:
       """
       WorkBench[Ins1].Workspace[1]::eventually: {
           Current: { header: Result }
@@ -103,11 +103,11 @@ Feature: workspace
       }
       """
 # copy to next
-    When you2:
+    When you:
       """
       WorkBench[Ins1].Workspace[0].newWorkspace
       """
-    Then you should see2:
+    Then you should see:
       """
       WorkBench[Ins1]::eventually: {
         Workspace.Current.header: '1'
@@ -134,11 +134,11 @@ Feature: workspace
       }
       """
 # remove
-    When you2:
+    When you:
       """
       WorkBench[Ins1].Workspace[1].dismiss
       """
-    Then you should see2:
+    Then you should see:
       """
       WorkBench[Ins1]::eventually: {
         Workspace.Current.header: '0'

@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
+package com.github.leeonky.dal.uiat;
 
 import com.github.leeonky.util.BeanClass;
 import org.slf4j.Logger;

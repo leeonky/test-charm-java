@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
-import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.dal.runtime.ProxyObject;
 
 import java.util.LinkedHashSet;
@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+import static com.github.leeonky.dal.uiat.By.css;
 
-public class WatchesPage extends OutputPage implements ProxyObject {
-    public WatchesPage(Element header, Element tab) {
+public class WatchesRegion extends OutputRegion implements ProxyObject {
+    public WatchesRegion(Element header, Element tab) {
         super(header, tab);
     }
 
     public List<Element> watches() {
-        return region.findAllBy(css(".watches-item"));
+        return element.findAllBy(css(".watches-item"));
     }
 
     @Override

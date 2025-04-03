@@ -1,15 +1,27 @@
 package com.github.leeonky.extensions.dal;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Element;
-import com.github.leeonky.dal.extensions.inspector.cucumber.ui.WebElement;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
+import com.github.leeonky.dal.runtime.checker.Checker;
+import com.github.leeonky.dal.runtime.checker.CheckingContext;
+import com.github.leeonky.dal.uiat.Element;
+import com.github.leeonky.dal.uiat.WebElement;
 import com.github.leeonky.util.BeanClass;
 
-import static com.github.leeonky.extensions.dal.AssignableExtension.PHONY_CHECKER;
-
 public class ElementExtension implements Extension {
+    public static final Checker PHONY_CHECKER = new Checker() {
+        @Override
+        public String message(CheckingContext checkingContext) {
+            return "Phony verification opt!!!";
+        }
+
+        @Override
+        public boolean failed(CheckingContext checkingContext) {
+            return false;
+        }
+    };
+
     @Override
     @SuppressWarnings("unchecked")
     public void extend(DAL dal) {

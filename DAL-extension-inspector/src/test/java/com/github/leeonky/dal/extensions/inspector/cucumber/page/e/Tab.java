@@ -1,8 +1,8 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber;
+package com.github.leeonky.dal.extensions.inspector.cucumber.page.e;
 
-import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Page;
+import com.github.leeonky.dal.uiat.Region;
 
-public class Tab extends Page<Element> {
+public class Tab extends Region<Element> {
     private final Element header;
 
     public Tab(Element header, Element element) {

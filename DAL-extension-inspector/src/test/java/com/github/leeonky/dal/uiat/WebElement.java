@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
+package com.github.leeonky.dal.uiat;
 
 public interface WebElement<T extends WebElement<T, E>, E> extends Element<T, E> {
     @Override

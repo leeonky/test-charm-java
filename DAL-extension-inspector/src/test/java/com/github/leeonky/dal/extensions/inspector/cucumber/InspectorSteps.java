@@ -5,8 +5,7 @@ import com.github.leeonky.dal.extensions.basic.binary.util.HexFormatter;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
-import com.github.leeonky.dal.extensions.inspector.cucumber.pagebk.MainPageBk;
-import com.github.leeonky.dal.extensions.inspector.cucumber.pagebk.SeleniumWebDriver;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.Sneaky;
 import io.cucumber.java.After;
@@ -16,7 +15,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
-import org.openqa.selenium.By;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -24,20 +22,19 @@ import java.net.URL;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
-import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+import static com.github.leeonky.dal.uiat.By.css;
 
 public class InspectorSteps {
     private TestContext testContext;
-    private MainPageBk mainPageBk;
     private MainPage mainPage;
     private final DAL dal = DAL.create(InspectorExtension.class);
 
-    private final SeleniumWebDriver seleniumWebDriver = new SeleniumWebDriver(() ->
+    private final Browser browser = new Browser(() ->
             Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
 
     @After
     public void close() {
-        seleniumWebDriver.destroy();
+        browser.destroy();
     }
 
     @Before
@@ -54,8 +51,8 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        mainPageBk = new MainPageBk(seleniumWebDriver);
-        mainPage = new MainPage(new Element(seleniumWebDriver.getWebDriver().findElement(By.tagName("html"))).findBy(css("body")));
+        Element html = browser.open("http://host.docker.internal:10082");
+        mainPage = new MainPage(html.findBy(css("body")));
     }
 
     @And("shutdown web server")
@@ -78,7 +75,7 @@ public class InspectorSteps {
     @Deprecated
     public void you(String expression) {
         try {
-            dal.evaluateAll(mainPageBk, expression);
+            dal.evaluateAll(mainPage, expression);
         } catch (InterpreterException e) {
             throw new AssertionError("\n" + e.show(expression) + "\n\n" + e.getMessage());
         }
@@ -119,22 +116,5 @@ public class InspectorSteps {
     @Given("the {string} binary input:")
     public void theInsBinaryInput(String dalIns, String binary) {
         testContext.addInput(dalIns, new HexFormatter().format(binary, null));
-    }
-
-    @Then("you should see2:")
-    @Then("you2:")
-    public void youShouldSee(String expression) {
-        try {
-            dal.evaluateAll(mainPage, expression);
-        } catch (InterpreterException e) {
-            throw new AssertionError("\n" + e.show(expression) + "\n\n" + e.getMessage());
-        }
-    }
-
-    @SneakyThrows
-    @Then("you should see2 after {int}s:")
-    public void youShouldSee2AfterS(int seconds, String expression) {
-        Thread.sleep(seconds * 1000L);
-        youShouldSee(expression);
     }
 }

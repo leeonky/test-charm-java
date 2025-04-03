@@ -1,34 +1,34 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
-import com.github.leeonky.dal.extensions.inspector.cucumber.Element;
-import com.github.leeonky.dal.extensions.inspector.cucumber.Tabs;
-import com.github.leeonky.dal.extensions.inspector.cucumber.ui.Page;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
+import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
+import com.github.leeonky.dal.uiat.Region;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.extensions.inspector.cucumber.ui.By.css;
+import static com.github.leeonky.dal.uiat.By.css;
 
-public class MainPage extends Page<Element> {
+public class MainPage extends Region<Element> {
 
-    private final Tabs<WorkbenchPage, Element> tabs;
+    private final Tabs<WorkbenchRegion, Element> tabs;
 
     public MainPage(Element element) {
         super(element);
-        tabs = new Tabs<WorkbenchPage, Element>(element.findBy(css(".workbenches"))) {
+        tabs = new Tabs<WorkbenchRegion, Element>(element.findBy(css(".workbenches"))) {
         };
     }
 
     public Element AutoExecute() {
-        return region.findBy(css(".auto-execute.switch"));
+        return element.findBy(css(".auto-execute.switch"));
     }
 
     public Element title() {
-        return region.findBy(css(".main-title"));
+        return element.findBy(css(".main-title"));
     }
 
-    public WorkbenchPage WorkBench(String name) {
+    public WorkbenchRegion WorkBench(String name) {
         if ("Current".contains(name))
             return tabs.getCurrent();
 
@@ -36,7 +36,7 @@ public class MainPage extends Page<Element> {
     }
 
     public Map<String, Element> Monitors() {
-        return region.findAllBy(css(".instance-monitors .switch")).stream()
+        return element.findAllBy(css(".instance-monitors .switch")).stream()
                 .collect(Collectors.toMap(Element::text, Function.identity()));
     }
 
@@ -45,7 +45,7 @@ public class MainPage extends Page<Element> {
     }
 
     public void ReleaseAll() {
-        region.findBy(css(".release.release-all")).click();
+        element.findBy(css(".release.release-all")).click();
     }
 
     public void Pass(String workbenchName) {

@@ -1,0 +1,60 @@
+package com.github.leeonky.dal.extensions.inspector.cucumber.page.e;
+
+import com.github.leeonky.dal.uiat.Element;
+import com.github.leeonky.dal.uiat.Pages;
+import com.github.leeonky.dal.uiat.Region;
+import com.github.leeonky.dal.uiat.Target;
+import com.github.leeonky.util.BeanClass;
+
+import static com.github.leeonky.dal.uiat.By.css;
+import static com.github.leeonky.dal.uiat.By.xpath;
+import static java.lang.String.format;
+
+public class Tabs<T extends Tab, E extends Element<E, ?>> extends Region<E> {
+    final Pages<T> tabs;
+
+    public Tabs(E element) {
+        super(element);
+        tabs = new Pages<T>() {
+            @Override
+            public T getCurrent() {
+                return Tabs.this.getCurrent();
+            }
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    protected T createTab(E header, E tab) {
+        return (T) BeanClass.create(getClass()).getSuper(Tabs.class).getTypeArguments(0)
+                .orElseThrow(() -> new IllegalStateException("Can not resolve generic type of: " + getClass()))
+                .newInstance(header, tab);
+    }
+
+    private String containsClass(String singleClassName) {
+        return "contains(concat(' ', normalize-space(@class), ' '), ' " + singleClassName + " ')";
+    }
+
+    public T getCurrent() {
+        try {
+            return createTab(Tabs.this.element.findAllBy(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")).get(0),
+                    Tabs.this.element.findAllBy(xpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]")).get(0));
+        } catch (Exception ignore) {
+            return null;
+        }
+    }
+
+    public T switchTo(String name) {
+        return tabs.switchTo(new Target<T>() {
+            @Override
+            public T create() {
+                return createTab(element.findBy(css(format(".tab-header[target='%s']", name))),
+                        element.findBy(css(format(".tab-content[target='%s']", name))));
+            }
+
+            @Override
+            public void navigateTo() {
+                element.findBy(css(format(".tab-header[target='%s']", name))).click();
+            }
+        });
+    }
+}

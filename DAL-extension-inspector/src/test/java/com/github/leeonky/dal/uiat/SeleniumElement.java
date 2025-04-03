@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
+package com.github.leeonky.dal.uiat;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.inspector.cucumber.ui;
+package com.github.leeonky.dal.uiat;
 
 public abstract class ElementState<T extends Element<T, E>, E> implements Element<T, E> {
     private By locator;

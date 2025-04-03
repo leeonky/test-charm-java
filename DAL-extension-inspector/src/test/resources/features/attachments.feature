@@ -17,12 +17,12 @@ Feature: attachments
       """
       ::inspect
       """
-    When you2:
+    When you:
       """
       WorkBench::await[Ins1]: { DAL: '.string::watch' }
       WorkBench[Ins1].execute
       """
-    Then you should see2:
+    Then you should see:
       """
       WorkBench[Ins1].Output: {
         Root: ```
@@ -58,12 +58,12 @@ Feature: attachments
       """
       ::inspect
       """
-    When you2:
+    When you:
       """
       WorkBench::await[Ins1]: { DAL: '::watch' }
       WorkBench[Ins1].execute
       """
-    Then you should see2:
+    Then you should see:
       """
       WorkBench[Ins1].Output.Watches= {
             '{}': {

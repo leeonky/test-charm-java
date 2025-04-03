@@ -7,11 +7,11 @@ Feature: basic
       And  launch inspector web page
 
     Scenario: launch server and page
-      Then you should see2:
+      Then you should see:
         """
         title: 'DAL inspector'
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench.Current.header: 'Try It!'
         """
@@ -23,15 +23,13 @@ Feature: basic
           "message": "hello"
         }
         """
-      When you2:
+      When you:
         """
         WorkBench[Try It!].DAL: message
         """
-      Then you should see2:
+      Then you should see:
         """
         WorkBench[Try It!]::eventually: {
-
-#        TODO refactor
           DAL.@class= [... result ...]
 
           Current: {
@@ -42,7 +40,7 @@ Feature: basic
              ```
         }
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench[Try It!].Output: {
           Root: ```
@@ -56,15 +54,13 @@ Feature: basic
           Inspect: message
         }
         """
-      When you2:
+      When you:
         """
         WorkBench[Try It!].DAL: '= world'
         """
-      Then you should see2:
+      Then you should see:
         """
         WorkBench[Try It!]::eventually: {
-
-#        TODO refactor
           DAL.@class= [... error ...]
 
           Current: { header: Error }
@@ -81,7 +77,7 @@ Feature: basic
                    ```
         }
         """
-      And you should see2:
+      And you should see:
         """
         WorkBench[Try It!].Output: {
           Root: ```
@@ -105,30 +101,25 @@ Feature: basic
           "message": "hello"
         }
         """
-      When you2:
+      When you:
         """
         AutoExecute: false
         WorkBench[Try It!].DAL: message
         """
-      Then you should see2 after 1s:
+      Then you should see after 1s:
         """
         WorkBench[Try It!]::eventually: {
-
-#        TODO refactor
           DAL.@class= [code-editor]
-
           Output.Result: ''
         }
         """
-      When you2:
+      When you:
         """
           WorkBench[Try It!].execute
         """
-      Then you should see2:
+      Then you should see:
         """
         WorkBench[Try It!]::eventually: {
-
-#        TODO refactor
           DAL.@class= [... result ...]
 
           Current: {
@@ -139,19 +130,17 @@ Feature: basic
              ```
         }
         """
-      When you2:
+      When you:
         """
         WorkBench[Try It!].DAL: '= world'
         """
-      When you2:
+      When you:
         """
           WorkBench[Try It!].execute
         """
-      Then you should see2:
+      Then you should see:
         """
         WorkBench[Try It!]::eventually: {
-
-#        TODO refactor
           DAL.@class= [... error ...]
 
           Current: { header: Error }
@@ -171,16 +160,14 @@ Feature: basic
 
     Scenario: editor in editing state
       When shutdown web server
-      And you2:
+      And you:
         """
         WorkBench[Try It!].DAL: message
         """
-      Then you should see2:
+      Then you should see:
         """
         WorkBench::eventually: {
           Current: {
-
-  #        TODO refactor
             DAL.@class= [... executing ...]
           }
         }
