@@ -318,7 +318,7 @@ Feature: async
       ::await.int= 100
       """
 
-    Scenario: default timeout is waiting time when set null to default timeout
+    Scenario: default timeout is double waiting time when set null to default timeout
       Given the following java class:
       """
       public class Data {
@@ -343,13 +343,13 @@ Feature: async
       Then the following should pass:
       """
       : {
-        ::await(0.13s).int::throw: {...}
+        ::await(0.065s).int::throw: {...}
 
         int2= 2
       }
       """
 
-    Scenario: default timeout is waiting time when default timeout less than waiting time
+    Scenario: default timeout is double waiting time when default timeout less than waiting time
       Given the following java class:
       """
       public class Data {
@@ -374,7 +374,7 @@ Feature: async
       Then the following should pass:
       """
       : {
-        ::await(0.14s).int::throw: {...}
+        ::await(0.07s).int::throw: {...}
 
         int2= 2
       }

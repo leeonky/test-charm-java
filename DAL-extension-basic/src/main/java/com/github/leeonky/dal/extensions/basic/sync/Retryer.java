@@ -33,7 +33,7 @@ public class Retryer {
         Instant start = Instant.now();
         do {
             try {
-                return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime, defaultTimeout), MILLISECONDS);
+                return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime * 2, defaultTimeout), MILLISECONDS);
             } catch (ExecutionException e) {
                 exception = e.getCause();
             } catch (Throwable e) {
