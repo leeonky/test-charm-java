@@ -40,6 +40,7 @@ public class Types implements Extension {
                         return proxyObject.isNull();
                     }
                 })
+                .registerReturnHook(d -> d.resolved().cast(ReturnHook.class).ifPresent(ReturnHook::onReturn))
         ;
     }
 }

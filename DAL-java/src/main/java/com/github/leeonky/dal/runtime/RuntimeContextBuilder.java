@@ -67,7 +67,7 @@ public class RuntimeContextBuilder {
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
     private final Features features = new Features();
-    private Consumer<Data> onPopHook = x -> {
+    private Consumer<Data> returnHook = x -> {
     };
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
@@ -296,8 +296,8 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerOnPop(Consumer<Data> hook) {
-        onPopHook = onPopHook.andThen(hook);
+    public RuntimeContextBuilder registerReturnHook(Consumer<Data> hook) {
+        returnHook = returnHook.andThen(hook);
         return this;
     }
 
@@ -336,7 +336,7 @@ public class RuntimeContextBuilder {
                 stack.push(data);
                 return supplier.get();
             } finally {
-                onPopHook.accept(stack.pop());
+                returnHook.accept(stack.pop());
             }
         }
 
