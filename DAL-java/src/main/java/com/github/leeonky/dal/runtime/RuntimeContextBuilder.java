@@ -20,10 +20,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +67,8 @@ public class RuntimeContextBuilder {
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
     private final Features features = new Features();
+    private Consumer<Data> onPopHook = x -> {
+    };
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -297,6 +296,11 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public RuntimeContextBuilder registerOnPop(Consumer<Data> hook) {
+        onPopHook = onPopHook.andThen(hook);
+        return this;
+    }
+
     public Features features() {
         return features;
     }
@@ -332,7 +336,7 @@ public class RuntimeContextBuilder {
                 stack.push(data);
                 return supplier.get();
             } finally {
-                stack.pop();
+                onPopHook.accept(stack.pop());
             }
         }
 
