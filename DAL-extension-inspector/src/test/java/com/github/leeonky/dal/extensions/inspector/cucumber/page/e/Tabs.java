@@ -1,13 +1,13 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page.e;
 
-import com.github.leeonky.dal.uiat.Element;
-import com.github.leeonky.dal.uiat.Pages;
-import com.github.leeonky.dal.uiat.Region;
-import com.github.leeonky.dal.uiat.Target;
+import com.github.leeonky.pf.Element;
+import com.github.leeonky.pf.Pages;
+import com.github.leeonky.pf.Region;
+import com.github.leeonky.pf.Target;
 import com.github.leeonky.util.BeanClass;
 
-import static com.github.leeonky.dal.uiat.By.css;
-import static com.github.leeonky.dal.uiat.By.xpath;
+import static com.github.leeonky.pf.By.css;
+import static com.github.leeonky.pf.By.xpath;
 import static java.lang.String.format;
 
 public class Tabs<T extends Tab, E extends Element<E, ?>> extends Region<E> {

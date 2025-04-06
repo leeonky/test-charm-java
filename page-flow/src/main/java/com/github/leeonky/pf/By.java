@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.uiat;
+package com.github.leeonky.pf;
 
 public class By {
     protected String type;

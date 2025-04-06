@@ -14,5 +14,7 @@ include(
         'jfactory-cucumber',
         'jfactory-property-value',
         'RESTful-cucumber',
+        'page-flow-selenium',
+        'page-flow',
         'view-mapper'
 )

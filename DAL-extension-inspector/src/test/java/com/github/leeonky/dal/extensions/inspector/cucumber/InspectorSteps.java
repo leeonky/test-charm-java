@@ -22,7 +22,7 @@ import java.net.URL;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
-import static com.github.leeonky.dal.uiat.By.css;
+import static com.github.leeonky.pf.By.css;
 
 public class InspectorSteps {
     private TestContext testContext;

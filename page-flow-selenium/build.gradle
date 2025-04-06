@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':page-flow')
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+}

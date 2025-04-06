@@ -2,13 +2,13 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
-import com.github.leeonky.dal.uiat.Region;
+import com.github.leeonky.pf.Region;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.uiat.By.css;
+import static com.github.leeonky.pf.By.css;
 
 public class MainPage extends Region<Element> {
 

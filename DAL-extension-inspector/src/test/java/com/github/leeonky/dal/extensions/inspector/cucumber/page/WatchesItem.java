@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
-import com.github.leeonky.dal.uiat.Region;
+import com.github.leeonky.pf.Region;
 
-import static com.github.leeonky.dal.uiat.By.css;
+import static com.github.leeonky.pf.By.css;
 
 public class WatchesItem extends Region<Element> {
     public WatchesItem(Element element) {

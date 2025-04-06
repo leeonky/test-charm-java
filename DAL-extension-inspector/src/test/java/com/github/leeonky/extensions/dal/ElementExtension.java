@@ -5,8 +5,8 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
-import com.github.leeonky.dal.uiat.Element;
-import com.github.leeonky.dal.uiat.WebElement;
+import com.github.leeonky.pf.Element;
+import com.github.leeonky.pf.WebElement;
 import com.github.leeonky.util.BeanClass;
 
 public class ElementExtension implements Extension {

@@ -4,8 +4,8 @@ import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tab;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
 
-import static com.github.leeonky.dal.uiat.By.css;
-import static com.github.leeonky.dal.uiat.By.placeholder;
+import static com.github.leeonky.pf.By.css;
+import static com.github.leeonky.pf.By.placeholder;
 
 public class WorkspaceRegion extends Tab {
     private final Tabs<OutputRegion, Element> outputs;

@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.uiat;
+package com.github.leeonky.pf;
 
 public interface WebElement<T extends WebElement<T, E>, E> extends Element<T, E> {
     @Override

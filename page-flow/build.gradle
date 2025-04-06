@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':DAL-java')
+    implementation 'org.slf4j:slf4j-api:1.8.0-beta4'
+    implementation project(':DAL-extension-basic')
+}

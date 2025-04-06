@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.uiat.By.css;
+import static com.github.leeonky.pf.By.css;
 
 public class WatchesRegion extends OutputRegion implements ProxyObject {
     public WatchesRegion(Element header, Element tab) {
