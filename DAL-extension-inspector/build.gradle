@@ -2,6 +2,7 @@ dependencies {
     implementation project(':DAL-java')
     implementation 'io.javalin:javalin:4.6.8'
     implementation("org.apache.tika:tika-core:1.28.5")
+    implementation 'org.slf4j:slf4j-simple:1.8.0-beta4'
     testImplementation project(':DAL-extension-basic')
     testImplementation project(':RESTful-cucumber')
     testImplementation project(':page-flow-selenium')

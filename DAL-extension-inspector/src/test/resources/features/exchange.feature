@@ -342,7 +342,7 @@ Feature: exchange
         """
       And you:
         """
-        WorkBench.Current.header: 'Ins1'
+        WorkBench::eventually: { Current.header: 'Ins1' }
 
         ReleaseAll
         """
