@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
+import static java.lang.Long.parseLong;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
@@ -199,7 +201,8 @@ public class Inspector {
             } catch (Exception ignore) {
             }
             //        TODO use sempahore to wait for the result
-            while (running)
+            Instant now = Instant.now();
+            while (running && stillWaiting(now))
                 Sneaky.run(() -> Thread.sleep(20));
 //            TODO use logger
             System.err.println("DAL inspector released with pass: " + pass);
@@ -329,6 +332,12 @@ public class Inspector {
             }
             return false;
         }
+    }
+
+    private static boolean stillWaiting(Instant now) {
+        String waitingTime = System.getenv("DAL_INSPECTOR_WAITING_TIME");
+        return (waitingTime == null ? 3600 * 1000 * 24 : parseLong(waitingTime))
+                > Duration.between(now, Instant.now()).toMillis();
     }
 
     public static boolean inspect(DAL dal, Data input, String code) {
