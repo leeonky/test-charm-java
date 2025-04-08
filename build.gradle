@@ -281,6 +281,7 @@ subprojects {
     configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
     configCucumber('jfactory-property-value', ['com.github.leeonky'])
     configCucumber('RESTful-cucumber', ['com.github.leeonky.cucumber.restful'])
+    configCucumber('page-flow', ['com.github.leeonky.pf.cucumber'])
 
     test {
         reports {

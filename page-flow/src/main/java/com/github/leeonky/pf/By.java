@@ -33,7 +33,7 @@ public class By {
         return value;
     }
 
-    public static final String XPATH = "xpath", CSS = "css", TAG = "tag", TEXT = "text", PLACEHOLDER = "placeholder";
+    public static final String XPATH = "xpath", CSS = "css", TEXT = "text", PLACEHOLDER = "placeholder";
 
     @Override
     public String toString() {

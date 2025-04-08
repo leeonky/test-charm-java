@@ -85,4 +85,32 @@ public interface Element<T extends Element<T, E>, E> {
     default Object value() {
         throw new IllegalStateException("Not support operation");
     }
+
+    default Finder<List<T>> findAll() {
+        return this::findAllBy;
+    }
+
+    default Finder<T> find() {
+        return this::findBy;
+    }
+
+    interface Finder<T> {
+        T by(By by);
+
+        default T css(String css) {
+            return by(By.css(css));
+        }
+
+        default T xpath(String xpath) {
+            return by(By.xpath(xpath));
+        }
+
+        default T text(String text) {
+            return by(By.text(text));
+        }
+
+        default T placeholder(String placeholder) {
+            return by(By.placeholder(placeholder));
+        }
+    }
 }
