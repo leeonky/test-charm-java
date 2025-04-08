@@ -22,3 +22,13 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - VNC_NO_PASSWORD=1
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.50.1-noble
+    ports:
+      - "3000:3000"
+    command: [ "npx", "-y", "playwright@1.50.1", "run-server", "--port", "3000", "--host", "0.0.0.0" ]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      DISPLAY: web-driver-arm:99.0

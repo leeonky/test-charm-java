@@ -15,6 +15,7 @@ include(
         'jfactory-property-value',
         'RESTful-cucumber',
         'page-flow-selenium',
+        'page-flow-playwright',
         'page-flow',
         'view-mapper'
 )
