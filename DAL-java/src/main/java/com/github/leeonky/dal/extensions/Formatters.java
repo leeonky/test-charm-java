@@ -14,6 +14,7 @@ public class Formatters implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.String())
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.URL())
+                .registerValueFormat(new com.github.leeonky.dal.format.Formatters.URI())
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.Instant())
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.LocalDate())
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.LocalDateTime())

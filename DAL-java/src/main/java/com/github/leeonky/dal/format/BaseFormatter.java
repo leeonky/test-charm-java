@@ -1,7 +1,5 @@
 package com.github.leeonky.dal.format;
 
-import com.github.leeonky.dal.runtime.IllegalTypeException;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -22,14 +20,6 @@ public abstract class BaseFormatter<T, R> implements Formatter<T, R> {
                 return guessInputType(parameterizedType.getRawType());
         } else
             return guessInputType(((Class) type).getGenericSuperclass());
-    }
-
-    public static <T, R> R toValueOrThrowIllegalTypeException(T arg, ParseBlock<T, R> parseBlock) {
-        try {
-            return parseBlock.run(arg);
-        } catch (Exception e) {
-            throw new IllegalTypeException();
-        }
     }
 
     @Override

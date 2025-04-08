@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.format;
 
 import com.github.leeonky.dal.runtime.IllegalTypeException;
+import com.github.leeonky.util.Sneaky;
 import com.github.leeonky.util.function.Comparator;
 
 import java.math.BigDecimal;
@@ -47,7 +48,7 @@ public class Formatters {
 
         @Override
         public java.time.Instant convert(java.lang.String input) {
-            return BaseFormatter.toValueOrThrowIllegalTypeException(input, java.time.Instant::parse);
+            return Sneaky.get(() -> java.time.Instant.parse(input));
         }
     }
 
@@ -121,7 +122,15 @@ public class Formatters {
 
         @Override
         public java.net.URL convert(java.lang.String input) {
-            return BaseFormatter.toValueOrThrowIllegalTypeException(input, java.net.URL::new);
+            return Sneaky.get(() -> new java.net.URL(input));
+        }
+    }
+
+    public static class URI extends BaseFormatter<java.lang.String, java.net.URI> {
+
+        @Override
+        public java.net.URI convert(java.lang.String input) {
+            return Sneaky.get(() -> new java.net.URI(input));
         }
     }
 
