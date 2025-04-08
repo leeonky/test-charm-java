@@ -67,7 +67,7 @@ Feature: attachments
       """
       WorkBench[Ins1].Output.Watches= {
             '{}': {
-              <<image.attribute[src] download.attribute[href]>> is URL: {
+              <<image.attribute[src] download.attribute[href]>> is URI: {
                 path: '/attachments'
                 query: /name=Ins1&index=0.*/
               }

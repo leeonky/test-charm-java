@@ -6,5 +6,6 @@ dependencies {
     testImplementation project(':DAL-extension-basic')
     testImplementation project(':RESTful-cucumber')
     testImplementation project(':page-flow-selenium')
+    testImplementation project(':page-flow-playwright')
     testImplementation "org.awaitility:awaitility:4.0.2"
 }

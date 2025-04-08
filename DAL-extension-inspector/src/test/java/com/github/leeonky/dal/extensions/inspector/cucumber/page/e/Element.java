@@ -1,13 +1,13 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page.e;
 
-import com.github.leeonky.pf.SeleniumElement;
-import org.openqa.selenium.WebElement;
+import com.github.leeonky.pf.PlaywrightElement;
+import com.microsoft.playwright.Locator;
 
 import static com.github.leeonky.pf.By.css;
 import static java.util.Arrays.binarySearch;
 
-public class Element extends SeleniumElement<Element> {
-    public Element(WebElement element) {
+public class Element extends PlaywrightElement<Element> {
+    public Element(Locator element) {
         super(element);
     }
 
@@ -29,7 +29,7 @@ public class Element extends SeleniumElement<Element> {
     @Override
     public Object value() {
         if (isCheckedBox())
-            return findBy(css("input")).attribute("value");
+            return findBy(css("input")).value();
         return super.value();
     }
 

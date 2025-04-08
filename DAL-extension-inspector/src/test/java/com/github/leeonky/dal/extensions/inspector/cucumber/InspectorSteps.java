@@ -5,9 +5,7 @@ import com.github.leeonky.dal.extensions.basic.binary.util.HexFormatter;
 import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
-import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.util.Sneaky;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -15,10 +13,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import java.net.URL;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
@@ -29,8 +23,10 @@ public class InspectorSteps {
     private MainPage mainPage;
     private final DAL dal = DAL.create(InspectorExtension.class);
 
-    private final Browser browser = new Browser(() ->
-            Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
+//    private final BrowserSelenium browser = new BrowserSelenium(() ->
+//            Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
+
+    private final BrowserPlaywright browser = new BrowserPlaywright();
 
     @After
     public void close() {
@@ -51,8 +47,7 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        Element html = browser.open("http://host.docker.internal:10082");
-        mainPage = new MainPage(html.findBy(css("body")));
+        mainPage = new MainPage(browser.open("http://host.docker.internal:10082").findBy(css("body")));
     }
 
     @And("shutdown web server")

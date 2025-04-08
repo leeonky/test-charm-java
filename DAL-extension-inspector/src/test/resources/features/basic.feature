@@ -13,7 +13,9 @@ Feature: basic
         """
       And you should see:
         """
-        WorkBench.Current.header: 'Try It!'
+        WorkBench::eventually: {
+          Current.header: 'Try It!'
+        }
         """
 
     Scenario: auto execute expression and get result or error
