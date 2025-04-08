@@ -27,12 +27,13 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
     private String locateInfo(By by) {
         switch (by.type()) {
             case "css":
-            case "xpath":
                 return by.value();
+            case "xpath":
+                return "xpath=" + by.value();
             case "text":
-                return format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value());
+                return format("xpath=.//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value());
             case "placeholder":
-                return format(".//*[@placeholder='%s']", by.value());
+                return format("xpath=.//*[@placeholder='%s']", by.value());
             default:
                 throw new UnsupportedOperationException("Unsupported find type: " + by.type());
         }
@@ -74,5 +75,10 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
     public T clear() {
         locator.fill("");
         return (T) this;
+    }
+
+    @Override
+    public Object value() {
+        return locator.inputValue();
     }
 }
