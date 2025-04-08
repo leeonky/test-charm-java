@@ -44,7 +44,7 @@ Feature: basic
         """
       And you should see:
         """
-        WorkBench[Try It!].Output: {
+        WorkBench[Try It!].Output::eventually: {
           Root: ```
                 {
                     message: java.lang.String <hello>
@@ -81,7 +81,7 @@ Feature: basic
         """
       And you should see:
         """
-        WorkBench[Try It!].Output: {
+        WorkBench[Try It!].Output::eventually: {
           Root: ```
                 {
                     message: java.lang.String <hello>

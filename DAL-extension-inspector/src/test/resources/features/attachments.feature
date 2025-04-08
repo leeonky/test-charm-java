@@ -24,7 +24,7 @@ Feature: attachments
       """
     Then you should see:
       """
-      WorkBench[Ins1].Output: {
+      WorkBench[Ins1].Output::eventually: {
         Root: ```
               {
                   string: java.lang.String <hello>
@@ -65,7 +65,7 @@ Feature: attachments
       """
     Then you should see:
       """
-      WorkBench[Ins1].Output.Watches= {
+      WorkBench[Ins1].Output.Watches::eventually= {
             '{}': {
               <<image.attribute[src] download.attribute[href]>> is URI: {
                 path: '/attachments'

@@ -126,7 +126,7 @@ Feature: exchange
                      <hello>
                      ```
           }
-          Output: {
+          Output::eventually: {
             Root: ```
                   java.lang.String
                   <hello>
@@ -220,7 +220,7 @@ Feature: exchange
                       ^
                      ```
           }
-          Output: {
+          Output::eventually: {
             Root: ```
                   null
                   ```
@@ -270,7 +270,7 @@ Feature: exchange
         """
       And you should see:
         """
-        WorkBench.Current.connected: false
+        WorkBench.Current::eventually: { connected: false }
         """
 
     Scenario: release failed test from current workbench and test got result
@@ -332,7 +332,7 @@ Feature: exchange
         """
       And you should see:
         """
-        WorkBench.Current.connected: false
+        WorkBench.Current::eventually: {connected: false}
         """
 
     Scenario: inspect same DAL twice should reuse workbench
@@ -352,9 +352,11 @@ Feature: exchange
         """
       Then you should see:
         """
-        WorkBench.Current::eventually: {
-          header: Ins1
-          connected: true
+        WorkBench::eventually: {
+            Current: {
+            header: Ins1
+            connected: true
+          }
         }
         """
       And you should see:
@@ -371,7 +373,7 @@ Feature: exchange
                      <hello>
                      ```
           }
-          Output: {
+          Output::eventually: {
             Root: ```
                   java.lang.String
                   <hello>
