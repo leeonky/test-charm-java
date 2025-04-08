@@ -6,6 +6,8 @@ import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Playwright;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -13,6 +15,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
+
+import java.util.HashMap;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.extensions.basic.text.Methods.json;
@@ -26,7 +30,11 @@ public class InspectorSteps {
 //    private final BrowserSelenium browser = new BrowserSelenium(() ->
 //            Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
 
-    private final BrowserPlaywright browser = new BrowserPlaywright();
+    private static final Playwright playwright = Playwright.create();
+    private final BrowserPlaywright browser = new BrowserPlaywright(() -> playwright.chromium().connect("ws://www.s.com:3000/", new BrowserType.ConnectOptions().setHeaders(
+            new HashMap<String, String>() {{
+                put("x-playwright-launch-options", "{ \"headless\": false }");
+            }})));
 
     @After
     public void close() {
