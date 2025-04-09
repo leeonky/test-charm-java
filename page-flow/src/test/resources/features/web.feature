@@ -3,13 +3,11 @@ Feature: web ui
     Scenario Outline: find all element by css
       When launch the following web page:
         """
-        <html>
-        <body>
-          <div>unexpected</div>
-          <div class='target'>expected1</div>
-          <div class='target'>expected2</div>
-        </body>
-        </html>
+        html
+          body
+            div unexpected
+            .target expected1
+            .target expected2
         """
       Then page in driver <driver> should:
         """
