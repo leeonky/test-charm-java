@@ -358,3 +358,35 @@ Feature: commons
     """
     beans::meta[]= [hello world]
     """
+
+  Scenario: local meta property pattern
+    Given the following java class:
+    """
+    public class Bean {
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaPropertyPattern(Bean.class, ".*", meta-> meta.name());
+    """
+    Then the following verification for the instance of java class "Bean" should pass:
+    """
+    ::any= any
+    """
+
+  Scenario: exact name match meta property has higher priority than pattern
+    Given the following java class:
+    """
+    public class Bean {
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder()
+      .registerMetaProperty(Bean.class, "any", meta-> "exact")
+      .registerMetaPropertyPattern(Bean.class, ".*", meta-> "pattern");
+    """
+    Then the following verification for the instance of java class "Bean" should pass:
+    """
+    ::any= exact
+    """

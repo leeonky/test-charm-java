@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,6 +65,8 @@ public class RuntimeContextBuilder {
     private int maxDumpingObjectSize = 255;
     private ErrorHook errorHook = (i, code, e) -> false;
     private final Map<Class<?>, Map<Object, Function<MetaData, Object>>> localMetaProperties
+            = new TreeMap<>(Classes::compareByExtends);
+    private final Map<Class<?>, Map<Pattern, Function<MetaData, Object>>> localMetaPropertyPatterns
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
     private final Features features = new Features();
@@ -259,6 +262,11 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public RuntimeContextBuilder registerMetaPropertyPattern(Class<?> type, String name, Function<MetaData, Object> function) {
+        localMetaPropertyPatterns.computeIfAbsent(type, k -> new HashMap<>()).put(Pattern.compile(name), function);
+        return this;
+    }
+
     public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Object> action) {
         remarks.put(type, action);
         return this;
@@ -438,10 +446,17 @@ public class RuntimeContextBuilder {
         }
 
         private Optional<Function<MetaData, Object>> fetchLocalMetaFunction(MetaData metaData) {
-            return metaFunctionsByType(metaData).map(e -> {
-                metaData.addCallType(e.getKey());
-                return e.getValue().get(metaData.name());
-            }).filter(Objects::nonNull).findFirst();
+            return Stream.concat(metaFunctionsByType(metaData).map(e -> {
+                        metaData.addCallType(e.getKey());
+                        return e.getValue().get(metaData.name());
+                    }), metaFunctionPatternsByType(metaData).map(e -> {
+                        metaData.addCallType(e.getKey());
+                        return e.getValue().entrySet()
+                                .stream().filter(entry -> entry.getKey().matcher(metaData.name().toString()).matches())
+                                .map(Map.Entry::getValue)
+                                .findFirst().orElse(null);
+                    })).filter(Objects::nonNull)
+                    .findFirst();
         }
 
         public Optional<Function<MetaData, Object>> fetchSuperMetaFunction(MetaData metaData) {
@@ -455,6 +470,10 @@ public class RuntimeContextBuilder {
 
         private Stream<Map.Entry<Class<?>, Map<Object, Function<MetaData, Object>>>> metaFunctionsByType(MetaData metaData) {
             return localMetaProperties.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
+        }
+
+        private Stream<Map.Entry<Class<?>, Map<Pattern, Function<MetaData, Object>>>> metaFunctionPatternsByType(MetaData metaData) {
+            return localMetaPropertyPatterns.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
         }
 
         @SuppressWarnings("unchecked")
