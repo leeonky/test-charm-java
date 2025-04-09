@@ -40,7 +40,7 @@ public class Steps {
 
     @Then("page in driver selenium should:")
     public void pageInDriverSeleniumShould(String expression) {
-        expect(browserSelenium.open("http://host.docker.internal:10081").findBy(css("body")))
+        expect(browserSelenium.open("http://host.docker.internal:10081"))
                 .should(expression);
     }
 

@@ -41,7 +41,7 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
 
     @Override
     public String getTag() {
-        return locator.evaluate("el => el.tagName").toString();
+        return locator.evaluate("el => el.tagName").toString().toLowerCase();
     }
 
     @Override
