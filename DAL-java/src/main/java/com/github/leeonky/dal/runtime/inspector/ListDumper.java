@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime.inspector;
 
-import com.github.leeonky.dal.runtime.Data.Resolved;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.util.Classes;
 
 import java.util.stream.Stream;
@@ -8,12 +8,12 @@ import java.util.stream.Stream;
 public class ListDumper implements Dumper.Cacheable {
 
     @Override
-    public void cachedInspect(Resolved data, DumpingBuffer context) {
+    public void cachedInspect(Data data, DumpingBuffer context) {
         dumpType(data, context);
         dumpBody(data, context);
     }
 
-    private void dumpBody(Resolved data, DumpingBuffer dumpingBuffer) {
+    private void dumpBody(Data data, DumpingBuffer dumpingBuffer) {
         dumpingBuffer.append("[").indent(indentBuffer ->
                 data.list().wraps().forEach(ie -> {
                     indentBuffer.index(ie.index()).newLine().dumpValue(ie.value());
@@ -21,9 +21,9 @@ public class ListDumper implements Dumper.Cacheable {
                 })).optionalNewLine().append("]");
     }
 
-    protected void dumpType(Resolved data, DumpingBuffer context) {
-        if (!(data.instanceOf(Iterable.class)) && !(data.instanceOf(Stream.class))
-                && !data.value().getClass().isArray())
-            context.append(Classes.getClassName(data.value())).appendThen(" ");
+    protected void dumpType(Data data, DumpingBuffer context) {
+        if (!(data.resolved().instanceOf(Iterable.class)) && !(data.resolved().instanceOf(Stream.class))
+                && !data.instance().getClass().isArray())
+            context.append(Classes.getClassName(data.instance())).appendThen(" ");
     }
 }

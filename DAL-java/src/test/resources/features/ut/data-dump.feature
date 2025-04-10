@@ -415,7 +415,7 @@ Feature: dump-data
       {
         com.github.leeonky.dal.DAL.dal("AssertD").getRuntimeContextBuilder().registerDumper(Data.class, data ->
         new com.github.leeonky.dal.runtime.inspector.Dumper(){
-          public void dump(com.github.leeonky.dal.runtime.Data.Resolved data,
+          public void dump(com.github.leeonky.dal.runtime.Data data,
             com.github.leeonky.dal.runtime.inspector.DumpingBuffer dumpingBuffer) {
             throw new java.lang.RuntimeException("Error");
           }

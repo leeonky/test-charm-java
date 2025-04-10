@@ -1,23 +1,23 @@
 package com.github.leeonky.dal.runtime.inspector;
 
-import com.github.leeonky.dal.runtime.Data.Resolved;
+import com.github.leeonky.dal.runtime.Data;
 
 import java.util.Objects;
 
 class DumpingCacheKey {
-    private final Resolved data;
+    private final Data data;
 
-    public DumpingCacheKey(Resolved data) {
+    public DumpingCacheKey(Data data) {
         this.data = data;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash((Object) data.value());
+        return Objects.hash((Object) data.instance());
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof DumpingCacheKey && ((DumpingCacheKey) obj).data.value() == data.value();
+        return obj instanceof DumpingCacheKey && ((DumpingCacheKey) obj).data.instance() == data.instance();
     }
 }

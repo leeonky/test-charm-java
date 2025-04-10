@@ -80,7 +80,7 @@ public class Actual {
     }
 
     public Stream<?> fieldNames() {
-        return actual.resolved().fieldNames().stream();
+        return actual.fieldNames().stream();
     }
 
     public Stream<Actual> subElements() {

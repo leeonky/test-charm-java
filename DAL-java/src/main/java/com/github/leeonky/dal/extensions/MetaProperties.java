@@ -35,7 +35,7 @@ public class MetaProperties implements Extension {
     }
 
     private static Object keys(MetaData metaData) {
-        return metaData.data().resolved().fieldNames();
+        return metaData.data().fieldNames();
     }
 
     @Override

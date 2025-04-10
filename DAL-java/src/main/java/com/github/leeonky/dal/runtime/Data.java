@@ -120,7 +120,7 @@ public class Data {
     public Data filter(String prefix) {
         return new Data(() -> {
             FilteredObject filteredObject = new FilteredObject();
-            resolved().fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
+            fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                     .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
                             filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
             return filteredObject;
@@ -284,18 +284,6 @@ public class Data {
             return type.isInstance(instance);
         }
 
-        public Data getValueData(Object field) {
-            return Data.this.getValue(field);
-        }
-
-        public Set<?> fieldNames() {
-            return context.findPropertyReaderNames(instance);
-        }
-
-        public Data repack() {
-            return Data.this;
-        }
-
         boolean isEnum() {
             return value() != null && value().getClass().isEnum();
         }
@@ -344,5 +332,28 @@ public class Data {
         public static <T> Function<Resolved, Optional<T>> cast(Class<T> type) {
             return r -> BeanClass.cast(r.value(), type);
         }
+    }
+
+
+//    -------------------new------------------------
+
+    private DataList list;
+
+    public Set<?> fieldNames() {
+        return context.findPropertyReaderNames(instance());
+    }
+
+    public boolean isList() {
+        Object instance = instance();
+        return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
+    }
+
+    public DataList list() {
+        if (list == null) {
+            if (!isList())
+                throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
+            list = new DataList(context.createCollection(instance()));
+        }
+        return list;
     }
 }

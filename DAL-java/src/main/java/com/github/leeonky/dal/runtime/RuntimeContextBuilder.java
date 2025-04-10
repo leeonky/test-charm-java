@@ -493,13 +493,13 @@ public class RuntimeContextBuilder {
             return checkerSetForMatching.fetch(expected, actual);
         }
 
-        public Dumper fetchDumper(Data.Resolved data) {
-            return dumperFactories.tryGetData(data.value()).map(factory -> factory.apply(data)).orElseGet(() -> {
-                if (data.isNull())
+        public Dumper fetchDumper(Data data) {
+            return dumperFactories.tryGetData(data.instance()).map(factory -> factory.apply(data.resolved())).orElseGet(() -> {
+                if (data.resolved().isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
                     return Dumper.LIST_DUMPER;
-                if (data.isEnum())
+                if (data.resolved().isEnum())
                     return Dumper.VALUE_DUMPER;
                 return Dumper.MAP_DUMPER;
             });
