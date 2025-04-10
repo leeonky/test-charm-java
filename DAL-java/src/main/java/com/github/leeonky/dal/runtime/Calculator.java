@@ -34,17 +34,19 @@ public class Calculator {
         return value == null ? "[null]" : format("[%s: %s]", getClassName(value), value);
     }
 
-    public static boolean equals(Resolved resolved1, Resolved resolved2) {
-        return resolved1.value() == resolved2.value()
+    public static boolean equals(Data data1, Data data2) {
+        Resolved resolved1 = data1.resolved();
+        Resolved resolved2 = data2.resolved();
+        return data1.instance() == data2.instance()
                 || opt2(resolved2::isNull) && opt1(resolved1::isNull)
                 || resolved2.castList().flatMap(l2 -> resolved1.castList().map(l1 ->
-                        collect(resolved2, "2").equals(collect(resolved1, "1"))))
+                        collect(data2, "2").equals(collect(data1, "1"))))
                 .orElseGet(() -> Objects.equals(resolved1.value(), resolved2.value()));
     }
 
-    private static List<Object> collect(Resolved resolved, String index) {
+    private static List<Object> collect(Data data, String index) {
         try {
-            return resolved.list().collect();
+            return data.list().collect();
         } catch (InfiniteCollectionException ignore) {
             throw illegalOperation("Invalid operation, operand " + index + " is infinite collection");
         }
@@ -110,6 +112,6 @@ public class Calculator {
     }
 
     public static boolean notEqual(Data left, Data right) {
-        return !equals(left.resolved(), right.resolved());
+        return !equals(left, right);
     }
 }

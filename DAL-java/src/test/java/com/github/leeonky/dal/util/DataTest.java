@@ -152,7 +152,7 @@ class DataTest {
         }
 
         private void assertListSize(Object object, int size) {
-            assertThat(runtimeContextBuilder.build(object).getThis().resolved().list().size()).isEqualTo(size);
+            assertThat(runtimeContextBuilder.build(object).getThis().list().size()).isEqualTo(size);
         }
     }
 

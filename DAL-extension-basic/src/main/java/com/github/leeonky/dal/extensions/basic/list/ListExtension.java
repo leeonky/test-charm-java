@@ -16,7 +16,7 @@ public class ListExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("top", metaData -> (Callable<Integer, DALCollection<Object>>)
-                        size -> opt1(metaData.data().resolved()::list).limit(size))
+                        size -> opt1(metaData.data()::list).limit(size))
                 .registerMetaProperty("filter", metaData -> new Filterable(metaData.data()))
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())
@@ -38,7 +38,7 @@ public class ListExtension implements Extension {
         }
 
         protected DALCollection<Object> filterList(DALOperator operator, Data v2, DALRuntimeContext context) {
-            return opt1(data.resolved()::list).wraps().filter(element -> {
+            return opt1(data::list).wraps().filter(element -> {
                 try {
                     context.calculate(element, operator, v2).resolve();
                     return true;

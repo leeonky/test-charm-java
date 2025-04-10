@@ -243,6 +243,10 @@ public class Data {
                 }
             return this;
         }
+
+        public Data wrap() {
+            return new Data(() -> this, context, schemaType);
+        }
     }
 
     public class Resolved {
@@ -260,14 +264,6 @@ public class Data {
 
         public boolean isNull() {
             return context.isNull(instance);
-        }
-
-        public boolean isList() {
-            return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
-        }
-
-        public DataList list() {
-            return castList().orElseThrow(() -> new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim())));
         }
 
         public Optional<DataList> castList() {
@@ -297,7 +293,7 @@ public class Data {
                 if (isList() && !(propertyChain instanceof String))
                     return list().getByIndex((int) propertyChain);
                 try {
-                    return context.getObjectPropertyAccessor(value()).getValueByData(this, propertyChain);
+                    return context.getObjectPropertyAccessor(value()).getValueByData(Data.this, propertyChain);
                 } catch (InvalidPropertyException e) {
                     try {
                         return context.currying(value(), propertyChain).orElseThrow(() -> e).resolve();
