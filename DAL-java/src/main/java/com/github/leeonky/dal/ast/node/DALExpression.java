@@ -52,7 +52,15 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
 
     @Override
     public Data evaluateData(DALRuntimeContext context) {
-        return operator.calculateData(this, context).onError(e -> {
+        Data data;
+        try {
+            data = operator.calculateData(this, context);
+        } catch (ExpressionException e) {
+            throw e.rethrow(this);
+        } catch (Throwable e) {
+            throw locateError(e, right().getPositionBegin());
+        }
+        return data.onError(e -> {
             if (e instanceof ExpressionException)
                 return ((ExpressionException) e).rethrow(this);
             return locateError(e, right().getPositionBegin());

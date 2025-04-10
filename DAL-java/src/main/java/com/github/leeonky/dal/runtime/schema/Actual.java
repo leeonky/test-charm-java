@@ -38,7 +38,7 @@ public class Actual {
     }
 
     public boolean isNull() {
-        return actual.resolved().isNull();
+        return actual.isNull();
     }
 
     public Actual sub(Integer index) {

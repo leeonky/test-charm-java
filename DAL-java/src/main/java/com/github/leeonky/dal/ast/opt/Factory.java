@@ -77,7 +77,7 @@ public class Factory {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "DATA_REMARK", false, Operators.NA) {
 
             @Override
-            public Object calculate(DALExpression expression, DALRuntimeContext context) {
+            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
                 return context.invokeDataRemark(new RemarkData(expression.left().evaluateData(context), context,
                         expression.right().inspect()));
             }
@@ -93,7 +93,7 @@ public class Factory {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "EXCLAMATION", false, Operators.NA) {
 
             @Override
-            public Object calculate(DALExpression expression, DALRuntimeContext context) {
+            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
                 return context.invokeExclamations(new ExclamationData(expression.left().evaluateData(context),
                         expression.left(), expression.right(), context));
             }

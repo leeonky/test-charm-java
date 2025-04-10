@@ -52,7 +52,7 @@ public interface Checker {
         return checkingContext.getOriginalActual().map(data -> {
             if (failed(checkingContext))
                 throw new AssertionError(message(checkingContext));
-            return data.value();
+            return data;
         });
     }
 }

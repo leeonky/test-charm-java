@@ -19,7 +19,6 @@ import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperatio
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
 import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public class Data {
@@ -77,8 +76,35 @@ public class Data {
         List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
         if (chain.size() == 1 && chain.get(0).equals(propertyChain)) {
             boolean isSubListMapping = isListMapping && propertyChain instanceof String;
-            return new Data(() -> resolved().getValue(propertyChain), context,
-                    propertySchema(propertyChain, isSubListMapping), isSubListMapping);
+            return new Data(() -> {
+                try {
+                    if (isList() && !(propertyChain instanceof String))
+                        return list().getByIndex((int) propertyChain);
+                    try {
+                        return context.getObjectPropertyAccessor(instance()).getValueByData(this, propertyChain);
+                    } catch (InvalidPropertyException e) {
+                        try {
+                            return context.currying(instance(), propertyChain).orElseThrow(() -> e).resolve();
+                        } catch (Throwable e1) {
+                            return throwUserRuntimeException(e1);
+                        }
+                    } catch (Throwable e) {
+                        return throwUserRuntimeException(e);
+                    }
+                } catch (IndexOutOfBoundsException ex) {
+                    throw new DalRuntimeException(ex.getMessage());
+                } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
+                    throw ex;
+                } catch (Throwable e) {
+                    throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
+                            "  1. public field\n" +
+                            "  2. public getter\n" +
+                            "  3. public method\n" +
+                            "  4. Map key value\n" +
+                            "  5. customized type getter\n" +
+                            "  6. static method extension", propertyChain), e);
+                }
+            }, context, propertySchema(propertyChain, isSubListMapping), isSubListMapping);
         }
         return getValue(chain);
     }
@@ -96,7 +122,7 @@ public class Data {
             ConvertException e = null;
             for (Class<?> target : targets) {
                 try {
-                    return context.getConverter().convert(target, object.value());
+                    return context.getConverter().convert(target, object);
                 } catch (ConvertException convertException) {
                     e = convertException;
                 }
@@ -105,12 +131,8 @@ public class Data {
         });
     }
 
-    public Data map(Function<Resolved, Object> mapper) {
-        return new Data(() -> mapper.apply(resolved()), context, schemaType);
-    }
-
-    public <T, R> Data map(Function<Resolved, T> getter, Function<T, R> mapper) {
-        return new Data(() -> mapper.apply(getter.apply(resolved())), context, schemaType);
+    public Data map(Function<Object, Object> mapper) {
+        return new Data(() -> mapper.apply(instance()), context, schemaType);
     }
 
     public <T> Supplier<T> get(Function<Resolved, T> mapper) {
@@ -266,12 +288,6 @@ public class Data {
             return context.isNull(instance);
         }
 
-        public Optional<DataList> castList() {
-            if (list == null && isList())
-                list = new DataList(context.createCollection(instance));
-            return ofNullable(list);
-        }
-
         public void eachSubData(Consumer<Data> consumer) {
             list().wraps().forEach(e -> consumer.accept(e.value()));
         }
@@ -286,36 +302,6 @@ public class Data {
 
         public <T> Optional<T> cast(Class<T> type) {
             return BeanClass.cast(instance, type);
-        }
-
-        public Object getValue(Object propertyChain) {
-            try {
-                if (isList() && !(propertyChain instanceof String))
-                    return list().getByIndex((int) propertyChain);
-                try {
-                    return context.getObjectPropertyAccessor(value()).getValueByData(Data.this, propertyChain);
-                } catch (InvalidPropertyException e) {
-                    try {
-                        return context.currying(value(), propertyChain).orElseThrow(() -> e).resolve();
-                    } catch (Throwable e1) {
-                        return throwUserRuntimeException(e1);
-                    }
-                } catch (Throwable e) {
-                    return throwUserRuntimeException(e);
-                }
-            } catch (IndexOutOfBoundsException ex) {
-                throw new DalRuntimeException(ex.getMessage());
-            } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
-                throw ex;
-            } catch (Throwable e) {
-                throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
-                        "  1. public field\n" +
-                        "  2. public getter\n" +
-                        "  3. public method\n" +
-                        "  4. Map key value\n" +
-                        "  5. customized type getter\n" +
-                        "  6. static method extension", propertyChain), e);
-            }
         }
     }
 
@@ -351,5 +337,13 @@ public class Data {
             list = new DataList(context.createCollection(instance()));
         }
         return list;
+    }
+
+    public boolean isNull() {
+        return context.isNull(instance());
+    }
+
+    public <T> Optional<T> cast(Class<T> type) {
+        return BeanClass.cast(instance(), type);
     }
 }

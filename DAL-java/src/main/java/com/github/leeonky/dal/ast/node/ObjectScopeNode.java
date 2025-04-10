@@ -3,7 +3,6 @@ package com.github.leeonky.dal.ast.node;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -46,7 +45,7 @@ public class ObjectScopeNode extends DALNode {
             public Data matches() {
                 if (verificationExpressions.isEmpty() && !isObjectWildcard)
                     throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
-                if (opt1(actual.get(Resolved::isNull)))
+                if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 return actual.execute(() -> {
                     Data result = context.data(null);
@@ -58,7 +57,7 @@ public class ObjectScopeNode extends DALNode {
 
             @Override
             public Data equalTo() {
-                if (opt1(actual.get(Resolved::isNull)))
+                if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 Data execute = actual.execute(() -> {
                     Data result = context.data(null);

@@ -3,7 +3,6 @@ package com.github.leeonky.dal.extensions.basic.string.util;
 import com.github.leeonky.dal.extensions.basic.CheckerType;
 import com.github.leeonky.dal.extensions.basic.CheckerWithDiff;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
@@ -23,7 +22,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
 
     @Override
     public Data transformExpected(Data expected, DALRuntimeContext context) {
-        return expected.map(Resolved::value, Object::toString);
+        return expected.map(Object::toString);
     }
 
     @Override
@@ -41,7 +40,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return actual.map(Resolved::value, Object::toString);
+            return actual.map(Object::toString);
         }
     }
 
