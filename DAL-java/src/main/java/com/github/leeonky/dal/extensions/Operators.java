@@ -10,7 +10,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.NumberType;
 import com.github.leeonky.util.function.TriFunction;
 
-import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
 import static com.github.leeonky.dal.runtime.Operators.*;
 
 public class Operators implements Extension {
@@ -37,12 +36,13 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v2.probeIf(instanceOf(ExpectationFactory.class));
+                return v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
             public Data operateData(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v1.trigger(((ExpectationFactory) v2.instance()).create(operator, v1).matches());
+                ((ExpectationFactory) v2.instance()).create(operator, v1).matches().instance();
+                return v1;
             }
         });
     }
@@ -52,12 +52,13 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v2.probeIf(instanceOf(ExpectationFactory.class));
+                return v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
             public Data operateData(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v1.trigger(((ExpectationFactory) v2.instance()).create(operator, v1).equalTo());
+                ((ExpectationFactory) v2.instance()).create(operator, v1).equalTo().instance();
+                return v1;
             }
         });
     }
@@ -67,7 +68,7 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v1.probeIf(instanceOf(String.class)) || v2.probeIf(instanceOf(String.class));
+                return v1.instanceOf(String.class) || v2.instanceOf(String.class);
             }
 
             @Override
@@ -83,7 +84,7 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v1.probeIf(instanceOf(Number.class)) && v2.probeIf(instanceOf(Number.class));
+                return v1.instanceOf(Number.class) && v2.instanceOf(Number.class);
             }
 
             @Override

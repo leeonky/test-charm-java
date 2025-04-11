@@ -10,7 +10,6 @@ import com.github.leeonky.util.ThrowingSupplier;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
@@ -18,7 +17,6 @@ import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeExcept
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
-import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 
 public class Data {
@@ -161,26 +159,6 @@ public class Data {
         return context.pushAndExecute(this, supplier);
     }
 
-    public <T> T probe(Function<Resolved, T> mapper, T defaultValue) {
-        try {
-            return mapper.apply(resolved());
-        } catch (Throwable e) {
-            return defaultValue;
-        }
-    }
-
-    public <T> Optional<T> probe(Function<Resolved, Optional<T>> mapper) {
-        try {
-            return mapper.apply(resolved());
-        } catch (Throwable e) {
-            return empty();
-        }
-    }
-
-    public boolean probeIf(Predicate<Resolved> mapper) {
-        return probe(mapper::test, false);
-    }
-
     public Data resolve() {
         instance();
         return this;
@@ -195,38 +173,6 @@ public class Data {
         else
             handlers = handlers.andThen(peek);
         return this;
-    }
-
-    public Data trigger(Data another) {
-        return peek(r -> another.resolve());
-    }
-
-    public ConditionalAction when(Predicate<Resolved> condition) {
-        return new ConditionalAction(condition);
-    }
-
-    public class ConditionalAction {
-        private final Predicate<Resolved> condition;
-
-        public ConditionalAction(Predicate<Resolved> condition) {
-            this.condition = condition;
-        }
-
-        public Data then(Consumer<Resolved> then) {
-            peek(r -> {
-                if (condition.test(r))
-                    then.accept(r);
-            });
-            return Data.this;
-        }
-
-        public Data thenThrow(Supplier<Throwable> supplier) {
-            peek(r -> {
-                if (condition.test(r))
-                    sneakyThrow(supplier.get());
-            });
-            return Data.this;
-        }
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
@@ -273,7 +219,6 @@ public class Data {
 
     public class Resolved {
         private final Object instance;
-        private DataList list;
 
         public Resolved(Object instance) {
             this.instance = instance;
@@ -283,39 +228,7 @@ public class Data {
         public <T> T value() {
             return (T) instance;
         }
-
-        public boolean isNull() {
-            return context.isNull(instance);
-        }
-
-        public void eachSubData(Consumer<Data> consumer) {
-            list().wraps().forEach(e -> consumer.accept(e.value()));
-        }
-
-        public boolean instanceOf(Class<?> type) {
-            return type.isInstance(instance);
-        }
-
-        boolean isEnum() {
-            return value() != null && value().getClass().isEnum();
-        }
-
-        public <T> Optional<T> cast(Class<T> type) {
-            return BeanClass.cast(instance, type);
-        }
     }
-
-    public static class ResolvedMethods {
-
-        public static Predicate<Resolved> instanceOf(Class<?> type) {
-            return r -> type.isInstance(r.value());
-        }
-
-        public static <T> Function<Resolved, Optional<T>> cast(Class<T> type) {
-            return r -> BeanClass.cast(r.value(), type);
-        }
-    }
-
 
 //    -------------------new------------------------
 
@@ -345,5 +258,13 @@ public class Data {
 
     public <T> Optional<T> cast(Class<T> type) {
         return BeanClass.cast(instance(), type);
+    }
+
+    public boolean instanceOf(Class<?> type) {
+        try {
+            return type.isInstance(instance());
+        } catch (Throwable ignore) {
+            return false;
+        }
     }
 }

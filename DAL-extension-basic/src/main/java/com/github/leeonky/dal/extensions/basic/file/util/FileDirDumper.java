@@ -12,12 +12,12 @@ public class FileDirDumper implements Dumper {
     public void dump(Data data, DumpingBuffer context) {
         DumpingBuffer sub = context.append("java.io.File").appendThen(" ")
                 .append(((File) data.instance()).getPath()).append("/").sub();
-        data.resolved().eachSubData(subFile -> sub.newLine().dumpValue(subFile));
+        data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 
     @Override
     public void dumpValue(Data data, DumpingBuffer context) {
         DumpingBuffer sub = context.append(((File) data.instance()).getName()).append("/").indent();
-        data.resolved().eachSubData(subFile -> sub.newLine().dumpValue(subFile));
+        data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 }

@@ -5,8 +5,6 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
-
 public class AwaitExtension implements Extension {
     @Override
     public void extend(DAL dal) {
@@ -36,7 +34,7 @@ public class AwaitExtension implements Extension {
     private static abstract class AwaitVerification implements Operation {
         @Override
         public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-            return v1.probeIf(instanceOf(Await.class)) && v2.probeIf(instanceOf(ExpectationFactory.class));
+            return v1.instanceOf(Await.class) && v2.instanceOf(ExpectationFactory.class);
         }
     }
 }

@@ -9,12 +9,12 @@ public class DirDumper implements Dumper {
     @Override
     public void dump(Data data, DumpingBuffer context) {
         DumpingBuffer sub = context.append(((SFtpFile) data.instance()).remoteInfo()).sub();
-        data.resolved().eachSubData(subFile -> sub.newLine().dumpValue(subFile));
+        data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 
     @Override
     public void dumpValue(Data data, DumpingBuffer context) {
         DumpingBuffer sub = context.append(((SFtpFile) data.instance()).name()).append("/").indent();
-        data.resolved().eachSubData(subFile -> sub.newLine().dumpValue(subFile));
+        data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 }

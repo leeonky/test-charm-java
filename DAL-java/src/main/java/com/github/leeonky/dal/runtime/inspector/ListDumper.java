@@ -22,7 +22,7 @@ public class ListDumper implements Dumper.Cacheable {
     }
 
     protected void dumpType(Data data, DumpingBuffer context) {
-        if (!(data.resolved().instanceOf(Iterable.class)) && !(data.resolved().instanceOf(Stream.class))
+        if (!(data.instanceOf(Iterable.class)) && !(data.instanceOf(Stream.class))
                 && !data.instance().getClass().isArray())
             context.append(Classes.getClassName(data.instance())).appendThen(" ");
     }

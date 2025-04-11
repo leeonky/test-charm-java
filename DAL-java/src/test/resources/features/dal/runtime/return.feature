@@ -17,7 +17,7 @@ Feature: return
     And register DAL:
     """
       dal.getRuntimeContextBuilder()
-      .registerReturnHook(d -> d.resolved().cast(DataValue.class).ifPresent(v -> v.j=20));
+      .registerReturnHook(d -> d.cast(DataValue.class).ifPresent(v -> v.j=20));
     """
     Then the following verification for the instance of java class "InputValue" should pass:
     """

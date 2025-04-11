@@ -24,7 +24,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.Long.parseLong;
 import static java.util.Objects.requireNonNull;
@@ -220,8 +219,8 @@ public class Inspector {
 
         private byte[] getBytes(Data data) {
             return getFirstPresent(
-                    () -> data.probe(cast(byte[].class)),
-                    () -> data.probe(cast(InputStream.class)).map(stream -> Sneaky.get(() -> {
+                    () -> data.cast(byte[].class),
+                    () -> data.cast(InputStream.class).map(stream -> Sneaky.get(() -> {
                         try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
                             int size;
                             byte[] data1 = new byte[1024];
@@ -230,7 +229,7 @@ public class Inspector {
                             return buffer.toByteArray();
                         }
                     })),
-                    () -> data.probe(cast(Byte[].class)).map(bytes -> {
+                    () -> data.cast(Byte[].class).map(bytes -> {
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
                         for (Byte b : bytes)
                             stream.write(b);
