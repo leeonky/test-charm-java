@@ -2,6 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.dal.type.InputCode;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.ConvertException;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
+import static com.github.leeonky.dal.runtime.DalException.buildUserRuntimeException;
 import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
@@ -131,10 +133,6 @@ public class Data {
 
     public Data map(Function<Object, Object> mapper) {
         return new Data(() -> mapper.apply(instance()), context, schemaType);
-    }
-
-    public <T> Supplier<T> get(Function<Resolved, T> mapper) {
-        return () -> mapper.apply(resolved());
     }
 
     public Data filter(String prefix) {
@@ -265,6 +263,20 @@ public class Data {
             return type.isInstance(instance());
         } catch (Throwable ignore) {
             return false;
+        }
+    }
+
+    public static Data lazy(InputCode<?> supplier, DALRuntimeContext context, SchemaType schemaType, final boolean isListMapping) {
+        try {
+            Object value = supplier.get();
+            return new Data(() -> value, context, schemaType, isListMapping);
+        } catch (Throwable e) {
+            return new Data(() -> null, context, schemaType, isListMapping) {
+                @Override
+                public Object instance() {
+                    return sneakyThrow(buildUserRuntimeException(e));
+                }
+            };
         }
     }
 }

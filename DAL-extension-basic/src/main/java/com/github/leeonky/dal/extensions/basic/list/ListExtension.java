@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 
@@ -15,7 +16,7 @@ public class ListExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("top", metaData -> (Callable<Integer, DALCollection<Object>>)
-                        size -> opt1(metaData.data()::list).limit(size))
+                        opt2(metaData.data()::list)::limit)
                 .registerMetaProperty("filter", metaData -> new Filterable(metaData.data()))
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())

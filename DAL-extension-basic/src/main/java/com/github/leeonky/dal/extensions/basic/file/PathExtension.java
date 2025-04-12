@@ -29,7 +29,7 @@ public class PathExtension implements Extension {
                     }
                 })
                 .registerPropertyAccessor(Path.class, new PathJavaClassPropertyAccessor())
-                .registerDumper(Path.class, data -> ((Path) data.value()).toFile().isDirectory()
+                .registerDumper(Path.class, data -> ((Path) data.instance()).toFile().isDirectory()
                         ? Util.PATH_DIR_DUMPER : Util.PATH_FILE_DUMPER)
                 .getConverter().addTypeConverter(Path.class, String.class, ToString::name)
         ;

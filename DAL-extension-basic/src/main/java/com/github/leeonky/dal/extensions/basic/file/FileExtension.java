@@ -22,7 +22,7 @@ public class FileExtension implements Extension {
                 .registerImplicitData(File.class, file -> Sneaky.get(() -> new FileInputStream(file)))
                 .registerDALCollectionFactory(File.class, new FileDALCollectionFactory())
                 .registerPropertyAccessor(File.class, new FileJavaClassPropertyAccessor())
-                .registerDumper(File.class, data -> ((File) data.value()).isDirectory()
+                .registerDumper(File.class, data -> ((File) data.instance()).isDirectory()
                         ? Util.FILE_DIR_DUMPER : Util.FILE_FILE_DUMPER);
         dal.getRuntimeContextBuilder().getConverter()
                 .addTypeConverter(File.class, String.class, File::getName);

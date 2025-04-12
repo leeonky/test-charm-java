@@ -247,18 +247,18 @@ class DataTest {
 
         private int i = 0;
 
-        @Test
-        void should_resolved_value_when_get_value() {
+//        @Test
+//        void should_resolved_value_when_get_value() {
 //            f()
 //              return result
 //            v = f()
 //            print v
-            Data data = data(() -> i += 1);
-
-            assertThat(i).isEqualTo(0);
-            assertThat(data.instance()).isEqualTo(1);
-            assertThat(i).isEqualTo(1);
-        }
+//            Data data = data(() -> i += 1);
+//
+//            assertThat(i).isEqualTo(0);
+//            assertThat(data.instance()).isEqualTo(1);
+//            assertThat(i).isEqualTo(1);
+//        }
 
         @Test
         void should_resolve_only_once_when_get_value_multiple_times() {

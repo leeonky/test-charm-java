@@ -321,17 +321,9 @@ public class RuntimeContextBuilder {
             return features;
         }
 
+
         public DALRuntimeContext(InputCode<?> supplier, Class<?> schema) {
-            BeanClass<?> rootSchema = null;
-            if (schema != null)
-                rootSchema = BeanClass.create(schema);
-            stack.push(data(() -> {
-                try {
-                    return supplier.get();
-                } catch (Exception e) {
-                    throw new UserRuntimeException(e);
-                }
-            }, rootSchema));
+            stack.push(Data.lazy(supplier, this, SchemaType.create(schema == null ? null : BeanClass.create(schema)), false));
             partialPropertyStacks = new HashMap<>();
         }
 
@@ -494,7 +486,7 @@ public class RuntimeContextBuilder {
         }
 
         public Dumper fetchDumper(Data data) {
-            return dumperFactories.tryGetData(data.instance()).map(factory -> factory.apply(data.resolved())).orElseGet(() -> {
+            return dumperFactories.tryGetData(data.instance()).map(factory -> factory.apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
