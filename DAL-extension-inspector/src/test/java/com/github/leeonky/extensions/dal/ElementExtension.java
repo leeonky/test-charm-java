@@ -26,7 +26,7 @@ public class ElementExtension implements Extension {
     @SuppressWarnings("unchecked")
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
-                .checkerSetForMatching().register((expected, actual) -> actual.resolved().cast(Element.class).map(e -> {
+                .checkerSetForMatching().register((expected, actual) -> actual.cast(Element.class).map(e -> {
                     if (e.isInput()) {
                         e.typeIn((String) expected.convert(String.class).instance());
                         return PHONY_CHECKER;

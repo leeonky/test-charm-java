@@ -53,6 +53,6 @@ public class Await implements ProxyObject {
 
     @Override
     public Set<?> getPropertyNames() {
-        return data.resolved().fieldNames();
+        return data.fieldNames();
     }
 }

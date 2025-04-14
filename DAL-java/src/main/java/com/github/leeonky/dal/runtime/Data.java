@@ -7,65 +7,56 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.ConvertException;
 import com.github.leeonky.util.ThrowingSupplier;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
-import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
+import static com.github.leeonky.dal.runtime.DalException.buildUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
-    private final ThrowingSupplier<?> supplier;
-    private Function<Throwable, Throwable> errorMapper = e -> e;
-    private final boolean isListMapping;
-    private Resolved resolved;
-    private Throwable error;
+    private final Object value;
+    private DataList list;
 
-    public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
-        this.supplier = Objects.requireNonNull(supplier);
+    public Data(Object value, DALRuntimeContext context, SchemaType schemaType) {
         this.context = context;
         this.schemaType = schemaType;
-        isListMapping = false;
-    }
-
-    public Data(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType, boolean isListMapping) {
-        this.supplier = Objects.requireNonNull(supplier);
-        this.context = context;
-        this.schemaType = schemaType;
-        this.isListMapping = isListMapping;
-    }
-
-    public Data onError(Function<Throwable, Throwable> mapper) {
-        errorMapper = errorMapper.andThen(mapper);
-        return this;
+        this.value = value;
     }
 
     public Object instance() {
-        return resolved().value();
+        return value;
     }
 
-    public Resolved resolved() {
-        if (error != null)
-            return sneakyThrow(error);
-        if (resolved == null) {
-            try {
-                resolved = new Resolved(supplier.get());
-            } catch (Throwable e) {
-                sneakyThrow(error = errorMapper.apply(e));
-            }
-            handlers.accept(resolved);
+    public Set<?> fieldNames() {
+        return context.findPropertyReaderNames(instance());
+    }
+
+    public boolean isList() {
+        Object instance = instance();
+        return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
+    }
+
+    public DataList list() {
+        if (list == null) {
+            if (!isList())
+                throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
+            list = new DataList(context.createCollection(instance()));
         }
-        return resolved;
+        return list;
+    }
+
+    public boolean isNull() {
+        return context.isNull(instance());
     }
 
     public Data getValue(List<Object> propertyChain) {
@@ -76,9 +67,24 @@ public class Data {
     public Data getValue(Object propertyChain) {
         List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
         if (chain.size() == 1 && chain.get(0).equals(propertyChain)) {
-            boolean isSubListMapping = isListMapping && propertyChain instanceof String;
-            return new Data(() -> resolved().getValue(propertyChain), context,
-                    propertySchema(propertyChain, isSubListMapping), isSubListMapping);
+            try {
+                Object value = isList() && !(propertyChain instanceof String) ? list().getByIndex((int) propertyChain)
+                        : context.getPropertyValue(this, propertyChain);
+                return new Data(value, context, propertySchema(propertyChain,
+                        this.value instanceof AutoMappingList && propertyChain instanceof String));
+            } catch (IndexOutOfBoundsException ex) {
+                throw new DalRuntimeException(ex.getMessage());
+            } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
+                throw ex;
+            } catch (Throwable e) {
+                throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
+                        "  1. public field\n" +
+                        "  2. public getter\n" +
+                        "  3. public method\n" +
+                        "  4. Map key value\n" +
+                        "  5. customized type getter\n" +
+                        "  6. static method extension", propertyChain), e);
+            }
         }
         return getValue(chain);
     }
@@ -96,7 +102,7 @@ public class Data {
             ConvertException e = null;
             for (Class<?> target : targets) {
                 try {
-                    return context.getConverter().convert(target, object.value());
+                    return context.getConverter().convert(target, object);
                 } catch (ConvertException convertException) {
                     e = convertException;
                 }
@@ -105,26 +111,16 @@ public class Data {
         });
     }
 
-    public Data map(Function<Resolved, Object> mapper) {
-        return new Data(() -> mapper.apply(resolved()), context, schemaType);
-    }
-
-    public <T, R> Data map(Function<Resolved, T> getter, Function<T, R> mapper) {
-        return new Data(() -> mapper.apply(getter.apply(resolved())), context, schemaType);
-    }
-
-    public <T> Supplier<T> get(Function<Resolved, T> mapper) {
-        return () -> mapper.apply(resolved());
+    public Data map(Function<Object, Object> mapper) {
+        return new Data(mapper.apply(instance()), context, schemaType);
     }
 
     public Data filter(String prefix) {
-        return new Data(() -> {
-            FilteredObject filteredObject = new FilteredObject();
-            resolved().fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
-                    .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
-                            filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
-            return filteredObject;
-        }, context, schemaType);
+        FilteredObject filteredObject = new FilteredObject();
+        fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
+                .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
+                        filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
+        return new Data(filteredObject, context, schemaType);
     }
 
     public String dump() {
@@ -139,75 +135,29 @@ public class Data {
         return context.pushAndExecute(this, supplier);
     }
 
-    public <T> T probe(Function<Resolved, T> mapper, T defaultValue) {
+    public <T> Optional<T> cast(Class<T> type) {
+        return BeanClass.cast(instance(), type);
+    }
+
+    public boolean instanceOf(Class<?> type) {
         try {
-            return mapper.apply(resolved());
-        } catch (Throwable e) {
-            return defaultValue;
+            return type.isInstance(instance());
+        } catch (Throwable ignore) {
+            return false;
         }
     }
 
-    public <T> Optional<T> probe(Function<Resolved, Optional<T>> mapper) {
+    public static Data lazy(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
         try {
-            return mapper.apply(resolved());
+            return new Data(supplier.get(), context, schemaType);
         } catch (Throwable e) {
-            return empty();
+            return new Data(null, context, schemaType) {
+                @Override
+                public Object instance() {
+                    return sneakyThrow(buildUserRuntimeException(e));
+                }
+            };
         }
-    }
-
-    public boolean probeIf(Predicate<Resolved> mapper) {
-        return probe(mapper::test, false);
-    }
-
-    public Data resolve() {
-        instance();
-        return this;
-    }
-
-    private Consumer<Resolved> handlers = r -> {
-    };
-
-    public Data peek(Consumer<Resolved> peek) {
-        if (resolved != null)
-            peek.accept(resolved);
-        else
-            handlers = handlers.andThen(peek);
-        return this;
-    }
-
-    public Data trigger(Data another) {
-        return peek(r -> another.resolve());
-    }
-
-    public ConditionalAction when(Predicate<Resolved> condition) {
-        return new ConditionalAction(condition);
-    }
-
-    public class ConditionalAction {
-        private final Predicate<Resolved> condition;
-
-        public ConditionalAction(Predicate<Resolved> condition) {
-            this.condition = condition;
-        }
-
-        public Data then(Consumer<Resolved> then) {
-            peek(r -> {
-                if (condition.test(r))
-                    then.accept(r);
-            });
-            return Data.this;
-        }
-
-        public Data thenThrow(Supplier<Throwable> supplier) {
-            peek(r -> {
-                if (condition.test(r))
-                    sneakyThrow(supplier.get());
-            });
-            return Data.this;
-        }
-    }
-
-    static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 
     public class DataList extends DALCollection.Decorated<Object> {
@@ -216,7 +166,7 @@ public class Data {
         }
 
         public DALCollection<Data> wraps() {
-            return map((index, e) -> new Data(() -> e, context, schemaType.access(index)));
+            return map((index, e) -> new Data(e, context, schemaType.access(index)));
         }
 
         public AutoMappingList autoMapping(Function<Data, Data> mapper) {
@@ -243,106 +193,9 @@ public class Data {
                 }
             return this;
         }
-    }
 
-    public class Resolved {
-        private final Object instance;
-        private DataList list;
-
-        public Resolved(Object instance) {
-            this.instance = instance;
-        }
-
-        @SuppressWarnings("unchecked")
-        public <T> T value() {
-            return (T) instance;
-        }
-
-        public boolean isNull() {
-            return context.isNull(instance);
-        }
-
-        public boolean isList() {
-            return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
-        }
-
-        public DataList list() {
-            return castList().orElseThrow(() -> new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim())));
-        }
-
-        public Optional<DataList> castList() {
-            if (list == null && isList())
-                list = new DataList(context.createCollection(instance));
-            return ofNullable(list);
-        }
-
-        public void eachSubData(Consumer<Data> consumer) {
-            list().wraps().forEach(e -> consumer.accept(e.value()));
-        }
-
-        public boolean instanceOf(Class<?> type) {
-            return type.isInstance(instance);
-        }
-
-        public Data getValueData(Object field) {
-            return Data.this.getValue(field);
-        }
-
-        public Set<?> fieldNames() {
-            return context.findPropertyReaderNames(instance);
-        }
-
-        public Data repack() {
-            return Data.this;
-        }
-
-        boolean isEnum() {
-            return value() != null && value().getClass().isEnum();
-        }
-
-        public <T> Optional<T> cast(Class<T> type) {
-            return BeanClass.cast(instance, type);
-        }
-
-        public Object getValue(Object propertyChain) {
-            try {
-                if (isList() && !(propertyChain instanceof String))
-                    return list().getByIndex((int) propertyChain);
-                try {
-                    return context.getObjectPropertyAccessor(value()).getValueByData(this, propertyChain);
-                } catch (InvalidPropertyException e) {
-                    try {
-                        return context.currying(value(), propertyChain).orElseThrow(() -> e).resolve();
-                    } catch (Throwable e1) {
-                        return throwUserRuntimeException(e1);
-                    }
-                } catch (Throwable e) {
-                    return throwUserRuntimeException(e);
-                }
-            } catch (IndexOutOfBoundsException ex) {
-                throw new DalRuntimeException(ex.getMessage());
-            } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
-                throw ex;
-            } catch (Throwable e) {
-                throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
-                        "  1. public field\n" +
-                        "  2. public getter\n" +
-                        "  3. public method\n" +
-                        "  4. Map key value\n" +
-                        "  5. customized type getter\n" +
-                        "  6. static method extension", propertyChain), e);
-            }
-        }
-    }
-
-    public static class ResolvedMethods {
-
-        public static Predicate<Resolved> instanceOf(Class<?> type) {
-            return r -> type.isInstance(r.value());
-        }
-
-        public static <T> Function<Resolved, Optional<T>> cast(Class<T> type) {
-            return r -> BeanClass.cast(r.value(), type);
+        public Data wrap() {
+            return new Data(this, context, schemaType);
         }
     }
 }

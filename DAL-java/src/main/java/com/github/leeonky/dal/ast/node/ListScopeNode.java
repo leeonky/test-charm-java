@@ -107,10 +107,10 @@ public class ListScopeNode extends DALNode {
             @Override
             public Data equalTo() {
                 try {
-                    Data sorted = actual.map(r -> opt1(r::list).sort(getComparator(context))).resolve();
+                    Data sorted = opt1(actual::list).sort(getComparator(context)).wrap();
                     return sorted.execute(() -> type == Type.CONTAINS ?
-                            verifyContainElement(context, sorted.resolved().list(), actual)
-                            : verifyCorrespondingElement(context, getVerificationExpressions(sorted.resolved().list(), actual)));
+                            verifyContainElement(context, sorted.list(), actual)
+                            : verifyCorrespondingElement(context, getVerificationExpressions(sorted.list(), actual)));
                 } catch (ListMappingElementAccessException e) {
                     throw exception(expression -> locateError(e, expression.left().getOperandPosition()));
                 }
@@ -210,7 +210,7 @@ public class ListScopeNode extends DALNode {
         if (style != Style.LIST)
             for (int index = 0; index < expressions.size(); index++)
                 try {
-                    result = expressions.get(index).evaluateData(context).resolve();
+                    result = expressions.get(index).evaluateData(context);
                 } catch (DifferentCellSize differentCellSize) {
                     throw new RowAssertionFailure(index, differentCellSize);
                 } catch (DalException dalException) {
@@ -220,7 +220,7 @@ public class ListScopeNode extends DALNode {
                 }
         else {
             for (DALNode expression : expressions)
-                result = expression.evaluateData(context).resolve();
+                result = expression.evaluateData(context);
         }
         return result;
     }

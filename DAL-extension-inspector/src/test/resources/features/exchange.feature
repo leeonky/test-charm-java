@@ -464,7 +464,9 @@ Feature: exchange
         """
       And you should see:
         """
-        WorkBench::eventually: { Current.connected: true }
+        WorkBench::eventually: {
+          Current.connected: true
+        }
         """
 
     Scenario: should clear connected when disconnected

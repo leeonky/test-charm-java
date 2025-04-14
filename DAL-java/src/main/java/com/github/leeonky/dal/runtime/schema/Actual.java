@@ -38,7 +38,7 @@ public class Actual {
     }
 
     public boolean isNull() {
-        return actual.resolved().isNull();
+        return actual.isNull();
     }
 
     public Actual sub(Integer index) {
@@ -66,7 +66,7 @@ public class Actual {
             return Verification.errorLog("Can not convert null field `%s` to %s, " +
                     "use @AllowNull to verify nullable field", property, inspect);
         try {
-            actual.convert(type.getType()).resolve();
+            actual.convert(type.getType());
             return true;
         } catch (Exception ignore) {
             return Verification.errorLog("Can not convert field `%s` (%s: %s) to %s", property,
@@ -80,11 +80,11 @@ public class Actual {
     }
 
     public Stream<?> fieldNames() {
-        return actual.resolved().fieldNames().stream();
+        return actual.fieldNames().stream();
     }
 
     public Stream<Actual> subElements() {
-        return actual.resolved().list().wraps().stream().map(data -> new Actual(property + "[" + data.index() + "]", data.value()));
+        return actual.list().wraps().stream().map(data -> new Actual(property + "[" + data.index() + "]", data.value()));
     }
 
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {

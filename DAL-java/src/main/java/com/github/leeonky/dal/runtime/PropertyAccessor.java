@@ -5,8 +5,8 @@ import java.util.Set;
 
 public interface PropertyAccessor<T> {
 
-    default Object getValueByData(Data.Resolved data, Object property) {
-        return getValue(data.value(), property);
+    default Object getValueByData(Data data, Object property) {
+        return getValue((T) data.instance(), property);
     }
 
     Object getValue(T instance, Object property);

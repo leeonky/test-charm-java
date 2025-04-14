@@ -16,8 +16,8 @@ import static java.lang.String.format;
 public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
         Data data = metaData.data();
-        if (data.resolved().isList())
-            return data.resolved().list().size();
+        if (data.isList())
+            return data.list().size();
         throw new DalRuntimeException(format("Invalid meta property `size` for: %s", data.dump()));
     }
 
@@ -35,7 +35,7 @@ public class MetaProperties implements Extension {
     }
 
     private static Object keys(MetaData metaData) {
-        return metaData.data().resolved().fieldNames();
+        return metaData.data().fieldNames();
     }
 
     @Override

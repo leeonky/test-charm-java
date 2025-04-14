@@ -38,7 +38,7 @@ public interface Checker {
 
     default Data transformActualAndCheck(Data actual, Data expected, DALRuntimeContext context) {
         try {
-            return transformActual(actual, expected, context).resolve();
+            return transformActual(actual, expected, context);
         } catch (ConvertException e) {
             throw new DalRuntimeException(e.getMessage());
         }
@@ -52,7 +52,7 @@ public interface Checker {
         return checkingContext.getOriginalActual().map(data -> {
             if (failed(checkingContext))
                 throw new AssertionError(message(checkingContext));
-            return data.value();
+            return data;
         });
     }
 }

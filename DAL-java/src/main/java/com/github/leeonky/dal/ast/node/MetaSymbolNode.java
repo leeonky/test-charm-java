@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.SchemaType;
 
 import static com.github.leeonky.dal.runtime.DalException.locateError;
 
@@ -12,7 +13,13 @@ public class MetaSymbolNode extends SymbolNode {
 
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.invokeMetaProperty(left, left.evaluateData(context), getRootSymbolName())
-                .onError(e -> locateError(e, getPositionBegin()));
+
+//        TODO refactor
+        Data inputData = Data.lazy(() -> left.evaluateData(context).instance(), context, SchemaType.create(null));
+        try {
+            return context.invokeMetaProperty(left, inputData, getRootSymbolName());
+        } catch (Throwable e) {
+            throw locateError(e, getPositionBegin());
+        }
     }
 }

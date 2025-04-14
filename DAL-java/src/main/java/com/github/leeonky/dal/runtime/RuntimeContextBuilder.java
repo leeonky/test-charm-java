@@ -13,7 +13,10 @@ import com.github.leeonky.dal.type.InputCode;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.*;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Classes;
+import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.NumberType;
 
 import java.io.PrintStream;
 import java.lang.reflect.Array;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
+import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
@@ -50,8 +54,8 @@ public class RuntimeContextBuilder {
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
     private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
-    private final ClassKeyMap<Function<RemarkData, Object>> remarks = new ClassKeyMap<>();
-    private final ClassKeyMap<Function<RuntimeData, Object>> exclamations = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RemarkData, Data>> remarks = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RuntimeData, Data>> exclamations = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
@@ -195,10 +199,6 @@ public class RuntimeContextBuilder {
         return extensionName != null ? extensionName.value() : method.getName();
     }
 
-    BiFunction<Object, List<Object>, List<Object>> fetchCurryingMethodArgRange(Method method) {
-        return curryingMethodArgRanges.get(method);
-    }
-
     public CheckerSet checkerSetForMatching() {
         return checkerSetForMatching;
     }
@@ -267,12 +267,12 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Object> action) {
+    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data> action) {
         remarks.put(type, action);
         return this;
     }
 
-    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Object> action) {
+    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Data> action) {
         exclamations.put(type, action);
         return this;
     }
@@ -322,16 +322,7 @@ public class RuntimeContextBuilder {
         }
 
         public DALRuntimeContext(InputCode<?> supplier, Class<?> schema) {
-            BeanClass<?> rootSchema = null;
-            if (schema != null)
-                rootSchema = BeanClass.create(schema);
-            stack.push(data(() -> {
-                try {
-                    return supplier.get();
-                } catch (Exception e) {
-                    throw new UserRuntimeException(e);
-                }
-            }, rootSchema));
+            stack.push(Data.lazy(supplier, this, SchemaType.create(schema == null ? null : BeanClass.create(schema))));
             partialPropertyStacks = new HashMap<>();
         }
 
@@ -356,7 +347,7 @@ public class RuntimeContextBuilder {
             return getObjectPropertyAccessor(instance).getPropertyNames(instance);
         }
 
-        public PropertyAccessor<Object> getObjectPropertyAccessor(Object instance) {
+        private PropertyAccessor<Object> getObjectPropertyAccessor(Object instance) {
             return propertyAccessors.tryGetData(instance)
                     .orElseGet(() -> new JavaClassPropertyAccessor<>(BeanClass.createFrom(instance)));
         }
@@ -364,6 +355,20 @@ public class RuntimeContextBuilder {
         public Boolean isNull(Object instance) {
             return propertyAccessors.tryGetData(instance).map(f -> f.isNull(instance))
                     .orElseGet(() -> Objects.equals(instance, null));
+        }
+
+        public Object getPropertyValue(Data data, Object property) {
+            try {
+                return getObjectPropertyAccessor(data.instance()).getValueByData(data, property);
+            } catch (InvalidPropertyException e) {
+                try {
+                    return currying(data.instance(), property).orElseThrow(() -> e).resolve();
+                } catch (Throwable e1) {
+                    return throwUserRuntimeException(e1);
+                }
+            } catch (Throwable e) {
+                return throwUserRuntimeException(e);
+            }
         }
 
         public DALCollection<Object> createCollection(Object instance) {
@@ -379,23 +384,17 @@ public class RuntimeContextBuilder {
             return converter;
         }
 
-        public Data data(ThrowingSupplier<?> instance, String schema, boolean isList) {
-            BeanClass<?> schemaType = schemas.get(schema);
-            if (isList && schemaType != null)
-                schemaType = BeanClass.create(Array.newInstance(schemaType.getType(), 0).getClass());
-            return data(instance, schemaType);
-        }
-
-        public Data data(ThrowingSupplier<?> supplier, BeanClass<?> schemaType) {
-            return new Data(supplier == null ? () -> null : supplier, this, SchemaType.create(schemaType));
-        }
-
-        public Data data(ThrowingSupplier<?> instance) {
-            return data(instance, null);
+        public Optional<BeanClass<?>> schemaType(String schema, boolean isList) {
+            return Optional.ofNullable(schemas.get(schema)).map(s ->
+                    isList ? BeanClass.create(Array.newInstance(s.getType(), 0).getClass()) : s);
         }
 
         public Data data(Object instance) {
-            return data(() -> instance, null);
+            return data(instance, null);
+        }
+
+        public Data data(Object instance, BeanClass<?> schemaType) {
+            return new Data(instance, this, SchemaType.create(schemaType));
         }
 
         public Optional<Result> takeUserDefinedLiteral(String token) {
@@ -493,13 +492,13 @@ public class RuntimeContextBuilder {
             return checkerSetForMatching.fetch(expected, actual);
         }
 
-        public Dumper fetchDumper(Data.Resolved data) {
-            return dumperFactories.tryGetData(data.value()).map(factory -> factory.apply(data)).orElseGet(() -> {
+        public Dumper fetchDumper(Data data) {
+            return dumperFactories.tryGetData(data.instance()).map(factory -> factory.apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
                     return Dumper.LIST_DUMPER;
-                if (data.isEnum())
+                if (data.instance() != null && data.instance().getClass().isEnum())
                     return Dumper.VALUE_DUMPER;
                 return Dumper.MAP_DUMPER;
             });
@@ -518,20 +517,18 @@ public class RuntimeContextBuilder {
         }
 
         public Data invokeMetaProperty(DALNode inputNode, Data inputData, Object symbolName) {
-            return data(() -> {
-                MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
-                return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
-            }).onError(DalException::buildUserRuntimeException);
+            MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
+            return data(fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData));
         }
 
-        public Object invokeDataRemark(RemarkData remarkData) {
+        public Data invokeDataRemark(RemarkData remarkData) {
             Object instance = remarkData.data().instance();
             return remarks.tryGetData(instance)
                     .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
                     .apply(remarkData);
         }
 
-        public Object invokeExclamations(ExclamationData exclamationData) {
+        public Data invokeExclamations(ExclamationData exclamationData) {
             Object instance = exclamationData.data().instance();
             return exclamations.tryGetData(instance)
                     .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
@@ -540,13 +537,11 @@ public class RuntimeContextBuilder {
         }
 
         public Data calculate(Data v1, DALOperator opt, Data v2) {
-            return data(() -> {
-                for (Operation operation : operations.get(opt.overrideType()))
-                    if (operation.match(v1, opt, v2, this))
-                        return operation.operate(v1, opt, v2, this);
-                throw illegalOperation(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
-                        getClassName(v1.instance()), getClassName(v2.instance())));
-            });
+            for (Operation operation : operations.get(opt.overrideType()))
+                if (operation.match(v1, opt, v2, this))
+                    return operation.operateData(v1, opt, v2, this);
+            throw illegalOperation(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
+                    getClassName(v1.instance()), getClassName(v2.instance())));
         }
 
         public PrintStream warningOutput() {

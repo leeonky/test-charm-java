@@ -5,8 +5,8 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 
@@ -16,14 +16,14 @@ public class ListExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("top", metaData -> (Callable<Integer, DALCollection<Object>>)
-                        size -> opt1(metaData.data().resolved()::list).limit(size))
+                        opt2(metaData.data()::list)::limit)
                 .registerMetaProperty("filter", metaData -> new Filterable(metaData.data()))
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())
-                .registerExclamation(Filterable.class, runtimeData ->
-                        ((Filterable) runtimeData.data().resolved().value()).requireNotEmpty())
-                .registerDataRemark(Filterable.class, remarkData ->
-                        ((Filterable) remarkData.data().resolved().value()).require(parseInt(remarkData.remark())));
+                .registerExclamation(Filterable.class, runtimeData -> runtimeData.data().map(
+                        data -> ((Filterable) data).requireNotEmpty()))
+                .registerDataRemark(Filterable.class, remarkData -> remarkData.data().map(
+                        data -> ((Filterable) data).require(parseInt(remarkData.remark()))));
     }
 
     public static class Filterable {
@@ -38,9 +38,9 @@ public class ListExtension implements Extension {
         }
 
         protected DALCollection<Object> filterList(DALOperator operator, Data v2, DALRuntimeContext context) {
-            return opt1(data.resolved()::list).wraps().filter(element -> {
+            return opt1(data::list).wraps().filter(element -> {
                 try {
-                    context.calculate(element, operator, v2).resolve();
+                    context.calculate(element, operator, v2);
                     return true;
                 } catch (Throwable ig) {
                     return false;
@@ -80,7 +80,7 @@ public class ListExtension implements Extension {
 
         @Override
         public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-            return v1.probeIf(instanceOf(Filterable.class));
+            return v1.instanceOf(Filterable.class);
         }
 
         @Override

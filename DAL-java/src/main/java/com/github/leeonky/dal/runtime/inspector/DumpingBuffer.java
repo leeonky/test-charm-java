@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.runtime.inspector;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.HashMap;
@@ -51,8 +50,7 @@ public class DumpingBuffer {
     public DumpingBuffer dump(Data data) {
         checkCount();
         try {
-            Resolved resolved = data.resolved();
-            runtimeContext.fetchDumper(resolved).dump(resolved, this);
+            runtimeContext.fetchDumper(data).dump(data, this);
         } catch (Throwable e) {
             append(e);
         }
@@ -62,8 +60,7 @@ public class DumpingBuffer {
     public DumpingBuffer dumpValue(Data data) {
         checkCount();
         try {
-            Resolved resolved = data.resolved();
-            runtimeContext.fetchDumper(resolved).dumpValue(resolved, this);
+            runtimeContext.fetchDumper(data).dumpValue(data, this);
         } catch (Throwable e) {
             append(e);
         }
@@ -107,7 +104,7 @@ public class DumpingBuffer {
         return temp;
     }
 
-    public void cached(Resolved data, Runnable runnable) {
+    public void cached(Data data, Runnable runnable) {
         lineBuffer.cached(path, data, runnable, p -> append("*reference* " + p));
     }
 
@@ -151,7 +148,7 @@ public class DumpingBuffer {
             this.runtimeContext = runtimeContext;
         }
 
-        public void cached(String path, Resolved data, Runnable dumpAction, Consumer<String> refAction) {
+        public void cached(String path, Data data, Runnable dumpAction, Consumer<String> refAction) {
             DumpingCacheKey key = new DumpingCacheKey(data);
             String reference = caches.get(key);
             if (reference == null) {

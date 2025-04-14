@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.github.leeonky.dal.runtime.DalException.locateError;
-import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.instanceOf;
 import static java.lang.String.format;
 
 public class SymbolNode extends DALNode implements ExecutableNode {
@@ -27,12 +26,16 @@ public class SymbolNode extends DALNode implements ExecutableNode {
 
     @Override
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data value = data.when(instanceOf(PartialObject.class))
-                .then(r -> context.appendPartialPropertyReference(data, symbol))
-                .getValue(symbol);
-        return value.onError(e -> locateError(e, getPositionBegin()))
-                .when(instanceOf(PartialObject.class))
-                .then(r -> context.initPartialPropertyStack(data, symbol, value));
+        try {
+            if (data.instanceOf(PartialObject.class))
+                context.appendPartialPropertyReference(data, symbol);
+            Data value = data.getValue(symbol);
+            if (value.instanceOf(PartialObject.class))
+                context.initPartialPropertyStack(data, symbol, value);
+            return value;
+        } catch (Throwable e) {
+            throw locateError(e, getPositionBegin());
+        }
     }
 
     @Override

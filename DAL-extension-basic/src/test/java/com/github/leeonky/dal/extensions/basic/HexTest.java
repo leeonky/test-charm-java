@@ -62,7 +62,7 @@ class HexTest {
         private String parseAndDump(String hexInText) {
             RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(parseToByteArray(hexInText));
             DumpingBuffer dumpingBuffer = DumpingBuffer.rootContext(context);
-            new HexDumper().dumpValue(context.getThis().resolved(), dumpingBuffer);
+            new HexDumper().dumpValue(context.getThis(), dumpingBuffer);
             return dumpingBuffer.content();
         }
 

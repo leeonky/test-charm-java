@@ -49,9 +49,9 @@ class DataTest {
             }
         });
 
-        assertTrue(runtimeContextBuilder.build(AlwaysNull::new).getThis().resolved().isNull());
-        assertTrue(runtimeContextBuilder.build(() -> null).getThis().resolved().isNull());
-        assertFalse(runtimeContextBuilder.build(Object::new).getThis().resolved().isNull());
+        assertTrue(runtimeContextBuilder.build(AlwaysNull::new).getThis().isNull());
+        assertTrue(runtimeContextBuilder.build(() -> null).getThis().isNull());
+        assertFalse(runtimeContextBuilder.build(Object::new).getThis().isNull());
     }
 
     private static class AlwaysNull {
@@ -140,10 +140,9 @@ class DataTest {
 
         @Test
         void support_get_value_via_field_alias() {
-            assertThat(new Data(() -> new HashMap<String, Object>() {{
+            assertThat(new Data(new HashMap<String, Object>() {{
                 put("age", 100);
-            }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class)))
-                    .getValue("aliasOfAge").instance()).isEqualTo(100);
+            }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class))).getValue("aliasOfAge").instance()).isEqualTo(100);
         }
 
         private void assertDataAccess(Object object, Object expected, Object... properties) {
@@ -152,7 +151,7 @@ class DataTest {
         }
 
         private void assertListSize(Object object, int size) {
-            assertThat(runtimeContextBuilder.build(object).getThis().resolved().list().size()).isEqualTo(size);
+            assertThat(runtimeContextBuilder.build(object).getThis().list().size()).isEqualTo(size);
         }
     }
 
@@ -211,212 +210,33 @@ class DataTest {
 
         @Test
         void return_currying_method_with_property() {
-            assertThat(context.currying(context.getThis().resolved().value(), "staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
+            assertThat(context.currying(context.getThis().instance(), "staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void return_currying_method_with_property_in_super_instance_type() {
-            assertThat(context.currying(context.getThis().resolved().value(), "baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
+            assertThat(context.currying(context.getThis().instance(), "baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
-            CurryingMethod currying = context.currying(context.getThis().resolved().value(), "staticCurrying2").get();
+            CurryingMethod currying = context.currying(context.getThis().instance(), "staticCurrying2").get();
 
             assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
         void should_choose_min_parameter_size_method() {
-            CurryingMethod currying = context.currying(context.getThis().resolved().value(), "staticOverrideMethod").get();
+            CurryingMethod currying = context.currying(context.getThis().instance(), "staticOverrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
 
         @Test
         void use_same_instance_type_first_when_more_than_one_candidate() {
-            CurryingMethod currying = context.currying(context.getThis().resolved().value(), "baseCurrying").get();
+            CurryingMethod currying = context.currying(context.getThis().instance(), "baseCurrying").get();
 
             assertThat(currying.call("a").resolve()).isEqualTo("A");
-        }
-    }
-
-    @Nested
-    class Lazy {
-        private final DALRuntimeContext context = new RuntimeContextBuilder().build(null);
-
-        private int i = 0;
-
-        @Test
-        void should_resolved_value_when_get_value() {
-//            f()
-//              return result
-//            v = f()
-//            print v
-            Data data = data(() -> i += 1);
-
-            assertThat(i).isEqualTo(0);
-            assertThat(data.instance()).isEqualTo(1);
-            assertThat(i).isEqualTo(1);
-        }
-
-        @Test
-        void should_resolve_only_once_when_get_value_multiple_times() {
-//            f()
-//              return result
-//            v = f()
-//            print v
-//            print v
-
-            Data data = data(() -> i += 1);
-            assertThat(data.instance()).isEqualTo(1);
-            assertThat(data.instance()).isEqualTo(1);
-        }
-
-        @Test
-        void should_throw_error_when_resolve_error() {
-//            f()
-//              throw e
-
-//            v = f() //throw
-//            print v
-
-            Exception e = new Exception();
-            Data data = errorData(e);
-
-            assertThat(assertThrows(Exception.class, data::instance))
-                    .isSameAs(e);
-        }
-
-        @Test
-        void map_error_when_resolve_error() {
-//            f()
-//              throw e
-//            try
-//              v=f()
-//            catch e
-//              throw mapError(e)
-//            print v
-            Exception e = new Exception();
-            Data data = errorData(e);
-            data.onError(RuntimeException::new);
-
-            assertThat(assertThrows(Exception.class, data::instance))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasCause(e);
-        }
-
-        @Test
-        void nested_map_error_when_resolve_error() {
-//            f()
-//              throw e
-//            try
-//              try
-//                v=f()
-//              catch e
-//                throw mapError(e)
-//              print1 v
-//            catch e
-//              throw mapError2(e)
-//            print2 v
-            Exception e = new Exception();
-            Data data = errorData(e);
-            data.onError(throwable -> new RuntimeException("1", throwable))
-                    .onError(throwable1 -> new RuntimeException("2", throwable1));
-
-            Exception actual = assertThrows(Exception.class, data::instance);
-            assertThat(actual).isInstanceOf(RuntimeException.class).hasMessage("2");
-            assertThat(actual.getCause()).isInstanceOf(RuntimeException.class).hasMessage("1");
-            assertThat(actual.getCause().getCause()).isSameAs(e);
-        }
-
-        private Data errorData(Exception e) {
-            return new Data(() -> {
-                throw e;
-            }, context, SchemaType.create(null));
-        }
-
-        @Test
-        void should_only_map_once_when_resolve_error() {
-//            f()
-//              throw e
-//            try
-//              v=f()
-//            catch e
-//              throw mapError(e)
-//            print v
-//            print v
-
-            Exception e = new Exception();
-            Data data = errorData(e);
-            data.onError(throwable -> {
-                i++;
-                return new RuntimeException(throwable);
-            });
-
-            assertThat(assertThrows(Exception.class, data::instance))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasCause(e);
-
-            assertThat(assertThrows(Exception.class, data::instance))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasCause(e);
-
-            assertThat(i).isEqualTo(1);
-        }
-
-        @Test
-        void peek_before_resolve() {
-//            f()
-//              return result
-//            v = f()
-//            process(v)
-//            print v
-            Data data = data(() -> new StringBuilder().append(i += 1));
-
-            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek"));
-
-            assertThat(data.instance().toString()).isEqualTo("1-peek");
-        }
-
-        private Data data(ThrowingSupplier<Object> supplier) {
-            return new RuntimeContextBuilder().build(supplier::get).getThis();
-        }
-
-        @Test
-        void peek_twice_before_resolve() {
-//            f()
-//              return result
-//            v = f()
-//            process1(v)
-//            process2(v)
-//            print v
-            Data data = data(() -> new StringBuilder().append(i += 1));
-
-            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek1"));
-            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek2"));
-
-            assertThat(data.instance().toString()).isEqualTo("1-peek1-peek2");
-        }
-
-        @Test
-        void should_call_handler_at_once_when_instance_has_already_resolved() {
-//            f()
-//              return result
-//            v = f()
-//            process1(v)
-//            print v
-//            process2(v)
-//            print v
-            Data data = data(() -> new StringBuilder().append(i += 1));
-
-            data.peek(resolved -> assertThat(resolved.value().toString()).isEqualTo("1"));
-            Object instance = data.instance();
-            assertThat(instance.toString()).isEqualTo("1");
-
-            data.peek(resolved -> ((StringBuilder) resolved.value()).append("-peek1"));
-
-            assertThat(instance.toString()).isEqualTo("1-peek1");
         }
     }
 

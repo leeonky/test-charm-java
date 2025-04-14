@@ -2,7 +2,6 @@ package com.github.leeonky.dal.extensions.jfactory;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
@@ -31,10 +30,10 @@ public class JFactoryExtension implements Extension {
                 });
         runtimeContextBuilder.registerDumper(JFactory.class, data -> new MapDumper() {
             @Override
-            protected void dumpField(Resolved data, Object field, DumpingBuffer context) {
+            protected void dumpField(Data data, Object field, DumpingBuffer context) {
                 try {
-                    Data value = data.getValueData(field);
-                    if (value.resolved().list().size() != 0) {
+                    Data value = data.getValue(field);
+                    if (value.list().size() != 0) {
                         context.append(key(field)).append(": ");
                         context.dumpValue(value);
                     }

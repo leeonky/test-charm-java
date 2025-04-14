@@ -1,8 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.runtime.ConstructorViaSchema;
-import com.github.leeonky.dal.runtime.DalRuntimeException;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.*;
 
 import static com.github.leeonky.dal.runtime.DalException.locateError;
 
@@ -13,13 +11,19 @@ public class SchemaNode extends DALNode {
         this.schema = schema;
     }
 
-    public ConstructorViaSchema getValueConstructorViaSchema(RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.searchValueConstructor(schema).orElseThrow(() ->
-                locateError(new DalRuntimeException("Schema '" + schema + "' not registered"), getPositionBegin()));
-    }
-
     @Override
     public String inspect() {
         return schema;
+    }
+
+    public Object convertViaSchema(RuntimeContextBuilder.DALRuntimeContext context, Data inputData, String inputProperty) {
+        try {
+            return context.searchValueConstructor(schema).orElseThrow(() -> locateError(
+                            new DalRuntimeException("Schema '" + schema + "' not registered"), getPositionBegin()))
+                    .apply(inputData, context);
+        } catch (IllegalTypeException exception) {
+            throw new AssertionFailure(exception.assertionFailureMessage(inputProperty.isEmpty() ?
+                    inputProperty : inputProperty + " ", this), getPositionBegin());
+        }
     }
 }

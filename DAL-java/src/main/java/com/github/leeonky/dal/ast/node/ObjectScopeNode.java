@@ -3,7 +3,6 @@ package com.github.leeonky.dal.ast.node;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Data.Resolved;
 import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.runtime.Data.ResolvedMethods.cast;
 import static com.github.leeonky.dal.runtime.ExpressionException.exception;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static java.lang.String.format;
@@ -46,24 +44,24 @@ public class ObjectScopeNode extends DALNode {
             public Data matches() {
                 if (verificationExpressions.isEmpty() && !isObjectWildcard)
                     throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
-                if (opt1(actual.get(Resolved::isNull)))
+                if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 return actual.execute(() -> {
                     Data result = context.data(null);
                     for (DALNode expression : verificationExpressions)
-                        result = expression.evaluateData(context).resolve();
+                        result = expression.evaluateData(context);
                     return result;
                 });
             }
 
             @Override
             public Data equalTo() {
-                if (opt1(actual.get(Resolved::isNull)))
+                if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 Data execute = actual.execute(() -> {
                     Data result = context.data(null);
                     for (DALNode expression : verificationExpressions)
-                        result = expression.evaluateData(context).resolve();
+                        result = expression.evaluateData(context);
                     return result;
                 });
                 Set<Object> dataFields = collectUnexpectedFields(actual, context);
@@ -85,14 +83,14 @@ public class ObjectScopeNode extends DALNode {
     }
 
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
-        return new LinkedHashSet<Object>(data.resolved().fieldNames()) {{
+        return new LinkedHashSet<Object>(data.fieldNames()) {{
             Stream.concat(collectFields(data), context.collectPartialProperties(data).stream())
                     .map(obj -> convertFiled(data, obj)).forEach(this::remove);
         }};
     }
 
     private Object convertFiled(Data data, Object obj) {
-        return data.probe(cast(CurryingMethod.class)).map(curryingMethod -> curryingMethod.convertToArgType(obj)).orElse(obj);
+        return data.cast(CurryingMethod.class).map(curryingMethod -> curryingMethod.convertToArgType(obj)).orElse(obj);
     }
 
     @Override
