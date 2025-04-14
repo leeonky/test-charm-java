@@ -10,7 +10,7 @@ import java.io.InputStream;
 import static com.github.leeonky.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
 import static java.lang.String.format;
 
-public class HexDumper implements Dumper {
+public class HexDumper<T> implements Dumper<T> {
 
     private static String dumpByteArray(byte[] data) {
         if (data.length == 0)
@@ -69,7 +69,7 @@ public class HexDumper implements Dumper {
     }
 
     @Override
-    public void dump(Data<?> data, DumpingBuffer context) {
+    public void dump(Data<T> data, DumpingBuffer context) {
         context.append(dumpByteArray(extractBytes(data.instance())));
     }
 }

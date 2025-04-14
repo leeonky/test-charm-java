@@ -47,7 +47,7 @@ public class DumpingBuffer {
             throw new MaximizeDump();
     }
 
-    public DumpingBuffer dump(Data<?> data) {
+    public <T> DumpingBuffer dump(Data<T> data) {
         checkCount();
         try {
             runtimeContext.fetchDumper(data).dump(data, this);
@@ -57,7 +57,7 @@ public class DumpingBuffer {
         return this;
     }
 
-    public DumpingBuffer dumpValue(Data<?> data) {
+    public <T> DumpingBuffer dumpValue(Data<T> data) {
         checkCount();
         try {
             runtimeContext.fetchDumper(data).dumpValue(data, this);

@@ -6,7 +6,7 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
-import com.github.leeonky.dal.runtime.inspector.MapDumper;
+import com.github.leeonky.dal.runtime.inspector.KeyValueDumper;
 import com.github.leeonky.jfactory.JFactory;
 
 import java.util.HashSet;
@@ -28,11 +28,11 @@ public class JFactoryExtension implements Extension {
                         return new HashSet<>(jFactory.specNames());
                     }
                 });
-        runtimeContextBuilder.registerDumper(JFactory.class, data -> new MapDumper() {
+        runtimeContextBuilder.registerDumper(JFactory.class, data -> new KeyValueDumper<JFactory>() {
             @Override
-            protected void dumpField(Data<?> data, Object field, DumpingBuffer context) {
+            protected void dumpField(Data<JFactory> data, Object field, DumpingBuffer context) {
                 try {
-                    Data value = data.getValue(field);
+                    Data<?> value = data.property(field);
                     if (value.list().size() != 0) {
                         context.append(key(field)).append(": ");
                         context.dumpValue(value);

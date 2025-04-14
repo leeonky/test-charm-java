@@ -6,18 +6,18 @@ import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import java.io.File;
 
-public class FileDirDumper implements Dumper {
+public class FileDirDumper implements Dumper<File> {
 
     @Override
-    public void dump(Data<?> data, DumpingBuffer context) {
+    public void dump(Data<File> data, DumpingBuffer context) {
         DumpingBuffer sub = context.append("java.io.File").appendThen(" ")
-                .append(((File) data.instance()).getPath()).append("/").sub();
+                .append(data.instance().getPath()).append("/").sub();
         data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 
     @Override
-    public void dumpValue(Data<?> data, DumpingBuffer context) {
-        DumpingBuffer sub = context.append(((File) data.instance()).getName()).append("/").indent();
+    public void dumpValue(Data<File> data, DumpingBuffer context) {
+        DumpingBuffer sub = context.append(data.instance().getName()).append("/").indent();
         data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 }

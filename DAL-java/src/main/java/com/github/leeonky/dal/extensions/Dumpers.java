@@ -32,17 +32,19 @@ public class Dumpers implements Extension {
         ;
     }
 
+    @SuppressWarnings("unchecked")
     private void registerValueTypes(DAL dal, Class<?>... types) {
         for (Class<?> type : types)
-            dal.getRuntimeContextBuilder().registerDumper(type, data -> VALUE_DUMPER);
+            dal.getRuntimeContextBuilder().registerDumper(type, data -> (Dumper) VALUE_DUMPER);
     }
 
-    private static class StackTraceDumper implements Dumper {
+    private static class StackTraceDumper implements Dumper<StackTraceElement[]> {
 
         @Override
-        public void dump(Data<?> data, DumpingBuffer dumpingBuffer) {
+        public void dump(Data<StackTraceElement[]> data, DumpingBuffer dumpingBuffer) {
             DumpingBuffer sub = dumpingBuffer.indent();
-            data.list().forEach(s -> sub.newLine().append("at " + s.value().toString()));
+            for (StackTraceElement stackTraceElement : data.instance())
+                sub.newLine().append("at " + stackTraceElement);
         }
     }
 }

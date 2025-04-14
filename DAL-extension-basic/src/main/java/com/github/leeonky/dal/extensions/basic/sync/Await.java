@@ -12,15 +12,15 @@ import static com.github.leeonky.dal.runtime.DalException.extractException;
 
 public class Await implements ProxyObject {
     private static int defaultWaitingTime = 5000;
-    private final Data data;
+    private final Data<?> data;
     private final int interval;
     private final int waitingTime;
 
-    public Await(Data data) {
+    public Await(Data<?> data) {
         this(data, 100, defaultWaitingTime);
     }
 
-    public Await(Data data, int interval, int waitingTime) {
+    public Await(Data<?> data, int interval, int waitingTime) {
         this.data = data;
         this.interval = interval;
         this.waitingTime = waitingTime;
@@ -30,7 +30,7 @@ public class Await implements ProxyObject {
         Await.defaultWaitingTime = ms;
     }
 
-    public <T> T await(Function<Data, T> supplier) {
+    public <T> T await(Function<Data<?>, T> supplier) {
         try {
             return new Retryer(waitingTime, interval).get(() -> supplier.apply(data));
         } catch (Throwable e) {
@@ -48,7 +48,7 @@ public class Await implements ProxyObject {
 
     @Override
     public Object getValue(Object property) {
-        return Sneaky.get(() -> await(data -> data.getValue(property).instance()));
+        return Sneaky.get(() -> await(data -> data.property(property).instance()));
     }
 
     @Override

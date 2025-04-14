@@ -46,7 +46,7 @@ public abstract class HexChecker implements Checker, CheckerType {
 
         @Override
         public Data<?> transformActual(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
-            return actual.convert(byte[].class, InputStream.class, Byte[].class).map(HexDumper::extractBytes);
+            return actual.tryConvert(byte[].class, InputStream.class, Byte[].class).map(HexDumper::extractBytes);
         }
     }
 }

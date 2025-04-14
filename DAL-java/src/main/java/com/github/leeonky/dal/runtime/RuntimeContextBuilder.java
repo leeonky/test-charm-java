@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
-import static com.github.leeonky.dal.runtime.DalException.throwUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
@@ -60,9 +59,9 @@ public class RuntimeContextBuilder {
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextFormatter<?, ?>> textFormatterMap = new LinkedHashMap<>();
-    private final Map<Operators, LinkedList<Operation>> operations = new HashMap<>();
+    private final Map<Operators, LinkedList<Operation<?, ?>>> operations = new HashMap<>();
     private Converter converter = Converter.getInstance();
-    private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
+    private final ClassKeyMap<DumperFactory<?>> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
     private final CheckerSet checkerSetForEqualing = new CheckerSet(CheckerSet::defaultEqualing);
     private int maxDumpingLineSize = 2000;
@@ -206,7 +205,7 @@ public class RuntimeContextBuilder {
         return checkerSetForEqualing;
     }
 
-    public RuntimeContextBuilder registerDumper(Class<?> type, DumperFactory factory) {
+    public <T> RuntimeContextBuilder registerDumper(Class<T> type, DumperFactory<T> factory) {
         dumperFactories.put(type, factory);
         return this;
     }
@@ -276,7 +275,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerOperator(Operators operator, Operation operation) {
+    public RuntimeContextBuilder registerOperator(Operators operator, Operation<?, ?> operation) {
         operations.computeIfAbsent(operator, o -> new LinkedList<>()).addFirst(operation);
         return this;
     }
@@ -342,8 +341,8 @@ public class RuntimeContextBuilder {
             return Optional.ofNullable(valueConstructors.get(type));
         }
 
-        public <T> Set<?> findPropertyReaderNames(T instance) {
-            return getObjectPropertyAccessor(instance).getPropertyNames(instance);
+        public <T> Set<?> findPropertyReaderNames(Data<T> data) {
+            return getObjectPropertyAccessor(data.instance()).getPropertyNames(data);
         }
 
         @SuppressWarnings("unchecked")
@@ -358,18 +357,8 @@ public class RuntimeContextBuilder {
                     .orElseGet(() -> Objects.equals(instance, null));
         }
 
-        public <T> Object getPropertyValue(Data<T> data, Object property) {
-            try {
-                return getObjectPropertyAccessor(data.instance()).getValueByData(data, property);
-            } catch (InvalidPropertyException e) {
-                try {
-                    return currying(data.instance(), property).orElseThrow(() -> e).resolve();
-                } catch (Throwable e1) {
-                    return throwUserRuntimeException(e1);
-                }
-            } catch (Throwable e) {
-                return throwUserRuntimeException(e);
-            }
+        public <T> Data<?> accessProperty(Data<T> data, Object propertyChain) {
+            return getObjectPropertyAccessor(data.instance()).getData(data, propertyChain, this);
         }
 
         public DALCollection<Object> createCollection(Object instance) {
@@ -391,11 +380,11 @@ public class RuntimeContextBuilder {
         }
 
         public <T> Data<T> data(T instance) {
-            return data(instance, null);
+            return data(instance, SchemaType.create(null));
         }
 
-        public <T> Data<T> data(T instance, BeanClass<?> schemaType) {
-            return new Data<>(instance, this, SchemaType.create(schemaType));
+        public <T> Data<T> data(T instance, SchemaType schema) {
+            return new Data<>(instance, this, schema);
         }
 
         public Optional<Result> takeUserDefinedLiteral(String token) {
@@ -493,15 +482,16 @@ public class RuntimeContextBuilder {
             return checkerSetForMatching.fetch(expected, actual);
         }
 
-        public Dumper fetchDumper(Data<?> data) {
-            return dumperFactories.tryGetData(data.instance()).map(factory -> factory.apply(data)).orElseGet(() -> {
+        @SuppressWarnings("unchecked")
+        public <T> Dumper<T> fetchDumper(Data<T> data) {
+            return dumperFactories.tryGetData(data.instance()).map(factory -> ((DumperFactory<T>) factory).apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
-                    return Dumper.LIST_DUMPER;
+                    return (Dumper<T>) Dumper.LIST_DUMPER;
                 if (data.instance() != null && data.instance().getClass().isEnum())
-                    return Dumper.VALUE_DUMPER;
-                return Dumper.MAP_DUMPER;
+                    return (Dumper<T>) Dumper.VALUE_DUMPER;
+                return (Dumper<T>) Dumper.MAP_DUMPER;
             });
         }
 
@@ -537,6 +527,7 @@ public class RuntimeContextBuilder {
                     .apply(exclamationData);
         }
 
+        @SuppressWarnings("unchecked")
         public Data<?> calculate(Data<?> v1, DALOperator opt, Data<?> v2) {
             for (Operation operation : operations.get(opt.overrideType()))
                 if (operation.match(v1, opt, v2, this))

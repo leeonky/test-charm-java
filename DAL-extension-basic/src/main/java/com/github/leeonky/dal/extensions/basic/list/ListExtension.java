@@ -33,7 +33,7 @@ public class ListExtension implements Extension {
             this.data = data;
         }
 
-        public DALCollection<Object> filter(DALOperator operator, Data v2, DALRuntimeContext context) {
+        public DALCollection<Object> filter(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
             return filterList(operator, v2, context);
         }
 
@@ -76,7 +76,7 @@ public class ListExtension implements Extension {
         }
     }
 
-    private static class VerificationInFilter implements Operation {
+    private static class VerificationInFilter implements Operation<Filterable, Object> {
 
         @Override
         public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
@@ -84,8 +84,8 @@ public class ListExtension implements Extension {
         }
 
         @Override
-        public Object operate(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-            return ((Filterable) v1.instance()).filter(operator, v2, context);
+        public Object operate(Data<Filterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+            return v1.instance().filter(operator, v2, context);
         }
     }
 }

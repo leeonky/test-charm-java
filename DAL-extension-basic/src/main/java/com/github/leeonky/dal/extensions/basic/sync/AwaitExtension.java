@@ -14,16 +14,16 @@ public class AwaitExtension implements Extension {
                         data -> ((Await) data).within(remarkData.remark())))
                 .registerOperator(Operators.MATCH, new AwaitVerification() {
                     @Override
-                    public Object operate(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-                        return ((Await) v1.instance()).await(data ->
-                                ((ExpectationFactory) v2.instance()).create(operator, data).matches().instance());
+                    public Object operate(Data<Await> v1, DALOperator operator, Data<ExpectationFactory> v2,
+                                          DALRuntimeContext context) {
+                        return v1.instance().await(data -> v2.instance().create(operator, data).matches().instance());
                     }
                 })
                 .registerOperator(Operators.EQUAL, new AwaitVerification() {
                     @Override
-                    public Object operate(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-                        return ((Await) v1.instance()).await(data ->
-                                ((ExpectationFactory) v2.instance()).create(operator, data).equalTo().instance());
+                    public Object operate(Data<Await> v1, DALOperator operator, Data<ExpectationFactory> v2,
+                                          DALRuntimeContext context) {
+                        return v1.instance().await(data -> v2.instance().create(operator, data).equalTo().instance());
                     }
                 })
                 .registerMetaProperty(Await.class, "every", metaData ->
@@ -31,7 +31,7 @@ public class AwaitExtension implements Extension {
         ;
     }
 
-    private static abstract class AwaitVerification implements Operation {
+    private static abstract class AwaitVerification implements Operation<Await, ExpectationFactory> {
         @Override
         public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
             return v1.instanceOf(Await.class) && v2.instanceOf(ExpectationFactory.class);

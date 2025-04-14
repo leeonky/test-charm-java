@@ -120,7 +120,7 @@ class DataTest {
         @Test
         void should_raise_error_when_index_out_of_range() {
             assertThrows(DalRuntimeException.class, () ->
-                    runtimeContextBuilder.build(new String[0]).getThis().getValue(0).instance());
+                    runtimeContextBuilder.build(new String[0]).getThis().property(0).instance());
         }
 
         @Test
@@ -142,11 +142,11 @@ class DataTest {
         void support_get_value_via_field_alias() {
             assertThat(new Data(new HashMap<String, Object>() {{
                 put("age", 100);
-            }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class))).getValue("aliasOfAge").instance()).isEqualTo(100);
+            }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class))).property("aliasOfAge").instance()).isEqualTo(100);
         }
 
         private void assertDataAccess(Object object, Object expected, Object... properties) {
-            assertThat(runtimeContextBuilder.build(object).getThis().getValue(asList(properties)).instance())
+            assertThat(runtimeContextBuilder.build(object).getThis().property(asList(properties)).instance())
                     .isEqualTo(expected);
         }
 

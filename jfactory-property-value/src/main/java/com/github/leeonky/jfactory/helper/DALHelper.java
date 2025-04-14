@@ -19,7 +19,7 @@ public class DALHelper {
         implementForceCreation(dal);
 
         dal.getRuntimeContextBuilder().registerDumper(ObjectReference.class, _ignore -> (data, dumpingBuffer) ->
-                dumpingBuffer.dump(data.getValue("value")));
+                dumpingBuffer.dump(data.property("value")));
         return dal;
     }
 
@@ -48,20 +48,20 @@ public class DALHelper {
     }
 
     private void overrideOptMatch(DAL dal) {
-        dal.getRuntimeContextBuilder().registerOperator(Operators.MATCH, new Operation() {
+        dal.getRuntimeContextBuilder().registerOperator(Operators.MATCH, new Operation<ObjectReference, ExpectationFactory>() {
             @Override
             public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
-            public Data<?> operateData(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
-                ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
+            public Data<?> operateData(Data<ObjectReference> v1, DALOperator operator, Data<ExpectationFactory> v2, RuntimeContextBuilder.DALRuntimeContext context) {
+                ExpectationFactory.Expectation expectation = v2.instance().create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 if (type == ExpectationFactory.Type.OBJECT)
-                    ((ObjectReference) v1.instance()).rawType(OBJECT);
+                    v1.instance().rawType(OBJECT);
                 else if (type == ExpectationFactory.Type.LIST)
-                    ((ObjectReference) v1.instance()).rawType(LIST);
+                    v1.instance().rawType(LIST);
                 return expectation.matches();
             }
         });
@@ -75,22 +75,22 @@ public class DALHelper {
     }
 
     private void overrideOptEqual(DAL dal) {
-        dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation() {
+        dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation<ObjectReference, ExpectationFactory>() {
             @Override
             public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
-            public Data<?> operateData(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
-                ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
+            public Data<?> operateData(Data<ObjectReference> v1, DALOperator operator, Data<ExpectationFactory> v2,
+                                       RuntimeContextBuilder.DALRuntimeContext context) {
+                ExpectationFactory.Expectation expectation = v2.instance().create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
-                ObjectReference objectReference = (ObjectReference) v1.instance();
                 if (type == ExpectationFactory.Type.OBJECT)
-                    objectReference.rawType(RAW_OBJECT);
+                    v1.instance().rawType(RAW_OBJECT);
                 else if (type == ExpectationFactory.Type.LIST)
-                    objectReference.rawType(RAW_LIST);
-                objectReference.clear();
+                    v1.instance().rawType(RAW_LIST);
+                v1.instance().clear();
                 return expectation.equalTo();
             }
         });

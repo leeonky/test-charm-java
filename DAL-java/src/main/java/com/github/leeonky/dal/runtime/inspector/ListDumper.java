@@ -5,15 +5,15 @@ import com.github.leeonky.util.Classes;
 
 import java.util.stream.Stream;
 
-public class ListDumper implements Dumper.Cacheable {
+public class ListDumper<T> implements Dumper.Cacheable<T> {
 
     @Override
-    public void cachedInspect(Data<?> data, DumpingBuffer context) {
+    public void cachedInspect(Data<T> data, DumpingBuffer context) {
         dumpType(data, context);
         dumpBody(data, context);
     }
 
-    private void dumpBody(Data<?> data, DumpingBuffer dumpingBuffer) {
+    private void dumpBody(Data<T> data, DumpingBuffer dumpingBuffer) {
         dumpingBuffer.append("[").indent(indentBuffer ->
                 data.list().wraps().forEach(ie -> {
                     indentBuffer.index(ie.index()).newLine().dumpValue(ie.value());
@@ -21,7 +21,7 @@ public class ListDumper implements Dumper.Cacheable {
                 })).optionalNewLine().append("]");
     }
 
-    protected void dumpType(Data<?> data, DumpingBuffer context) {
+    protected void dumpType(Data<T> data, DumpingBuffer context) {
         if (!(data.instanceOf(Iterable.class)) && !(data.instanceOf(Stream.class))
                 && !data.instance().getClass().isArray())
             context.append(Classes.getClassName(data.instance())).appendThen(" ");

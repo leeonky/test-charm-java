@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.extensions.basic.file.util;
 
-import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.util.Sneaky;
 
 import java.io.File;
@@ -19,10 +18,10 @@ import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 
 public class Util {
-    public static final Dumper FILE_DIR_DUMPER = new FileDirDumper(),
-            FILE_FILE_DUMPER = new FileFileDumper(),
-            PATH_DIR_DUMPER = new PathDirDumper(),
-            PATH_FILE_DUMPER = new PathFileDumper();
+    public static final FileDirDumper FILE_DIR_DUMPER = new FileDirDumper();
+    public static final FileFileDumper FILE_FILE_DUMPER = new FileFileDumper();
+    public static final PathDirDumper PATH_DIR_DUMPER = new PathDirDumper();
+    public static final PathFileDumper PATH_FILE_DUMPER = new PathFileDumper();
 
     public static String formatFileSize(long size) {
         if (size < 10000)

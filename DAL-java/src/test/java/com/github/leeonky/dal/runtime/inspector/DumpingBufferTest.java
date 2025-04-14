@@ -11,9 +11,9 @@ class DumpingBufferTest {
     public static class Bean {
     }
 
-    public static class BeanDumper implements Dumper {
+    public static class BeanDumper<T> implements Dumper<T> {
         @Override
-        public void dump(Data<?> data, DumpingBuffer dumpingBuffer) {
+        public void dump(Data<T> data, DumpingBuffer dumpingBuffer) {
             throw new RuntimeException("dump error");
         }
     }
@@ -21,7 +21,7 @@ class DumpingBufferTest {
     @Test
     void ignore_dump_error() {
         RuntimeContextBuilder builder = new RuntimeContextBuilder();
-        builder.registerDumper(Bean.class, d -> new BeanDumper());
+        builder.registerDumper(Bean.class, d -> new BeanDumper<>());
         RuntimeContextBuilder.DALRuntimeContext context = builder.build(new Bean());
 
         assertThat(context.getThis().dumpValue()).isEqualTo("*throw* java.lang.RuntimeException: dump error");

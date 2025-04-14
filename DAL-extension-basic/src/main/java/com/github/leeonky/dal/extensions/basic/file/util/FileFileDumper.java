@@ -6,15 +6,15 @@ import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import java.io.File;
 
-public class FileFileDumper implements Dumper {
+public class FileFileDumper implements Dumper<File> {
 
     @Override
-    public void dump(Data<?> data, DumpingBuffer buffer) {
+    public void dump(Data<File> data, DumpingBuffer buffer) {
         buffer.append("java.io.File").newLine().dumpValue(data);
     }
 
     @Override
-    public void dumpValue(Data<?> data, DumpingBuffer buffer) {
-        buffer.append(Util.attribute(((File) data.instance()).toPath()));
+    public void dumpValue(Data<File> data, DumpingBuffer buffer) {
+        buffer.append(Util.attribute(data.instance().toPath()));
     }
 }

@@ -5,7 +5,7 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
-import com.github.leeonky.dal.runtime.inspector.MapDumper;
+import com.github.leeonky.dal.runtime.inspector.KeyValueDumper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +32,10 @@ public class JDBCExtension implements Extension {
         ;
     }
 
-    private static class TableDumper implements Dumper {
+    private static class TableDumper<T extends DataBase.Table<T>> implements Dumper<DataBase.Table<T>> {
 
         @Override
-        public void dump(Data<?> data, DumpingBuffer dumpingBuffer) {
+        public void dump(Data<DataBase.Table<T>> data, DumpingBuffer dumpingBuffer) {
             List<List<String>> tableData = getData(data);
             if (tableData.isEmpty())
                 dumpingBuffer.append("[]");
@@ -49,9 +49,9 @@ public class JDBCExtension implements Extension {
             }
         }
 
-        private List<List<String>> getData(Data data) {
+        private List<List<String>> getData(Data<DataBase.Table<T>> data) {
             List<List<String>> tableData = new ArrayList<>();
-            stream(((DataBase.Table<?>) data.instance()).spliterator(), false).limit(100).forEach(row -> {
+            stream(data.instance().spliterator(), false).limit(100).forEach(row -> {
                 if (tableData.isEmpty())
                     tableData.add(new ArrayList<>(row.columns()));
                 tableData.add(row.data().values().stream().map(String::valueOf).collect(Collectors.toList()));
@@ -69,19 +69,18 @@ public class JDBCExtension implements Extension {
         }
     }
 
-    private static class DataBaseDumper extends MapDumper {
+    private static class DataBaseDumper extends KeyValueDumper<DataBase> {
 
         @Override
-        protected void dumpType(Data<?> data, DumpingBuffer dumpingBuffer) {
-            DataBase dataBase = (DataBase) data.instance();
-            dumpingBuffer.append("DataBase[").append(dataBase.getUrl()).append("] ");
+        protected void dumpType(Data<DataBase> data, DumpingBuffer dumpingBuffer) {
+            dumpingBuffer.append("DataBase[").append(data.instance().getUrl()).append("] ");
         }
 
         @Override
-        protected void dumpField(Data<?> data, Object field, DumpingBuffer context) {
-            DataBase.Table<?> table = (DataBase.Table<?>) data.getValue(field).instance();
+        protected void dumpField(Data<DataBase> data, Object field, DumpingBuffer context) {
+            DataBase.Table<?> table = (DataBase.Table<?>) data.property(field).instance();
             if (table.iterator().hasNext())
-                context.append(key(field)).append(":").dumpValue(data.getValue(field));
+                context.append(key(field)).append(":").dumpValue(data.property(field));
         }
     }
 }

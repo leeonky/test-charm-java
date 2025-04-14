@@ -352,7 +352,7 @@ Feature: commons
     """
     And register DAL:
     """
-    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "meta", meta-> meta.data().getValue("value").instance());
+    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "meta", meta-> meta.data().property("value").instance());
     """
     Then the following verification for the instance of java class "Bean" should pass:
     """

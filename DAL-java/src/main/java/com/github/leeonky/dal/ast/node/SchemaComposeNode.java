@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast.node;
 import com.github.leeonky.dal.runtime.DALCollection;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.SchemaType;
 
 import java.util.List;
 import java.util.stream.Collector;
@@ -27,11 +28,11 @@ public class SchemaComposeNode extends DALNode {
         return schemas.stream().map(SchemaNode::inspect).collect(joining);
     }
 
-    public Data verify(DALNode input, DALRuntimeContext context) {
+    public Data<?> verify(DALNode input, DALRuntimeContext context) {
         List<Object> instanceBySchema = schemas.stream().map(schemaNode -> verifyAndConvertAsSchemaType(context,
                 schemaNode, input.inspect(), input.evaluateData(context))).collect(toList());
         return context.data(instanceBySchema.get(instanceBySchema.size() - 1),
-                context.schemaType(schemas.get(0).inspect(), isList).orElse(null));
+                SchemaType.create(context.schemaType(schemas.get(0).inspect(), isList).orElse(null)));
     }
 
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode,

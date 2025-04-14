@@ -1,15 +1,13 @@
 package com.github.leeonky.dal.extensions.basic.sftp.util;
 
-import com.github.leeonky.dal.runtime.inspector.Dumper;
-
 import java.io.FileNotFoundException;
 import java.util.Optional;
 
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 
 public class Util {
-    public static final Dumper DIR_DUMPER = new DirDumper();
-    public static final Dumper FILE_DUMPER = new FileDumper();
+    public static final DirDumper DIR_DUMPER = new DirDumper();
+    public static final FileDumper FILE_DUMPER = new FileDumper();
 
     public static Object getSubFile(SFtpFile sFtpFile, Object property) {
         Optional<SFtpFile> first = sFtpFile.access(property);

@@ -6,15 +6,15 @@ import com.github.leeonky.util.Classes;
 import java.util.Map;
 import java.util.Set;
 
-public class MapDumper implements Dumper.Cacheable {
+public class KeyValueDumper<T> implements Dumper.Cacheable<T> {
 
     @Override
-    public void cachedInspect(Data<?> data, DumpingBuffer context) {
+    public void cachedInspect(Data<T> data, DumpingBuffer context) {
         dumpType(data, context);
         dumpBody(data, context);
     }
 
-    private void dumpBody(Data<?> data, DumpingBuffer dumpingBuffer) {
+    private void dumpBody(Data<T> data, DumpingBuffer dumpingBuffer) {
         DumpingBuffer indentContext = dumpingBuffer.append("{").indent();
         getFieldNames(data).forEach(fieldName -> {
             dumpField(data, fieldName, indentContext.sub(fieldName).newLine());
@@ -23,11 +23,11 @@ public class MapDumper implements Dumper.Cacheable {
         dumpingBuffer.optionalNewLine().append("}");
     }
 
-    protected void dumpField(Data<?> data, Object field, DumpingBuffer context) {
+    protected void dumpField(Data<T> data, Object field, DumpingBuffer context) {
         context.append(key(field)).append(": ");
         Data<?> value;
         try {
-            value = data.getValue(field);
+            value = data.property(field);
         } catch (Throwable e) {
             context.append(e);
             return;
@@ -39,11 +39,11 @@ public class MapDumper implements Dumper.Cacheable {
         return String.valueOf(o);
     }
 
-    protected Set<?> getFieldNames(Data<?> data) {
+    protected Set<?> getFieldNames(Data<T> data) {
         return data.fieldNames();
     }
 
-    protected void dumpType(Data<?> data, DumpingBuffer dumpingBuffer) {
+    protected void dumpType(Data<T> data, DumpingBuffer dumpingBuffer) {
         if (!(data.instanceOf(Map.class)))
             dumpingBuffer.append(Classes.getClassName(data.instance())).appendThen(" ");
     }

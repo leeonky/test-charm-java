@@ -17,7 +17,7 @@ public class MetaThrowTest {
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
         builder.registerPropertyAccessor(Bean.class, new JavaClassPropertyAccessor<Bean>(create(Bean.class)) {
             @Override
-            public Object getValueByData(Data<Bean> data, Object property) {
+            public Object getValue(Data<Bean> data, Object property) {
                 throw new UserRuntimeException(new java.lang.RuntimeException("hello"));
             }
         });

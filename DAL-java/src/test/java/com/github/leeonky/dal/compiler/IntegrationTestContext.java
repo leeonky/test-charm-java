@@ -363,9 +363,9 @@ public class IntegrationTestContext {
                         return Result.of(new Empty());
                     return Result.empty();
                 })
-                .registerDumper(Empty.class, data -> new ValueDumper() {
+                .registerDumper(Empty.class, data -> new ValueDumper<Empty>() {
                     @Override
-                    protected void inspectValue(Data<?> data, DumpingBuffer dumpingBuffer) {
+                    protected void inspectValue(Data<Empty> data, DumpingBuffer dumpingBuffer) {
                     }
                 });
     }

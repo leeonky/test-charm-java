@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.util.Sneaky;
 
 import java.util.Optional;
 
@@ -75,10 +74,6 @@ public class DalException extends InterpreterException {
         if (e instanceof AssertionError)
             return new AssertionFailure(e.getMessage(), positionBegin);
         return new DalException(positionBegin, e);
-    }
-
-    public static Object throwUserRuntimeException(Throwable error) {
-        return Sneaky.sneakyThrow(buildUserRuntimeException(error));
     }
 
     public static Throwable buildUserRuntimeException(Throwable error) {

@@ -61,7 +61,7 @@ public class MetaProperties implements Extension {
                 Object instance = data.instance();
                 return BeanClass.createFrom(instance).getPropertyValue(instance, property.toString());
             } catch (NoSuchAccessorException ignore) {
-                return data.getValue(property).instance();
+                return data.property(property).instance();
             }
         }
 

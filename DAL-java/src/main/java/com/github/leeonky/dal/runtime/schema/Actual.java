@@ -34,7 +34,7 @@ public class Actual {
     }
 
     public Actual sub(Object property) {
-        return new Actual(this.property + "." + property, actual.getValue(property));
+        return new Actual(this.property + "." + property, actual.property(property));
     }
 
     public boolean isNull() {
@@ -42,7 +42,7 @@ public class Actual {
     }
 
     public Actual sub(Integer index) {
-        return new Actual(property + "[" + index + "]", actual.getValue(index));
+        return new Actual(property + "[" + index + "]", actual.property(index));
     }
 
     private final static Compiler compiler = new Compiler();
@@ -50,7 +50,7 @@ public class Actual {
     @SuppressWarnings("unchecked")
     public Class<Object> polymorphicSchemaType(Class<?> schemaType) {
         return ofNullable(schemaType.getAnnotation(SubType.class)).map(subType -> {
-            Object subTypeProperty = actual.getValue(compiler.toChainNodes(subType.property())).instance();
+            Object subTypeProperty = actual.property(compiler.toChainNodes(subType.property())).instance();
             return (Class<Object>) Stream.of(subType.types()).filter(t -> t.value().equals(subTypeProperty))
                     .map(SubType.Type::type).findFirst().orElseThrow(() -> new DalRuntimeException(
                             format("Cannot guess sub type through property type value[%s]", subTypeProperty)));

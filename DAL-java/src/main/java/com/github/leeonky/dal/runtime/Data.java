@@ -38,7 +38,7 @@ public class Data<T> {
     }
 
     public Set<?> fieldNames() {
-        return context.findPropertyReaderNames(instance());
+        return context.findPropertyReaderNames(this);
     }
 
     public boolean isList() {
@@ -59,19 +59,18 @@ public class Data<T> {
         return context.isNull(instance());
     }
 
-    public Data<?> getValue(List<Object> propertyChain) {
+    public Data<?> property(List<Object> propertyChain) {
         return propertyChain.isEmpty() ? this :
-                getValue(propertyChain.get(0)).getValue(propertyChain.subList(1, propertyChain.size()));
+                property(propertyChain.get(0)).property(propertyChain.subList(1, propertyChain.size()));
     }
 
-    public Data<?> getValue(Object propertyChain) {
+    public Data<?> property(Object propertyChain) {
         List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
         if (chain.size() == 1 && chain.get(0).equals(propertyChain)) {
             try {
-                Object value = isList() && !(propertyChain instanceof String) ? list().getByIndex((int) propertyChain)
-                        : context.getPropertyValue(this, propertyChain);
-                return new Data<>(value, context, propertySchema(propertyChain,
-                        this.value instanceof AutoMappingList && propertyChain instanceof String));
+                return isList() && !(propertyChain instanceof String)
+                        ? new Data<>(list().getByIndex((int) propertyChain), context, schemaType.access(propertyChain))
+                        : context.accessProperty(this, propertyChain);
             } catch (IndexOutOfBoundsException ex) {
                 throw new DalRuntimeException(ex.getMessage());
             } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
@@ -86,7 +85,7 @@ public class Data<T> {
                         "  6. static method extension", propertyChain), e);
             }
         }
-        return getValue(chain);
+        return property(chain);
     }
 
     public SchemaType propertySchema(Object property, boolean isListMapping) {
@@ -97,7 +96,7 @@ public class Data<T> {
         return schemaType.firstFieldFromAlias(alias);
     }
 
-    public Data<?> convert(Class<?>... targets) {
+    public Data<?> tryConvert(Class<?>... targets) {
         return map(object -> {
             ConvertException e = null;
             for (Class<?> target : targets) {
@@ -111,6 +110,10 @@ public class Data<T> {
         });
     }
 
+    public <N> Data<N> convert(Class<N> target) {
+        return map(object -> context.getConverter().convert(target, object));
+    }
+
     public <N> Data<N> map(Function<T, N> mapper) {
         return new Data<>(mapper.apply(instance()), context, schemaType);
     }
@@ -119,7 +122,7 @@ public class Data<T> {
         FilteredObject filteredObject = new FilteredObject();
         fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
-                        filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
+                        filteredObject.put(fieldName.substring(prefix.length()), property(fieldName).instance()));
         return new Data<>(filteredObject, context, schemaType);
     }
 

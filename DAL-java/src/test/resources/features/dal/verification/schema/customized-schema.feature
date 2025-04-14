@@ -6,7 +6,7 @@ Feature: customized schema
     @Partial
     public class SchemaVerify implements Schema {
         public void verify(Data data) throws SchemaAssertionFailure {
-            throw new SchemaAssertionFailure((String)data.getValue("message").instance());
+            throw new SchemaAssertionFailure((String)data.property("message").instance());
         }
     }
     """

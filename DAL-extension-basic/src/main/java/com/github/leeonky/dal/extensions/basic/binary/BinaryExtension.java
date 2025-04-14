@@ -15,7 +15,7 @@ import java.io.InputStream;
 
 public class BinaryExtension implements Extension {
     private static final HexFormatter HEX_FORMATTER = new HexFormatter();
-    private static final Dumper HEX_DUMPER = new HexDumper();
+    private static final Dumper<Object> HEX_DUMPER = new HexDumper<>();
 
     private static final Class<?>[] BINARY_TYPES = new Class<?>[]{byte[].class, Byte[].class, InputStream.class};
 
@@ -53,10 +53,11 @@ public class BinaryExtension implements Extension {
             extendBinary(contextBuilder, binaryType);
     }
 
+    @SuppressWarnings("unchecked")
     private void extendBinary(RuntimeContextBuilder contextBuilder, Class<?> type) {
-        contextBuilder.registerDumper(type, data -> HEX_DUMPER);
+        contextBuilder.registerDumper(type, data -> (Dumper) HEX_DUMPER);
         for (Class<?> binaryType : BINARY_TYPES)
-            contextBuilder.checkerSetForEqualing().register(type, binaryType, (d1, d2) -> HexChecker.equals(d1, d2));
-        contextBuilder.checkerSetForMatching().register(type, (d1, d2) -> HexChecker.matches(d1, d2));
+            contextBuilder.checkerSetForEqualing().register(type, binaryType, HexChecker::equals);
+        contextBuilder.checkerSetForMatching().register(type, HexChecker::matches);
     }
 }

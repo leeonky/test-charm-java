@@ -20,15 +20,15 @@ public class EventuallyExtension implements Extension {
         ;
     }
 
-    private static class EventuallyVerification implements Operation {
+    private static class EventuallyVerification implements Operation<Eventually, Object> {
         @Override
         public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
             return v1.instanceOf(Eventually.class);
         }
 
         @Override
-        public Object operate(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-            return ((Eventually) v1.instance()).verify(operator, v2, context);
+        public Object operate(Data<Eventually> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+            return v1.instance().verify(operator, v2, context);
         }
     }
 }
