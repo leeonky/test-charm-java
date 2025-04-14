@@ -85,7 +85,7 @@ public class Assertions {
     @SuppressWarnings("unchecked")
     public Assertions is(Class<?> schema) {
         RuntimeContextBuilder.DALRuntimeContext context = getDal().getRuntimeContextBuilder().build(inputCode, schema);
-        Data input = context.getThis();
+        Data<?> input = context.getThis();
         try {
             this.schema = schema;
             Verification.expect(new Expect(create((Class) schema), null))

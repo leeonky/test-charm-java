@@ -24,7 +24,7 @@ public class TransposedTableNode extends DALNode {
 
             return new ExpectationFactory.Expectation() {
                 @Override
-                public Data matches() {
+                public Data<?> matches() {
                     try {
                         return expectation.matches();
                     } catch (RowAssertionFailure rowAssertionFailure) {
@@ -33,7 +33,7 @@ public class TransposedTableNode extends DALNode {
                 }
 
                 @Override
-                public Data equalTo() {
+                public Data<?> equalTo() {
                     try {
                         return expectation.equalTo();
                     } catch (RowAssertionFailure rowAssertionFailure) {

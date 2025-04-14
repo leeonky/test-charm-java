@@ -47,7 +47,7 @@ public class DumpingBuffer {
             throw new MaximizeDump();
     }
 
-    public DumpingBuffer dump(Data data) {
+    public DumpingBuffer dump(Data<?> data) {
         checkCount();
         try {
             runtimeContext.fetchDumper(data).dump(data, this);
@@ -57,7 +57,7 @@ public class DumpingBuffer {
         return this;
     }
 
-    public DumpingBuffer dumpValue(Data data) {
+    public DumpingBuffer dumpValue(Data<?> data) {
         checkCount();
         try {
             runtimeContext.fetchDumper(data).dumpValue(data, this);
@@ -104,7 +104,7 @@ public class DumpingBuffer {
         return temp;
     }
 
-    public void cached(Data data, Runnable runnable) {
+    public void cached(Data<?> data, Runnable runnable) {
         lineBuffer.cached(path, data, runnable, p -> append("*reference* " + p));
     }
 
@@ -148,7 +148,7 @@ public class DumpingBuffer {
             this.runtimeContext = runtimeContext;
         }
 
-        public void cached(String path, Data data, Runnable dumpAction, Consumer<String> refAction) {
+        public void cached(String path, Data<?> data, Runnable dumpAction, Consumer<String> refAction) {
             DumpingCacheKey key = new DumpingCacheKey(data);
             String reference = caches.get(key);
             if (reference == null) {

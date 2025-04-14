@@ -44,7 +44,7 @@ public class Factory {
     public static DALOperator executable(Notation<?, ?, ?, ?, ?> notation) {
         return new DALOperator(Precedence.PROPERTY, notation.getLabel(), false, Operators.NA) {
             @Override
-            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
                 return ((ExecutableNode) expression.right()).getValue(expression.left(), context);
             }
 
@@ -58,7 +58,7 @@ public class Factory {
     public static DALOperator is() {
         return new DALOperator(Precedence.VERIFICATION, Notations.Operators.IS.getLabel(), true, Operators.NA) {
             @Override
-            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
                 return ((SchemaComposeNode) expression.right()).verify(expression.left(), context);
             }
         };
@@ -67,7 +67,7 @@ public class Factory {
     public static DALOperator which() {
         return new DALOperator(Precedence.WHICH, Notations.Operators.WHICH.getLabel(), true, Operators.NA) {
             @Override
-            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
                 return expression.left().evaluateData(context).execute(() -> expression.right().evaluateData(context));
             }
         };
@@ -77,7 +77,7 @@ public class Factory {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "DATA_REMARK", false, Operators.NA) {
 
             @Override
-            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
                 return context.invokeDataRemark(new RemarkData(expression.left().evaluateData(context), context,
                         expression.right().inspect()));
             }
@@ -93,7 +93,7 @@ public class Factory {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "EXCLAMATION", false, Operators.NA) {
 
             @Override
-            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
                 return context.invokeExclamations(new ExclamationData(expression.left().evaluateData(context),
                         expression.left(), expression.right(), context));
             }
@@ -113,7 +113,7 @@ public class Factory {
         return new VerificationOperator(Notations.Operators.MATCHER.getLabel(), Operators.MATCH);
     }
 
-    public interface ExpressionContextData extends BiFunction<DALExpression, DALRuntimeContext, Data> {
+    public interface ExpressionContextData extends BiFunction<DALExpression, DALRuntimeContext, Data<?>> {
         static ExpressionContextData adapt(SupplierSupplierData operation) {
             return (expression, context) -> operation.apply(() -> expression.left().evaluateData(context),
                     () -> expression.right().evaluateData(context));
@@ -130,8 +130,8 @@ public class Factory {
 
         static ExpressionContextData adapt(DataOptDataContextObj operation) {
             return (expression, context) -> {
-                Data left = expression.left().evaluateData(context);
-                Data right = expression.right().evaluateData(context);
+                Data<?> left = expression.left().evaluateData(context);
+                Data<?> right = expression.right().evaluateData(context);
                 return context.data(operation.apply(left, expression.operator(), right, context));
             };
         }
@@ -144,22 +144,22 @@ public class Factory {
             return (expression, context) -> context.data(operation.apply(expression.right().evaluate(context)));
         }
 
-        interface SupplierSupplierData extends BiFunction<Supplier<Data>, Supplier<Data>, Data> {
+        interface SupplierSupplierData extends BiFunction<Supplier<Data<?>>, Supplier<Data<?>>, Data<?>> {
         }
 
-        interface DataOptDataContextData extends QuadFunction<Data, DALOperator, Data, DALRuntimeContext, Data> {
+        interface DataOptDataContextData extends QuadFunction<Data<?>, DALOperator, Data<?>, DALRuntimeContext, Data<?>> {
         }
 
-        interface DataOptDataContextObj extends QuadFunction<Data, DALOperator, Data, DALRuntimeContext, Object> {
+        interface DataOptDataContextObj extends QuadFunction<Data<?>, DALOperator, Data<?>, DALRuntimeContext, Object> {
         }
 
-        interface DataContextData extends BiFunction<Data, DALRuntimeContext, Data> {
+        interface DataContextData extends BiFunction<Data<?>, DALRuntimeContext, Data<?>> {
         }
 
         interface DataObject extends Function<Object, Object> {
         }
 
-        interface DataDataObject extends BiFunction<Data, Data, Object> {
+        interface DataDataObject extends BiFunction<Data<?>, Data<?>, Object> {
         }
     }
 
@@ -173,7 +173,7 @@ public class Factory {
         }
 
         @Override
-        public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+        public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
             return operation.apply(expression, context);
         }
     }
@@ -188,7 +188,7 @@ public class Factory {
         }
 
         @Override
-        public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+        public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
             return expression.right().verify(expression.operator(), expression.left(), context);
         }
 

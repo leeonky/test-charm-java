@@ -22,14 +22,14 @@ import static java.util.Optional.ofNullable;
 
 public class Actual {
     private final String property;
-    private final Data actual;
+    private final Data<?> actual;
 
-    public Actual(String property, Data actual) {
+    public Actual(String property, Data<?> actual) {
         this.property = property;
         this.actual = actual;
     }
 
-    public static Actual actual(Data data) {
+    public static Actual actual(Data<?> data) {
         return new Actual("", data);
     }
 

@@ -11,7 +11,7 @@ class AutoMappingListPropertyAccessor extends JavaClassPropertyAccessor<AutoMapp
     }
 
     @Override
-    public Object getValueByData(Data data, Object property) {
+    public Object getValueByData(Data<AutoMappingList> data, Object property) {
         return data.list().autoMapping(item -> item.getValue(property));
     }
 }

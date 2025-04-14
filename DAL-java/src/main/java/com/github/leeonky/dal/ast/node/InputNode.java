@@ -10,7 +10,7 @@ public class InputNode extends DALNode {
     public static final InputNode INPUT_NODE = new InputNode();
 
     @Override
-    public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data<?> evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.getThis();
     }
 

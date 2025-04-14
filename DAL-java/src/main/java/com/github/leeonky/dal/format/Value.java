@@ -68,7 +68,7 @@ public interface Value<T> extends Type<T> {
     }
 
     @SuppressWarnings("unchecked")
-    default T convertAs(Data actual, BeanClass<?> type) {
+    default T convertAs(Data<?> actual, BeanClass<?> type) {
         if (type == null)
             throw new IllegalFieldException();
         return (T) actual.convert(type.getType()).instance();

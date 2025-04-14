@@ -13,7 +13,7 @@ class DumpingBufferTest {
 
     public static class BeanDumper implements Dumper {
         @Override
-        public void dump(Data data, DumpingBuffer dumpingBuffer) {
+        public void dump(Data<?> data, DumpingBuffer dumpingBuffer) {
             throw new RuntimeException("dump error");
         }
     }

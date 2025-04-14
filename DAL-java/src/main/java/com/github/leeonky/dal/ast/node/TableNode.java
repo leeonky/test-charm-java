@@ -29,7 +29,7 @@ public class TableNode extends DALNode {
                     context).toVerify(context).create(operator, actual);
             return new ExpectationFactory.Expectation() {
                 @Override
-                public Data matches() {
+                public Data<?> matches() {
                     try {
                         return verificationExpectation.matches();
                     } catch (RowAssertionFailure rowAssertionFailure) {
@@ -38,7 +38,7 @@ public class TableNode extends DALNode {
                 }
 
                 @Override
-                public Data equalTo() {
+                public Data<?> equalTo() {
                     try {
                         return verificationExpectation.equalTo();
                     } catch (RowAssertionFailure rowAssertionFailure) {

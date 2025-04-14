@@ -9,13 +9,13 @@ import java.nio.file.Path;
 public class PathDirDumper implements Dumper {
 
     @Override
-    public void dump(Data data, DumpingBuffer buffer) {
+    public void dump(Data<?> data, DumpingBuffer buffer) {
         DumpingBuffer sub = buffer.append("java.nio.Path").appendThen(" ").append(data.instance() + "/").sub();
         data.list().wraps().values().forEach(subPath -> sub.newLine().dumpValue(subPath));
     }
 
     @Override
-    public void dumpValue(Data data, DumpingBuffer buffer) {
+    public void dumpValue(Data<?> data, DumpingBuffer buffer) {
         DumpingBuffer sub = buffer.append(((Path) data.instance()).toFile().getName()).append("/").indent();
         data.list().wraps().values().forEach(subPath -> sub.newLine().dumpValue(subPath));
     }

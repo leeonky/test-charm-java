@@ -50,12 +50,12 @@ public class DALHelper {
     private void overrideOptMatch(DAL dal) {
         dal.getRuntimeContextBuilder().registerOperator(Operators.MATCH, new Operation() {
             @Override
-            public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
-            public Data operateData(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data<?> operateData(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 if (type == ExpectationFactory.Type.OBJECT)
@@ -77,12 +77,12 @@ public class DALHelper {
     private void overrideOptEqual(DAL dal) {
         dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation() {
             @Override
-            public boolean match(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
-            public Data operateData(Data v1, DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data<?> operateData(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
                 ExpectationFactory.Expectation expectation = ((ExpectationFactory) v2.instance()).create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 ObjectReference objectReference = (ObjectReference) v1.instance();

@@ -14,13 +14,13 @@ public class MetaData extends RuntimeData {
     private DALNode inputNode;
     private final Object name;
 
-    public MetaData(DALNode inputNode, Data inputData, Object symbolName, DALRuntimeContext runtimeContext) {
+    public MetaData(DALNode inputNode, Data<?> inputData, Object symbolName, DALRuntimeContext runtimeContext) {
         super(inputData, runtimeContext);
         this.inputNode = inputNode;
         name = symbolName;
     }
 
-    private MetaData(DALRuntimeContext runtimeContext, Data data, String name) {
+    private MetaData(DALRuntimeContext runtimeContext, Data<?> data, String name) {
         super(data, runtimeContext);
         this.name = name;
     }

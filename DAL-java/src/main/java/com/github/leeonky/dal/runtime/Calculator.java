@@ -20,7 +20,7 @@ import static java.util.Comparator.*;
 public class Calculator {
     private static final NumberType numberType = new NumberType();
 
-    private static int compare(Pair<Data> pair, DALRuntimeContext context) {
+    private static int compare(Pair<Data<?>> pair, DALRuntimeContext context) {
         return getFirstPresent(
                 () -> pair.both(d -> d.cast(Number.class), (num1, num2) -> context.getNumberType().compare(num1, num2)),
                 () -> pair.both(d -> d.cast(String.class), String::compareTo)).orElseThrow(() ->
@@ -31,7 +31,7 @@ public class Calculator {
         return value == null ? "[null]" : format("[%s: %s]", getClassName(value), value);
     }
 
-    public static boolean equals(Data data1, Data data2) {
+    public static boolean equals(Data<?> data1, Data<?> data2) {
         return data1.instance() == data2.instance()
                 || opt2(data2::isNull) && opt1(data1::isNull)
                 || (data2.isList() && data1.isList() ?
@@ -39,7 +39,7 @@ public class Calculator {
                 : Objects.equals(data1.instance(), data2.instance()));
     }
 
-    private static List<Object> collect(Data data, String index) {
+    private static List<Object> collect(Data<?> data, String index) {
         try {
             return data.list().collect();
         } catch (InfiniteCollectionException ignore) {
@@ -47,23 +47,23 @@ public class Calculator {
         }
     }
 
-    public static Data arithmetic(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
+    public static Data<?> arithmetic(Data<?> v1, DALOperator opt, Data<?> v2, DALRuntimeContext context) {
         return context.calculate(v1, opt, v2);
     }
 
-    public static Data and(Supplier<Data> s1, Supplier<Data> s2) {
-        Data v1 = s1.get();
+    public static Data<?> and(Supplier<Data<?>> s1, Supplier<Data<?>> s2) {
+        Data<?> v1 = s1.get();
         return isTrue(v1) ? s2.get() : v1;
     }
 
-    private static boolean isTrue(Data data) {
+    private static boolean isTrue(Data<?> data) {
         return getFirstPresent(() -> data.cast(Boolean.class),
                 () -> data.cast(Number.class).map(number -> numberType.compare(0, number) != 0)
         ).orElseGet(() -> !data.isNull());
     }
 
-    public static Data or(Supplier<Data> s1, Supplier<Data> s2) {
-        Data v1 = s1.get();
+    public static Data<?> or(Supplier<Data<?>> s1, Supplier<Data<?>> s2) {
+        Data<?> v1 = s1.get();
         return isTrue(v1) ? v1 : s2.get();
     }
 
@@ -73,7 +73,7 @@ public class Calculator {
         throw illegalOperation("Operand" + " should be boolean but '" + getClassName(v) + "'");
     }
 
-    public static Data negate(Data input, DALRuntimeContext context) {
+    public static Data<?> negate(Data<?> input, DALRuntimeContext context) {
         return input.map(value -> {
             if (value instanceof Number)
                 return context.getNumberType().negate((Number) value);
@@ -84,11 +84,11 @@ public class Calculator {
     }
 
     @SuppressWarnings("unchecked")
-    private static Object sortList(Data.DataList list, Comparator<?> comparator, DALRuntimeContext context) {
+    private static Object sortList(Data<?>.DataList list, Comparator<?> comparator, DALRuntimeContext context) {
         return list.sort(comparing(data -> context.transformComparable(data.instance()), (Comparator<Object>) comparator));
     }
 
-    public static Data positive(Data input, DALRuntimeContext context) {
+    public static Data<?> positive(Data<?> input, DALRuntimeContext context) {
         return input.map(value -> {
             if (input.isList())
                 return sortList(input.list(), naturalOrder(), context);
@@ -96,23 +96,23 @@ public class Calculator {
         });
     }
 
-    public static Object less(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+    public static Object less(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
         return compare(pair(left, right), context) < 0;
     }
 
-    public static Object greaterOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+    public static Object greaterOrEqual(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
         return compare(pair(left, right), context) >= 0;
     }
 
-    public static Object lessOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+    public static Object lessOrEqual(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
         return compare(pair(left, right), context) <= 0;
     }
 
-    public static Object greater(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
+    public static Object greater(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
         return compare(pair(left, right), context) > 0;
     }
 
-    public static boolean notEqual(Data left, Data right) {
+    public static boolean notEqual(Data<?> left, Data<?> right) {
         return !equals(left, right);
     }
 }

@@ -8,17 +8,17 @@ import com.github.leeonky.interpreter.StringWithPosition;
 import static java.lang.String.format;
 
 public class CheckingContext {
-    private final Data originalExpected, originalActual, expected, actual;
+    private final Data<?> originalExpected, originalActual, expected, actual;
 
-    public Data getOriginalActual() {
+    public Data<?> getOriginalActual() {
         return originalActual;
     }
 
-    public Data getOriginalExpected() {
+    public Data<?> getOriginalExpected() {
         return originalExpected;
     }
 
-    public CheckingContext(Data originalExpected, Data originalActual, Data expected, Data actual) {
+    public CheckingContext(Data<?> originalExpected, Data<?> originalActual, Data<?> expected, Data<?> actual) {
         this.originalExpected = originalExpected;
         this.originalActual = originalActual;
         this.expected = expected;
@@ -50,11 +50,11 @@ public class CheckingContext {
         return format("Cannot compare between %s\nand %s", actual.dump(), expected.dump());
     }
 
-    public Data getExpected() {
+    public Data<?> getExpected() {
         return expected;
     }
 
-    public Data getActual() {
+    public Data<?> getActual() {
         return actual;
     }
 }

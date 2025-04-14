@@ -4,9 +4,9 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 public class RuntimeData {
     protected final DALRuntimeContext runtimeContext;
-    protected final Data data;
+    protected final Data<?> data;
 
-    public RuntimeData(Data data, DALRuntimeContext runtimeContext) {
+    public RuntimeData(Data<?> data, DALRuntimeContext runtimeContext) {
         this.runtimeContext = runtimeContext;
         this.data = data;
     }
@@ -15,7 +15,7 @@ public class RuntimeData {
         return runtimeContext;
     }
 
-    public Data data() {
+    public Data<?> data() {
         return data;
     }
 }

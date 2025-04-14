@@ -30,7 +30,7 @@ public class JFactoryExtension implements Extension {
                 });
         runtimeContextBuilder.registerDumper(JFactory.class, data -> new MapDumper() {
             @Override
-            protected void dumpField(Data data, Object field, DumpingBuffer context) {
+            protected void dumpField(Data<?> data, Object field, DumpingBuffer context) {
                 try {
                     Data value = data.getValue(field);
                     if (value.list().size() != 0) {

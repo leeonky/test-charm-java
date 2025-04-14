@@ -17,7 +17,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         this.type = type;
     }
 
-    public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+    public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
         return context.data(calculate(expression, context));
     }
 

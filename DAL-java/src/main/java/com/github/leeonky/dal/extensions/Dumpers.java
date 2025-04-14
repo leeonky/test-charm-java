@@ -40,7 +40,7 @@ public class Dumpers implements Extension {
     private static class StackTraceDumper implements Dumper {
 
         @Override
-        public void dump(Data data, DumpingBuffer dumpingBuffer) {
+        public void dump(Data<?> data, DumpingBuffer dumpingBuffer) {
             DumpingBuffer sub = dumpingBuffer.indent();
             data.list().forEach(s -> sub.newLine().append("at " + s.value().toString()));
         }

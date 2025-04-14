@@ -21,19 +21,19 @@ import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
-public class Data {
+public class Data<T> {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
-    private final Object value;
+    private final T value;
     private DataList list;
 
-    public Data(Object value, DALRuntimeContext context, SchemaType schemaType) {
+    public Data(T value, DALRuntimeContext context, SchemaType schemaType) {
         this.context = context;
         this.schemaType = schemaType;
         this.value = value;
     }
 
-    public Object instance() {
+    public T instance() {
         return value;
     }
 
@@ -59,18 +59,18 @@ public class Data {
         return context.isNull(instance());
     }
 
-    public Data getValue(List<Object> propertyChain) {
+    public Data<?> getValue(List<Object> propertyChain) {
         return propertyChain.isEmpty() ? this :
                 getValue(propertyChain.get(0)).getValue(propertyChain.subList(1, propertyChain.size()));
     }
 
-    public Data getValue(Object propertyChain) {
+    public Data<?> getValue(Object propertyChain) {
         List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
         if (chain.size() == 1 && chain.get(0).equals(propertyChain)) {
             try {
                 Object value = isList() && !(propertyChain instanceof String) ? list().getByIndex((int) propertyChain)
                         : context.getPropertyValue(this, propertyChain);
-                return new Data(value, context, propertySchema(propertyChain,
+                return new Data<>(value, context, propertySchema(propertyChain,
                         this.value instanceof AutoMappingList && propertyChain instanceof String));
             } catch (IndexOutOfBoundsException ex) {
                 throw new DalRuntimeException(ex.getMessage());
@@ -97,7 +97,7 @@ public class Data {
         return schemaType.firstFieldFromAlias(alias);
     }
 
-    public Data convert(Class<?>... targets) {
+    public Data<?> convert(Class<?>... targets) {
         return map(object -> {
             ConvertException e = null;
             for (Class<?> target : targets) {
@@ -111,16 +111,16 @@ public class Data {
         });
     }
 
-    public Data map(Function<Object, Object> mapper) {
-        return new Data(mapper.apply(instance()), context, schemaType);
+    public <N> Data<N> map(Function<T, N> mapper) {
+        return new Data<>(mapper.apply(instance()), context, schemaType);
     }
 
-    public Data filter(String prefix) {
+    public Data<?> filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
         fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
                         filteredObject.put(fieldName.substring(prefix.length()), getValue(fieldName).instance()));
-        return new Data(filteredObject, context, schemaType);
+        return new Data<>(filteredObject, context, schemaType);
     }
 
     public String dump() {
@@ -131,11 +131,11 @@ public class Data {
         return DumpingBuffer.rootContext(context).dumpValue(this).content();
     }
 
-    public <T> T execute(Supplier<T> supplier) {
+    public <N> N execute(Supplier<N> supplier) {
         return context.pushAndExecute(this, supplier);
     }
 
-    public <T> Optional<T> cast(Class<T> type) {
+    public <N> Optional<N> cast(Class<N> type) {
         return BeanClass.cast(instance(), type);
     }
 
@@ -147,13 +147,13 @@ public class Data {
         }
     }
 
-    public static Data lazy(ThrowingSupplier<?> supplier, DALRuntimeContext context, SchemaType schemaType) {
+    public static <N> Data<N> lazy(ThrowingSupplier<N> supplier, DALRuntimeContext context, SchemaType schemaType) {
         try {
-            return new Data(supplier.get(), context, schemaType);
+            return new Data<>(supplier.get(), context, schemaType);
         } catch (Throwable e) {
-            return new Data(null, context, schemaType) {
+            return new Data<N>(null, context, schemaType) {
                 @Override
-                public Object instance() {
+                public N instance() {
                     return sneakyThrow(buildUserRuntimeException(e));
                 }
             };
@@ -165,15 +165,15 @@ public class Data {
             super(origin);
         }
 
-        public DALCollection<Data> wraps() {
-            return map((index, e) -> new Data(e, context, schemaType.access(index)));
+        public DALCollection<Data<?>> wraps() {
+            return map((index, e) -> new Data<>(e, context, schemaType.access(index)));
         }
 
-        public AutoMappingList autoMapping(Function<Data, Data> mapper) {
+        public AutoMappingList autoMapping(Function<Data<?>, Data<?>> mapper) {
             return new AutoMappingList(mapper, wraps());
         }
 
-        public DataList sort(Comparator<Data> comparator) {
+        public DataList sort(Comparator<Data<?>> comparator) {
             if (comparator != NOP_COMPARATOR)
                 try {
                     return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
@@ -194,8 +194,8 @@ public class Data {
             return this;
         }
 
-        public Data wrap() {
-            return new Data(this, context, schemaType);
+        public Data<?> wrap() {
+            return new Data<>(this, context, schemaType);
         }
     }
 }

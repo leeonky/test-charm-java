@@ -14,7 +14,7 @@ public class ParenthesesNode extends DALNode {
     }
 
     @Override
-    public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data<?> evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
         return node.evaluateData(context);
     }
 
@@ -40,7 +40,7 @@ public class ParenthesesNode extends DALNode {
     }
 
     @Override
-    public Stream<Object> collectFields(Data data) {
+    public Stream<Object> collectFields(Data<?> data) {
         return node.collectFields(data);
     }
 }

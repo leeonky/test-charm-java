@@ -35,7 +35,7 @@ public class SchemaComposeNode extends DALNode {
     }
 
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode,
-                                                String inputInspect, Data inputData) {
+                                                String inputInspect, Data<?> inputData) {
         if (isList) {
             DALCollection<Object> collection = opt1(inputData::list).wraps().map((index, data) ->
                     schemaNode.convertViaSchema(context, data, format("%s[%d]", inputInspect, index)));

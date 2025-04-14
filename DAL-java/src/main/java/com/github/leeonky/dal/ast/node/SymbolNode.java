@@ -25,11 +25,11 @@ public class SymbolNode extends DALNode implements ExecutableNode {
     }
 
     @Override
-    public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data<?> getValue(Data<?> data, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
             if (data.instanceOf(PartialObject.class))
                 context.appendPartialPropertyReference(data, symbol);
-            Data value = data.getValue(symbol);
+            Data<?> value = data.getValue(symbol);
             if (value.instanceOf(PartialObject.class))
                 context.initPartialPropertyStack(data, symbol, value);
             return value;

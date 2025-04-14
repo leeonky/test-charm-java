@@ -9,12 +9,12 @@ import java.nio.file.Path;
 public class PathFileDumper implements Dumper {
 
     @Override
-    public void dump(Data path, DumpingBuffer buffer) {
+    public void dump(Data<?> path, DumpingBuffer buffer) {
         buffer.append("java.nio.Path").newLine().dumpValue(path);
     }
 
     @Override
-    public void dumpValue(Data data, DumpingBuffer buffer) {
+    public void dumpValue(Data<?> data, DumpingBuffer buffer) {
         buffer.append(Util.attribute((Path) data.instance()));
     }
 }

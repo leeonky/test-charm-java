@@ -245,8 +245,8 @@ public class VerifyValueInSchema extends Base {
     public static class ToIntegerAndIncrease implements Value<Integer> {
 
         @Override
-        public Integer convertAs(Data actual, BeanClass<?> type) {
-            return (int) actual.instance() + 1;
+        public Integer convertAs(Data<?> actual, BeanClass<?> type) {
+            return (Integer) actual.instance() + 1;
         }
 
         @Override

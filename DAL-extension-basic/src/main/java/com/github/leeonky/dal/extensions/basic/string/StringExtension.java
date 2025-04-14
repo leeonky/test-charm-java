@@ -15,9 +15,9 @@ public class StringExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder().registerStaticMethodExtension(Methods.class);
         dal.getRuntimeContextBuilder().checkerSetForMatching()
-                .register(CharSequence.class, CharSequenceChecker::matches);
+                .register(CharSequence.class, (d1, d2) -> CharSequenceChecker.matches(d1, d2));
         dal.getRuntimeContextBuilder().checkerSetForEqualing()
-                .register(CharSequence.class, CharSequence.class, CharSequenceChecker::equals);
+                .register(CharSequence.class, CharSequence.class, (d1, d2) -> CharSequenceChecker.equals(d1, d2));
 
         register("txt", inputStream -> string(readAll(inputStream)));
         register("TXT", inputStream -> string(readAll(inputStream)));

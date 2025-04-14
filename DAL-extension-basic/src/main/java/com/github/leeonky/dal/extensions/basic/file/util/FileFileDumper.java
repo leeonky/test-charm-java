@@ -9,12 +9,12 @@ import java.io.File;
 public class FileFileDumper implements Dumper {
 
     @Override
-    public void dump(Data data, DumpingBuffer buffer) {
+    public void dump(Data<?> data, DumpingBuffer buffer) {
         buffer.append("java.io.File").newLine().dumpValue(data);
     }
 
     @Override
-    public void dumpValue(Data data, DumpingBuffer buffer) {
+    public void dumpValue(Data<?> data, DumpingBuffer buffer) {
         buffer.append(Util.attribute(((File) data.instance()).toPath()));
     }
 }

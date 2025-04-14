@@ -27,7 +27,7 @@ public class RegexNode extends DALNode {
     protected ExpectationFactory toVerify(DALRuntimeContext context) {
         return (operator, actual) -> new ExpectationFactory.Expectation() {
             @Override
-            public Data matches() {
+            public Data<?> matches() {
                 String converted = opt2(() -> (String) actual.convert(String.class).instance());
                 if (pattern.matcher(converted).matches())
                     return actual;
@@ -36,7 +36,7 @@ public class RegexNode extends DALNode {
             }
 
             @Override
-            public Data equalTo() {
+            public Data<?> equalTo() {
                 String str = actual.cast(String.class)
                         .orElseThrow(() -> illegalOperation("Operator = before regex need a string input value"));
                 if (pattern.matcher(str).matches())

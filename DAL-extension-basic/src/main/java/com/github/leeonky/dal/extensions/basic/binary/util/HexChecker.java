@@ -14,11 +14,11 @@ import static java.util.Optional.of;
 
 public abstract class HexChecker implements Checker, CheckerType {
 
-    public static Optional<Checker> equals(Data d1, Data d2) {
+    public static Optional<Checker> equals(Data<?> d1, Data<?> d2) {
         return Equals.INSTANCE;
     }
 
-    public static Optional<Checker> matches(Data d1, Data d2) {
+    public static Optional<Checker> matches(Data<?> d1, Data<?> d2) {
         return Matches.INSTANCE;
     }
 
@@ -28,7 +28,7 @@ public abstract class HexChecker implements Checker, CheckerType {
     }
 
     @Override
-    public Data transformExpected(Data expected, DALRuntimeContext context) {
+    public Data<?> transformExpected(Data<?> expected, DALRuntimeContext context) {
         return expected.map(HexDumper::extractBytes);
     }
 
@@ -36,7 +36,7 @@ public abstract class HexChecker implements Checker, CheckerType {
         private static final Optional<Checker> INSTANCE = of(new HexChecker.Equals());
 
         @Override
-        public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
+        public Data<?> transformActual(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
             return actual.map(HexDumper::extractBytes);
         }
     }
@@ -45,7 +45,7 @@ public abstract class HexChecker implements Checker, CheckerType {
         private static final Optional<Checker> INSTANCE = of(new HexChecker.Matches());
 
         @Override
-        public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
+        public Data<?> transformActual(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
             return actual.convert(byte[].class, InputStream.class, Byte[].class).map(HexDumper::extractBytes);
         }
     }

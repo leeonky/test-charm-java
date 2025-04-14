@@ -33,16 +33,16 @@ public class ListScopeNode extends DALNode {
     private List<Clause<DALNode>> inputClauses;
     private final Type type;
     private final Style style;
-    private final Comparator<Data> comparator;
+    private final Comparator<Data<?>> comparator;
 
-    public ListScopeNode(List<Clause<DALNode>> clauses, Comparator<Data> comparator, Style style) {
+    public ListScopeNode(List<Clause<DALNode>> clauses, Comparator<Data<?>> comparator, Style style) {
         type = guessType(clauses);
         inputClauses = clauses;
         this.comparator = comparator;
         this.style = style;
     }
 
-    public ListScopeNode(List<DALNode> verificationExpressions, Type type, Comparator<Data> comparator, Style style) {
+    public ListScopeNode(List<DALNode> verificationExpressions, Type type, Comparator<Data<?>> comparator, Style style) {
         this.verificationExpressions = inputExpressions = new ArrayList<>(verificationExpressions);
         this.type = type;
         this.comparator = comparator;
@@ -100,14 +100,14 @@ public class ListScopeNode extends DALNode {
     protected ExpectationFactory toVerify(DALRuntimeContext context) {
         return (operator, actual) -> new ExpectationFactory.Expectation() {
             @Override
-            public Data matches() {
+            public Data<?> matches() {
                 return equalTo();
             }
 
             @Override
-            public Data equalTo() {
+            public Data<?> equalTo() {
                 try {
-                    Data sorted = opt1(actual::list).sort(getComparator(context)).wrap();
+                    Data<?> sorted = opt1(actual::list).sort(getComparator(context)).wrap();
                     return sorted.execute(() -> type == Type.CONTAINS ?
                             verifyContainElement(context, sorted.list(), actual)
                             : verifyCorrespondingElement(context, getVerificationExpressions(sorted.list(), actual)));
@@ -123,7 +123,7 @@ public class ListScopeNode extends DALNode {
         };
     }
 
-    protected Comparator<Data> getComparator(DALRuntimeContext context) {
+    protected Comparator<Data<?>> getComparator(DALRuntimeContext context) {
         return comparator;
     }
 
@@ -242,8 +242,8 @@ public class ListScopeNode extends DALNode {
         return new ListScopeNode(clauses, null, Style.LIST) {
             @SuppressWarnings("unchecked")
             @Override
-            protected Comparator<Data> getComparator(DALRuntimeContext context) {
-                return Comparator.comparing((Data data) -> context.transformComparable(data.instance()),
+            protected Comparator<Data<?>> getComparator(DALRuntimeContext context) {
+                return Comparator.comparing((Data<?> data) -> context.transformComparable(data.instance()),
                         (Comparator<Object>) comparator);
             }
 

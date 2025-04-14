@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.joining;
 
 public class SortGroupNode extends DALNode {
-    public static final Comparator<Data> NOP_COMPARATOR = (o1, o2) -> 0;
+    public static final Comparator<Data<?>> NOP_COMPARATOR = (o1, o2) -> 0;
     public static final SortGroupNode NO_SEQUENCE = new SortGroupNode(Collections.emptyList()) {
         @Override
-        public Comparator<Data> comparator(Function<Data, Object> orderBy) {
+        public Comparator<Data<?>> comparator(Function<Data<?>, Object> orderBy) {
             return NOP_COMPARATOR;
         }
     };
@@ -35,7 +35,7 @@ public class SortGroupNode extends DALNode {
     }
 
     @SuppressWarnings("unchecked")
-    public Comparator<Data> comparator(Function<Data, Object> orderBy) {
+    public Comparator<Data<?>> comparator(Function<Data<?>, Object> orderBy) {
         return sortSymbolNodes.get(0).getType().azOrZa(Comparator.comparing(o -> (Comparable<Object>) orderBy.apply(o)));
     }
 

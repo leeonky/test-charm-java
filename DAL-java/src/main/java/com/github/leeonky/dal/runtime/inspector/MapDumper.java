@@ -9,12 +9,12 @@ import java.util.Set;
 public class MapDumper implements Dumper.Cacheable {
 
     @Override
-    public void cachedInspect(Data data, DumpingBuffer context) {
+    public void cachedInspect(Data<?> data, DumpingBuffer context) {
         dumpType(data, context);
         dumpBody(data, context);
     }
 
-    private void dumpBody(Data data, DumpingBuffer dumpingBuffer) {
+    private void dumpBody(Data<?> data, DumpingBuffer dumpingBuffer) {
         DumpingBuffer indentContext = dumpingBuffer.append("{").indent();
         getFieldNames(data).forEach(fieldName -> {
             dumpField(data, fieldName, indentContext.sub(fieldName).newLine());
@@ -23,9 +23,9 @@ public class MapDumper implements Dumper.Cacheable {
         dumpingBuffer.optionalNewLine().append("}");
     }
 
-    protected void dumpField(Data data, Object field, DumpingBuffer context) {
+    protected void dumpField(Data<?> data, Object field, DumpingBuffer context) {
         context.append(key(field)).append(": ");
-        Data value;
+        Data<?> value;
         try {
             value = data.getValue(field);
         } catch (Throwable e) {
@@ -39,11 +39,11 @@ public class MapDumper implements Dumper.Cacheable {
         return String.valueOf(o);
     }
 
-    protected Set<?> getFieldNames(Data data) {
+    protected Set<?> getFieldNames(Data<?> data) {
         return data.fieldNames();
     }
 
-    protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
+    protected void dumpType(Data<?> data, DumpingBuffer dumpingBuffer) {
         if (!(data.instanceOf(Map.class)))
             dumpingBuffer.append(Classes.getClassName(data.instance())).appendThen(" ");
     }

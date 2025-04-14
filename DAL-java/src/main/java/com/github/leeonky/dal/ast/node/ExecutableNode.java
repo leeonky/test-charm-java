@@ -10,14 +10,14 @@ import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 
 public interface ExecutableNode extends Node<RuntimeContextBuilder.DALRuntimeContext, DALNode> {
 
-    Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context);
+    Data<?> getValue(Data<?> data, RuntimeContextBuilder.DALRuntimeContext context);
 
-    default Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
+    default Data<?> getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         return getValue(evaluateInput(left, context), context);
     }
 
-    default Data evaluateInput(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data data = left.evaluateData(context);
+    default Data<?> evaluateInput(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
+        Data<?> data = left.evaluateData(context);
         if (opt1(data::isNull))
             throw locateError(new DalRuntimeException("Instance is null"), getOperandPosition());
         return data;

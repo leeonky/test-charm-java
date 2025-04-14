@@ -7,13 +7,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 class PartialPropertyStack {
-    private final Map<Data, PartialProperties> partials = new HashMap<>();
+    private final Map<Data<?>, PartialProperties> partials = new HashMap<>();
 
-    public void setupPartialProperties(Object prefix, Data partial) {
+    public void setupPartialProperties(Object prefix, Data<?> partial) {
         partials.put(partial, new PartialProperties(prefix, partial));
     }
 
-    public PartialProperties fetchPartialProperties(Data instance) {
+    public PartialProperties fetchPartialProperties(Data<?> instance) {
         PartialProperties partialProperties = partials.get(instance);
         if (partialProperties == null)
             partialProperties = partials.values().stream()
@@ -22,7 +22,7 @@ class PartialPropertyStack {
         return partialProperties;
     }
 
-    public Set<String> collectPartialProperties(Data data) {
+    public Set<String> collectPartialProperties(Data<?> data) {
         return partials.values().stream().flatMap(partialProperties ->
                 partialProperties.collectPartialProperties(data).stream()).collect(Collectors.toSet());
     }

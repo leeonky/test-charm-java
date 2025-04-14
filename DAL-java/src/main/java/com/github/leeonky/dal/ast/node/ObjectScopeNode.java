@@ -41,13 +41,13 @@ public class ObjectScopeNode extends DALNode {
     protected ExpectationFactory toVerify(DALRuntimeContext context) {
         return (operator, actual) -> new ExpectationFactory.Expectation() {
             @Override
-            public Data matches() {
+            public Data<?> matches() {
                 if (verificationExpressions.isEmpty() && !isObjectWildcard)
                     throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
                 if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 return actual.execute(() -> {
-                    Data result = context.data(null);
+                    Data<?> result = context.data(null);
                     for (DALNode expression : verificationExpressions)
                         result = expression.evaluateData(context);
                     return result;
@@ -55,11 +55,11 @@ public class ObjectScopeNode extends DALNode {
             }
 
             @Override
-            public Data equalTo() {
+            public Data<?> equalTo() {
                 if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
-                Data execute = actual.execute(() -> {
-                    Data result = context.data(null);
+                Data<?> execute = actual.execute(() -> {
+                    Data<?> result = context.data(null);
                     for (DALNode expression : verificationExpressions)
                         result = expression.evaluateData(context);
                     return result;
@@ -89,12 +89,12 @@ public class ObjectScopeNode extends DALNode {
         }};
     }
 
-    private Object convertFiled(Data data, Object obj) {
+    private Object convertFiled(Data<?> data, Object obj) {
         return data.cast(CurryingMethod.class).map(curryingMethod -> curryingMethod.convertToArgType(obj)).orElse(obj);
     }
 
     @Override
-    public Stream<Object> collectFields(Data data) {
+    public Stream<Object> collectFields(Data<?> data) {
         return verificationExpressions.stream().flatMap(expression -> expression.collectFields(data));
     }
 }

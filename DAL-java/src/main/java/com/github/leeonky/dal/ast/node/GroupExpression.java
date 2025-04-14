@@ -67,7 +67,7 @@ public class GroupExpression extends DALNode {
     }
 
     @Override
-    public Stream<Object> collectFields(Data data) {
+    public Stream<Object> collectFields(Data<?> data) {
         return expressions.stream().map(e -> data.firstFieldFromAlias(e.getRootSymbolName()));
     }
 

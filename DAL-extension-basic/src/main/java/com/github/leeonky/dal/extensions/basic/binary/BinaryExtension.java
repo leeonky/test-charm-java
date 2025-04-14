@@ -56,7 +56,7 @@ public class BinaryExtension implements Extension {
     private void extendBinary(RuntimeContextBuilder contextBuilder, Class<?> type) {
         contextBuilder.registerDumper(type, data -> HEX_DUMPER);
         for (Class<?> binaryType : BINARY_TYPES)
-            contextBuilder.checkerSetForEqualing().register(type, binaryType, HexChecker::equals);
-        contextBuilder.checkerSetForMatching().register(type, HexChecker::matches);
+            contextBuilder.checkerSetForEqualing().register(type, binaryType, (d1, d2) -> HexChecker.equals(d1, d2));
+        contextBuilder.checkerSetForMatching().register(type, (d1, d2) -> HexChecker.matches(d1, d2));
     }
 }

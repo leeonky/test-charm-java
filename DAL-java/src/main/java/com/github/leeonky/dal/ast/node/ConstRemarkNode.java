@@ -23,9 +23,9 @@ public class ConstRemarkNode extends DALNode {
     }
 
     @Override
-    public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
-        Data leftValue = constNode.evaluateData(context);
-        Data rightValue = remarkNode.evaluateData(context);
+    public Data<?> evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
+        Data<?> leftValue = constNode.evaluateData(context);
+        Data<?> rightValue = remarkNode.evaluateData(context);
         if (Objects.equals(leftValue.instance(), rightValue.instance()))
             return leftValue;
         throw locateError(new DalRuntimeException(String.format("Incorrect const remark, const value was %s\nbut remark %s was %s",

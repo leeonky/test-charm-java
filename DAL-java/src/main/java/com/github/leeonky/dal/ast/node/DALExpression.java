@@ -51,7 +51,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public Data evaluateData(DALRuntimeContext context) {
+    public Data<?> evaluateData(DALRuntimeContext context) {
         try {
             return operator.calculateData(this, context);
         } catch (ExpressionException e) {
@@ -89,7 +89,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public Stream<Object> collectFields(Data data) {
+    public Stream<Object> collectFields(Data<?> data) {
         if (((DALExpression) left()).right() instanceof PropertyThis)
             if (right() instanceof ObjectScopeNode)
                 return right().collectFields(data);
@@ -97,7 +97,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public Data getValue(Data data, DALRuntimeContext context) {
+    public Data<?> getValue(Data<?> data, DALRuntimeContext context) {
         return context.pushAndExecute(data, () -> evaluateData(context));
     }
 

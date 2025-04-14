@@ -27,7 +27,7 @@ public class ColumnHeaderRow extends DALNode {
         return TableNode.printLine(headers) + "\n";
     }
 
-    public Comparator<Data> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {
+    public Comparator<Data<?>> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {
         return headers.stream().sorted(ColumnHeader.bySequence()).map(headerNode -> headerNode.comparator(context))
                 .reduce((comparator, other) -> comparator == NOP_COMPARATOR ? other : comparator.thenComparing(other))
                 .orElse(NOP_COMPARATOR);

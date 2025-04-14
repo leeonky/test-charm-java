@@ -32,11 +32,11 @@ public interface Checker {
 
     String message(CheckingContext checkingContext);
 
-    default Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
+    default Data<?> transformActual(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
         return actual;
     }
 
-    default Data transformActualAndCheck(Data actual, Data expected, DALRuntimeContext context) {
+    default Data<?> transformActualAndCheck(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
         try {
             return transformActual(actual, expected, context);
         } catch (ConvertException e) {
@@ -44,11 +44,11 @@ public interface Checker {
         }
     }
 
-    default Data transformExpected(Data expected, DALRuntimeContext context) {
+    default Data<?> transformExpected(Data<?> expected, DALRuntimeContext context) {
         return expected;
     }
 
-    default Data verify(CheckingContext checkingContext) {
+    default Data<?> verify(CheckingContext checkingContext) {
         return checkingContext.getOriginalActual().map(data -> {
             if (failed(checkingContext))
                 throw new AssertionError(message(checkingContext));

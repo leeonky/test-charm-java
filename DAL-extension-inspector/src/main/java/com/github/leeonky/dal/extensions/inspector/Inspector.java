@@ -217,7 +217,7 @@ public class Inspector {
             release();
         }
 
-        private byte[] getBytes(Data data) {
+        private byte[] getBytes(Data<?> data) {
             return getFirstPresent(
                     () -> data.cast(byte[].class),
                     () -> data.cast(InputStream.class).map(stream -> Sneaky.get(() -> {

@@ -27,9 +27,9 @@ public class ListExtension implements Extension {
     }
 
     public static class Filterable {
-        private final Data data;
+        private final Data<?> data;
 
-        public Filterable(Data data) {
+        public Filterable(Data<?> data) {
             this.data = data;
         }
 
@@ -37,7 +37,7 @@ public class ListExtension implements Extension {
             return filterList(operator, v2, context);
         }
 
-        protected DALCollection<Object> filterList(DALOperator operator, Data v2, DALRuntimeContext context) {
+        protected DALCollection<Object> filterList(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
             return opt1(data::list).wraps().filter(element -> {
                 try {
                     context.calculate(element, operator, v2);
@@ -51,7 +51,7 @@ public class ListExtension implements Extension {
         public Filterable requireNotEmpty() {
             return new Filterable(data) {
                 @Override
-                protected DALCollection<Object> filterList(DALOperator operator, Data v2, DALRuntimeContext context) {
+                protected DALCollection<Object> filterList(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
                     DALCollection<Object> list = super.filterList(operator, v2, context);
                     if (!list.iterator().hasNext())
                         throw ExpressionException.exception(expression -> new NotReadyException(
@@ -65,7 +65,7 @@ public class ListExtension implements Extension {
             return new Filterable(data) {
 
                 @Override
-                protected DALCollection<Object> filterList(DALOperator operator, Data v2, DALRuntimeContext context) {
+                protected DALCollection<Object> filterList(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
                     DALCollection<Object> list = super.filterList(operator, v2, context).limit(size);
                     if (list.size() >= size)
                         return list;
@@ -79,12 +79,12 @@ public class ListExtension implements Extension {
     private static class VerificationInFilter implements Operation {
 
         @Override
-        public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+        public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
             return v1.instanceOf(Filterable.class);
         }
 
         @Override
-        public Object operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+        public Object operate(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
             return ((Filterable) v1.instance()).filter(operator, v2, context);
         }
     }

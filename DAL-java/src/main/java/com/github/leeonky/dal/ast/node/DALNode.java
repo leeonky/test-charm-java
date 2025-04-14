@@ -18,7 +18,7 @@ import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 
 public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
-    public Data evaluateData(DALRuntimeContext context) {
+    public Data<?> evaluateData(DALRuntimeContext context) {
         return context.data(evaluate(context));
     }
 
@@ -37,19 +37,19 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         throw new IllegalStateException();
     }
 
-    public Stream<Object> collectFields(Data data) {
+    public Stream<Object> collectFields(Data<?> data) {
         return Stream.of(data.firstFieldFromAlias(getRootSymbolName()));
     }
 
-    public Data verify(DALOperator operator, DALNode actual, DALRuntimeContext context) {
+    public Data<?> verify(DALOperator operator, DALNode actual, DALRuntimeContext context) {
         return context.calculate(actual.evaluateData(context), operator, context.data(toVerify(context)));
     }
 
     protected ExpectationFactory toVerify(DALRuntimeContext context) {
-        Data expected = evaluateData(context);
+        Data<?> expected = evaluateData(context);
         return (operator, actual) -> new ExpectationFactory.Expectation() {
             @Override
-            public Data matches() {
+            public Data<?> matches() {
                 Checker checker = context.fetchMatchingChecker(expected, actual);
                 return checker.verify(new CheckingContext(expected, actual,
                         opt2(() -> checker.transformExpected(expected, context)),
@@ -57,7 +57,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
             }
 
             @Override
-            public Data equalTo() {
+            public Data<?> equalTo() {
                 Checker checker = context.fetchEqualsChecker(expected, actual);
                 return checker.verify(new CheckingContext(expected, actual,
                         opt2(() -> checker.transformExpected(expected, context)),

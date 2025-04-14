@@ -46,7 +46,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class RuntimeContextBuilder {
-    private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
+    private final ClassKeyMap<PropertyAccessor<?>> propertyAccessors = new ClassKeyMap<>();
     private final ClassKeyMap<DALCollectionFactory<Object, Object>> dALCollectionFactories = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Comparable<?>>> customSorters = new ClassKeyMap<>();
@@ -54,8 +54,8 @@ public class RuntimeContextBuilder {
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
     private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
-    private final ClassKeyMap<Function<RemarkData, Data>> remarks = new ClassKeyMap<>();
-    private final ClassKeyMap<Function<RuntimeData, Data>> exclamations = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RemarkData, Data<?>>> remarks = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RuntimeData, Data<?>>> exclamations = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
@@ -74,7 +74,7 @@ public class RuntimeContextBuilder {
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
     private final Features features = new Features();
-    private Consumer<Data> returnHook = x -> {
+    private Consumer<Data<?>> returnHook = x -> {
     };
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
@@ -122,7 +122,7 @@ public class RuntimeContextBuilder {
                 expect(new Expect(BeanClass.create((Class) schema), null)).verify(context, actual(data)));
     }
 
-    public RuntimeContextBuilder registerSchema(String name, BiFunction<Data, DALRuntimeContext, Boolean> predicate) {
+    public RuntimeContextBuilder registerSchema(String name, BiFunction<Data<?>, DALRuntimeContext, Boolean> predicate) {
         valueConstructors.put(name, (o, context) -> {
             if (predicate.apply(o, context))
                 return o.instance();
@@ -131,9 +131,8 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> RuntimeContextBuilder registerPropertyAccessor(Class<T> type, PropertyAccessor<? extends T> propertyAccessor) {
-        propertyAccessors.put(type, (PropertyAccessor<Object>) propertyAccessor);
+        propertyAccessors.put(type, propertyAccessor);
         return this;
     }
 
@@ -267,12 +266,12 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data> action) {
+    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data<?>> action) {
         remarks.put(type, action);
         return this;
     }
 
-    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Data> action) {
+    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Data<?>> action) {
         exclamations.put(type, action);
         return this;
     }
@@ -304,7 +303,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerReturnHook(Consumer<Data> hook) {
+    public RuntimeContextBuilder registerReturnHook(Consumer<Data<?>> hook) {
         returnHook = returnHook.andThen(hook);
         return this;
     }
@@ -314,8 +313,8 @@ public class RuntimeContextBuilder {
     }
 
     public class DALRuntimeContext implements RuntimeContext {
-        private final LinkedList<Data> stack = new LinkedList<>();
-        private final Map<Data, PartialPropertyStack> partialPropertyStacks;
+        private final LinkedList<Data<?>> stack = new LinkedList<>();
+        private final Map<Data<?>, PartialPropertyStack> partialPropertyStacks;
 
         public Features features() {
             return features;
@@ -326,11 +325,11 @@ public class RuntimeContextBuilder {
             partialPropertyStacks = new HashMap<>();
         }
 
-        public Data getThis() {
+        public Data<?> getThis() {
             return stack.getFirst();
         }
 
-        public <T> T pushAndExecute(Data data, Supplier<T> supplier) {
+        public <T> T pushAndExecute(Data<?> data, Supplier<T> supplier) {
             try {
                 stack.push(data);
                 return supplier.get();
@@ -343,21 +342,23 @@ public class RuntimeContextBuilder {
             return Optional.ofNullable(valueConstructors.get(type));
         }
 
-        public Set<?> findPropertyReaderNames(Object instance) {
+        public <T> Set<?> findPropertyReaderNames(T instance) {
             return getObjectPropertyAccessor(instance).getPropertyNames(instance);
         }
 
-        private PropertyAccessor<Object> getObjectPropertyAccessor(Object instance) {
-            return propertyAccessors.tryGetData(instance)
+        @SuppressWarnings("unchecked")
+        private <T> PropertyAccessor<T> getObjectPropertyAccessor(T instance) {
+            return (PropertyAccessor<T>) propertyAccessors.tryGetData(instance)
                     .orElseGet(() -> new JavaClassPropertyAccessor<>(BeanClass.createFrom(instance)));
         }
 
-        public Boolean isNull(Object instance) {
-            return propertyAccessors.tryGetData(instance).map(f -> f.isNull(instance))
+        @SuppressWarnings("unchecked")
+        public <T> Boolean isNull(T instance) {
+            return propertyAccessors.tryGetData(instance).map(f -> ((PropertyAccessor<T>) f).isNull(instance))
                     .orElseGet(() -> Objects.equals(instance, null));
         }
 
-        public Object getPropertyValue(Data data, Object property) {
+        public <T> Object getPropertyValue(Data<T> data, Object property) {
             try {
                 return getObjectPropertyAccessor(data.instance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
@@ -389,12 +390,12 @@ public class RuntimeContextBuilder {
                     isList ? BeanClass.create(Array.newInstance(s.getType(), 0).getClass()) : s);
         }
 
-        public Data data(Object instance) {
+        public <T> Data<T> data(T instance) {
             return data(instance, null);
         }
 
-        public Data data(Object instance, BeanClass<?> schemaType) {
-            return new Data(instance, this, SchemaType.create(schemaType));
+        public <T> Data<T> data(T instance, BeanClass<?> schemaType) {
+            return new Data<>(instance, this, SchemaType.create(schemaType));
         }
 
         public Optional<Result> takeUserDefinedLiteral(String token) {
@@ -403,22 +404,22 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        public void appendPartialPropertyReference(Data data, Object symbol) {
+        public void appendPartialPropertyReference(Data<?> data, Object symbol) {
             fetchPartialProperties(data).map(partialProperties -> partialProperties.appendPartialProperties(symbol));
         }
 
-        private Optional<PartialProperties> fetchPartialProperties(Data data) {
+        private Optional<PartialProperties> fetchPartialProperties(Data<?> data) {
             return partialPropertyStacks.values().stream().map(partialPropertyStack ->
                     partialPropertyStack.fetchPartialProperties(data)).filter(Objects::nonNull).findFirst();
         }
 
-        public void initPartialPropertyStack(Data instance, Object prefix, Data partial) {
+        public void initPartialPropertyStack(Data<?> instance, Object prefix, Data<?> partial) {
             partialPropertyStacks.computeIfAbsent(instance, _key -> fetchPartialProperties(instance)
                     .map(partialProperties -> partialProperties.partialPropertyStack)
                     .orElseGet(PartialPropertyStack::new)).setupPartialProperties(prefix, partial);
         }
 
-        public Set<String> collectPartialProperties(Data instance) {
+        public Set<String> collectPartialProperties(Data<?> instance) {
             PartialPropertyStack partialPropertyStack = partialPropertyStacks.get(instance);
             if (partialPropertyStack != null)
                 return partialPropertyStack.collectPartialProperties(instance);
@@ -484,15 +485,15 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public Checker fetchEqualsChecker(Data expected, Data actual) {
+        public Checker fetchEqualsChecker(Data<?> expected, Data<?> actual) {
             return checkerSetForEqualing.fetch(expected, actual);
         }
 
-        public Checker fetchMatchingChecker(Data expected, Data actual) {
+        public Checker fetchMatchingChecker(Data<?> expected, Data<?> actual) {
             return checkerSetForMatching.fetch(expected, actual);
         }
 
-        public Dumper fetchDumper(Data data) {
+        public Dumper fetchDumper(Data<?> data) {
             return dumperFactories.tryGetData(data.instance()).map(factory -> factory.apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
@@ -516,19 +517,19 @@ public class RuntimeContextBuilder {
             return errorHook.handle(getThis(), expression, error);
         }
 
-        public Data invokeMetaProperty(DALNode inputNode, Data inputData, Object symbolName) {
+        public Data<?> invokeMetaProperty(DALNode inputNode, Data<?> inputData, Object symbolName) {
             MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
             return data(fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData));
         }
 
-        public Data invokeDataRemark(RemarkData remarkData) {
+        public Data<?> invokeDataRemark(RemarkData remarkData) {
             Object instance = remarkData.data().instance();
             return remarks.tryGetData(instance)
                     .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
                     .apply(remarkData);
         }
 
-        public Data invokeExclamations(ExclamationData exclamationData) {
+        public Data<?> invokeExclamations(ExclamationData exclamationData) {
             Object instance = exclamationData.data().instance();
             return exclamations.tryGetData(instance)
                     .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
@@ -536,7 +537,7 @@ public class RuntimeContextBuilder {
                     .apply(exclamationData);
         }
 
-        public Data calculate(Data v1, DALOperator opt, Data v2) {
+        public Data<?> calculate(Data<?> v1, DALOperator opt, Data<?> v2) {
             for (Operation operation : operations.get(opt.overrideType()))
                 if (operation.match(v1, opt, v2, this))
                     return operation.operateData(v1, opt, v2, this);

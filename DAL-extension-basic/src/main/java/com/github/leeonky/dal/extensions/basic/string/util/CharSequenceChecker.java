@@ -21,7 +21,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
     }
 
     @Override
-    public Data transformExpected(Data expected, DALRuntimeContext context) {
+    public Data<?> transformExpected(Data<?> expected, DALRuntimeContext context) {
         return expected.map(Object::toString);
     }
 
@@ -39,7 +39,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
         private static final Optional<Checker> INSTANCE = of(new CharSequenceChecker.Equals());
 
         @Override
-        public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
+        public Data<?> transformActual(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
             return actual.map(Object::toString);
         }
     }
@@ -48,7 +48,7 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
         private static final Optional<Checker> INSTANCE = of(new CharSequenceChecker.Matches());
 
         @Override
-        public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
+        public Data<?> transformActual(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
             return actual.convert(String.class);
         }
     }

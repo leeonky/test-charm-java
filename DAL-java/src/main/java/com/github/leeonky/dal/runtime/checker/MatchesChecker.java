@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class MatchesChecker implements Checker {
 
     @Override
-    public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data<?> transformActual(Data<?> actual, Data<?> expected, RuntimeContextBuilder.DALRuntimeContext context) {
         return actual.convert(expected.instance().getClass());
     }
 

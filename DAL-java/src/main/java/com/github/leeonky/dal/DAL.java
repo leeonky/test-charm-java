@@ -119,15 +119,15 @@ public class DAL {
         }
     }
 
-    public Data evaluateData(Object input, String expression) {
+    public Data<?> evaluateData(Object input, String expression) {
         return evaluateData(() -> input, expression, null);
     }
 
-    public Data evaluateData(InputCode<Object> input, String expression) {
+    public Data<?> evaluateData(InputCode<Object> input, String expression) {
         return evaluateData(input, expression, null);
     }
 
-    public Data evaluateData(InputCode<Object> input, String expression, Class<?> rootSchema) {
+    public Data<?> evaluateData(InputCode<Object> input, String expression, Class<?> rootSchema) {
         return compileSingle(expression, runtimeContextBuilder.build(input, rootSchema))
                 .evaluateData(runtimeContextBuilder.build(input, rootSchema));
     }

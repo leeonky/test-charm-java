@@ -35,7 +35,7 @@ public class JDBCExtension implements Extension {
     private static class TableDumper implements Dumper {
 
         @Override
-        public void dump(Data data, DumpingBuffer dumpingBuffer) {
+        public void dump(Data<?> data, DumpingBuffer dumpingBuffer) {
             List<List<String>> tableData = getData(data);
             if (tableData.isEmpty())
                 dumpingBuffer.append("[]");
@@ -72,13 +72,13 @@ public class JDBCExtension implements Extension {
     private static class DataBaseDumper extends MapDumper {
 
         @Override
-        protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
+        protected void dumpType(Data<?> data, DumpingBuffer dumpingBuffer) {
             DataBase dataBase = (DataBase) data.instance();
             dumpingBuffer.append("DataBase[").append(dataBase.getUrl()).append("] ");
         }
 
         @Override
-        protected void dumpField(Data data, Object field, DumpingBuffer context) {
+        protected void dumpField(Data<?> data, Object field, DumpingBuffer context) {
             DataBase.Table<?> table = (DataBase.Table<?>) data.getValue(field).instance();
             if (table.iterator().hasNext())
                 context.append(key(field)).append(":").dumpValue(data.getValue(field));

@@ -7,14 +7,14 @@ import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 public class FileDumper implements Dumper {
 
     @Override
-    public void dump(Data path, DumpingBuffer context) {
+    public void dump(Data<?> path, DumpingBuffer context) {
         SFtpFile sFtpFile = (SFtpFile) path.instance();
         context.append(sFtpFile.remoteInfo()).newLine();
         dumpValue(path, context);
     }
 
     @Override
-    public void dumpValue(Data data, DumpingBuffer context) {
+    public void dumpValue(Data<?> data, DumpingBuffer context) {
         SFtpFile sFtpFile = (SFtpFile) data.instance();
         context.append(sFtpFile.attribute()).append(" ").append(sFtpFile.name());
     }
