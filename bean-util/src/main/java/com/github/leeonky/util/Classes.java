@@ -111,8 +111,8 @@ public class Classes {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Class<? super T> named(Class<T> type) {
+    public static <T> Class<T> named(Class<T> type) {
         return type.getInterfaces().length > 0 && (type.isAnonymousClass() && type.getSuperclass() == Object.class
-                || type.isSynthetic()) ? (Class<? super T>) type.getInterfaces()[0] : type;
+                || type.isSynthetic()) ? (Class<T>) type.getInterfaces()[0] : type;
     }
 }

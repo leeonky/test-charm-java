@@ -165,19 +165,19 @@ public class BeanClass<T> {
 
     @Override
     public boolean equals(Object obj) {
-        return obj.getClass().equals(BeanClass.class) && Objects.equals(((BeanClass) obj).getType(), type);
+        return obj.getClass().equals(BeanClass.class) && Objects.equals(((BeanClass<?>) obj).getType(), type);
     }
 
     @SuppressWarnings("unchecked")
     public <S> BeanClass<S> getSuper(Class<S> target) {
-        List<BeanClass> superBeanClasses = supers();
+        List<BeanClass<?>> superBeanClasses = supers();
         return (BeanClass<S>) superBeanClasses.stream().filter(beanClass -> beanClass.getType().equals(target))
-                .findFirst().orElseGet(() -> (BeanClass<S>) superBeanClasses.stream()
+                .findFirst().orElseGet(() -> superBeanClasses.stream()
                         .map(beanClass -> beanClass.getSuper(target))
                         .filter(Objects::nonNull).findFirst().orElse(null));
     }
 
-    private List<BeanClass> supers() {
+    private List<BeanClass<?>> supers() {
         List<Type> suppers = new ArrayList<>(asList(type.getGenericInterfaces()));
         suppers.add(type.getGenericSuperclass());
         return suppers.stream().filter(Objects::nonNull)

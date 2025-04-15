@@ -522,22 +522,22 @@ public class RuntimeContextBuilder {
 
         public Data<?> invokeMetaProperty(DALNode inputNode, Data<?> inputData, Object symbolName) {
             MetaData<?> metaData = new MetaData<>(inputNode, inputData, symbolName, this);
-            return data(fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData));
+            return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).handleData(metaData);
         }
 
         public Data<?> invokeDataRemark(RemarkData<?> remarkData) {
-            Object instance = remarkData.data().instance();
-            return data(remarks.tryGetData(instance)
-                    .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
-                    .apply(remarkData));
+            Object value = remarkData.data().value();
+            return remarks.tryGetData(value)
+                    .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(value)))
+                    .handleData(remarkData);
         }
 
         public Data<?> invokeExclamations(ExclamationData<?> exclamationData) {
-            Object instance = exclamationData.data().instance();
-            return data(exclamations.tryGetData(instance)
+            Object value = exclamationData.data().value();
+            return exclamations.tryGetData(value)
                     .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
-                            exclamationData.label(), Classes.getClassName(instance))))
-                    .apply(exclamationData));
+                            exclamationData.label(), Classes.getClassName(value))))
+                    .handleData(exclamationData);
         }
 
         @SuppressWarnings("unchecked")

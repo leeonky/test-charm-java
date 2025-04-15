@@ -30,7 +30,7 @@ public class MetaData<T> extends RuntimeData<T> {
     public Object callSuper() {
         return runtimeContext().fetchSuperMetaFunction(this).orElseThrow(() -> illegalOp2(format(
                         "Local meta property `%s` has no super in type %s", name, callTypes.get(callTypes.size() - 1).getName())))
-                .apply(this);
+                .handle(this);
     }
 
 //    public Object callSuper(Supplier<Object> supplier) {
@@ -43,7 +43,7 @@ public class MetaData<T> extends RuntimeData<T> {
 //    }
 
     public Object callGlobal() {
-        return runtimeContext().fetchGlobalMetaFunction(this).apply(this);
+        return runtimeContext().fetchGlobalMetaFunction(this).handle(this);
     }
 
 //    TODO
@@ -58,7 +58,7 @@ public class MetaData<T> extends RuntimeData<T> {
 
     public Object callMeta(String another) {
         MetaData<T> metaData = newMeta(another);
-        return runtimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
+        return runtimeContext().fetchGlobalMetaFunction(metaData).handle(metaData);
     }
 
 //    TODO
