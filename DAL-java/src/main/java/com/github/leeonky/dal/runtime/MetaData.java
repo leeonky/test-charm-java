@@ -10,17 +10,17 @@ import java.util.Objects;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static java.lang.String.format;
 
-public class MetaData extends RuntimeData {
+public class MetaData<T> extends RuntimeData<T> {
     private DALNode inputNode;
     private final Object name;
 
-    public MetaData(DALNode inputNode, Data<?> inputData, Object symbolName, DALRuntimeContext runtimeContext) {
+    public MetaData(DALNode inputNode, Data<T> inputData, Object symbolName, DALRuntimeContext runtimeContext) {
         super(inputData, runtimeContext);
         this.inputNode = inputNode;
         name = symbolName;
     }
 
-    private MetaData(DALRuntimeContext runtimeContext, Data<?> data, String name) {
+    private MetaData(DALRuntimeContext runtimeContext, Data<T> data, String name) {
         super(data, runtimeContext);
         this.name = name;
     }
@@ -52,12 +52,12 @@ public class MetaData extends RuntimeData {
 //        return callGlobal();
 //    }
 
-    private MetaData newMeta(String name) {
-        return new MetaData(runtimeContext, data, name);
+    private MetaData<T> newMeta(String name) {
+        return new MetaData<>(runtimeContext, data, name);
     }
 
     public Object callMeta(String another) {
-        MetaData metaData = newMeta(another);
+        MetaData<T> metaData = newMeta(another);
         return runtimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
     }
 

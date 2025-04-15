@@ -31,7 +31,7 @@ Feature: meta ::size
     """
     Then failed with the message:
     """
-    Invalid meta property `size` for: java.lang.String
+    Invalid input value, expect a List but: java.lang.String
     <not list>
     """
     And got the following notation:
@@ -78,7 +78,7 @@ Feature: meta ::size
     Then failed with the message:
     """
     Mapping element[1]:
-    Invalid meta property `size` for: java.lang.String
+    Invalid input value, expect a List but: java.lang.String
     <not list>
     """
     And got the following notation:

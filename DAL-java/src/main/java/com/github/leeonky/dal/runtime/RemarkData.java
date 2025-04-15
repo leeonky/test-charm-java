@@ -2,10 +2,10 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-public class RemarkData extends RuntimeData {
+public class RemarkData<T> extends RuntimeData<T> {
     private final String remark;
 
-    public RemarkData(Data data, DALRuntimeContext runtimeContext, String remark) {
+    public RemarkData(Data<T> data, DALRuntimeContext runtimeContext, String remark) {
         super(data, runtimeContext);
         this.remark = remark;
     }
@@ -14,7 +14,7 @@ public class RemarkData extends RuntimeData {
         return remark;
     }
 
-    public Data acceptRemarkAsParameter() {
+    public Data<?> acceptRemarkAsParameter() {
         return data().map(i -> ((DataRemarkParameterAcceptor<?>) i).apply(remark()));
     }
 }

@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory.helper;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.Optional;
 
@@ -25,14 +26,14 @@ public class DALHelper {
 
     private void implementForceCreation(DAL dal) {
         dal.getRuntimeContextBuilder().registerExclamation(ObjectReference.class, runtimeData -> {
-            ((ObjectReference) runtimeData.data().instance()).intently();
+            runtimeData.data().instance().intently();
             return runtimeData.data();
         });
     }
 
     private void implementTraitSpec(DAL dal) {
         dal.getRuntimeContextBuilder().registerDataRemark(ObjectReference.class, remarkData -> {
-            ((ObjectReference) remarkData.data().instance()).addTraitSpec(remarkData.remark());
+            remarkData.data().instance().addTraitSpec(remarkData.remark());
             return remarkData.data();
         });
     }
@@ -50,12 +51,12 @@ public class DALHelper {
     private void overrideOptMatch(DAL dal) {
         dal.getRuntimeContextBuilder().registerOperator(Operators.MATCH, new Operation<ObjectReference, ExpectationFactory>() {
             @Override
-            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
                 return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
-            public Data<?> operateData(Data<ObjectReference> v1, DALOperator operator, Data<ExpectationFactory> v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data<?> operateData(Data<ObjectReference> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
                 ExpectationFactory.Expectation expectation = v2.instance().create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 if (type == ExpectationFactory.Type.OBJECT)
@@ -77,13 +78,13 @@ public class DALHelper {
     private void overrideOptEqual(DAL dal) {
         dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation<ObjectReference, ExpectationFactory>() {
             @Override
-            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
+            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
                 return v1.instanceOf(ObjectReference.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
             public Data<?> operateData(Data<ObjectReference> v1, DALOperator operator, Data<ExpectationFactory> v2,
-                                       RuntimeContextBuilder.DALRuntimeContext context) {
+                                       DALRuntimeContext context) {
                 ExpectationFactory.Expectation expectation = v2.instance().create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 if (type == ExpectationFactory.Type.OBJECT)
@@ -95,7 +96,7 @@ public class DALHelper {
             }
         });
         dal.getRuntimeContextBuilder().checkerSetForEqualing()
-                .register((expected, actual) -> actual.instanceOf(ObjectReference.class)
-                        ? of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty());
+                .register((expected, actual) -> actual.instanceOf(ObjectReference.class) ?
+                        of(new OverrideVerificationOptChecker<>(ObjectReference::setValue)) : Optional.empty());
     }
 }

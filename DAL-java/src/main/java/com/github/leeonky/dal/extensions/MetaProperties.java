@@ -10,15 +10,11 @@ import java.util.Set;
 
 import static com.github.leeonky.dal.runtime.DalException.extractException;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
-import static java.lang.String.format;
 
 @Order(BUILD_IN)
 public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
-        Data data = metaData.data();
-        if (data.isList())
-            return data.list().size();
-        throw new DalRuntimeException(format("Invalid meta property `size` for: %s", data.dump()));
+        return metaData.data().list().size();
     }
 
     private static Object throw_(MetaData metaData) {

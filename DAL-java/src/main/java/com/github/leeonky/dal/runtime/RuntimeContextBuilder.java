@@ -13,10 +13,7 @@ import com.github.leeonky.dal.type.InputCode;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.Classes;
-import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.NumberType;
+import com.github.leeonky.util.*;
 
 import java.io.PrintStream;
 import java.lang.reflect.Array;
@@ -29,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
+import static com.github.leeonky.dal.runtime.DalException.buildUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
@@ -36,6 +34,7 @@ import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.Classes.getClassName;
 import static com.github.leeonky.util.Classes.named;
 import static com.github.leeonky.util.CollectionHelper.toStream;
+import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
@@ -52,9 +51,9 @@ public class RuntimeContextBuilder {
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
-    private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
-    private final ClassKeyMap<Function<RemarkData, Data<?>>> remarks = new ClassKeyMap<>();
-    private final ClassKeyMap<Function<RuntimeData, Data<?>>> exclamations = new ClassKeyMap<>();
+    private final Map<Object, Function<MetaData<?>, Object>> metaProperties = new HashMap<>();
+    private final ClassKeyMap<Function<RemarkData<?>, Data<?>>> remarks = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RuntimeData<?>, Data<?>>> exclamations = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
@@ -67,17 +66,18 @@ public class RuntimeContextBuilder {
     private int maxDumpingLineSize = 2000;
     private int maxDumpingObjectSize = 255;
     private ErrorHook errorHook = (i, code, e) -> false;
-    private final Map<Class<?>, Map<Object, Function<MetaData, Object>>> localMetaProperties
+    private final Map<Class<?>, Map<Object, Function<MetaData<?>, Object>>> localMetaProperties
             = new TreeMap<>(Classes::compareByExtends);
-    private final Map<Class<?>, Map<Pattern, Function<MetaData, Object>>> localMetaPropertyPatterns
+    private final Map<Class<?>, Map<Pattern, Function<MetaData<?>, Object>>> localMetaPropertyPatterns
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
     private final Features features = new Features();
     private Consumer<Data<?>> returnHook = x -> {
     };
 
-    public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
-        metaProperties.put(property, function);
+    @SuppressWarnings("unchecked")
+    public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData<Object>, Object> function) {
+        metaProperties.put(property, (Function) function);
         return this;
     }
 
@@ -255,23 +255,27 @@ public class RuntimeContextBuilder {
         };
     }
 
-    public RuntimeContextBuilder registerMetaProperty(Class<?> type, Object name, Function<MetaData, Object> function) {
-        localMetaProperties.computeIfAbsent(type, k -> new HashMap<>()).put(name, function);
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerMetaProperty(Class<T> type, Object name, Function<MetaData<T>, Object> function) {
+        localMetaProperties.computeIfAbsent(type, k -> new HashMap<>()).put(name, (Function) function);
         return this;
     }
 
-    public RuntimeContextBuilder registerMetaPropertyPattern(Class<?> type, String name, Function<MetaData, Object> function) {
-        localMetaPropertyPatterns.computeIfAbsent(type, k -> new HashMap<>()).put(Pattern.compile(name), function);
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerMetaPropertyPattern(Class<T> type, String name, Function<MetaData<T>, Object> function) {
+        localMetaPropertyPatterns.computeIfAbsent(type, k -> new HashMap<>()).put(Pattern.compile(name), (Function) function);
         return this;
     }
 
-    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data<?>> action) {
-        remarks.put(type, action);
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerDataRemark(Class<T> type, Function<RemarkData<T>, Data<?>> action) {
+        remarks.put(type, (Function) action);
         return this;
     }
 
-    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Data<?>> action) {
-        exclamations.put(type, action);
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerExclamation(Class<T> type, Function<RuntimeData<T>, Data<?>> action) {
+        exclamations.put(type, (Function) action);
         return this;
     }
 
@@ -320,7 +324,7 @@ public class RuntimeContextBuilder {
         }
 
         public DALRuntimeContext(InputCode<?> supplier, Class<?> schema) {
-            stack.push(Data.lazy(supplier, this, SchemaType.create(schema == null ? null : BeanClass.create(schema))));
+            stack.push(lazy(supplier, SchemaType.create(schema == null ? null : BeanClass.create(schema))));
             partialPropertyStacks = new HashMap<>();
         }
 
@@ -387,6 +391,19 @@ public class RuntimeContextBuilder {
             return new Data<>(instance, this, schema);
         }
 
+        public <N> Data<N> lazy(ThrowingSupplier<N> supplier, SchemaType schemaType) {
+            try {
+                return new Data<>(supplier.get(), this, schemaType);
+            } catch (Throwable e) {
+                return new Data<N>(null, this, schemaType) {
+                    @Override
+                    public N instance() {
+                        return sneakyThrow(buildUserRuntimeException(e));
+                    }
+                };
+            }
+        }
+
         public Optional<Result> takeUserDefinedLiteral(String token) {
             return userDefinedLiterals.stream().map(userLiteralRule -> userLiteralRule.compile(token))
                     .filter(Result::hasResult)
@@ -428,13 +445,13 @@ public class RuntimeContextBuilder {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
-        public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
+        public Function<MetaData<?>, Object> fetchGlobalMetaFunction(MetaData<?> metaData) {
             return metaProperties.computeIfAbsent(metaData.name(), k -> {
                 throw illegalOp2(format("Meta property `%s` not found", metaData.name()));
             });
         }
 
-        private Optional<Function<MetaData, Object>> fetchLocalMetaFunction(MetaData metaData) {
+        private Optional<Function<MetaData<?>, Object>> fetchLocalMetaFunction(MetaData<?> metaData) {
             return Stream.concat(metaFunctionsByType(metaData).map(e -> {
                         metaData.addCallType(e.getKey());
                         return e.getValue().get(metaData.name());
@@ -448,7 +465,7 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        public Optional<Function<MetaData, Object>> fetchSuperMetaFunction(MetaData metaData) {
+        public Optional<Function<MetaData<?>, Object>> fetchSuperMetaFunction(MetaData<?> metaData) {
             return metaFunctionsByType(metaData)
                     .filter(e -> !metaData.calledBy(e.getKey()))
                     .map(e -> {
@@ -457,11 +474,11 @@ public class RuntimeContextBuilder {
                     }).filter(Objects::nonNull).findFirst();
         }
 
-        private Stream<Map.Entry<Class<?>, Map<Object, Function<MetaData, Object>>>> metaFunctionsByType(MetaData metaData) {
+        private Stream<Map.Entry<Class<?>, Map<Object, Function<MetaData<?>, Object>>>> metaFunctionsByType(MetaData<?> metaData) {
             return localMetaProperties.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
         }
 
-        private Stream<Map.Entry<Class<?>, Map<Pattern, Function<MetaData, Object>>>> metaFunctionPatternsByType(MetaData metaData) {
+        private Stream<Map.Entry<Class<?>, Map<Pattern, Function<MetaData<?>, Object>>>> metaFunctionPatternsByType(MetaData<?> metaData) {
             return localMetaPropertyPatterns.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
         }
 
@@ -508,18 +525,18 @@ public class RuntimeContextBuilder {
         }
 
         public Data<?> invokeMetaProperty(DALNode inputNode, Data<?> inputData, Object symbolName) {
-            MetaData metaData = new MetaData(inputNode, inputData, symbolName, this);
+            MetaData<?> metaData = new MetaData<>(inputNode, inputData, symbolName, this);
             return data(fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData));
         }
 
-        public Data<?> invokeDataRemark(RemarkData remarkData) {
+        public Data<?> invokeDataRemark(RemarkData<?> remarkData) {
             Object instance = remarkData.data().instance();
             return remarks.tryGetData(instance)
                     .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
                     .apply(remarkData);
         }
 
-        public Data<?> invokeExclamations(ExclamationData exclamationData) {
+        public Data<?> invokeExclamations(ExclamationData<?> exclamationData) {
             Object instance = exclamationData.data().instance();
             return exclamations.tryGetData(instance)
                     .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",

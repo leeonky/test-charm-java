@@ -12,11 +12,11 @@ import java.util.Optional;
 import static java.util.Optional.of;
 
 public abstract class CharSequenceChecker extends CheckerWithDiff {
-    public static Optional<Checker> equals(Data d1, Data d2) {
+    public static Optional<Checker> equals(Data<?> d1, Data<?> d2) {
         return Equals.INSTANCE;
     }
 
-    public static Optional<Checker> matches(Data d1, Data d2) {
+    public static Optional<Checker> matches(Data<?> d1, Data<?> d2) {
         return Matches.INSTANCE;
     }
 

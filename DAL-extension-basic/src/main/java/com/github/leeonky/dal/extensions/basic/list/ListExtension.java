@@ -20,10 +20,9 @@ public class ListExtension implements Extension {
                 .registerMetaProperty("filter", metaData -> new Filterable(metaData.data()))
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())
-                .registerExclamation(Filterable.class, runtimeData -> runtimeData.data().map(
-                        data -> ((Filterable) data).requireNotEmpty()))
+                .registerExclamation(Filterable.class, runtimeData -> runtimeData.data().map(Filterable::requireNotEmpty))
                 .registerDataRemark(Filterable.class, remarkData -> remarkData.data().map(
-                        data -> ((Filterable) data).require(parseInt(remarkData.remark()))));
+                        data -> data.require(parseInt(remarkData.remark()))));
     }
 
     public static class Filterable {

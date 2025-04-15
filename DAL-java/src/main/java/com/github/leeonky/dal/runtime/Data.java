@@ -5,7 +5,6 @@ import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.ConvertException;
-import com.github.leeonky.util.ThrowingSupplier;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,9 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
-import static com.github.leeonky.dal.runtime.DalException.buildUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
-import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
@@ -150,19 +147,6 @@ public class Data<T> {
         }
     }
 
-    public static <N> Data<N> lazy(ThrowingSupplier<N> supplier, DALRuntimeContext context, SchemaType schemaType) {
-        try {
-            return new Data<>(supplier.get(), context, schemaType);
-        } catch (Throwable e) {
-            return new Data<N>(null, context, schemaType) {
-                @Override
-                public N instance() {
-                    return sneakyThrow(buildUserRuntimeException(e));
-                }
-            };
-        }
-    }
-
     public class DataList extends DALCollection.Decorated<Object> {
         public DataList(DALCollection<Object> origin) {
             super(origin);
@@ -195,10 +179,6 @@ public class Data<T> {
                     throw illegalOperation("Can not sort infinite collection");
                 }
             return this;
-        }
-
-        public Data<?> wrap() {
-            return new Data<>(this, context, schemaType);
         }
     }
 }

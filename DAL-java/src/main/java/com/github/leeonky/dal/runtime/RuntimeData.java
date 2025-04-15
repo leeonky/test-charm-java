@@ -2,11 +2,11 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-public class RuntimeData {
+public class RuntimeData<T> {
     protected final DALRuntimeContext runtimeContext;
-    protected final Data<?> data;
+    protected final Data<T> data;
 
-    public RuntimeData(Data<?> data, DALRuntimeContext runtimeContext) {
+    public RuntimeData(Data<T> data, DALRuntimeContext runtimeContext) {
         this.runtimeContext = runtimeContext;
         this.data = data;
     }
@@ -15,7 +15,7 @@ public class RuntimeData {
         return runtimeContext;
     }
 
-    public Data<?> data() {
+    public Data<T> data() {
         return data;
     }
 }

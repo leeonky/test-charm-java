@@ -14,9 +14,9 @@ public class EventuallyExtension implements Extension {
                 .registerOperator(Operators.MATCH, new EventuallyVerification())
                 .registerOperator(Operators.EQUAL, new EventuallyVerification())
                 .registerMetaProperty(Eventually.class, "in", metaData ->
-                        (DataRemarkParameterAcceptor<Eventually>) s -> ((Eventually) metaData.data().instance()).within(s))
+                        (DataRemarkParameterAcceptor<Eventually>) s -> metaData.data().instance().within(s))
                 .registerMetaProperty(Eventually.class, "every", metaData ->
-                        (DataRemarkParameterAcceptor<Eventually>) s -> ((Eventually) metaData.data().instance()).interval(s))
+                        (DataRemarkParameterAcceptor<Eventually>) s -> metaData.data().instance().interval(s))
         ;
     }
 
