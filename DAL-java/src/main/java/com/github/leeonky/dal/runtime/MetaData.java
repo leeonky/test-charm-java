@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static java.lang.String.format;
@@ -52,13 +53,17 @@ public class MetaData<T> extends RuntimeData<T> {
 //        return callGlobal();
 //    }
 
-    private MetaData<T> newMeta(String name) {
+    private MetaData<T> rename(String name) {
         return new MetaData<>(runtimeContext, data, name);
     }
 
     public Object callMeta(String another) {
-        MetaData<T> metaData = newMeta(another);
+        MetaData<T> metaData = rename(another);
         return runtimeContext().fetchGlobalMetaFunction(metaData).handle(metaData);
+    }
+
+    public Data<?> delegate(Function<Data<T>, Data<?>> sub) {
+        return runtimeContext.invokeMetaProperty(inputNode, sub.apply(data), name);
     }
 
 //    TODO

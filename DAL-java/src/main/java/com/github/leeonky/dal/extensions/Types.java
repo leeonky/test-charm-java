@@ -42,6 +42,37 @@ public class Types implements Extension {
                     }
                 })
                 .registerReturnHook(d -> d.cast(ReturnHook.class).ifPresent(ReturnHook::onReturn))
+                .registerDALCollectionFactory(AdaptiveList.class, AdaptiveList::list)
+                .registerPropertyAccessor(AdaptiveList.class, new PropertyAccessor<AdaptiveList<?>>() {
+
+                    @Override
+                    public Data<?> getData(Data<AdaptiveList<?>> data, Object property, RuntimeContextBuilder.DALRuntimeContext context) {
+                        data.value().only();
+                        return data.property(data.value().list().firstIndex()).property(property);
+                    }
+
+                    @Override
+                    public Set<?> getPropertyNames(Data<AdaptiveList<?>> data) {
+                        data.value().only();
+                        return data.property(data.value().list().firstIndex()).fieldNames();
+                    }
+                })
+                .registerMetaPropertyPattern(AdaptiveList.class, ".*", new RuntimeHandler<MetaData<AdaptiveList>>() {
+                    @Override
+                    public Data<?> handleData(MetaData<AdaptiveList> metaData) {
+                        if (metaData.name().equals("size"))
+                            return metaData.delegate(d -> d.map(AdaptiveList::list));
+                        else {
+                            metaData.data().value().only();
+                            return metaData.delegate(d -> d.property(d.value().list().firstIndex()));
+                        }
+                    }
+
+                    @Override
+                    public Object handle(MetaData<AdaptiveList> metaData) {
+                        return null;
+                    }
+                })
         ;
     }
 }
