@@ -13,8 +13,4 @@ public class RemarkData<T> extends RuntimeData<T> {
     public String remark() {
         return remark;
     }
-
-    public Data<?> acceptRemarkAsParameter() {
-        return data().map(i -> ((DataRemarkParameterAcceptor<?>) i).apply(remark()));
-    }
 }

@@ -42,7 +42,7 @@ Feature: exclamation
     Scenario Outline: <position> property <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->((Bean)i).value.toUpperCase()));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().value().value.toUpperCase());
       """
       Then the following verification for the instance of java class "BeanRef" should pass:
       """
@@ -65,7 +65,7 @@ Feature: exclamation
     Scenario: with not !
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->true));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> true);
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -79,7 +79,7 @@ Feature: exclamation
     Scenario: with negative -
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->100));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> 100);
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -95,7 +95,7 @@ Feature: exclamation
     Scenario Outline: <position> <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->100));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> 100);
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -121,7 +121,7 @@ Feature: exclamation
     Scenario Outline: <position> <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->100));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> 100);
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -163,7 +163,7 @@ Feature: exclamation
     Scenario Outline: <position> <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->Boolean.parseBoolean("<exclamationValue>")));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> Boolean.parseBoolean("<exclamationValue>"));
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -199,7 +199,7 @@ Feature: exclamation
     Scenario: before verification = :
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->99));
+      dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> 99);
       """
       When use a instance of java class "BeanRef" to evaluate:
       """

@@ -34,6 +34,7 @@ import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.Classes.getClassName;
 import static com.github.leeonky.util.Classes.named;
 import static com.github.leeonky.util.CollectionHelper.toStream;
+import static com.github.leeonky.util.Sneaky.cast;
 import static com.github.leeonky.util.Sneaky.sneakyThrow;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
@@ -51,9 +52,9 @@ public class RuntimeContextBuilder {
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
-    private final Map<Object, Function<MetaData<?>, Object>> metaProperties = new HashMap<>();
-    private final ClassKeyMap<Function<RemarkData<?>, Data<?>>> remarks = new ClassKeyMap<>();
-    private final ClassKeyMap<Function<RuntimeData<?>, Data<?>>> exclamations = new ClassKeyMap<>();
+    private final Map<Object, RuntimeHandler<MetaData<?>>> metaProperties = new HashMap<>();
+    private final ClassKeyMap<RuntimeHandler<RemarkData<?>>> remarks = new ClassKeyMap<>();
+    private final ClassKeyMap<RuntimeHandler<RuntimeData<?>>> exclamations = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
@@ -66,18 +67,17 @@ public class RuntimeContextBuilder {
     private int maxDumpingLineSize = 2000;
     private int maxDumpingObjectSize = 255;
     private ErrorHook errorHook = (i, code, e) -> false;
-    private final Map<Class<?>, Map<Object, Function<MetaData<?>, Object>>> localMetaProperties
+    private final Map<Class<?>, Map<Object, RuntimeHandler<MetaData<?>>>> localMetaProperties
             = new TreeMap<>(Classes::compareByExtends);
-    private final Map<Class<?>, Map<Pattern, Function<MetaData<?>, Object>>> localMetaPropertyPatterns
+    private final Map<Class<?>, Map<Pattern, RuntimeHandler<MetaData<?>>>> localMetaPropertyPatterns
             = new TreeMap<>(Classes::compareByExtends);
     private PrintStream warning = System.err;
     private final Features features = new Features();
     private Consumer<Data<?>> returnHook = x -> {
     };
 
-    @SuppressWarnings("unchecked")
-    public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData<Object>, Object> function) {
-        metaProperties.put(property, (Function) function);
+    public RuntimeContextBuilder registerMetaProperty(Object property, RuntimeHandler<MetaData<?>> function) {
+        metaProperties.put(property, function);
         return this;
     }
 
@@ -255,27 +255,23 @@ public class RuntimeContextBuilder {
         };
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerMetaProperty(Class<T> type, Object name, Function<MetaData<T>, Object> function) {
-        localMetaProperties.computeIfAbsent(type, k -> new HashMap<>()).put(name, (Function) function);
+    public <T> RuntimeContextBuilder registerMetaProperty(Class<T> type, Object name, RuntimeHandler<MetaData<T>> function) {
+        localMetaProperties.computeIfAbsent(type, k -> new HashMap<>()).put(name, cast(function));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerMetaPropertyPattern(Class<T> type, String name, Function<MetaData<T>, Object> function) {
-        localMetaPropertyPatterns.computeIfAbsent(type, k -> new HashMap<>()).put(Pattern.compile(name), (Function) function);
+    public <T> RuntimeContextBuilder registerMetaPropertyPattern(Class<T> type, String name, RuntimeHandler<MetaData<T>> function) {
+        localMetaPropertyPatterns.computeIfAbsent(type, k -> new HashMap<>()).put(Pattern.compile(name), cast(function));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerDataRemark(Class<T> type, Function<RemarkData<T>, Data<?>> action) {
-        remarks.put(type, (Function) action);
+    public <T> RuntimeContextBuilder registerDataRemark(Class<T> type, RuntimeHandler<RemarkData<T>> action) {
+        remarks.put(type, cast(action));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerExclamation(Class<T> type, Function<RuntimeData<T>, Data<?>> action) {
-        exclamations.put(type, (Function) action);
+    public <T> RuntimeContextBuilder registerExclamation(Class<T> type, RuntimeHandler<RuntimeData<T>> action) {
+        exclamations.put(type, cast(action));
         return this;
     }
 
@@ -445,13 +441,13 @@ public class RuntimeContextBuilder {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
-        public Function<MetaData<?>, Object> fetchGlobalMetaFunction(MetaData<?> metaData) {
+        public RuntimeHandler<MetaData<?>> fetchGlobalMetaFunction(MetaData<?> metaData) {
             return metaProperties.computeIfAbsent(metaData.name(), k -> {
                 throw illegalOp2(format("Meta property `%s` not found", metaData.name()));
             });
         }
 
-        private Optional<Function<MetaData<?>, Object>> fetchLocalMetaFunction(MetaData<?> metaData) {
+        private Optional<RuntimeHandler<MetaData<?>>> fetchLocalMetaFunction(MetaData<?> metaData) {
             return Stream.concat(metaFunctionsByType(metaData).map(e -> {
                         metaData.addCallType(e.getKey());
                         return e.getValue().get(metaData.name());
@@ -465,7 +461,7 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        public Optional<Function<MetaData<?>, Object>> fetchSuperMetaFunction(MetaData<?> metaData) {
+        public Optional<RuntimeHandler<MetaData<?>>> fetchSuperMetaFunction(MetaData<?> metaData) {
             return metaFunctionsByType(metaData)
                     .filter(e -> !metaData.calledBy(e.getKey()))
                     .map(e -> {
@@ -474,11 +470,11 @@ public class RuntimeContextBuilder {
                     }).filter(Objects::nonNull).findFirst();
         }
 
-        private Stream<Map.Entry<Class<?>, Map<Object, Function<MetaData<?>, Object>>>> metaFunctionsByType(MetaData<?> metaData) {
+        private Stream<Map.Entry<Class<?>, Map<Object, RuntimeHandler<MetaData<?>>>>> metaFunctionsByType(MetaData<?> metaData) {
             return localMetaProperties.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
         }
 
-        private Stream<Map.Entry<Class<?>, Map<Pattern, Function<MetaData<?>, Object>>>> metaFunctionPatternsByType(MetaData<?> metaData) {
+        private Stream<Map.Entry<Class<?>, Map<Pattern, RuntimeHandler<MetaData<?>>>>> metaFunctionPatternsByType(MetaData<?> metaData) {
             return localMetaPropertyPatterns.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
         }
 
@@ -531,17 +527,17 @@ public class RuntimeContextBuilder {
 
         public Data<?> invokeDataRemark(RemarkData<?> remarkData) {
             Object instance = remarkData.data().instance();
-            return remarks.tryGetData(instance)
+            return data(remarks.tryGetData(instance)
                     .orElseThrow(() -> illegalOperation("Not implement operator () of " + getClassName(instance)))
-                    .apply(remarkData);
+                    .apply(remarkData));
         }
 
         public Data<?> invokeExclamations(ExclamationData<?> exclamationData) {
             Object instance = exclamationData.data().instance();
-            return exclamations.tryGetData(instance)
+            return data(exclamations.tryGetData(instance)
                     .orElseThrow(() -> illegalOp2(format("Not implement operator %s of %s",
                             exclamationData.label(), Classes.getClassName(instance))))
-                    .apply(exclamationData);
+                    .apply(exclamationData));
         }
 
         @SuppressWarnings("unchecked")

@@ -29,7 +29,7 @@ Feature: exclamation
     """
     And register DAL:
     """
-    dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().map(i->((Bean)i).value + "!"));
+    dal.getRuntimeContextBuilder().registerExclamation(Bean.class, rd-> rd.data().value().value + "!");
     """
     When the following verification for the instance of java class "Beans" should pass:
     """
@@ -103,8 +103,8 @@ Feature: exclamation
     When register DAL:
     """
     dal.getRuntimeContextBuilder()
-      .registerExclamation(Map.class, rd-> rd.data().map(m->((Map)m).get("key")))
-      .registerExclamation(String.class, rd-> rd.data().map(m->((String)m).toUpperCase()));
+      .registerExclamation(Map.class, rd-> rd.data().value().get("key"))
+      .registerExclamation(String.class, rd-> rd.data().value().toUpperCase());
     """
     And the following json:
     """
@@ -127,8 +127,8 @@ Feature: exclamation
     When register DAL:
     """
     dal.getRuntimeContextBuilder()
-      .registerExclamation(Map.class, rd-> rd.data().map(m->((Map)m).get("key")))
-      .registerExclamation(String.class, rd-> rd.data().map(m->((String)m).toUpperCase()));
+      .registerExclamation(Map.class, rd-> rd.data().value().get("key"))
+      .registerExclamation(String.class, rd-> rd.data().value().toUpperCase());
     """
     And the following json:
     """

@@ -39,4 +39,9 @@ public class Sneaky {
     public static <E extends Throwable, T> T sneakyThrow(Throwable throwable) throws E {
         throw (E) throwable;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T, R> R cast(T input) {
+        return (R) input;
+    }
 }

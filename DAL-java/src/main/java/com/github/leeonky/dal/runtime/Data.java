@@ -30,7 +30,12 @@ public class Data<T> {
         this.value = value;
     }
 
+    @Deprecated
     public T instance() {
+        return value;
+    }
+
+    public T value() {
         return value;
     }
 

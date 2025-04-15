@@ -23,7 +23,8 @@ public class Types implements Extension {
                 .registerDALCollectionFactory(Stream.class, (stream) ->
                         new IterableDALCollection<Object>(stream::iterator))
                 .registerDALCollectionFactory(DALCollection.class, instance -> instance)
-                .registerDataRemark(DataRemarkParameterAcceptor.class, RemarkData::acceptRemarkAsParameter)
+                .registerDataRemark(DataRemarkParameterAcceptor.class, remarkData ->
+                        remarkData.data().instance().apply(remarkData.remark()))
                 .registerPropertyAccessor(ProxyObject.class, new PropertyAccessor<ProxyObject>() {
                     @Override
                     public Object getValue(ProxyObject proxyObject, Object property) {

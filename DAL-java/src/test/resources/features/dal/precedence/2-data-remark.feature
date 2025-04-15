@@ -45,7 +45,7 @@ Feature: data remark
     Scenario Outline: <position> property <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->((Bean)i).value+rd.remark()));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().value().value+rd.remark());
       """
       Then the following verification for the instance of java class "BeanRef" should pass:
       """
@@ -68,7 +68,7 @@ Feature: data remark
     Scenario: with not !
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->Boolean.parseBoolean(rd.remark())));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> Boolean.parseBoolean(rd.remark()));
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -82,7 +82,7 @@ Feature: data remark
     Scenario: with negative -
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->Integer.parseInt(rd.remark())));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> Integer.parseInt(rd.remark()));
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -98,7 +98,7 @@ Feature: data remark
     Scenario Outline: <position> <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->Integer.parseInt(rd.remark())));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> Integer.parseInt(rd.remark()));
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -124,7 +124,7 @@ Feature: data remark
     Scenario Outline: <position> <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->Integer.parseInt(rd.remark())));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> Integer.parseInt(rd.remark()));
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -166,7 +166,7 @@ Feature: data remark
     Scenario Outline: <position> <opt>
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->Boolean.parseBoolean(rd.remark())));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> Boolean.parseBoolean(rd.remark()));
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
@@ -202,7 +202,7 @@ Feature: data remark
     Background:
       When register DAL:
       """
-      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->Integer.parseInt(rd.remark())));
+      dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> Integer.parseInt(rd.remark()));
       """
 
     Scenario: before verification = :
