@@ -7,7 +7,7 @@ Feature: single or list
         """
         public class Test {
           public AdaptiveList<Integer> getList() {
-            return new AdaptiveList<Integer>(Arrays.asList(1, 2, 3));
+            return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
           }
         }
         """
@@ -36,7 +36,7 @@ Feature: single or list
         """
         public class Test {
           public AdaptiveList<Integer> getList() {
-            return new AdaptiveList<Integer>(Arrays.asList(1, 2, 3));
+            return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
           }
         }
         """
@@ -58,6 +58,21 @@ Feature: single or list
          ^
         """
 
+    Scenario: works well when list is unlimited
+      Given the following java class:
+        """
+        public class Test {
+          int i = 1;
+          public AdaptiveList<Integer> getList() {
+            return AdaptiveList.staticList(()-> i++);
+          }
+        }
+        """
+      Then the following verification for the instance of java class "Test" should pass:
+        """
+        list= [1 2 ...]
+        """
+
   Rule: solo element
 
     Scenario: When accessing the list property, the access is delegated to the sole element of the list
@@ -65,7 +80,7 @@ Feature: single or list
         """
         public class Test {
           public AdaptiveList<String> getList() {
-            return new AdaptiveList<String>(Arrays.asList("hello"));
+            return AdaptiveList.staticList(Arrays.asList("hello"));
           }
         }
         """
@@ -85,7 +100,7 @@ Feature: single or list
         """
         public class Test {
           public AdaptiveList<String> getList() {
-            return new AdaptiveList<String>(Arrays.asList("hello", "world"));
+            return AdaptiveList.staticList(Arrays.asList("hello", "world"));
           }
         }
         """
@@ -145,7 +160,7 @@ Feature: single or list
         """
         public class Test {
           public AdaptiveList<Data> getList() {
-            return new AdaptiveList<Data>(Arrays.asList(new Data()));
+            return AdaptiveList.staticList(Arrays.asList(new Data()));
           }
         }
         """
@@ -185,7 +200,7 @@ Feature: single or list
         """
         public class Test {
           public AdaptiveList<Data> getList() {
-            return new AdaptiveList<Data>(Arrays.asList(new Data()));
+            return AdaptiveList.staticList(Arrays.asList(new Data()));
           }
         }
         """
@@ -256,7 +271,7 @@ Feature: single or list
         """
         public class Test {
           public AdaptiveList<Data> getList() {
-              return new AdaptiveList<Data>(Arrays.asList(new Data(), new Data()));
+              return AdaptiveList.staticList(Arrays.asList(new Data(), new Data()));
           }
         }
         """
@@ -274,5 +289,28 @@ Feature: single or list
               ^
         """
 
-#  first index
-#  unlimited list
+    Scenario: always raise error when list is unlimited
+      Given the following java class:
+        """
+        public class Test {
+          private int i = 0;
+          public AdaptiveList<String> getList() {
+            return AdaptiveList.staticList(()-> String.valueOf(i++));
+          }
+        }
+        """
+      When use a instance of java class "Test" to evaluate:
+        """
+        list.toUpperCase: "1"
+        """
+      Then failed with the message:
+        """
+        Get property `toUpperCase` failed, property can be:
+          1. public field
+          2. public getter
+          3. public method
+          4. Map key value
+          5. customized type getter
+          6. static method extension
+        Not supported for infinite collection
+        """
