@@ -17,7 +17,6 @@ class CompositeDataRepositoryTest {
 
     @Test
     void raise_error_when_no_default() {
-
         assertThat(Assertions.assertThrows(IllegalStateException.class, () ->
                 compositeDataRepository.save(new Object())).getMessage()).isEqualTo("There is no default or appropriate repository available for type `java.lang.Object`");
 

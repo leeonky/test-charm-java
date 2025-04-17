@@ -24,7 +24,7 @@ Feature: single or list
         Unexpected list size
         Expected: <2>
         Actual: <3>
-        Actual list: com.github.leeonky.dal.runtime.AdaptiveList [
+        Actual list: com.github.leeonky.dal.runtime.StaticAdaptiveList [
             java.lang.Integer <1>,
             java.lang.Integer <2>,
             java.lang.Integer <3>

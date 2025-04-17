@@ -47,32 +47,22 @@ public class Types implements Extension {
 
                     @Override
                     public Data<?> getData(Data<AdaptiveList<?>> data, Object property, RuntimeContextBuilder.DALRuntimeContext context) {
-                        data.value().only();
-                        return data.property(data.value().list().firstIndex()).property(property);
+                        return data.map(AdaptiveList::soloList).property(0).property(property);
                     }
 
                     @Override
                     public Set<?> getPropertyNames(Data<AdaptiveList<?>> data) {
-                        data.value().only();
-                        return data.property(data.value().list().firstIndex()).fieldNames();
+                        return data.map(AdaptiveList::soloList).property(0).fieldNames();
                     }
                 })
-                .registerMetaPropertyPattern(AdaptiveList.class, ".*", new RuntimeHandler<MetaData<AdaptiveList>>() {
-                    @Override
-                    public Data<?> handleData(MetaData<AdaptiveList> metaData) {
-                        if (metaData.name().equals("size"))
-                            return metaData.delegate(d -> d.map(AdaptiveList::list));
-                        else {
-                            metaData.data().value().only();
-                            return metaData.delegate(d -> d.property(d.value().list().firstIndex()));
-                        }
-                    }
-
-                    @Override
-                    public Object handle(MetaData<AdaptiveList> metaData) {
-                        return null;
-                    }
-                })
+                .registerMetaPropertyPattern(AdaptiveList.class, ".*",
+                        (RuntimeDataHandler<MetaData<AdaptiveList>>) metaData -> {
+                            if (metaData.name().equals("size"))
+                                return metaData.delegate(d -> d.map(AdaptiveList::list));
+                            else {
+                                return metaData.delegate(d -> d.map(AdaptiveList::soloList).property(0));
+                            }
+                        })
         ;
     }
 }
