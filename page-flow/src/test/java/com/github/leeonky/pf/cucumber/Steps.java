@@ -1,9 +1,14 @@
 package com.github.leeonky.pf.cucumber;
 
+import com.github.leeonky.pf.Element;
 import com.github.leeonky.util.Sneaky;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.microsoft.playwright.BrowserType;
 import de.neuland.pug4j.Pug4J;
 import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.javalin.Javalin;
@@ -40,7 +45,7 @@ public class Steps {
 
     @Then("page in driver selenium should:")
     public void pageInDriverSeleniumShould(String expression) {
-        expect(browserSelenium.open("http://host.docker.internal:10081"))
+        expect(browserSelenium.open("http://host.docker.internal:10081").findBy(css("body")))
                 .should(expression);
     }
 
@@ -58,5 +63,18 @@ public class Steps {
     public void pageInDriverPlaywrightShould(String expression) {
         expect(browserPlaywright.open("http://host.docker.internal:10081").findBy(css("body")))
                 .should(expression);
+    }
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(Element.class);
+
+    @Before
+    public void flushLog() {
+        logger.clearAll();
+    }
+
+
+    @And("logs should:")
+    public void logsShould(String expression) {
+        expect(logger).should(expression);
     }
 }

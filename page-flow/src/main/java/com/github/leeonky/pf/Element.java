@@ -1,11 +1,15 @@
 package com.github.leeonky.pf;
 
 import com.github.leeonky.dal.extensions.basic.sync.Retryer;
+import com.github.leeonky.dal.runtime.AdaptiveList;
+import com.github.leeonky.dal.runtime.CollectionDALCollection;
+import com.github.leeonky.dal.runtime.DALCollection;
 import com.github.leeonky.util.BeanClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -112,5 +116,28 @@ public interface Element<T extends Element<T, E>, E> {
         default T placeholder(String placeholder) {
             return by(By.placeholder(placeholder));
         }
+    }
+
+    default AdaptiveList<T> find(By locator) {
+        return new AdaptiveList<T>() {
+            @Override
+            public DALCollection<T> list() {
+                logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "Finding: ", " => " + locator)));
+                List<E> elements = findElements(locator);
+                CollectionDALCollection<T> result = new CollectionDALCollection<>(elements.stream()
+                        .map(element -> buildChild(element, locator)).collect(Collectors.toList()));
+                logger.info(String.format("Found %d elements", elements.size()));
+                return result;
+            }
+
+            @Override
+            public List<T> soloList() {
+                return Collections.emptyList();
+            }
+        };
+    }
+
+    default AdaptiveList<T> css(String css) {
+        return find(By.css(css));
     }
 }

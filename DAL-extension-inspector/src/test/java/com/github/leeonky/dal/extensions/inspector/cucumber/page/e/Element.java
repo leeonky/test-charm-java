@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page.e;
 
+import com.github.leeonky.pf.By;
 import com.github.leeonky.pf.PlaywrightElement;
 import com.microsoft.playwright.Locator;
 
-import static com.github.leeonky.pf.By.css;
 import static java.util.Arrays.binarySearch;
 
 public class Element extends PlaywrightElement<Element> {
@@ -29,7 +29,7 @@ public class Element extends PlaywrightElement<Element> {
     @Override
     public Object value() {
         if (isCheckedBox())
-            return findBy(css("input")).value();
+            return findBy(By.css("input")).value();
         return super.value();
     }
 
