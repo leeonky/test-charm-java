@@ -22,7 +22,7 @@ Feature: query data
     """
     = ```
       com.github.leeonky.dal.extensions.jfactory.Steps$1 {
-          Orders: [
+          Orders: com.github.leeonky.dal.runtime.StaticAdaptiveList [
               com.github.leeonky.dal.extensions.jfactory.entity.Order {
                   code: java.lang.String <SN1>,
                   id: java.lang.Integer <1>
@@ -30,4 +30,16 @@ Feature: query data
           ]
       }
       ```
+    """
+
+  Scenario: use adaptive list in query all result
+    Given "Orders":
+      | id | code |
+      | 1  | SN1  |
+    Then query data by jfactory:
+    """
+    Orders: {
+      id= 1
+      code= SN1
+    }
     """

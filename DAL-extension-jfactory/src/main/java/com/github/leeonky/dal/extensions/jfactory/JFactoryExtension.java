@@ -1,10 +1,7 @@
 package com.github.leeonky.dal.extensions.jfactory;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.dal.runtime.PropertyAccessor;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.KeyValueDumper;
 import com.github.leeonky.jfactory.JFactory;
@@ -20,7 +17,7 @@ public class JFactoryExtension implements Extension {
                 new PropertyAccessor<JFactory>() {
                     @Override
                     public Object getValue(JFactory jFactory, Object property) {
-                        return jFactory.spec((String) property).queryAll();
+                        return AdaptiveList.staticList(jFactory.spec((String) property).queryAll());
                     }
 
                     @Override
