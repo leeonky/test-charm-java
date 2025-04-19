@@ -24,36 +24,12 @@ public interface Element<T extends Element<T, E>, E> {
     }
 
     @SuppressWarnings("unchecked")
-    default T findBy(By locator) {
-        logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "find: ", " => " + locator)));
-        List<E> list = new Retryer(defaultTimeout(), 20).get(() -> {
-            List<E> elements = findElements(locator);
-            if (elements.isEmpty())
-                throw new IllegalStateException("No elements " + locator + " found");
-            return elements;
-        });
-        if (list.size() > 1)
-            throw new IllegalStateException("Found more than one elements: " + locator);
-        T child = newChildren(list.get(0));
-        child.parent((T) this);
-        child.setLocator(locator);
-        return child;
-    }
-
-    @SuppressWarnings("unchecked")
     default List<By> locators() {
         return new ArrayList<By>() {{
             for (T p = (T) Element.this; p != null; p = p.parent())
                 if (p.getLocator() != null)
                     add(0, p.getLocator());
         }};
-    }
-
-    default List<T> findAllBy(By locator) {
-        logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "find all: ", " => " + locator)));
-        List<T> elements = findElements(locator).stream().map(this::newChildren).collect(Collectors.toList());
-        logger.info(String.format("Found %d elements", elements.size()));
-        return elements;
     }
 
     String getTag();
@@ -86,12 +62,36 @@ public interface Element<T extends Element<T, E>, E> {
         throw new IllegalStateException("Not support operation");
     }
 
-    default Finder<List<T>> findAll() {
-        return this::findAllBy;
+    default List<T> findAllBy(By locator) {
+        logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "Find all: ", " => " + locator)));
+        List<T> elements = findElements(locator).stream().map(element -> buildChild(element, locator)).collect(Collectors.toList());
+        logger.info(String.format("Found %d elements", elements.size()));
+        return elements;
     }
 
-    default Finder<T> find() {
-        return this::findBy;
+    default T findBy(By locator) {
+        logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "find: ", " => " + locator)));
+        List<E> list = new Retryer(defaultTimeout(), 20).get(() -> {
+            List<E> elements = findElements(locator);
+            if (elements.isEmpty())
+                throw new IllegalStateException("No elements " + locator + " found");
+            return elements;
+        });
+        if (list.size() > 1)
+            throw new IllegalStateException("Found more than one elements: " + locator);
+        return buildChild(list.get(0), locator);
+    }
+
+    @SuppressWarnings("unchecked")
+    default T buildChild(E element, By locator) {
+        T child = newChildren(element);
+        child.parent((T) this);
+        child.setLocator(locator);
+        return child;
+    }
+
+    default Finder<List<T>> findAll() {
+        return this::findAllBy;
     }
 
     interface Finder<T> {

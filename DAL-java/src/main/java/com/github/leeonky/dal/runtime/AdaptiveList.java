@@ -9,6 +9,10 @@ public interface AdaptiveList<T> {
 
     List<T> soloList();
 
+    default T only() {
+        return soloList().get(0);
+    }
+
     static <T> AdaptiveList<T> staticList(Collection<T> list) {
         return new StaticAdaptiveList<>(new CollectionDALCollection<>(list));
     }
