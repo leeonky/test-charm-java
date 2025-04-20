@@ -5,7 +5,6 @@ import java.util.List;
 import static com.github.leeonky.pf.By.*;
 import static java.lang.String.format;
 import static org.openqa.selenium.By.cssSelector;
-import static org.openqa.selenium.By.xpath;
 
 public abstract class SeleniumElement<T extends SeleniumElement<T>>
         extends ElementState<T, org.openqa.selenium.WebElement>
@@ -56,12 +55,12 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
         switch (by.type()) {
             case CSS:
                 return cssSelector(by.value());
-            case TEXT:
-                return xpath(format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value()));
+            case CAPTION:
+                return org.openqa.selenium.By.xpath(format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value()));
             case XPATH:
-                return xpath(by.value());
+                return org.openqa.selenium.By.xpath(by.value());
             case PLACEHOLDER:
-                return xpath(format(".//*[@placeholder='%s']", by.value()));
+                return org.openqa.selenium.By.xpath(format(".//*[@placeholder='%s']", by.value()));
             default:
                 throw new UnsupportedOperationException("Unsupported find type: " + by.type());
         }

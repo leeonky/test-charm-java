@@ -66,55 +66,11 @@ public interface Element<T extends Element<T, E>, E> {
     }
 
     default List<T> findAllBy(By locator) {
-        logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "Find all: ", " => " + locator)));
-        List<T> elements = findElements(locator).stream().map(element -> buildChild(element, locator)).collect(Collectors.toList());
-        logger.info(String.format("Found %d elements", elements.size()));
-        return elements;
+        return find(locator).list().collect();
     }
 
     default T findBy(By locator) {
-        logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "find: ", " => " + locator)));
-        List<E> list = new Retryer(defaultTimeout(), 20).get(() -> {
-            List<E> elements = findElements(locator);
-            if (elements.isEmpty())
-                throw new IllegalStateException("No elements " + locator + " found");
-            return elements;
-        });
-        if (list.size() > 1)
-            throw new IllegalStateException("Found more than one elements: " + locator);
-        return buildChild(list.get(0), locator);
-    }
-
-    @SuppressWarnings("unchecked")
-    default T buildChild(E element, By locator) {
-        T child = newChildren(element);
-        child.parent((T) this);
-        child.setLocator(locator);
-        return child;
-    }
-
-    default Finder<List<T>> findAll() {
-        return this::findAllBy;
-    }
-
-    interface Finder<T> {
-        T by(By by);
-
-        default T css(String css) {
-            return by(By.css(css));
-        }
-
-        default T xpath(String xpath) {
-            return by(By.xpath(xpath));
-        }
-
-        default T text(String text) {
-            return by(By.text(text));
-        }
-
-        default T placeholder(String placeholder) {
-            return by(By.placeholder(placeholder));
-        }
+        return find(locator).only();
     }
 
     default AdaptiveList<T> find(By locator) {
@@ -129,11 +85,17 @@ public interface Element<T extends Element<T, E>, E> {
                 return list;
             }
 
+            @SuppressWarnings("unchecked")
             private CollectionDALCollection<T> findAll() {
                 logger.info(locateInfo("Finding: "));
                 List<E> elements = findElements(locator);
                 CollectionDALCollection<T> result = new CollectionDALCollection<>(elements.stream()
-                        .map(element -> buildChild(element, locator)).collect(Collectors.toList()));
+                        .map(element -> {
+                            T child = newChildren(element);
+                            child.parent((T) Element.this);
+                            child.setLocator(locator);
+                            return child;
+                        }).collect(Collectors.toList()));
                 logger.info(String.format("Found %d elements", elements.size()));
                 return result;
             }
@@ -168,6 +130,14 @@ public interface Element<T extends Element<T, E>, E> {
     }
 
     default AdaptiveList<T> caption(String text) {
-        return find(By.text(text));
+        return find(By.caption(text));
+    }
+
+    default AdaptiveList<T> xpath(String xpath) {
+        return find(By.xpath(xpath));
+    }
+
+    default AdaptiveList<T> placeholder(String placeholder) {
+        return find(By.placeholder(placeholder));
     }
 }

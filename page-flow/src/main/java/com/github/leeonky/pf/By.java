@@ -17,8 +17,8 @@ public class By {
         return new By(XPATH, xpath);
     }
 
-    public static By text(String xpath) {
-        return new By(TEXT, xpath);
+    public static By caption(String xpath) {
+        return new By(CAPTION, xpath);
     }
 
     public static By placeholder(String placeholder) {
@@ -33,7 +33,7 @@ public class By {
         return value;
     }
 
-    public static final String XPATH = "xpath", CSS = "css", TEXT = "text", PLACEHOLDER = "placeholder";
+    public static final String XPATH = "xpath", CSS = "css", CAPTION = "caption", PLACEHOLDER = "placeholder";
 
     @Override
     public String toString() {
