@@ -32,8 +32,8 @@ public class ListExtension implements Extension {
             this.data = data;
         }
 
-        public DALCollection<Object> filter(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-            return filterList(operator, v2, context);
+        public AdaptiveList<Object> filter(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
+            return new StaticAdaptiveList<>(filterList(operator, v2, context));
         }
 
         protected DALCollection<Object> filterList(DALOperator operator, Data<?> v2, DALRuntimeContext context) {

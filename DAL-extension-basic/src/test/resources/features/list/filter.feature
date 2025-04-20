@@ -235,3 +235,23 @@ Feature: filter
         }
     ]
     """
+
+  Scenario: filter result is adaptive list
+    Given the following json:
+    """
+    [{
+      "type": "A",
+      "value": "1"
+    }, {
+      "type": "B",
+      "value": "b"
+    }]
+    """
+    When evaluate by:
+    """
+    ::filter: {type= A}
+      = {
+        type= A
+        value= 1
+      }
+    """
