@@ -50,7 +50,7 @@ public class Actual {
     @SuppressWarnings("unchecked")
     public Class<Object> polymorphicSchemaType(Class<?> schemaType) {
         return ofNullable(schemaType.getAnnotation(SubType.class)).map(subType -> {
-            Object subTypeProperty = actual.property(compiler.toChainNodes(subType.property())).instance();
+            Object subTypeProperty = actual.property(compiler.toChainNodes(subType.property())).value();
             return (Class<Object>) Stream.of(subType.types()).filter(t -> t.value().equals(subTypeProperty))
                     .map(SubType.Type::type).findFirst().orElseThrow(() -> new DalRuntimeException(
                             format("Cannot guess sub type through property type value[%s]", subTypeProperty)));
@@ -70,13 +70,13 @@ public class Actual {
             return true;
         } catch (Exception ignore) {
             return Verification.errorLog("Can not convert field `%s` (%s: %s) to %s", property,
-                    getClassName(actual.instance()), actual.instance(), inspect);
+                    getClassName(actual.value()), actual.value(), inspect);
         }
     }
 
     public boolean verifyValue(Value<Object> value, BeanClass<?> type) {
-        return value.verify(value.convertAs(actual, type))
-                || Verification.errorLog(value.errorMessage(property, actual.instance()));
+        if (value.verify(value.convertAs(actual, type))) return true;
+        return Verification.errorLog(value.errorMessage(property, actual.value()));
     }
 
     public Stream<?> fieldNames() {
@@ -88,7 +88,7 @@ public class Actual {
     }
 
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {
-        return formatter.isValid(actual.instance())
+        return formatter.isValid(actual.value())
                 || Verification.errorLog("Expected field `%s` to be formatter `%s`\nActual: %s", property,
                 formatter.getFormatterName(), actual.dump());
     }
@@ -109,18 +109,18 @@ public class Actual {
     }
 
     boolean verifyType(Type<Object> expect) {
-        return expect.verify(actual.instance()) ||
-                Verification.errorLog(expect.errorMessage(property, actual.instance()));
+        if (expect.verify(actual.value())) return true;
+        return Verification.errorLog(expect.errorMessage(property, actual.value()));
     }
 
     boolean inInstanceOf(BeanClass<?> type) {
-        return type.isInstance(actual.instance()) ||
+        return type.isInstance(actual.value()) ||
                 Verification.errorLog(String.format("Expected field `%s` to be %s\nActual: %s", property,
                         type.getName(), actual.dump()));
     }
 
     public boolean equalsExpect(Object expect, DALRuntimeContext runtimeContext) {
-        return Objects.equals(expect, actual.instance()) ||
+        return Objects.equals(expect, actual.value()) ||
                 Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
                         runtimeContext.data(expect).dump(), actual.dump()));
     }

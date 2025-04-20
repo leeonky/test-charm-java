@@ -6,7 +6,7 @@ public class AutoMappingList extends DALCollection.Decorated<Object> {
     public AutoMappingList(Function<Data<?>, Data<?>> mapper, DALCollection<Data<?>> list) {
         super(list.map((index, data) -> {
             try {
-                return mapper.apply(data).instance();
+                return mapper.apply(data).value();
             } catch (Exception e) {
                 throw new ListMappingElementAccessException(index, e);
             }

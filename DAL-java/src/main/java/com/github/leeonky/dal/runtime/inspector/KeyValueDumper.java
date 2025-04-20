@@ -45,6 +45,6 @@ public class KeyValueDumper<T> implements Dumper.Cacheable<T> {
 
     protected void dumpType(Data<T> data, DumpingBuffer dumpingBuffer) {
         if (!(data.instanceOf(Map.class)))
-            dumpingBuffer.append(Classes.getClassName(data.instance())).appendThen(" ");
+            dumpingBuffer.append(Classes.getClassName(data.value())).appendThen(" ");
     }
 }

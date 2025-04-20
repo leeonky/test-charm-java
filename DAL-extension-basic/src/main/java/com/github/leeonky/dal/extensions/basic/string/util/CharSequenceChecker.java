@@ -27,12 +27,12 @@ public abstract class CharSequenceChecker extends CheckerWithDiff {
 
     @Override
     protected String actualDetail(CheckingContext checkingContext) {
-        return (String) checkingContext.getActual().instance();
+        return (String) checkingContext.getActual().value();
     }
 
     @Override
     protected String expectedDetail(CheckingContext checkingContext) {
-        return (String) checkingContext.getExpected().instance();
+        return (String) checkingContext.getExpected().value();
     }
 
     public static class Equals extends CharSequenceChecker implements CheckerType.Equals {

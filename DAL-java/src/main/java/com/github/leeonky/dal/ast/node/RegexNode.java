@@ -28,7 +28,7 @@ public class RegexNode extends DALNode {
         return (operator, actual) -> new ExpectationFactory.Expectation() {
             @Override
             public Data<?> matches() {
-                String converted = opt2(() -> actual.convert(String.class).instance());
+                String converted = opt2(() -> actual.convert(String.class).value());
                 if (pattern.matcher(converted).matches())
                     return actual;
                 throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s> converted from: %s", pattern,
@@ -41,7 +41,7 @@ public class RegexNode extends DALNode {
                         .orElseThrow(() -> illegalOperation("Operator = before regex need a string input value"));
                 if (pattern.matcher(str).matches())
                     return actual;
-                throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual.instance()), getPositionBegin());
+                throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual.value()), getPositionBegin());
             }
 
             @Override

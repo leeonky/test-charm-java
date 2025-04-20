@@ -15,6 +15,6 @@ public class FileFileDumper implements Dumper<File> {
 
     @Override
     public void dumpValue(Data<File> data, DumpingBuffer buffer) {
-        buffer.append(Util.attribute(data.instance().toPath()));
+        buffer.append(Util.attribute(data.value().toPath()));
     }
 }

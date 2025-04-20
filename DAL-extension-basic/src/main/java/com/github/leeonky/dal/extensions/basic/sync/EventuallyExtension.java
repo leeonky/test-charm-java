@@ -14,9 +14,9 @@ public class EventuallyExtension implements Extension {
                 .registerOperator(Operators.MATCH, new EventuallyVerification())
                 .registerOperator(Operators.EQUAL, new EventuallyVerification())
                 .registerMetaProperty(Eventually.class, "in", metaData ->
-                        (DataRemarkParameterAcceptor<Eventually>) s -> metaData.data().instance().within(s))
+                        (DataRemarkParameterAcceptor<Eventually>) s -> metaData.data().value().within(s))
                 .registerMetaProperty(Eventually.class, "every", metaData ->
-                        (DataRemarkParameterAcceptor<Eventually>) s -> metaData.data().instance().interval(s))
+                        (DataRemarkParameterAcceptor<Eventually>) s -> metaData.data().value().interval(s))
         ;
     }
 
@@ -28,7 +28,7 @@ public class EventuallyExtension implements Extension {
 
         @Override
         public Object operate(Data<Eventually> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
-            return v1.instance().verify(operator, v2, context);
+            return v1.value().verify(operator, v2, context);
         }
     }
 }

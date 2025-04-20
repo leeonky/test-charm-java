@@ -22,8 +22,7 @@ public class ListDumper<T> implements Dumper.Cacheable<T> {
     }
 
     protected void dumpType(Data<T> data, DumpingBuffer context) {
-        if (!(data.instanceOf(Iterable.class)) && !(data.instanceOf(Stream.class))
-                && !data.instance().getClass().isArray())
-            context.append(Classes.getClassName(data.instance())).appendThen(" ");
+        if (!data.instanceOf(Iterable.class) && !data.instanceOf(Stream.class) && !data.value().getClass().isArray())
+            context.append(Classes.getClassName(data.value())).appendThen(" ");
     }
 }

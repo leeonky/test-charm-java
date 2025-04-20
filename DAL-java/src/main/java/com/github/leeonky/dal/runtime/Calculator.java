@@ -24,7 +24,7 @@ public class Calculator {
         return getFirstPresent(
                 () -> pair.both(d -> d.cast(Number.class), (num1, num2) -> context.getNumberType().compare(num1, num2)),
                 () -> pair.both(d -> d.cast(String.class), String::compareTo)).orElseThrow(() ->
-                illegalOperation(pair.map(data -> dump(data.instance()), (s1, s2) -> format("Can not compare %s and %s", s1, s2))));
+                illegalOperation(pair.map(data -> dump(data.value()), (s1, s2) -> format("Can not compare %s and %s", s1, s2))));
     }
 
     private static String dump(Object value) {
@@ -32,11 +32,13 @@ public class Calculator {
     }
 
     public static boolean equals(Data<?> data1, Data<?> data2) {
-        return data1.instance() == data2.instance()
-                || opt2(data2::isNull) && opt1(data1::isNull)
-                || (data2.isList() && data1.isList() ?
-                collect(data2, "2").equals(collect(data1, "1"))
-                : Objects.equals(data1.instance(), data2.instance()));
+        if (data1.value() == data2.value()
+                || opt2(data2::isNull) && opt1(data1::isNull)) return true;
+        if (data2.isList() && data1.isList())
+            return collect(data2, "2").equals(collect(data1, "1"));
+        else
+            return Objects.equals(data1.value(), data2.value());
+
     }
 
     private static List<Object> collect(Data<?> data, String index) {
@@ -85,14 +87,14 @@ public class Calculator {
 
     @SuppressWarnings("unchecked")
     private static Object sortList(Data<?>.DataList list, Comparator<?> comparator, DALRuntimeContext context) {
-        return list.sort(comparing(data -> context.transformComparable(data.instance()), (Comparator<Object>) comparator));
+        return list.sort(comparing(data -> context.transformComparable(data.value()), (Comparator<Object>) comparator));
     }
 
     public static Data<?> positive(Data<?> input, DALRuntimeContext context) {
         return input.map(value -> {
             if (input.isList())
                 return sortList(input.list(), naturalOrder(), context);
-            throw illegalOp2(format("Operand should be list but '%s'", getClassName(input.instance())));
+            throw illegalOp2(format("Operand should be list but '%s'", getClassName(input.value())));
         });
     }
 

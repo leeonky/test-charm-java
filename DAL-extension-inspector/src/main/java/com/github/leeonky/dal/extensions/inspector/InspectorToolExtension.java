@@ -9,9 +9,9 @@ public class InspectorToolExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("watch", metaData -> {
-                    Data data = metaData.data();
+                    Data<?> data = metaData.data();
                     Inspector.watch(dal, metaData.inputNode().inspect(), data);
-                    return data.instance();
+                    return data.value();
                 });
     }
 }

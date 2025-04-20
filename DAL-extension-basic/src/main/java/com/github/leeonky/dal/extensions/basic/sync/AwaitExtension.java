@@ -10,23 +10,23 @@ public class AwaitExtension implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("await", metaData -> new Await(metaData.data()))
-                .registerDataRemark(Await.class, remarkData -> remarkData.data().instance().within(remarkData.remark()))
+                .registerDataRemark(Await.class, remarkData -> remarkData.data().value().within(remarkData.remark()))
                 .registerOperator(Operators.MATCH, new AwaitVerification() {
                     @Override
                     public Object operate(Data<Await> v1, DALOperator operator, Data<ExpectationFactory> v2,
                                           DALRuntimeContext context) {
-                        return v1.instance().await(data -> v2.instance().create(operator, data).matches().instance());
+                        return v1.value().await(data -> v2.value().create(operator, data).matches().value());
                     }
                 })
                 .registerOperator(Operators.EQUAL, new AwaitVerification() {
                     @Override
                     public Object operate(Data<Await> v1, DALOperator operator, Data<ExpectationFactory> v2,
                                           DALRuntimeContext context) {
-                        return v1.instance().await(data -> v2.instance().create(operator, data).equalTo().instance());
+                        return v1.value().await(data -> v2.value().create(operator, data).equalTo().value());
                     }
                 })
                 .registerMetaProperty(Await.class, "every", metaData ->
-                        (DataRemarkParameterAcceptor<Await>) s -> metaData.data().instance().interval(s))
+                        (DataRemarkParameterAcceptor<Await>) s -> metaData.data().value().interval(s))
         ;
     }
 

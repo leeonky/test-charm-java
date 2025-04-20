@@ -70,6 +70,6 @@ public class HexDumper<T> implements Dumper<T> {
 
     @Override
     public void dump(Data<T> data, DumpingBuffer context) {
-        context.append(dumpByteArray(extractBytes(data.instance())));
+        context.append(dumpByteArray(extractBytes(data.value())));
     }
 }

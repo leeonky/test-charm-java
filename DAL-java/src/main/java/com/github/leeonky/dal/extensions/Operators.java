@@ -41,7 +41,7 @@ public class Operators implements Extension {
 
             @Override
             public Data<?> operateData(Data<Object> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
-                v2.instance().create(operator, v1).matches().instance();
+                v2.value().create(operator, v1).matches().value();
                 return v1;
             }
         });
@@ -57,7 +57,7 @@ public class Operators implements Extension {
 
             @Override
             public Data<?> operateData(Data<Object> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
-                v2.instance().create(operator, v1).equalTo().instance();
+                v2.value().create(operator, v1).equalTo().value();
                 return v1;
             }
         });
@@ -73,7 +73,7 @@ public class Operators implements Extension {
 
             @Override
             public Object operate(Data<Object> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
-                return String.valueOf(v1.instance()) + v2.instance();
+                return String.valueOf(v1.value()) + v2.value();
             }
         });
     }
@@ -89,7 +89,7 @@ public class Operators implements Extension {
 
             @Override
             public Object operate(Data<Number> v1, DALOperator operator, Data<Number> v2, DALRuntimeContext context) {
-                return action.apply(context.getNumberType(), v1.instance(), v2.instance());
+                return action.apply(context.getNumberType(), v1.value(), v2.value());
             }
         });
     }

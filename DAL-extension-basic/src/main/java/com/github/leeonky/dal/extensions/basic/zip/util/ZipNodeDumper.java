@@ -8,7 +8,7 @@ public class ZipNodeDumper implements Dumper<ZipBinary.ZipNode> {
 
     @Override
     public void dump(Data<ZipBinary.ZipNode> data, DumpingBuffer context) {
-        ZipBinary.ZipNode node = data.instance();
+        ZipBinary.ZipNode node = data.value();
         if (node.isDirectory()) {
             DumpingBuffer sub = context.append(node.name()).append("/").indent();
             data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));

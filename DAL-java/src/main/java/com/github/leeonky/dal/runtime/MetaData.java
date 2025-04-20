@@ -74,7 +74,7 @@ public class MetaData<T> extends RuntimeData<T> {
 //    }
 
     private void checkType(Object data) {
-        Class<?> expect = this.data.instance().getClass();
+        Class<?> expect = this.data.value().getClass();
         Class<?> actual = Objects.requireNonNull(data).getClass();
         if (actual.isAnonymousClass())
             actual = actual.getSuperclass();

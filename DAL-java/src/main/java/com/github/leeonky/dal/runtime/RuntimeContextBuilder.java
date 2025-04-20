@@ -106,7 +106,7 @@ public class RuntimeContextBuilder {
 
     @SuppressWarnings("unchecked")
     public RuntimeContextBuilder registerValueFormat(String name, Formatter<?, ?> formatter) {
-        valueConstructors.put(name, (o, c) -> ((Formatter<Object, ?>) formatter).transform(o.instance()));
+        valueConstructors.put(name, (o, c) -> ((Formatter<Object, ?>) formatter).transform(o.value()));
         return this;
     }
 
@@ -124,7 +124,7 @@ public class RuntimeContextBuilder {
     public RuntimeContextBuilder registerSchema(String name, BiFunction<Data<?>, DALRuntimeContext, Boolean> predicate) {
         valueConstructors.put(name, (o, context) -> {
             if (predicate.apply(o, context))
-                return o.instance();
+                return o.value();
             throw new IllegalTypeException();
         });
         return this;
@@ -342,7 +342,7 @@ public class RuntimeContextBuilder {
         }
 
         public <T> Set<?> findPropertyReaderNames(Data<T> data) {
-            return getObjectPropertyAccessor(data.instance()).getPropertyNames(data);
+            return getObjectPropertyAccessor(data.value()).getPropertyNames(data);
         }
 
         @SuppressWarnings("unchecked")
@@ -358,7 +358,7 @@ public class RuntimeContextBuilder {
         }
 
         public <T> Data<?> accessProperty(Data<T> data, Object propertyChain) {
-            return getObjectPropertyAccessor(data.instance()).getData(data, propertyChain, this);
+            return getObjectPropertyAccessor(data.value()).getData(data, propertyChain, this);
         }
 
         public DALCollection<Object> createCollection(Object instance) {
@@ -393,7 +393,7 @@ public class RuntimeContextBuilder {
             } catch (Throwable e) {
                 return new Data<N>(null, this, schemaType) {
                     @Override
-                    public N instance() {
+                    public N value() {
                         return sneakyThrow(buildUserRuntimeException(e));
                     }
                 };
@@ -497,12 +497,12 @@ public class RuntimeContextBuilder {
 
         @SuppressWarnings("unchecked")
         public <T> Dumper<T> fetchDumper(Data<T> data) {
-            return dumperFactories.tryGetData(data.instance()).map(factory -> ((DumperFactory<T>) factory).apply(data)).orElseGet(() -> {
+            return dumperFactories.tryGetData(data.value()).map(factory -> ((DumperFactory<T>) factory).apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
                     return (Dumper<T>) Dumper.LIST_DUMPER;
-                if (data.instance() != null && data.instance().getClass().isEnum())
+                if (data.value() != null && data.value().getClass().isEnum())
                     return (Dumper<T>) Dumper.VALUE_DUMPER;
                 return (Dumper<T>) Dumper.MAP_DUMPER;
             });
@@ -546,7 +546,7 @@ public class RuntimeContextBuilder {
                 if (operation.match(v1, opt, v2, this))
                     return operation.operateData(v1, opt, v2, this);
             throw illegalOperation(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
-                    getClassName(v1.instance()), getClassName(v2.instance())));
+                    getClassName(v1.value()), getClassName(v2.value())));
         }
 
         public PrintStream warningOutput() {

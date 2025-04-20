@@ -5,11 +5,11 @@ import com.github.leeonky.util.Classes;
 
 public class ValueDumper<T> implements Dumper<T> {
     protected void inspectType(Data<T> data, DumpingBuffer dumpingBuffer) {
-        dumpingBuffer.append(Classes.getClassName(data.instance()));
+        dumpingBuffer.append(Classes.getClassName(data.value()));
     }
 
     protected void inspectValue(Data<T> data, DumpingBuffer dumpingBuffer) {
-        dumpingBuffer.append("<" + data.instance() + ">");
+        dumpingBuffer.append("<" + data.value() + ">");
     }
 
     @Override

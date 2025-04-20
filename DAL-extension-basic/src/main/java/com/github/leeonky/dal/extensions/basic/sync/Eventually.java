@@ -26,7 +26,7 @@ public class Eventually {
     }
 
     public Object verify(DALOperator operator, Data v2, RuntimeContextBuilder.DALRuntimeContext context) {
-        return new Retryer(waitingTime, interval).get(() -> context.calculate(data, operator, v2).instance());
+        return new Retryer(waitingTime, interval).get(() -> context.calculate(data, operator, v2).value());
     }
 
     public Eventually within(String s) {

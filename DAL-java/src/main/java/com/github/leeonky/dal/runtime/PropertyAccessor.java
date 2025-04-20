@@ -17,7 +17,7 @@ public interface PropertyAccessor<T> {
             result = getValue(data, property);
         } catch (InvalidPropertyException e) {
             try {
-                result = context.currying(data.instance(), property).orElseThrow(() -> e).resolve();
+                result = context.currying(data.value(), property).orElseThrow(() -> e).resolve();
             } catch (Throwable e1) {
                 Sneaky.sneakyThrow(buildUserRuntimeException(e1));
             }
@@ -29,7 +29,7 @@ public interface PropertyAccessor<T> {
     }
 
     default Object getValue(Data<T> data, Object property) {
-        return getValue(data.instance(), property);
+        return getValue(data.value(), property);
     }
 
     default Object getValue(T instance, Object property) {
@@ -37,7 +37,7 @@ public interface PropertyAccessor<T> {
     }
 
     default Set<?> getPropertyNames(Data<T> data) {
-        return getPropertyNames(data.instance());
+        return getPropertyNames(data.value());
     }
 
     default Set<?> getPropertyNames(T instance) {

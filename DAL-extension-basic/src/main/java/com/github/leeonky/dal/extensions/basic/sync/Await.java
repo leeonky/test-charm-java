@@ -48,7 +48,7 @@ public class Await implements ProxyObject {
 
     @Override
     public Object getValue(Object property) {
-        return Sneaky.get(() -> await(data -> data.property(property).instance()));
+        return Sneaky.get(() -> await(data -> data.property(property).value()));
     }
 
     @Override

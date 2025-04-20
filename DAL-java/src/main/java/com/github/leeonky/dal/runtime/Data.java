@@ -32,7 +32,7 @@ public class Data<T> {
 
     @Deprecated
     public T instance() {
-        return value;
+        return value();
     }
 
     public T value() {
@@ -44,7 +44,7 @@ public class Data<T> {
     }
 
     public boolean isList() {
-        Object instance = instance();
+        Object instance = value();
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
@@ -52,13 +52,13 @@ public class Data<T> {
         if (list == null) {
             if (!isList())
                 throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
-            list = new DataList(context.createCollection(instance()));
+            list = new DataList(context.createCollection(value()));
         }
         return list;
     }
 
     public boolean isNull() {
-        return context.isNull(instance());
+        return context.isNull(value());
     }
 
     public Data<?> property(List<Object> propertyChain) {
@@ -117,14 +117,16 @@ public class Data<T> {
     }
 
     public <N> Data<N> map(Function<T, N> mapper) {
-        return new Data<>(mapper.apply(instance()), context, schemaType);
+        return new Data<>(mapper.apply(value()), context, schemaType);
     }
 
     public Data<?> filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
         fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
-                        filteredObject.put(fieldName.substring(prefix.length()), property(fieldName).instance()));
+                {
+                    filteredObject.put(fieldName.substring(prefix.length()), property(fieldName).value());
+                });
         return new Data<>(filteredObject, context, schemaType);
     }
 
@@ -141,12 +143,12 @@ public class Data<T> {
     }
 
     public <N> Optional<N> cast(Class<N> type) {
-        return BeanClass.cast(instance(), type);
+        return BeanClass.cast(value(), type);
     }
 
     public boolean instanceOf(Class<?> type) {
         try {
-            return type.isInstance(instance());
+            return type.isInstance(value());
         } catch (Throwable ignore) {
             return false;
         }
@@ -169,7 +171,7 @@ public class Data<T> {
             if (comparator != NOP_COMPARATOR)
                 try {
                     return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
-                            .sorted(comparator).map(Data::instance).collect(toList())) {
+                            .sorted(comparator).map(Data::value).collect(toList())) {
                         @Override
                         public int firstIndex() {
                             return DataList.this.firstIndex();

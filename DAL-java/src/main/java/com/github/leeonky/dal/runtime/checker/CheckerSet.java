@@ -39,12 +39,12 @@ public class CheckerSet {
     }
 
     private Optional<Checker> fetchByExpectedType(Data<?> expected, Data<?> actual) {
-        return typeFactories.tryGetData(expected.instance()).flatMap(factory -> factory.create(expected, actual));
+        return typeFactories.tryGetData(expected.value()).flatMap(factory -> factory.create(expected, actual));
     }
 
     private Optional<Checker> fetchByExpectedTypeAndActualType(Data<?> expected, Data<?> actual) {
-        return typeTypeFactories.tryGetData(expected.instance())
-                .flatMap(classKeyMap -> classKeyMap.tryGetData(actual.instance()))
+        return typeTypeFactories.tryGetData(expected.value())
+                .flatMap(classKeyMap -> classKeyMap.tryGetData(actual.value()))
                 .flatMap(factory -> factory.create(expected, actual));
     }
 

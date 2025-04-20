@@ -26,15 +26,15 @@ public class DALHelper {
 
     private void implementForceCreation(DAL dal) {
         dal.getRuntimeContextBuilder().registerExclamation(ObjectReference.class, runtimeData -> {
-            runtimeData.data().instance().intently();
+            runtimeData.data().value().intently();
             return runtimeData.data().value();
         });
     }
 
     private void implementTraitSpec(DAL dal) {
         dal.getRuntimeContextBuilder().registerDataRemark(ObjectReference.class, remarkData -> {
-            remarkData.data().instance().addTraitSpec(remarkData.remark());
-            return remarkData.data().instance();
+            remarkData.data().value().addTraitSpec(remarkData.remark());
+            return remarkData.data().value();
         });
     }
 
@@ -57,12 +57,12 @@ public class DALHelper {
 
             @Override
             public Data<?> operateData(Data<ObjectReference> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
-                ExpectationFactory.Expectation expectation = v2.instance().create(operator, v1);
+                ExpectationFactory.Expectation expectation = v2.value().create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 if (type == ExpectationFactory.Type.OBJECT)
-                    v1.instance().rawType(OBJECT);
+                    v1.value().rawType(OBJECT);
                 else if (type == ExpectationFactory.Type.LIST)
-                    v1.instance().rawType(LIST);
+                    v1.value().rawType(LIST);
                 return expectation.matches();
             }
         });
@@ -85,13 +85,13 @@ public class DALHelper {
             @Override
             public Data<?> operateData(Data<ObjectReference> v1, DALOperator operator, Data<ExpectationFactory> v2,
                                        DALRuntimeContext context) {
-                ExpectationFactory.Expectation expectation = v2.instance().create(operator, v1);
+                ExpectationFactory.Expectation expectation = v2.value().create(operator, v1);
                 ExpectationFactory.Type type = expectation.type();
                 if (type == ExpectationFactory.Type.OBJECT)
-                    v1.instance().rawType(RAW_OBJECT);
+                    v1.value().rawType(RAW_OBJECT);
                 else if (type == ExpectationFactory.Type.LIST)
-                    v1.instance().rawType(RAW_LIST);
-                v1.instance().clear();
+                    v1.value().rawType(RAW_LIST);
+                v1.value().clear();
                 return expectation.equalTo();
             }
         });

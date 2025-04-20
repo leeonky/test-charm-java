@@ -24,7 +24,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     @Override
     public Object evaluate(DALRuntimeContext context) {
-        return evaluateData(context).instance();
+        return evaluateData(context).value();
     }
 
     public abstract String inspect();

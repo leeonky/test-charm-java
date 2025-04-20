@@ -22,7 +22,7 @@ public class ListExtension implements Extension {
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())
                 .registerExclamation(Filterable.class, runtimeData -> runtimeData.data().value().requireNotEmpty())
                 .registerDataRemark(Filterable.class, remarkData ->
-                        remarkData.data().instance().require(parseInt(remarkData.remark())));
+                        remarkData.data().value().require(parseInt(remarkData.remark())));
     }
 
     public static class Filterable {
@@ -44,7 +44,7 @@ public class ListExtension implements Extension {
                 } catch (Throwable ig) {
                     return false;
                 }
-            }).map((i, d) -> d.instance());
+            }).map((i, d) -> d.value());
         }
 
         public Filterable requireNotEmpty() {
@@ -84,7 +84,7 @@ public class ListExtension implements Extension {
 
         @Override
         public Object operate(Data<Filterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
-            return v1.instance().filter(operator, v2, context);
+            return v1.value().filter(operator, v2, context);
         }
     }
 }

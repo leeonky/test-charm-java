@@ -9,7 +9,7 @@ public class MatchesChecker implements Checker {
 
     @Override
     public Data<?> transformActual(Data<?> actual, Data<?> expected, RuntimeContextBuilder.DALRuntimeContext context) {
-        return actual.convert(expected.instance().getClass());
+        return actual.convert(expected.value().getClass());
     }
 
     @Override

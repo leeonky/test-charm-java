@@ -243,7 +243,7 @@ public class ListScopeNode extends DALNode {
             @SuppressWarnings("unchecked")
             @Override
             protected Comparator<Data<?>> getComparator(DALRuntimeContext context) {
-                return Comparator.comparing((Data<?> data) -> context.transformComparable(data.instance()),
+                return Comparator.comparing((Data<?> data) -> context.transformComparable(data.value()),
                         (Comparator<Object>) comparator);
             }
 

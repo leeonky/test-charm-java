@@ -13,24 +13,24 @@ import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 
 @Order(BUILD_IN)
 public class MetaProperties implements Extension {
-    private static Object size(MetaData metaData) {
+    private static Object size(MetaData<?> metaData) {
         return metaData.data().list().size();
     }
 
-    private static Object throw_(MetaData metaData) {
+    private static Object throw_(MetaData<?> metaData) {
         try {
-            metaData.data().instance();
+            metaData.data().value();
             throw new AssertionError("Expecting an error to be thrown, but nothing was thrown");
         } catch (Exception e) {
             return Sneaky.get(() -> extractException(e).orElseThrow(() -> e));
         }
     }
 
-    private static Object object_(MetaData metaData) {
-        return metaData.data().instance() == null ? null : new OriginalJavaObject(metaData.data());
+    private static Object object_(MetaData<?> metaData) {
+        return metaData.data().value() == null ? null : new OriginalJavaObject(metaData.data());
     }
 
-    private static Object keys(MetaData metaData) {
+    private static Object keys(MetaData<?> metaData) {
         return metaData.data().fieldNames();
     }
 
@@ -45,25 +45,25 @@ public class MetaProperties implements Extension {
     }
 
     static class OriginalJavaObject implements ProxyObject {
-        private final Data data;
+        private final Data<?> data;
 
-        public OriginalJavaObject(Data data) {
+        public OriginalJavaObject(Data<?> data) {
             this.data = data;
         }
 
         @Override
         public Object getValue(Object property) {
             try {
-                Object instance = data.instance();
+                Object instance = data.value();
                 return BeanClass.createFrom(instance).getPropertyValue(instance, property.toString());
             } catch (NoSuchAccessorException ignore) {
-                return data.property(property).instance();
+                return data.property(property).value();
             }
         }
 
         @Override
         public Set<?> getPropertyNames() {
-            return BeanClass.createFrom(data.instance()).getPropertyReaders().keySet();
+            return BeanClass.createFrom(data.value()).getPropertyReaders().keySet();
         }
     }
 }

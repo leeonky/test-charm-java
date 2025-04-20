@@ -13,11 +13,12 @@ class DumpingCacheKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(data.instance());
+        return Objects.hash(data.value());
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof DumpingCacheKey && ((DumpingCacheKey) obj).data.instance() == data.instance();
+        if (!(obj instanceof DumpingCacheKey)) return false;
+        return ((DumpingCacheKey) obj).data.value() == data.value();
     }
 }

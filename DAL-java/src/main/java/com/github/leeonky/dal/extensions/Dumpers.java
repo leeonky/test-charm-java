@@ -43,7 +43,7 @@ public class Dumpers implements Extension {
         @Override
         public void dump(Data<StackTraceElement[]> data, DumpingBuffer dumpingBuffer) {
             DumpingBuffer sub = dumpingBuffer.indent();
-            for (StackTraceElement stackTraceElement : data.instance())
+            for (StackTraceElement stackTraceElement : data.value())
                 sub.newLine().append("at " + stackTraceElement);
         }
     }

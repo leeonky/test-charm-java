@@ -15,8 +15,8 @@ class OverrideVerificationOptChecker<A, E> implements Checker {
     @Override
     @SuppressWarnings("unchecked")
     public boolean failed(CheckingContext checkingContext) {
-        runnable.accept((A) checkingContext.getOriginalActual().instance(),
-                (E) checkingContext.getOriginalExpected().instance());
+        runnable.accept((A) checkingContext.getOriginalActual().value(),
+                (E) checkingContext.getOriginalExpected().value());
         return false;
     }
 

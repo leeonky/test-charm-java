@@ -151,18 +151,15 @@ public class Inspector {
         private final DAL dal;
         private final String code;
         private final List<Watch> watches = new ArrayList<>();
-        private final Data inputData;
 
         public DalInstance(Supplier<Object> input, DAL dal, String code) {
             this.input = input;
             this.dal = dal;
             this.code = code;
-            inputData = null;
         }
 
-        public DalInstance(Data inputData, DAL dal, String code) {
-            input = inputData::instance;
-            this.inputData = inputData;
+        public DalInstance(Data<?> inputData, DAL dal, String code) {
+            input = inputData::value;
             this.dal = dal;
             this.code = code;
         }

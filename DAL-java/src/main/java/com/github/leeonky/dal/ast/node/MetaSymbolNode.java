@@ -13,7 +13,9 @@ public class MetaSymbolNode extends SymbolNode {
 
     @Override
     public Data<?> getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data<?> inputData = context.lazy(() -> left.evaluateData(context).instance(), SchemaType.create(null));
+        Data<?> inputData = context.lazy(() -> {
+            return left.evaluateData(context).value();
+        }, SchemaType.create(null));
         try {
             return context.invokeMetaProperty(left, inputData, getRootSymbolName());
         } catch (Throwable e) {

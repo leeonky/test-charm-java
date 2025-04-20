@@ -51,7 +51,7 @@ public class JDBCExtension implements Extension {
 
         private List<List<String>> getData(Data<DataBase.Table<T>> data) {
             List<List<String>> tableData = new ArrayList<>();
-            stream(data.instance().spliterator(), false).limit(100).forEach(row -> {
+            stream(data.value().spliterator(), false).limit(100).forEach(row -> {
                 if (tableData.isEmpty())
                     tableData.add(new ArrayList<>(row.columns()));
                 tableData.add(row.data().values().stream().map(String::valueOf).collect(Collectors.toList()));
@@ -73,12 +73,12 @@ public class JDBCExtension implements Extension {
 
         @Override
         protected void dumpType(Data<DataBase> data, DumpingBuffer dumpingBuffer) {
-            dumpingBuffer.append("DataBase[").append(data.instance().getUrl()).append("] ");
+            dumpingBuffer.append("DataBase[").append(data.value().getUrl()).append("] ");
         }
 
         @Override
         protected void dumpField(Data<DataBase> data, Object field, DumpingBuffer context) {
-            DataBase.Table<?> table = (DataBase.Table<?>) data.property(field).instance();
+            DataBase.Table<?> table = (DataBase.Table<?>) data.property(field).value();
             if (table.iterator().hasNext())
                 context.append(key(field)).append(":").dumpValue(data.property(field));
         }

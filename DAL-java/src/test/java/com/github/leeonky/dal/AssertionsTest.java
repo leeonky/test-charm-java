@@ -93,7 +93,7 @@ public class AssertionsTest {
 
         @Override
         public void verify(Data<?> data) throws SchemaAssertionFailure {
-            Bean bean = (Bean) data.instance();
+            Bean bean = (Bean) data.value();
             if (bean.getValue() != 1)
                 throw new SchemaAssertionFailure("Failed");
         }
