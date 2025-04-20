@@ -58,7 +58,7 @@ Feature: filter
     Then the following should pass:
     """
     ::filter: [{type= A}]
-      =    | type | value |
+      :    | type | value |
     [0][0] | A    | '1'   |
     [1][0] | A    | '2'   |
     """
@@ -78,7 +78,7 @@ Feature: filter
     Then the following should pass:
     """
     ::filter= [{type= A, value: '1'}]
-      =    | type | value |
+      :    | type | value |
     [0][0] | A    | '1'   |
     """
 

@@ -40,6 +40,10 @@ public interface DALCollection<E> extends Iterable<IndexedElement<E>> {
 
     DALCollection<Object> limit(int size);
 
+    default boolean isEmpty() {
+        return size() == 0;
+    }
+
     class Decorated<E> implements DALCollection<E> {
 
         private final DALCollection<E> origin;
@@ -112,6 +116,11 @@ public interface DALCollection<E> extends Iterable<IndexedElement<E>> {
         public Decorated<E> requireLimitedCollection(String message) {
             origin.requireLimitedCollection(message);
             return this;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return origin.isEmpty();
         }
     }
 }

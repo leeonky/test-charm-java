@@ -1,5 +1,6 @@
 package com.github.leeonky.pf.cucumber;
 
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.pf.Element;
 import com.github.leeonky.util.Sneaky;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -22,9 +23,9 @@ import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 
 import static com.github.leeonky.dal.Assertions.expect;
-import static com.github.leeonky.pf.By.css;
 
 public class Steps {
+    private Throwable lastError;
     private Javalin javalin;
     private final Selenium.BrowserSelenium browserSelenium = new Selenium.BrowserSelenium(() ->
             Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
@@ -45,8 +46,7 @@ public class Steps {
 
     @Then("page in driver selenium should:")
     public void pageInDriverSeleniumShould(String expression) {
-        expect(browserSelenium.open("http://host.docker.internal:10081").findBy(css("body")))
-                .should(expression);
+        expect(browserSelenium.open("http://host.docker.internal:10081")).should(expression);
     }
 
     @After
@@ -57,12 +57,12 @@ public class Steps {
         }
         browserSelenium.destroy();
         browserPlaywright.destroy();
+        lastError = null;
     }
 
     @Then("page in driver playwright should:")
     public void pageInDriverPlaywrightShould(String expression) {
-        expect(browserPlaywright.open("http://host.docker.internal:10081").findBy(css("body")))
-                .should(expression);
+        expect(browserPlaywright.open("http://host.docker.internal:10081")).should(expression);
     }
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(Element.class);
@@ -72,9 +72,33 @@ public class Steps {
         logger.clearAll();
     }
 
-
     @And("logs should:")
     public void logsShould(String expression) {
-        expect(logger).should(expression);
+        expect(logger.getAllLoggingEvents()).should(expression);
+    }
+
+    @When("find element via driver playwright:")
+    public void findElementViaDriverPlaywright(String expression) {
+
+        try {
+            DAL.dal().evaluate(browserPlaywright.open("http://host.docker.internal:10081"), expression);
+        } catch (Throwable e) {
+            lastError = e;
+        }
+    }
+
+    @When("find element via driver selenium:")
+    public void findElementViaDriverSelenium(String expression) {
+
+        try {
+            DAL.dal().evaluate(browserSelenium.open("http://host.docker.internal:10081"), expression);
+        } catch (Throwable e) {
+            lastError = e;
+        }
+    }
+
+    @Then("failed with:")
+    public void failedWith(String message) {
+        expect(lastError.getMessage()).isEqualTo(message);
     }
 }

@@ -22,4 +22,9 @@ public class InfiniteDALCollection<E> extends IterableDALCollection<E> {
     public boolean infinite() {
         return true;
     }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
 }

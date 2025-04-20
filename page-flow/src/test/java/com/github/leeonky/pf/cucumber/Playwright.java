@@ -1,5 +1,6 @@
 package com.github.leeonky.pf.cucumber;
 
+import com.github.leeonky.pf.By;
 import com.github.leeonky.pf.PlaywrightElement;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Locator;
@@ -29,7 +30,9 @@ public class Playwright {
             browser = browserSupplier.get();
             Page page = browser.newContext().newPage();
             page.navigate(url);
-            return new PlaywrightE(page.locator("html"));
+            PlaywrightE e = new PlaywrightE(page.locator("html"));
+            e.setLocator(By.css("html"));
+            return e;
         }
     }
 

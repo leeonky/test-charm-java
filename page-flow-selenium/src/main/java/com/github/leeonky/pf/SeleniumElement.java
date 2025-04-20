@@ -2,6 +2,7 @@ package com.github.leeonky.pf;
 
 import java.util.List;
 
+import static com.github.leeonky.pf.By.*;
 import static java.lang.String.format;
 import static org.openqa.selenium.By.cssSelector;
 import static org.openqa.selenium.By.xpath;
@@ -53,13 +54,13 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
 
     private static org.openqa.selenium.By seleniumBy(By by) {
         switch (by.type()) {
-            case "css":
+            case CSS:
                 return cssSelector(by.value());
-            case "text":
+            case TEXT:
                 return xpath(format(".//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value()));
-            case "xpath":
+            case XPATH:
                 return xpath(by.value());
-            case "placeholder":
+            case PLACEHOLDER:
                 return xpath(format(".//*[@placeholder='%s']", by.value()));
             default:
                 throw new UnsupportedOperationException("Unsupported find type: " + by.type());

@@ -34,7 +34,10 @@ public class Selenium {
             if (webDriver == null)
                 webDriver = driverFactory.get();
             webDriver.get(url);
-            return new SeleniumE(webDriver.findElement(By.tagName("html")));
+            By by = By.tagName("html");
+            SeleniumE e = new SeleniumE(webDriver.findElement(by));
+            e.setLocator(com.github.leeonky.pf.By.css("html"));
+            return e;
         }
     }
 }

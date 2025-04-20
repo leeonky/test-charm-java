@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator;
 
 import java.util.List;
 
+import static com.github.leeonky.pf.By.*;
 import static java.lang.String.format;
 
 public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
@@ -26,13 +27,13 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
 
     private String locateInfo(By by) {
         switch (by.type()) {
-            case "css":
+            case CSS:
                 return by.value();
-            case "xpath":
+            case XPATH:
                 return "xpath=" + by.value();
-            case "text":
+            case TEXT:
                 return format("xpath=.//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value());
-            case "placeholder":
+            case PLACEHOLDER:
                 return format("xpath=.//*[@placeholder='%s']", by.value());
             default:
                 throw new UnsupportedOperationException("Unsupported find type: " + by.type());

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,9 +119,18 @@ public interface Element<T extends Element<T, E>, E> {
 
     default AdaptiveList<T> find(By locator) {
         return new AdaptiveList<T>() {
+
+            private DALCollection<T> list;
+
             @Override
             public DALCollection<T> list() {
-                logger.info(locators().stream().map(By::toString).collect(Collectors.joining(" / ", "Finding: ", " => " + locator)));
+                if (list == null)
+                    list = findAll();
+                return list;
+            }
+
+            private CollectionDALCollection<T> findAll() {
+                logger.info(locateInfo("Finding: "));
                 List<E> elements = findElements(locator);
                 CollectionDALCollection<T> result = new CollectionDALCollection<>(elements.stream()
                         .map(element -> buildChild(element, locator)).collect(Collectors.toList()));
@@ -132,12 +140,34 @@ public interface Element<T extends Element<T, E>, E> {
 
             @Override
             public List<T> soloList() {
-                return Collections.emptyList();
+                if (list == null)
+                    list = new Retryer(defaultTimeout(), 20).get(() -> {
+                        DALCollection<T> elements = findAll();
+                        if (elements.isEmpty())
+                            throw unexpectedElementSize("no");
+                        return elements;
+                    });
+                if (list.size() != 1)
+                    throw unexpectedElementSize(list.size());
+                return list.collect();
+            }
+
+            private IllegalStateException unexpectedElementSize(Object size) {
+                return new IllegalStateException(String.format("%s, but %s elements were found",
+                        locateInfo("Operations can only be performed on a single located element at: "), size));
+            }
+
+            private String locateInfo(String prefix) {
+                return locators().stream().map(By::toString).collect(Collectors.joining(" / ", prefix, " => " + locator));
             }
         };
     }
 
     default AdaptiveList<T> css(String css) {
         return find(By.css(css));
+    }
+
+    default AdaptiveList<T> caption(String text) {
+        return find(By.text(text));
     }
 }
