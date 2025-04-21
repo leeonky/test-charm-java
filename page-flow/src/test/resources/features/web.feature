@@ -17,9 +17,9 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                            |
-          | INFO  | Finding: css{html} => css{.target} |
-          | INFO  | Found 2 elements                   |
+        : | level | message                             |
+          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Found 2 elements                    |
         """
       Examples:
         | driver     |
@@ -41,9 +41,9 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                                 |
-          | INFO  | Finding: css{html} => caption{expected} |
-          | INFO  | Found 2 elements                        |
+        : | level | message                                  |
+          | INFO  | Locating: css{html} => caption{expected} |
+          | INFO  | Found 2 elements                         |
         """
       Examples:
         | driver     |
@@ -65,9 +65,9 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                                       |
-          | INFO  | Finding: css{html} => xpath{//div[@attr='a']} |
-          | INFO  | Found 2 elements                              |
+        : | level | message                                        |
+          | INFO  | Locating: css{html} => xpath{//div[@attr='a']} |
+          | INFO  | Found 2 elements                               |
         """
       Examples:
         | driver     |
@@ -89,9 +89,9 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                              |
-          | INFO  | Finding: css{html} => placeholder{a} |
-          | INFO  | Found 2 elements                     |
+        : | level | message                               |
+          | INFO  | Locating: css{html} => placeholder{a} |
+          | INFO  | Found 2 elements                      |
         """
       Examples:
         | driver     |
@@ -114,9 +114,9 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                            |
-          | INFO  | Finding: css{html} => css{.target} |
-          | INFO  | Found 1 elements                   |
+        : | level | message                             |
+          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Found 1 elements                    |
         """
       Examples:
         | driver     |
@@ -172,13 +172,13 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                            |
-          | ...                                        |
-          | INFO  | Finding: css{html} => css{.target} |
-          | INFO  | Found 0 elements                   |
-          | INFO  | Finding: css{html} => css{.target} |
-          | INFO  | Found 1 elements                   |
-          | ...                                        |
+        : | level | message                             |
+          | ...                                         |
+          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Found 0 elements                    |
+          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Found 1 elements                    |
+          | ...                                         |
         """
       Examples:
         | driver     |
@@ -208,13 +208,13 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                            |
-          | ...                                        |
-          | INFO  | Finding: css{html} => css{.target} |
-          | INFO  | Found 0 elements                   |
-          | INFO  | Finding: css{html} => css{.target} |
-          | INFO  | Found 0 elements                   |
-          | ...                                        |
+        : | level | message                             |
+          | ...                                         |
+          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Found 0 elements                    |
+          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Found 0 elements                    |
+          | ...                                         |
         """
       Examples:
         | driver     |
@@ -256,9 +256,9 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                            |
-          | INFO  | Finding: css{html} => css{.target} |
-          | INFO  | Found 0 elements                   |
+        : | level | message                             |
+          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Found 0 elements                    |
         """
       Examples:
         | driver     |

@@ -178,7 +178,8 @@ public class RuntimeContextBuilder {
     }
 
     private Set<Method> methodToCurrying(Class<?> type, Object methodName) {
-        return Stream.of(stream(type.getMethods()).filter(method -> !Modifier.isStatic(method.getModifiers()))
+        return Stream.of(stream(type.getMethods())
+                                .filter(method -> !Modifier.isStatic(method.getModifiers()) && !method.isBridge())
                                 .filter(method -> method.getName().equals(methodName)),
                         staticMethodsToCurrying(type, methodName, Object::equals),
                         staticMethodsToCurrying(type, methodName, Class::isAssignableFrom))
