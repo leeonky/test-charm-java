@@ -3,9 +3,9 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tab;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
+import com.github.leeonky.pf.Elements;
 
 import static com.github.leeonky.pf.By.css;
-import static com.github.leeonky.pf.By.placeholder;
 
 public class WorkbenchRegion extends Tab {
 
@@ -13,12 +13,12 @@ public class WorkbenchRegion extends Tab {
 
     public WorkbenchRegion(Element header, Element element) {
         super(header, element);
-        workspaces = new Tabs<WorkspaceRegion, Element>(element.findBy(css(".workspaces"))) {
+        workspaces = new Tabs<WorkspaceRegion, Element>(locate("css[.workspaces]").single()) {
         };
     }
 
-    public Element DAL() {
-        return element.findBy(placeholder("DAL expression"));
+    public Elements<Element> DAL() {
+        return locate("placeholder[DAL expression]");
     }
 
     public OutputRegion Current() {
@@ -38,15 +38,15 @@ public class WorkbenchRegion extends Tab {
     }
 
     public void Release() {
-        element.findBy(css(".release")).click();
+        perform("css[.release].click");
     }
 
     public void Pass() {
-        element.findBy(css(".pass")).click();
+        perform("css[.pass].click");
     }
 
     public void newWorkspace() {
-        element.findBy(css(".new")).click();
+        perform("css[.new].click");
     }
 
     public WorkspaceRegion Workspace(String target) {

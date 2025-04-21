@@ -25,7 +25,6 @@ public class Accessors {
 
     public Accessors(String expression) {
         this.expression = expression;
-        dal = dalFactory.get();
     }
 
     public static Accessors get(String expression) {
@@ -34,13 +33,19 @@ public class Accessors {
 
     public <T> T from(Object input) {
         try {
-            return dal.evaluate(input, expression);
+            return getDal().evaluate(input, expression);
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(expression, 0) + "\n\n" + e.getMessage();
             if (dumpInput)
                 detailMessage += "\n\nThe root value was: "
-                        + dal.getRuntimeContextBuilder().build(input).getThis().dump();
+                        + getDal().getRuntimeContextBuilder().build(input).getThis().dump();
             throw new RuntimeException(detailMessage, e);
         }
+    }
+
+    private DAL getDal() {
+        if (dal == null)
+            dal = dalFactory.get();
+        return dal;
     }
 }

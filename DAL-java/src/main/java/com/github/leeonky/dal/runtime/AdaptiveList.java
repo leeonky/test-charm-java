@@ -9,7 +9,7 @@ public interface AdaptiveList<T> {
 
     List<T> soloList();
 
-    default T only() {
+    default T single() {
         return soloList().get(0);
     }
 

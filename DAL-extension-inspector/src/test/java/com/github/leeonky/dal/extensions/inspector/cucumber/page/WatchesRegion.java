@@ -21,14 +21,14 @@ public class WatchesRegion extends OutputRegion implements ProxyObject {
 
     @Override
     public WatchesItem getValue(Object property) {
-        return watches().stream().filter(panel -> property.equals(panel.findBy(css(".watches-item-name")).text()))
+        return watches().stream().filter(panel -> property.equals(panel.single(css(".watches-item-name")).text()))
                 .map(WatchesItem::new)
                 .findFirst().orElse(null);
     }
 
     @Override
     public Set<Object> getPropertyNames() {
-        return watches().stream().map(panel -> (Object) panel.findBy(css(".watches-item-name")).text())
+        return watches().stream().map(panel -> (Object) panel.single(css(".watches-item-name")).text())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

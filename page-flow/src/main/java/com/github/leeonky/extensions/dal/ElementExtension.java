@@ -32,7 +32,7 @@ public class ElementExtension implements Extension {
                 .register((expected, actual) -> actual.cast(Element.class)
                         .map(e -> inputToElement(expected, e)))
                 .register((expected, actual) -> actual.cast(Elements.class)
-                        .map(e -> inputToElement(expected, (Element) e.only())));
+                        .map(e -> inputToElement(expected, (Element) e.single())));
 
         dal.getRuntimeContextBuilder().registerPropertyAccessor(WebElement.class,
                 new JavaClassPropertyAccessor<WebElement<?, ?>>((BeanClass) BeanClass.create(WebElement.class)) {

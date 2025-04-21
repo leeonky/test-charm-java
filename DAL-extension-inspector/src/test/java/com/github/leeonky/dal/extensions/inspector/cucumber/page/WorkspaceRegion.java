@@ -3,16 +3,16 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tab;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
+import com.github.leeonky.pf.Elements;
 
 import static com.github.leeonky.pf.By.css;
-import static com.github.leeonky.pf.By.placeholder;
 
 public class WorkspaceRegion extends Tab {
     private final Tabs<OutputRegion, Element> outputs;
 
     public WorkspaceRegion(Element header, Element element) {
         super(header, element);
-        outputs = new Tabs<OutputRegion, Element>(element.findBy(css(".code-results"))) {
+        outputs = new Tabs<OutputRegion, Element>(locate("css[.code-results]").single()) {
 
             @Override
             public OutputRegion getCurrent() {
@@ -42,18 +42,18 @@ public class WorkspaceRegion extends Tab {
     }
 
     public void execute() {
-        element.findBy(css(".run")).click();
+        perform("css[.run].click");
     }
 
-    public Element DAL() {
-        return element.findBy(placeholder("DAL expression"));
+    public Elements<Element> DAL() {
+        return locate("placeholder[DAL expression]");
     }
 
     public void newWorkspace() {
-        element.findBy(css(".new")).click();
+        perform("css[.new].click");
     }
 
     public void dismiss() {
-        element.findBy(css(".dismiss")).click();
+        perform("css[.dismiss].click");
     }
 }

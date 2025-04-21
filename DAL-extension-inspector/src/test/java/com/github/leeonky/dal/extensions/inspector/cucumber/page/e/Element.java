@@ -28,7 +28,7 @@ public class Element extends PlaywrightElement<Element> {
     @Override
     public Object value() {
         if (isCheckedBox())
-            return css("input").only().value();
+            return css("input").single().value();
         return super.value();
     }
 

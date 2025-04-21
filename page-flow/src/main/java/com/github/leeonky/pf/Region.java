@@ -1,10 +1,8 @@
 package com.github.leeonky.pf;
 
 import com.github.leeonky.dal.Accessors;
-import com.github.leeonky.dal.DAL;
 
 public class Region<T extends Element<T, ?>> {
-    private static final DAL dal = DAL.dal("PageFlow");
     protected final T element;
 
     public Region(T element) {
@@ -17,6 +15,10 @@ public class Region<T extends Element<T, ?>> {
     }
 
     public <O> O perform(String expression) {
-        return Accessors.get(expression).by(dal).from(element);
+        return Accessors.get(expression).by(PageFlow.dal()).from(element);
+    }
+
+    public Elements<T> locate(String expression) {
+        return Accessors.get(expression).by(PageFlow.dal()).from(element);
     }
 }

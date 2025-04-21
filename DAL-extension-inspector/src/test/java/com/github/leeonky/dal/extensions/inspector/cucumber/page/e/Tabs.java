@@ -36,8 +36,8 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Region<E> {
 
     public T getCurrent() {
         try {
-            return createTab(Tabs.this.element.findAllBy(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")).get(0),
-                    Tabs.this.element.findAllBy(xpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]")).get(0));
+            return createTab(element.findAllBy(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")).get(0),
+                    element.findAllBy(xpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]")).get(0));
         } catch (Exception ignore) {
             return null;
         }
@@ -47,13 +47,13 @@ public class Tabs<T extends Tab, E extends Element<E, ?>> extends Region<E> {
         return tabs.switchTo(new Target<T>() {
             @Override
             public T create() {
-                return createTab(element.findBy(css(format(".tab-header[target='%s']", name))),
-                        element.findBy(css(format(".tab-content[target='%s']", name))));
+                return createTab(element.single(css(format(".tab-header[target='%s']", name))),
+                        element.single(css(format(".tab-content[target='%s']", name))));
             }
 
             @Override
             public void navigateTo() {
-                element.findBy(css(format(".tab-header[target='%s']", name))).click();
+                element.single(css(format(".tab-header[target='%s']", name))).click();
             }
         });
     }

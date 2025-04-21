@@ -2,6 +2,7 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
+import com.github.leeonky.pf.Elements;
 import com.github.leeonky.pf.Region;
 
 import java.util.Map;
@@ -16,16 +17,16 @@ public class MainPage extends Region<Element> {
 
     public MainPage(Element element) {
         super(element);
-        tabs = new Tabs<WorkbenchRegion, Element>(element.findBy(css(".workbenches"))) {
+        tabs = new Tabs<WorkbenchRegion, Element>(locate("css[.workbenches]").single()) {
         };
     }
 
-    public Element AutoExecute() {
-        return element.findBy(css(".auto-execute.switch"));
+    public Elements<Element> AutoExecute() {
+        return locate("css[.auto-execute.switch]");
     }
 
     public Element title() {
-        return element.findBy(css(".main-title"));
+        return element.single(css(".main-title"));
     }
 
     public WorkbenchRegion WorkBench(String name) {
@@ -45,7 +46,7 @@ public class MainPage extends Region<Element> {
     }
 
     public void ReleaseAll() {
-        element.findBy(css(".release.release-all")).click();
+        perform("css[.release.release-all].click");
     }
 
     public void Pass(String workbenchName) {

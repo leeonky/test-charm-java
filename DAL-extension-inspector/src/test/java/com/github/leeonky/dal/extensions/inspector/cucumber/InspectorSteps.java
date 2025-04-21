@@ -6,6 +6,7 @@ import com.github.leeonky.dal.extensions.inspector.Inspector;
 import com.github.leeonky.dal.extensions.inspector.InspectorExtension;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.MainPage;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.pf.PageFlow;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Playwright;
 import io.cucumber.java.After;
@@ -36,6 +37,7 @@ public class InspectorSteps {
                 put("x-playwright-launch-options", "{ \"headless\": false }");
             }})));
 
+
     @After
     public void close() {
         browser.destroy();
@@ -45,6 +47,7 @@ public class InspectorSteps {
     public void initTest() {
         testContext = new TestContext();
         Inspector.shutdown();
+        PageFlow.setDal(dal);
     }
 
     @When("launch inspector web server")
@@ -55,7 +58,7 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        mainPage = new MainPage(browser.open("http://host.docker.internal:10082").findBy(css("body")));
+        mainPage = new MainPage(browser.open("http://host.docker.internal:10082").single(css("body")));
     }
 
     @And("shutdown web server")
