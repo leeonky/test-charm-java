@@ -314,3 +314,57 @@ Feature: single or list
           6. static method extension
         Not supported for infinite collection
         """
+
+    Scenario: verify with a single object, the verification is delegated to the sole element of the list
+      Given the following java class:
+        """
+        public class Test {
+          public AdaptiveList<String> getList() {
+            return AdaptiveList.staticList(Arrays.asList("hello"));
+          }
+        }
+        """
+      Then the following verification for the instance of java class "Test" should pass:
+        """
+        list= hello
+        """
+      And the following verification for the instance of java class "Test" should pass:
+        """
+        list: hello
+      """
+
+    Scenario: raise error when verify with single object but list size is not 1
+      Given the following java class:
+        """
+        public class Test {
+          public AdaptiveList<String> getList() {
+            return AdaptiveList.staticList(Arrays.asList("hello", "world"));
+          }
+        }
+        """
+      When use a instance of java class "Test" to evaluate:
+        """
+        list: "hello"
+        """
+      Then failed with the message:
+        """
+        java.lang.IllegalStateException: Expected only one element
+        """
+      And got the following notation:
+        """
+        list: "hello"
+        ^
+        """
+      When use a instance of java class "Test" to evaluate:
+        """
+        list= "hello"
+        """
+      Then failed with the message:
+        """
+        java.lang.IllegalStateException: Expected only one element
+        """
+      And got the following notation:
+        """
+        list= "hello"
+        ^
+        """

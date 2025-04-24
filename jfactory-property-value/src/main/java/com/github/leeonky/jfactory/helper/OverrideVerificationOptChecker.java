@@ -19,9 +19,4 @@ class OverrideVerificationOptChecker<A, E> implements Checker {
                 (E) checkingContext.getOriginalExpected().value());
         return false;
     }
-
-    @Override
-    public String message(CheckingContext checkingContext) {
-        return null;
-    }
 }

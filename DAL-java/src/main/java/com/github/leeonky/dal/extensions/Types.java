@@ -2,13 +2,19 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.checker.Checker;
+import com.github.leeonky.dal.runtime.checker.CheckerSet;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
+import static java.util.Optional.of;
 
 @Order(BUILD_IN)
 public class Types implements Extension {
@@ -46,7 +52,7 @@ public class Types implements Extension {
                 .registerPropertyAccessor(AdaptiveList.class, new PropertyAccessor<AdaptiveList<?>>() {
 
                     @Override
-                    public Data<?> getData(Data<AdaptiveList<?>> data, Object property, RuntimeContextBuilder.DALRuntimeContext context) {
+                    public Data<?> getData(Data<AdaptiveList<?>> data, Object property, DALRuntimeContext context) {
                         return data.map(AdaptiveList::soloList).property(0).property(property);
                     }
 
@@ -64,5 +70,24 @@ public class Types implements Extension {
                             }
                         })
         ;
+
+        verifySingle(builder.checkerSetForEqualing());
+        verifySingle(builder.checkerSetForMatching());
+    }
+
+    private void verifySingle(CheckerSet checkerSet) {
+        checkerSet.register((expected, actual) -> {
+            if (actual.instanceOf(AdaptiveList.class)) {
+                Data<Object> single = opt1(() -> actual.map(t -> ((AdaptiveList<?>) t).single()));
+                Checker checkerOfElement = checkerSet.fetch(expected, single);
+                return of(new Checker() {
+                    @Override
+                    public Data<?> verify(Data<?> expected1, Data<?> actual1, DALRuntimeContext context) {
+                        return checkerOfElement.verify(expected1, single, context);
+                    }
+                });
+            }
+            return Optional.empty();
+        });
     }
 }

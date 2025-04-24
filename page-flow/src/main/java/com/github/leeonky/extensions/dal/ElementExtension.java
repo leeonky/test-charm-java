@@ -14,11 +14,6 @@ import com.github.leeonky.util.BeanClass;
 public class ElementExtension implements Extension {
     public static final Checker PHONY_CHECKER = new Checker() {
         @Override
-        public String message(CheckingContext checkingContext) {
-            return "Phony verification opt!!!";
-        }
-
-        @Override
         public boolean failed(CheckingContext checkingContext) {
             return false;
         }

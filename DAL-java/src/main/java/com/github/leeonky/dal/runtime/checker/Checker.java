@@ -7,8 +7,16 @@ import com.github.leeonky.util.ConvertException;
 
 import java.util.function.Function;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
+
 public interface Checker {
-    Checker MATCH_NULL_CHECKER = CheckingContext::messageMatch;
+    Checker MATCH_NULL_CHECKER = new Checker() {
+        @Override
+        public String message(CheckingContext checkingContext) {
+            return checkingContext.messageMatch();
+        }
+    };
     Checker EQUALS_CHECKER = new EqualsChecker();
     Checker MATCHES_CHECKER = new MatchesChecker();
 
@@ -30,7 +38,9 @@ public interface Checker {
         return checkingContext.objectNotEquals();
     }
 
-    String message(CheckingContext checkingContext);
+    default String message(CheckingContext checkingContext) {
+        return "Failed";
+    }
 
     default Data<?> transformActual(Data<?> actual, Data<?> expected, DALRuntimeContext context) {
         return actual;
@@ -54,5 +64,11 @@ public interface Checker {
                 throw new AssertionError(message(checkingContext));
             return data;
         });
+    }
+
+    default Data<?> verify(Data<?> expected, Data<?> actual, DALRuntimeContext context) {
+        return verify(new CheckingContext(expected, actual,
+                opt2(() -> transformExpected(expected, context)),
+                opt1(() -> transformActualAndCheck(actual, expected, context))));
     }
 }

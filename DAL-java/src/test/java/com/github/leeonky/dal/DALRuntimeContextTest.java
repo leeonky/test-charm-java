@@ -82,11 +82,6 @@ class DALRuntimeContextTest {
             public boolean failed(CheckingContext checkingContext) {
                 return false;
             }
-
-            @Override
-            public String message(CheckingContext checkingContext) {
-                return null;
-            }
         });
 
         @BeforeEach
