@@ -58,7 +58,7 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        mainPage = new MainPage(browser.open("http://host.docker.internal:10082").single(css("body")));
+        mainPage = new MainPage(browser.open("http://host.docker.internal:10082").find(css("body")).single());
     }
 
     @And("shutdown web server")

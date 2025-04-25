@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.pf.By.css;
-
 public class MainPage extends Region<Element> {
 
     private final Tabs<WorkbenchRegion, Element> tabs;
@@ -25,8 +23,8 @@ public class MainPage extends Region<Element> {
         return locate("css[.auto-execute.switch]");
     }
 
-    public Element title() {
-        return element.single(css(".main-title"));
+    public Elements<Element> title() {
+        return locate("css[.main-title]");
     }
 
     public WorkbenchRegion WorkBench(String name) {
@@ -37,7 +35,7 @@ public class MainPage extends Region<Element> {
     }
 
     public Map<String, Element> Monitors() {
-        return element.findAllBy(css(".instance-monitors .switch")).stream()
+        return locate("css[.instance-monitors .switch]").stream()
                 .collect(Collectors.toMap(Element::text, Function.identity()));
     }
 

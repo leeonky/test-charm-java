@@ -60,16 +60,6 @@ public interface Element<T extends Element<T, E>, E> {
         throw new IllegalStateException("Not support operation");
     }
 
-    @Deprecated
-    default List<T> findAllBy(By locator) {
-        return find(locator).list().collect();
-    }
-
-    @Deprecated
-    default T single(By locator) {
-        return find(locator).single();
-    }
-
     @SuppressWarnings("unchecked")
     default Elements<T> find(By locator) {
         return new Elements<>(locator, (T) this);

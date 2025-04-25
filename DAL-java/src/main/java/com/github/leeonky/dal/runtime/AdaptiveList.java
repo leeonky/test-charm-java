@@ -3,9 +3,14 @@ package com.github.leeonky.dal.runtime;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public interface AdaptiveList<T> {
     DALCollection<T> list();
+
+    default boolean isEmpty() {
+        return list().isEmpty();
+    }
 
     List<T> soloList();
 
@@ -19,5 +24,9 @@ public interface AdaptiveList<T> {
 
     static <T> AdaptiveList<T> staticList(Supplier<T> supplier) {
         return new StaticAdaptiveList<>(new InfiniteDALCollection<>(supplier));
+    }
+
+    default Stream<T> stream() {
+        return list().values();
     }
 }

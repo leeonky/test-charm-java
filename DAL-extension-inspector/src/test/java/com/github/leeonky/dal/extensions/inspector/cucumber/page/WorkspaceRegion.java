@@ -5,8 +5,6 @@ import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tab;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
 import com.github.leeonky.pf.Elements;
 
-import static com.github.leeonky.pf.By.css;
-
 public class WorkspaceRegion extends Tab {
     private final Tabs<OutputRegion, Element> outputs;
 
@@ -17,8 +15,8 @@ public class WorkspaceRegion extends Tab {
             @Override
             public OutputRegion getCurrent() {
                 try {
-                    return createTab(element.findAllBy(css(".tab-header.active")).get(0),
-                            element.findAllBy(css(".tab-content.active")).get(0));
+                    return createTab(locate("css[.tab-header.active]").single(),
+                            locate("css[.tab-content.active]").single());
                 } catch (Exception ignore) {
                     return null;
                 }
