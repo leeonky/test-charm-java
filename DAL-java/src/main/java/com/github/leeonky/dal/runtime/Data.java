@@ -154,6 +154,10 @@ public class Data<T> {
         }
     }
 
+    public Optional<CurryingMethod> currying(Object property) {
+        return context.currying(value(), property);
+    }
+
     public class DataList extends DALCollection.Decorated<Object> {
         public DataList(DALCollection<Object> origin) {
             super(origin);

@@ -2,6 +2,8 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.checker.Checker;
+import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.NoSuchAccessorException;
 import com.github.leeonky.util.Sneaky;
@@ -41,7 +43,22 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty("throw", MetaProperties::throw_)
                 .registerMetaProperty("object", MetaProperties::object_)
                 .registerMetaProperty("keys", MetaProperties::keys)
+                .registerMetaProperty("should", MetaShould::new)
         ;
+
+        dal.getRuntimeContextBuilder().checkerSetForMatching()
+                .register((expected, actual) -> actual.cast(MetaShould.PredicateMethod.class)
+                        .map(curryingMethod -> new Checker() {
+                            @Override
+                            public boolean failed(CheckingContext checkingContext) {
+                                return !curryingMethod.should(expected.value());
+                            }
+
+                            @Override
+                            public String message(CheckingContext checkingContext) {
+                                return curryingMethod.errorMessage(expected);
+                            }
+                        }));
     }
 
     static class OriginalJavaObject implements ProxyObject {

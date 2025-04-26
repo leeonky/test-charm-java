@@ -17,7 +17,7 @@ public interface PropertyAccessor<T> {
             result = getValue(data, property);
         } catch (InvalidPropertyException e) {
             try {
-                result = context.currying(data.value(), property).orElseThrow(() -> e).resolve();
+                result = data.currying(property).orElseThrow(() -> e).resolve();
             } catch (Throwable e1) {
                 Sneaky.sneakyThrow(buildUserRuntimeException(e1));
             }
