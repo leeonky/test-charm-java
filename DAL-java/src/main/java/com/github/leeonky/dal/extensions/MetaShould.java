@@ -2,6 +2,8 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.runtime.*;
 
+import static java.lang.String.format;
+
 public class MetaShould implements ProxyObject {
     private final MetaData<?> metaData;
 
@@ -12,11 +14,11 @@ public class MetaShould implements ProxyObject {
     @Override
     public Object getValue(Object property) {
         return metaData.data().currying(property).map(curryingMethod -> new PredicateMethod(curryingMethod, property))
-                .orElseThrow(() -> new DalRuntimeException(String.format("Predicate method %s not exist in %s",
+                .orElseThrow(() -> new DalRuntimeException(format("Predicate method %s not exist in %s",
                         property, metaData.data().dump())));
     }
 
-    public class PredicateMethod {
+    public class PredicateMethod implements ProxyObject {
         private final CurryingMethod curryingMethod;
         private final Object method;
 
@@ -28,9 +30,12 @@ public class MetaShould implements ProxyObject {
         public boolean should(Object value) {
             Object result = curryingMethod.call(value).resolve();
             if (result instanceof CurryingMethod)
-                throw new DalRuntimeException(String.format("Failed to invoke predicate method `%s` of %s, " +
+                throw new DalRuntimeException(format("Failed to invoke predicate method `%s` of %s, " +
                         "maybe missing parameters", method, metaData.data().dump()));
-            return (boolean) result;
+            if (result instanceof Boolean)
+                return (boolean) result;
+            throw new DalRuntimeException(format("Predicate method `%s` return type should boolean but %s", method,
+                    metaData.runtimeContext().data(result).dump()));
         }
 
         public Data<?> instance() {
@@ -38,7 +43,12 @@ public class MetaShould implements ProxyObject {
         }
 
         public String errorMessage(Data<?> expected) {
-            return String.format("Expected: %s\nShould %s: %s", instance().dump(), method, expected.dump());
+            return format("Expected: %s\nShould %s: %s", instance().dump(), method, expected.dump());
+        }
+
+        @Override
+        public Object getValue(Object property) {
+            return new PredicateMethod(curryingMethod.call(property), method);
         }
     }
 }

@@ -75,18 +75,40 @@ Feature: should
                      ^
       """
 
-#  Scenario: should with multi parameters
-#    Given the following java class:
-#      """
-#      public class Bean {
-#        public boolean test(String s1, String s2) {
-#          return s1.equals(s2);
-#        }
-#      }
-#      """
-#    Then the following verification for the instance of java class "Bean" should pass:
-#      """
-#      ::should.test[t1]: t1
-#      """
+  Scenario: should with multi parameters
+    Given the following java class:
+      """
+      public class Bean {
+        public boolean test(String s1, String s2) {
+          return s1.equals(s2);
+        }
+      }
+      """
+    Then the following verification for the instance of java class "Bean" should pass:
+      """
+      ::should.test[t1]: t1
+      """
 
-#TODO return type not boolean
+  Scenario: predicate method should return boolean value
+    Given the following java class:
+      """
+      public class Bean {
+        public int test(String s1) {
+          return s1.length();
+        }
+      }
+      """
+    When use a instance of java class "Bean" to evaluate:
+      """
+      ::should.test: 'hello'
+      """
+    Then failed with the message:
+      """
+      Predicate method `test` return type should boolean but java.lang.Integer
+      <5>
+      """
+    And got the following notation:
+      """
+      ::should.test: 'hello'
+                     ^
+      """
