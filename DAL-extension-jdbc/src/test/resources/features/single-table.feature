@@ -93,7 +93,7 @@ Feature: assert db as data via jdbc
       """
     Then raise error
     """
-    message.trim= ```
+    message.trim::should.startsWith: ```
                   products: [{
                     notExist= {...}
                     ^
@@ -107,12 +107,6 @@ Feature: assert db as data via jdbc
                     5. customized type getter
                     6. static method extension
                   java.lang.RuntimeException: No such column: notExist
-
-                  The root value was: DataBase[jdbc:h2:mem:test] {
-                      products:
-                          | id |             createdat |    name | pid | price |
-                          | 66 | 1996-01-23 00:01:06.0 | name#66 |  66 |    66 |
-                  }
                   ```
     """
 

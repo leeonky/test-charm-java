@@ -203,7 +203,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldFailedWith(String message) {
-        assertThat(exception.getMessage()).isEqualTo(message.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(exception.getMessage()).startsWith(message.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     public void shouldHaveNotation(String notation) {

@@ -2,6 +2,8 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.interpreter.InterpreterException;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Optional;
 
 public class DalException extends InterpreterException {
@@ -59,13 +61,23 @@ public class DalException extends InterpreterException {
         if (message != null && !message.isEmpty()) {
             Throwable cause = e.getCause();
             if (cause != null)
-                return message + "\n" + cause;
+                return message + "\n" + clauseInfo(cause);
             return message;
         }
         Throwable cause = e.getCause();
         if (cause != null)
-            return cause.toString();
+            return clauseInfo(cause);
         return e.getClass().getName();
+    }
+
+    private static String clauseInfo(Throwable cause) {
+        String info = cause.toString();
+        if (cause instanceof UserRuntimeException) {
+            StringWriter writer = new StringWriter();
+            cause.getCause().printStackTrace(new PrintWriter(writer));
+            return writer.toString();
+        }
+        return info;
     }
 
     public static RuntimeException locateError(Throwable e, int positionBegin) {

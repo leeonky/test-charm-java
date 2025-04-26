@@ -293,11 +293,6 @@ Feature: async
         5. customized type getter
         6. static method extension
       java.lang.RuntimeException
-
-      The root value was: #package#Data {
-          int2: java.lang.Integer <3>,
-          int: *throw* java.lang.RuntimeException
-      }
       """
 
     Scenario: await single property

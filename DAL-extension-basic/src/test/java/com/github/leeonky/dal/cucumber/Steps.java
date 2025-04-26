@@ -236,7 +236,7 @@ public class Steps {
 
     @Then("failed with the message:")
     public void failedWithTheMessage(String message) {
-        assertThat(assertionError.getMessage()).isEqualTo(message.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(assertionError.getMessage()).startsWith(message.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     private String left, right;
