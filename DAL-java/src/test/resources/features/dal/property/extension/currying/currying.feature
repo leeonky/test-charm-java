@@ -276,3 +276,23 @@ Feature: currying function
     """
     method.hello= sub
     """
+
+  Scenario: use : invoke method (1 parameter)
+    Then the following verification should pass:
+      """
+      ('hello'.indexOf: 'l')= 2
+      """
+
+  Scenario: use : invoke method (2 parameter)
+    Given the following java class:
+      """
+      public class Bean {
+        public int fun(String str1, String str2) {
+          return str1.indexOf(str2);
+        }
+      }
+      """
+    Then the following verification for the instance of java class "Bean" should pass:
+      """
+      (fun[hello]: 'l')= 2
+      """

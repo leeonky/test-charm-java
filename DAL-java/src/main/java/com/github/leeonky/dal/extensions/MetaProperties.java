@@ -1,7 +1,9 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.util.BeanClass;
@@ -47,18 +49,37 @@ public class MetaProperties implements Extension {
         ;
 
         dal.getRuntimeContextBuilder().checkerSetForMatching()
-                .register((expected, actual) -> actual.cast(MetaShould.PredicateMethod.class)
-                        .map(curryingMethod -> new Checker() {
-                            @Override
-                            public boolean failed(CheckingContext checkingContext) {
-                                return !curryingMethod.should(expected.value());
-                            }
+                .register((expected, actual) -> actual.cast(MetaShould.PredicateMethod.class).map(curryingMethod -> new Checker() {
+                    @Override
+                    public boolean failed(CheckingContext checkingContext) {
+                        return !curryingMethod.should(expected.value());
+                    }
 
-                            @Override
-                            public String message(CheckingContext checkingContext) {
-                                return curryingMethod.errorMessage(expected);
-                            }
-                        }));
+                    @Override
+                    public String message(CheckingContext checkingContext) {
+                        return curryingMethod.errorMessage(expected);
+                    }
+                }))
+                .register((expected, actual) -> actual.cast(CurryingMethod.class).map(curryingMethod -> new Checker() {
+                    @Override
+                    public Data<?> verify(Data<?> expected, Data<?> actual, DALRuntimeContext context) {
+                        return actual.property(expected.value());
+                    }
+                }))
+        ;
+
+        dal.getRuntimeContextBuilder().registerOperator(com.github.leeonky.dal.runtime.Operators.MATCH, new Operation<CurryingMethod, ExpectationFactory>() {
+
+            @Override
+            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
+                return v1.instanceOf(CurryingMethod.class) && v2.instanceOf(ExpectationFactory.class);
+            }
+
+            @Override
+            public Data<?> operateData(Data<CurryingMethod> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
+                return v2.value().create(operator, v1).matches();
+            }
+        });
     }
 
     static class OriginalJavaObject implements ProxyObject {
