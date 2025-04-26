@@ -131,7 +131,7 @@ Feature: web ui
             .target unexpected
             .target unexpected
         """
-      When find element via driver <driver>:
+      When try to find element via driver <driver>:
         """
         css[.target].text
         """
@@ -191,7 +191,7 @@ Feature: web ui
         html
           body
         """
-      When find element via driver <driver>:
+      When try to find element via driver <driver>:
         """
         css[.target].text
         """
@@ -236,7 +236,7 @@ Feature: web ui
             });
           body
         """
-      When find element via driver <driver>:
+      When try to find element via driver <driver>:
         """
         css[.target]: {
           text[]= []
@@ -281,7 +281,7 @@ Feature: web ui
           body
             .target hello
         """
-      When find element via driver <driver>:
+      When try to find element via driver <driver>:
         """
         css[.target]: {
           text= hello
@@ -296,6 +296,104 @@ Feature: web ui
         Actual list: [
             java.lang.String <hello>
         ]
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+  Rule: ui operation
+
+    Scenario Outline: click element
+      Given launch the following web page:
+        """
+        html
+          head
+            script.
+              function changeText() {
+                const target = document.querySelector('.target');
+                target.textContent = 'HelloWorld';
+              }
+          body
+            .target(onclick="changeText()") click
+        """
+      When perform via driver <driver>:
+        """
+        css[.target].click
+        """
+      Then page in driver <driver> should:
+        """
+        css[.target]::eventually: {
+          text= HelloWorld
+        }
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: return tag name in lower case
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            .target
+        """
+      Then page in driver <driver> should:
+        """
+        css[.target].tag= div
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: web element textarea and input is input
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            textarea
+            input
+            div
+        """
+      Then page in driver <driver> should:
+        """
+        css:     | input |
+        textarea | true  |
+           input | true  |
+             div | false |
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: type in and verify via value
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            textarea
+        """
+      When perform via driver <driver>:
+        """
+        css[textarea].typeIn[hello]
+        """
+      Then page in driver <driver> should:
+        """
+        css[textarea].value=  hello
+        """
+      When perform via driver <driver>:
+        """
+        css[textarea].typeIn[world]
+        """
+      Then page in driver <driver> should:
+        """
+        css[textarea].value=  helloworld
         """
       Examples:
         | driver     |

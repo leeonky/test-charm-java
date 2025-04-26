@@ -1,6 +1,7 @@
 package com.github.leeonky.pf.cucumber;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.pf.Element;
 import com.github.leeonky.util.Sneaky;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -34,6 +35,8 @@ public class Steps {
             new HashMap<String, String>() {{
                 put("x-playwright-launch-options", "{ \"headless\": false }");
             }})));
+    private Selenium.SeleniumE seleniumE;
+    private Playwright.PlaywrightE playwrightE;
 
     @When("launch the following web page:")
     public void launchTheFollowingWebPage(String pug) throws IOException {
@@ -42,11 +45,6 @@ public class Steps {
         String html = Pug4J.render(new StringReader(pug), "", new HashMap<>());
         javalin.get("/", ctx -> ctx.html(html));
         javalin.start(10081);
-    }
-
-    @Then("page in driver selenium should:")
-    public void pageInDriverSeleniumShould(String expression) {
-        expect(browserSelenium.open("http://host.docker.internal:10081")).should(expression);
     }
 
     @After
@@ -58,11 +56,31 @@ public class Steps {
         browserSelenium.destroy();
         browserPlaywright.destroy();
         lastError = null;
+        seleniumE = null;
+        playwrightE = null;
+    }
+
+
+    @Then("page in driver selenium should:")
+    public void pageInDriverSeleniumShould(String expression) {
+        expect(rootSeleniumElement()).should(expression);
+    }
+
+    private Selenium.SeleniumE rootSeleniumElement() {
+        if (seleniumE == null)
+            seleniumE = browserSelenium.open("http://host.docker.internal:10081");
+        return seleniumE;
     }
 
     @Then("page in driver playwright should:")
     public void pageInDriverPlaywrightShould(String expression) {
-        expect(browserPlaywright.open("http://host.docker.internal:10081")).should(expression);
+        expect(rootPlaywrightElement()).should(expression);
+    }
+
+    private Playwright.PlaywrightE rootPlaywrightElement() {
+        if (playwrightE == null)
+            playwrightE = browserPlaywright.open("http://host.docker.internal:10081");
+        return playwrightE;
     }
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(Element.class);
@@ -77,21 +95,19 @@ public class Steps {
         expect(logger.getAllLoggingEvents()).should(expression);
     }
 
-    @When("find element via driver playwright:")
+    @When("try to find element via driver playwright:")
     public void findElementViaDriverPlaywright(String expression) {
-
         try {
-            DAL.dal().evaluate(browserPlaywright.open("http://host.docker.internal:10081"), expression);
+            DAL.dal().evaluate(rootPlaywrightElement(), expression);
         } catch (Throwable e) {
             lastError = e;
         }
     }
 
-    @When("find element via driver selenium:")
+    @When("try to find element via driver selenium:")
     public void findElementViaDriverSelenium(String expression) {
-
         try {
-            DAL.dal().evaluate(browserSelenium.open("http://host.docker.internal:10081"), expression);
+            DAL.dal().evaluate(rootSeleniumElement(), expression);
         } catch (Throwable e) {
             lastError = e;
         }
@@ -100,5 +116,25 @@ public class Steps {
     @Then("failed with:")
     public void failedWith(String message) {
         expect(lastError.getMessage()).isEqualTo(message);
+    }
+
+    @When("perform via driver selenium:")
+    public void perform_via_driver_selenium(String actions) {
+        try {
+            DAL.dal().evaluateAll(rootSeleniumElement(), actions);
+        } catch (DalException e) {
+            String detailMessage = "\n" + e.show(actions) + "\n\n" + e.getMessage();
+            throw new AssertionError(detailMessage);
+        }
+    }
+
+    @When("perform via driver playwright:")
+    public void perform_via_driver_playwright(String actions) {
+        try {
+            DAL.dal().evaluateAll(rootPlaywrightElement(), actions);
+        } catch (DalException e) {
+            String detailMessage = "\n" + e.show(actions) + "\n\n" + e.getMessage();
+            throw new AssertionError(detailMessage);
+        }
     }
 }

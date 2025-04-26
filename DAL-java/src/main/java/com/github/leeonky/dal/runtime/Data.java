@@ -75,16 +75,11 @@ public class Data<T> {
                         : context.accessProperty(this, propertyChain);
             } catch (IndexOutOfBoundsException ex) {
                 throw new DalRuntimeException(ex.getMessage());
-            } catch (ListMappingElementAccessException | ExpressionException | InterpreterException ex) {
+            } catch (ListMappingElementAccessException | ExpressionException | InterpreterException |
+                     PropertyAccessException ex) {
                 throw ex;
             } catch (Throwable e) {
-                throw new DalRuntimeException(format("Get property `%s` failed, property can be:\n" +
-                        "  1. public field\n" +
-                        "  2. public getter\n" +
-                        "  3. public method\n" +
-                        "  4. Map key value\n" +
-                        "  5. customized type getter\n" +
-                        "  6. static method extension", propertyChain), e);
+                throw new PropertyAccessException(propertyChain, e);
             }
         }
         return property(chain);
