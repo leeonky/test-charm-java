@@ -16,13 +16,13 @@ public class Element extends PlaywrightElement<Element> {
     }
 
     @Override
-    public Element typeIn(String value) {
+    public Element fillIn(String value) {
         if (isCheckedBox()) {
             if (!value.equals(value()))
                 click();
             return this;
         } else
-            return super.typeIn(value);
+            return super.fillIn(value);
     }
 
     @Override

@@ -27,7 +27,7 @@ Feature: basic
         """
       When you:
         """
-        WorkBench[Try It!].DAL: message
+        WorkBench[Try It!].DAL.typeIn: message
         """
       Then you should see:
         """
@@ -58,7 +58,7 @@ Feature: basic
         """
       When you:
         """
-        WorkBench[Try It!].DAL: '= world'
+        WorkBench[Try It!].DAL.typeIn: '= world'
         """
       Then you should see:
         """
@@ -106,7 +106,7 @@ Feature: basic
       When you:
         """
         AutoExecute: false
-        WorkBench[Try It!].DAL: message
+        WorkBench[Try It!].DAL.typeIn: message
         """
       Then you should see after 1s:
         """
@@ -134,7 +134,7 @@ Feature: basic
         """
       When you:
         """
-        WorkBench[Try It!].DAL: '= world'
+        WorkBench[Try It!].DAL.typeIn: '= world'
         """
       When you:
         """
@@ -164,7 +164,7 @@ Feature: basic
       When shutdown web server
       And you:
         """
-        WorkBench[Try It!].DAL: message
+        WorkBench[Try It!].DAL.typeIn: message
         """
       Then you should see:
         """

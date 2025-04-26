@@ -60,7 +60,7 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
     @SuppressWarnings("unchecked")
     @Override
     public T typeIn(String value) {
-        locator.type(value);
+        locator.pressSequentially(value);
         return (T) this;
     }
 

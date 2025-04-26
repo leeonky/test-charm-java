@@ -27,7 +27,7 @@ public class ElementExtension implements Extension {
                 .register((expected, actual) -> actual.cast(Element.class)
                         .map(e -> inputToElement(expected, e)))
                 .register((expected, actual) -> actual.cast(Elements.class)
-                        .map(e -> inputToElement(expected, (Element) e.single())));
+                        .map(e -> inputToElement(expected, (Element<?, ?>) e.single())));
 
         dal.getRuntimeContextBuilder().registerPropertyAccessor(WebElement.class,
                 new JavaClassPropertyAccessor<WebElement<?, ?>>((BeanClass) BeanClass.create(WebElement.class)) {
@@ -40,9 +40,9 @@ public class ElementExtension implements Extension {
                 });
     }
 
-    private static Checker inputToElement(Data<?> expected, Element e) {
+    private static Checker inputToElement(Data<?> expected, Element<?, ?> e) {
         if (e.isInput()) {
-            e.typeIn(expected.convert(String.class).value());
+            e.fillIn(expected.convert(String.class).value());
             return PHONY_CHECKER;
         }
         return null;

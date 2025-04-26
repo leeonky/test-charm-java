@@ -73,7 +73,7 @@ Feature: workspace
 # execute in new space
     When you:
       """
-      WorkBench[Ins1].Workspace[1].DAL: '= hello'
+      WorkBench[Ins1].Workspace[1].DAL.typeIn: '= hello'
       """
     Then you should see:
       """

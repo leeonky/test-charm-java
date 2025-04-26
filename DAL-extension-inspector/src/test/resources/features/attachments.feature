@@ -19,7 +19,7 @@ Feature: attachments
       """
     When you:
       """
-      WorkBench::await[Ins1]: { DAL: '.string::watch' }
+      WorkBench::await[Ins1]: { DAL.typeIn: '.string::watch' }
       WorkBench[Ins1].execute
       """
     Then you should see:
@@ -60,7 +60,7 @@ Feature: attachments
       """
     When you:
       """
-      WorkBench::await[Ins1]: { DAL: '::watch' }
+      WorkBench::await[Ins1]: { DAL.typeIn: '::watch' }
       WorkBench[Ins1].execute
       """
     Then you should see:
