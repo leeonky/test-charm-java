@@ -66,8 +66,8 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
 
     @SuppressWarnings("unchecked")
     @Override
-    public T fillIn(String value) {
-        locator.fill(value);
+    public T fillIn(Object value) {
+        locator.fill(String.valueOf(value));
         return (T) this;
     }
 

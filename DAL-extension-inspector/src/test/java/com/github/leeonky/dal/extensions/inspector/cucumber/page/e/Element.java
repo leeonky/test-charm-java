@@ -16,7 +16,7 @@ public class Element extends PlaywrightElement<Element> {
     }
 
     @Override
-    public Element fillIn(String value) {
+    public Element fillIn(Object value) {
         if (isCheckedBox()) {
             if (!value.equals(value()))
                 click();

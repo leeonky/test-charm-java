@@ -40,8 +40,8 @@ public interface Element<T extends Element<T, E>, E> {
 
     T clear();
 
-    default T fillIn(String value) {
-        return clear().typeIn(value);
+    default T fillIn(Object value) {
+        return clear().typeIn(String.valueOf(value));
     }
 
     default boolean isInput() {

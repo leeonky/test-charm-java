@@ -385,7 +385,7 @@ Feature: web ui
         """
       Then page in driver <driver> should:
         """
-        css[textarea].value=  hello
+        css[textarea].value= hello
         """
       When perform via driver <driver>:
         """
@@ -393,7 +393,49 @@ Feature: web ui
         """
       Then page in driver <driver> should:
         """
-        css[textarea].value=  helloworld
+        css[textarea].value= helloworld
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: clear input
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            input(value= 'any str')
+        """
+      When perform via driver <driver>:
+        """
+        css[input].clear
+        """
+      Then page in driver <driver> should:
+        """
+        css[input].value= ''
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: fill in means clear and type in
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            input(value= 'any str')
+        """
+      When perform via driver <driver>:
+        """
+        css[input].fillIn: hello
+        """
+      Then page in driver <driver> should:
+        """
+        css[input].value= hello
         """
       Examples:
         | driver     |
