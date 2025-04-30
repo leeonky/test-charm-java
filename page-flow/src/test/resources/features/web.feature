@@ -441,3 +441,47 @@ Feature: web ui
         | driver     |
         | selenium   |
         | playwright |
+
+    Scenario Outline: fill in (check) checkbox
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            input(type= 'checkbox')
+        """
+      When perform via driver <driver>:
+        """
+        css[input].fillIn: true
+        """
+      Then page in driver <driver> should:
+        """
+        css[input].value= true
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: fill in (uncheck) checkbox
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            input(type= 'checkbox', checked)
+        """
+      When perform via driver <driver>:
+        """
+        css[input].fillIn: false
+        """
+      Then page in driver <driver> should:
+        """
+        css[input].value= false
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+#  fill checkbox select

@@ -21,8 +21,8 @@ public class Element extends PlaywrightElement<Element> {
             if (!value.equals(value()))
                 click();
             return this;
-        } else
-            return super.fillIn(value);
+        }
+        return super.fillIn(value);
     }
 
     @Override

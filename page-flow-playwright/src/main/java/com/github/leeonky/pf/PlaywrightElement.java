@@ -66,20 +66,27 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
 
     @SuppressWarnings("unchecked")
     @Override
-    public T fillIn(Object value) {
-        locator.fill(String.valueOf(value));
+    public T clear() {
+        locator.clear();
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public T clear() {
-        locator.fill("");
+    public T fillIn(Object value) {
+        if (isCheckbox()) {
+            if (locator.isChecked() != (boolean) value)
+                click();
+            return (T) this;
+        }
+        locator.fill(String.valueOf(value));
         return (T) this;
     }
 
     @Override
     public Object value() {
+        if (isCheckbox())
+            return locator.isChecked();
         return locator.inputValue();
     }
 }

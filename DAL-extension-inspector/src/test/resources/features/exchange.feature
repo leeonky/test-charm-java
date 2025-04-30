@@ -13,8 +13,8 @@ Feature: exchange
         ::eventually : {
 //        TODO refactor
           Monitors=  | value |
-               Ins1: | on   |
-               Ins2: | on   |
+               Ins1: | true  |
+               Ins2: | true  |
         }
         """
 
@@ -26,8 +26,8 @@ Feature: exchange
         """
         ::eventually : {
           Monitors=  | value |
-               Ins1: | on   |
-               Ins2: | on   |
+               Ins1: | true  |
+               Ins2: | true  |
         }
         """
 
@@ -63,8 +63,8 @@ Feature: exchange
         """
         ::eventually : {
           Monitors=  | value |
-               Ins1: | on   |
-               Ins2: | on   |
+               Ins1: | true  |
+               Ins2: | true  |
         }
         """
 
@@ -75,8 +75,8 @@ Feature: exchange
         """
         ::eventually : {
           Monitors=  | value |
-               Ins1: | on   |
-               Ins2: | on   |
+               Ins1: | true  |
+               Ins2: | true  |
         }
         """
 
@@ -87,7 +87,7 @@ Feature: exchange
       And created DAL 'Ins1' with inspector extended
       And you should see:
       """
-      ::eventually : { Monitors[Ins1].value: on }
+      ::eventually : { Monitors[Ins1].value: true }
       """
 
     Scenario Outline: ::inspect will suspend, web page will catch the code and result in both AUTO and FORCE mode
@@ -244,7 +244,7 @@ Feature: exchange
       Given Inspector in "FORCED" mode
       And you should see:
       """
-      ::eventually : { Monitors[Ins1].value: on }
+      ::eventually : { Monitors[Ins1].value: true }
       """
       Given the 'Ins1' following input:
         """

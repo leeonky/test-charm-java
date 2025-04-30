@@ -70,4 +70,22 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
     public String attributeValue(String name) {
         return element.getAttribute(name);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T fillIn(Object value) {
+        if (isCheckbox()) {
+            if (element.isSelected() != (boolean) value)
+                click();
+            return (T) this;
+        }
+        return super.fillIn(value);
+    }
+
+    @Override
+    public Object value() {
+        if (isCheckbox())
+            return element.isSelected();
+        return WebElement.super.value();
+    }
 }

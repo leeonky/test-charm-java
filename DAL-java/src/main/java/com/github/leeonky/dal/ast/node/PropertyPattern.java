@@ -18,7 +18,7 @@ public class PropertyPattern extends DALNode implements ExecutableNode {
     @Override
     public Data<?> getValue(Data<?> data, RuntimeContextBuilder.DALRuntimeContext context) {
         String prefix = symbol.getRootSymbolName().toString();
-        Data partial = data.filter(prefix);
+        Data<?> partial = data.filter(prefix);
         context.initPartialPropertyStack(data, prefix, partial);
         return partial;
     }

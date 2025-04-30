@@ -19,6 +19,10 @@ public interface WebElement<T extends WebElement<T, E>, E> extends Element<T, E>
 
     String attributeValue(String name);
 
+    default boolean isCheckbox() {
+        return "checkbox".equals(attributeValue("type"));
+    }
+
     @Override
     default Object value() {
         if (isInput())
