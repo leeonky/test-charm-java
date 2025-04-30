@@ -484,4 +484,6 @@ Feature: web ui
         | selenium   |
         | playwright |
 
-#  fill checkbox select
+
+#  auto fillin
+#  fill select multi select

@@ -12,12 +12,12 @@ public class Element extends PlaywrightElement<Element> {
 
     @Override
     public boolean isInput() {
-        return isCheckedBox() || super.isInput();
+        return isCssCheckbox() || super.isInput();
     }
 
     @Override
     public Element fillIn(Object value) {
-        if (isCheckedBox()) {
+        if (isCssCheckbox()) {
             if (!value.equals(value()))
                 click();
             return this;
@@ -27,12 +27,12 @@ public class Element extends PlaywrightElement<Element> {
 
     @Override
     public Object value() {
-        if (isCheckedBox())
+        if (isCssCheckbox())
             return css("input").single().value();
         return super.value();
     }
 
-    private boolean isCheckedBox() {
+    private boolean isCssCheckbox() {
         return binarySearch((String[]) attribute("class"), "switch") >= 0;
     }
 }

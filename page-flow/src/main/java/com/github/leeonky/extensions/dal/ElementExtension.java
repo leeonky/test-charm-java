@@ -42,7 +42,7 @@ public class ElementExtension implements Extension {
 
     private static Checker inputToElement(Data<?> expected, Element<?, ?> e) {
         if (e.isInput()) {
-            e.fillIn(expected.convert(String.class).value());
+            e.fillIn(expected.value());
             return PHONY_CHECKER;
         }
         return null;
