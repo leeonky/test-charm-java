@@ -1,7 +1,9 @@
 package com.github.leeonky.pf;
 
+import com.github.leeonky.dal.runtime.AdaptiveList;
 import com.microsoft.playwright.Locator;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.github.leeonky.pf.By.*;
@@ -74,19 +76,23 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
     @SuppressWarnings("unchecked")
     @Override
     public T fillIn(Object value) {
-        if (isCheckbox()) {
+        if (checkAble()) {
             if (locator.isChecked() != (boolean) value)
                 click();
-            return (T) this;
-        }
-        locator.fill(String.valueOf(value));
+        } else if (selectAble()) {
+            locator.selectOption(String.valueOf(value).trim().split("\r\n|\r|\n"));
+        } else
+            locator.fill(String.valueOf(value));
         return (T) this;
     }
 
     @Override
     public Object value() {
-        if (isCheckbox())
+        if (checkAble())
             return locator.isChecked();
+        if (selectAble())
+            return AdaptiveList.staticList((Collection<?>)
+                    locator.evaluate("select => Array.from(select.selectedOptions).map(option => option.text)"));
         return locator.inputValue();
     }
 }

@@ -7,7 +7,7 @@ public interface WebElement<T extends WebElement<T, E>, E> extends Element<T, E>
     @Override
     default boolean isInput() {
         String tag = getTag().toLowerCase();
-        return tag.equals("textarea") || tag.equals("input");
+        return tag.equals("textarea") || tag.equals("input") || tag.equals("select");
     }
 
     default Object attribute(String name) {
@@ -19,8 +19,12 @@ public interface WebElement<T extends WebElement<T, E>, E> extends Element<T, E>
 
     String attributeValue(String name);
 
-    default boolean isCheckbox() {
+    default boolean checkAble() {
         return "checkbox".equals(attributeValue("type"));
+    }
+
+    default boolean selectAble() {
+        return "select".equals(getTag());
     }
 
     @Override

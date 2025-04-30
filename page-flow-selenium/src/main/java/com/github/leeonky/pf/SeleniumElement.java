@@ -1,6 +1,11 @@
 package com.github.leeonky.pf;
 
+import com.github.leeonky.dal.runtime.AdaptiveList;
+import org.openqa.selenium.support.ui.Select;
+
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.pf.By.*;
 import static java.lang.String.format;
@@ -74,18 +79,27 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
     @SuppressWarnings("unchecked")
     @Override
     public T fillIn(Object value) {
-        if (isCheckbox()) {
+        if (checkAble()) {
             if (element.isSelected() != (boolean) value)
                 click();
-            return (T) this;
-        }
-        return super.fillIn(value);
+        } else if (selectAble()) {
+            Select select = new Select(element);
+            if (select.isMultiple())
+                select.deselectAll();
+            Pattern.compile("\r\n|\r|\n").splitAsStream(String.valueOf(value).trim())
+                    .forEach(select::selectByVisibleText);
+        } else
+            super.fillIn(value);
+        return (T) this;
     }
 
     @Override
     public Object value() {
-        if (isCheckbox())
+        if (checkAble())
             return element.isSelected();
+        else if (selectAble())
+            return AdaptiveList.staticList(new Select(element).getAllSelectedOptions().stream()
+                    .map(org.openqa.selenium.WebElement::getText).collect(Collectors.toList()));
         return WebElement.super.value();
     }
 }

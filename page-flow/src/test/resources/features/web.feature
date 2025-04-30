@@ -349,7 +349,9 @@ Feature: web ui
         | selenium   |
         | playwright |
 
-    Scenario Outline: web element textarea and input is input
+  Rule: input output
+
+    Scenario Outline: web element textarea input select is input
       Given launch the following web page:
         """
         html
@@ -357,6 +359,7 @@ Feature: web ui
           body
             textarea
             input
+            select
             div
         """
       Then page in driver <driver> should:
@@ -429,6 +432,10 @@ Feature: web ui
           body
             input(value= 'any str')
         """
+      Then page in driver <driver> should:
+        """
+        css[input].value= 'any str'
+        """
       When perform via driver <driver>:
         """
         css[input].fillIn: hello
@@ -449,6 +456,10 @@ Feature: web ui
           head
           body
             input(type= 'checkbox')
+        """
+      Then page in driver <driver> should:
+        """
+        css[input].value= false
         """
       When perform via driver <driver>:
         """
@@ -471,6 +482,10 @@ Feature: web ui
           body
             input(type= 'checkbox', checked)
         """
+      Then page in driver <driver> should:
+        """
+        css[input].value= true
+        """
       When perform via driver <driver>:
         """
         css[input].fillIn: false
@@ -484,6 +499,65 @@ Feature: web ui
         | selenium   |
         | playwright |
 
+    Scenario Outline: fill in select
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            select
+              option Apple
+              option Banana
+              option(selected) Cherry
+              option Date
+        """
+      Then page in driver <driver> should:
+        """
+        css[select].value= Cherry
+        """
+      When perform via driver <driver>:
+        """
+        css[select].fillIn: Banana
+        """
+      Then page in driver <driver> should:
+        """
+        css[select].value= Banana
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: fill in multi select
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            select(multiple)
+              option Apple
+              option Banana
+              option(selected) Cherry
+              option Date
+        """
+      Then page in driver <driver> should:
+        """
+        css[select].value= Cherry
+        """
+      When perform via driver <driver>:
+        """
+        css[select].fillIn: ```
+                            Apple
+                            Date
+                            ```
+        """
+      Then page in driver <driver> should:
+        """
+        css[select].value= [Apple Date]
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
 
 #  auto fillin
-#  fill select multi select
