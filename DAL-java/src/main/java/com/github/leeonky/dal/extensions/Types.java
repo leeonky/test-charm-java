@@ -5,13 +5,16 @@ import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckerSet;
+import com.github.leeonky.util.Sneaky;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 import static java.util.Optional.of;
@@ -53,21 +56,21 @@ public class Types implements Extension {
 
                     @Override
                     public Data<?> getData(Data<AdaptiveList<?>> data, Object property, DALRuntimeContext context) {
-                        return data.map(AdaptiveList::soloList).property(0).property(property);
+                        return adaptiveListOf(data, d -> d.map(AdaptiveList::soloList).property(0).property(property));
                     }
 
                     @Override
                     public Set<?> getPropertyNames(Data<AdaptiveList<?>> data) {
-                        return data.map(AdaptiveList::soloList).property(0).fieldNames();
+                        return adaptiveListOf(data, d -> d.map(AdaptiveList::soloList).property(0).fieldNames());
                     }
                 })
                 .registerMetaPropertyPattern(AdaptiveList.class, ".*",
                         (RuntimeDataHandler<MetaData<AdaptiveList>>) metaData -> {
                             if (metaData.name().equals("size"))
                                 return metaData.delegate(d -> d.map(AdaptiveList::list));
-                            else {
-                                return metaData.delegate(d -> d.map(AdaptiveList::soloList).property(0));
-                            }
+                            else
+                                return metaData.delegate(d -> adaptiveListOf(Sneaky.cast(d),
+                                        data -> data.map(AdaptiveList::soloList).property(0)));
                         })
         ;
 
@@ -89,5 +92,13 @@ public class Types implements Extension {
             }
             return Optional.empty();
         });
+    }
+
+    private <T> T adaptiveListOf(Data<AdaptiveList<?>> data, Function<Data<AdaptiveList<?>>, T> function) {
+        try {
+            return function.apply(data);
+        } catch (InvalidAdaptiveListException e) {
+            throw illegalOp2("Expected list can only have one element, but is: " + data.dump());
+        }
     }
 }

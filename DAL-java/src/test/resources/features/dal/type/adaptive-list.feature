@@ -110,14 +110,10 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Get property `toUpperCase` failed, property can be:
-          1. public field
-          2. public getter
-          3. public method
-          4. Map key value
-          5. customized type getter
-          6. static method extension
-        java.lang.IllegalStateException: Expected only one element
+        Expected list can only have one element, but is: com.github.leeonky.dal.runtime.StaticAdaptiveList [
+            java.lang.String <hello>,
+            java.lang.String <world>
+        ]
         """
       And got the following notation:
         """
@@ -132,14 +128,10 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Get property `toUpperCase` failed, property can be:
-          1. public field
-          2. public getter
-          3. public method
-          4. Map key value
-          5. customized type getter
-          6. static method extension
-        java.lang.IllegalStateException: Expected only one element
+        Expected list can only have one element, but is: com.github.leeonky.dal.runtime.StaticAdaptiveList [
+            java.lang.String <hello>,
+            java.lang.String <world>
+        ]
         """
       And got the following notation:
         """
@@ -281,7 +273,16 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        java.lang.IllegalStateException: Expected only one element
+        Expected list can only have one element, but is: com.github.leeonky.dal.runtime.StaticAdaptiveList [
+            #package#Data {
+                i: java.lang.Integer <1>,
+                j: java.lang.Integer <2>
+            },
+            #package#Data {
+                i: java.lang.Integer <1>,
+                j: java.lang.Integer <2>
+            }
+        ]
         """
       And got the following notation:
         """
@@ -348,7 +349,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        java.lang.IllegalStateException: Expected only one element
+        com.github.leeonky.dal.runtime.InvalidAdaptiveListException: Expected only one element
         """
       And got the following notation:
         """
@@ -361,7 +362,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        java.lang.IllegalStateException: Expected only one element
+        com.github.leeonky.dal.runtime.InvalidAdaptiveListException: Expected only one element
         """
       And got the following notation:
         """

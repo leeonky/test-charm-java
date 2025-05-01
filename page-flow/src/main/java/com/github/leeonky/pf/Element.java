@@ -60,6 +60,10 @@ public interface Element<T extends Element<T, E>, E> {
         throw new IllegalStateException("Not support operation");
     }
 
+    default String getLocation() {
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     default Elements<T> find(By locator) {
         return new Elements<>(locator, (T) this);

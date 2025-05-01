@@ -137,19 +137,25 @@ Feature: web ui
         """
       Then failed with:
         """
-        Get property `text` failed, property can be:
-          1. public field
-          2. public getter
-          3. public method
-          4. Map key value
-          5. customized type getter
-          6. static method extension
-        java.lang.IllegalStateException: Operations can only be performed on a single located element at: css{html} => css{.target}, but 2 elements were found
+        Expected list can only have one element, but is: com.github.leeonky.pf.Elements [
+            com.github.leeonky.pf.cucumber.<type> {
+                input: java.lang.Boolean <false>,
+                location: java.lang.String </html[1]/body[1]/div[1]>,
+                locator: css{.target},
+                tag: java.lang.String <div>
+            },
+            com.github.leeonky.pf.cucumber.<type> {
+                input: java.lang.Boolean <false>,
+                location: java.lang.String </html[1]/body[1]/div[2]>,
+                locator: css{.target},
+                tag: java.lang.String <div>
+            }
+        ]
         """
       Examples:
-        | driver     |
-        | selenium   |
-        | playwright |
+        | driver     | type                   |
+        | selenium   | Selenium$SeleniumE     |
+        | playwright | Playwright$PlaywrightE |
 
     Scenario Outline: find element after waiting time
       Given launch the following web page:
@@ -197,14 +203,7 @@ Feature: web ui
         """
       Then failed with:
         """
-        Get property `text` failed, property can be:
-          1. public field
-          2. public getter
-          3. public method
-          4. Map key value
-          5. customized type getter
-          6. static method extension
-        java.lang.IllegalStateException: Operations can only be performed on a single located element at: css{html} => css{.target}, but no elements were found
+        Expected list can only have one element, but is: com.github.leeonky.pf.Elements []
         """
       And logs should:
         """
@@ -245,14 +244,7 @@ Feature: web ui
         """
       Then failed with:
         """
-        Get property `text` failed, property can be:
-          1. public field
-          2. public getter
-          3. public method
-          4. Map key value
-          5. customized type getter
-          6. static method extension
-        java.lang.IllegalStateException: Operations can only be performed on a single located element at: css{html} => css{.target}, but 0 elements were found
+        Expected list can only have one element, but is: com.github.leeonky.pf.Elements []
         """
       And logs should:
         """
@@ -261,9 +253,9 @@ Feature: web ui
           | INFO  | Found 0 elements                    |
         """
       Examples:
-        | driver     |
-        | selenium   |
-        | playwright |
+        | driver     | type                   |
+        | selenium   | Selenium$SeleniumE     |
+        | playwright | Playwright$PlaywrightE |
 
     Scenario Outline: Once only element have been operated, the previously located set of elements does not change
       Given launch the following web page:
@@ -560,4 +552,124 @@ Feature: web ui
         | selenium   |
         | playwright |
 
-#  auto fillin
+    Scenario Outline: fill in text input via : xxx
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            input(value= 'any str')
+        """
+      When perform via driver <driver>:
+        """
+        css[input]: hello
+        """
+      Then page in driver <driver> should:
+        """
+        css[input].value= hello
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: fill in to textarea via : xxx
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            textarea
+        """
+      When perform via driver <driver>:
+        """
+        css[textarea]: ```
+                       hello
+                       world
+                       ```
+        """
+      Then page in driver <driver> should:
+        """
+        css[textarea].value= ```
+                             hello
+                             world
+                             ```
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: fill in to checkbox via : xxx
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            input(type= 'checkbox')
+        """
+      When perform via driver <driver>:
+        """
+        css[input]: true
+        """
+      Then page in driver <driver> should:
+        """
+        css[input].value= true
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: fill in select via : xxx
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            select
+              option Apple
+              option Banana
+              option(selected) Cherry
+              option Date
+        """
+      When perform via driver <driver>:
+        """
+        css[select]: Banana
+        """
+      Then page in driver <driver> should:
+        """
+        css[select].value= Banana
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: fill in multi select via : xxx
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            select(multiple)
+              option Apple
+              option Banana
+              option(selected) Cherry
+              option Date
+        """
+      When perform via driver <driver>:
+        """
+        css[select].fillIn: ```
+                            Apple
+                            Date
+                            ```
+        """
+      Then page in driver <driver> should:
+        """
+        css[select].value= [Apple Date]
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |

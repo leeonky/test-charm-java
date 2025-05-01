@@ -17,7 +17,7 @@ public class StaticAdaptiveList<T> implements AdaptiveList<T> {
     @Override
     public List<T> soloList() {
         if (list.size() != 1)
-            throw new IllegalStateException("Expected only one element");
+            throw new InvalidAdaptiveListException("Expected only one element");
         return list.collect();
     }
 }

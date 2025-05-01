@@ -4,6 +4,7 @@ import com.github.leeonky.dal.extensions.basic.sync.Retryer;
 import com.github.leeonky.dal.runtime.AdaptiveList;
 import com.github.leeonky.dal.runtime.CollectionDALCollection;
 import com.github.leeonky.dal.runtime.DALCollection;
+import com.github.leeonky.dal.runtime.InvalidAdaptiveListException;
 import com.github.leeonky.util.Sneaky;
 
 import java.util.List;
@@ -54,8 +55,8 @@ public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
         return list.collect();
     }
 
-    private IllegalStateException unexpectedElementSize(Object size) {
-        return new IllegalStateException(String.format("%s, but %s elements were found",
+    private InvalidAdaptiveListException unexpectedElementSize(Object size) {
+        return new InvalidAdaptiveListException(String.format("%s, but %s elements were found",
                 locateInfo("Operations can only be performed on a single located element at: ", " => " + locator), size));
     }
 

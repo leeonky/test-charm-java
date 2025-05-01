@@ -102,4 +102,32 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
                     .map(org.openqa.selenium.WebElement::getText).collect(Collectors.toList()));
         return WebElement.super.value();
     }
+
+    @Override
+    public String getLocation() {
+        return generateFullXPath(element);
+    }
+
+    private String generateFullXPath(org.openqa.selenium.WebElement element) {
+        if (element.getTagName().equals("html")) {
+            return "/html[1]";
+        }
+        org.openqa.selenium.WebElement parent = element.findElement(org.openqa.selenium.By.xpath(".."));
+        String elementTag = element.getTagName();
+        int count = 0;
+        int index = 1;
+
+        for (org.openqa.selenium.WebElement sibling : parent.findElements(org.openqa.selenium.By.xpath("*"))) {
+            String siblingTag = sibling.getTagName();
+            if (siblingTag.equals(elementTag)) {
+                if (sibling.equals(element)) {
+                    index = count + 1;
+                    break;
+                }
+                count++;
+            }
+        }
+
+        return generateFullXPath(parent) + "/" + elementTag + "[" + index + "]";
+    }
 }

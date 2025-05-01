@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.JavaClassPropertyAccessor;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
+import com.github.leeonky.pf.By;
 import com.github.leeonky.pf.Element;
 import com.github.leeonky.pf.Elements;
 import com.github.leeonky.pf.WebElement;
@@ -38,6 +39,9 @@ public class ElementExtension implements Extension {
                         return super.getValue(webElement, property);
                     }
                 });
+
+        dal.getRuntimeContextBuilder().registerDumper(By.class, byData -> (data, dumpingBuffer) ->
+                dumpingBuffer.append(data.value().toString()));
     }
 
     private static Checker inputToElement(Data<?> expected, Element<?, ?> e) {
