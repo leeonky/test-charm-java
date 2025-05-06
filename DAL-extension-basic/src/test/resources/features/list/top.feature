@@ -32,3 +32,17 @@ Feature: top n lit
 
     The root value was: null
     """
+
+  Scenario: top n for adaptive list
+    Given the following java class:
+      """
+      public class Test {
+        public AdaptiveList<String> getList() {
+          return AdaptiveList.staticList(Arrays.asList("a", "abc"));
+        }
+      }
+      """
+    Then the following should pass:
+      """
+      list::top[1]= [a]
+      """
