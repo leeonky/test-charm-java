@@ -34,7 +34,7 @@ public class Steps {
     private final Playwright.BrowserPlaywright browserPlaywright = new Playwright.BrowserPlaywright(() -> com.github.leeonky.pf.cucumber.Playwright.playwright.chromium().connect("ws://www.s.com:3000/", new BrowserType.ConnectOptions().setHeaders(
             new HashMap<String, String>() {{
                 put("x-playwright-launch-options", "{ \"headless\": false }");
-            }})));
+            }})).newContext());
     private Selenium.SeleniumE seleniumE;
     private Playwright.PlaywrightE playwrightE;
 

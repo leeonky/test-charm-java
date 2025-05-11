@@ -7,7 +7,6 @@ import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.DalRuntimeException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
@@ -128,8 +127,8 @@ public class Actual {
     public void verifySchema(Schema expect) {
         try {
             expect.verify(actual);
-        } catch (SchemaAssertionFailure schemaAssertionFailure) {
-            Verification.errorLog(schemaAssertionFailure.getMessage());
+        } catch (Throwable throwable) {
+            Verification.errorLog(throwable.getMessage());
         }
     }
 }
