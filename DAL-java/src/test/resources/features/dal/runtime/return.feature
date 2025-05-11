@@ -30,10 +30,10 @@ Feature: return
   Scenario: return hook via interface
     Given the following java class:
     """
-    public class DataValue implements ReturnHook {
+    public class DataValue implements ScopedObject {
       public int i = 100;
       public int j = 0;
-      public void onReturn() {
+      public void onExit() {
         j = 20;
       }
     }

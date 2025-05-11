@@ -50,7 +50,7 @@ public class Types implements Extension {
                         return proxyObject.isNull();
                     }
                 })
-                .registerReturnHook(d -> d.cast(ReturnHook.class).ifPresent(ReturnHook::onReturn))
+                .registerReturnHook(d -> d.cast(ScopedObject.class).ifPresent(ScopedObject::onExit))
                 .registerDALCollectionFactory(AdaptiveList.class, AdaptiveList::list)
                 .registerPropertyAccessor(AdaptiveList.class, new PropertyAccessor<AdaptiveList<?>>() {
 

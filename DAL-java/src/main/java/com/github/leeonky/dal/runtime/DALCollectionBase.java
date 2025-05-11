@@ -1,7 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.IndexedElement;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
