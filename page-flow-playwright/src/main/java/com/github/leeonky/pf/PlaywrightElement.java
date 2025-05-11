@@ -10,7 +10,7 @@ import static com.github.leeonky.pf.By.*;
 import static java.lang.String.format;
 
 public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
-        extends ElementState<T, Locator> implements WebElement<T, Locator> {
+        extends AbstractElement<T, Locator> implements WebElement<T, Locator> {
     protected final Locator locator;
 
     protected PlaywrightElement(Locator locator) {

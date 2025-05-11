@@ -2,14 +2,14 @@ package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Tabs;
+import com.github.leeonky.pf.AbstractRegion;
 import com.github.leeonky.pf.Elements;
-import com.github.leeonky.pf.Region;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MainPage extends Region<Element> {
+public class MainPage extends AbstractRegion<Element> {
 
     private final Tabs<WorkbenchRegion, Element> tabs;
 

@@ -1,6 +1,6 @@
 package com.github.leeonky.pf;
 
-public abstract class ElementState<T extends Element<T, E>, E> implements Element<T, E> {
+public abstract class AbstractElement<T extends Element<T, E>, E> implements Element<T, E> {
     private By locator;
     private T parent;
 
@@ -22,5 +22,10 @@ public abstract class ElementState<T extends Element<T, E>, E> implements Elemen
     @Override
     public void parent(T parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public String toString() {
+        return text();
     }
 }

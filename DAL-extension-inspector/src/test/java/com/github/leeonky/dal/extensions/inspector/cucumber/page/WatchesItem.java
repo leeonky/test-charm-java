@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page;
 
 import com.github.leeonky.dal.extensions.inspector.cucumber.page.e.Element;
+import com.github.leeonky.pf.AbstractRegion;
 import com.github.leeonky.pf.Elements;
-import com.github.leeonky.pf.Region;
 
-public class WatchesItem extends Region<Element> {
+public class WatchesItem extends AbstractRegion<Element> {
     public WatchesItem(Element element) {
         super(element);
     }

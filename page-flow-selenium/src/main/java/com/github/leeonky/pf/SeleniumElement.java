@@ -12,7 +12,7 @@ import static java.lang.String.format;
 import static org.openqa.selenium.By.cssSelector;
 
 public abstract class SeleniumElement<T extends SeleniumElement<T>>
-        extends ElementState<T, org.openqa.selenium.WebElement>
+        extends AbstractElement<T, org.openqa.selenium.WebElement>
         implements WebElement<T, org.openqa.selenium.WebElement> {
     protected final org.openqa.selenium.WebElement element;
 

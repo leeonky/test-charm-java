@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.extensions.inspector.cucumber.page.e;
 
-import com.github.leeonky.pf.Region;
+import com.github.leeonky.pf.AbstractRegion;
 
-public class Tab extends Region<Element> {
+public class Tab extends AbstractRegion<Element> {
     private final Element header;
 
     public Tab(Element header, Element element) {

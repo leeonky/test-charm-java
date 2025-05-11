@@ -119,9 +119,7 @@ public class Data<T> {
         FilteredObject filteredObject = new FilteredObject();
         fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
-                {
-                    filteredObject.put(fieldName.substring(prefix.length()), property(fieldName).value());
-                });
+                        filteredObject.put(fieldName.substring(prefix.length()), property(fieldName).value()));
         return new Data<>(filteredObject, context, schemaType);
     }
 
