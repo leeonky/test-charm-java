@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.runtime.schema;
 
-import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
+import com.github.leeonky.dal.runtime.MissingFieldValueGenericTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.TriplePredicate;
 import com.github.leeonky.util.BeanClass;
@@ -55,7 +55,7 @@ public class Verification {
     private boolean valueContent(DALRuntimeContext runtimeContext, Actual actual) {
         try {
             return expect.verifyValue(actual::verifyValue);
-        } catch (IllegalFieldException ignore) {
+        } catch (MissingFieldValueGenericTypeException ignore) {
             throw actual.invalidGenericType();
         }
     }

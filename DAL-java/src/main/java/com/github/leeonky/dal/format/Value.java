@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.format;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.IllegalFieldException;
+import com.github.leeonky.dal.runtime.MissingFieldValueGenericTypeException;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.function.Comparator;
 
@@ -70,7 +70,7 @@ public interface Value<T> extends Type<T> {
     @SuppressWarnings("unchecked")
     default T convertAs(Data<?> actual, BeanClass<?> type) {
         if (type == null)
-            throw new IllegalFieldException();
+            throw new MissingFieldValueGenericTypeException();
         return (T) actual.convert(type.getType()).value();
     }
 
