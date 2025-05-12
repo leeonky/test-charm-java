@@ -12,7 +12,7 @@ import com.github.leeonky.util.Sneaky;
 
 import java.util.Set;
 
-import static com.github.leeonky.dal.runtime.DalException.extractException;
+import static com.github.leeonky.dal.runtime.DALException.extractException;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 
 @Order(BUILD_IN)

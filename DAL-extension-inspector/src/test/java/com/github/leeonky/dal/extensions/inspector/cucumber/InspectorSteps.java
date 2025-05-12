@@ -47,7 +47,7 @@ public class InspectorSteps {
     public void initTest() {
         testContext = new TestContext();
         Inspector.shutdown();
-        PageFlow.setDal(dal);
+        PageFlow.setDAL(dal);
     }
 
     @When("launch inspector web server")

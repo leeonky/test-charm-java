@@ -1,7 +1,6 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.dal.type.Partial;
@@ -92,10 +91,10 @@ public class AssertionsTest {
     public static class BeanSchema implements Schema {
 
         @Override
-        public void verify(Data<?> data) throws SchemaAssertionFailure {
+        public void verify(Data<?> data) {
             Bean bean = (Bean) data.value();
             if (bean.getValue() != 1)
-                throw new SchemaAssertionFailure("Failed");
+                throw new AssertionError("Failed");
         }
     }
 

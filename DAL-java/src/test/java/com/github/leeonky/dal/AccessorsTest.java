@@ -9,7 +9,7 @@ class AccessorsTest {
 
     @Test
     void given_dal_factory() {
-        Accessors.setDalFactory(DAL::getInstance);
+        Accessors.setDALFactory(DAL::getInstance);
 
         assertThat((int) get("length").from("hello")).isEqualTo(5);
     }

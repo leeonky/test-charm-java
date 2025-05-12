@@ -38,11 +38,11 @@ public class Inspector {
     //   TODO refactor
     private final Map<String, WsContext> clientConnections = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> clientMonitors = new ConcurrentHashMap<>();
-    private final Map<String, DalInstance> dalInstances = new ConcurrentHashMap<>();
+    private final Map<String, DALInstance> dalInstances = new ConcurrentHashMap<>();
     private static Supplier<Object> defaultInput = () -> null;
 
     public Inspector() {
-        DalInstance defaultInstance = new DalInstance(() -> defaultInput.get(), DAL.create("Try It!", InspectorExtension.class), "");
+        DALInstance defaultInstance = new DALInstance(() -> defaultInput.get(), DAL.create("Try It!", InspectorExtension.class), "");
         defaultInstance.running = false;
         dalInstances.put("Try It!", defaultInstance);
         javalin = Javalin.create(config -> config.addStaticFiles("/public", Location.CLASSPATH))
@@ -67,12 +67,12 @@ public class Inspector {
     }
 
     private void responseAttachment(String name, int index, Context ctx) {
-        DalInstance dalInstance = dalInstances.get(name);
+        DALInstance dalInstance = dalInstances.get(name);
         if (dalInstance != null) {
             Watch watch = dalInstance.watches.get(index);
-            if (watch instanceof DalInstance.BinaryWatch) {
+            if (watch instanceof DALInstance.BinaryWatch) {
 
-                DalInstance.BinaryWatch binaryWatch = (DalInstance.BinaryWatch) watch;
+                DALInstance.BinaryWatch binaryWatch = (DALInstance.BinaryWatch) watch;
                 String contentType = Sneaky.get(() -> new Tika().detect(binaryWatch.binary()));
                 ctx.contentType(contentType == null ? "application/octet-stream" : contentType);
                 ctx.result(binaryWatch.binary());
@@ -92,7 +92,7 @@ public class Inspector {
 
     private void pass(String name) {
         if (!name.equals("Try It!")) {
-            DalInstance remove = dalInstances.remove(name);
+            DALInstance remove = dalInstances.remove(name);
             if (remove != null)
                 remove.pass();
         }
@@ -121,7 +121,7 @@ public class Inspector {
 
     private void release(String name) {
         if (!name.equals("Try It!")) {
-            DalInstance remove = dalInstances.remove(name);
+            DALInstance remove = dalInstances.remove(name);
             if (remove != null)
                 remove.release();
         }
@@ -135,7 +135,7 @@ public class Inspector {
         if (clientConnections.containsKey(session)) {
             clientMonitors.put(session, Arrays.stream(body.trim().split("\\n")).map(String::trim).filter(s -> !s.isEmpty()).collect(Collectors.toSet()));
 
-            for (DalInstance dalInstance : dalInstances.values()) {
+            for (DALInstance dalInstance : dalInstances.values()) {
                 if (dalInstance.running)
                     clientConnections.get(session).send(ObjectWriter.serialize(new HashMap<String, String>() {{
                         put("request", dalInstance.dal.getName());
@@ -144,7 +144,7 @@ public class Inspector {
         }
     }
 
-    public static class DalInstance {
+    public static class DALInstance {
         private final Supplier<Object> input;
         private boolean running = true;
         private boolean pass = false;
@@ -152,13 +152,13 @@ public class Inspector {
         private final String code;
         private final List<Watch> watches = new ArrayList<>();
 
-        public DalInstance(Supplier<Object> input, DAL dal, String code) {
+        public DALInstance(Supplier<Object> input, DAL dal, String code) {
             this.input = input;
             this.dal = dal;
             this.code = code;
         }
 
-        public DalInstance(Data<?> inputData, DAL dal, String code) {
+        public DALInstance(Data<?> inputData, DAL dal, String code) {
             input = inputData::value;
             this.dal = dal;
             this.code = code;
@@ -185,7 +185,7 @@ public class Inspector {
             try {
                 Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
 
-                System.err.println("\tDal inspector running at:");
+                System.err.println("\tDAl inspector running at:");
 
                 while (interfaces.hasMoreElements()) {
                     Enumeration<InetAddress> inetAddresses = interfaces.nextElement().getInetAddresses();
@@ -296,7 +296,7 @@ public class Inspector {
 //        lock inspect by name
 //        check mode
         if (currentMode() == Mode.FORCED) {
-            DalInstance dalInstance = new DalInstance(input, dal, code);
+            DALInstance dalInstance = new DALInstance(input, dal, code);
             dalInstances.put(dal.getName(), dalInstance);
 
 //            List<WsContext> monitored = clientMonitors.entrySet().stream().filter(e -> e.getValue().contains(dal.getName()))
@@ -317,7 +317,7 @@ public class Inspector {
                     .map(o -> clientConnections.get(o.getKey()))
                     .collect(Collectors.toList());
             if (!monitored.isEmpty()) {
-                DalInstance dalInstance = new DalInstance(input, dal, code);
+                DALInstance dalInstance = new DALInstance(input, dal, code);
                 dalInstances.put(dal.getName(), dalInstance);
                 for (WsContext wsContext : monitored) {
                     wsContext.send(ObjectWriter.serialize(new HashMap<String, String>() {{
@@ -403,7 +403,7 @@ public class Inspector {
 
     private boolean calledFromInspector() {
         for (StackTraceElement stack : Thread.currentThread().getStackTrace())
-            if (DalInstance.class.getName().equals(stack.getClassName()))
+            if (DALInstance.class.getName().equals(stack.getClassName()))
                 return true;
         return false;
     }

@@ -1,21 +1,21 @@
 package com.github.leeonky.dal.runtime;
 
-import static com.github.leeonky.dal.runtime.DalException.buildMessage;
+import static com.github.leeonky.dal.runtime.DALException.buildMessage;
 
-public class DalRuntimeException extends RuntimeException {
-    public DalRuntimeException(String message) {
+public class DALRuntimeException extends RuntimeException {
+    public DALRuntimeException(String message) {
         this(message, null);
     }
 
-    public DalRuntimeException() {
+    public DALRuntimeException() {
         this(null, null);
     }
 
-    public DalRuntimeException(Throwable cause) {
+    public DALRuntimeException(Throwable cause) {
         this(null, cause);
     }
 
-    public DalRuntimeException(String message, Throwable cause) {
+    public DALRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
 

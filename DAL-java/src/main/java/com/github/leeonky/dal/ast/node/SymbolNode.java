@@ -7,7 +7,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.leeonky.dal.runtime.DalException.locateError;
+import static com.github.leeonky.dal.runtime.DALException.locateError;
 import static java.lang.String.format;
 
 public class SymbolNode extends DALNode implements ExecutableNode {

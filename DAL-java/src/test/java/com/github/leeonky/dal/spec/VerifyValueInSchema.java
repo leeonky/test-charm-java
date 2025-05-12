@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.DALException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Schema;
@@ -120,7 +120,7 @@ public class VerifyValueInSchema extends Base {
         assertPass(new HashMap<String, Object>() {{
             put("value", "0");
         }}, "is MatchType");
-        DalException dalException = assertFailed(new HashMap<String, Object>() {{
+        DALException dalException = assertFailed(new HashMap<String, Object>() {{
             put("value", "invalid int");
         }}, "is MatchType");
         assertThat(dalException).hasMessage("Expected to match schema `MatchType` but was not\n" +
@@ -142,11 +142,11 @@ public class VerifyValueInSchema extends Base {
                 .registerSchema(MissingTypeArg.class)
                 .registerSchema(MissingTypeArgButGivenValue.class);
 
-        assertThrows(DalException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
+        assertThrows(DALException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArg"));
 
-        assertThrows(DalException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
+        assertThrows(DALException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArgButGivenValue"));
     }

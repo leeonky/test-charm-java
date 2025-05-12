@@ -4,7 +4,7 @@ import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.DalRuntimeException;
+import com.github.leeonky.dal.runtime.DALRuntimeException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.type.Schema;
@@ -51,7 +51,7 @@ public class Actual {
         return ofNullable(schemaType.getAnnotation(SubType.class)).map(subType -> {
             Object subTypeProperty = actual.property(compiler.toChainNodes(subType.property())).value();
             return (Class<Object>) Stream.of(subType.types()).filter(t -> t.value().equals(subTypeProperty))
-                    .map(SubType.Type::type).findFirst().orElseThrow(() -> new DalRuntimeException(
+                    .map(SubType.Type::type).findFirst().orElseThrow(() -> new DALRuntimeException(
                             format("Cannot guess sub type through property type value[%s]", subTypeProperty)));
         }).orElse((Class<Object>) schemaType);
     }

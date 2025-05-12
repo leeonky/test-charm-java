@@ -26,7 +26,7 @@ public class Assertions {
     private static Supplier<DAL> dalFactory = () -> DAL.dal("AssertD");
     private Class<?> schema;
 
-    public static void setDalFactory(Supplier<DAL> dalFactory) {
+    public static void setDALFactory(Supplier<DAL> dalFactory) {
         Assertions.dalFactory = dalFactory;
     }
 
@@ -58,17 +58,17 @@ public class Assertions {
     public Assertions should(String prefix, String verification) {
         String fullCode = prefix + verification;
         try {
-            getDal().evaluate(inputCode, fullCode, schema);
+            getDAL().evaluate(inputCode, fullCode, schema);
             return this;
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + getDal().getRuntimeContextBuilder().build(inputCode).getThis().dump();
+                detailMessage += "\n\nThe root value was: " + getDAL().getRuntimeContextBuilder().build(inputCode).getThis().dump();
             throw new AssertionError(detailMessage);
         }
     }
 
-    private DAL getDal() {
+    private DAL getDAL() {
         if (dal == null)
             dal = dalFactory.get();
         return dal;
@@ -84,7 +84,7 @@ public class Assertions {
 
     @SuppressWarnings("unchecked")
     public Assertions is(Class<?> schema) {
-        RuntimeContextBuilder.DALRuntimeContext context = getDal().getRuntimeContextBuilder().build(inputCode, schema);
+        RuntimeContextBuilder.DALRuntimeContext context = getDAL().getRuntimeContextBuilder().build(inputCode, schema);
         Data<?> input = context.getThis();
         try {
             this.schema = schema;
@@ -101,14 +101,14 @@ public class Assertions {
 
     public Assertions is(String schema) {
         if (schema.startsWith("[") && schema.endsWith("]"))
-            return is(Array.newInstance(getDal().getRuntimeContextBuilder().schemaType(
+            return is(Array.newInstance(getDAL().getRuntimeContextBuilder().schemaType(
                     schema.replace('[', ' ').replace(']', ' ').trim()).getType(), 0).getClass());
-        return is(getDal().getRuntimeContextBuilder().schemaType(schema).getType());
+        return is(getDAL().getRuntimeContextBuilder().schemaType(schema).getType());
     }
 
     public Assertions isEqualTo(Object expect) {
         expression(InputNode.INPUT_NODE, Factory.equal(), new ConstValueNode(expect))
-                .evaluate(getDal().getRuntimeContextBuilder().build(inputCode));
+                .evaluate(getDAL().getRuntimeContextBuilder().build(inputCode));
         return this;
     }
 }

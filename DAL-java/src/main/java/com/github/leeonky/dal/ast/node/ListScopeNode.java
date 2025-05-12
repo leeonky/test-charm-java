@@ -17,7 +17,7 @@ import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
-import static com.github.leeonky.dal.runtime.DalException.locateError;
+import static com.github.leeonky.dal.runtime.DALException.locateError;
 import static com.github.leeonky.dal.runtime.ExpressionException.exception;
 import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static com.github.leeonky.util.Zipped.zip;
@@ -184,7 +184,7 @@ public class ListScopeNode extends DALNode {
                                 new SymbolNode(elementIndex, BRACKET))).evaluate(context);
                         break;
 //                        TODO test should which exception ignore which exception not ignore
-                    } catch (DalException ignore) {
+                    } catch (DALException ignore) {
                     }
                 }
             } catch (AssertionFailure exception) {
@@ -213,7 +213,7 @@ public class ListScopeNode extends DALNode {
                     result = expressions.get(index).evaluateData(context);
                 } catch (DifferentCellSize differentCellSize) {
                     throw new RowAssertionFailure(index, differentCellSize);
-                } catch (DalException dalException) {
+                } catch (DALException dalException) {
                     if (style == Style.TABLE)
                         throw new ElementAssertionFailure(index, dalException);
                     throw dalException;

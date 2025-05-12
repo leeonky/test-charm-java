@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime.checker;
 
-import com.github.leeonky.dal.runtime.DalRuntimeException;
+import com.github.leeonky.dal.runtime.DALRuntimeException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.ConvertException;
@@ -50,7 +50,7 @@ public interface Checker {
         try {
             return transformActual(actual, expected, context);
         } catch (ConvertException e) {
-            throw new DalRuntimeException(e.getMessage());
+            throw new DALRuntimeException(e.getMessage());
         }
     }
 

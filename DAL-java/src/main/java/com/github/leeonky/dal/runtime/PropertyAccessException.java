@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-public class PropertyAccessException extends DalRuntimeException {
+public class PropertyAccessException extends DALRuntimeException {
     public PropertyAccessException(Object property, Throwable cause) {
         super(buildMessage(property), cause);
     }

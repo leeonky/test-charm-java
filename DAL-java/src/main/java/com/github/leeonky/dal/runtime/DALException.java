@@ -6,31 +6,31 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
 
-public class DalException extends InterpreterException {
+public class DALException extends InterpreterException {
     private final Throwable cause;
 
-    public DalException(String message, int position) {
+    public DALException(String message, int position) {
         this(message, position, Position.Type.CHAR, null);
     }
 
-    public DalException(String message, int position, Throwable cause) {
+    public DALException(String message, int position, Throwable cause) {
         this(message, position, Position.Type.CHAR, cause);
     }
 
-    public DalException(String message, int position, Position.Type type) {
+    public DALException(String message, int position, Position.Type type) {
         this(message, position, type, null);
     }
 
-    public DalException(String message, int position, Position.Type type, Throwable cause) {
+    public DALException(String message, int position, Position.Type type, Throwable cause) {
         super(message, position, type);
         this.cause = cause;
     }
 
-    public DalException(int position, Throwable cause) {
+    public DALException(int position, Throwable cause) {
         this(null, position, Position.Type.CHAR, cause);
     }
 
-    public DalException(int position, Position.Type type, Throwable cause) {
+    public DALException(int position, Position.Type type, Throwable cause) {
         this(null, position, type, cause);
     }
 
@@ -85,11 +85,11 @@ public class DalException extends InterpreterException {
             return (RuntimeException) e;
         if (e instanceof AssertionError)
             return new AssertionFailure(e.getMessage(), positionBegin);
-        return new DalException(positionBegin, e);
+        return new DALException(positionBegin, e);
     }
 
     public static Throwable buildUserRuntimeException(Throwable error) {
-        if (error instanceof DalRuntimeException
+        if (error instanceof DALRuntimeException
                 || error instanceof UserRuntimeException
                 || error instanceof AssertionError
                 || error instanceof ExpressionException

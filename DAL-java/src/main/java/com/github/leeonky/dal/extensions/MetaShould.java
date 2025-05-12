@@ -14,7 +14,7 @@ public class MetaShould implements ProxyObject {
     @Override
     public Object getValue(Object property) {
         return metaData.data().currying(property).map(curryingMethod -> new PredicateMethod(curryingMethod, property))
-                .orElseThrow(() -> new DalRuntimeException(format("Predicate method %s not exist in %s",
+                .orElseThrow(() -> new DALRuntimeException(format("Predicate method %s not exist in %s",
                         property, metaData.data().dump())));
     }
 
@@ -30,11 +30,11 @@ public class MetaShould implements ProxyObject {
         public boolean should(Object value) {
             Object result = curryingMethod.call(value).resolve();
             if (result instanceof CurryingMethod)
-                throw new DalRuntimeException(format("Failed to invoke predicate method `%s` of %s, " +
+                throw new DALRuntimeException(format("Failed to invoke predicate method `%s` of %s, " +
                         "maybe missing parameters", method, metaData.data().dump()));
             if (result instanceof Boolean)
                 return (boolean) result;
-            throw new DalRuntimeException(format("Predicate method `%s` return type should boolean but %s", method,
+            throw new DALRuntimeException(format("Predicate method `%s` return type should boolean but %s", method,
                     metaData.runtimeContext().data(result).dump()));
         }
 

@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.CollectionDALCollection;
-import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.DALException;
 import com.github.leeonky.dal.runtime.IterableDALCollection;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.spec.Base;
@@ -130,7 +130,7 @@ class PropertyNodeTest {
                     .registerStaticMethodExtension(SameStaticBeanMethods.class)
                     .build(new Bean());
 
-            assertThrows(DalException.class, () -> Base.createPropertyNode(INPUT_NODE, "getInt")
+            assertThrows(DALException.class, () -> Base.createPropertyNode(INPUT_NODE, "getInt")
                     .evaluate(DALRuntimeContext));
         }
     }

@@ -51,7 +51,7 @@ public class Data<T> {
     public DataList list() {
         if (list == null) {
             if (!isList())
-                throw new DalRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
+                throw new DALRuntimeException(format("Invalid input value, expect a List but: %s", dump().trim()));
             list = new DataList(context.createCollection(value()));
         }
         return list;
@@ -74,7 +74,7 @@ public class Data<T> {
                         ? new Data<>(list().getByIndex((int) propertyChain), context, schemaType.access(propertyChain))
                         : context.accessProperty(this, propertyChain);
             } catch (IndexOutOfBoundsException ex) {
-                throw new DalRuntimeException(ex.getMessage());
+                throw new DALRuntimeException(ex.getMessage());
             } catch (ListMappingElementAccessException | ExpressionException | InterpreterException |
                      PropertyAccessException ex) {
                 throw ex;

@@ -10,7 +10,7 @@ public class Accessors {
     private DAL dal;
     private static Supplier<DAL> dalFactory = () -> DAL.dal("AssertD");
 
-    public static void setDalFactory(Supplier<DAL> dalFactory) {
+    public static void setDALFactory(Supplier<DAL> dalFactory) {
         Accessors.dalFactory = dalFactory;
     }
 
@@ -33,17 +33,17 @@ public class Accessors {
 
     public <T> T from(Object input) {
         try {
-            return getDal().evaluate(input, expression);
+            return getDAL().evaluate(input, expression);
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(expression, 0) + "\n\n" + e.getMessage();
             if (dumpInput)
                 detailMessage += "\n\nThe root value was: "
-                        + getDal().getRuntimeContextBuilder().build(input).getThis().dump();
+                        + getDAL().getRuntimeContextBuilder().build(input).getThis().dump();
             throw new RuntimeException(detailMessage, e);
         }
     }
 
-    private DAL getDal() {
+    private DAL getDAL() {
         if (dal == null)
             dal = dalFactory.get();
         return dal;

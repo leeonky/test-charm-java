@@ -5,8 +5,8 @@ Feature: customized schema
     """
     @Partial
     public class SchemaVerify implements Schema {
-        public void verify(Data data) throws SchemaAssertionFailure {
-            throw new SchemaAssertionFailure((String)data.property("message").instance());
+        public void verify(Data data) {
+            throw new AssertionError((String)data.property("message").instance());
         }
     }
     """
@@ -36,7 +36,7 @@ Feature: customized schema
     """
     @Partial
     public class SchemaVerify implements Schema {
-        public void verify(Data data) throws SchemaAssertionFailure {
+        public void verify(Data data) {
             throw new java.lang.RuntimeException("error");
         }
     }

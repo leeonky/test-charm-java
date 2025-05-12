@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.runtime.DalRuntimeException;
+import com.github.leeonky.dal.runtime.DALRuntimeException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Objects;
 
-import static com.github.leeonky.dal.runtime.DalException.locateError;
+import static com.github.leeonky.dal.runtime.DALException.locateError;
 
 public class ConstRemarkNode extends DALNode {
     private final DALNode constNode;
@@ -28,7 +28,7 @@ public class ConstRemarkNode extends DALNode {
         Data<?> rightValue = remarkNode.evaluateData(context);
         if (Objects.equals(leftValue.value(), rightValue.value()))
             return leftValue;
-        throw locateError(new DalRuntimeException(String.format("Incorrect const remark, const value was %s\nbut remark %s was %s",
+        throw locateError(new DALRuntimeException(String.format("Incorrect const remark, const value was %s\nbut remark %s was %s",
                 leftValue.dump(), remarkNode.inspect(), rightValue.dump())), remarkNode.getPositionBegin());
     }
 }

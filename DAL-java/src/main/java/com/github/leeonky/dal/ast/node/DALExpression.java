@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.runtime.DalException.locateError;
+import static com.github.leeonky.dal.runtime.DALException.locateError;
 
 public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator>,
         ExecutableNode {

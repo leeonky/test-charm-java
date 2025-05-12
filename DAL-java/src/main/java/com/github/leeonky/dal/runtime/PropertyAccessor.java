@@ -7,7 +7,7 @@ import com.github.leeonky.util.Sneaky;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.github.leeonky.dal.runtime.DalException.buildUserRuntimeException;
+import static com.github.leeonky.dal.runtime.DALException.buildUserRuntimeException;
 
 public interface PropertyAccessor<T> {
 

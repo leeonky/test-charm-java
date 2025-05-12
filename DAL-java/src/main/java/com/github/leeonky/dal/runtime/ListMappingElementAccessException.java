@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-public class ListMappingElementAccessException extends DalRuntimeException {
+public class ListMappingElementAccessException extends DALRuntimeException {
     public ListMappingElementAccessException(int index, Throwable exception) {
         super(mappingIndexMessage(index), exception);
     }

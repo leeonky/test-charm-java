@@ -11,7 +11,7 @@ public class PageFlow {
         return dal;
     }
 
-    public static void setDal(DAL dal) {
+    public static void setDAL(DAL dal) {
         PageFlow.dal = dal;
     }
 }

@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions.jdbc;
 
-import com.github.leeonky.dal.runtime.DalRuntimeException;
+import com.github.leeonky.dal.runtime.DALRuntimeException;
 import com.github.leeonky.dal.runtime.ProxyObject;
 import com.github.leeonky.util.Sneaky;
 
@@ -229,7 +229,7 @@ public class DataBase implements AutoCloseable, ProxyObject {
                 if (iterator.hasNext()) {
                     DataBase.Row<LinkedTable> row = iterator.next();
                     if (iterator.hasNext())
-                        throw new DalRuntimeException("Result set has multiple records");
+                        throw new DALRuntimeException("Result set has multiple records");
                     return row.data();
                 }
                 return null;

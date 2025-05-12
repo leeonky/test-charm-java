@@ -1,14 +1,14 @@
 package com.github.leeonky.dal.ast.node.text;
 
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.runtime.DalRuntimeException;
+import com.github.leeonky.dal.runtime.DALRuntimeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.TextFormatter;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.runtime.DalException.locateError;
+import static com.github.leeonky.dal.runtime.DALException.locateError;
 import static java.lang.String.format;
 
 public class TextBlockAttributeListNode extends DALNode {
@@ -26,7 +26,7 @@ public class TextBlockAttributeListNode extends DALNode {
             TextBlockAttributeNode attributeNode = (TextBlockAttributeNode) attribute;
             TextFormatter eachFormatter = attributeNode.extractTextFormatter(context);
             if (!context.getConverter().supported(accept, eachFormatter.acceptType()))
-                throw locateError(new DalRuntimeException(format("Invalid text formatter, expect a formatter which accept %s but %s",
+                throw locateError(new DALRuntimeException(format("Invalid text formatter, expect a formatter which accept %s but %s",
                         accept.getName(), eachFormatter.acceptType().getName())), attributeNode.getPositionBegin());
             accept = eachFormatter.returnType();
             textFormatter = textFormatter.merge(eachFormatter);

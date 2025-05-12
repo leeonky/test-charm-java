@@ -119,7 +119,7 @@ class DataTest {
 
         @Test
         void should_raise_error_when_index_out_of_range() {
-            assertThrows(DalRuntimeException.class, () ->
+            assertThrows(DALRuntimeException.class, () ->
             {
                 runtimeContextBuilder.build(new String[0]).getThis().property(0).value();
             });

@@ -1,7 +1,7 @@
 package com.github.leeonky.pf.cucumber;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.DALException;
 import com.github.leeonky.pf.Element;
 import com.github.leeonky.util.Sneaky;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -122,7 +122,7 @@ public class Steps {
     public void perform_via_driver_selenium(String actions) {
         try {
             DAL.dal().evaluateAll(rootSeleniumElement(), actions);
-        } catch (DalException e) {
+        } catch (DALException e) {
             String detailMessage = "\n" + e.show(actions) + "\n\n" + e.getMessage();
             throw new AssertionError(detailMessage);
         }
@@ -132,7 +132,7 @@ public class Steps {
     public void perform_via_driver_playwright(String actions) {
         try {
             DAL.dal().evaluateAll(rootPlaywrightElement(), actions);
-        } catch (DalException e) {
+        } catch (DALException e) {
             String detailMessage = "\n" + e.show(actions) + "\n\n" + e.getMessage();
             throw new AssertionError(detailMessage);
         }
