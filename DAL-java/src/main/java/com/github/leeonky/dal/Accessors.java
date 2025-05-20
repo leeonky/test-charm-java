@@ -39,7 +39,13 @@ public class Accessors {
             if (dumpInput)
                 detailMessage += "\n\nThe root value was: "
                         + getDAL().getRuntimeContextBuilder().build(input).getThis().dump();
-            throw new RuntimeException(detailMessage, e);
+            throw new RuntimeException(detailMessage, e) {
+
+                @Override
+                public String toString() {
+                    return RuntimeException.class.getName() + ":\n" + getMessage();
+                }
+            };
         }
     }
 

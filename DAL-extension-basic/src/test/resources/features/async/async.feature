@@ -47,7 +47,6 @@ Feature: async
       """
       Then failed with the message:
       """
-
       ::eventually: {
         int: 100
              ^
@@ -86,7 +85,6 @@ Feature: async
       """
       Then failed with the message:
       """
-
       ::eventually::in(1s): {
         int: 100
              ^
@@ -123,7 +121,6 @@ Feature: async
       """
       Then failed with the message:
       """
-
       ::eventually::in(1s)::every(0.5s): {
         int: 100
              ^
@@ -208,7 +205,6 @@ Feature: async
       """
       Then failed with the message:
       """
-
       ::await: {list::filter!: {i=1}}
                             ^
 
@@ -248,7 +244,6 @@ Feature: async
       """
       Then failed with the message:
       """
-
       ::await(1s): {list::filter!: {i=1}}
                                 ^
 
@@ -281,17 +276,9 @@ Feature: async
       """
       Then failed with the message:
       """
-
       ::await(1s)::every(0.5s).int: 100
                                ^
 
-      Get property `int` failed, property can be:
-        1. public field
-        2. public getter
-        3. public method
-        4. Map key value
-        5. customized type getter
-        6. static method extension
       java.lang.RuntimeException
       """
 

@@ -61,10 +61,15 @@ public class Assertions {
             getDAL().evaluate(inputCode, fullCode, schema);
             return this;
         } catch (InterpreterException e) {
-            String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
+            String detailMessage = e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
                 detailMessage += "\n\nThe root value was: " + getDAL().getRuntimeContextBuilder().build(inputCode).getThis().dump();
-            throw new AssertionError(detailMessage);
+            throw new AssertionError(detailMessage) {
+                @Override
+                public String toString() {
+                    return AssertionError.class.getName() + ":\n" + getMessage();
+                }
+            };
         }
     }
 

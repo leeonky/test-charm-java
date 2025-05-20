@@ -21,7 +21,6 @@ Feature: expect - run
     """
     Then assert error with the message:
     """
-
     = 200
       ^
 
@@ -47,5 +46,8 @@ Feature: expect - run
     """
     Then assert error with the message:
     """
+    = 200
+      ^
+
     java.lang.RuntimeException: Error
     """

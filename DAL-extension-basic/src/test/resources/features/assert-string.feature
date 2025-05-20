@@ -15,7 +15,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       value= "hello"
              ^
 
@@ -44,7 +43,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       value= "hello\nWorld"
              ^
 
@@ -80,7 +78,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       value= "hello\nWorld"
              ^
 
@@ -110,7 +107,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       value: "hello"
              ^
 
@@ -139,7 +135,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       value: "hello\nWorld"
              ^
 
@@ -175,7 +170,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       value: "hello\nWorld"
              ^
 
@@ -197,7 +191,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       5: '5'
          ^
 
@@ -216,7 +209,6 @@ Feature: assert string
       """
       Then failed with the message:
       """
-
       true: 'true'
             ^
 

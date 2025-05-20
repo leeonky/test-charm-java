@@ -149,7 +149,6 @@ Feature: dir/file with java path
     """
     And error message should be:
     """
-
     : {
       test/dir= {
               ^

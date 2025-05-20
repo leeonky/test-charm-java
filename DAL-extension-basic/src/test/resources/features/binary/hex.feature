@@ -17,7 +17,6 @@ Feature: hex
     """
     Then failed with the message:
     """
-
     '你好'.bytes= ``` HEX
                   E4 BD A0 E5 A5 BF
                   ```
@@ -59,7 +58,6 @@ Feature: hex
     """
     Then failed with the message:
     """
-
     "file:/tmp/work/test/dir/file1.txt".url.openStream= ``` HEX
                                                         E4 BD A0 E5 A5 BF
                                                         ```

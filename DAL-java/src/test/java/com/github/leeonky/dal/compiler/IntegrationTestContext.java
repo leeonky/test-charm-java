@@ -286,8 +286,8 @@ public class IntegrationTestContext {
         }
     }
 
-    public void shouldAssertError(String message) {
-        assertThat(bizException).hasMessageContaining(message);
+    public void shouldAssertErrorMesssageContains(String message) {
+        assertThat(bizException).hasMessageStartingWith(message);
     }
 
     public void exactPass(String equalExpression) {
@@ -440,6 +440,10 @@ public class IntegrationTestContext {
 
     public void setErrorWhenAmbiguousMissedComma() {
         dal.getRuntimeContextBuilder().features().ambiguousMissedComma(Features.Level.ERROR);
+    }
+
+    public void shouldAssertError(String verification) {
+        expect(bizException).should(verification.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     public static class Empty {

@@ -1004,13 +1004,6 @@ Feature: list
       """
       Then failed with the message:
       """
-      Get property `-1` failed, property can be:
-        1. public field
-        2. public getter
-        3. public method
-        4. Map key value
-        5. customized type getter
-        6. static method extension
       Not support negative index in infinite collection
       """
       And got the following notation:

@@ -89,7 +89,6 @@ Feature: filter
     """
     Then failed with the message:
     """
-
     ::filter: {a + b}
                  ^
 
@@ -105,7 +104,6 @@ Feature: filter
     """
     Then failed with the message:
     """
-
     ::filter: {a: 1}
       ^
 
@@ -154,7 +152,6 @@ Feature: filter
     """
     Then failed with the message:
     """
-
     {}::filter!: {type= C}
               ^
 
@@ -218,7 +215,6 @@ Feature: filter
     """
     Then failed with the message:
     """
-
     {}::filter(2): {type= A}
                ^
 

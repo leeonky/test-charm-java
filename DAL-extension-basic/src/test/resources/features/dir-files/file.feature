@@ -149,7 +149,6 @@ Feature: dir/file with java File
     """
     And error message should be:
     """
-
     : {
       test/dir= {
               ^
@@ -183,19 +182,11 @@ Feature: dir/file with java File
     """
     And error message should be:
     """
-
     : {
       un-exist.txt: 'any'
       ^
     }
 
-    Get property `un-exist` failed, property can be:
-      1. public field
-      2. public getter
-      3. public method
-      4. Map key value
-      5. customized type getter
-      6. static method extension
     java.io.FileNotFoundException: File or File Group <un-exist> not found
     """
 
@@ -212,19 +203,11 @@ Feature: dir/file with java File
     """
     And error message should be:
     """
-
     : {
       file.not-exist: 'any'
            ^
     }
 
-    Get property `not-exist` failed, property can be:
-      1. public field
-      2. public getter
-      3. public method
-      4. Map key value
-      5. customized type getter
-      6. static method extension
     java.io.FileNotFoundException: File `file.not-exist` not exist
     """
 
@@ -267,7 +250,6 @@ Feature: dir/file with java File
     """
     And error message should be:
     """
-
     : {
       file= {
           ^
