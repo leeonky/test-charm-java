@@ -225,13 +225,6 @@ Feature: commons
     """
     Then failed with the message:
     """
-    Get property `test` failed, property can be:
-      1. public field
-      2. public getter
-      3. public method
-      4. Map key value
-      5. customized type getter
-      6. static method extension
     java.lang.RuntimeException: error
     """
     And got the following notation:

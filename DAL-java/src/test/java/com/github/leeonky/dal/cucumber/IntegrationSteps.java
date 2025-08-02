@@ -155,7 +155,7 @@ public class IntegrationSteps {
 
     @Then("assert error with the message:")
     public void assertErrorWithTheMessage(String message) {
-        integrationTestContext.shouldAssertError(message);
+        integrationTestContext.shouldAssertErrorMesssageContains(message);
     }
 
     @Then("the following exact expectation should pass:")
@@ -280,5 +280,10 @@ public class IntegrationSteps {
     @Given("set error when ambiguous missed comma")
     public void setErrorWhenAmbiguousMissedComma() {
         integrationTestContext.setErrorWhenAmbiguousMissedComma();
+    }
+
+    @Then("got assert error:")
+    public void assertError(String verification) {
+        integrationTestContext.shouldAssertError(verification);
     }
 }

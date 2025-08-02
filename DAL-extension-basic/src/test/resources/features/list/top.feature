@@ -24,7 +24,6 @@ Feature: top n lit
     """
     Then failed with the message:
     """
-
     ::top[3]= [1 2 3]
       ^
 

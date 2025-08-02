@@ -78,7 +78,7 @@ public class Data<T> {
             } catch (ListMappingElementAccessException | ExpressionException | InterpreterException |
                      PropertyAccessException ex) {
                 throw ex;
-            } catch (Throwable e) {
+            } catch (InvalidPropertyException e) {
                 throw new PropertyAccessException(propertyChain, e);
             }
         }

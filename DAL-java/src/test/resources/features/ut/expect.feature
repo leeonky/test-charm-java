@@ -25,7 +25,6 @@ Feature: expect - assertion
     """
     Then assert error with the message:
     """
-
     = {
       key= 200
            ^
@@ -68,7 +67,6 @@ Feature: expect - assertion
     """
     Then assert error with the message:
     """
-
     {
       key= 200
            ^
@@ -111,7 +109,6 @@ Feature: expect - assertion
     """
     Then assert error with the message:
     """
-
     {
       key= 200
            ^

@@ -330,13 +330,6 @@ Feature: list mapping
     Then failed with the message:
     """
     Mapping element[0]:
-    Get property `value` failed, property can be:
-      1. public field
-      2. public getter
-      3. public method
-      4. Map key value
-      5. customized type getter
-      6. static method extension
     java.lang.RuntimeException: Error
     """
     And got the following notation:
@@ -351,13 +344,6 @@ Feature: list mapping
     Then failed with the message:
     """
     Mapping element[0]:
-    Get property `value` failed, property can be:
-      1. public field
-      2. public getter
-      3. public method
-      4. Map key value
-      5. customized type getter
-      6. static method extension
     java.lang.RuntimeException: Error
     """
     And got the following notation:
