@@ -6,9 +6,15 @@ import static java.lang.String.format;
 
 public class MetaShould implements ProxyObject {
     private final MetaData<?> metaData;
+    private final boolean negative;
 
     public MetaShould(MetaData<?> metaData) {
+        this(metaData, false);
+    }
+
+    public MetaShould(MetaData<?> metaData, boolean negative) {
         this.metaData = metaData;
+        this.negative = negative;
     }
 
     @Override
@@ -16,6 +22,10 @@ public class MetaShould implements ProxyObject {
         return metaData.data().currying(property).map(curryingMethod -> new PredicateMethod(curryingMethod, property))
                 .orElseThrow(() -> new DALRuntimeException(format("Predicate method %s not exist in %s",
                         property, metaData.data().dump())));
+    }
+
+    public MetaShould negative() {
+        return new MetaShould(metaData, !negative);
     }
 
     public class PredicateMethod implements ProxyObject {
@@ -32,8 +42,11 @@ public class MetaShould implements ProxyObject {
             if (result instanceof CurryingMethod)
                 throw new DALRuntimeException(format("Failed to invoke predicate method `%s` of %s, " +
                         "maybe missing parameters", method, metaData.data().dump()));
-            if (result instanceof Boolean)
+            if (result instanceof Boolean) {
+                if (negative)
+                    return !(boolean) result;
                 return (boolean) result;
+            }
             throw new DALRuntimeException(format("Predicate method `%s` return type should boolean but %s", method,
                     metaData.runtimeContext().data(result).dump()));
         }
@@ -43,6 +56,8 @@ public class MetaShould implements ProxyObject {
         }
 
         public String errorMessage(Data<?> expected) {
+            if (negative)
+                return format("Expected: %s\nShould not %s: %s", instance().dump(), method, expected.dump());
             return format("Expected: %s\nShould %s: %s", instance().dump(), method, expected.dump());
         }
 

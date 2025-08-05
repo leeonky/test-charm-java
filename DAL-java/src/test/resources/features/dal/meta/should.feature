@@ -110,3 +110,31 @@ Feature: should
       ::should.test: 'hello'
                      ^
       """
+
+  Scenario: negative
+    Given the following json:
+      """
+      {
+        "value": "hello"
+      }
+      """
+    Then the following verification should pass:
+      """
+      value::should::not.startsWith: xx
+      """
+    When evaluate by:
+      """
+      value::should::not.startsWith: hel
+      """
+    Then failed with the message:
+      """
+      Expected: java.lang.String
+      <hello>
+      Should not startsWith: java.lang.String
+      <hel>
+      """
+    And got the following notation:
+      """
+      value::should::not.startsWith: hel
+                                     ^
+      """

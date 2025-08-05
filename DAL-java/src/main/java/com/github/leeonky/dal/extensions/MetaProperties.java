@@ -47,6 +47,7 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty("keys", MetaProperties::keys)
                 .registerMetaProperty("should", MetaShould::new)
                 .registerMetaProperty("value", (RuntimeDataHandler<MetaData<?>>) RuntimeData::data)
+                .registerMetaProperty(MetaShould.class, "not", (metaData) -> metaData.data().value().negative())
         ;
 
         dal.getRuntimeContextBuilder().checkerSetForMatching()
