@@ -9,36 +9,24 @@ import static java.util.Optional.of;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class CurryingMethodGroup implements CurryingMethod {
-    private final CurryingMethodGroup parent;
+public class CurryingMethodGroup implements ProxyObject {
     private final List<InstanceCurryingMethod> curryingMethods;
-    private InstanceCurryingMethod resolvedCurryingMethod;
 
-    CurryingMethodGroup(List<InstanceCurryingMethod> curryingMethods, CurryingMethodGroup parent) {
+    CurryingMethodGroup(List<InstanceCurryingMethod> curryingMethods) {
         this.curryingMethods = curryingMethods;
-        this.parent = parent;
     }
 
-    @Override
     public CurryingMethodGroup call(Object arg) {
         return new CurryingMethodGroup(curryingMethods.stream().map(curryingMethod ->
-                curryingMethod.call(arg)).collect(toList()), this);
+                curryingMethod.call(arg)).collect(toList()));
     }
 
-    @Override
     public Object resolve() {
         Optional<InstanceCurryingMethod> curryingMethod = getFirstPresent(
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsSameType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsBaseType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsConvertible));
-        return curryingMethod.isPresent() ? setResolveCurryingMethod(curryingMethod.get()).resolve() : this;
-    }
-
-    private InstanceCurryingMethod setResolveCurryingMethod(InstanceCurryingMethod curryingMethod) {
-        if (parent != null)
-            parent.setResolveCurryingMethod(curryingMethod);
-        resolvedCurryingMethod = curryingMethod;
-        return curryingMethod;
+        return curryingMethod.isPresent() ? curryingMethod.get().resolve() : this;
     }
 
     private Optional<InstanceCurryingMethod> selectCurryingMethod(Predicate<InstanceCurryingMethod> predicate) {
@@ -60,7 +48,8 @@ public class CurryingMethodGroup implements CurryingMethod {
         return Optional.empty();
     }
 
-    private Optional<InstanceCurryingMethod> queryResolvedMethod() {
-        return curryingMethods.stream().filter(method -> method.method.equals(resolvedCurryingMethod.method)).findFirst();
+    @Override
+    public Object getValue(Object property) {
+        return call(property).resolve();
     }
 }

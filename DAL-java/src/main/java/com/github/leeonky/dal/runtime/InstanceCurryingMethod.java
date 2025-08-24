@@ -4,6 +4,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Converter;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.function.Predicate;
 import static com.github.leeonky.util.Sneaky.execute;
 import static java.util.stream.Collectors.toList;
 
-public class InstanceCurryingMethod implements CurryingMethod {
+public class InstanceCurryingMethod {
     protected final Object instance;
     protected final Method method;
     protected final Converter converter;
@@ -26,7 +27,13 @@ public class InstanceCurryingMethod implements CurryingMethod {
         this.context = context;
     }
 
-    @Override
+    public static InstanceCurryingMethod createCurryingMethod(Object instance, Method method, Converter converter,
+                                                              DALRuntimeContext context) {
+        if (Modifier.isStatic(method.getModifiers()))
+            return new StaticCurryingMethod(instance, method, converter, context);
+        return new InstanceCurryingMethod(instance, method, converter, context);
+    }
+
     public InstanceCurryingMethod call(Object arg) {
         InstanceCurryingMethod curryingMethod = clone();
         curryingMethod.parameterValues.addAll(parameterValues);
@@ -47,16 +54,13 @@ public class InstanceCurryingMethod implements CurryingMethod {
         return new InstanceCurryingMethod(instance, method, converter, context);
     }
 
+    private boolean testParameterTypes(Predicate<ParameterValue> checking) {
+        return method.getParameterCount() - parameterOffset() == parameterValues.size()
+                && parameterValues.stream().allMatch(checking);
+    }
+
     public boolean allParamsSameType() {
         return testParameterTypes(ParameterValue::isSameType);
-    }
-
-    private boolean testParameterTypes(Predicate<ParameterValue> checking) {
-        return isArgCountEnough() && parameterValues.stream().allMatch(checking);
-    }
-
-    private boolean isArgCountEnough() {
-        return method.getParameterCount() - parameterOffset() == parameterValues.size();
     }
 
     public boolean allParamsBaseType() {
@@ -67,7 +71,6 @@ public class InstanceCurryingMethod implements CurryingMethod {
         return testParameterTypes(parameterValue -> parameterValue.isConvertibleType(converter));
     }
 
-    @Override
     public Object resolve() {
         return execute(() -> method.invoke(instance, parameterValues.stream().map(parameterValue ->
                 parameterValue.getArg(converter)).collect(toList()).toArray()));

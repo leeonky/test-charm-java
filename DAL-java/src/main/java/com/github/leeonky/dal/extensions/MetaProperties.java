@@ -62,7 +62,7 @@ public class MetaProperties implements Extension {
                         return curryingMethod.errorMessage(expected);
                     }
                 }))
-                .register((expected, actual) -> actual.cast(CurryingMethod.class).map(curryingMethod -> new Checker() {
+                .register((expected, actual) -> actual.cast(CurryingMethodGroup.class).map(curryingMethod -> new Checker() {
                     @Override
                     public Data<?> verify(Data<?> expected, Data<?> actual, DALRuntimeContext context) {
                         return actual.property(expected.value());
@@ -70,15 +70,15 @@ public class MetaProperties implements Extension {
                 }))
         ;
 
-        dal.getRuntimeContextBuilder().registerOperator(com.github.leeonky.dal.runtime.Operators.MATCH, new Operation<CurryingMethod, ExpectationFactory>() {
+        dal.getRuntimeContextBuilder().registerOperator(com.github.leeonky.dal.runtime.Operators.MATCH, new Operation<CurryingMethodGroup, ExpectationFactory>() {
 
             @Override
             public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-                return v1.instanceOf(CurryingMethod.class) && v2.instanceOf(ExpectationFactory.class);
+                return v1.instanceOf(CurryingMethodGroup.class) && v2.instanceOf(ExpectationFactory.class);
             }
 
             @Override
-            public Data<?> operateData(Data<CurryingMethod> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
+            public Data<?> operateData(Data<CurryingMethodGroup> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
                 return v2.value().create(operator, v1).matches();
             }
         });

@@ -187,15 +187,15 @@ class DataTest {
         @Test
         void currying_of_currying() {
             Data data = data(Currying::new);
-            CurryingMethod currying = context.currying(data.value(), "currying2").get();
+            CurryingMethodGroup currying = context.currying(data.value(), "currying2").get();
 
-            assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
+            assertThat(((CurryingMethodGroup) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
         void should_choose_min_parameter_size_method() {
             Data data = data(Currying::new);
-            CurryingMethod currying = context.currying(data.value(), "overrideMethod").get();
+            CurryingMethodGroup currying = context.currying(data.value(), "overrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
@@ -222,21 +222,21 @@ class DataTest {
 
         @Test
         void currying_of_currying() {
-            CurryingMethod currying = context.currying(context.getThis().value(), "staticCurrying2").get();
+            CurryingMethodGroup currying = context.currying(context.getThis().value(), "staticCurrying2").get();
 
-            assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
+            assertThat(((CurryingMethodGroup) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
         void should_choose_min_parameter_size_method() {
-            CurryingMethod currying = context.currying(context.getThis().value(), "staticOverrideMethod").get();
+            CurryingMethodGroup currying = context.currying(context.getThis().value(), "staticOverrideMethod").get();
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
 
         @Test
         void use_same_instance_type_first_when_more_than_one_candidate() {
-            CurryingMethod currying = context.currying(context.getThis().value(), "baseCurrying").get();
+            CurryingMethodGroup currying = context.currying(context.getThis().value(), "baseCurrying").get();
 
             assertThat(currying.call("a").resolve()).isEqualTo("A");
         }

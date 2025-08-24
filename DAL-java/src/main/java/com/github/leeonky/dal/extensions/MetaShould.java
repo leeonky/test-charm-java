@@ -39,7 +39,7 @@ public class MetaShould implements ProxyObject {
 
         public boolean should(Object value) {
             Object result = curryingMethodGroup.call(value).resolve();
-            if (result instanceof CurryingMethod)
+            if (result instanceof CurryingMethodGroup)
                 throw new DALRuntimeException(format("Failed to invoke predicate method `%s` of %s, " +
                         "maybe missing parameters", method, metaData.data().dump()));
             if (result instanceof Boolean) {
