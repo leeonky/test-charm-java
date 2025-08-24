@@ -11,7 +11,6 @@ import com.github.leeonky.dal.runtime.inspector.ValueDumper;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.JavaCompiler;
 import com.github.leeonky.util.JavaCompilerPool;
 import com.github.leeonky.util.Sneaky;
@@ -19,7 +18,6 @@ import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -319,26 +317,6 @@ public class IntegrationTestContext {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = builder.build(input);
         String dump = runtimeContext.getThis().dumpValue();
         assertThat(dump).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
-    }
-
-    public void setCurryingStaticMethodArgRange(String type, String methodType, String method, List<String> range) {
-        compileAll();
-        dal.getRuntimeContextBuilder().registerCurryingMethodAvailableParameters(
-                Arrays.stream(getType(methodType).getMethods()).filter(m -> m.getName().equals(method)
-                        && m.getParameters()[0].getType().equals(getType(type))).findFirst().get(),
-                (instance, args) -> new ArrayList<>(range));
-    }
-
-    @SneakyThrows
-    public void setCurryingMethodArgRange2(String type, String methodName, List<Map<String, List<?>>> rangeList) {
-        compileAll();
-        Method method = getType(type).getMethod(methodName, rangeList.stream().map(m -> m.keySet().iterator().next())
-                .map(s -> getClass(s)).toArray(Class[]::new));
-        dal.getRuntimeContextBuilder().registerCurryingMethodAvailableParameters(method, (instance, args) -> {
-            Map<String, List<?>> stringListMap = rangeList.get(args.size());
-            return stringListMap.values().iterator().next().stream().map(a -> Converter.getInstance()
-                    .convert(getClass(stringListMap.keySet().iterator().next()), a)).collect(Collectors.toList());
-        });
     }
 
     private Class<?> getClass(String s) {

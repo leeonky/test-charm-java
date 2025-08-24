@@ -1,14 +1,9 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.compiler.IntegrationTestContext;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
-import lombok.SneakyThrows;
-
-import java.util.List;
-import java.util.Map;
 
 public class IntegrationSteps {
     private IntegrationTestContext integrationTestContext;
@@ -187,18 +182,6 @@ public class IntegrationSteps {
     public void dumpedInstanceOfJavaClassShouldBe(String type, String verification) {
         integrationTestContext.givenJavaDataByClassName(type);
         integrationTestContext.verifyDumpedData(verification);
-    }
-
-    @And("args range of java class {string} static method {string}::{string}:")
-    public void argsRangeOfJavaClassStaticMethod(String type, String methodType, String method, List<List<String>> range) {
-        integrationTestContext.setCurryingStaticMethodArgRange(type, methodType, method, range.get(0));
-    }
-
-    @SneakyThrows
-    @And("args range of java class {string} method {string}:")
-    public void argsRangeOfJavaClassMethod(String type, String method, String ranges) {
-        List<Map<String, List<?>>> rangeList = new ObjectMapper().readValue(ranges, List.class);
-        integrationTestContext.setCurryingMethodArgRange2(type, method, rangeList);
     }
 
     @Given("the following dal input:")

@@ -5,14 +5,11 @@ import com.github.leeonky.util.Converter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static com.github.leeonky.util.Sneaky.execute;
-import static java.lang.String.format;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class InstanceCurryingMethod implements CurryingMethod {
@@ -50,15 +47,6 @@ public class InstanceCurryingMethod implements CurryingMethod {
         return new InstanceCurryingMethod(instance, method, converter, context);
     }
 
-    private String parameterInfo() {
-        List<String> parameters = Arrays.stream(method.getParameters()).map(Parameter::toString).collect(toList());
-        int argPosition = parameterValues.size() + parameterOffset();
-        if (!parameters.isEmpty())
-            parameters.set(argPosition, "> " + parameters.get(argPosition));
-        return parameters.stream().collect(joining(",\n", format("%s.%s(\n", method.getDeclaringClass().getName(),
-                method.getName()), "\n)"));
-    }
-
     public boolean allParamsSameType() {
         return testParameterTypes(ParameterValue::isSameType);
     }
@@ -86,26 +74,11 @@ public class InstanceCurryingMethod implements CurryingMethod {
     }
 
     @Override
-    public Set<Object> fetchArgRange() {
-        BiFunction<Object, List<Object>, List<Object>> rangeFactory = context.fetchCurryingMethodArgRange(method);
-        if (rangeFactory != null)
-            return new LinkedHashSet<>(rangeFactory.apply(instance, parameterValues.stream()
-                    .map(parameterValue -> parameterValue.getArg(converter)).collect(toList())));
-        System.err.printf("No arg range for %s, give the range or use `:`%n", parameterInfo());
-        return emptySet();
-    }
-
-    @Override
     public String toString() {
         return method.toString();
     }
 
     public boolean isSameInstanceType() {
         return true;
-    }
-
-    @Override
-    public Object convertToArgType(Object obj) {
-        return converter.convert(currentPositionParameter().getType(), obj);
     }
 }

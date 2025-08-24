@@ -1,9 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
@@ -62,17 +60,7 @@ public class CurryingMethodGroup implements CurryingMethod {
         return Optional.empty();
     }
 
-    @Override
-    public Set<Object> fetchArgRange() {
-        return queryResolvedMethod().map(InstanceCurryingMethod::fetchArgRange).orElseGet(Collections::emptySet);
-    }
-
     private Optional<InstanceCurryingMethod> queryResolvedMethod() {
         return curryingMethods.stream().filter(method -> method.method.equals(resolvedCurryingMethod.method)).findFirst();
-    }
-
-    @Override
-    public Object convertToArgType(Object obj) {
-        return queryResolvedMethod().map(method -> method.convertToArgType(obj)).orElse(obj);
     }
 }

@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.runtime.AssertionFailure;
-import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -84,13 +83,8 @@ public class ObjectScopeNode extends DALNode {
 
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
         return new LinkedHashSet<Object>(data.fieldNames()) {{
-            Stream.concat(collectFields(data), context.collectPartialProperties(data).stream())
-                    .map(obj -> convertFiled(data, obj)).forEach(this::remove);
+            Stream.concat(collectFields(data), context.collectPartialProperties(data).stream()).forEach(this::remove);
         }};
-    }
-
-    private Object convertFiled(Data<?> data, Object obj) {
-        return data.cast(CurryingMethod.class).map(curryingMethod -> curryingMethod.convertToArgType(obj)).orElse(obj);
     }
 
     @Override

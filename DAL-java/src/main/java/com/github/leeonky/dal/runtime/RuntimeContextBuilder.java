@@ -57,7 +57,6 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<RuntimeHandler<RuntimeData<?>>> exclamations = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
-    private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextFormatter<?, ?>> textFormatterMap = new LinkedHashMap<>();
     private final Map<Operators, LinkedList<Operation<?, ?>>> operations = new HashMap<>();
     private Converter converter = Converter.getInstance();
@@ -168,12 +167,6 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerUserDefinedLiterals(UserLiteralRule rule) {
         userDefinedLiterals.add(rule);
-        return this;
-    }
-
-    public RuntimeContextBuilder registerCurryingMethodAvailableParameters(Method method, BiFunction<Object,
-            List<Object>, List<Object>> range) {
-        curryingMethodArgRanges.put(method, range);
         return this;
     }
 
@@ -552,10 +545,6 @@ public class RuntimeContextBuilder {
 
         public PrintStream warningOutput() {
             return warning;
-        }
-
-        public BiFunction<Object, List<Object>, List<Object>> fetchCurryingMethodArgRange(Method method) {
-            return curryingMethodArgRanges.get(method);
         }
 
         public Optional<CurryingMethodGroup> currying(Object instance, Object property) {
