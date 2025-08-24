@@ -29,16 +29,16 @@ public class MetaShould implements ProxyObject {
     }
 
     public class PredicateMethod implements ProxyObject {
-        private final CurryingMethod curryingMethod;
+        private final CurryingMethodGroup curryingMethodGroup;
         private final Object method;
 
-        public PredicateMethod(CurryingMethod curryingMethod, Object method) {
-            this.curryingMethod = curryingMethod;
+        public PredicateMethod(CurryingMethodGroup curryingMethodGroup, Object method) {
+            this.curryingMethodGroup = curryingMethodGroup;
             this.method = method;
         }
 
         public boolean should(Object value) {
-            Object result = curryingMethod.call(value).resolve();
+            Object result = curryingMethodGroup.call(value).resolve();
             if (result instanceof CurryingMethod)
                 throw new DALRuntimeException(format("Failed to invoke predicate method `%s` of %s, " +
                         "maybe missing parameters", method, metaData.data().dump()));
@@ -63,7 +63,7 @@ public class MetaShould implements ProxyObject {
 
         @Override
         public Object getValue(Object property) {
-            return new PredicateMethod(curryingMethod.call(property), method);
+            return new PredicateMethod(curryingMethodGroup.call(property), method);
         }
     }
 }

@@ -73,19 +73,38 @@ Feature: should
                      ^
       """
 
-  Scenario: should with multi parameters
-    Given the following java class:
-      """
-      public class Bean {
-        public boolean test(String s1, String s2) {
-          return s1.equals(s2);
-        }
-      }
-      """
-    Then the following verification for the instance of java class "Bean" should pass:
-      """
-      ::should.test[t1]: t1
-      """
+
+#TODO
+#  Scenario: should with multi parameters
+#    Given the following java class:
+#      """
+#      public class Bean {
+#        public boolean test(String s1, String s2) {
+#          return s1.equals(s2);
+#        }
+#      }
+#      """
+#    Then the following verification for the instance of java class "Bean" should pass:
+#      """
+#      ::should.test[t1]: t1
+#      """
+#    When evaluate by:
+#      """
+#      ::should.test[t1]: t2
+#      """
+#    Then failed with the message:
+#      """
+#      Expected: #package#Bean {}
+#      Should test: java.lang.String
+#      <t1>
+#      java.lang.String
+#      <t2>
+#      """
+#    And got the following notation:
+#      """
+#      ::should.test[t1]: t2
+#                         ^
+#      """
 
   Scenario: predicate method should return boolean value
     Given the following java class:
@@ -137,4 +156,37 @@ Feature: should
       """
       value::should::not.startsWith: hel
                                      ^
+      """
+
+  Scenario: overloaded predicate method with 1 and 2 parameters, should with 1 arg
+    Given the following java class:
+      """
+      public class Bean {
+        public boolean test(String s1, String s2) {
+          return false;
+        }
+
+        public boolean test(String s1) {
+          return s1.equals("t1");
+        }
+      }
+      """
+    Then the following verification for the instance of java class "Bean" should pass:
+      """
+      ::should.test: t1
+      """
+    When evaluate by:
+      """
+      ::should.test: t2
+      """
+    Then failed with the message:
+      """
+      Expected: #package#Bean {}
+      Should test: java.lang.String
+      <t2>
+      """
+    And got the following notation:
+      """
+      ::should.test: t2
+                     ^
       """

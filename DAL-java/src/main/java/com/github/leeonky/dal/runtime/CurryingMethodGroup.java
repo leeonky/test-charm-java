@@ -11,7 +11,7 @@ import static java.util.Optional.of;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-class CurryingMethodGroup implements CurryingMethod {
+public class CurryingMethodGroup implements CurryingMethod {
     private final CurryingMethodGroup parent;
     private final List<InstanceCurryingMethod> curryingMethods;
     private InstanceCurryingMethod resolvedCurryingMethod;

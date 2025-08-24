@@ -558,7 +558,7 @@ public class RuntimeContextBuilder {
             return curryingMethodArgRanges.get(method);
         }
 
-        public Optional<CurryingMethod> currying(Object instance, Object property) {
+        public Optional<CurryingMethodGroup> currying(Object instance, Object property) {
             List<InstanceCurryingMethod> methods = methodToCurrying(named(instance.getClass()), property).stream()
                     .map(method -> createCurryingMethod(instance, method, getConverter(), this)).collect(toList());
             if (!methods.isEmpty())

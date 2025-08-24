@@ -147,7 +147,7 @@ public class Data<T> {
         }
     }
 
-    public Optional<CurryingMethod> currying(Object property) {
+    public Optional<CurryingMethodGroup> currying(Object property) {
         return context.currying(value(), property);
     }
 
