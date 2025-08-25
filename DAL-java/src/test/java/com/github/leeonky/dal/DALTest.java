@@ -1,6 +1,7 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.extensions.DALExtension;
+import com.github.leeonky.dal.runtime.inspector.DumperFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,5 +71,17 @@ public class DALTest {
 
     public void throwError() {
         throw new RuntimeException("Error");
+    }
+
+    public static class SkipType {
+    }
+
+    @Test
+    void skip_dump() {
+        DAL dal = new DAL("");
+        dal.getRuntimeContextBuilder().registerDumper(SkipType.class, DumperFactory.skip());
+
+        assertThat(dal.evaluateData(new SkipType(), "").dump())
+                .isEqualTo("*skipped*");
     }
 }
