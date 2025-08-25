@@ -64,6 +64,7 @@ nexusPublishing {
         sonatype {
             username = System.env.ossrhUsername
             password = System.env.ossrhPassword
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
         }
     }
 }
