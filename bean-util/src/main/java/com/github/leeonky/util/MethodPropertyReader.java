@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import static com.github.leeonky.util.Sneaky.execute;
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
-class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReader<T> {
+class MethodPropertyReader<T> extends MethodPropertyAccessor<T> implements PropertyReader<T> {
     private static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
     private static final int GETTER_PREFIX_LENGTH = 3;
     private String name;
@@ -24,19 +24,19 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
 
     @Override
     public Object getValue(T instance) {
-        return execute(() -> method.invoke(instance));
+        return execute(() -> getMethod().invoke(instance));
     }
 
     @Override
     protected Type provideGenericType() {
-        return method.getGenericReturnType();
+        return getMethod().getGenericReturnType();
     }
 
     @Override
     public String getName() {
         if (name == null) {
-            String methodName = method.getName();
-            return name = unCapitalize(method.getReturnType().equals(boolean.class) ?
+            String methodName = getMethod().getName();
+            return name = unCapitalize(getMethod().getReturnType().equals(boolean.class) ?
                     methodName.substring(BOOLEAN_GETTER_PREFIX_LENGTH) : methodName.substring(GETTER_PREFIX_LENGTH));
         }
         return name;
@@ -44,6 +44,6 @@ class MethodPropertyReader<T> extends MethodProperty<T> implements PropertyReade
 
     @Override
     public boolean isBeanProperty() {
-        return super.isBeanProperty() && !method.getName().equals("getClass");
+        return super.isBeanProperty() && !getMethod().getName().equals("getClass");
     }
 }

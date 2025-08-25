@@ -13,11 +13,11 @@ class FieldPropertyReader<T> extends FieldPropertyAccessor<T> implements Propert
 
     @Override
     public Object getValue(T instance) {
-        return execute(() -> field.get(instance));
+        return execute(() -> getField().get(instance));
     }
 
     @Override
     public boolean isBeanProperty() {
-        return !Modifier.isStatic(field.getModifiers());
+        return !Modifier.isStatic(getField().getModifiers());
     }
 }

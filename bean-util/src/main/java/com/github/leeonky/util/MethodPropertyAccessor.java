@@ -4,10 +4,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-abstract class MethodProperty<T> extends AbstractPropertyAccessor<T> {
-    final Method method;
+abstract class MethodPropertyAccessor<T> extends AbstractPropertyAccessor<T> {
+    private final Method method;
 
-    MethodProperty(BeanClass<T> beanClass, Method method) {
+    public Method getMethod() {
+        return method;
+    }
+
+    MethodPropertyAccessor(BeanClass<T> beanClass, Method method) {
         super(beanClass);
         this.method = method;
     }

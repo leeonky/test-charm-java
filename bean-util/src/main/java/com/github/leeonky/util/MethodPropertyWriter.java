@@ -7,9 +7,9 @@ import java.util.function.BiConsumer;
 import static com.github.leeonky.util.Sneaky.execute;
 import static com.github.leeonky.util.StringUtil.unCapitalize;
 
-class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWriter<T> {
+class MethodPropertyWriter<T> extends MethodPropertyAccessor<T> implements PropertyWriter<T> {
     private static final int SETTER_PREFIX_LENGTH = 3;
-    private final BiConsumer<T, Object> SETTER = (bean, value) -> execute(() -> method.invoke(bean, tryConvert(value)));
+    private final BiConsumer<T, Object> SETTER = (bean, value) -> execute(() -> getMethod().invoke(bean, tryConvert(value)));
     private String name;
 
     MethodPropertyWriter(BeanClass<T> beanClass, Method method) {
@@ -28,12 +28,12 @@ class MethodPropertyWriter<T> extends MethodProperty<T> implements PropertyWrite
     @Override
     public String getName() {
         if (name == null)
-            return name = unCapitalize(method.getName().substring(SETTER_PREFIX_LENGTH));
+            return name = unCapitalize(getMethod().getName().substring(SETTER_PREFIX_LENGTH));
         return name;
     }
 
     @Override
     protected Type provideGenericType() {
-        return method.getGenericParameterTypes()[0];
+        return getMethod().getGenericParameterTypes()[0];
     }
 }
