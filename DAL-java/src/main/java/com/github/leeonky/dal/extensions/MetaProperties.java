@@ -46,7 +46,7 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty("object", MetaProperties::object_)
                 .registerMetaProperty("keys", MetaProperties::keys)
                 .registerMetaProperty("should", MetaShould::new)
-                .registerMetaProperty("value", (RuntimeDataHandler<MetaData<?>>) RuntimeData::data)
+                .registerMetaProperty("this", (RuntimeDataHandler<MetaData<?>>) RuntimeData::data)
                 .registerMetaProperty(MetaShould.class, "not", (metaData) -> metaData.data().value().negative())
         ;
 

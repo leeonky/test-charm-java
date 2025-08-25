@@ -1,6 +1,6 @@
 Feature: value
 
-  Scenario: reference current input value via ::value
+  Scenario: reference current input value via ::this
     Given the following json:
       """
       {
@@ -9,11 +9,11 @@ Feature: value
       """
     Then the following verification should pass:
       """
-      ::value= {key= value}
+      ::this= {key= value}
       """
     When evaluate by:
       """
-      ::value= {key= not}
+      ::this= {key= not}
       """
     Then failed with the message:
       """
@@ -26,11 +26,11 @@ Feature: value
       """
     And got the following notation:
       """
-      ::value= {key= not}
-                     ^
+      ::this= {key= not}
+                    ^
       """
 
-  Scenario: reference current input value via ::value in object scope
+  Scenario: reference current input value via ::this in object scope
     Given the following json:
       """
       {
@@ -40,13 +40,13 @@ Feature: value
     Then the following verification should pass:
       """
       :{
-        ::value= {key= value}
+        ::this= {key= value}
       }
       """
     When evaluate by:
       """
       : {
-        ::value= {key= not}
+        ::this= {key= not}
       }
       """
     Then failed with the message:
@@ -61,8 +61,8 @@ Feature: value
     And got the following notation:
       """
       : {
-        ::value= {key= not}
-                       ^
+        ::this= {key= not}
+                      ^
       }
       """
 
