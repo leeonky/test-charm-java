@@ -90,4 +90,20 @@ class PropertyTest {
             assertThat((Object) beanClass.getProperty("str2").getValue(bean)).isEqualTo("hello");
         }
     }
+
+    @Nested
+    class AccessorFilter {
+
+        @Test
+        void exclude_property() {
+            BeanClass<BeanExclude> beanClass = BeanClass.create(BeanExclude.class);
+            assertThat(beanClass.getProperties()).isEmpty();
+            assertThat(beanClass.getPropertyReaders()).isEmpty();
+            assertThat(beanClass.getPropertyWriters()).isEmpty();
+        }
+    }
+
+    public static class BeanExclude {
+        public int excludeProperty;
+    }
 }

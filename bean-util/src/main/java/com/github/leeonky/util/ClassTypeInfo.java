@@ -17,6 +17,8 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     private final Map<String, PropertyReader<T>> allReaders = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> allWriters = new LinkedHashMap<>();
 
+    private static final AccessorFilter ACCESSOR_FILTER = new AccessorFilter().extend();
+
     public ClassTypeInfo(BeanClass<T> type) {
         this.type = type;
         collectFields(type);
@@ -54,7 +56,7 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap,
                                                              Map<String, A> allAccessorMap) {
         allAccessorMap.put(accessor.getName(), accessor);
-        if (accessor.isBeanProperty()) {
+        if (accessor.isBeanProperty() && ACCESSOR_FILTER.test(accessor)) {
             properties.put(accessor.getName(), new DefaultProperty<>(accessor.getName(), accessor.getBeanType()));
             accessorMap.put(accessor.getName(), accessor);
         }
