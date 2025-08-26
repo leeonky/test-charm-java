@@ -5,6 +5,7 @@ import com.github.leeonky.util.PropertyWriter;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.*;
@@ -160,6 +161,11 @@ class DefaultValueFactoriesTest {
 
             @Override
             public BeanClass<Object> getBeanType() {
+                return null;
+            }
+
+            @Override
+            public Type getGenericType() {
                 return null;
             }
 

@@ -14,7 +14,7 @@ class DataPropertyAccessor<T> extends AbstractPropertyAccessor<T> {
     }
 
     @Override
-    protected Type provideGenericType() {
+    public Type getGenericType() {
         return type.getType();
     }
 

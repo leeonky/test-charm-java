@@ -27,7 +27,7 @@ abstract class FieldPropertyAccessor<T> extends AbstractPropertyAccessor<T> {
     }
 
     @Override
-    protected Type provideGenericType() {
+    public Type getGenericType() {
         return field.getGenericType();
     }
 }

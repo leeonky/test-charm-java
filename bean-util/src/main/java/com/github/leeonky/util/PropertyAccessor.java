@@ -1,6 +1,7 @@
 package com.github.leeonky.util;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 public interface PropertyAccessor<T> {
@@ -11,11 +12,9 @@ public interface PropertyAccessor<T> {
 
     BeanClass<T> getBeanType();
 
-    BeanClass<?> getType();
+    Type getGenericType();
 
-    default Class<?> getTypeClass() {
-        return getType().getType();
-    }
+    BeanClass<?> getType();
 
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
 

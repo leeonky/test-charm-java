@@ -28,7 +28,7 @@ class MethodPropertyReader<T> extends MethodPropertyAccessor<T> implements Prope
     }
 
     @Override
-    protected Type provideGenericType() {
+    public Type getGenericType() {
         return getMethod().getGenericReturnType();
     }
 
