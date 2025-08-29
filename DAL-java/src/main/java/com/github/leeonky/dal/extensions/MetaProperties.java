@@ -61,7 +61,7 @@ public class MetaProperties implements Extension {
 
                     @Override
                     public String message(CheckingContext checkingContext) {
-                        return predicateMethod.errorMessage(expected);
+                        return resolved.errorMessage();
                     }
                 }))
                 .register((expected, actual) -> actual.cast(CurryingMethodGroup.class).map(curryingMethod -> new Checker() {

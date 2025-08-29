@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import java.util.List;
@@ -8,20 +9,21 @@ import java.util.function.Predicate;
 
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.util.Optional.of;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class CurryingMethodGroup implements ProxyObject {
     private final List<InstanceCurryingMethod> candidateMethods;
+    private final DALRuntimeContext runtimeContext;
     private InstanceCurryingMethod resolvedMethod;
 
-    CurryingMethodGroup(List<InstanceCurryingMethod> candidateMethods) {
+    CurryingMethodGroup(List<InstanceCurryingMethod> candidateMethods, DALRuntimeContext runtimeContext) {
         this.candidateMethods = candidateMethods;
+        this.runtimeContext = runtimeContext;
     }
 
     public CurryingMethodGroup call(Object arg) {
         return new CurryingMethodGroup(candidateMethods.stream().map(curryingMethod ->
-                curryingMethod.call(arg)).collect(toList()));
+                curryingMethod.call(arg)).collect(toList()), runtimeContext);
     }
 
     public Object resolve() {
@@ -40,11 +42,10 @@ public class CurryingMethodGroup implements ProxyObject {
         List<InstanceCurryingMethod> methods = candidateMethods.stream().filter(predicate).collect(toList());
         if (methods.size() > 1) {
             List<InstanceCurryingMethod> highPriorityMethod = methods.stream().filter(StaticCurryingMethod.class::isInstance).collect(toList());
-            return of(getFirstPresent(() -> getOnlyOne(highPriorityMethod), () -> getOnlyOne(highPriorityMethod.stream()
-                    .filter(InstanceCurryingMethod::isSameInstanceType).collect(toList())))
-                    .orElseThrow(() -> new InvalidPropertyException("More than one currying method:\n"
-                            + methods.stream().map(instanceCurryingMethod -> "  " + instanceCurryingMethod.toString())
-                            .sorted().collect(joining("\n")))));
+            return of(getFirstPresent(() -> getOnlyOne(highPriorityMethod),
+                    () -> getOnlyOne(highPriorityMethod.stream().filter(InstanceCurryingMethod::isSameInstanceType).collect(toList())))
+                    .orElseThrow(() -> new InvalidPropertyException(DumpingBuffer.rootContext(runtimeContext)
+                            .append("More than one currying method:").indent(this::dumpCandidates).content())));
         }
         return methods.stream().findFirst();
     }
@@ -60,23 +61,13 @@ public class CurryingMethodGroup implements ProxyObject {
         return call(property).resolve();
     }
 
-    @Override
-    public String toString() {
-        return candidateMethods.stream().map(InstanceCurryingMethod::toString).collect(joining("\n"));
-    }
-
     public InstanceCurryingMethod getResolvedMethod() {
         return resolvedMethod;
     }
 
-    public void dumpCandidates(DumpingBuffer sub) {
-        candidateMethods.forEach(m -> {
-            sub.newLine();
-            if (m == getResolvedMethod()) {
-                sub.append("-> ");
-            }
-            sub.append(m.toString());
-            sub.indent(m::dumpArguments);
-        });
+    public void dumpCandidates(DumpingBuffer buffer) {
+        candidateMethods.forEach(curryingMethod -> buffer.newLine()
+                .append(curryingMethod == getResolvedMethod() ? "-> " : "")
+                .append(curryingMethod.toString()).indent(curryingMethod::dumpArguments));
     }
 }
