@@ -19,8 +19,8 @@ Feature: should
       """
       Expected: java.lang.String
       <hello>
-      Should startsWith: java.lang.String
-      <nothel>
+      Should startsWith:
+          java.lang.String <nothel>
       """
     And got the following notation:
       """
@@ -65,7 +65,9 @@ Feature: should
       """
     Then failed with the message:
       """
-      Failed to invoke predicate method `test` of #package#Bean {}, maybe missing parameters
+      Failed to invoke predicate method `test` of #package#Bean {}, maybe missing parameters, all candidate methods are:
+          public boolean #package#Bean.test(java.lang.String,java.lang.String)
+              java.lang.String <any>
       """
     And got the following notation:
       """
@@ -73,38 +75,35 @@ Feature: should
                      ^
       """
 
-
-#TODO
-#  Scenario: should with multi parameters
-#    Given the following java class:
-#      """
-#      public class Bean {
-#        public boolean test(String s1, String s2) {
-#          return s1.equals(s2);
-#        }
-#      }
-#      """
-#    Then the following verification for the instance of java class "Bean" should pass:
-#      """
-#      ::should.test[t1]: t1
-#      """
-#    When evaluate by:
-#      """
-#      ::should.test[t1]: t2
-#      """
-#    Then failed with the message:
-#      """
-#      Expected: #package#Bean {}
-#      Should test: java.lang.String
-#      <t1>
-#      java.lang.String
-#      <t2>
-#      """
-#    And got the following notation:
-#      """
-#      ::should.test[t1]: t2
-#                         ^
-#      """
+  Scenario: should with multi parameters
+    Given the following java class:
+      """
+      public class Bean {
+        public boolean test(String s1, String s2) {
+          return s1.equals(s2);
+        }
+      }
+      """
+    Then the following verification for the instance of java class "Bean" should pass:
+      """
+      ::should.test[t1]: t1
+      """
+    When evaluate by:
+      """
+      ::should.test[t1]: t2
+      """
+    Then failed with the message:
+      """
+      Expected: #package#Bean {}
+      Should test:
+          java.lang.String <t1>
+          java.lang.String <t2>
+      """
+    And got the following notation:
+      """
+      ::should.test[t1]: t2
+                         ^
+      """
 
   Scenario: predicate method should return boolean value
     Given the following java class:
@@ -121,8 +120,11 @@ Feature: should
       """
     Then failed with the message:
       """
-      Predicate method `test` return type should boolean but java.lang.Integer
+      Predicate method `test` should return boolean but java.lang.Integer
       <5>
+      all candidate methods are:
+          -> public int #package#Bean.test(java.lang.String)
+              java.lang.String <hello>
       """
     And got the following notation:
       """
@@ -149,8 +151,8 @@ Feature: should
       """
       Expected: java.lang.String
       <hello>
-      Should not startsWith: java.lang.String
-      <hel>
+      Should not startsWith:
+          java.lang.String <hel>
       """
     And got the following notation:
       """
@@ -182,8 +184,8 @@ Feature: should
     Then failed with the message:
       """
       Expected: #package#Bean {}
-      Should test: java.lang.String
-      <t2>
+      Should test:
+          java.lang.String <t2>
       """
     And got the following notation:
       """

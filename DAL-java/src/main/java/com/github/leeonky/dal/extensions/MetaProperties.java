@@ -51,15 +51,17 @@ public class MetaProperties implements Extension {
         ;
 
         dal.getRuntimeContextBuilder().checkerSetForMatching()
-                .register((expected, actual) -> actual.cast(MetaShould.PredicateMethod.class).map(curryingMethod -> new Checker() {
+                .register((expected, actual) -> actual.cast(MetaShould.PredicateMethod.class).map(predicateMethod -> new Checker() {
+                    private MetaShould.PredicateMethod resolved;
+
                     @Override
                     public boolean failed(CheckingContext checkingContext) {
-                        return !curryingMethod.should(expected.value());
+                        return !(resolved = (MetaShould.PredicateMethod) predicateMethod.getValue(expected.value())).should();
                     }
 
                     @Override
                     public String message(CheckingContext checkingContext) {
-                        return curryingMethod.errorMessage(expected);
+                        return predicateMethod.errorMessage(expected);
                     }
                 }))
                 .register((expected, actual) -> actual.cast(CurryingMethodGroup.class).map(curryingMethod -> new Checker() {

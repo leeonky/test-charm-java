@@ -549,7 +549,7 @@ public class RuntimeContextBuilder {
 
         public Optional<CurryingMethodGroup> currying(Object instance, Object property) {
             List<InstanceCurryingMethod> methods = methodToCurrying(named(instance.getClass()), property).stream()
-                    .map(method -> createCurryingMethod(instance, method, getConverter(), this)).collect(toList());
+                    .map(method -> createCurryingMethod(instance, method, this)).collect(toList());
             if (!methods.isEmpty())
                 return of(new CurryingMethodGroup(methods));
             return getImplicitObject(instance).flatMap(obj -> currying(obj, property));

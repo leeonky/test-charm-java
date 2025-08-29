@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import static java.lang.String.format;
 
@@ -37,28 +38,34 @@ public class MetaShould implements ProxyObject {
             this.method = method;
         }
 
-        public boolean should(Object value) {
-            Object result = curryingMethodGroup.call(value).resolve();
+        public boolean should() {
+            Object result = curryingMethodGroup.resolve();
             if (result instanceof CurryingMethodGroup)
-                throw new DALRuntimeException(format("Failed to invoke predicate method `%s` of %s, " +
-                        "maybe missing parameters", method, metaData.data().dump()));
-            if (result instanceof Boolean) {
-                if (negative)
-                    return !(boolean) result;
-                return (boolean) result;
-            }
-            throw new DALRuntimeException(format("Predicate method `%s` return type should boolean but %s", method,
-                    metaData.runtimeContext().data(result).dump()));
-        }
-
-        public Data<?> instance() {
-            return metaData.data();
+                throw new DALRuntimeException(DumpingBuffer.rootContext(metaData.runtimeContext())
+                        .append("Failed to invoke predicate method `").append(method.toString()).append("` of ")
+                        .dump(metaData.data()).append(", maybe missing parameters, all candidate methods are:")
+                        .indent(curryingMethodGroup::dumpCandidates).content());
+            if (result instanceof Boolean)
+                return negative != (boolean) result;
+            throw new DALRuntimeException(DumpingBuffer.rootContext(metaData.runtimeContext())
+                    .append("Predicate method `").append(method.toString()).append("` should return boolean but ")
+                    .dump(metaData.runtimeContext().data(result)).newLine()
+                    .append("all candidate methods are:")
+                    .indent(curryingMethodGroup::dumpCandidates).content());
+//            throw new DALRuntimeException(format("Predicate method `%s` return type should boolean but %s", method,
+//                    metaData.runtimeContext().data(result).dump()));
         }
 
         public String errorMessage(Data<?> expected) {
+            DumpingBuffer dumpingBuffer = DumpingBuffer.rootContext(metaData.runtimeContext());
+            dumpingBuffer.append("Expected: ").dump(metaData.data()).newLine().append("Should");
             if (negative)
-                return format("Expected: %s\nShould not %s: %s", instance().dump(), method, expected.dump());
-            return format("Expected: %s\nShould %s: %s", instance().dump(), method, expected.dump());
+                dumpingBuffer.append(" not");
+            dumpingBuffer.append(" ").append(method.toString()).append(":");
+            CurryingMethodGroup called = curryingMethodGroup.call(expected.value());
+            called.resolve();
+            dumpingBuffer.indent(called.getResolvedMethod()::dumpArguments);
+            return dumpingBuffer.content();
         }
 
         @Override
