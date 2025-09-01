@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
+import static java.util.Comparator.comparing;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
@@ -66,8 +67,8 @@ public class CurryingMethodGroup implements ProxyObject {
     }
 
     public void dumpCandidates(DumpingBuffer buffer) {
-        candidateMethods.forEach(curryingMethod -> buffer.newLine()
-                .append(curryingMethod == getResolvedMethod() ? "-> " : "")
-                .append(curryingMethod.toString()).indent(curryingMethod::dumpArguments));
+        candidateMethods.stream().sorted(comparing(InstanceCurryingMethod::toString)).forEach(curryingMethod ->
+                buffer.newLine().append(curryingMethod == getResolvedMethod() ? "-> " : "")
+                        .append(curryingMethod.toString()).indent(curryingMethod::dumpArguments));
     }
 }

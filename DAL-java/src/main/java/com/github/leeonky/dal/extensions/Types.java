@@ -66,7 +66,7 @@ public class Types implements Extension {
                 })
                 .registerMetaPropertyPattern(AdaptiveList.class, ".*",
                         (RuntimeDataHandler<MetaData<AdaptiveList>>) metaData -> {
-                            if (metaData.name().equals("size"))
+                            if (metaData.name().equals("size") || metaData.name().equals("this"))
                                 return metaData.delegate(d -> d.map(AdaptiveList::list));
                             else
                                 return metaData.delegate(d -> adaptiveListOf(Sneaky.cast(d),

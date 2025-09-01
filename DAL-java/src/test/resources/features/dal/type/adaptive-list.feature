@@ -362,3 +362,91 @@ Feature: single or list
         list= "hello"
         ^
         """
+
+    Scenario: meta size should return list size no mater list is single or not
+      Given the following java class:
+        """
+        public class Test {
+          public AdaptiveList<Integer> getList3() {
+            return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
+          }
+
+          public AdaptiveList<Integer> getList1() {
+            return AdaptiveList.staticList(Arrays.asList(1));
+          }
+        }
+        """
+      Then the following verification for the instance of java class "Test" should pass:
+        """
+        : {
+          list3: {::size= 3}
+          list1: {::size= 1}
+        }
+        """
+      When use a instance of java class "Test" to evaluate:
+        """
+        : {
+          list3: {::size= 2}
+        }
+        """
+      Then failed with the message:
+        """
+        Expected to be equal to: java.lang.Integer
+        <2>
+         ^
+        Actual: java.lang.Integer
+        <3>
+         ^
+        """
+      Then got the following notation:
+        """
+        : {
+          list3: {::size= 2}
+                          ^
+        }
+        """
+
+    Scenario: meta this should return list no mater list is single or not
+      Given the following java class:
+        """
+        public class Test {
+          public AdaptiveList<Integer> getList3() {
+              return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
+          }
+
+          public AdaptiveList<Integer> getList1() {
+              return AdaptiveList.staticList(Arrays.asList(1));
+          }
+        }
+        """
+      Then the following verification for the instance of java class "Test" should pass:
+        """
+        : {
+          list3: {::this= [1 2 3]}
+          list1: {::this= [1]}
+        }
+        """
+      When use a instance of java class "Test" to evaluate:
+        """
+        : {
+          list3: {::this= [1 2]}
+        }
+        """
+      Then failed with the message:
+        """
+        Unexpected list size
+        Expected: <2>
+        Actual: <3>
+        Actual list: [
+            java.lang.Integer <1>,
+            java.lang.Integer <2>,
+            java.lang.Integer <3>
+        ]
+        """
+      And got the following notation:
+        """
+        : {
+          list3: {::this= [1 2]}
+                          ^
+        }
+        """
