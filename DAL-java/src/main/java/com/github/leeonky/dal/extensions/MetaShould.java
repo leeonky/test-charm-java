@@ -34,24 +34,24 @@ public class MetaShould implements ProxyObject {
 
     public class PredicateMethod implements ProxyObject {
         private final CurryingMethodGroup curryingMethodGroup;
-        private final Object method;
+        private final Object methodName;
 
-        public PredicateMethod(CurryingMethodGroup curryingMethodGroup, Object method) {
+        public PredicateMethod(CurryingMethodGroup curryingMethodGroup, Object methodName) {
             this.curryingMethodGroup = curryingMethodGroup;
-            this.method = method;
+            this.methodName = methodName;
         }
 
         public boolean should() {
             Object result = curryingMethodGroup.resolve();
             if (result instanceof CurryingMethodGroup)
                 throw new DALRuntimeException(rootContext(metaData.runtimeContext())
-                        .append("Failed to invoke predicate method `").append(method.toString()).append("` of ")
+                        .append("Failed to invoke predicate method `").append(methodName.toString()).append("` of ")
                         .dump(metaData.data()).append(", maybe missing parameters, all candidate methods are:")
                         .indent(curryingMethodGroup::dumpCandidates).content());
             if (result instanceof Boolean)
                 return negative != (boolean) result;
             throw new DALRuntimeException(rootContext(metaData.runtimeContext())
-                    .append("Predicate method `").append(method.toString()).append("` should return boolean but ")
+                    .append("Predicate method `").append(methodName.toString()).append("` should return boolean but ")
                     .dump(metaData.runtimeContext().data(result)).newLine()
                     .append("all candidate methods are:")
                     .indent(curryingMethodGroup::dumpCandidates).content());
@@ -60,13 +60,17 @@ public class MetaShould implements ProxyObject {
         public String errorMessage() {
             return rootContext(metaData.runtimeContext())
                     .append("Expected: ").dump(metaData.data()).newLine()
-                    .append("Should").append(negative ? " not" : "").append(" ").append(method.toString()).append(":")
+                    .append("Should").append(negative ? " not" : "").append(" ").append(methodName.toString()).append(":")
                     .indent(curryingMethodGroup.getResolvedMethod()::dumpArguments).content();
+        }
+
+        public CurryingMethodGroup curryingMethodGroup() {
+            return curryingMethodGroup;
         }
 
         @Override
         public Object getValue(Object property) {
-            return new PredicateMethod(curryingMethodGroup.call(property), method);
+            return new PredicateMethod(curryingMethodGroup.call(property), methodName);
         }
     }
 }

@@ -192,3 +192,18 @@ Feature: should
       ::should.test: t2
                      ^
       """
+
+  Scenario: ::should in list mapping
+    Given the following json:
+      """
+      {
+          "list": [
+          {"value": "hello"},
+          {"value": "world"}
+          ]
+      }
+      """
+    Then the following verification should pass:
+      """
+      list.value[]::should[].startsWith: [ ... hel wor ...]
+      """
