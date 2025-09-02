@@ -42,7 +42,7 @@ public class ObjectScopeNode extends DALNode {
             @Override
             public Data<?> matches() {
                 if (verificationExpressions.isEmpty() && !isObjectWildcard)
-                    throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
+                    throw new SyntaxException("Should use `{...}` to verify any non null object or `=` before {}", getPositionBegin());
                 if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 return actual.execute(() -> {

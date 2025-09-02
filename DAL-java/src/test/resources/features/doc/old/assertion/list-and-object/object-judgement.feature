@@ -128,7 +128,7 @@ Feature: verify object
     """
     Then failed with the message:
     """
-    Should use `{...}` to verify any non null object
+    Should use `{...}` to verify any non null object or `=` before {}
     """
     And got the following notation:
     """
