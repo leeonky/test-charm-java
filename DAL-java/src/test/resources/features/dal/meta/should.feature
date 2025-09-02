@@ -207,3 +207,54 @@ Feature: should
       """
       list.value[]::should[].startsWith: [ ... hel wor ...]
       """
+
+  Scenario: raise error when use = in ::should last verification
+    Given the following json:
+      """
+      {
+        "value": "hello",
+        "list": [
+          {"value": "hello"},
+          {"value": "world"}
+        ]
+      }
+      """
+    When evaluate by:
+      """
+      value::should.startsWith= hel
+      """
+    Then failed with the message:
+      """
+      Should use `:` in ::should verification
+      """
+    And got the following notation:
+      """
+      value::should.startsWith= hel
+                              ^
+      """
+    When evaluate by:
+      """
+      list.value[]::should[].startsWith= [ ... hel wor ...]
+      """
+    Then failed with the message:
+      """
+      Should use `:` in ::should verification
+      """
+    And got the following notation:
+      """
+      list.value[]::should[].startsWith= [ ... hel wor ...]
+                                       ^
+      """
+    When evaluate by:
+      """
+      list.value[]::should[].startsWith: [ ... =hel wor ...]
+      """
+    Then failed with the message:
+      """
+      Should use `:` in ::should verification
+      """
+    And got the following notation:
+      """
+      list.value[]::should[].startsWith: [ ... =hel wor ...]
+                                               ^
+      """

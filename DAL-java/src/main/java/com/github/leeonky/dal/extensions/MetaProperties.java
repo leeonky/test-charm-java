@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
+import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.NoSuchAccessorException;
 import com.github.leeonky.util.Sneaky;
@@ -13,6 +14,7 @@ import com.github.leeonky.util.Sneaky;
 import java.util.Set;
 
 import static com.github.leeonky.dal.runtime.DALException.extractException;
+import static com.github.leeonky.dal.runtime.Operators.MATCH;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 
 @Order(BUILD_IN)
@@ -72,7 +74,16 @@ public class MetaProperties implements Extension {
                 }))
         ;
 
-        dal.getRuntimeContextBuilder().registerOperator(com.github.leeonky.dal.runtime.Operators.MATCH, new Operation<CurryingMethodGroup, ExpectationFactory>() {
+        dal.getRuntimeContextBuilder().checkerSetForEqualing()
+                .register((expected, actual) -> actual.cast(MetaShould.PredicateMethod.class).map(predicateMethod -> new Checker() {
+                    @Override
+                    public boolean failed(CheckingContext checkingContext) {
+                        throw ExpressionException.exception(expression -> new SyntaxException("Should use `:` in ::should verification",
+                                expression.operator().getPosition()));
+                    }
+                }));
+
+        dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation<CurryingMethodGroup, ExpectationFactory>() {
 
             @Override
             public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
