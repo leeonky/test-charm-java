@@ -2,6 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
+import com.github.leeonky.util.NumberType;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Sneaky.execute;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
@@ -17,6 +19,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 
 public class CurryingMethod implements ProxyObject {
     private final List<CandidateMethod> candidateMethods;
@@ -24,27 +27,24 @@ public class CurryingMethod implements ProxyObject {
     private final Data<Object> instance;
     private CandidateMethod resolvedMethod;
 
-    public CurryingMethod(List<CandidateMethod> candidateMethods, DALRuntimeContext runtimeContext, Data<Object> instance) {
-        this.candidateMethods = candidateMethods;
+    public CurryingMethod(DALRuntimeContext runtimeContext, Data<Object> instance) {
+        candidateMethods = new ArrayList<>();
         this.runtimeContext = runtimeContext;
         this.instance = instance;
     }
 
     public CurryingMethod call(Object arg) {
-        return new CurryingMethod(candidateMethods.stream().map(curryingMethod ->
-                curryingMethod.call(arg)).collect(toList()), runtimeContext, instance);
+        CurryingMethod curryingMethod = new CurryingMethod(runtimeContext, instance);
+        candidateMethods.forEach(candidateMethod -> curryingMethod.candidateMethods.add(candidateMethod.call(arg)));
+        return curryingMethod;
     }
 
     public Object resolve() {
-        Optional<CandidateMethod> curryingMethod = getFirstPresent(
+        Optional<CandidateMethod> methodOptional = getFirstPresent(
                 () -> selectCurryingMethod(CandidateMethod::allParamsSameType),
                 () -> selectCurryingMethod(CandidateMethod::allParamsBaseType),
                 () -> selectCurryingMethod(CandidateMethod::allParamsConvertible));
-        if (!curryingMethod.isPresent())
-            return this;
-        Object resolve = curryingMethod.get().resolve(instance.value());
-        resolvedMethod = curryingMethod.get();
-        return resolve;
+        return methodOptional.isPresent() ? (resolvedMethod = methodOptional.get()).resolve() : this;
     }
 
     private Optional<CandidateMethod> selectCurryingMethod(Predicate<CandidateMethod> predicate) {
@@ -52,7 +52,7 @@ public class CurryingMethod implements ProxyObject {
         if (methods.size() > 1) {
             List<CandidateMethod> highPriorityMethod = methods.stream().filter(StaticCandidateMethod.class::isInstance).collect(toList());
             return of(getFirstPresent(() -> getOnlyOne(highPriorityMethod),
-                    () -> getOnlyOne(highPriorityMethod.stream().filter(curryingMethod -> curryingMethod.isSameInstanceType(instance.value())).collect(toList())))
+                    () -> getOnlyOne(highPriorityMethod.stream().filter(CandidateMethod::isSameInstanceType).collect(toList())))
                     .orElseThrow(() -> new InvalidPropertyException(DumpingBuffer.rootContext(runtimeContext)
                             .append("More than one currying method:").indent(this::dumpCandidates).content())));
         }
@@ -81,27 +81,28 @@ public class CurryingMethod implements ProxyObject {
                         .append(curryingMethod.toString()).indent(curryingMethod::dumpArguments));
     }
 
-    public static class CandidateMethod {
+    public void candidateMethod(Method method) {
+        candidateMethods.add(Modifier.isStatic(method.getModifiers()) ?
+                new StaticCandidateMethod(method) : new CandidateMethod(method));
+    }
+
+    public boolean isEmpty() {
+        return candidateMethods.isEmpty();
+    }
+
+    public class CandidateMethod {
         protected final Method method;
-        protected final DALRuntimeContext context;
         protected final List<CurryingArgument> curryingArguments = new ArrayList<>();
 
-        protected CandidateMethod(Method method, DALRuntimeContext context) {
+        protected CandidateMethod(Method method) {
             this.method = method;
-            this.context = context;
-        }
-
-        public static CandidateMethod candidateMethod(Method method, DALRuntimeContext context) {
-            if (Modifier.isStatic(method.getModifiers()))
-                return new StaticCandidateMethod(method, context);
-            return new CandidateMethod(method, context);
         }
 
         public CandidateMethod call(Object arg) {
-            CandidateMethod curryingMethod = clone();
-            curryingMethod.curryingArguments.addAll(curryingArguments);
-            curryingMethod.curryingArguments.add(new CurryingArgument(currentPositionParameter(), context.data(arg)));
-            return curryingMethod;
+            CandidateMethod candidateMethod = newInstance();
+            candidateMethod.curryingArguments.addAll(curryingArguments);
+            candidateMethod.curryingArguments.add(new CurryingArgument(currentPositionParameter(), runtimeContext.data(arg)));
+            return candidateMethod;
         }
 
         private Parameter currentPositionParameter() {
@@ -112,9 +113,8 @@ public class CurryingMethod implements ProxyObject {
             return 0;
         }
 
-        @Override
-        protected CandidateMethod clone() {
-            return new CandidateMethod(method, context);
+        protected CandidateMethod newInstance() {
+            return new CandidateMethod(method);
         }
 
         private boolean testParameterTypes(Predicate<CurryingArgument> checking) {
@@ -134,8 +134,8 @@ public class CurryingMethod implements ProxyObject {
             return testParameterTypes(CurryingArgument::isConvertibleType);
         }
 
-        public Object resolve(Object instance) {
-            return execute(() -> method.invoke(instance,
+        public Object resolve() {
+            return execute(() -> method.invoke(instance.value(),
                     curryingArguments.stream().map(CurryingArgument::properType).toArray()));
         }
 
@@ -144,7 +144,7 @@ public class CurryingMethod implements ProxyObject {
             return method.toString();
         }
 
-        public boolean isSameInstanceType(Object instance) {
+        public boolean isSameInstanceType() {
             return true;
         }
 
@@ -154,6 +154,33 @@ public class CurryingMethod implements ProxyObject {
 
         public void dumpArguments(DumpingBuffer indentBuffer) {
             arguments().forEach(argument -> indentBuffer.newLine().dumpValue(argument.origin()));
+        }
+    }
+
+    class StaticCandidateMethod extends CandidateMethod {
+        public StaticCandidateMethod(Method method) {
+            super(method);
+        }
+
+        @Override
+        protected CandidateMethod newInstance() {
+            return new StaticCandidateMethod(method);
+        }
+
+        @Override
+        protected int parameterOffset() {
+            return 1;
+        }
+
+        @Override
+        public Object resolve() {
+            return execute(() -> method.invoke(null, concat(Stream.of(instance.value()),
+                    curryingArguments.stream().map(CurryingArgument::properType)).toArray()));
+        }
+
+        @Override
+        public boolean isSameInstanceType() {
+            return method.getParameters()[0].getType().equals(NumberType.boxedClass(instance.value().getClass()));
         }
     }
 }

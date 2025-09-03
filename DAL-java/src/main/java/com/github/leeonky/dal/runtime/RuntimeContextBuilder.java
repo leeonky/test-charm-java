@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.runtime.CurryingMethod.CandidateMethod.candidateMethod;
 import static com.github.leeonky.dal.runtime.DALException.buildUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
@@ -548,10 +547,10 @@ public class RuntimeContextBuilder {
         }
 
         public Optional<CurryingMethod> currying(Object instance, Object property) {
-            List<CurryingMethod.CandidateMethod> methods = methodToCurrying(named(instance.getClass()), property).stream()
-                    .map(method -> candidateMethod(method, this)).collect(toList());
-            if (!methods.isEmpty())
-                return of(new CurryingMethod(methods, this, data(instance)));
+            CurryingMethod curryingMethod = new CurryingMethod(this, data(instance));
+            methodToCurrying(named(instance.getClass()), property).forEach(curryingMethod::candidateMethod);
+            if (!curryingMethod.isEmpty())
+                return of(curryingMethod);
             return getImplicitObject(instance).flatMap(obj -> currying(obj, property));
         }
 
