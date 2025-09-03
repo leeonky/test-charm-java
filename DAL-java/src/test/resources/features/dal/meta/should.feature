@@ -65,7 +65,8 @@ Feature: should
       """
     Then failed with the message:
       """
-      Failed to invoke predicate method `test` of #package#Bean {}, maybe missing parameters, all candidate methods are:
+      Failed to invoke predicate method `test`, maybe missing parameters, all candidate methods are:
+          instance: #package#Bean {}
           public boolean #package#Bean.test(java.lang.String,java.lang.String)
               java.lang.String <any>
       """
@@ -123,6 +124,7 @@ Feature: should
       Predicate method `test` should return boolean but java.lang.Integer
       <5>
       all candidate methods are:
+          instance: #package#Bean {}
           -> public int #package#Bean.test(java.lang.String)
               java.lang.String <hello>
       """

@@ -246,6 +246,7 @@ Feature: currying function
       5. customized type getter
       6. static method extension
     More than one currying method:
+        instance: #package#Data {}
         public java.lang.String #package#Data.method(java.lang.CharSequence)
             java.lang.String <str>
         public java.lang.String #package#Data.method(java.lang.Object)

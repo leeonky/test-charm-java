@@ -25,10 +25,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.CurryingMethod.CandidateMethod.candidateMethod;
 import static com.github.leeonky.dal.runtime.DALException.buildUserRuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperation;
-import static com.github.leeonky.dal.runtime.InstanceCurryingMethod.createCurryingMethod;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.Classes.getClassName;
@@ -547,11 +547,11 @@ public class RuntimeContextBuilder {
             return warning;
         }
 
-        public Optional<CurryingMethodGroup> currying(Object instance, Object property) {
-            List<InstanceCurryingMethod> methods = methodToCurrying(named(instance.getClass()), property).stream()
-                    .map(method -> createCurryingMethod(instance, method, this)).collect(toList());
+        public Optional<CurryingMethod> currying(Object instance, Object property) {
+            List<CurryingMethod.CandidateMethod> methods = methodToCurrying(named(instance.getClass()), property).stream()
+                    .map(method -> candidateMethod(method, this)).collect(toList());
             if (!methods.isEmpty())
-                return of(new CurryingMethodGroup(methods, this));
+                return of(new CurryingMethod(methods, this, data(instance)));
             return getImplicitObject(instance).flatMap(obj -> currying(obj, property));
         }
 

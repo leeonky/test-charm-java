@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.extensions;
 
-import com.github.leeonky.dal.runtime.CurryingMethodGroup;
+import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.DALRuntimeException;
 import com.github.leeonky.dal.runtime.MetaData;
 import com.github.leeonky.dal.runtime.ProxyObject;
@@ -33,44 +33,44 @@ public class MetaShould implements ProxyObject {
     }
 
     public class PredicateMethod implements ProxyObject {
-        private final CurryingMethodGroup curryingMethodGroup;
+        private final CurryingMethod curryingMethod;
         private final Object methodName;
 
-        public PredicateMethod(CurryingMethodGroup curryingMethodGroup, Object methodName) {
-            this.curryingMethodGroup = curryingMethodGroup;
+        public PredicateMethod(CurryingMethod curryingMethod, Object methodName) {
+            this.curryingMethod = curryingMethod;
             this.methodName = methodName;
         }
 
         public boolean should() {
-            Object result = curryingMethodGroup.resolve();
-            if (result instanceof CurryingMethodGroup)
+            Object result = curryingMethod.resolve();
+            if (result instanceof CurryingMethod)
                 throw new DALRuntimeException(rootContext(metaData.runtimeContext())
-                        .append("Failed to invoke predicate method `").append(methodName.toString()).append("` of ")
-                        .dump(metaData.data()).append(", maybe missing parameters, all candidate methods are:")
-                        .indent(curryingMethodGroup::dumpCandidates).content());
+                        .append("Failed to invoke predicate method `").append(methodName.toString())
+                        .append("`, maybe missing parameters, all candidate methods are:")
+                        .indent(curryingMethod::dumpCandidates).content());
             if (result instanceof Boolean)
                 return negative != (boolean) result;
             throw new DALRuntimeException(rootContext(metaData.runtimeContext())
                     .append("Predicate method `").append(methodName.toString()).append("` should return boolean but ")
                     .dump(metaData.runtimeContext().data(result)).newLine()
                     .append("all candidate methods are:")
-                    .indent(curryingMethodGroup::dumpCandidates).content());
+                    .indent(curryingMethod::dumpCandidates).content());
         }
 
         public String errorMessage() {
             return rootContext(metaData.runtimeContext())
                     .append("Expected: ").dump(metaData.data()).newLine()
                     .append("Should").append(negative ? " not" : "").append(" ").append(methodName.toString()).append(":")
-                    .indent(curryingMethodGroup.getResolvedMethod()::dumpArguments).content();
+                    .indent(curryingMethod.getResolvedMethod()::dumpArguments).content();
         }
 
-        public CurryingMethodGroup curryingMethodGroup() {
-            return curryingMethodGroup;
+        public CurryingMethod curryingMethodGroup() {
+            return curryingMethod;
         }
 
         @Override
         public Object getValue(Object property) {
-            return new PredicateMethod(curryingMethodGroup.call(property), methodName);
+            return new PredicateMethod(curryingMethod.call(property), methodName);
         }
     }
 }

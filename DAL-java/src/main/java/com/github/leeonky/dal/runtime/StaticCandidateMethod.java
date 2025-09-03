@@ -9,14 +9,14 @@ import java.util.stream.Stream;
 import static com.github.leeonky.util.Sneaky.execute;
 import static java.util.stream.Stream.concat;
 
-class StaticCurryingMethod extends InstanceCurryingMethod {
-    public StaticCurryingMethod(Object instance, Method method, DALRuntimeContext context) {
-        super(instance, method, context);
+class StaticCandidateMethod extends CurryingMethod.CandidateMethod {
+    public StaticCandidateMethod(Method method, DALRuntimeContext context) {
+        super(method, context);
     }
 
     @Override
-    protected InstanceCurryingMethod clone() {
-        return new StaticCurryingMethod(instance, method, context);
+    protected CurryingMethod.CandidateMethod clone() {
+        return new StaticCandidateMethod(method, context);
     }
 
     @Override
@@ -25,13 +25,13 @@ class StaticCurryingMethod extends InstanceCurryingMethod {
     }
 
     @Override
-    public Object resolve() {
+    public Object resolve(Object instance) {
         return execute(() -> method.invoke(null, concat(Stream.of(instance),
                 curryingArguments.stream().map(CurryingArgument::properType)).toArray()));
     }
 
     @Override
-    public boolean isSameInstanceType() {
+    public boolean isSameInstanceType(Object instance) {
         return method.getParameters()[0].getType().equals(NumberType.boxedClass(instance.getClass()));
     }
 }
