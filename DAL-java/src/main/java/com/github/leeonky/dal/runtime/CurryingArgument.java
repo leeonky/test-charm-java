@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.util.ConvertException;
 
 import java.lang.reflect.Parameter;
@@ -8,7 +9,7 @@ import static com.github.leeonky.util.NumberType.boxedClass;
 
 public class CurryingArgument {
     private final Parameter parameter;
-    private final Data<?> data;
+    protected final Data<?> data;
     private Object properType;
 
     public CurryingArgument(Parameter parameter, Data<?> data) {
@@ -39,12 +40,34 @@ public class CurryingArgument {
         return properType;
     }
 
-    public Data<?> origin() {
-        return data;
+    public void dumpParameter(DumpingBuffer indentBuffer) {
+        indentBuffer.newLine().dumpValue(data);
     }
 
-    @Override
-    public String toString() {
-        return data.dumpValue();
+    public static class Extraneous extends CurryingArgument {
+
+        public Extraneous(Data<Object> data) {
+            super(null, data);
+        }
+
+        @Override
+        public boolean isConvertibleType() {
+            return false;
+        }
+
+        @Override
+        public boolean isSameType() {
+            return false;
+        }
+
+        @Override
+        public boolean isSuperType() {
+            return false;
+        }
+
+        @Override
+        public void dumpParameter(DumpingBuffer indentBuffer) {
+            indentBuffer.newLine().append("*extraneous* ").dumpValue(data);
+        }
     }
 }

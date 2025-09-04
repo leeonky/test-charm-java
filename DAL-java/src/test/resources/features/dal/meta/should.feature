@@ -57,23 +57,32 @@ Feature: should
         public boolean test(String s1, String s2) {
           return true;
         }
+        public boolean test(String s1, String s2, String s3, String s4) {
+          return true;
+        }
       }
       """
     When use a instance of java class "Bean" to evaluate:
       """
-      ::should.test: any
+      ::should.test[any1][any2]: any3
       """
     Then failed with the message:
       """
       Failed to invoke predicate method `test`, maybe missing parameters, all candidate methods are:
           instance: #package#Bean {}
           public boolean #package#Bean.test(java.lang.String,java.lang.String)
-              java.lang.String <any>
+              java.lang.String <any1>
+              java.lang.String <any2>
+              *extraneous* java.lang.String <any3>
+          public boolean #package#Bean.test(java.lang.String,java.lang.String,java.lang.String,java.lang.String)
+              java.lang.String <any1>
+              java.lang.String <any2>
+              java.lang.String <any3>
       """
     And got the following notation:
       """
-      ::should.test: any
-                     ^
+      ::should.test[any1][any2]: any3
+                                 ^
       """
 
   Scenario: should with multi parameters
@@ -259,4 +268,78 @@ Feature: should
       """
       list.value[]::should[].startsWith: [ ... =hel wor ...]
                                                ^
+      """
+
+  Scenario: call overloading method
+    Given the following java class:
+      """
+      public class Bean {
+        public boolean test(String s1, String s2, String s3) {
+          return s3.equals(s1+s2);
+        }
+
+        public boolean test(String s1, String s2) {
+          return s1.equals(s2);
+        }
+
+        public boolean test(String s1) {
+          return s1.equals("t1");
+        }
+      }
+      """
+    Then the following verification for the instance of java class "Bean" should pass:
+      """
+      : {
+        ::should.test: t1
+        ::should.test[t2]: t2
+        ::should.test[t1][t2]: t1t2
+      }
+      """
+    When evaluate by:
+      """
+      ::should.test: t2
+      """
+    Then failed with the message:
+      """
+      Expected: #package#Bean {}
+      Should test:
+          java.lang.String <t2>
+      """
+    And got the following notation:
+      """
+      ::should.test: t2
+                     ^
+      """
+    When evaluate by:
+      """
+      ::should.test[t2]: t3
+      """
+    Then failed with the message:
+      """
+      Expected: #package#Bean {}
+      Should test:
+          java.lang.String <t2>
+          java.lang.String <t3>
+      """
+    And got the following notation:
+      """
+      ::should.test[t2]: t3
+                         ^
+      """
+    When evaluate by:
+      """
+      ::should.test[t2][t3]: any
+      """
+    Then failed with the message:
+      """
+      Expected: #package#Bean {}
+      Should test:
+          java.lang.String <t2>
+          java.lang.String <t3>
+          java.lang.String <any>
+      """
+    And got the following notation:
+      """
+      ::should.test[t2][t3]: any
+                             ^
       """

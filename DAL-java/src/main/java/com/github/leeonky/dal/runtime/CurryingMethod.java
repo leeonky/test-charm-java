@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Sneaky.execute;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
-import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -25,7 +24,6 @@ public class CurryingMethod implements ProxyObject {
     private final List<CandidateMethod> candidateMethods;
     private final DALRuntimeContext runtimeContext;
     private final Data<Object> instance;
-    private CandidateMethod resolvedMethod;
 
     public CurryingMethod(DALRuntimeContext runtimeContext, Data<Object> instance) {
         candidateMethods = new ArrayList<>();
@@ -44,7 +42,7 @@ public class CurryingMethod implements ProxyObject {
                 () -> selectCurryingMethod(CandidateMethod::allParamsSameType),
                 () -> selectCurryingMethod(CandidateMethod::allParamsBaseType),
                 () -> selectCurryingMethod(CandidateMethod::allParamsConvertible));
-        return methodOptional.isPresent() ? (resolvedMethod = methodOptional.get()).resolve() : this;
+        return methodOptional.isPresent() ? methodOptional.get().resolve() : this;
     }
 
     private Optional<CandidateMethod> selectCurryingMethod(Predicate<CandidateMethod> predicate) {
@@ -71,14 +69,13 @@ public class CurryingMethod implements ProxyObject {
     }
 
     public CandidateMethod getResolvedMethod() {
-        return resolvedMethod;
+        return candidateMethods.stream().filter(candidateMethod -> candidateMethod.resolved).findFirst().orElse(null);
     }
 
     public void dumpCandidates(DumpingBuffer buffer) {
         buffer.newLine().append("instance: ").dumpValue(instance);
         candidateMethods.stream().sorted(comparing(CandidateMethod::toString)).forEach(curryingMethod ->
-                buffer.newLine().append(curryingMethod == getResolvedMethod() ? "-> " : "")
-                        .append(curryingMethod.toString()).indent(curryingMethod::dumpArguments));
+                buffer.newLine().append(curryingMethod.toString()).indent(curryingMethod::dumpArguments));
     }
 
     public void candidateMethod(Method method) {
@@ -91,22 +88,28 @@ public class CurryingMethod implements ProxyObject {
     }
 
     public class CandidateMethod {
+        private final Parameter[] parameters;
+        protected boolean resolved = false;
         protected final Method method;
         protected final List<CurryingArgument> curryingArguments = new ArrayList<>();
 
         protected CandidateMethod(Method method) {
             this.method = method;
+            parameters = this.method.getParameters();
         }
 
         public CandidateMethod call(Object arg) {
             CandidateMethod candidateMethod = newInstance();
             candidateMethod.curryingArguments.addAll(curryingArguments);
-            candidateMethod.curryingArguments.add(new CurryingArgument(currentPositionParameter(), runtimeContext.data(arg)));
+            candidateMethod.curryingArguments.add(createArgument(arg));
             return candidateMethod;
         }
 
-        private Parameter currentPositionParameter() {
-            return method.getParameters()[curryingArguments.size() + parameterOffset()];
+        private CurryingArgument createArgument(Object arg) {
+            int index = curryingArguments.size() + parameterOffset();
+            if (index < parameters.length)
+                return new CurryingArgument(parameters[index], runtimeContext.data(arg));
+            return new CurryingArgument.Extraneous(runtimeContext.data(arg));
         }
 
         protected int parameterOffset() {
@@ -118,7 +121,7 @@ public class CurryingMethod implements ProxyObject {
         }
 
         private boolean testParameterTypes(Predicate<CurryingArgument> checking) {
-            return method.getParameterCount() - parameterOffset() == curryingArguments.size()
+            return parameters.length - parameterOffset() == curryingArguments.size()
                     && curryingArguments.stream().allMatch(checking);
         }
 
@@ -135,25 +138,22 @@ public class CurryingMethod implements ProxyObject {
         }
 
         public Object resolve() {
+            resolved = true;
             return execute(() -> method.invoke(instance.value(),
                     curryingArguments.stream().map(CurryingArgument::properType).toArray()));
         }
 
         @Override
         public String toString() {
-            return method.toString();
+            return (resolved ? "-> " : "") + method.toString();
         }
 
         public boolean isSameInstanceType() {
             return true;
         }
 
-        public List<CurryingArgument> arguments() {
-            return unmodifiableList(curryingArguments);
-        }
-
         public void dumpArguments(DumpingBuffer indentBuffer) {
-            arguments().forEach(argument -> indentBuffer.newLine().dumpValue(argument.origin()));
+            curryingArguments.forEach(argument -> argument.dumpParameter(indentBuffer));
         }
     }
 
