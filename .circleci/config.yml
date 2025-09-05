@@ -31,6 +31,7 @@ jobs:
   build:
     machine:
       image: ubuntu-2004:2024.08.1
+      docker_layer_caching: true
     steps:
       - add_ssh_keys:
           fingerprints:

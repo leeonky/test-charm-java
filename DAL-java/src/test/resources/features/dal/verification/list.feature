@@ -907,6 +907,28 @@ Feature: list
                      -1 | c          |
       """
 
+    Scenario: sort null and non null
+      Given the following json:
+      """
+      [1, null, 3]
+      """
+      When evaluate by:
+      """
+      (+{})
+      """
+      Then the result should:
+      """
+      : [1, 3, null]
+      """
+      When evaluate by:
+      """
+      (-{})
+      """
+      Then the result should:
+      """
+      : [null, 3, 1]
+      """
+
   Rule: infinite collection
 
     Background:

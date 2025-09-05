@@ -80,7 +80,7 @@ public class Calculator {
             if (value instanceof Number)
                 return context.getNumberType().negate((Number) value);
             if (input.isList())
-                return sortList(input.list(), reverseOrder(), context);
+                return sortList(input.list(), nullsFirst(reverseOrder()), context);
             throw illegalOp2(format("Operand should be number or list but '%s'", getClassName(value)));
         });
     }
@@ -93,7 +93,7 @@ public class Calculator {
     public static Data<?> positive(Data<?> input, DALRuntimeContext context) {
         return input.map(value -> {
             if (input.isList())
-                return sortList(input.list(), naturalOrder(), context);
+                return sortList(input.list(), nullsLast(naturalOrder()), context);
             throw illegalOp2(format("Operand should be list but '%s'", getClassName(input.value())));
         });
     }
