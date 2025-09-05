@@ -130,3 +130,28 @@ Feature: sort
       list= -[1 2]
       """
 
+  Scenario: sort with null property
+    When the following json:
+    """
+    [{
+      "name": "Tom"
+    },{
+      "name": "John"
+    }, {
+      "name": null
+    }]
+    """
+    Then the following verification should pass:
+    """
+    = | ￪name |
+      | John  |
+      | Tom   |
+      | null  |
+    """
+    Then the following verification should pass:
+    """
+    = | -name |
+      | null  |
+      | Tom   |
+      | John  |
+    """

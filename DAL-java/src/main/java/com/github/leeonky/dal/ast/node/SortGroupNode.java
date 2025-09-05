@@ -34,9 +34,8 @@ public class SortGroupNode extends DALNode {
                 .collect(joining("", "", " ")) : "";
     }
 
-    @SuppressWarnings("unchecked")
     public Comparator<Data<?>> comparator(Function<Data<?>, Object> orderBy) {
-        return sortSymbolNodes.get(0).getType().azOrZa(Comparator.comparing(o -> (Comparable<Object>) orderBy.apply(o)));
+        return sortSymbolNodes.get(0).getType().azOrZa(orderBy);
     }
 
     public static Comparator<SortGroupNode> comparator() {
