@@ -50,6 +50,8 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty("should", MetaShould::new)
                 .registerMetaProperty("this", (RuntimeDataHandler<MetaData<?>>) RuntimeData::data)
                 .registerMetaProperty(MetaShould.class, "not", (metaData) -> metaData.data().value().negative())
+                .registerMetaProperty("root", (RuntimeDataHandler<MetaData<?>>) metaData ->
+                        metaData.runtimeContext().inputRoot())
         ;
 
         dal.getRuntimeContextBuilder().checkerSetForMatching()

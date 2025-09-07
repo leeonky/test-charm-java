@@ -1,68 +1,80 @@
-Feature: this
+Feature: root
 
-  Scenario: reference current input value via ::this
+  Scenario: ref input root value by ::root
     Given the following json:
       """
       {
-        "key": "value"
+        "key": {
+          "key": "value"
+        }
       }
       """
     Then the following verification should pass:
       """
-      ::this= {key= value}
+      ::root= {key= {key= value}}
       """
     When evaluate by:
       """
-      ::this= {key= not}
+      ::root: {key= any}
       """
     Then failed with the message:
       """
       Expected to be equal to: java.lang.String
-      <not>
-       ^
-      Actual: java.lang.String
-      <value>
-       ^
+                               ^
+      <any>
+      Actual: {
+              ^
+          key: java.lang.String <value>
+      }
       """
     And got the following notation:
       """
-      ::this= {key= not}
+      ::root: {key= any}
                     ^
       """
 
-  Scenario: reference current input value via ::this in object scope
+  Scenario: ::root in object scope
     Given the following json:
       """
       {
-        "key": "value"
+        "key": {
+          "key": "value"
+        }
       }
       """
     Then the following verification should pass:
       """
-      :{
-        ::this= {key= value}
+      : {
+        key: {
+          ::root= {key= {key= value}}
+        }
       }
       """
     When evaluate by:
       """
       : {
-        ::this= {key= not}
+        key: {
+          ::root= {key= any}
+        }
       }
       """
     Then failed with the message:
       """
       Expected to be equal to: java.lang.String
-      <not>
-       ^
-      Actual: java.lang.String
-      <value>
-       ^
+                               ^
+      <any>
+      Actual: {
+              ^
+          key: java.lang.String <value>
+      }
       """
     And got the following notation:
       """
       : {
-        ::this= {key= not}
-                      ^
+        key: {
+          ::root= {key= any}
+                        ^
+        }
       }
       """
 

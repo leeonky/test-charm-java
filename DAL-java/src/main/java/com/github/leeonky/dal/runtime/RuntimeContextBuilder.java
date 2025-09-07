@@ -573,5 +573,9 @@ public class RuntimeContextBuilder {
         public int lastPosition() {
             return positionStack.getFirst();
         }
+
+        public Data<?> inputRoot() {
+            return stack.getLast();
+        }
     }
 }
