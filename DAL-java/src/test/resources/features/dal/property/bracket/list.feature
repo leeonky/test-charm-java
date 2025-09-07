@@ -127,7 +127,7 @@ Feature: access list element by [n]
     """
     Then failed with the message:
     """
-    Instance is null
+    The instance of the property is null
     """
     And got the following notation:
     """

@@ -112,7 +112,7 @@ public class Assertions {
     }
 
     public Assertions isEqualTo(Object expect) {
-        expression(InputNode.INPUT_NODE, Factory.equal(), new ConstValueNode(expect))
+        expression(InputNode.Root.INSTANCE, Factory.equal(), new ConstValueNode(expect))
                 .evaluate(getDAL().getRuntimeContextBuilder().build(inputCode));
         return this;
     }

@@ -15,7 +15,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    The input value is null
+    Expected value to be not null, but it was null
     """
     And got the following notation:
     """
@@ -25,6 +25,23 @@ Feature: object
     And the inspect should:
     """
     null: {...}
+    """
+    When evaluate by:
+    """
+    null= {...}
+    """
+    Then failed with the message:
+    """
+    Expected value to be not null, but it was null
+    """
+    And got the following notation:
+    """
+    null= {...}
+          ^
+    """
+    And the inspect should:
+    """
+    null= {...}
     """
 
   Scenario: unexpected fields
@@ -501,4 +518,38 @@ Feature: object
     And the inspect should:
     """
     : {::object.class.simpleName= 'LinkedHashMap'}
+    """
+
+  Scenario: ignore property verification for null object
+    Then the following verification should pass:
+    """
+    null: {
+      any: *
+    }
+    """
+    And the following verification should pass:
+    """
+    null= {
+      any: *
+    }
+    """
+
+  Scenario: ignore property verification for invalid property
+    Given the following json:
+    """
+    100
+    """
+    Then the following verification should pass:
+    """
+    : {
+      toLowerCase: *
+      notExist: *
+    }
+    """
+    Then the following verification should pass:
+    """
+    = {
+      toLowerCase: *
+      notExist: *
+    }
     """

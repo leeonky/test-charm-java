@@ -1058,5 +1058,44 @@ Feature: list
           | 6        |
       """
 
+    Scenario: ignore cell with * for invalid property
+      Given the following java class:
+      """
+      public class ListValue {
+        public Object[] list = new Object[] {"A", 1, null};
+      }
+      """
+      Then the following verification for the instance of java class "ListValue" should pass:
+      """
+      list: [{toLowerCase: a}
+      {any: *}
+      {any: *}]
+      """
+
+    Scenario: ignore verification * in list should check size
+      Given the following json:
+      """
+      [1, 2]
+      """
+      When evaluate by:
+      """
+      : [1 2, *]
+      """
+      Then failed with the message:
+      """
+      Unexpected list size
+      Expected: <3>
+      Actual: <2>
+      Actual list: [
+          java.lang.Integer <1>,
+          java.lang.Integer <2>
+      ]
+      """
+      And got the following notation:
+      """
+      : [1 2, *]
+        ^
+      """
+
 #  TODO contains not allow set index or key in table
 #  TODO try to support [1 ... 2] ?

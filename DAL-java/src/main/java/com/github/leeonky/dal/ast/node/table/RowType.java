@@ -1,8 +1,10 @@
 package com.github.leeonky.dal.ast.node.table;
 
 import com.github.leeonky.dal.ast.node.*;
+import com.github.leeonky.dal.ast.node.InputNode.StackInput;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
 import java.util.Collections;
@@ -12,7 +14,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.node.DALExpression.expression;
-import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
 import static com.github.leeonky.dal.ast.node.table.SpecifyIndexRowType.indexToExpression;
 import static com.github.leeonky.dal.compiler.Notations.EMPTY;
@@ -38,7 +39,7 @@ public abstract class RowType {
     public abstract DALNode constructVerificationNode(Data<?> actual, Stream<Clause<DALNode>> rowClauses,
                                                       Comparator<Data<?>> comparator);
 
-    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
+    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey, DALRuntimeContext context) {
         return input;
     }
 }
@@ -100,12 +101,12 @@ class SpecifyIndexRowType extends RowType {
     }
 
     @Override
-    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
-        return indexOrKey.flatMap(SpecifyIndexRowType::indexToExpression).orElseThrow(IllegalStateException::new);
+    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey, DALRuntimeContext context) {
+        return indexOrKey.flatMap(node -> indexToExpression(node, context)).orElseThrow(IllegalStateException::new);
     }
 
-    static Optional<DALNode> indexToExpression(DALNode node) {
-        return when(node instanceof ConstValueNode).optional(() -> expression(INPUT_NODE, Factory.executable(EMPTY),
+    static Optional<DALNode> indexToExpression(DALNode node, DALRuntimeContext context) {
+        return when(node instanceof ConstValueNode).optional(() -> expression(new StackInput(context), Factory.executable(EMPTY),
                 new SymbolNode(((ConstValueNode) node).getValue(), BRACKET).setPositionBegin(node.getPositionBegin())));
     }
 }
@@ -152,7 +153,7 @@ class SpecifyPropertyRowType extends RowType {
     }
 
     @Override
-    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
-        return indexOrKey.map(node -> indexToExpression(node).orElse(node)).orElseThrow(IllegalStateException::new);
+    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey, DALRuntimeContext context) {
+        return indexOrKey.map(node -> indexToExpression(node, context).orElse(node)).orElseThrow(IllegalStateException::new);
     }
 }

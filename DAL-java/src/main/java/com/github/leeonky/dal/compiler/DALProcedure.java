@@ -149,4 +149,8 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return DALExpression.expression(left, operator, right);
     }
 
+    @Override
+    public DALRuntimeContext getRuntimeContext() {
+        return runtimeContext;
+    }
 }

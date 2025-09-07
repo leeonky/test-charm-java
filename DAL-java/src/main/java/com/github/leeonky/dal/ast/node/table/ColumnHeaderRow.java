@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast.node.table;
 
 import com.github.leeonky.dal.ast.node.DALNode;
+import com.github.leeonky.dal.ast.node.InputNode;
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.ast.node.TableNode;
 import com.github.leeonky.dal.runtime.Data;
@@ -11,7 +12,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static java.util.stream.Collectors.toList;
 
@@ -33,9 +33,9 @@ public class ColumnHeaderRow extends DALNode {
                 .orElse(NOP_COMPARATOR);
     }
 
-    public ColumnHeader getHeader(int index) {
+    public ColumnHeader getHeader(int index, RuntimeContextBuilder.DALRuntimeContext context) {
         if (index >= headers.size())
-            return new ColumnHeader(SortGroupNode.NO_SEQUENCE, INPUT_NODE, Optional.empty());
+            return new ColumnHeader(SortGroupNode.NO_SEQUENCE, new InputNode.StackInput(context), Optional.empty());
         return headers.get(index);
     }
 

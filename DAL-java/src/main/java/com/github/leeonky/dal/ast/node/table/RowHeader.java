@@ -38,8 +38,9 @@ public class RowHeader extends DALNode {
     }
 
     public DALNode makeExpressionWithOptionalIndexAndSchema(RowType rowType, DALNode input,
-                                                            DALOperator defaultOperator, DALNode expectedRow) {
-        DALNode rowAccessor = rowType.constructAccessingRowNode(input, indexOrProperty);
+                                                            DALOperator defaultOperator, DALNode expectedRow,
+                                                            DALRuntimeContext context) {
+        DALNode rowAccessor = rowType.constructAccessingRowNode(input, indexOrProperty, context);
         return expression(clause.map(clause -> clause.expression(rowAccessor)).orElse(rowAccessor),
                 rowOperator.orElse(defaultOperator), expectedRow);
     }
@@ -54,7 +55,7 @@ public class RowHeader extends DALNode {
 
     public Optional<Integer> position() {
         return getFirstPresent(() -> indexOrProperty.map(DALNode::getPositionBegin),
-                () -> clause.map(c -> ((DALExpression) c.expression(InputNode.INPUT_NODE)).operator().getPosition()),
+                () -> clause.map(c -> ((DALExpression) c.expression(InputNode.Placeholder.INSTANCE)).operator().getPosition()),
                 () -> rowOperator.map(Operator::getPosition));
     }
 }

@@ -306,6 +306,7 @@ public class RuntimeContextBuilder {
 
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data<?>> stack = new LinkedList<>();
+        private final LinkedList<Integer> positionStack = new LinkedList<>();
         private final Map<Data<?>, PartialPropertyStack> partialPropertyStacks;
 
         public Features features() {
@@ -314,6 +315,7 @@ public class RuntimeContextBuilder {
 
         public DALRuntimeContext(InputCode<?> supplier, Class<?> schema) {
             stack.push(lazy(supplier, SchemaType.create(schema == null ? null : BeanClass.create(schema))));
+            positionStack.push(0);
             partialPropertyStacks = new HashMap<>();
         }
 
@@ -327,6 +329,15 @@ public class RuntimeContextBuilder {
                 return supplier.get();
             } finally {
                 returnHook.accept(stack.pop());
+            }
+        }
+
+        public <T> T pushPositionAndExecute(int position, Supplier<T> supplier) {
+            try {
+                positionStack.push(position);
+                return supplier.get();
+            } finally {
+                positionStack.pop();
             }
         }
 
@@ -557,6 +568,10 @@ public class RuntimeContextBuilder {
         @SuppressWarnings("unchecked")
         public Comparable<?> transformComparable(Object object) {
             return customSorters.tryGetData(object).map(f -> f.apply(object)).orElseGet(() -> (Comparable) object);
+        }
+
+        public int lastPosition() {
+            return positionStack.getFirst();
         }
     }
 }

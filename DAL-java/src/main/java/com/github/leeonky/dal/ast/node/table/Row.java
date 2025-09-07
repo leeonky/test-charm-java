@@ -1,15 +1,16 @@
 package com.github.leeonky.dal.ast.node.table;
 
 import com.github.leeonky.dal.ast.node.*;
+import com.github.leeonky.dal.ast.node.InputNode.Placeholder;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.DALException;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.ListScopeNode.Style.ROW;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.TableNode.printLine;
@@ -31,27 +32,27 @@ public class Row extends DALNode {
         this.rowHeader = (RowHeader) rowHeader;
         cells = new ArrayList<>(clauses);
         this.columnHeaderRow = columnHeaderRow;
-        setPositionBegin(clauses.get(clauses.size() - 1).getOperandPosition(INPUT_NODE));
+        setPositionBegin(clauses.get(clauses.size() - 1).getOperandPosition(Placeholder.INSTANCE));
     }
 
     @Override
     public String inspect() {
         String header = rowHeader.inspect();
-        String data = printLine(cells.stream().map(clause -> clause.expression(INPUT_NODE)).collect(toList()));
+        String data = printLine(cells.stream().map(clause -> clause.expression(Placeholder.INSTANCE)).collect(toList()));
         return (header.isEmpty() ? data : header + " " + data);
     }
 
-    public Clause<DALNode> constructVerificationClause(DALOperator operator, RowType rowType) {
+    public Clause<DALNode> constructVerificationClause(DALOperator operator, RowType rowType, DALRuntimeContext context) {
         return input -> isEllipsis() ? firstCell() :
-                rowHeader.makeExpressionWithOptionalIndexAndSchema(rowType, input, operator, expectedRow());
+                rowHeader.makeExpressionWithOptionalIndexAndSchema(rowType, input, operator, expectedRow(context), context);
     }
 
-    private DALNode expectedRow() {
+    private DALNode expectedRow(DALRuntimeContext context) {
         if (isRowWildcard())
             return firstCell();
         if (columnHeaderRow instanceof DefaultIndexColumnHeaderRow)
             return new ListScopeNode(cells, NOP_COMPARATOR, ROW).setPositionBegin(getPositionBegin());
-        return new ObjectScopeNode(getCells()).setPositionBegin(getPositionBegin());
+        return new ObjectScopeNode(getCells(context)).setPositionBegin(getPositionBegin());
     }
 
     private DALNode firstCell() {
@@ -66,10 +67,10 @@ public class Row extends DALNode {
         return cells.size() >= 1 && firstCell() instanceof ListEllipsisNode;
     }
 
-    private List<DALNode> getCells() {
+    private List<DALNode> getCells(DALRuntimeContext context) {
         return new ArrayList<DALNode>() {{
             for (int i = 0; i < cells.size(); i++)
-                add(cells.get(i).expression(columnHeaderRow.getHeader(i).property()));
+                add(cells.get(i).expression(columnHeaderRow.getHeader(i, context).property()));
         }};
     }
 
@@ -94,7 +95,8 @@ public class Row extends DALNode {
 
     public void checkSize(int size) {
         if (!specialRow() && cells.size() != size)
-            throw new SyntaxException("Different cell size", cells.get(cells.size() - 1).getOperandPosition(INPUT_NODE));
+            throw new SyntaxException("Different cell size", cells.get(cells.size() - 1)
+                    .getOperandPosition(Placeholder.INSTANCE));
     }
 
 

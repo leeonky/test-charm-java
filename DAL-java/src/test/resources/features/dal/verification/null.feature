@@ -179,7 +179,7 @@ Feature: compare null
     """
     Then failed with the message:
     """
-    The input value is null
+    Expected value to be not null, but it was null
     """
     And got the following notation:
     """

@@ -113,7 +113,7 @@ Feature: access object property by .xxx
     """
     Then failed with the message:
     """
-    Instance is null
+    The instance of the property is null
     """
     And got the following notation:
     """

@@ -585,3 +585,18 @@ Feature: basic verification via table
     : | ::object.class.simpleName |
     | : 'LinkedHashMap' |
     """
+
+  Scenario: ignore cell with * for invalid property
+    Given the following java class:
+    """
+    public class ListValue {
+      public Object[] list = new Object[] {"A", 1, null};
+    }
+    """
+    Then the following verification for the instance of java class "ListValue" should pass:
+    """
+    list: | toLowerCase |
+          | a           |
+          | *           |
+          | *           |
+    """

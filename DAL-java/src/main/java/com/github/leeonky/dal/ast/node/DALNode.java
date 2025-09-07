@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
-
     public Data<?> evaluateData(DALRuntimeContext context) {
         return context.data(evaluate(context));
     }
@@ -37,7 +36,9 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public Data<?> verify(DALOperator operator, DALNode actual, DALRuntimeContext context) {
-        return context.calculate(actual.evaluateData(context), operator, context.data(toVerify(context)));
+        Data<?> actualData = actual.evaluateData(context);
+        return context.pushPositionAndExecute(actual.getOperandPosition(),
+                () -> context.calculate(actualData, operator, context.data(toVerify(context))));
     }
 
     protected ExpectationFactory toVerify(DALRuntimeContext context) {

@@ -59,7 +59,7 @@ Feature: access object property by ['xxx']
     """
     Then failed with the message:
     """
-    Instance is null
+    The instance of the property is null
     """
     And got the following notation:
     """
@@ -124,3 +124,22 @@ Feature: access object property by ['xxx']
       | id                         | [ id ]                         | 100   | ['id']                         |
       | with space                 | [ with space ]                 | 100   | ['with space']                 |
       | !@#$%^&*(){}~`\|=+/?_-,.<> | [ !@#$%^&*(){}~`\|=+/?_-,.<> ] | 100   | ['!@#$%^&*(){}~`\|=+/?_-,.<>'] |
+
+  Scenario: access property in null object
+    When evaluate by:
+    """
+    null: {
+      any: any
+    }
+    """
+    Then failed with the message:
+    """
+    The instance of the property is null
+    """
+    And got the following notation:
+    """
+    null: {
+      any: any
+      ^
+    }
+    """

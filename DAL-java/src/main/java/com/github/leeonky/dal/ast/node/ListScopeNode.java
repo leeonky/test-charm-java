@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.github.leeonky.dal.ast.node.DALExpression.expression;
-import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
 import static com.github.leeonky.dal.runtime.DALException.locateError;
@@ -53,12 +52,12 @@ public class ListScopeNode extends DALNode {
         this(clauses, NOP_COMPARATOR, Style.LIST);
     }
 
-    private List<DALNode> getVerificationExpressions(Data<?>.DataList list, Data<?> actual) {
-        return verificationExpressions != null ? verificationExpressions : buildVerificationExpressions(list, actual)
+    private List<DALNode> getVerificationExpressions(Data<?>.DataList list, Data<?> actual, DALRuntimeContext context) {
+        return verificationExpressions != null ? verificationExpressions : buildVerificationExpressions(list, actual, context)
                 .stream().filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
     }
 
-    private List<DALNode> buildVerificationExpressions(Data<?>.DataList list, Data<?> actual) {
+    private List<DALNode> buildVerificationExpressions(Data<?>.DataList list, Data<?> actual, DALRuntimeContext context) {
         if (inputExpressions != null)
             return inputExpressions;
         return new ArrayList<DALNode>() {
@@ -66,13 +65,13 @@ public class ListScopeNode extends DALNode {
                 List<Clause<DALNode>> usefulInputClauses = new ArrayList<>(inputClauses);
                 if (type == Type.FIRST_N_ITEMS)
                     for (int i = 0; i < usefulInputClauses.size() - 1; i++)
-                        add(buildIndexExpression(usefulInputClauses.get(i), i + list.firstIndex()));
+                        add(buildIndexExpression(usefulInputClauses.get(i), i + list.firstIndex(), context));
                 else if (type == Type.LAST_N_ITEMS)
                     for (int i = usefulInputClauses.size() - 1; i >= 0; i--)
-                        add(0, buildIndexExpression(usefulInputClauses.get(i), i - usefulInputClauses.size()));
+                        add(0, buildIndexExpression(usefulInputClauses.get(i), i - usefulInputClauses.size(), context));
                 else if (type == Type.ALL_ITEMS) {
                     Zipped<Clause<DALNode>, Integer> zipped = zip(usefulInputClauses, list.indexes());
-                    zipped.forEachElement((clause, index) -> add(buildIndexExpression(clause, index)));
+                    zipped.forEachElement((clause, index) -> add(buildIndexExpression(clause, index, context)));
                     if (zipped.hasLeft())
                         throw differentSizeException(usefulInputClauses, actual, zipped.index());
                     if (zipped.hasRight() && !list.infinite())
@@ -80,9 +79,9 @@ public class ListScopeNode extends DALNode {
                 }
             }
 
-            private DALNode buildIndexExpression(Clause<DALNode> clause, Integer index) {
+            private DALNode buildIndexExpression(Clause<DALNode> clause, Integer index, DALRuntimeContext context) {
                 DALNode symbolNode = new SymbolNode(index, BRACKET);
-                DALNode expression = clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY), symbolNode));
+                DALNode expression = clause.expression(expression(new InputNode.StackInput(context), Factory.executable(Notations.EMPTY), symbolNode));
                 symbolNode.setPositionBegin(expression.getOperandPosition());
                 return expression;
             }
@@ -110,7 +109,7 @@ public class ListScopeNode extends DALNode {
                     Data<?> sorted = actual.map(e -> opt1(actual::list).sort(getComparator(context)));
                     return sorted.execute(() -> type == Type.CONTAINS ?
                             verifyContainElement(context, sorted.list(), actual)
-                            : verifyCorrespondingElement(context, getVerificationExpressions(sorted.list(), actual)));
+                            : verifyCorrespondingElement(context, getVerificationExpressions(sorted.list(), actual, context)));
                 } catch (ListMappingElementAccessException e) {
                     throw exception(expression -> locateError(e, expression.left().getOperandPosition()));
                 }
@@ -135,13 +134,13 @@ public class ListScopeNode extends DALNode {
             if (type == Type.LAST_N_ITEMS) {
                 int negativeIndex = -1;
                 for (int i = inputClauses.size() - 1; i >= 0; i--) {
-                    add(0, inputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
-                            new SymbolNode(negativeIndex--, BRACKET))));
+                    add(0, inputClauses.get(i).expression(expression(InputNode.Placeholder.INSTANCE,
+                            Factory.executable(Notations.EMPTY), new SymbolNode(negativeIndex--, BRACKET))));
                 }
             } else {
                 for (int i = 0; i < inputClauses.size(); i++)
-                    add(inputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
-                            new SymbolNode(i, BRACKET))));
+                    add(inputClauses.get(i).expression(expression(InputNode.Placeholder.INSTANCE,
+                            Factory.executable(Notations.EMPTY), new SymbolNode(i, BRACKET))));
             }
         }};
     }
@@ -166,7 +165,7 @@ public class ListScopeNode extends DALNode {
     @Override
     public String inspect() {
         if (type == Type.CONTAINS)
-            return inputClauses.stream().map(clause -> clause.expression(INPUT_NODE).inspect())
+            return inputClauses.stream().map(clause -> clause.expression(InputNode.Placeholder.INSTANCE).inspect())
                     .collect(joining(", ", "[", "]"));
         return buildVerificationExpressions().stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
     }
@@ -178,9 +177,9 @@ public class ListScopeNode extends DALNode {
             Clause<DALNode> clause = expected.get(clauseIndex);
             try {
                 while (true) {
-                    int elementIndex = getElementIndex(clause, iterator, actual);
+                    int elementIndex = getElementIndex(clause, iterator, actual, context);
                     try {
-                        clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+                        clause.expression(expression(new InputNode.StackInput(context), Factory.executable(Notations.EMPTY),
                                 new SymbolNode(elementIndex, BRACKET))).evaluate(context);
                         break;
 //                        TODO test should which exception ignore which exception not ignore
@@ -194,11 +193,11 @@ public class ListScopeNode extends DALNode {
         return actual;
     }
 
-    private int getElementIndex(Clause<DALNode> clause, Iterator<Integer> iterator, Data<?> actual) {
+    private int getElementIndex(Clause<DALNode> clause, Iterator<Integer> iterator, Data<?> actual, DALRuntimeContext context) {
         if (iterator.hasNext())
             return iterator.next();
         throw new AssertionFailure("No such element in list: " + actual.dump(),
-                clause.expression(INPUT_NODE).getOperandPosition());
+                clause.expression(new InputNode.StackInput(context)).getOperandPosition());
     }
 
     private List<Clause<DALNode>> trimFirstEllipsis() {
@@ -226,7 +225,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private boolean isListEllipsis(Clause<DALNode> clause) {
-        return clause.expression(INPUT_NODE) instanceof ListEllipsisNode;
+        return clause.expression(InputNode.Placeholder.INSTANCE) instanceof ListEllipsisNode;
     }
 
     public enum Type {

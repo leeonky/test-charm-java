@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static com.github.leeonky.dal.ast.node.DALExpression.expression;
-import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.opt.Factory.exclamation;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
@@ -46,7 +45,7 @@ public class Compiler {
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
             OBJECT_VERIFICATION_PROPERTY,
-            ROOT_INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
+            ROOT_INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.Root.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(NodeFactory::constNumber),
             INTEGER = Tokens.INTEGER.nodeParser(NodeFactory::constInteger),
             SINGLE_QUOTED_STRING = Notations.SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
@@ -96,7 +95,7 @@ public class Compiler {
 
     public NodeParser.Mandatory<DALNode, DALProcedure>
             PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY,
-            DEFAULT_INPUT = procedure -> INPUT_NODE,
+            DEFAULT_INPUT = procedure -> new InputNode.StackInput(procedure.getRuntimeContext()),
             SCHEMA_COMPOSE = Notations.OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
                     .and(splitBy(Notations.SCHEMA_AND)).as(NodeFactory::elementSchemas))
                     .and(endWith(Notations.CLOSING_BRACKET)).as()).or(many(SCHEMA.mandatory("Expect a schema"))
@@ -263,8 +262,8 @@ public class Compiler {
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((ColumnHeaderRow) head, (Body) many(ROW_PREFIX.with(oneOf(
             Notations.COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS, (ColumnHeaderRow) head)),
             Notations.COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD, (ColumnHeaderRow) head)),
-            Notations.COLUMN_SPLITTER.before(tableRow((ColumnHeaderRow) head))))).and(endWithOptionalLine())
-            .as(Body::new).parse(procedure));
+            Notations.COLUMN_SPLITTER.before(tableRow((ColumnHeaderRow) head, procedure.getRuntimeContext())))))
+            .and(endWithOptionalLine()).as(Body::new).parse(procedure));
 
     private ClauseParser<DALNode, DALProcedure> singleCellRow(NodeParser<DALNode, DALProcedure> nodeParser,
                                                               ColumnHeaderRow head) {
@@ -272,15 +271,17 @@ public class Compiler {
                 .clause((prefix, cell) -> new Row(prefix, cell, head));
     }
 
-    private ClauseParser.Mandatory<DALNode, DALProcedure> tableCell(DALNode rowPrefix, ColumnHeaderRow head) {
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableCell(DALNode rowPrefix, ColumnHeaderRow head,
+                                                                    DALRuntimeContext context) {
         return positionClause(ClauseParser.<DALNode, DALProcedure>
                 columnMandatory(column -> shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS,
-                head.getHeader(column).operator(), ((RowHeader) rowPrefix).operator()).or(
+                head.getHeader(column, context).operator(), ((RowHeader) rowPrefix).operator()).or(
                 Operators.DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))));
     }
 
-    private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(ColumnHeaderRow columnHeaderRow) {
-        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, columnHeaderRow))
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(ColumnHeaderRow columnHeaderRow,
+                                                                   DALRuntimeContext context) {
+        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, columnHeaderRow, context))
                 .as(cells -> new Row(rowPrefix, cells, columnHeaderRow)));
     }
 

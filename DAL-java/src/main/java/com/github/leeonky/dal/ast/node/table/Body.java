@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast.node.table;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -43,9 +44,10 @@ public class Body extends DALNode {
         return rows.stream().map(Row::inspect).collect(Collectors.joining("\n"));
     }
 
-    public DALNode convertToVerificationNode(Data actual, DALOperator operator, Comparator<Data<?>> comparator) {
+    public DALNode convertToVerificationNode(Data actual, DALOperator operator, Comparator<Data<?>> comparator,
+                                             DALRuntimeContext context) {
         return rowType.constructVerificationNode(actual, rows.stream().map(rowNode ->
-                rowNode.constructVerificationClause(operator, rowType)), comparator);
+                rowNode.constructVerificationClause(operator, rowType, context)), comparator);
     }
 
     public Row dataRowSkipEllipsis(int indexSkipEllipsis) {

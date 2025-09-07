@@ -17,7 +17,7 @@ public abstract class NodeBase<C extends RuntimeContext, N extends NodeBase<C, N
 
     @Override
     public int getOperandPosition() {
-        return positionBegin;
+        return getPositionBegin();
     }
 
     @Override

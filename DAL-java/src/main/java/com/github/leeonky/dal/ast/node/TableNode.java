@@ -55,7 +55,7 @@ public class TableNode extends DALNode {
     }
 
     public DALNode convertToVerificationNode(Data actual, DALOperator operator, DALRuntimeContext context) {
-        return body.convertToVerificationNode(actual, operator, columnHeaderRow.collectComparator(context))
+        return body.convertToVerificationNode(actual, operator, columnHeaderRow.collectComparator(context), context)
                 .setPositionBegin(getPositionBegin());
     }
 

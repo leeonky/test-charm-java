@@ -19,7 +19,7 @@ public interface ExecutableNode extends Node<RuntimeContextBuilder.DALRuntimeCon
     default Data<?> evaluateInput(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         Data<?> data = left.evaluateData(context);
         if (opt1(data::isNull))
-            throw locateError(new DALRuntimeException("Instance is null"), getOperandPosition());
+            throw locateError(new DALRuntimeException("The instance of the property is null"), getOperandPosition());
         return data;
     }
 }
