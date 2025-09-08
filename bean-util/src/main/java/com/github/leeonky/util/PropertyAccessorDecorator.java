@@ -3,31 +3,31 @@ package com.github.leeonky.util;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-public abstract class PropertyAccessorDecorator<T> implements PropertyAccessor<T> {
-    protected final PropertyReader<T> reader;
+public abstract class PropertyAccessorDecorator<T, A extends PropertyAccessor<T>> implements PropertyAccessor<T> {
+    protected final A accessor;
 
-    public PropertyAccessorDecorator(PropertyReader<T> reader) {
-        this.reader = reader;
+    public PropertyAccessorDecorator(A accessor) {
+        this.accessor = accessor;
     }
 
     @Override
     public String getName() {
-        return reader.getName();
+        return accessor.getName();
     }
 
     @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-        return reader.getAnnotation(annotationClass);
+        return accessor.getAnnotation(annotationClass);
     }
 
     @Override
     public boolean isBeanProperty() {
-        return reader.isBeanProperty();
+        return accessor.isBeanProperty();
     }
 
     @Override
     public BeanClass<T> getBeanType() {
-        return reader.getBeanType();
+        return accessor.getBeanType();
     }
 
     @Override
@@ -37,7 +37,7 @@ public abstract class PropertyAccessorDecorator<T> implements PropertyAccessor<T
 
     @Override
     public Type getGenericType() {
-        return reader.getGenericType();
+        return accessor.getGenericType();
     }
 
     @Override

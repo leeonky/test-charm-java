@@ -9,7 +9,7 @@ import static com.github.leeonky.util.StringUtil.unCapitalize;
 
 class MethodPropertyWriter<T> extends MethodPropertyAccessor<T> implements PropertyWriter<T> {
     private static final int SETTER_PREFIX_LENGTH = 3;
-    private final BiConsumer<T, Object> SETTER = (bean, value) -> execute(() -> getMethod().invoke(bean, tryConvert(value)));
+    private final BiConsumer<T, Object> SETTER = (bean, value) -> execute(() -> getMethod().invoke(bean, value));
     private String name;
 
     MethodPropertyWriter(BeanClass<T> beanClass, Method method) {

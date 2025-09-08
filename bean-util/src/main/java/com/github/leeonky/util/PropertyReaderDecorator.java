@@ -2,7 +2,7 @@ package com.github.leeonky.util;
 
 import java.util.List;
 
-public class PropertyReaderDecorator<T> extends PropertyAccessorDecorator<T> implements PropertyReader<T> {
+public class PropertyReaderDecorator<T> extends PropertyAccessorDecorator<T, PropertyReader<T>> implements PropertyReader<T> {
 
     public PropertyReaderDecorator(PropertyReader<T> reader) {
         super(reader);
@@ -10,11 +10,11 @@ public class PropertyReaderDecorator<T> extends PropertyAccessorDecorator<T> imp
 
     @Override
     public Object getValue(T instance) {
-        return reader.getValue(instance);
+        return accessor.getValue(instance);
     }
 
     @Override
     public PropertyReader<?> getPropertyChainReader(List<Object> chain) {
-        return reader.getPropertyChainReader(chain);
+        return accessor.getPropertyChainReader(chain);
     }
 }

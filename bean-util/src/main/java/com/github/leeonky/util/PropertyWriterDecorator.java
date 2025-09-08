@@ -2,11 +2,18 @@ package com.github.leeonky.util;
 
 import java.util.function.BiConsumer;
 
-public interface PropertyWriter<T> extends PropertyAccessor<T> {
+public class PropertyWriterDecorator<T> extends PropertyAccessorDecorator<T, PropertyWriter<T>> implements PropertyWriter<T> {
+    public PropertyWriterDecorator(PropertyWriter<T> writer) {
+        super(writer);
+    }
 
-    BiConsumer<T, Object> setter();
+    @Override
+    public BiConsumer<T, Object> setter() {
+        return accessor.setter();
+    }
 
-    default void setValue(T bean, Object value) {
+    @Override
+    public void setValue(T bean, Object value) {
         try {
             setter().accept(bean, tryConvert(value));
         } catch (CannotSetElementByIndexException e) {

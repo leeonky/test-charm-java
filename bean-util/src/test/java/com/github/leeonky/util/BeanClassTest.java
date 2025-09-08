@@ -282,6 +282,29 @@ class BeanClassTest {
             BeanClass<?> type = reader.getType();
             assertThat(type.getTypeArguments(0).get().getType()).isEqualTo(String.class);
         }
+
+        @Test
+        void create_dynamic_bean_with_writer_decorator() {
+            BeanClass<?> beanClass = new BeanClass<>(BeanDy.class, new PropertyProxyFactory<BeanDy>() {
+                @Override
+                public PropertyWriter<BeanDy> proxyWriter(PropertyWriter<BeanDy> writer) {
+                    if (writer.getName().equals("value"))
+                        return new PropertyWriterDecorator<BeanDy>(writer) {
+                            @Override
+                            public Type getGenericType() {
+                                return new TypeReference<List<String>>() {
+                                }.getType().getGenericType();
+                            }
+                        };
+                    return writer;
+                }
+            });
+
+            PropertyWriter<?> writer = beanClass.getPropertyWriter("value");
+
+            BeanClass<?> type = writer.getType();
+            assertThat(type.getTypeArguments(0).get().getType()).isEqualTo(String.class);
+        }
     }
 
     public static class BeanDy {
