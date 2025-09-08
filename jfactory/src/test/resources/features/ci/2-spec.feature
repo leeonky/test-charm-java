@@ -811,3 +811,154 @@ Feature: use spec
                ```
       """
 
+  Rule: super type
+
+    Scenario: create by spec for type object
+      Given the following bean class:
+      """
+      public class Bean {
+        public Object bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean(BeanSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: {
+        class.simpleName= BeanData
+        value2= world
+      }
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean(BeanSpec).value1", "hello").create();
+      """
+      Then the result should:
+      """
+      bean: {
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean(hello BeanSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: {
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }
+      """
+
+    Scenario: create list by spec for type object
+      Given the following bean class:
+      """
+      public class Bean {
+        public Object[] bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean[0](BeanSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value2= world
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean[0](BeanSpec).value1", "hello").create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean[0](hello BeanSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }]
+      """
+
+#      object(spec) {}
+#      object[0](spec) [{}]
+#      object[0][0](spec) [[{}]]
+#      list[0](spec) [{}]
+#      list[0][0](spec) [[{}]]
