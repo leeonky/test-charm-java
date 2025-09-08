@@ -47,4 +47,8 @@ public class GenericType {
     public boolean equals(Object obj) {
         return obj instanceof GenericType && Objects.equals(type, ((GenericType) obj).type);
     }
+
+    public Type getGenericType() {
+        return type;
+    }
 }

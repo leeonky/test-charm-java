@@ -6,11 +6,13 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.github.leeonky.util.Classes.named;
 
-class ClassTypeInfo<T> implements TypeInfo<T> {
+public class ClassTypeInfo<T> implements TypeInfo<T> {
     protected final BeanClass<T> type;
+    private final PropertyProxyFactory<T> proxyFactory;
     private final Map<String, PropertyReader<T>> readers = new LinkedHashMap<>();
     private final Map<String, PropertyWriter<T>> writers = new LinkedHashMap<>();
     private final Map<String, Property<T>> properties = new LinkedHashMap<>();
@@ -19,8 +21,9 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
 
     private static final AccessorFilter ACCESSOR_FILTER = new AccessorFilter().extend();
 
-    public ClassTypeInfo(BeanClass<T> type) {
+    public ClassTypeInfo(BeanClass<T> type, PropertyProxyFactory<T> proxyFactory) {
         this.type = type;
+        this.proxyFactory = Objects.requireNonNull(proxyFactory);
         collectFields(type);
         collectGetterSetters(type);
     }
@@ -28,9 +31,9 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
     private void collectGetterSetters(BeanClass<T> type) {
         for (Method method : named(type.getType()).getMethods()) {
             if (MethodPropertyReader.isGetter(method))
-                addAccessor(new MethodPropertyReader<>(type, method), readers, allReaders);
+                addReaders(new MethodPropertyReader<>(type, method));
             if (MethodPropertyWriter.isSetter(method))
-                addAccessor(new MethodPropertyWriter<>(type, method), writers, allWriters);
+                addWriters(new MethodPropertyWriter<>(type, method));
         }
     }
 
@@ -40,24 +43,34 @@ class ClassTypeInfo<T> implements TypeInfo<T> {
         for (Field field : type.getType().getFields()) {
             Field addedReaderField = addedReaderFields.get(field.getName());
             if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
-                addAccessor(new FieldPropertyReader<>(type, field), readers, allReaders);
+                addReaders(new FieldPropertyReader<>(type, field));
                 addedReaderFields.put(field.getName(), field);
             }
             if (!Modifier.isFinal(field.getModifiers())) {
                 Field addedWriterField = addedWriterFields.get(field.getName());
                 if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
-                    addAccessor(new FieldPropertyWriter<>(type, field), writers, allWriters);
+                    addWriters(new FieldPropertyWriter<>(type, field));
                     addedWriterFields.put(field.getName(), field);
                 }
             }
         }
     }
 
+    private void addWriters(PropertyWriter<T> writer) {
+        addAccessor(proxyFactory.proxyWriter(writer), writers, allWriters);
+    }
+
+    private void addReaders(PropertyReader<T> reader) {
+        addAccessor(proxyFactory.proxyReader(reader), readers, allReaders);
+    }
+
     private <A extends PropertyAccessor<T>> void addAccessor(A accessor, Map<String, A> accessorMap,
                                                              Map<String, A> allAccessorMap) {
         allAccessorMap.put(accessor.getName(), accessor);
         if (accessor.isBeanProperty() && ACCESSOR_FILTER.test(accessor)) {
-            properties.put(accessor.getName(), new DefaultProperty<>(accessor.getName(), accessor.getBeanType()));
+
+            properties.put(accessor.getName(), proxyFactory.proxyProperty(
+                    new DefaultProperty<>(accessor.getName(), accessor.getBeanType())));
             accessorMap.put(accessor.getName(), accessor);
         }
     }

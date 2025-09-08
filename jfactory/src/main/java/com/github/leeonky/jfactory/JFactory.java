@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
+import com.github.leeonky.util.TypeReference;
 
 import java.util.*;
 import java.util.function.Consumer;

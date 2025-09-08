@@ -1,5 +1,6 @@
 package com.github.leeonky.util;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,5 +38,10 @@ public class GenericBeanClass<T> extends BeanClass<T> {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof GenericBeanClass && Objects.equals(genericType, ((GenericBeanClass) obj).genericType);
+    }
+
+    @Override
+    public Type getGenericType() {
+        return genericType.getGenericType();
     }
 }

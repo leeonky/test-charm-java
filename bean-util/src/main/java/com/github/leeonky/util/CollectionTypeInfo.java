@@ -1,9 +1,9 @@
 package com.github.leeonky.util;
 
-class CollectionTypeInfo<T> extends ClassTypeInfo<T> {
+public class CollectionTypeInfo<T> extends ClassTypeInfo<T> {
 
-    public CollectionTypeInfo(BeanClass<T> type) {
-        super(type);
+    public CollectionTypeInfo(BeanClass<T> type, PropertyProxyFactory<T> proxyFactory) {
+        super(type, proxyFactory);
     }
 
     @Override

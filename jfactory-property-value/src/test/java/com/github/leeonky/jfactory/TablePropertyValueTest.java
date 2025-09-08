@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.dal.Assertions;
+import com.github.leeonky.util.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

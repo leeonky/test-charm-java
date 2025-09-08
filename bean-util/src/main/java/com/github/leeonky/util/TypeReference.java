@@ -1,7 +1,4 @@
-package com.github.leeonky.jfactory;
-
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.GenericType;
+package com.github.leeonky.util;
 
 public abstract class TypeReference<T> {
     @SuppressWarnings("unchecked")

@@ -3,10 +3,10 @@ package com.github.leeonky.util;
 import java.util.Map;
 
 interface TypeInfo<T> {
-    static <T> TypeInfo<T> create(BeanClass<T> type) {
+    static <T> TypeInfo<T> create(BeanClass<T> type, PropertyProxyFactory<T> proxyFactory) {
         if (type.isCollection())
-            return new CollectionTypeInfo<>(type);
-        return new ClassTypeInfo<>(type);
+            return new CollectionTypeInfo<>(type, proxyFactory);
+        return new ClassTypeInfo<>(type, proxyFactory);
     }
 
     PropertyReader<T> getReader(String property);

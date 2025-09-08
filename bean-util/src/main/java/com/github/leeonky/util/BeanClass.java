@@ -16,9 +16,15 @@ public class BeanClass<T> {
     private final TypeInfo<T> typeInfo;
     private final Class<T> type;
 
+    @SuppressWarnings("unchecked")
     protected BeanClass(Class<T> type) {
         this.type = Objects.requireNonNull(type);
-        typeInfo = TypeInfo.create(this);
+        typeInfo = TypeInfo.create(this, PropertyProxyFactory.NO_PROXY);
+    }
+
+    public BeanClass(Class<T> type, PropertyProxyFactory<T> proxyFactory) {
+        this.type = Objects.requireNonNull(type);
+        typeInfo = TypeInfo.create(this, proxyFactory);
     }
 
     @SuppressWarnings("unchecked")
@@ -211,5 +217,9 @@ public class BeanClass<T> {
 
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         return type.getAnnotation(annotationClass);
+    }
+
+    public Type getGenericType() {
+        return getType();
     }
 }

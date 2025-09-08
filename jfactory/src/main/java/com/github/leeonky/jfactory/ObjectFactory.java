@@ -116,7 +116,7 @@ class ObjectFactory<T> implements Factory<T> {
 
     public RootInstance<T> createInstance(DefaultArguments argument) {
         Spec<T> spec = createSpec();
-        RootInstance<T> rootInstance = new RootInstance<>(factorySet.nextSequence(type.getType()), spec, argument);
+        RootInstance<T> rootInstance = new RootInstance<>(factorySet.nextSequence(getType().getType()), spec, argument);
         spec.setInstance(rootInstance);
         return rootInstance;
     }
@@ -138,8 +138,8 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     protected Supplier<Transformer> fallback(String name, Supplier<Transformer> fallback) {
-        return () -> type.getType().getSuperclass() == null ? fallback.get()
-                : factorySet.queryObjectFactory(BeanClass.create(type.getType().getSuperclass()))
+        return () -> getType().getType().getSuperclass() == null ? fallback.get()
+                : factorySet.queryObjectFactory(BeanClass.create(getType().getType().getSuperclass()))
                 .queryTransformer(name, fallback);
     }
 }

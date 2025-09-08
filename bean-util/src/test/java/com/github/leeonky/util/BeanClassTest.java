@@ -11,6 +11,7 @@ import subtype.Base;
 import subtype.Sub1;
 import subtype.Sub2;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -254,5 +255,36 @@ class BeanClassTest {
                 assertThat(named(((Supplier<Object>) () -> null).getClass())).isEqualTo(Supplier.class);
             }
         }
+    }
+
+    @Nested
+    class DynamicBeanClass {
+
+        @Test
+        void create_dynamic_bean_with_reader_decorator() {
+            BeanClass<?> beanClass = new BeanClass<>(BeanDy.class, new PropertyProxyFactory<BeanDy>() {
+                @Override
+                public PropertyReader<BeanDy> proxyReader(PropertyReader<BeanDy> reader) {
+                    if (reader.getName().equals("value"))
+                        return new PropertyReaderDecorator<BeanDy>(reader) {
+                            @Override
+                            public Type getGenericType() {
+                                return new TypeReference<List<String>>() {
+                                }.getType().getGenericType();
+                            }
+                        };
+                    return reader;
+                }
+            });
+
+            PropertyReader<?> reader = beanClass.getPropertyReader("value");
+
+            BeanClass<?> type = reader.getType();
+            assertThat(type.getTypeArguments(0).get().getType()).isEqualTo(String.class);
+        }
+    }
+
+    public static class BeanDy {
+        public Object value;
     }
 }
