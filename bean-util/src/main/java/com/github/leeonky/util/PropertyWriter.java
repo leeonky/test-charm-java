@@ -1,5 +1,6 @@
 package com.github.leeonky.util;
 
+import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
 
 public interface PropertyWriter<T> extends PropertyAccessor<T> {
@@ -17,5 +18,16 @@ public interface PropertyWriter<T> extends PropertyAccessor<T> {
                     value == null ? "null" : Classes.getClassName(value) + "[" + value + "]",
                     getBeanType().getName(), propertyName, getType().getName()), e);
         }
+    }
+
+    default PropertyWriter<T> decorateType(BeanClass<? extends T> narrowType) {
+        if (narrowType == getType())
+            return this;
+        return new PropertyWriterDecorator<T>(this) {
+            @Override
+            public Type getGenericType() {
+                return narrowType.getGenericType();
+            }
+        };
     }
 }

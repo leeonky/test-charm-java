@@ -811,9 +811,9 @@ Feature: use spec
                ```
       """
 
-  Rule: super type
+  Rule: narrow java.lang.Object
 
-    Scenario: create by spec for type object
+    Scenario: narrow single from input spec
       Given the following bean class:
       """
       public class Bean {
@@ -829,7 +829,7 @@ Feature: use spec
       Given the following spec class:
       """
       @Global
-      public class BeanSpec extends Spec<BeanData> {
+      public class BeanDataSpec extends Spec<BeanData> {
         @Override
         public void main() {
           property("value2").value("world");
@@ -843,7 +843,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.type(Bean.class).property("bean(BeanSpec)", new HashMap<>()).create();
+      jFactory.type(Bean.class).property("bean(BeanDataSpec)", new HashMap<>()).create();
       """
       Then the result should:
       """
@@ -858,7 +858,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.type(Bean.class).property("bean(BeanSpec).value1", "hello").create();
+      jFactory.type(Bean.class).property("bean(BeanDataSpec).value1", "hello").create();
       """
       Then the result should:
       """
@@ -874,7 +874,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.type(Bean.class).property("bean(hello BeanSpec)", new HashMap<>()).create();
+      jFactory.type(Bean.class).property("bean(hello BeanDataSpec)", new HashMap<>()).create();
       """
       Then the result should:
       """
@@ -885,11 +885,11 @@ Feature: use spec
       }
       """
 
-    Scenario: create list by spec for type object
+    Scenario Outline: narrow element in list <list> from input spec
       Given the following bean class:
       """
       public class Bean {
-        public Object[] bean;
+        public <list> bean;
       }
       """
       Given the following bean class:
@@ -901,7 +901,7 @@ Feature: use spec
       Given the following spec class:
       """
       @Global
-      public class BeanSpec extends Spec<BeanData> {
+      public class BeanDataSpec extends Spec<BeanData> {
         @Override
         public void main() {
           property("value2").value("world");
@@ -915,7 +915,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.type(Bean.class).property("bean[0](BeanSpec)", new HashMap<>()).create();
+      jFactory.type(Bean.class).property("bean[0](BeanDataSpec)", new HashMap<>()).create();
       """
       Then the result should:
       """
@@ -930,7 +930,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.type(Bean.class).property("bean[0](BeanSpec).value1", "hello").create();
+      jFactory.type(Bean.class).property("bean[0](BeanDataSpec).value1", "hello").create();
       """
       Then the result should:
       """
@@ -946,7 +946,7 @@ Feature: use spec
       """
       When build:
       """
-      jFactory.type(Bean.class).property("bean[0](hello BeanSpec)", new HashMap<>()).create();
+      jFactory.type(Bean.class).property("bean[0](hello BeanDataSpec)", new HashMap<>()).create();
       """
       Then the result should:
       """
@@ -957,8 +957,223 @@ Feature: use spec
       }]
       """
 
+      Examples:
+        | list         |
+        | Object[]     |
+        | List<Object> |
+
+    Scenario: narrow single from parent spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public Object bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("bean").is("BeanDataSpec");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: {
+        class.simpleName= BeanData
+        value2= world
+      }
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean.value1", "hello").create();
+      """
+      Then the result should:
+      """
+      bean: {
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean(hello BeanDataSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: {
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }
+      """
+
+#    Scenario: narrow element in Object[] from parent spec
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public Object[] bean;
+#      }
+#      """
+#      Given the following bean class:
+#      """
+#      public class BeanData {
+#        public String value1, value2;
+#      }
+#      """
+#      Given the following spec class:
+#      """
+#      public class BeanSpec extends Spec<Bean> {
+#        @Override
+#        public void main() {
+#          property("bean[]").is("BeanDataSpec");
+#        }
+#      }
+#      """
+#      Given the following spec class:
+#      """
+#      @Global
+#      public class BeanDataSpec extends Spec<BeanData> {
+#        @Override
+#        public void main() {
+#          property("value2").value("world");
+#        }
+#
+#        @Trait
+#        public void hello() {
+#          property("value1").value("hello");
+#        }
+#      }
+#      """
+#      When build:
+#      """
+#      jFactory.spec(BeanSpec.class).property("bean[0]", new HashMap<>()).create();
+#      """
+#      Then the result should:
+#      """
+#      bean: [{
+#        class.simpleName= BeanData
+#        value2= world
+#      }]
+#      """
+#      When operate:
+#      """
+#      jFactory.getDataRepository().clear();
+#      """
+#      When build:
+#      """
+#      jFactory.spec(BeanSpec.class).property("bean[0].value1", "hello").create();
+#      """
+#      Then the result should:
+#      """
+#      bean: [{
+#        class.simpleName= BeanData
+#        value1= hello
+#        value2= world
+#      }]
+#      """
+#      When operate:
+#      """
+#      jFactory.getDataRepository().clear();
+#      """
+#      When build:
+#      """
+#      jFactory.spec(BeanSpec.class).property("bean[0](hello BeanDataSpec)", new HashMap<>()).create();
+#      """
+#      Then the result should:
+#      """
+#      bean: [{
+#        class.simpleName= BeanData
+#        value1= hello
+#        value2= world
+#      }]
+#      """
+
+#    Scenario: create list primitive from spec for type object
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public Object bean;
+#      }
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("bean[0]", 1).create();
+#      """
+#      Then the result should:
+#      """
+#      bean: [1]
+#      """
+#      When operate:
+#      """
+#      jFactory.getDataRepository().clear();
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class)
+#        .property("bean[0]", 1)
+#        .property("bean[1]", "a")
+#        .create();
+#      """
+#      Then the result should:
+#      """
+#      bean: [1 a]
+#      """
+#
+
+
+#  create
 #      object(spec) {}
 #      object[0](spec) [{}]
 #      object[0][0](spec) [[{}]]
 #      list[0](spec) [{}]
 #      list[0][0](spec) [[{}]]
+
+#  bug: define object type property spec in parent spec
+#  jFactory.type(Object.class).property("[0]", new BeanData()).create(); => list
+#  jFactory.type(Object.class).property("any", new BeanData()).create(); => map
+#
+#  query
+#      object(spec) {}
+#      object[0](spec) [{}]
+#      object[0][0](spec) [[{}]]
+#      list[0](spec) [{}]
+#      list[0][0](spec) [[{}]]
+
+#  bug: define object type property spec in parent spec
+#  jFactory.type(Object.class).property("[0]", new BeanData()).create(); => list
+#  jFactory.type(Object.class).property("any", new BeanData()).create(); => map

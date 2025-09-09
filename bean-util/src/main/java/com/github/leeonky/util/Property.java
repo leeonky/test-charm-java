@@ -43,4 +43,34 @@ public interface Property<T> {
     default <P> P getValue(T instance) {
         return (P) getReader().getValue(instance);
     }
+
+    default Property<T> decorateNarrowReaderType(BeanClass<? extends T> narrowType) {
+        PropertyReader<T> reader = getReader();
+        Class<?> type = reader.getType().getType();
+        if (type.equals(narrowType.getType()))
+            return this;
+        if (narrowType.isInheritedFrom(type))
+            return new PropertyDecorator<T>(this) {
+                @Override
+                public PropertyReader<T> getReader() {
+                    return reader.decorateType(narrowType);
+                }
+            };
+        throw new IllegalStateException("Type " + narrowType.getType() + " is not inherited from " + type);
+    }
+
+    default Property<T> decorateNarrowWriterType(BeanClass<? extends T> narrowType) {
+        PropertyWriter<T> writer = getWriter();
+        Class<?> type = writer.getType().getType();
+        if (type.equals(narrowType.getType()))
+            return this;
+        if (narrowType.isInheritedFrom(type))
+            return new PropertyDecorator<T>(this) {
+                @Override
+                public PropertyWriter<T> getWriter() {
+                    return writer.decorateType(narrowType);
+                }
+            };
+        throw new IllegalStateException("Type " + narrowType.getType() + " is not inherited from " + type);
+    }
 }

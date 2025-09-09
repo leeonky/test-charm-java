@@ -1,5 +1,6 @@
 package com.github.leeonky.util;
 
+import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,5 +18,16 @@ public interface PropertyReader<T> extends PropertyAccessor<T> {
                 reader = getType().getPropertyReader((String) p);
         }
         return reader;
+    }
+
+    default PropertyReader<T> decorateType(BeanClass<? extends T> narrowType) {
+        if (narrowType == getType())
+            return this;
+        return new PropertyReaderDecorator<T>(this) {
+            @Override
+            public Type getGenericType() {
+                return narrowType.getGenericType();
+            }
+        };
     }
 }

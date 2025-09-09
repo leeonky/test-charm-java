@@ -9,17 +9,19 @@ class SubObjectExpression<P> extends Expression<P> {
     private final KeyValueCollection properties;
     private final TraitsSpec traitsSpec;
     private final ObjectFactory objectFactory;
+    private final Producer<?> subProducer;
 
-    public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property, ObjectFactory<?> objectFactory) {
+    public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property, ObjectFactory<?> objectFactory, Producer<?> subProducer) {
         super(property);
         this.properties = properties;
         this.traitsSpec = traitsSpec;
         this.objectFactory = objectFactory;
+        this.subProducer = subProducer;
     }
 
     @Override
     protected boolean isPropertyMatch(Object propertyValue) {
-        return properties.matcher(property.getReaderType(), objectFactory).matches(propertyValue);
+        return properties.matcher(property.getReaderType(), objectFactory, subProducer).matches(propertyValue);
     }
 
     @Override
