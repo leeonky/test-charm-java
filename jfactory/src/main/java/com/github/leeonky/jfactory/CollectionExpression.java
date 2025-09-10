@@ -14,8 +14,8 @@ import static com.github.leeonky.util.BeanClass.cast;
 class CollectionExpression<P, E> extends Expression<P> {
     private final Map<Integer, Expression<E>> children = new LinkedHashMap<>();
 
-    public CollectionExpression(Property<P> property, int index, Expression<E> elementExpression) {
-        super(property);
+    public CollectionExpression(Property<P> property, int index, Expression<E> elementExpression, boolean forQuery) {
+        super(property, forQuery);
         children.put(index, elementExpression);
     }
 

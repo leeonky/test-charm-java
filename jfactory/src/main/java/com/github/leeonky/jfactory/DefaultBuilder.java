@@ -135,12 +135,8 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Collection<T> queryAll() {
-        KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType(), objectFactory, new Producer<T>(objectFactory.getType()) {
-            @Override
-            protected T produce() {
-                throw new IllegalStateException();
-            }
-        });
+        ObjectProducer<T> producer = new ObjectProducer<>(jFactory, objectFactory, this, true);
+        KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType(), objectFactory, producer);
         return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
                 .filter(matcher::matches).collect(Collectors.toList());
     }
@@ -158,9 +154,9 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void processSpecAndInputProperty(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
+    public void processSpecAndInputProperty(ObjectProducer<T> objectProducer, RootInstance<T> instance, boolean forQuery) {
         collectSpec(objectProducer, instance);
-        processInputProperty(objectProducer);
+        processInputProperty(objectProducer, forQuery);
         instance.setCollectionSize(collectionSize);
     }
 
@@ -170,8 +166,8 @@ class DefaultBuilder<T> implements Builder<T> {
         objectProducer.processSpecIgnoreProperties();
     }
 
-    private void processInputProperty(ObjectProducer<T> producer) {
-        properties.expressions(objectFactory.getType(), objectFactory, producer).forEach(exp -> producer.changeChild(exp.getProperty(),
+    private void processInputProperty(ObjectProducer<T> producer, boolean forQuery) {
+        properties.expressions(objectFactory.getType(), objectFactory, producer, forQuery).forEach(exp -> producer.changeChild(exp.getProperty(),
                 intentlyCreateWhenReverseAssociation(producer, exp).buildProducer(jFactory, producer)));
     }
 

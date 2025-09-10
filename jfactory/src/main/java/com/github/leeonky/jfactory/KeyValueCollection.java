@@ -37,21 +37,22 @@ public class KeyValueCollection {
     }
 
     //    TODO remove arg type
-    <T> Collection<Expression<T>> expressions(BeanClass<T> type, ObjectFactory<T> objectFactory, Producer<T> producer) {
-        return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type, objectFactory, producer))
+    <T> Collection<Expression<T>> expressions(BeanClass<T> type, ObjectFactory<T> objectFactory,
+                                              Producer<T> producer, boolean forQuery) {
+        return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type, objectFactory, producer, forQuery))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
                 .map(Expression::merge)
                 .collect(Collectors.toList());
     }
 
-    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Property<?> parentProperty, ObjectFactory<?> objectFactory, Producer<?> subProducer) {
+    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Property<?> parentProperty, ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery) {
         if (isSingleValue()) {
             Object value = transform(property, parentProperty, objectFactory);
             if (createOrLinkAnyExist(value))
-                return new SubObjectExpression<>(new KeyValueCollection(factorySet), traitsSpec, property, objectFactory, subProducer);
-            return new SingleValueExpression<>(value, traitsSpec, property);
+                return new SubObjectExpression<>(new KeyValueCollection(factorySet), traitsSpec, property, objectFactory, subProducer, forQuery);
+            return new SingleValueExpression<>(value, traitsSpec, property, forQuery);
         }
-        return new SubObjectExpression<>(this, traitsSpec, property, objectFactory, subProducer);
+        return new SubObjectExpression<>(this, traitsSpec, property, objectFactory, subProducer, forQuery);
     }
 
     private boolean createOrLinkAnyExist(Object value) {
@@ -93,7 +94,7 @@ public class KeyValueCollection {
         private final Collection<Expression<T>> expressions;
 
         Matcher(BeanClass<T> type, ObjectFactory<T> objectFactory, Producer<T> producer) {
-            expressions = expressions(type, objectFactory, producer);
+            expressions = expressions(type, objectFactory, producer, true);
         }
 
         public boolean matches(T object) {

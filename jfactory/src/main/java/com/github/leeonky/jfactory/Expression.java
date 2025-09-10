@@ -7,9 +7,11 @@ import java.util.List;
 abstract class Expression<P> {
     protected final Property<P> property;
     protected boolean intently = false;
+    protected final boolean forQuery;
 
-    public Expression(Property<P> property) {
+    public Expression(Property<P> property, boolean forQuery) {
         this.property = property;
+        this.forQuery = forQuery;
     }
 
     protected String getProperty() {

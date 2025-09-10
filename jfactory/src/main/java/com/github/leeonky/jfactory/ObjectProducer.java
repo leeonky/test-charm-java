@@ -24,6 +24,10 @@ class ObjectProducer<T> extends Producer<T> {
     private Persistable persistable;
 
     public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
+        this(jFactory, factory, builder, false);
+    }
+
+    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean forQuery) {
         super(factory.getType());
         this.factory = factory;
         this.jFactory = jFactory;
@@ -31,7 +35,7 @@ class ObjectProducer<T> extends Producer<T> {
         instance = factory.createInstance(builder.getArguments());
         persistable = jFactory.getDataRepository();
         createDefaultValueProducers();
-        builder.processSpecAndInputProperty(this, instance);
+        builder.processSpecAndInputProperty(this, instance, forQuery);
         createElementDefaultValueProducersWhenBuildListAsRoot();
         setupReverseAssociations();
         resolveBuilderProducers();

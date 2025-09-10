@@ -11,8 +11,9 @@ class SubObjectExpression<P> extends Expression<P> {
     private final ObjectFactory objectFactory;
     private final Producer<?> subProducer;
 
-    public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property, ObjectFactory<?> objectFactory, Producer<?> subProducer) {
-        super(property);
+    public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property,
+                               ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery) {
+        super(property, forQuery);
         this.properties = properties;
         this.traitsSpec = traitsSpec;
         this.objectFactory = objectFactory;
@@ -32,7 +33,7 @@ class SubObjectExpression<P> extends Expression<P> {
     }
 
     private Optional<?> query(JFactory jFactory) {
-        if (intently)
+        if (intently || forQuery)
             return Optional.empty();
         return toBuilder(jFactory, property.getReaderType()).queryAll().stream().findFirst();
     }

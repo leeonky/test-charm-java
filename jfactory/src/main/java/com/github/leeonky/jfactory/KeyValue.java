@@ -36,7 +36,7 @@ class KeyValue {
         this.factorySet = factorySet;
     }
 
-    public <T> Expression<T> createExpression(BeanClass<T> beanClass, ObjectFactory<T> objectFactory, Producer<T> producer) {
+    public <T> Expression<T> createExpression(BeanClass<T> beanClass, ObjectFactory<T> objectFactory, Producer<T> producer, boolean forQuery) {
         Matcher matcher = parse(beanClass);
         String propertyName = matcher.group(GROUP_PROPERTY);
         Property<T> property = beanClass.getProperty(propertyName);
@@ -46,11 +46,12 @@ class KeyValue {
             property = property.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
         }
         Property<T> finalSubProducer = property;
-        return hasIndex(matcher).map(index -> createCollectionExpression(matcher, finalSubProducer, index, objectFactory, subProducer))
-                .orElseGet(() -> createSubExpression(matcher, finalSubProducer, null, objectFactory, subProducer));
+        return hasIndex(matcher).map(index -> createCollectionExpression(matcher, finalSubProducer, index, objectFactory, subProducer, forQuery))
+                .orElseGet(() -> createSubExpression(matcher, finalSubProducer, null, objectFactory, subProducer, forQuery));
     }
 
-    private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index, ObjectFactory<T> objectFactory, Producer<?> collectionProducer) {
+    private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index,
+                                                         ObjectFactory<T> objectFactory, Producer<?> collectionProducer, boolean forQuery) {
         Property<?> propertySub = property.getWriter().getType().getProperty(index);
         int intIndex = parseInt(index);
         Producer<?> subProducer;
@@ -63,20 +64,21 @@ class KeyValue {
         } else
             subProducer = collectionProducer.child(index).orElse(Producer.PLACE_HOLDER);
         return new CollectionExpression<>(property, intIndex,
-                createSubExpression(matcher, propertySub, property, objectFactory, subProducer));
+                createSubExpression(matcher, propertySub, property, objectFactory, subProducer, forQuery), forQuery);
     }
 
     private Optional<String> hasIndex(Matcher matcher) {
         return Optional.ofNullable(matcher.group(GROUP_COLLECTION_INDEX));
     }
 
-    private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property, Property<?> parentProperty, ObjectFactory<?> objectFactory, Producer<?> subProducer) {
+    private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property, Property<?> parentProperty,
+                                                  ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery) {
         KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
         TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
                 matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
         return properties.createExpression(traitsSpec.guessPropertyType(objectFactory)
                         .map(type -> property.decorateNarrowWriterType(type).decorateNarrowReaderType(type)).orElse(property),
-                traitsSpec, parentProperty, objectFactory, subProducer).setIntently(matcher.group(GROUP_INTENTLY) != null);
+                traitsSpec, parentProperty, objectFactory, subProducer, forQuery).setIntently(matcher.group(GROUP_INTENTLY) != null);
     }
 
     private <T> Matcher parse(BeanClass<T> beanClass) {

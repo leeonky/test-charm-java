@@ -931,38 +931,6 @@ Feature: use spec
         }
       }]
       """
-      When operate:
-      """
-      jFactory.getDataRepository().clear();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("bean(BeanDataSpec).value1", "hello").create();
-      """
-      Then the result should:
-      """
-      bean: {
-        class.simpleName= BeanData
-        value1= hello
-        value2= world
-      }
-      """
-      When operate:
-      """
-      jFactory.getDataRepository().clear();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("bean(hello BeanDataSpec)", new HashMap<>()).create();
-      """
-      Then the result should:
-      """
-      bean: {
-        class.simpleName= BeanData
-        value1= hello
-        value2= world
-      }
-      """
 
     Scenario Outline: create narrow element in list <list> from input spec
       Given the following bean class:
@@ -1118,6 +1086,62 @@ Feature: use spec
         value1= hello
         value2= world
       }
+      """
+
+    Scenario: query narrow single from parent spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public Object bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("bean").is("BeanDataSpec");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When operate:
+      """
+      Object bean = jFactory.type(BeanData.class).property("value1", "hello").create();
+      jFactory.type(Bean.class).property("bean", bean).create();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean.value1", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        bean : {
+          class.simpleName= BeanData
+          value1= hello
+        }
+      }]
       """
 
     Scenario: create narrow single override from input spec override parent spec
