@@ -57,6 +57,7 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     public final T create(Instance<T> instance) {
+        instance.getSequence();
         return constructor.apply(instance);
     }
 
@@ -114,9 +115,10 @@ class ObjectFactory<T> implements Factory<T> {
     protected void collectSubSpec(Instance<T> instance) {
     }
 
-    public RootInstance<T> createInstance(DefaultArguments argument) {
+    public RootInstance<T> createInstance(Arguments argument) {
         Spec<T> spec = createSpec();
-        RootInstance<T> rootInstance = new RootInstance<>(factorySet.nextSequence(getType().getType()), spec, argument);
+        RootInstance<T> rootInstance = new RootInstance<>(spec, argument,
+                factorySet.sequence(getType().getType()));
         spec.setInstance(rootInstance);
         return rootInstance;
     }

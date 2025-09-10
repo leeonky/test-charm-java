@@ -109,7 +109,7 @@ Feature: assert belongs to
                   The root value was: DataBase[jdbc:h2:mem:test] {
                       order_lines:
                           | id | quantity | refid | order_id | product_id |
-                          |  5 |        5 |   100 |     null |         14 |
+                          |  5 |        5 |   100 |     null |          9 |
                   }
                   ```
     """
@@ -146,7 +146,7 @@ Feature: assert belongs to
                   The root value was: DataBase[jdbc:h2:mem:test] {
                       order_lines:
                           | id | quantity | refid | order_id | product_id |
-                          |  6 |        6 |   100 |     null |         17 |
+                          |  6 |        6 |   100 |     null |         12 |
                   }
                   ```
     """

@@ -72,8 +72,8 @@ class FactorySet {
         return queryDefaultValueFactory(type).orElseGet(() -> new DefaultValueFactories.DefaultTypeFactory<>(type));
     }
 
-    public int nextSequence(Class<?> type) {
-        return typeSequence.generate(type);
+    public TypeSequence.Sequence sequence(Class<?> type) {
+        return typeSequence.register(type);
     }
 
     public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {

@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 class CollectionInstance<T> extends SubInstance<T> {
     private final List<Integer> indexes;
 
-    public CollectionInstance(List<Integer> indexes, PropertyWriter<?> property, int sequence, Spec<T> spec,
-                              DefaultArguments argument) {
-        super(property, sequence, spec, argument);
+    public CollectionInstance(List<Integer> indexes, PropertyWriter<?> property,
+                              Spec<T> spec, Arguments argument, TypeSequence.Sequence sequence) {
+        super(property, spec, argument, sequence);
         this.indexes = new ArrayList<>(indexes);
     }
 
@@ -22,7 +22,7 @@ class CollectionInstance<T> extends SubInstance<T> {
     }
 
     public CollectionInstance<T> element(int index) {
-        CollectionInstance<T> collection = new CollectionInstance<>(indexes, getProperty(), getSequence(), spec, arguments);
+        CollectionInstance<T> collection = new CollectionInstance<>(indexes, getProperty(), spec, arguments, sequence);
         collection.indexes.add(index);
         return collection;
     }

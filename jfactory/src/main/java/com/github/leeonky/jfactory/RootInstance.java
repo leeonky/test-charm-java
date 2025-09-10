@@ -8,25 +8,25 @@ import java.util.function.Supplier;
 class RootInstance<T> implements Instance<T> {
     private static final Object[] NO_TRAIT_PARAMS = new Object[0];
     protected final Spec<T> spec;
-    protected final DefaultArguments arguments;
-    private final int sequence;
+    protected final Arguments arguments;
+    protected final TypeSequence.Sequence sequence;
     private final ValueCache<T> valueCache = new ValueCache<>();
     private int collectionSize = 0;
     private Object[] traitParams = NO_TRAIT_PARAMS;
 
-    public RootInstance(int sequence, Spec<T> spec, DefaultArguments arguments) {
-        this.sequence = sequence;
+    public RootInstance(Spec<T> spec, Arguments arguments, TypeSequence.Sequence sequence) {
         this.spec = spec;
         this.arguments = arguments;
+        this.sequence = sequence;
     }
 
     @Override
     public int getSequence() {
-        return sequence;
+        return sequence.get();
     }
 
     SubInstance<T> sub(PropertyWriter<?> property) {
-        return new SubInstance<>(property, sequence, spec, arguments);
+        return new SubInstance<>(property, spec, arguments, sequence);
     }
 
     @Override
