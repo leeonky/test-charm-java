@@ -23,4 +23,8 @@ public interface PropertyAccessor<T> {
     }
 
     boolean isBeanProperty();
+
+    default BeanClass<?> getOriginType() {
+        return getType();
+    }
 }

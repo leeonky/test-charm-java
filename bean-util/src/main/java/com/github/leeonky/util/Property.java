@@ -49,6 +49,7 @@ public interface Property<T> {
         Class<?> type = reader.getType().getType();
         if (type.equals(narrowType.getType()))
             return this;
+        type = reader.getOriginType().getType();
         if (narrowType.isInheritedFrom(type))
             return new PropertyDecorator<T>(this) {
                 @Override
@@ -64,6 +65,7 @@ public interface Property<T> {
         Class<?> type = writer.getType().getType();
         if (type.equals(narrowType.getType()))
             return this;
+        type = writer.getOriginType().getType();
         if (narrowType.isInheritedFrom(type))
             return new PropertyDecorator<T>(this) {
                 @Override

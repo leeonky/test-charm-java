@@ -44,4 +44,9 @@ public abstract class PropertyAccessorDecorator<T, A extends PropertyAccessor<T>
     public BeanClass<?> getType() {
         return BeanClass.create(GenericType.createGenericType(getGenericType()));
     }
+
+    @Override
+    public BeanClass<?> getOriginType() {
+        return accessor.getOriginType();
+    }
 }

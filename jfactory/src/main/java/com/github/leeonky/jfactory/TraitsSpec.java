@@ -4,13 +4,14 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
 
 class TraitsSpec {
     private String spec;
-    private Set<String> traits;
+    private final Set<String> traits;
 
     public TraitsSpec(String[] traits, String spec) {
         this.spec = spec;
@@ -41,5 +42,11 @@ class TraitsSpec {
     public void merge(TraitsSpec another, String property) {
         mergeTraits(another);
         mergeSpec(another, property);
+    }
+
+    public Optional<BeanClass> guessPropertyType(ObjectFactory<?> objectFactory) {
+        if (spec != null)
+            return Optional.of(objectFactory.getFactorySet().querySpecClassFactory(spec).getType());
+        return Optional.empty();
     }
 }

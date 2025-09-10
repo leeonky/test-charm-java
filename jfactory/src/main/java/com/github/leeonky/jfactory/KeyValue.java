@@ -40,7 +40,7 @@ class KeyValue {
         Matcher matcher = parse(beanClass);
         String propertyName = matcher.group(GROUP_PROPERTY);
         Property<T> property = beanClass.getProperty(propertyName);
-        Producer<?> subProducer = producer.descendant(PropertyChain.propertyChain(propertyName));
+        Producer<?> subProducer = producer.child(propertyName).orElse(Producer.PLACE_HOLDER);
         if (subProducer instanceof ObjectProducer) {
             BeanClass<? extends T> type = (BeanClass<? extends T>) subProducer.getType();
             property = property.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
@@ -61,7 +61,7 @@ class KeyValue {
                 propertySub = propertySub.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
             }
         } else
-            subProducer = collectionProducer.descendant(PropertyChain.propertyChain(index));
+            subProducer = collectionProducer.child(index).orElse(Producer.PLACE_HOLDER);
         return new CollectionExpression<>(property, intIndex,
                 createSubExpression(matcher, propertySub, property, objectFactory, subProducer));
     }
@@ -74,7 +74,9 @@ class KeyValue {
         KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
         TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
                 matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
-        return properties.createExpression(property, traitsSpec, parentProperty, objectFactory, subProducer).setIntently(matcher.group(GROUP_INTENTLY) != null);
+        return properties.createExpression(traitsSpec.guessPropertyType(objectFactory)
+                        .map(type -> property.decorateNarrowWriterType(type).decorateNarrowReaderType(type)).orElse(property),
+                traitsSpec, parentProperty, objectFactory, subProducer).setIntently(matcher.group(GROUP_INTENTLY) != null);
     }
 
     private <T> Matcher parse(BeanClass<T> beanClass) {

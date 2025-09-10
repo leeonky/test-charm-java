@@ -109,7 +109,7 @@ class TablePropertyValueTest {
         void use_table_during_collection_creation() {
             jFactory.register(AnItem.class);
 
-            expect(jFactory.type(new TypeReference<ArrayList<Bean>>() {
+            expect(jFactory.type(new TypeReference<ArrayList<Item>>() {
             }).properties(table("    | value2 |\n" +
                     "value3Ok AnItem | Tom    |")).create())
                     .should("value[]: ['spec']")
