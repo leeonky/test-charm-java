@@ -956,7 +956,6 @@ Feature: use spec
         value2= world
       }]
       """
-
       Examples:
         | list         |
         | Object[]     |
@@ -1042,86 +1041,90 @@ Feature: use spec
       }
       """
 
-#    Scenario: narrow element in Object[] from parent spec
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public Object[] bean;
-#      }
-#      """
-#      Given the following bean class:
-#      """
-#      public class BeanData {
-#        public String value1, value2;
-#      }
-#      """
-#      Given the following spec class:
-#      """
-#      public class BeanSpec extends Spec<Bean> {
-#        @Override
-#        public void main() {
-#          property("bean[]").is("BeanDataSpec");
-#        }
-#      }
-#      """
-#      Given the following spec class:
-#      """
-#      @Global
-#      public class BeanDataSpec extends Spec<BeanData> {
-#        @Override
-#        public void main() {
-#          property("value2").value("world");
-#        }
-#
-#        @Trait
-#        public void hello() {
-#          property("value1").value("hello");
-#        }
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.spec(BeanSpec.class).property("bean[0]", new HashMap<>()).create();
-#      """
-#      Then the result should:
-#      """
-#      bean: [{
-#        class.simpleName= BeanData
-#        value2= world
-#      }]
-#      """
-#      When operate:
-#      """
-#      jFactory.getDataRepository().clear();
-#      """
-#      When build:
-#      """
-#      jFactory.spec(BeanSpec.class).property("bean[0].value1", "hello").create();
-#      """
-#      Then the result should:
-#      """
-#      bean: [{
-#        class.simpleName= BeanData
-#        value1= hello
-#        value2= world
-#      }]
-#      """
-#      When operate:
-#      """
-#      jFactory.getDataRepository().clear();
-#      """
-#      When build:
-#      """
-#      jFactory.spec(BeanSpec.class).property("bean[0](hello BeanDataSpec)", new HashMap<>()).create();
-#      """
-#      Then the result should:
-#      """
-#      bean: [{
-#        class.simpleName= BeanData
-#        value1= hello
-#        value2= world
-#      }]
-#      """
+    Scenario Outline: narrow element in list from parent spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public <list> bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("bean[]").is("BeanDataSpec");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0]", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value2= world
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0].value1", "hello").create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0](hello BeanDataSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }]
+      """
+      Examples:
+        | list         |
+        | Object[]     |
+        | List<Object> |
 
 #    Scenario: create list primitive from spec for type object
 #      Given the following bean class:

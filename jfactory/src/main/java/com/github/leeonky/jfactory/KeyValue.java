@@ -43,8 +43,7 @@ class KeyValue {
         Producer<?> subProducer = producer.descendant(PropertyChain.propertyChain(propertyName));
         if (subProducer instanceof ObjectProducer) {
             BeanClass<? extends T> type = (BeanClass<? extends T>) subProducer.getType();
-            property = property.decorateNarrowWriterType(type)
-                    .decorateNarrowReaderType(type);
+            property = property.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
         }
         Property<T> finalSubProducer = property;
         return hasIndex(matcher).map(index -> createCollectionExpression(matcher, finalSubProducer, index, objectFactory, subProducer))
@@ -53,8 +52,17 @@ class KeyValue {
 
     private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index, ObjectFactory<T> objectFactory, Producer<?> collectionProducer) {
         Property<?> propertySub = property.getWriter().getType().getProperty(index);
-        Producer<?> subProducer = collectionProducer.descendant(PropertyChain.propertyChain(index));
-        return new CollectionExpression<>(property, parseInt(index),
+        int intIndex = parseInt(index);
+        Producer<?> subProducer;
+        if (collectionProducer instanceof CollectionProducer) {
+            subProducer = ((CollectionProducer<?, ?>) collectionProducer).defaultElementProducer(intIndex);
+            if (subProducer instanceof ObjectProducer) {
+                BeanClass type = subProducer.getType();
+                propertySub = propertySub.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
+            }
+        } else
+            subProducer = collectionProducer.descendant(PropertyChain.propertyChain(index));
+        return new CollectionExpression<>(property, intIndex,
                 createSubExpression(matcher, propertySub, property, objectFactory, subProducer));
     }
 

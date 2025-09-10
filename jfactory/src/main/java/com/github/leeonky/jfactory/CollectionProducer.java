@@ -64,13 +64,17 @@ class CollectionProducer<T, C> extends Producer<C> {
         int changed = 0;
         if (index >= 0) {
             for (int i = children.size(); i <= index; i++, changed++)
-                children.add(elementDefaultValueProducerFactory.apply(i));
+                children.add(defaultElementProducer(i));
         } else {
             int count = max(children.size(), -index) - children.size();
             for (int i = 0; i < count; i++, changed++)
-                children.add(i, elementDefaultValueProducerFactory.apply(i));
+                children.add(i, defaultElementProducer(i));
         }
         return changed;
+    }
+
+    public Producer<?> defaultElementProducer(int i) {
+        return elementDefaultValueProducerFactory.apply(i);
     }
 
     @Override
