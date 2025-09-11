@@ -7,7 +7,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
-import static com.github.leeonky.util.BeanClass.create;
 import static java.util.stream.IntStream.range;
 
 class ObjectProducer<T> extends Producer<T> {
@@ -22,6 +21,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final ListPersistable cachedChildren = new ListPersistable();
     private final Set<String> ignorePropertiesInSpec = new HashSet<>();
     private Persistable persistable;
+    private Function<PropertyWriter<?>, Producer<?>> defaultListElementValueProducerFactory;
 
     public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
         this(jFactory, factory, builder, false);
@@ -34,11 +34,16 @@ class ObjectProducer<T> extends Producer<T> {
         this.builder = builder;
         instance = factory.createInstance(builder.getArguments());
         persistable = jFactory.getDataRepository();
+        defaultListElementValueProducerFactory = propertyWriter -> new DefaultValueFactoryProducer<>(factory.getType(),
+                factory.getFactorySet().getDefaultValueFactory(propertyWriter.getType()),
+                instance.sub(propertyWriter));
         createDefaultValueProducers();
-        builder.processSpecAndInputProperty(this, instance, forQuery);
+        builder.collectSpec(this, instance);
         createElementDefaultValueProducersWhenBuildListAsRoot();
+        builder.processInputProperty(this, forQuery);
         setupReverseAssociations();
         resolveBuilderProducers();
+
     }
 
     protected void resolveBuilderProducers() {
@@ -52,9 +57,7 @@ class ObjectProducer<T> extends Producer<T> {
                 .filter(index -> children.get(index) == null)
                 .map(index -> getType().getPropertyWriter(index))
                 .forEach((PropertyWriter<T> propertyWriter) ->
-                        setChild(propertyWriter.getName(), new DefaultValueFactoryProducer<>(factory.getType(),
-                                factory.getFactorySet().getDefaultValueFactory(propertyWriter.getType()),
-                                instance.sub(propertyWriter))));
+                        setChild(propertyWriter.getName(), defaultListElementValueProducerFactory.apply(propertyWriter)));
     }
 
     private void setupReverseAssociations() {
@@ -164,7 +167,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
-        setChild(association, new UnFixedValueProducer<>(instance.reference(), create(instance.spec().getType())));
+        setChild(association, new UnFixedValueProducer<>(instance.reference(), instance.spec().getType()));
         persistable = cachedChildren;
     }
 
@@ -185,5 +188,9 @@ class ObjectProducer<T> extends Producer<T> {
     @Override
     protected boolean isFixed() {
         return children.values().stream().anyMatch(Producer::isFixed);
+    }
+
+    public void changeElementDefaultValueProducerFactory(Function<PropertyWriter<?>, Producer<?>> factory) {
+        defaultListElementValueProducerFactory = factory;
     }
 }

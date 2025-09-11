@@ -93,6 +93,12 @@ public class PropertySpec<T> {
                         producerFactory.apply(jFactory, collectionProducer, index.toString()));
             });
         }
+        if (property.isTopLevelDefaultPropertyCollection()) {
+            return spec.append((jFactory, objectProducer) -> {
+                objectProducer.changeElementDefaultValueProducerFactory(propertyWriter ->
+                        producerFactory.apply(jFactory, objectProducer, propertyWriter.getName()));
+            });
+        }
         throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
     }
 

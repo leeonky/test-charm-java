@@ -19,7 +19,7 @@ public class Spec<T> {
     private final Set<PropertySpec<T>.IsSpec<?, ? extends Spec<?>>> invalidIsSpecs = new LinkedHashSet<>();
 
     private Instance<T> instance;
-    private Class<T> type = null;
+    private BeanClass<T> type = null;
 
     private ObjectFactory<T> objectFactory;
 
@@ -52,7 +52,7 @@ public class Spec<T> {
 
     void apply(JFactory jFactory, ObjectProducer<T> producer) {
         operations.forEach(o -> o.accept(jFactory, producer));
-        type = producer.getType().getType();
+        type = producer.getType();
         if (!invalidIsSpecs.isEmpty())
             throw new InvalidSpecException("Invalid property spec:\n\t"
                     + invalidIsSpecs.stream().map(PropertySpec.IsSpec::getPosition).collect(Collectors.joining("\n\t"))
@@ -63,11 +63,10 @@ public class Spec<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public Class<T> getType() {
+    public BeanClass<T> getType() {
         return getClass().equals(Spec.class) ? type :
-                (Class<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
-                        .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"))
-                        .getType();
+                (BeanClass<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
+                        .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"));
     }
 
     protected String getName() {

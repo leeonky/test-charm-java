@@ -137,7 +137,7 @@ class BeanClassTest {
         }
 
         @Test
-        void should_return_bean_class_bygiven__grand_farther_class() {
+        void should_return_bean_class_by_given_grand_farther_class() {
             BeanClass<ArrayList> beanClass = create(SubStringList.class).getSuper(ArrayList.class);
 
             assertThat(beanClass.getType()).isEqualTo(ArrayList.class);

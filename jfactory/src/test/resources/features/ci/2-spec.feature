@@ -1700,57 +1700,91 @@ Feature: use spec
         | Object[]     |
         | List<Object> |
 
-#  Rule: narrow java.lang.Object as list
-#    Scenario: create list primitive from spec for type object
+  Rule: create top list
+
+    Scenario: create from list spec
+      Given the following bean class:
+        """
+        public class Bean { public String value; }
+        """
+      And the following spec class:
+        """
+        public class BeanListSpec extends Spec<List<Bean>> { }
+        """
+      When build:
+        """
+        jFactory.spec(BeanListSpec.class).property("[0].value", "hello").property("[1].value", "world").create();
+        """
+      Then the result should:
+        """
+        value[]: [hello world]
+        """
+      And operate:
+        """
+        jFactory.getDataRepository().clear();
+        """
+      When build:
+        """
+        jFactory.spec(BeanListSpec.class).property("[1].value", "world").create();
+        """
+      Then the result should:
+        """
+        : [null {value= world}]
+        """
+
+    Scenario: create from list spec and default element create
+      Given the following bean class:
+        """
+        public class Bean { public String value; }
+        """
+      Given the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> { }
+        """
+      And the following spec class:
+        """
+        public class BeanListSpec extends Spec<List<Bean>> {
+          public void main() { property("[]").is("BeanSpec"); }
+        }
+        """
+      When build:
+        """
+        jFactory.spec(BeanListSpec.class).property("[0].value", "hello").property("[1].value", "world").create();
+        """
+      Then the result should:
+        """
+        value[]: [hello world]
+        """
+      And operate:
+        """
+        jFactory.getDataRepository().clear();
+        """
+      When build:
+        """
+        jFactory.spec(BeanListSpec.class).property("[1].value", "world").create();
+        """
+      Then the result should:
+        """
+        : [{class.simpleName= Bean} {value= world}]
+        """
+
+#    Scenario Outline: create from spec directly
 #      Given the following bean class:
-#      """
-#      public class Bean {
-#        public Object bean;
-#      }
-#      """
+#        """
+#        public class Bean { public String value; }
+#        """
+#      And the following spec class:
+#        """
+#        public class BeanSpec extends Spec<Bean> { }
+#        """
 #      When build:
-#      """
-#      jFactory.type(Bean.class).property("bean[0]", 1).create();
-#      """
+#        """
+#        jFactory.spec(<spec>).property("[0].value", "hello").property("[1].value", "world").create();
+#        """
 #      Then the result should:
-#      """
-#      bean: [1]
-#      """
-#      When operate:
-#      """
-#      jFactory.getDataRepository().clear();
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class)
-#        .property("bean[0]", 1)
-#        .property("bean[1]", "a")
-#        .create();
-#      """
-#      Then the result should:
-#      """
-#      bean: [1 a]
-#      """
-
-
-#  create
-#      object(spec) {}
-#      object[0](spec) [{}]
-#      object[0][0](spec) [[{}]]
-#      list[0](spec) [{}]
-#      list[0][0](spec) [[{}]]
-
-#  bug: define object type property spec in parent spec
-#  jFactory.type(Object.class).property("[0]", new BeanData()).create(); => list
-#  jFactory.type(Object.class).property("any", new BeanData()).create(); => map
-#
-#  query
-#      object(spec) {}
-#      object[0](spec) [{}]
-#      object[0][0](spec) [[{}]]
-#      list[0](spec) [{}]
-#      list[0][0](spec) [[{}]]
-
-#  bug: define object type property spec in parent spec
-#  jFactory.type(Object.class).property("[0]", new BeanData()).create(); => list
-#  jFactory.type(Object.class).property("any", new BeanData()).create(); => map
+#        """
+#        value[]: [hello world]
+#        """
+#      Examples:
+#        | spec         |
+#        | "BeanSpec[]" |

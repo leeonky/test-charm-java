@@ -42,7 +42,7 @@ class PropertyChain {
     }
 
     public boolean isSingle() {
-        return property.size() == 1;
+        return property.size() == 1 && !property.get(0).equals("[]");
     }
 
     @Override
@@ -116,5 +116,9 @@ class PropertyChain {
 
     public boolean isDefaultPropertyCollection() {
         return property.size() == 2 && "[]".equals(property.get(1));
+    }
+
+    public boolean isTopLevelDefaultPropertyCollection() {
+        return property.size() == 1 && property.get(0).equals("[]");
     }
 }

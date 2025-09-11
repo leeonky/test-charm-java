@@ -1,6 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 
 import java.lang.reflect.Method;
@@ -18,7 +17,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private final Supplier<ObjectFactory<T>> base;
 
     public SpecClassFactory(Class<? extends Spec<T>> specClass, FactorySet factorySet, boolean globalSpec) {
-        super(BeanClass.create(newInstance(specClass).getType()), factorySet);
+        super(newInstance(specClass).getType(), factorySet);
         this.specClass = specClass;
         base = guessBaseFactory(factorySet, globalSpec);
         registerTraits();
