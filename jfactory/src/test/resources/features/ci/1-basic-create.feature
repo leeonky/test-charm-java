@@ -66,6 +66,63 @@ Feature: basic use
       i= 100
       """
 
+    Scenario: use base customized constructor when create via spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public int i;
+        public Bean(int i) {
+          this.i = i;
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class).constructor(arg -> new Bean(100));
+      """
+      And the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        public void main() {
+          property("i").ignore();
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).create();
+      """
+      Then the result should:
+      """
+      i= 100
+      """
+
+
+    Scenario: customize constructor from spec
+      Given the following bean class:
+      """
+      public class Bean {
+        private int i;
+      }
+      """
+      And the following spec class:
+      """
+      public class BeanSpec extends Spec<Object> {
+      }
+      """
+      And register:
+      """
+      jFactory.specFactory(BeanSpec.class).constructor(arg -> new Bean());
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).create();
+      """
+      Then the result should:
+      """
+      class.simpleName= Bean
+      """
+
   Rule: default value
 
     Scenario: default value types - support generate default value for these types under the current version of JFactory

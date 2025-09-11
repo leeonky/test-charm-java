@@ -1700,6 +1700,7 @@ Feature: use spec
         | Object[]     |
         | List<Object> |
 
+#  Rule: narrow java.lang.Object as list
 #    Scenario: create list primitive from spec for type object
 #      Given the following bean class:
 #      """
@@ -1730,7 +1731,6 @@ Feature: use spec
 #      """
 #      bean: [1 a]
 #      """
-#
 
 
 #  create
