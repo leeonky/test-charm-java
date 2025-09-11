@@ -29,7 +29,7 @@ class ObjectFactory<T> implements Factory<T> {
     @SuppressWarnings("unchecked")
     private T defaultConstruct(Instance<T> instance) {
         return getType().isCollection()
-                ? (T) getType().createCollection(Collections.nCopies(instance.collectionSize(), null))
+                ? (T) getType().createCollection(Collections.nCopies(instance.collectionSize(), getType().getElementType().createDefault()))
                 : getType().newInstance();
     }
 
@@ -38,7 +38,7 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> constructor(Function<Instance<T>, T> constructor) {
+    public final Factory<T> constructor(Function<Instance<T>, T> constructor) {
         this.constructor = Objects.requireNonNull(constructor);
         return this;
     }

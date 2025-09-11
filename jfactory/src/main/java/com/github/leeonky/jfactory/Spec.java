@@ -21,6 +21,23 @@ public class Spec<T> {
     private Instance<T> instance;
     private Class<T> type = null;
 
+    private ObjectFactory<T> objectFactory;
+
+    T constructBy(ObjectFactory<T> factory) {
+        objectFactory = factory;
+        try {
+            if (objectFactory == null)
+                throw new IllegalStateException("Illegal construct context");
+            return construct();
+        } finally {
+            objectFactory = null;
+        }
+    }
+
+    protected T construct() {
+        return objectFactory.getBase().create(instance);
+    }
+
     public void main() {
     }
 

@@ -97,7 +97,6 @@ Feature: basic use
       i= 100
       """
 
-
     Scenario: customize constructor from spec
       Given the following bean class:
       """
@@ -122,6 +121,64 @@ Feature: basic use
       """
       class.simpleName= Bean
       """
+
+    Scenario: define constructor in spec class
+      Given the following bean class:
+      """
+      public class Bean {
+        public int i;
+        public Bean(int i) {
+          this.i = i;
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class BeanSpec extends Spec<Object> {
+        public void main() {
+          property("i").ignore();
+        }
+
+        protected Object construct() {
+          return new Bean(100);
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        class.simpleName= Bean
+        i= 100
+      }
+      """
+
+    Scenario Outline: construct specific list type in construct
+      Given the following spec class:
+      """
+      public class ListSpec extends Spec<<listType>> {
+        protected <listType> construct() {
+          return <listCode>;
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(ListSpec.class).property("[0]", 1).property("[1]", 2).create();
+      """
+      Then the result should:
+      """
+      : {
+        class.simpleName= <listType>
+        ::this: [1 2]
+      }
+      """
+      Examples:
+        | listCode                                                              | listType  |
+        | new ArrayList(Collections.nCopies(instance().collectionSize(), null)) | ArrayList |
 
   Rule: default value
 
@@ -909,6 +966,16 @@ Feature: basic use
       Then the result should:
       """
       = []
+      """
+
+    Scenario: support create primitive array
+      When build:
+      """
+      jFactory.type(int[].class).property("[0]", 1).property("[1]", 3).create();
+      """
+      Then the result should:
+      """
+      = [1 3]
       """
 
     Scenario: use input property

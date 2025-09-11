@@ -22,7 +22,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         this.specClass = specClass;
         base = guessBaseFactory(factorySet, globalSpec);
         registerTraits();
-        constructor(getBase()::create);
+        constructor(instance -> instance.spec().constructBy(this));
     }
 
     private Supplier<ObjectFactory<T>> guessBaseFactory(FactorySet factorySet, boolean globalSpec) {
