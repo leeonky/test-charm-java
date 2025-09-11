@@ -932,82 +932,6 @@ Feature: use spec
       }]
       """
 
-    Scenario Outline: create narrow element in list <list> from input spec
-      Given the following bean class:
-      """
-      public class Bean {
-        public <list> bean;
-      }
-      """
-      Given the following bean class:
-      """
-      public class BeanData {
-        public String value1, value2;
-      }
-      """
-      Given the following spec class:
-      """
-      @Global
-      public class BeanDataSpec extends Spec<BeanData> {
-        @Override
-        public void main() {
-          property("value2").value("world");
-        }
-
-        @Trait
-        public void hello() {
-          property("value1").value("hello");
-        }
-      }
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("bean[0](BeanDataSpec)", new HashMap<>()).create();
-      """
-      Then the result should:
-      """
-      bean: [{
-        class.simpleName= BeanData
-        value2= world
-      }]
-      """
-      When operate:
-      """
-      jFactory.getDataRepository().clear();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("bean[0](BeanDataSpec).value1", "hello").create();
-      """
-      Then the result should:
-      """
-      bean: [{
-        class.simpleName= BeanData
-        value1= hello
-        value2= world
-      }]
-      """
-      When operate:
-      """
-      jFactory.getDataRepository().clear();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("bean[0](hello BeanDataSpec)", new HashMap<>()).create();
-      """
-      Then the result should:
-      """
-      bean: [{
-        class.simpleName= BeanData
-        value1= hello
-        value2= world
-      }]
-      """
-      Examples:
-        | list         |
-        | Object[]     |
-        | List<Object> |
-
     Scenario: create narrow single from parent spec
       Given the following bean class:
       """
@@ -1244,6 +1168,209 @@ Feature: use spec
       }
       """
 
+    Scenario: query narrow single override from input spec override parent spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public Object bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData2 {
+        public String value3, value4;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("bean").is("BeanDataSpec");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanData2Spec extends Spec<BeanData2> {
+        @Override
+        public void main() {
+          property("value3").value("goodbye");
+        }
+
+        @Trait
+        public void java() {
+          property("value4").value("java");
+        }
+      }
+      """
+      When operate:
+      """
+      Object beanData2 = jFactory.type(BeanData2.class).property("value4", "cucumber").create();
+      jFactory.type(Bean.class).property("bean", beanData2).create();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean(BeanData2Spec).value4", "cucumber").queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        bean: {
+          class.simpleName= BeanData2
+          value4= cucumber
+        }
+      }]
+      """
+
+    Scenario Outline: create narrow element in list <list> from input spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public <list> bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean[0](BeanDataSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value2= world
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean[0](BeanDataSpec).value1", "hello").create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean[0](hello BeanDataSpec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData
+        value1= hello
+        value2= world
+      }]
+      """
+      Examples:
+        | list         |
+        | Object[]     |
+        | List<Object> |
+
+    Scenario Outline: query narrow element in list <list> from input spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public <list> bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When operate:
+      """
+      Object beanData = jFactory.type(BeanData.class).property("value1", "hello").create();
+      jFactory.type(Bean.class).property("bean[0]", beanData).create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("bean[0](BeanDataSpec).value1", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        bean: [{
+          class.simpleName= BeanData
+          value1= hello
+          value2= world
+        }]
+      }]
+      """
+      Examples:
+        | list         |
+        | Object[]     |
+        | List<Object> |
+
     Scenario Outline: create narrow element in list from parent spec
       Given the following bean class:
       """
@@ -1322,6 +1449,250 @@ Feature: use spec
         class.simpleName= BeanData
         value1= hello
         value2= world
+      }]
+      """
+      Examples:
+        | list         |
+        | Object[]     |
+        | List<Object> |
+
+    Scenario Outline: query narrow element in list from parent spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public <list> bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("bean[]").is("BeanDataSpec");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      When operate:
+      """
+      Object beanData = jFactory.type(BeanData.class).property("value1", "hello").create();
+      jFactory.type(Bean.class).property("bean[0]", beanData).create();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0].value1", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        bean: [{
+          class.simpleName= BeanData
+          value1= hello
+          value2= world
+        }]
+      }]
+      """
+      Examples:
+        | list         |
+        | Object[]     |
+        | List<Object> |
+
+    Scenario Outline: create narrow element in list from input spec override parent spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public <list> bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData2 {
+        public String value3, value4;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("bean[]").is("BeanDataSpec");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanData2Spec extends Spec<BeanData2> {
+        @Override
+        public void main() {
+          property("value3").value("goodbye");
+        }
+
+        @Trait
+        public void java() {
+          property("value4").value("java");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0](BeanData2Spec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData2
+        value3= goodbye
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0](BeanData2Spec).value4", "cucumber").create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData2
+        value3= goodbye
+        value4= cucumber
+      }]
+      """
+      When operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0](java BeanData2Spec)", new HashMap<>()).create();
+      """
+      Then the result should:
+      """
+      bean: [{
+        class.simpleName= BeanData2
+        value3= goodbye
+        value4= java
+      }]
+      """
+      Examples:
+        | list         |
+        | Object[]     |
+        | List<Object> |
+
+    Scenario Outline: query narrow element in list from input spec override parent spec
+      Given the following bean class:
+      """
+      public class Bean {
+        public <list> bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData2 {
+        public String value3, value4;
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("bean[]").is("BeanDataSpec");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanData2Spec extends Spec<BeanData2> {
+        @Override
+        public void main() {
+          property("value3").value("goodbye");
+        }
+
+        @Trait
+        public void java() {
+          property("value4").value("java");
+        }
+      }
+      """
+      When operate:
+      """
+      Object beanData2 = jFactory.type(BeanData2.class).property("value4", "cucumber").create();
+      jFactory.type(Bean.class).property("bean[0]", beanData2).create();
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).property("bean[0](BeanData2Spec).value4", "cucumber").queryAll();
+      """
+      Then the result should:
+      """
+      : [{
+        bean: [{
+          class.simpleName= BeanData2
+          value4= cucumber
+        }]
       }]
       """
       Examples:
