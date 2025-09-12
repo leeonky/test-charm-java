@@ -21,11 +21,15 @@ class KeyValue {
     private static final String PATTERN_CLAUSE = "(\\." + "(.+)" + ")?";
     private static final String PATTERN_INTENTLY = "(!)?";
     private static final int GROUP_PROPERTY = 1;
-    private static final int GROUP_COLLECTION_INDEX = 3;
-    private static final int GROUP_TRAIT = 5;
-    private static final int GROUP_SPEC = 8;
-    private static final int GROUP_INTENTLY = 9;
-    private static final int GROUP_CLAUSE = 11;
+
+    private static final int GROUP_TRAIT = 3;
+    private static final int GROUP_SPEC = 6;
+
+    private static final int GROUP_COLLECTION_INDEX = 3 + 5;
+    private static final int GROUP_ELEMENT_TRAIT = 5 + 5;
+    private static final int GROUP_ELEMENT_SPEC = 8 + 5;
+    private static final int GROUP_INTENTLY = 9 + 5;
+    private static final int GROUP_CLAUSE = 11 + 5;
     private final String key;
     private final Object value;
     private final FactorySet factorySet;
@@ -47,7 +51,11 @@ class KeyValue {
         }
         Property<T> finalSubProducer = property;
         return hasIndex(matcher).map(index -> createCollectionExpression(matcher, finalSubProducer, index, objectFactory, subProducer, forQuery))
-                .orElseGet(() -> createSubExpression(matcher, finalSubProducer, null, objectFactory, subProducer, forQuery));
+                .orElseGet(() -> {
+                    TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
+                            matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
+                    return createSubExpression(matcher, finalSubProducer, null, objectFactory, subProducer, forQuery, traitsSpec);
+                });
     }
 
     private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index,
@@ -63,8 +71,10 @@ class KeyValue {
             }
         } else
             subProducer = collectionProducer.child(index).orElse(Producer.PLACE_HOLDER);
+        TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_ELEMENT_TRAIT) != null ?
+                matcher.group(GROUP_ELEMENT_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_ELEMENT_SPEC));
         return new CollectionExpression<>(property, intIndex,
-                createSubExpression(matcher, propertySub, property, objectFactory, subProducer, forQuery), forQuery);
+                createSubExpression(matcher, propertySub, property, objectFactory, subProducer, forQuery, traitsSpec), forQuery);
     }
 
     private Optional<String> hasIndex(Matcher matcher) {
@@ -72,17 +82,15 @@ class KeyValue {
     }
 
     private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property, Property<?> parentProperty,
-                                                  ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery) {
+                                                  ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery, TraitsSpec traitsSpec) {
         KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
-        TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
-                matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
         return properties.createExpression(traitsSpec.guessPropertyType(objectFactory)
                         .map(type -> property.decorateNarrowWriterType(type).decorateNarrowReaderType(type)).orElse(property),
                 traitsSpec, parentProperty, objectFactory, subProducer, forQuery).setIntently(matcher.group(GROUP_INTENTLY) != null);
     }
 
     private <T> Matcher parse(BeanClass<T> beanClass) {
-        Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_COLLECTION_INDEX +
+        Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_TRAIT_SPEC + PATTERN_COLLECTION_INDEX +
                 PATTERN_TRAIT_SPEC + PATTERN_INTENTLY + PATTERN_CLAUSE).matcher(key);
         if (!matcher.matches())
             throw new IllegalArgumentException(String.format("Invalid property `%s` for %s creation.",

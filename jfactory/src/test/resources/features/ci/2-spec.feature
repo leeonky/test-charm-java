@@ -1768,6 +1768,54 @@ Feature: use spec
         : [{class.simpleName= Bean} {value= world}]
         """
 
+
+  Rule: create sub list
+
+    Scenario: create from list spec and default element create
+      Given the following bean class:
+        """
+        public class ListObject { public Object list; }
+        """
+      Given the following bean class:
+        """
+        public class Bean { public String value; }
+        """
+      Given the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> { }
+        """
+      And the following spec class:
+        """
+        public class BeanListSpec extends Spec<List<Bean>> {
+          public void main() { property("[]").is("BeanSpec"); }
+        }
+        """
+      And operate:
+        """
+        jFactory.factory(ListObject.class).spec(ins-> ins.spec().property("list").is("BeanListSpec") );
+        """
+      When build:
+        """
+        jFactory.type(ListObject.class).property("list(BeanListSpec)[0].value", "hello").property("list[1].value", "world").create();
+        """
+#      Then the result should:
+#        """
+#        list.value[]: [hello world]
+#        """
+#      And operate:
+#        """
+#        jFactory.getDataRepository().clear();
+#        """
+#      When build:
+#        """
+#        jFactory.type(ListObject.class).property("list(BeanListSpec)[1].value", "world").create();
+#        """
+#      Then the result should:
+#        """
+#        list: [{class.simpleName= Bean} {value= world}]
+#        """
+
+
 #    Scenario Outline: create from spec directly
 #      Given the following bean class:
 #        """
