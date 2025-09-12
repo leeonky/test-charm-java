@@ -1770,10 +1770,10 @@ Feature: use spec
 
   Rule: create sub list
 
-    Scenario: create sub list from list spec
+    Scenario Outline: create sub list from list spec
       Given the following bean class:
         """
-        public class ListObject { public Object list; }
+        public class ListObject { public <type> list; }
         """
       Given the following bean class:
         """
@@ -1811,11 +1811,17 @@ Feature: use spec
         """
         list: [null {value= world}]
         """
+      Examples:
+        | type         |
+        | Object       |
+        | List         |
+        | List<Object> |
+        | List<Bean>   |
 
-    Scenario: create sub list from list spec and element default create by factory
+    Scenario Outline: create sub list from list spec and element default create by factory
       Given the following bean class:
         """
-        public class ListObject { public Object list; }
+        public class ListObject { public <type> list; }
         """
       Given the following bean class:
         """
@@ -1855,7 +1861,12 @@ Feature: use spec
         """
         list: [{class.simpleName= Bean} {value= world}]
         """
-
+      Examples:
+        | type         |
+        | Object       |
+        | List         |
+        | List<Object> |
+        | List<Bean>   |
 
 #    Scenario Outline: create from spec directly
 #      Given the following bean class:

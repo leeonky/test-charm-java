@@ -46,10 +46,9 @@ public interface Property<T> {
 
     default Property<T> decorateNarrowReaderType(BeanClass<? extends T> narrowType) {
         PropertyReader<T> reader = getReader();
-        Class<?> type = reader.getType().getType();
-        if (type.equals(narrowType.getType()))
+        if (reader.getType().equals(narrowType))
             return this;
-        type = reader.getOriginType().getType();
+        Class<?> type = reader.getOriginType().getType();
         if (narrowType.isInheritedFrom(type))
             return new PropertyDecorator<T>(this) {
                 @Override
@@ -62,10 +61,9 @@ public interface Property<T> {
 
     default Property<T> decorateNarrowWriterType(BeanClass<? extends T> narrowType) {
         PropertyWriter<T> writer = getWriter();
-        Class<?> type = writer.getType().getType();
-        if (type.equals(narrowType.getType()))
+        if (writer.getType().equals(narrowType))
             return this;
-        type = writer.getOriginType().getType();
+        Class<?> type = writer.getOriginType().getType();
         if (narrowType.isInheritedFrom(type))
             return new PropertyDecorator<T>(this) {
                 @Override
