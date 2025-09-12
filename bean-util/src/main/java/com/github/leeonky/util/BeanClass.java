@@ -222,4 +222,8 @@ public class BeanClass<T> {
     public Type getGenericType() {
         return getType();
     }
+
+    public boolean is(Class<?> clazz) {
+        return getType().equals(clazz);
+    }
 }

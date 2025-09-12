@@ -1,6 +1,8 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.GenericBeanClass;
+import com.github.leeonky.util.PropertyWriter;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -86,7 +88,12 @@ public class PropertySpec<T> {
             });
         if (property.isDefaultPropertyCollection()) {
             return spec.append((jFactory, objectProducer) -> {
-                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.childOrDefault((String) property.head()),
+                PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
+                if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
+                    Producer<?> element = producerFactory.apply(jFactory, objectProducer, "0");
+                    propertyWriter = propertyWriter.decorateType(GenericBeanClass.create(List.class, element.getType().getGenericType()));
+                }
+                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.childOrDefaultCollection(propertyWriter, true),
                         CollectionProducer.class).orElseThrow(() ->
                         new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
                 collectionProducer.changeElementDefaultValueProducerFactory(index ->

@@ -20,13 +20,13 @@ public interface PropertyReader<T> extends PropertyAccessor<T> {
         return reader;
     }
 
-    default PropertyReader<T> decorateType(BeanClass<? extends T> narrowType) {
-        if (narrowType == getType())
+    default PropertyReader<T> decorateType(BeanClass<? extends T> newType) {
+        if (newType == getType())
             return this;
         return new PropertyReaderDecorator<T>(this) {
             @Override
             public Type getGenericType() {
-                return narrowType.getGenericType();
+                return newType.getGenericType();
             }
         };
     }

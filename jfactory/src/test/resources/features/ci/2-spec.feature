@@ -1739,12 +1739,15 @@ Feature: use spec
         """
       Given the following spec class:
         """
-        public class BeanSpec extends Spec<Bean> { }
+        public class BeanSpec extends Spec<Bean> {
+          @Trait
+          public void Default() { property("value").value("default"); }
+        }
         """
       And the following spec class:
         """
         public class BeanListSpec extends Spec<List<Bean>> {
-          public void main() { property("[]").is("BeanSpec"); }
+          public void main() { property("[]").is("Default", "BeanSpec"); }
         }
         """
       When build:
@@ -1765,8 +1768,31 @@ Feature: use spec
         """
       Then the result should:
         """
-        : [{class.simpleName= Bean} {value= world}]
+        value[]: [default world]
         """
+
+    Scenario Outline: create from list spec in test
+      Given the following bean class:
+        """
+        public class Bean { public String value; }
+        """
+      Given the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> { }
+        """
+      When build:
+        """
+        jFactory.<type>.property("[0].value", "hello").property("[1].value", "world").create();
+        """
+      Then the result should:
+        """
+        value[]: [hello world]
+        """
+      Examples:
+        | type                              |
+        | spec("BeanSpec[]")                |
+        | specs(BeanSpec.class)             |
+        | specs(List.class, BeanSpec.class) |
 
   Rule: create sub list
 
@@ -1860,6 +1886,55 @@ Feature: use spec
       Then the result should:
         """
         list: [{class.simpleName= Bean} {value= world}]
+        """
+      Examples:
+        | type         |
+        | Object       |
+        | List         |
+        | List<Object> |
+        | List<Bean>   |
+
+    Scenario Outline: create sub list from spec list in spec
+      Given the following bean class:
+        """
+        public class ListObject { public <type> list; }
+        """
+      Given the following bean class:
+        """
+        public class Bean { public String value; }
+        """
+      Given the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          @Trait
+          public void Default() { property("value").value("default"); }
+        }
+        """
+      And the following spec class:
+        """
+        public class ListObjectSpec extends Spec<ListObject> {
+          public void main() { property("list[]").is("Default", "BeanSpec"); }
+        }
+        """
+      When build:
+        """
+        jFactory.spec(ListObjectSpec.class).property("list[0].value", "hello").property("list[1].value", "world").create();
+        """
+      Then the result should:
+        """
+        list.value[]: [hello world]
+        """
+      And operate:
+        """
+        jFactory.getDataRepository().clear();
+        """
+      When build:
+        """
+        jFactory.spec(ListObjectSpec.class).property("list[1].value", "world").create();
+        """
+      Then the result should:
+        """
+        list.value[]= [default world]
         """
       Examples:
         | type         |

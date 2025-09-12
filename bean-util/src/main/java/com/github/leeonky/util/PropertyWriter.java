@@ -20,13 +20,13 @@ public interface PropertyWriter<T> extends PropertyAccessor<T> {
         }
     }
 
-    default PropertyWriter<T> decorateType(BeanClass<? extends T> narrowType) {
-        if (narrowType == getType())
+    default PropertyWriter<T> decorateType(BeanClass<? extends T> newType) {
+        if (newType == getType())
             return this;
         return new PropertyWriterDecorator<T>(this) {
             @Override
             public Type getGenericType() {
-                return narrowType.getGenericType();
+                return newType.getGenericType();
             }
         };
     }

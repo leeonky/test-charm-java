@@ -1,5 +1,6 @@
 package com.github.leeonky.util;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Objects;
@@ -18,6 +19,27 @@ public class GenericBeanClass<T> extends BeanClass<T> {
 
     public static BeanClass<?> create(GenericType genericType) {
         return instanceCache.computeIfAbsent(genericType, GenericBeanClass::new);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> GenericBeanClass<T> create(Class<?> rawClass, Type... types) {
+        return (GenericBeanClass<T>) create(GenericType.createGenericType(new ParameterizedType() {
+
+            @Override
+            public Type[] getActualTypeArguments() {
+                return types;
+            }
+
+            @Override
+            public Type getRawType() {
+                return rawClass;
+            }
+
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+        }));
     }
 
     @Override

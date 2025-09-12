@@ -45,7 +45,8 @@ class KeyValue {
         String propertyName = matcher.group(GROUP_PROPERTY);
         Property<T> property = beanClass.getProperty(propertyName);
         Producer<?> subProducer = producer.child(propertyName).orElse(Producer.PLACE_HOLDER);
-        if (subProducer instanceof ObjectProducer) {
+        if (subProducer instanceof ObjectProducer ||
+                subProducer instanceof CollectionProducer && property.getWriterType().is(Object.class)) {
             BeanClass<? extends T> type = (BeanClass<? extends T>) subProducer.getType();
             property = property.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
         }

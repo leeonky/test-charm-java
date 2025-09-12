@@ -1,9 +1,11 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.GenericBeanClass;
 import com.github.leeonky.util.PropertyWriter;
 import com.github.leeonky.util.TypeReference;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -57,6 +59,35 @@ public class JFactory {
         return new DefaultBuilder<>(factorySet.createSpecFactory(specClass, trait), this, SPEC);
     }
 
+    public <T, S extends Spec<T>> Builder<T[]> specs(Class<S> specClass) {
+        Factory<T> specFactory = specFactory(specClass);
+        Class<T[]> arrayType = (Class<T[]>) Array.newInstance(specFactory.getType().getType(), 0).getClass();
+        ObjectFactory<T[]> listFactory = new ObjectFactory<>(BeanClass.create(arrayType), factorySet);
+        listFactory.spec(ins -> ins.spec().property("[]").is(specClass));
+        return new DefaultBuilder<>(listFactory, this, TYPE);
+    }
+
+    public <T, S extends Spec<T>, L extends List<T>> Builder<L> specs(Class<L> collectionType, Class<S> specClass) {
+        Factory<T> specFactory = specFactory(specClass);
+        ObjectFactory<L> listFactory = new ObjectFactory<>(GenericBeanClass.create(collectionType,
+                specFactory.getType().getType()), factorySet);
+        listFactory.spec(ins -> ins.spec().property("[]").is(specClass));
+        return new DefaultBuilder<>(listFactory, this, TYPE);
+    }
+
+    public <T> Builder<T> spec(String... traitsAndSpec) {
+        String specName = traitsAndSpec[traitsAndSpec.length - 1];
+        if (specName.endsWith("[]")) {
+            specName = specName.replace("[]", "");
+            Factory<Object> specFactory = specFactory(specName);
+            ObjectFactory<?> listFactory = new ObjectFactory<>(GenericBeanClass.create(List.class, specFactory.getType().getType()), factorySet);
+            listFactory.spec(ins -> ins.spec().property("[]").is(traitsAndSpec));
+            return new DefaultBuilder(listFactory, this, TYPE);
+        }
+        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specName), this, SPEC)
+                .traits(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
+    }
+
     public <T, S extends Spec<T>> JFactory register(Class<S> specClass) {
         getPropertyAliasesInSpec(specClass).stream().filter(Objects::nonNull).forEach(propertyAliases -> {
             if (propertyAliases.value().length > 0) {
@@ -76,11 +107,6 @@ public class JFactory {
                 addAll(getPropertyAliasesInSpec(superclass));
             add(specClass.getAnnotation(PropertyAliases.class));
         }};
-    }
-
-    public <T> Builder<T> spec(String... traitsAndSpec) {
-        return new DefaultBuilder<>((ObjectFactory<T>) specFactory(traitsAndSpec[traitsAndSpec.length - 1]), this, SPEC)
-                .traits(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));
     }
 
     public <T> Factory<T> specFactory(String specName) {

@@ -77,18 +77,17 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public Producer<?> childOrDefault(String property) {
-        Producer<?> producer = children.get(property);
-        if (producer == null)
-            producer = addDefaultCollectionProducer(getType().getPropertyWriter(property));
-        return producer;
+        return childOrDefaultCollection(getType().getPropertyWriter(property), false);
     }
 
-    private Producer<?> addDefaultCollectionProducer(PropertyWriter<?> property) {
-        Producer<?> result = null;
-        if (property.getType().isCollection())
-            setChild(property.getName(), result = new CollectionProducer<>(getType(), property.getType(),
-                    instance.sub(property), factory.getFactorySet()));
-        return result;
+    public Producer<?> childOrDefaultCollection(PropertyWriter<T> propertyWriter, boolean force) {
+        Producer<?> producer = children.get(propertyWriter.getName());
+        if (producer == null) {
+            if (force || propertyWriter.getType().isCollection())
+                setChild(propertyWriter.getName(), producer = new CollectionProducer<>(getType(), propertyWriter.getType(),
+                        instance.sub(propertyWriter), factory.getFactorySet()));
+        }
+        return producer;
     }
 
     @Override
