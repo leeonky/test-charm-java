@@ -65,7 +65,8 @@ abstract class Producer<T> {
     @SuppressWarnings("unchecked")
     public <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> origin = (Producer<T>) childOrDefault(property);
-        setChild(property, origin == null ? producer : origin.changeTo(producer));
+        if (origin != producer)
+            setChild(property, origin == null ? producer : origin.changeTo(producer));
     }
 
     public BeanClass<?> getPropertyWriterType(String property) {

@@ -158,7 +158,6 @@ class DefaultBuilder<T> implements Builder<T> {
         objectFactory.collectSpec(traits, instance);
         instance.spec().apply(jFactory, objectProducer);
         objectProducer.processSpecIgnoreProperties();
-        instance.setCollectionSize(collectionSize);
     }
 
     public void processInputProperty(ObjectProducer<T> producer, boolean forQuery) {

@@ -39,11 +39,9 @@ class ObjectProducer<T> extends Producer<T> {
                 instance.sub(propertyWriter));
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
-        createElementDefaultValueProducersWhenBuildListAsRoot();
         builder.processInputProperty(this, forQuery);
         setupReverseAssociations();
         resolveBuilderProducers();
-
     }
 
     protected void resolveBuilderProducers() {
@@ -53,11 +51,18 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private void createElementDefaultValueProducersWhenBuildListAsRoot() {
-        range(0, instance.collectionSize()).mapToObj(String::valueOf)
-                .filter(index -> children.get(index) == null)
-                .map(index -> getType().getPropertyWriter(index))
-                .forEach((PropertyWriter<T> propertyWriter) ->
-                        setChild(propertyWriter.getName(), defaultListElementValueProducerFactory.apply(propertyWriter)));
+        try {
+            children.keySet().stream().map(Integer::valueOf).max(Integer::compareTo).ifPresent(size -> {
+                size++;
+                instance.setCollectionSize(size);
+                range(0, size).mapToObj(String::valueOf)
+                        .filter(index -> children.get(index) == null)
+                        .map(index -> getType().getPropertyWriter(index))
+                        .forEach((PropertyWriter<T> propertyWriter) ->
+                                setChild(propertyWriter.getName(), defaultListElementValueProducerFactory.apply(propertyWriter)));
+            });
+        } catch (Exception ignore) {
+        }
     }
 
     private void setupReverseAssociations() {
@@ -88,7 +93,10 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected T produce() {
-        return instance.cache(() -> factory.create(instance), obj -> {
+        return instance.cache(() -> {
+            createElementDefaultValueProducersWhenBuildListAsRoot();
+            return factory.create(instance);
+        }, obj -> {
             produceSubs(obj);
             persistable.save(obj);
             cachedChildren.getAll().forEach(persistable::save);
