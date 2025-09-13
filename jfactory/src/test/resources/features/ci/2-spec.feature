@@ -1946,7 +1946,7 @@ Feature: use spec
         | List<Object> |
         | List<Bean>   |
 
-    Scenario: create sub list from spec list in test
+    Scenario Outline: create sub list from spec list in test
       Given the following bean class:
         """
         public class Bean { public String value; }
@@ -1960,7 +1960,7 @@ Feature: use spec
         """
       Given the following bean class:
         """
-        public class ListObject { public Object list; }
+        public class ListObject { public <type> list; }
         """
       When build:
         """
@@ -1982,3 +1982,9 @@ Feature: use spec
         """
         list: [{value= default} {value= hello}]
         """
+      Examples:
+        | type         |
+        | Object       |
+        | List         |
+        | List<Object> |
+        | List<Bean>   |

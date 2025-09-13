@@ -59,6 +59,14 @@ class KeyValue {
                         traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
             if (subProducer == null)
                 subProducer = Producer.PLACE_HOLDER;
+        } else if (traitsSpec.isCollectionSpec() && producer instanceof ObjectProducer && property.getWriterType().isCollection()) {
+            SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
+            subProducer = ((ObjectProducer) producer).childOrDefaultCollection(property.getWriter(), false);
+            if (subProducer instanceof CollectionProducer)
+                ((CollectionProducer<?, ?>) subProducer).changeElementDefaultValueProducerFactory(i ->
+                        traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
+            if (subProducer == null)
+                subProducer = Producer.PLACE_HOLDER;
         } else {
             subProducer = producer.child(propertyName).orElse(Producer.PLACE_HOLDER);
             if (subProducer instanceof ObjectProducer ||

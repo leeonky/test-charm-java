@@ -34,6 +34,7 @@ public class PropertySpec<T> {
                 new UnFixedValueProducer<>(value, (BeanClass<V>) producer.getPropertyWriterType(property)));
     }
 
+    @Deprecated
     public <V> Spec<T> is(Class<? extends Spec<V>> specClass) {
         return appendProducer(jFactory -> createCreateProducer(jFactory.spec(specClass)));
     }
@@ -42,6 +43,7 @@ public class PropertySpec<T> {
         return appendProducer(jFactory -> createCreateProducer(jFactory.spec(traitsAndSpec)));
     }
 
+    @Deprecated
     public <V, S extends Spec<V>> IsSpec<V, S> from(Class<S> specClass) {
         return spec.newIsSpec(specClass, this);
     }
