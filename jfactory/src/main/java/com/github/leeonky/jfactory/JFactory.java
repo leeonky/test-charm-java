@@ -81,6 +81,7 @@ public class JFactory {
             specName = specName.replace("[]", "");
             Factory<Object> specFactory = specFactory(specName);
             ObjectFactory<?> listFactory = new ObjectFactory<>(GenericBeanClass.create(List.class, specFactory.getType().getType()), factorySet);
+            traitsAndSpec[traitsAndSpec.length - 1] = specName;
             listFactory.spec(ins -> ins.spec().property("[]").is(traitsAndSpec));
             return new DefaultBuilder(listFactory, this, TYPE);
         }

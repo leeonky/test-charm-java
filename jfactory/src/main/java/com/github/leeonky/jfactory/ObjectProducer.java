@@ -23,6 +23,10 @@ class ObjectProducer<T> extends Producer<T> {
     private Persistable persistable;
     private Function<PropertyWriter<?>, Producer<?>> defaultListElementValueProducerFactory;
 
+    public JFactory jFactory() {
+        return jFactory;
+    }
+
     public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
         this(jFactory, factory, builder, false);
     }

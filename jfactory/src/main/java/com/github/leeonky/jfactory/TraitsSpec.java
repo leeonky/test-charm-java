@@ -12,9 +12,10 @@ import static java.util.Arrays.asList;
 class TraitsSpec {
     private String spec;
     private final Set<String> traits;
+    private boolean collectionSpec = false;
 
     public TraitsSpec(String[] traits, String spec) {
-        this.spec = spec;
+        setSpec(spec);
         this.traits = new LinkedHashSet<>(asList(traits));
     }
 
@@ -27,7 +28,14 @@ class TraitsSpec {
             throw new IllegalArgumentException(String.format("Cannot merge different spec `%s` and `%s` for %s",
                     spec, another.spec, property));
         if (spec == null)
-            spec = another.spec;
+            setSpec(another.spec);
+    }
+
+    private void setSpec(String spec) {
+        if (spec != null) {
+            collectionSpec = spec.endsWith("[]");
+            this.spec = spec.replace("[]", "");
+        }
     }
 
     private boolean isDifferentSpec(TraitsSpec another) {
@@ -48,5 +56,17 @@ class TraitsSpec {
         if (spec != null)
             return Optional.of(objectFactory.getFactorySet().querySpecClassFactory(spec).getType());
         return Optional.empty();
+    }
+
+    public boolean isCollectionSpec() {
+        return collectionSpec;
+    }
+
+    public String spec() {
+        return spec;
+    }
+
+    public boolean isEmpty() {
+        return spec == null;
     }
 }

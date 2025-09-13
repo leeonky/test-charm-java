@@ -1,8 +1,10 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.GenericBeanClass;
 import com.github.leeonky.util.Property;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -44,19 +46,31 @@ class KeyValue {
         Matcher matcher = parse(beanClass);
         String propertyName = matcher.group(GROUP_PROPERTY);
         Property<T> property = beanClass.getProperty(propertyName);
-        Producer<?> subProducer = producer.child(propertyName).orElse(Producer.PLACE_HOLDER);
-        if (subProducer instanceof ObjectProducer ||
-                subProducer instanceof CollectionProducer && property.getWriterType().is(Object.class)) {
-            BeanClass<? extends T> type = (BeanClass<? extends T>) subProducer.getType();
-            property = property.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
+        TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
+                matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
+        Producer<?> subProducer;
+        if (traitsSpec.isCollectionSpec() && producer instanceof ObjectProducer && property.getWriterType().is(Object.class)) {
+            SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
+            GenericBeanClass<T> newType = GenericBeanClass.create(List.class, specFactory.getType().getGenericType());
+            property = property.decorateWriterType(newType).decorateReaderType(newType);
+            subProducer = ((ObjectProducer) producer).childOrDefaultCollection(property.getWriter(), true);
+            if (subProducer instanceof CollectionProducer)
+                ((CollectionProducer<?, ?>) subProducer).changeElementDefaultValueProducerFactory(i ->
+                        traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
+            if (subProducer == null)
+                subProducer = Producer.PLACE_HOLDER;
+        } else {
+            subProducer = producer.child(propertyName).orElse(Producer.PLACE_HOLDER);
+            if (subProducer instanceof ObjectProducer ||
+                    subProducer instanceof CollectionProducer && property.getWriterType().is(Object.class)) {
+                BeanClass<? extends T> type = (BeanClass<? extends T>) subProducer.getType();
+                property = property.decorateWriterType(type).decorateReaderType(type);
+            }
         }
-        Property<T> finalSubProducer = property;
-        return hasIndex(matcher).map(index -> createCollectionExpression(matcher, finalSubProducer, index, objectFactory, subProducer, forQuery))
-                .orElseGet(() -> {
-                    TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
-                            matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
-                    return createSubExpression(matcher, finalSubProducer, null, objectFactory, subProducer, forQuery, traitsSpec);
-                });
+        Property<T> finalSubProperty = property;
+        Producer<T> finalSubProducer = (Producer<T>) subProducer;
+        return hasIndex(matcher).map(index -> createCollectionExpression(matcher, finalSubProperty, index, objectFactory, finalSubProducer, forQuery))
+                .orElseGet(() -> createSubExpression(matcher, finalSubProperty, null, objectFactory, finalSubProducer, forQuery, traitsSpec));
     }
 
     private <T> Expression<T> createCollectionExpression(Matcher matcher, Property<T> property, String index,
@@ -68,14 +82,14 @@ class KeyValue {
             subProducer = ((CollectionProducer<?, ?>) collectionProducer).defaultElementProducer(intIndex);
             if (subProducer instanceof ObjectProducer) {
                 BeanClass type = subProducer.getType();
-                propertySub = propertySub.decorateNarrowWriterType(type).decorateNarrowReaderType(type);
+                propertySub = propertySub.decorateWriterType(type).decorateReaderType(type);
             }
         } else
             subProducer = collectionProducer.child(index).orElse(Producer.PLACE_HOLDER);
-        TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_ELEMENT_TRAIT) != null ?
+        TraitsSpec elementTraitSpec = new TraitsSpec(matcher.group(GROUP_ELEMENT_TRAIT) != null ?
                 matcher.group(GROUP_ELEMENT_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_ELEMENT_SPEC));
         return new CollectionExpression<>(property, intIndex,
-                createSubExpression(matcher, propertySub, property, objectFactory, subProducer, forQuery, traitsSpec), forQuery);
+                createSubExpression(matcher, propertySub, property, objectFactory, subProducer, forQuery, elementTraitSpec), forQuery);
     }
 
     private Optional<String> hasIndex(Matcher matcher) {
@@ -86,7 +100,7 @@ class KeyValue {
                                                   ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery, TraitsSpec traitsSpec) {
         KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
         return properties.createExpression(traitsSpec.guessPropertyType(objectFactory)
-                        .map(type -> property.decorateNarrowWriterType(type).decorateNarrowReaderType(type)).orElse(property),
+                        .map(type -> property.decorateWriterType(type).decorateReaderType(type)).orElse(property),
                 traitsSpec, parentProperty, objectFactory, subProducer, forQuery).setIntently(matcher.group(GROUP_INTENTLY) != null);
     }
 

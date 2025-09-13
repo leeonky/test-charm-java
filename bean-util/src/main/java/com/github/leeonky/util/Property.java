@@ -44,33 +44,33 @@ public interface Property<T> {
         return (P) getReader().getValue(instance);
     }
 
-    default Property<T> decorateNarrowReaderType(BeanClass<? extends T> narrowType) {
+    default Property<T> decorateReaderType(BeanClass<? extends T> newType) {
         PropertyReader<T> reader = getReader();
-        if (reader.getType().equals(narrowType))
+        if (reader.getType().equals(newType))
             return this;
         Class<?> type = reader.getOriginType().getType();
-        if (narrowType.isInheritedFrom(type))
+        if (newType.isInheritedFrom(type))
             return new PropertyDecorator<T>(this) {
                 @Override
                 public PropertyReader<T> getReader() {
-                    return reader.decorateType(narrowType);
+                    return reader.decorateType(newType);
                 }
             };
-        throw new IllegalStateException("Type " + narrowType.getType() + " is not inherited from " + type);
+        throw new IllegalStateException("Type " + newType.getType() + " is not inherited from " + type);
     }
 
-    default Property<T> decorateNarrowWriterType(BeanClass<? extends T> narrowType) {
+    default Property<T> decorateWriterType(BeanClass<? extends T> newType) {
         PropertyWriter<T> writer = getWriter();
-        if (writer.getType().equals(narrowType))
+        if (writer.getType().equals(newType))
             return this;
         Class<?> type = writer.getOriginType().getType();
-        if (narrowType.isInheritedFrom(type))
+        if (newType.isInheritedFrom(type))
             return new PropertyDecorator<T>(this) {
                 @Override
                 public PropertyWriter<T> getWriter() {
-                    return writer.decorateType(narrowType);
+                    return writer.decorateType(newType);
                 }
             };
-        throw new IllegalStateException("Type " + narrowType.getType() + " is not inherited from " + type);
+        throw new IllegalStateException("Type " + newType.getType() + " is not inherited from " + type);
     }
 }
