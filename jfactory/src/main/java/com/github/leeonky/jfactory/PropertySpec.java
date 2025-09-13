@@ -35,6 +35,9 @@ public class PropertySpec<T> {
     }
 
     @Deprecated
+    /**
+     * reference spec and trait via string
+     */
     public <V> Spec<T> is(Class<? extends Spec<V>> specClass) {
         return appendProducer(jFactory -> createCreateProducer(jFactory.spec(specClass)));
     }
@@ -43,7 +46,14 @@ public class PropertySpec<T> {
         return appendProducer(jFactory -> createCreateProducer(jFactory.spec(traitsAndSpec)));
     }
 
+    public <V> IsSpec2<V> from(String... traitsAndSpec) {
+        return spec.newIsSpec(traitsAndSpec, this);
+    }
+
     @Deprecated
+    /**
+     * reference spec and trait via string
+     */
     public <V, S extends Spec<V>> IsSpec<V, S> from(Class<S> specClass) {
         return spec.newIsSpec(specClass, this);
     }
@@ -157,6 +167,25 @@ public class PropertySpec<T> {
         public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
             spec.consume(this);
             return appendProducer(jFactory -> createQueryOrCreateProducer(builder.apply(jFactory.spec(specClass))));
+        }
+
+        public String getPosition() {
+            return position;
+        }
+    }
+
+    public class IsSpec2<V> {
+        private final String[] spec;
+        private final String position;
+
+        public IsSpec2(String[] spec) {
+            position = Thread.currentThread().getStackTrace()[4].toString();
+            this.spec = spec;
+        }
+
+        public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
+            PropertySpec.this.spec.consume(this);
+            return appendProducer(jFactory -> createQueryOrCreateProducer(builder.apply(jFactory.spec(spec))));
         }
 
         public String getPosition() {

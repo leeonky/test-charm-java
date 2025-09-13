@@ -447,6 +447,55 @@ Feature: define spec
       }
       """
 
+    Scenario: create sub object with out query during creation when use `is` with spec and trait name and properties
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2, value3;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("value2").value("bean");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean").from("hello", "ABean").and(builder -> builder.property("value3", "v3"));
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then the result should:
+      """
+      bean= {
+        value1= hello
+        value2= bean
+        value3= v3
+      }
+      """
+
     Scenario: create sub object with out query during creation when use `from which`
       Given the following bean class:
       """
@@ -611,7 +660,7 @@ Feature: define spec
       ::size= 1
       """
 
-    Scenario: raise error when incomplete method invoke
+    Scenario: raise error when incomplete method invoke - deprecate
       Given the following bean class:
       """
       public class Bean {
@@ -647,6 +696,45 @@ Feature: define spec
       \t#package#ABeanWrapper.main(ABeanWrapper.java:8)
       Should finish method chain with `and` or `which`:
       \tproperty().from().which()
+      \tproperty().from().and()
+      Or use property().is() to create object with only spec directly."
+      """
+
+    Scenario: raise error when incomplete method invoke
+      Given the following bean class:
+      """
+      public class Bean {
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanWrapper {
+        public Bean bean;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+      }
+      """
+      And the following spec class:
+      """
+      public class ABeanWrapper extends Spec<BeanWrapper> {
+        @Override
+        public void main() {
+          property("bean").from("ABean");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.createAs(ABeanWrapper.class);
+      """
+      Then should raise error:
+      """
+      message: "Invalid property spec:
+      \t#package#ABeanWrapper.main(ABeanWrapper.java:8)
+      Should finish method chain with `and`:
       \tproperty().from().and()
       Or use property().is() to create object with only spec directly."
       """

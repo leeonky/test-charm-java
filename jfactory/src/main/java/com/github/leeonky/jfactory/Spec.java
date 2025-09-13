@@ -17,6 +17,7 @@ import static java.util.stream.Stream.of;
 public class Spec<T> {
     private final List<BiConsumer<JFactory, ObjectProducer<T>>> operations = new ArrayList<>();
     private final Set<PropertySpec<T>.IsSpec<?, ? extends Spec<?>>> invalidIsSpecs = new LinkedHashSet<>();
+    private final Set<PropertySpec<T>.IsSpec2<?>> invalidIsSpec2s = new LinkedHashSet<>();
 
     private Instance<T> instance;
     private BeanClass<T> type = null;
@@ -58,6 +59,12 @@ public class Spec<T> {
                     + invalidIsSpecs.stream().map(PropertySpec.IsSpec::getPosition).collect(Collectors.joining("\n\t"))
                     + "\nShould finish method chain with `and` or `which`:\n"
                     + "\tproperty().from().which()\n"
+                    + "\tproperty().from().and()\n"
+                    + "Or use property().is() to create object with only spec directly.");
+        if (!invalidIsSpec2s.isEmpty())
+            throw new InvalidSpecException("Invalid property spec:\n\t"
+                    + invalidIsSpec2s.stream().map(PropertySpec.IsSpec2::getPosition).collect(Collectors.joining("\n\t"))
+                    + "\nShould finish method chain with `and`:\n"
                     + "\tproperty().from().and()\n"
                     + "Or use property().is() to create object with only spec directly.");
     }
@@ -110,14 +117,26 @@ public class Spec<T> {
         return this;
     }
 
+    @Deprecated
     <V, S extends Spec<V>> PropertySpec<T>.IsSpec<V, S> newIsSpec(Class<S> specClass, PropertySpec<T> propertySpec) {
         PropertySpec<T>.IsSpec<V, S> isSpec = propertySpec.new IsSpec<V, S>(specClass);
         invalidIsSpecs.add(isSpec);
         return isSpec;
     }
 
+    @Deprecated
     void consume(PropertySpec<T>.IsSpec<?, ? extends Spec<?>> isSpec) {
         invalidIsSpecs.remove(isSpec);
+    }
+
+    <V> PropertySpec<T>.IsSpec2<V> newIsSpec(String[] traitsAndSpec, PropertySpec<T> propertySpec) {
+        PropertySpec<T>.IsSpec2<V> isSpec = propertySpec.new IsSpec2<V>(traitsAndSpec);
+        invalidIsSpec2s.add(isSpec);
+        return isSpec;
+    }
+
+    void consume(PropertySpec<T>.IsSpec2<?> isSpec) {
+        invalidIsSpec2s.remove(isSpec);
     }
 
     void append(Spec<T> spec) {
