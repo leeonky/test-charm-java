@@ -10,7 +10,7 @@ import static java.util.Optional.of;
 import static java.util.stream.IntStream.range;
 
 //TODO alias should not use this class
-class PropertyChain {
+public class PropertyChain {
     private final List<Object> property;
 
     private PropertyChain(String property) {

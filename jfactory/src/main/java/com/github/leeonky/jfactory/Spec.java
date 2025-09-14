@@ -10,7 +10,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.jfactory.Consistency.direct;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -148,10 +147,15 @@ public class Spec<T> {
     }
 
     public Spec<T> linkNew(String propertyChain1, String propertyChain2, String... others) {
-        Consistency<T> consistency = new Consistency<>();
-        append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        Consistency<?> consistency = consistent();
         concat(Stream.of(propertyChain1, propertyChain2), Stream.of(others))
-                .forEach(property -> consistency.link(direct(property)));
+                .forEach(consistency::direct);
         return this;
+    }
+
+    public <V> Consistency<V> consistent() {
+        Consistency<V> consistency = new DefaultConsistency<>();
+        append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        return consistency;
     }
 }
