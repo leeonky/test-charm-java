@@ -37,7 +37,7 @@ abstract class Producer<T> {
     protected void doDependencies() {
     }
 
-    protected void doLinks(Producer<?> root, PropertyChain base) {
+    protected void collectLinks(Producer<?> root, PropertyChain base) {
     }
 
     public void setChild(String property, Producer<?> producer) {

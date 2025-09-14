@@ -85,6 +85,7 @@ public class IntegrationTestContext {
         classes.addAll(compiler.compileToClasses(classCodes.values().stream().map(s -> "import com.github.leeonky.jfactory.*;\n" +
                 "import java.util.function.*;\n" +
                 "import java.util.*;\n" +
+//                "import static com.github.leeonky.jfactory.Link.link\n"+
                 "import java.math.*;\n" + s).collect(Collectors.toList())));
         classes.stream().filter(Spec.class::isAssignableFrom).forEach(jFactory::register);
     }

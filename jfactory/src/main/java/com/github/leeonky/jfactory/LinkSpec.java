@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+@Deprecated
 class LinkSpec {
     private final Set<PropertyChain> linkedProperties = new LinkedHashSet<>();
 

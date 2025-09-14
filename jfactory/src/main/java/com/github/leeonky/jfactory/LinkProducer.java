@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Deprecated
 class LinkProducer<T> extends Producer<T> {
     private final Link.Reference<T> linkerReference;
     private final Producer<T> origin;

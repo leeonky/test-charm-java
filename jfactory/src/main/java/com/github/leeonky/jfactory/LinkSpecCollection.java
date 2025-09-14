@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 class LinkSpecCollection {
 
     private final List<LinkSpec> linkSpecs = new ArrayList<>();

@@ -7,6 +7,7 @@ import static com.github.leeonky.util.BeanClass.cast;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
+@Deprecated
 class Link<T> {
     private static final List<Class<?>> TYPE_PRIORITY = asList(
             FixedValueProducer.class,

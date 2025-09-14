@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.github.leeonky.jfactory.Consistency.direct;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -80,6 +82,7 @@ public class Spec<T> {
         return getClass().getSimpleName();
     }
 
+    @Deprecated
     public Spec<T> link(String property, String... others) {
         List<PropertyChain> linkProperties = concat(of(property), of(others)).map(PropertyChain::propertyChain).collect(toList());
         append((jFactory, objectProducer) -> objectProducer.link(linkProperties));
@@ -142,5 +145,13 @@ public class Spec<T> {
     void append(Spec<T> spec) {
         operations.addAll(spec.operations);
         invalidIsSpecs.addAll(spec.invalidIsSpecs);
+    }
+
+    public Spec<T> linkNew(String propertyChain1, String propertyChain2, String... others) {
+        Consistency<T> consistency = new Consistency<>();
+        append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        concat(Stream.of(propertyChain1, propertyChain2), Stream.of(others))
+                .forEach(property -> consistency.link(direct(property)));
+        return this;
     }
 }

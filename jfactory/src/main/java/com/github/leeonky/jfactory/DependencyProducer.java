@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@Deprecated
 class DependencyProducer<T> extends Producer<T> {
     private final List<Supplier<Object>> dependencies;
     private final Function<Object[], T> rule;

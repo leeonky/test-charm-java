@@ -22,6 +22,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final Set<String> ignorePropertiesInSpec = new HashSet<>();
     private Persistable persistable;
     private Function<PropertyWriter<?>, Producer<?>> defaultListElementValueProducerFactory;
+    private final LinkCollection links = new LinkCollection();
 
     public JFactory jFactory() {
         return jFactory;
@@ -130,13 +131,14 @@ class ObjectProducer<T> extends Producer<T> {
 
     public ObjectProducer<T> doDependenciesAndLinks() {
         doDependencies();
-        doLinks(this, propertyChain(""));
+        collectLinks(this, propertyChain(""));
+        links.applyLink(this);
         return this;
     }
 
     @Override
-    protected void doLinks(Producer<?> root, PropertyChain base) {
-        children.forEach((property, producer) -> producer.doLinks(root, base.concat(property)));
+    protected void collectLinks(Producer<?> root, PropertyChain base) {
+        children.forEach((property, producer) -> producer.collectLinks(root, base.concat(property)));
         linkSpecCollection.processLinks(root, base);
     }
 
@@ -203,5 +205,9 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void changeElementDefaultValueProducerFactory(Function<PropertyWriter<?>, Producer<?>> factory) {
         defaultListElementValueProducerFactory = factory;
+    }
+
+    public void appendLink(Consistency<?> consistency) {
+        links.add(consistency);
     }
 }

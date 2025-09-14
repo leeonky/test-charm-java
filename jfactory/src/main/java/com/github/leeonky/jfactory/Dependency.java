@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Deprecated
 class Dependency<T> {
     private final Function<Object[], T> rule;
     private final PropertyChain property;
