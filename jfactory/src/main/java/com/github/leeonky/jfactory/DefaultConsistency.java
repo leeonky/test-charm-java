@@ -3,10 +3,8 @@ package com.github.leeonky.jfactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static com.github.leeonky.util.function.Extension.not;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class DefaultConsistency<T> implements Consistency<T> {
@@ -40,29 +38,4 @@ public class DefaultConsistency<T> implements Consistency<T> {
                     return resolving;
         return resolvingList.get(0);
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Consistency<T> direct(String property) {
-        return link(new ConsistencyItem<>(singletonList(propertyChain(property)), objs -> (T) objs[0], t -> new Object[]{t}));
-    }
-
-    @Override
-    public <P> Consistency.P1<T, P> property(String property) {
-        return new P1<>(this, new ConsistencyItem<>(singletonList(propertyChain(property))));
-    }
-
-//    public static class Item1<T, P> extends Item<T> {
-//        public Item1(Composer<T> composer, Decomposer<T> decomposer, PropertyChain... propertyChains) {
-//            super(composer, decomposer, propertyChains);
-//        }
-//
-//        public Item1<T, P> compose(Function<P, T> composer) {
-//            return new Item1<>(objects -> composer.apply((P) objects[0]), decomposer, propertyChains);
-//        }
-//
-//        public Item1<T, P> decompose(Function<T, P> decomposer) {
-//            return new Item1<>(composer, t -> new Object[]{decomposer.apply(t)}, propertyChains);
-//        }
-//    }
 }

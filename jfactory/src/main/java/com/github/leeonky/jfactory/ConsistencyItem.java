@@ -54,21 +54,21 @@ public class ConsistencyItem<T> {
             zip(propertyChains, propertyProducers).forEachElementWithIndex((index, propertyChain, propertyProducer) -> {
                 beanProducer.changeDescendant(propertyChain, (parent, property) -> new DependencyProducer<>(
                         cast(propertyProducer.getType()),
-                        singletonList(() -> composer.apply(dependency.valuesForComposing())),
+                        singletonList(dependency::compose),
                         values -> decompose((T) values[0])[index]));
             });
+        }
+
+        private T compose() {
+            if (cachedValuesForComposing == null)
+                cachedValuesForComposing = propertyProducers.stream().map(Producer::getValue).toArray();
+            return composer.apply(cachedValuesForComposing);
         }
 
         private Object[] decompose(T obj) {
             if (decomposedCachedValues == null)
                 decomposedCachedValues = decomposer.apply(obj);
             return decomposedCachedValues;
-        }
-
-        private Object[] valuesForComposing() {
-            if (cachedValuesForComposing == null)
-                cachedValuesForComposing = propertyProducers.stream().map(Producer::getValue).toArray();
-            return cachedValuesForComposing;
         }
     }
 }

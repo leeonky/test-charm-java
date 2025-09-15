@@ -165,4 +165,9 @@ public class JFactory {
     public Set<String> specNames() {
         return factorySet.specNames();
     }
+
+    public JFactory clear() {
+        getDataRepository().clear();
+        return this;
+    }
 }

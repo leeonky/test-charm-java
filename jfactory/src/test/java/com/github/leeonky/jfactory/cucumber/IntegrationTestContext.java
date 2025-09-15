@@ -85,9 +85,6 @@ public class IntegrationTestContext {
         classes.addAll(compiler.compileToClasses(classCodes.values().stream().map(s -> "import com.github.leeonky.jfactory.*;\n" +
                 "import java.util.function.*;\n" +
                 "import java.util.*;\n" +
-                "import com.github.leeonky.jfactory.Consistency;\n" +
-//                "import static com.github.leeonky.jfactory.Consistency.direct;\n" +
-//                "import static com.github.leeonky.jfactory.Consistency.property;\n" +
                 "import java.math.*;\n" + s).collect(Collectors.toList())));
         classes.stream().filter(Spec.class::isAssignableFrom).forEach(jFactory::register);
     }
