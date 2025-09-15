@@ -147,14 +147,18 @@ public class Spec<T> {
     }
 
     public Spec<T> linkNew(String propertyChain1, String propertyChain2, String... others) {
-        Consistency<?> consistency = consistent();
+        Consistency<?> consistency = consistent(Object.class);
         concat(Stream.of(propertyChain1, propertyChain2), Stream.of(others))
                 .forEach(consistency::direct);
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        for (ConsistencyItem<?> item : ((DefaultConsistency<?>) consistency).items()) {
+            item.changeLocation(stackTrace[1]).changeComposerLocation(stackTrace[1]).changeDecomposerLocation(stackTrace[1]);
+        }
         return this;
     }
 
-    public <V> Consistency<V> consistent() {
-        Consistency<V> consistency = new DefaultConsistency<>();
+    public <V> Consistency<V> consistent(Class<V> type) {
+        DefaultConsistency<V> consistency = new DefaultConsistency<>(type);
         append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
         return consistency;
     }

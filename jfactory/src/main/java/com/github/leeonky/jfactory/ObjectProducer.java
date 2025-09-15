@@ -207,7 +207,7 @@ class ObjectProducer<T> extends Producer<T> {
         defaultListElementValueProducerFactory = factory;
     }
 
-    public void appendLink(Consistency<?> consistency) {
+    public void appendLink(DefaultConsistency<?> consistency) {
         links.add(consistency);
     }
 }

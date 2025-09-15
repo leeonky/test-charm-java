@@ -1,6 +1,9 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.github.leeonky.util.function.Extension.not;
@@ -16,6 +19,16 @@ public class DefaultConsistency<T> implements Consistency<T> {
     );
 
     private final List<ConsistencyItem<T>> items = new ArrayList<>();
+    private final BeanClass<T> type;
+
+    public DefaultConsistency(Class<T> type) {
+        this.type = BeanClass.create(type);
+    }
+
+    @Override
+    public BeanClass<T> type() {
+        return type;
+    }
 
     @Override
     public Consistency<T> link(ConsistencyItem<T> item) {
@@ -37,5 +50,17 @@ public class DefaultConsistency<T> implements Consistency<T> {
                 if (resolving.isProducerType(type))
                     return resolving;
         return resolvingList.get(0);
+    }
+
+    public boolean merge(DefaultConsistency<?> another) {
+        if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::sameProperty))) {
+            items.addAll((List) another.items);
+            return true;
+        }
+        return false;
+    }
+
+    public List<ConsistencyItem<T>> items() {
+        return Collections.unmodifiableList(items);
     }
 }

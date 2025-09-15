@@ -1,37 +1,89 @@
 package com.github.leeonky.jfactory;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.github.leeonky.util.Sneaky.cast;
 import static com.github.leeonky.util.Zipped.zip;
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class ConsistencyItem<T> {
     private final List<PropertyChain> propertyChains;
-    private DefaultConsistency.Composer<T> composer;
-    private DefaultConsistency.Decomposer<T> decomposer;
+    private final Consistency<T> consistency;
+    private StackTraceElement location, composerLocation, decomposerLocation;
+    private Consistency.Composer<T> composer;
+    private Consistency.Decomposer<T> decomposer;
 
-    public ConsistencyItem(List<PropertyChain> propertyChains, DefaultConsistency.Composer<T> composer, DefaultConsistency.Decomposer<T> decomposer) {
+    public ConsistencyItem(List<PropertyChain> propertyChains, Consistency<T> consistency) {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        location = stackTrace[2];
         this.propertyChains = propertyChains;
-        this.composer = composer;
-        this.decomposer = decomposer;
+        this.consistency = consistency;
     }
 
-    public ConsistencyItem(List<PropertyChain> propertyChains) {
-        this.propertyChains = propertyChains;
+    public ConsistencyItem<T> changeLocation(StackTraceElement location) {
+        this.location = location;
+        return this;
     }
 
     public void setComposer(DefaultConsistency.Composer<T> composer) {
         this.composer = composer;
+        composerLocation = composer.getLocation();
     }
 
     public void setDecomposer(DefaultConsistency.Decomposer<T> decomposer) {
         this.decomposer = decomposer;
+        decomposerLocation = decomposer.getLocation();
     }
 
     Resolving resolving(Producer<?> producer) {
         return new Resolving(producer);
+    }
+
+    boolean sameProperty(ConsistencyItem<?> another) {
+        boolean sameProperty = propertyChains.equals(another.propertyChains);
+        if (sameProperty) {
+            if (!another.consistency.type().equals(consistency.type()))
+                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>:%s%s",
+                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), this, another));
+        }
+        return sameProperty;
+    }
+
+    @Override
+    public String toString() {
+        return "\n    " + getPosition()
+                + "\n        type: " + consistency.type().getName()
+                + "\n        composer: " + composerLocation()
+                + "\n        decomposer: " + decomposerLocation();
+    }
+
+    private String getPosition() {
+        return location.getClassName() + "::" + location.getMethodName() +
+                "(" + location.getFileName() + ":" + location.getLineNumber() + ")";
+    }
+
+    private String composerLocation() {
+        return composerLocation == null ? "null" :
+                "(" + composerLocation.getFileName() + ":" + composerLocation.getLineNumber() + ")";
+    }
+
+    private String decomposerLocation() {
+        return decomposerLocation == null ? "null" :
+                "(" + decomposerLocation.getFileName() + ":" + decomposerLocation.getLineNumber() + ")";
+    }
+
+    public ConsistencyItem<T> changeComposerLocation(StackTraceElement stackTraceElement) {
+        composerLocation = stackTraceElement;
+        return this;
+    }
+
+    public ConsistencyItem<T> changeDecomposerLocation(StackTraceElement stackTraceElement) {
+        decomposerLocation = stackTraceElement;
+        return this;
     }
 
     class Resolving {

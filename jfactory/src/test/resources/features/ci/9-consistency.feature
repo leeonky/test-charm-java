@@ -52,7 +52,7 @@ Feature: consistency
         """
         public class ABean extends Spec<Bean> {
           public void main() {
-            this.<String>consistent()
+            consistent(String.class)
               .direct("str")
               .property("i").compose(Object::toString).decompose(Integer::parseInt);
           }
@@ -85,50 +85,9 @@ Feature: consistency
         }
         """
 
-#    Scenario: merge with the same property and composer / decomposer
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#          public String str1, str2, str3;
-#        }
-#        """
-#      And the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#            linkNew("str1", "str2");
-#            linkNew("str2", "str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
+  Rule: multiple properties consistency
 
-  Rule: multiple properties
-
-    Scenario: multi properties link
+    Scenario: two properties consistency
       Given the following bean class:
         """
         public class Person {
@@ -139,7 +98,7 @@ Feature: consistency
         """
         public class APerson extends Spec<Person> {
           public void main() {
-            this.<String>consistent()
+            consistent(String.class)
               .direct("fullName")
               .properties("firstName", "lastName")
                 .compose((first,last) -> first+" "+last).decompose(s -> s.split(" "))
@@ -150,7 +109,21 @@ Feature: consistency
         """
       When build:
         """
-        jFactory.spec(APerson.class).property("fullName", "James Anderson").create();
+        jFactory.clear().spec(APerson.class).property("fullName", "James Anderson").create();
+        """
+      Then the result should:
+        """
+        : {
+          fullName: 'James Anderson'
+          firstName: James
+          lastName: Anderson
+          familyName: James
+          givenName: Anderson
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(APerson.class).property("firstName", "James").property("lastName", "Anderson").create();
         """
       Then the result should:
         """
@@ -163,51 +136,131 @@ Feature: consistency
         }
         """
 
-#    Scenario: merge consistency
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#          public String str1, str2, str3;
-#        }
-#        """
-#      And the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#            linkNew("str1", "str2");
-#            linkNew("str2", "str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,sr3>>= hello
-#        """
-#      And operate:
-#        """
-#        jFactory.getDataRepository().clear();
-#        """
-#      When build:
-#        """
-#        jFactory.spec(ABean.class).property("str2", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
-#      And operate:
-#        """
-#        jFactory.getDataRepository().clear();
-#        """
-#      When build:
-#        """
-#        jFactory.spec(ABean.class).property("str3", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
+  Rule: merge consistency
+
+    Scenario: merge with the same consistency type, property, composer, decomposer
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            linkNew("str1", "str2");
+            linkNew("str2", "str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3>>= hello
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3>>= hello
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3>>= hello
+        """
+
+    Scenario: raise error when different consistency type
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2;
+          public int i;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(String.class)
+              .direct("str1")
+              .property("i")
+                .compose(Object::toString)
+                .decompose(Integer::parseInt);
+
+            consistent(Integer.class)
+              .direct("i")
+              .<String>property("str2")
+                .compose(Integer::parseInt)
+                .decompose(Object::toString);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("i", 100).create();
+        """
+      Then should raise error:
+        """
+        message: ```
+                 Conflict consistency on property <i>:
+                     #package#ABean::main(ABean.java:9)
+                         type: java.lang.String
+                         composer: (ABean.java:10)
+                         decomposer: (ABean.java:11)
+                     #package#ABean::main(ABean.java:14)
+                         type: java.lang.Integer
+                         composer: (ABean.java:14)
+                         decomposer: (ABean.java:14)
+                 ```
+        """
+
+    Scenario: raise error when different consistency type - show location in link
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2;
+          public int i;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            linkNew("str1", "str2");
+
+            consistent(Integer.class)
+              .direct("i")
+              .<String>property("str2")
+                .compose(Integer::parseInt)
+                .decompose(Object::toString);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("i", 100).create();
+        """
+      Then should raise error:
+        """
+        message: ```
+                 Conflict consistency on property <str2>:
+                     #package#ABean::main(ABean.java:7)
+                         type: java.lang.Object
+                         composer: (ABean.java:7)
+                         decomposer: (ABean.java:7)
+                     #package#ABean::main(ABean.java:11)
+                         type: java.lang.Integer
+                         composer: (ABean.java:12)
+                         decomposer: (ABean.java:13)
+                 ```
+        """

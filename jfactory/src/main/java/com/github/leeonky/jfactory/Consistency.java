@@ -1,5 +1,8 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -8,27 +11,47 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 public interface Consistency<T> {
+    Function<Object[], ?> LINK_COMPOSER = objs -> objs[0];
+    Function<?, Object[]> LINK_DECOMPOSER = t -> new Object[]{t};
+
     Consistency<T> link(ConsistencyItem<T> item);
 
     void apply(Producer<?> producer);
 
+    BeanClass<T> type();
+
     @SuppressWarnings("unchecked")
     default Consistency<T> direct(String property) {
-        return link(new ConsistencyItem<>(singletonList(propertyChain(property)), objs -> (T) objs[0], t -> new Object[]{t}));
+        ConsistencyItem<T> item = new ConsistencyItem<>(singletonList(propertyChain(property)), this);
+        item.setComposer(new ComposerWrapper(LINK_COMPOSER, LINK_COMPOSER));
+        item.setDecomposer(new DecomposerWrapper(LINK_DECOMPOSER, LINK_DECOMPOSER));
+        return link(item);
     }
 
     default <P> C1<T, P> property(String property) {
-        return new C1<>(this, new ConsistencyItem<>(singletonList(propertyChain(property))));
+        return new C1<>(this, new ConsistencyItem<>(singletonList(propertyChain(property)), this));
     }
 
     default <P1, P2> C2<T, P1, P2> properties(String property1, String property2) {
-        return new C2<>(this, new ConsistencyItem<>(asList(propertyChain(property1), propertyChain(property2))));
+        return new C2<>(this, new ConsistencyItem<>(asList(propertyChain(property1), propertyChain(property2)), this));
     }
 
-    interface Composer<T> extends Function<Object[], T> {
+    interface Identity {
+        default Object identity() {
+            return this;
+        }
+
+        default boolean same(Identity another) {
+            return identity() == another;
+        }
+
+        StackTraceElement getLocation();
     }
 
-    interface Decomposer<T> extends Function<T, Object[]> {
+    interface Composer<T> extends Function<Object[], T>, Identity {
+    }
+
+    interface Decomposer<T> extends Function<T, Object[]>, Identity {
     }
 
     class DecorateConsistency<T> implements Consistency<T> {
@@ -46,6 +69,11 @@ public interface Consistency<T> {
         @Override
         public void apply(Producer<?> producer) {
             consistency.apply(producer);
+        }
+
+        @Override
+        public BeanClass<T> type() {
+            return consistency.type();
         }
 
         @Override
@@ -72,43 +100,104 @@ public interface Consistency<T> {
             link(this.lastItem = lastItem);
         }
 
+        @SuppressWarnings("unchecked")
         public C1<T, P> compose(Function<P, T> composer) {
-            lastItem.setComposer(objs -> composer.apply((P) objs[0]));
+            lastItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P) objs[0]), composer));
             return this;
         }
 
         public C1<T, P> decompose(Function<T, P> decomposer) {
-            lastItem.setDecomposer(t -> new Object[]{decomposer.apply(t)});
+            lastItem.setDecomposer(new DecomposerWrapper<>(t -> new Object[]{decomposer.apply(t)}, decomposer));
             return this;
         }
     }
 
-    class C2<T, P1, P2> extends DecorateConsistency<T> {
-        private final ConsistencyItem<T> lastItem;
+    class MultiPropertyConsistency<T, C extends MultiPropertyConsistency<T, C>> extends DecorateConsistency<T> {
+        protected final ConsistencyItem<T> lastItem;
 
-        public C2(Consistency<T> origin, ConsistencyItem<T> lastItem) {
+        public MultiPropertyConsistency(Consistency<T> origin, ConsistencyItem<T> lastItem) {
             super(origin);
-            link(this.lastItem = lastItem);
+            this.lastItem = lastItem;
+            link(lastItem);
+        }
+
+        @SuppressWarnings("unchecked")
+        public C compose(Function<Object[], T> composer) {
+            lastItem.setComposer(new ComposerWrapper<>(composer, composer));
+            return (C) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public C decompose(Function<T, Object[]> decomposer) {
+            lastItem.setDecomposer(new DecomposerWrapper<>(decomposer, decomposer));
+            return (C) this;
+        }
+    }
+
+    class C2<T, P1, P2> extends MultiPropertyConsistency<T, C2<T, P1, P2>> {
+        public C2(Consistency<T> origin, ConsistencyItem<T> lastItem) {
+            super(origin, lastItem);
         }
 
         @SuppressWarnings("unchecked")
         public C2<T, P1, P2> compose(BiFunction<P1, P2, T> composer) {
-            return compose(objs -> composer.apply((P1) objs[0], (P2) objs[1]));
-        }
-
-        public C2<T, P1, P2> compose(Composer<T> composer) {
-            lastItem.setComposer(composer);
+            lastItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P1) objs[0], (P2) objs[1]), composer));
             return this;
         }
 
         public C2<T, P1, P2> decompose(Function<T, P1> decompose1, Function<T, P2> decompose2) {
-            lastItem.setDecomposer(t -> new Object[]{decompose1.apply(t), decompose2.apply(t)});
+            lastItem.setDecomposer(new DecomposerWrapper<>(
+                    t -> new Object[]{decompose1.apply(t), decompose2.apply(t)}, asList(decompose1, decompose2)));
             return this;
         }
+    }
+}
 
-        public C2<T, P1, P2> decompose(Decomposer<T> decomposer) {
-            lastItem.setDecomposer(decomposer);
-            return this;
-        }
+class IdentityAction implements Consistency.Identity {
+    protected final Object identity;
+    protected StackTraceElement location;
+
+    public IdentityAction(Object identity) {
+        this.identity = Objects.requireNonNull(identity);
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        location = stackTrace[3];
+    }
+
+    @Override
+    public Object identity() {
+        return identity;
+    }
+
+    @Override
+    public StackTraceElement getLocation() {
+        return location;
+    }
+}
+
+class ComposerWrapper<T> extends IdentityAction implements Consistency.Composer<T> {
+    private final Function<Object[], T> action;
+
+    ComposerWrapper(Function<Object[], T> action, Object identity) {
+        super(identity);
+        this.action = Objects.requireNonNull(action);
+    }
+
+    @Override
+    public T apply(Object[] objects) {
+        return action.apply(objects);
+    }
+}
+
+class DecomposerWrapper<T> extends IdentityAction implements Consistency.Decomposer<T> {
+    private final Function<T, Object[]> action;
+
+    DecomposerWrapper(Function<T, Object[]> action, Object identity) {
+        super(identity);
+        this.action = Objects.requireNonNull(action);
+    }
+
+    @Override
+    public Object[] apply(T t) {
+        return action.apply(t);
     }
 }
