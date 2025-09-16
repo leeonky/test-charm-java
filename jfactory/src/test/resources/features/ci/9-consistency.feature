@@ -312,7 +312,7 @@ Feature: consistency
         }
         """
 
-    Scenario: raise error when composer is not the same lambda instance
+    Scenario: raise error when composer and decompose is not the same lambda instance
       Given the following bean class:
         """
         public class Bean {
@@ -323,7 +323,6 @@ Feature: consistency
         """
         public class ABean extends Spec<Bean> {
             public void main() {
-
                 consistent(String.class)
                   .<String>property("str1")
                     .compose(String::toUpperCase)
@@ -351,7 +350,86 @@ Feature: consistency
         message: ```
                  Conflict consistency on property <str1>, composer and decomposer mismatch:
                                                                    | type             | composer        | decomposer      |
-                   #package#ABean.main(ABean.java:9)  | java.lang.String | (ABean.java:10) | (ABean.java:11) |
-                   #package#ABean.main(ABean.java:17) | java.lang.String | (ABean.java:18) | (ABean.java:19) |
+                   #package#ABean.main(ABean.java:8)  | java.lang.String | (ABean.java:9)  | (ABean.java:10) |
+                   #package#ABean.main(ABean.java:16) | java.lang.String | (ABean.java:17) | (ABean.java:18) |
                  ```
         """
+
+    Scenario: raise error when composer is not the same lambda instance
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+                consistent(String.class)
+                  .<String>property("str1")
+                    .compose(String::toUpperCase)
+                  .<String>property("str2")
+                    .compose(String::toLowerCase);
+
+                consistent(String.class)
+                  .<String>property("str1")
+                    .compose(String::toUpperCase)
+                  .<String>property("str3")
+                    .compose(String::toLowerCase);
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then should raise error:
+        """
+        message: ```
+                 Conflict consistency on property <str1>, composer mismatch:
+                                                                   | type             | composer        | decomposer |
+                   #package#ABean.main(ABean.java:8)  | java.lang.String | (ABean.java:9)  | null       |
+                   #package#ABean.main(ABean.java:14) | java.lang.String | (ABean.java:15) | null       |
+                 ```
+        """
+
+    Scenario: raise error when decomposer is not the same lambda instance
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+                consistent(String.class)
+                  .<String>property("str1")
+                    .decompose(String::toLowerCase)
+                  .<String>property("str2")
+                    .decompose(String::toUpperCase);
+
+                consistent(String.class)
+                  .<String>property("str1")
+                    .decompose(String::toLowerCase)
+                  .<String>property("str3")
+                    .decompose(String::toUpperCase);
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then should raise error:
+        """
+        message: ```
+                 Conflict consistency on property <str1>, decomposer mismatch:
+                                                                   | type             | composer | decomposer      |
+                   #package#ABean.main(ABean.java:8)  | java.lang.String | null     | (ABean.java:9)  |
+                   #package#ABean.main(ABean.java:14) | java.lang.String | null     | (ABean.java:15) |
+                 ```
+        """
+

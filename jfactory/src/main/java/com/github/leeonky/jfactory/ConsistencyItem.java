@@ -54,8 +54,17 @@ public class ConsistencyItem<T> {
             if (!another.consistency.type().equals(consistency.type()))
                 throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, consistency type mismatch:\n%s",
                         propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
-            if (!composer.same(another.composer) && !decomposer.same(another.decomposer))
+            if (composer != null && another.composer != null && decomposer != null && another.decomposer != null &&
+                    !composer.same(another.composer) && !decomposer.same(another.decomposer))
                 throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer and decomposer mismatch:\n%s",
+                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+
+            if (composer != null && another.composer != null && !composer.same(another.composer))
+                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
+                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+
+            if (decomposer != null && another.decomposer != null && !decomposer.same(another.decomposer))
+                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, decomposer mismatch:\n%s",
                         propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
         }
         return sameProperty;
