@@ -42,7 +42,7 @@ public interface Consistency<T> {
         }
 
         default boolean same(Identity another) {
-            return identity() == another;
+            return another != null && identity() == another.identity();
         }
 
         StackTraceElement getLocation();

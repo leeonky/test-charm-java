@@ -138,7 +138,7 @@ Feature: consistency
 
   Rule: merge consistency
 
-    Scenario: merge with the same consistency type, property, composer, decomposer
+    Scenario: merge with the same link
       Given the following bean class:
         """
         public class Bean {
@@ -212,15 +212,10 @@ Feature: consistency
       Then should raise error:
         """
         message: ```
-                 Conflict consistency on property <i>:
-                     #package#ABean::main(ABean.java:9)
-                         type: java.lang.String
-                         composer: (ABean.java:10)
-                         decomposer: (ABean.java:11)
-                     #package#ABean::main(ABean.java:14)
-                         type: java.lang.Integer
-                         composer: (ABean.java:14)
-                         decomposer: (ABean.java:14)
+                 Conflict consistency on property <i>, consistency type mismatch:
+                                                                   | type              | composer        | decomposer      |
+                   #package#ABean.main(ABean.java:9)  | java.lang.String  | (ABean.java:10) | (ABean.java:11) |
+                   #package#ABean.main(ABean.java:14) | java.lang.Integer | (ABean.java:14) | (ABean.java:14) |
                  ```
         """
 
@@ -253,14 +248,110 @@ Feature: consistency
       Then should raise error:
         """
         message: ```
-                 Conflict consistency on property <str2>:
-                     #package#ABean::main(ABean.java:7)
-                         type: java.lang.Object
-                         composer: (ABean.java:7)
-                         decomposer: (ABean.java:7)
-                     #package#ABean::main(ABean.java:11)
-                         type: java.lang.Integer
-                         composer: (ABean.java:12)
-                         decomposer: (ABean.java:13)
+                 Conflict consistency on property <str2>, consistency type mismatch:
+                                                                   | type              | composer        | decomposer      |
+                   #package#ABean.main(ABean.java:7)  | java.lang.Object  | (ABean.java:7)  | (ABean.java:7)  |
+                   #package#ABean.main(ABean.java:11) | java.lang.Integer | (ABean.java:12) | (ABean.java:13) |
+                 ```
+        """
+
+    Scenario: merge with the same consistency type, property, composer, decomposer
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+                Function<String,String> toUpper = s -> s.toUpperCase();
+                Function<String,String> toLower = s -> s.toLowerCase();
+
+                consistent(String.class)
+                  .<String>property("str1")
+                    .compose(toUpper)
+                    .decompose(toLower)
+                  .<String>property("str2")
+                    .compose(String::toLowerCase)
+                    .decompose(String::toUpperCase);
+
+                consistent(String.class)
+                  .<String>property("str1")
+                    .compose(toUpper)
+                    .decompose(toLower)
+                  .<String>property("str3")
+                    .compose(String::toLowerCase)
+                    .decompose(String::toUpperCase);
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: HELLO
+          str3: HELLO
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: HELLO
+          str3: HELLO
+        }
+        """
+
+    Scenario: raise error when composer is not the same lambda instance
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+
+                consistent(String.class)
+                  .<String>property("str1")
+                    .compose(String::toUpperCase)
+                    .decompose(String::toLowerCase)
+                  .<String>property("str2")
+                    .compose(String::toLowerCase)
+                    .decompose(String::toUpperCase);
+
+                consistent(String.class)
+                  .<String>property("str1")
+                    .compose(String::toUpperCase)
+                    .decompose(String::toLowerCase)
+                  .<String>property("str3")
+                    .compose(String::toLowerCase)
+                    .decompose(String::toUpperCase);
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then should raise error:
+        """
+        message: ```
+                 Conflict consistency on property <str1>, composer and decomposer mismatch:
+                                                                   | type             | composer        | decomposer      |
+                   #package#ABean.main(ABean.java:9)  | java.lang.String | (ABean.java:10) | (ABean.java:11) |
+                   #package#ABean.main(ABean.java:17) | java.lang.String | (ABean.java:18) | (ABean.java:19) |
                  ```
         """

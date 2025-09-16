@@ -1,11 +1,15 @@
 package com.github.leeonky.jfactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static com.github.leeonky.util.Sneaky.cast;
 import static com.github.leeonky.util.Zipped.zip;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -43,26 +47,39 @@ public class ConsistencyItem<T> {
         return new Resolving(producer);
     }
 
+
     boolean sameProperty(ConsistencyItem<?> another) {
         boolean sameProperty = propertyChains.equals(another.propertyChains);
         if (sameProperty) {
             if (!another.consistency.type().equals(consistency.type()))
-                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>:%s%s",
-                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), this, another));
+                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, consistency type mismatch:\n%s",
+                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+            if (!composer.same(another.composer) && !decomposer.same(another.decomposer))
+                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer and decomposer mismatch:\n%s",
+                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
         }
         return sameProperty;
     }
 
-    @Override
-    public String toString() {
-        return "\n    " + getPosition()
-                + "\n        type: " + consistency.type().getName()
-                + "\n        composer: " + composerLocation()
-                + "\n        decomposer: " + decomposerLocation();
+    private String toTable(ConsistencyItem<?> another, String linePrefix) {
+        List<List<String>> data = new ArrayList<>();
+        data.add(asList("", "type", "composer", "decomposer"));
+        data.add(asList(getPosition(), consistency.type().getName(), composerLocation(), decomposerLocation()));
+        data.add(asList(another.getPosition(), another.consistency.type().getName(), another.composerLocation(), another.decomposerLocation()));
+        return formatTable(data, linePrefix);
+    }
+
+    private String formatTable(List<List<String>> data, String linePrefix) {
+        List<Integer> columnWidths = IntStream.range(0, data.get(0).size()).mapToObj(col ->
+                data.stream().mapToInt(d -> d.get(col).length()).max().orElse(0)).collect(toList());
+        return data.stream().map(line -> {
+            AtomicInteger col = new AtomicInteger(0);
+            return line.stream().map(cell -> format("%-" + columnWidths.get(col.getAndIncrement()) + "s", cell)).collect(joining(" | ", linePrefix, " |"));
+        }).collect(joining("\n"));
     }
 
     private String getPosition() {
-        return location.getClassName() + "::" + location.getMethodName() +
+        return location.getClassName() + "." + location.getMethodName() +
                 "(" + location.getFileName() + ":" + location.getLineNumber() + ")";
     }
 
