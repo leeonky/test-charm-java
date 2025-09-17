@@ -130,10 +130,10 @@ public class ConsistencyItem<T> {
         @SuppressWarnings("unchecked")
         void resolve(Resolving dependency) {
             zip(propertyChains, propertyProducers).forEachElementWithIndex((index, propertyChain, propertyProducer) -> {
-                beanProducer.changeDescendant(propertyChain, (parent, property) -> new DependencyProducer<>(
-                        cast(propertyProducer.getType()),
-                        singletonList(dependency::compose),
-                        values -> decompose((T) values[0])[index]));
+                if (decomposer != null)
+                    beanProducer.changeDescendant(propertyChain, (parent, property) -> new DependencyProducer<>(
+                            cast(propertyProducer.getType()), singletonList(dependency::compose),
+                            values -> decompose((T) values[0])[index]));
             });
         }
 
@@ -147,6 +147,10 @@ public class ConsistencyItem<T> {
             if (decomposedCachedValues == null)
                 decomposedCachedValues = decomposer.apply(obj);
             return decomposedCachedValues;
+        }
+
+        public boolean hasComposer() {
+            return composer != null;
         }
     }
 }

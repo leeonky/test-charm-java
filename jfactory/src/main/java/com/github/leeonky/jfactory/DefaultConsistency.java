@@ -5,9 +5,11 @@ import com.github.leeonky.util.BeanClass;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.leeonky.util.function.Extension.not;
 import static java.util.Arrays.asList;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 public class DefaultConsistency<T> implements Consistency<T> {
@@ -39,17 +41,17 @@ public class DefaultConsistency<T> implements Consistency<T> {
     @Override
     public void apply(Producer<?> producer) {
         List<ConsistencyItem<T>.Resolving> resolvingList = items.stream().map(i -> i.resolving(producer)).collect(toList());
-        ConsistencyItem<T>.Resolving dependency = guessDependency(resolvingList);
-        resolvingList.stream().filter(not(dependency::equals))
-                .forEach(dependent -> dependent.resolve(dependency));
+        guessDependency(resolvingList).ifPresent(dependency -> resolvingList.stream().filter(not(dependency::equals))
+                .forEach(dependent -> dependent.resolve(dependency)));
     }
 
-    private ConsistencyItem<T>.Resolving guessDependency(List<ConsistencyItem<T>.Resolving> resolvingList) {
+    private Optional<ConsistencyItem<T>.Resolving> guessDependency(List<ConsistencyItem<T>.Resolving> resolvingList) {
+        resolvingList = resolvingList.stream().filter(ConsistencyItem.Resolving::hasComposer).collect(toList());
         for (Class<?> type : TYPE_PRIORITY)
             for (ConsistencyItem<T>.Resolving resolving : resolvingList)
                 if (resolving.isProducerType(type))
-                    return resolving;
-        return resolvingList.get(0);
+                    return of(resolving);
+        return of(resolvingList.get(0));
     }
 
     public boolean merge(DefaultConsistency<?> another) {
