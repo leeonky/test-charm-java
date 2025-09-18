@@ -51,7 +51,7 @@ public class DefaultConsistency<T> implements Consistency<T> {
             for (ConsistencyItem<T>.Resolving resolving : resolvingList)
                 if (resolving.isProducerType(type))
                     return of(resolving);
-        return of(resolvingList.get(0));
+        return resolvingList.stream().findFirst();
     }
 
     public boolean merge(DefaultConsistency<?> another) {

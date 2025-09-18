@@ -47,27 +47,47 @@ public class ConsistencyItem<T> {
         return new Resolving(producer);
     }
 
-
     boolean sameProperty(ConsistencyItem<?> another) {
         boolean sameProperty = propertyChains.equals(another.propertyChains);
         if (sameProperty) {
-            if (!another.consistency.type().equals(consistency.type()))
+            if (another.consistency.type().equals(consistency.type())) {
+                if (notSameComposer(another) && notSameDecomposer(another))
+                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer and decomposer mismatch:\n%s",
+                            propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+
+                if (notSameComposer(another))
+                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
+                            propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+
+                if (notSameDecomposer(another))
+                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, decomposer mismatch:\n%s",
+                            propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+
+                if (composer == null && another.composer != null || decomposer == null && another.decomposer != null)
+                    return false;
+            } else {
+                if (composer == null && another.composer != null || decomposer == null && another.decomposer != null)
+                    return false;
                 throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, consistency type mismatch:\n%s",
                         propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
-            if (composer != null && another.composer != null && decomposer != null && another.decomposer != null &&
-                    !composer.same(another.composer) && !decomposer.same(another.decomposer))
-                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer and decomposer mismatch:\n%s",
-                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
-
-            if (composer != null && another.composer != null && !composer.same(another.composer))
-                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
-                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
-
-            if (decomposer != null && another.decomposer != null && !decomposer.same(another.decomposer))
-                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, decomposer mismatch:\n%s",
-                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+            }
+        } else {
+            if (propertyChains.stream().anyMatch(another.propertyChains::contains)) {
+                throw new ConflictConsistencyException(format("Conflict consistency on property <%s> and <%s>, property overlap:\n%s",
+                        propertyChains.stream().map(Objects::toString).collect(joining(", ")),
+                        another.propertyChains.stream().map(Objects::toString).collect(joining(", ")),
+                        toTable(another, "  ")));
+            }
         }
         return sameProperty;
+    }
+
+    private boolean notSameComposer(ConsistencyItem<?> another) {
+        return composer != null && another.composer != null && !composer.same(another.composer);
+    }
+
+    private boolean notSameDecomposer(ConsistencyItem<?> another) {
+        return decomposer != null && another.decomposer != null && !decomposer.same(another.decomposer);
     }
 
     private String toTable(ConsistencyItem<?> another, String linePrefix) {

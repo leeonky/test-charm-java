@@ -101,12 +101,12 @@ public interface Consistency<T> {
         }
 
         @SuppressWarnings("unchecked")
-        public C1<T, P> compose(Function<P, T> composer) {
+        public C1<T, P> read(Function<P, T> composer) {
             lastItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P) objs[0]), composer));
             return this;
         }
 
-        public C1<T, P> decompose(Function<T, P> decomposer) {
+        public C1<T, P> write(Function<T, P> decomposer) {
             lastItem.setDecomposer(new DecomposerWrapper<>(t -> new Object[]{decomposer.apply(t)}, decomposer));
             return this;
         }
@@ -122,13 +122,13 @@ public interface Consistency<T> {
         }
 
         @SuppressWarnings("unchecked")
-        public C compose(Function<Object[], T> composer) {
+        public C read(Function<Object[], T> composer) {
             lastItem.setComposer(new ComposerWrapper<>(composer, composer));
             return (C) this;
         }
 
         @SuppressWarnings("unchecked")
-        public C decompose(Function<T, Object[]> decomposer) {
+        public C write(Function<T, Object[]> decomposer) {
             lastItem.setDecomposer(new DecomposerWrapper<>(decomposer, decomposer));
             return (C) this;
         }
@@ -140,12 +140,12 @@ public interface Consistency<T> {
         }
 
         @SuppressWarnings("unchecked")
-        public C2<T, P1, P2> compose(BiFunction<P1, P2, T> composer) {
+        public C2<T, P1, P2> read(BiFunction<P1, P2, T> composer) {
             lastItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P1) objs[0], (P2) objs[1]), composer));
             return this;
         }
 
-        public C2<T, P1, P2> decompose(Function<T, P1> decompose1, Function<T, P2> decompose2) {
+        public C2<T, P1, P2> write(Function<T, P1> decompose1, Function<T, P2> decompose2) {
             lastItem.setDecomposer(new DecomposerWrapper<>(
                     t -> new Object[]{decompose1.apply(t), decompose2.apply(t)}, asList(decompose1, decompose2)));
             return this;
