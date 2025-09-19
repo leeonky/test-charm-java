@@ -422,6 +422,60 @@ Feature: consistency
         }
         """
 
+    Scenario: merge multi properties
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+                BiFunction<String,String,String> join = (s1, s2)-> s1+"#"+s2;
+                Function<String,Object[]> divide = s->s.split("#");
+                consistent(String.class)
+                  .<String, String>properties("str1", "str2")
+                    .read(join)
+                    .write(divide)
+                  .direct("str3");
+
+                consistent(String.class)
+                  .<String, String>properties("str1", "str2")
+                    .read(join)
+                    .write(divide)
+                  .direct("str4");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str4", "hello#world").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: world
+          str3: hello#world
+          str4: hello#world
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "good#bye").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: good
+          str2: bye
+          str3: good#bye
+          str4: good#bye
+        }
+        """
+
   Rule: invalid merge
 
     Scenario: raise error when different consistency type
@@ -615,10 +669,10 @@ Feature: consistency
               Function<<type1>, Object[]> writer1= any -> {
                 throw new RuntimeException();
               };
-              Function<Object[], <type1>> reader2= any -> {
+              Function<Object[], <type2>> reader2= any -> {
                 throw new RuntimeException();
               };
-              Function<<type1>, Object[]> writer2= any -> {
+              Function<<type2>, Object[]> writer2= any -> {
                 throw new RuntimeException();
               };
               consistent(<type1>.class)
@@ -649,8 +703,12 @@ Feature: consistency
         ]
         """
       Examples:
-        | type1  | type2  | read1          | write1          | read2          | write2          | read1Loction        | write1Location      | read2Location       | write2Location      |
-        | Object | Object | .read(reader1) | .write(writer1) | .read(reader2) | .write(writer2) | (OrderSpec.java:21) | (OrderSpec.java:22) | (OrderSpec.java:27) | (OrderSpec.java:28) |
+        | type1  | read1          | write1          | type2  | read2          | write2          | read1Loction        | write1Location      | read2Location       | write2Location      |
+        | Object | .read(reader1) | .write(writer1) | Object | .read(reader2) | .write(writer2) | (OrderSpec.java:21) | (OrderSpec.java:22) | (OrderSpec.java:27) | (OrderSpec.java:28) |
+        | Object | .read(reader1) | .write(writer1) | String | .read(reader2) | .write(writer2) | (OrderSpec.java:21) | (OrderSpec.java:22) | (OrderSpec.java:27) | (OrderSpec.java:28) |
+        | Object | .read(reader1) |                 | String | .read(reader2) |                 | (OrderSpec.java:21) | null                | (OrderSpec.java:27) | null                |
+        | Object |                | .write(writer1) | String |                | .write(writer2) | null                | (OrderSpec.java:22) | null                | (OrderSpec.java:28) |
+        | Object | .read(reader1) | .write(writer1) | String |                | .write(writer2) | (OrderSpec.java:21) | (OrderSpec.java:22) | null                | (OrderSpec.java:28) |
 
   Rule: resolution order
 
@@ -910,6 +968,58 @@ Feature: consistency
         }
         """
 
+    Scenario: not merge part of properties matched when compose is null and not null and decomposer is not null and null
+      Given the following bean class:
+        """
+        public class Order {
+          public int quantity;
+          public BigDecimal unitPrice, total, unitDiscount, discountTotal;
+        }
+        """
+      And the following spec class:
+        """
+        public class OrderSpec extends Spec<Order> {
+            public void main() {
+              consistent(BigDecimal.class)
+                .<Integer, BigDecimal>properties("quantity", "unitPrice")
+                  .read((qty, price) -> price.multiply(BigDecimal.valueOf(qty)))
+                .direct("total");
+
+              consistent(BigDecimal.class)
+                .<Integer, BigDecimal>properties("quantity", "unitDiscount")
+                  .write(amount -> new Object[]{1, amount})
+                .direct("discountTotal");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(OrderSpec.class).property("total", 100).create();
+        """
+      Then the result should:
+        """
+        : {
+          quantity: 1
+          unitPrice: 1
+          total: 100
+          unitDiscount: 1
+          discountTotal: 1
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(OrderSpec.class).property("discountTotal", 50).create();
+        """
+      Then the result should:
+        """
+        : {
+          quantity: 1
+          unitPrice: 2
+          total:  4
+          unitDiscount: 50
+          discountTotal: 50
+        }
+        """
 
 # TODO 2/3/4 properties
 # TODO merge multi properties

@@ -73,10 +73,11 @@ public class ConsistencyItem<T> {
             }
         } else {
             if (propertyChains.stream().anyMatch(another.propertyChains::contains)) {
-                throw new ConflictConsistencyException(format("Conflict consistency on property <%s> and <%s>, property overlap:\n%s",
-                        propertyChains.stream().map(Objects::toString).collect(joining(", ")),
-                        another.propertyChains.stream().map(Objects::toString).collect(joining(", ")),
-                        toTable(another, "  ")));
+                if ((composer != null && another.composer != null) || (decomposer != null && another.decomposer != null))
+                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s> and <%s>, property overlap:\n%s",
+                            propertyChains.stream().map(Objects::toString).collect(joining(", ")),
+                            another.propertyChains.stream().map(Objects::toString).collect(joining(", ")),
+                            toTable(another, "  ")));
             }
         }
         return sameProperty;
