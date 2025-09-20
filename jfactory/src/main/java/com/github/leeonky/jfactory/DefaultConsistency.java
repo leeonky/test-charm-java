@@ -56,7 +56,10 @@ public class DefaultConsistency<T> implements Consistency<T> {
 
     public boolean merge(DefaultConsistency<?> another) {
         if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::sameProperty))) {
-            items.addAll((List) another.items);
+            for (ConsistencyItem item : another.items) {
+//                if (!items.stream().anyMatch(i -> item.sameProperty(i)))
+                items.add(item);
+            }
             return true;
         }
         return false;

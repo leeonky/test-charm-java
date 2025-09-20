@@ -46,6 +46,18 @@ public interface Consistency<T> {
         }
 
         StackTraceElement getLocation();
+
+        static boolean isSame(Identity identity1, Identity identity2) {
+            return identity1 != null && identity2 != null && identity1.same(identity2);
+        }
+
+        static boolean isNotSame(Identity identity1, Identity identity2) {
+            return identity1 != null && identity2 != null && !identity1.same(identity2);
+        }
+
+        static boolean isBothNull(Identity identity1, Identity identity2) {
+            return identity1 == null && identity2 == null;
+        }
     }
 
     interface Composer<T> extends Function<Object[], T>, Identity {

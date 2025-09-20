@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+import static com.github.leeonky.jfactory.Consistency.Identity.*;
 import static com.github.leeonky.util.Sneaky.cast;
 import static com.github.leeonky.util.Zipped.zip;
 import static java.lang.String.format;
@@ -51,20 +52,21 @@ public class ConsistencyItem<T> {
         boolean sameProperty = propertyChains.equals(another.propertyChains);
         if (sameProperty) {
             if (another.consistency.type().equals(consistency.type())) {
-                if (notSameComposer(another) && notSameDecomposer(another))
+                if (isNotSame(composer, another.composer) && isNotSame(decomposer, another.decomposer))
                     throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer and decomposer mismatch:\n%s",
                             propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
 
-                if (notSameComposer(another))
+                if (isNotSame(composer, another.composer))
                     throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
                             propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
 
-                if (notSameDecomposer(another))
+                if (isNotSame(decomposer, another.decomposer))
                     throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, decomposer mismatch:\n%s",
                             propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
 
-                if (composer == null && another.composer != null || decomposer == null && another.decomposer != null)
-                    return false;
+                return isSame(composer, another.composer) && isSame(decomposer, another.decomposer)
+                        || isBothNull(composer, another.composer) && isSame(decomposer, another.decomposer)
+                        || isSame(composer, another.composer) && isBothNull(decomposer, another.decomposer);
             } else {
                 if (composer == null && another.composer != null || decomposer == null && another.decomposer != null)
                     return false;
@@ -81,14 +83,6 @@ public class ConsistencyItem<T> {
             }
         }
         return sameProperty;
-    }
-
-    private boolean notSameComposer(ConsistencyItem<?> another) {
-        return composer != null && another.composer != null && !composer.same(another.composer);
-    }
-
-    private boolean notSameDecomposer(ConsistencyItem<?> another) {
-        return decomposer != null && another.decomposer != null && !decomposer.same(another.decomposer);
     }
 
     private String toTable(ConsistencyItem<?> another, String linePrefix) {
