@@ -481,7 +481,67 @@ Feature: single property consistency
         ]
         """
 
-  Rule: no merge, non conflict
+    Scenario Outline: Same property + different type, association with composer and decomposer
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              Function<Object, String> reader1= any -> {
+                throw new RuntimeException();
+              };
+              Function<String, Object> writer1= any -> {
+                throw new RuntimeException();
+              };
+              Function<Object, Object> reader2= any -> {
+                throw new RuntimeException();
+              };
+              Function<Object, Object> writer2= any -> {
+                throw new RuntimeException();
+              };
+              consistent(String.class)
+              .property("str1")
+                <composer1>
+                <decomposer1>
+              .property("str2");
+
+              consistent(Object.class)
+              .property("str1")
+                <composer2>
+                <decomposer2>
+              .property("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then should raise error:
+        """
+        message.table: [
+          ['Conflict consistency on property <str1>, <error>:'],
+          ['', type composer decomposer],
+          [#package#ABean.main(ABean.java:20) java.lang.String '<composer1Pos>' '<decomposer1Pos>'],
+          [#package#ABean.main(ABean.java:26) java.lang.Object '<composer2Pos>' '<decomposer2Pos>']
+        ]
+        """
+      Examples:
+        | composer1      | composer2      | decomposer1     | decomposer2     | composer1Pos    | composer2Pos    | decomposer1Pos  | decomposer2Pos  | error                     |
+        |                |                | .write(writer1) | .write(writer2) | null            | null            | (ABean.java:22) | (ABean.java:28) | consistency type mismatch |
+        | .read(reader1) | .read(reader2) |                 |                 | (ABean.java:21) | (ABean.java:27) | null            | null            | consistency type mismatch |
+        | .read(reader1) | .read(reader2) | .write(writer1) | .write(writer2) | (ABean.java:21) | (ABean.java:27) | (ABean.java:22) | (ABean.java:28) | consistency type mismatch |
+        | .read(reader1) | .read(reader2) |                 | .write(writer2) | (ABean.java:21) | (ABean.java:27) | null            | (ABean.java:28) | consistency type mismatch |
+        | .read(reader1) | .read(reader2) | .write(writer1) |                 | (ABean.java:21) | (ABean.java:27) | (ABean.java:22) | null            | consistency type mismatch |
+        | .read(reader1) |                | .write(writer1) | .write(writer2) | (ABean.java:21) | null            | (ABean.java:22) | (ABean.java:28) | consistency type mismatch |
+        |                | .read(reader2) | .write(writer1) | .write(writer2) | null            | (ABean.java:27) | (ABean.java:22) | (ABean.java:28) | consistency type mismatch |
+
+  Rule: Same property + same type no merge
 
     Background:
       Given the following bean class:
@@ -491,7 +551,7 @@ Feature: single property consistency
         }
         """
 
-    Scenario: Same property + same type, composer: null null and decomposer: null null
+    Scenario: composer: null null and decomposer: null null
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -543,7 +603,7 @@ Feature: single property consistency
         }
         """
 
-    Scenario: Same property + same type, composer: null null and decomposer: null not_null
+    Scenario: composer: null null and decomposer: null not_null
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -596,7 +656,7 @@ Feature: single property consistency
         }
         """
 
-    Scenario: Same property + same type, composer: null null and decomposer: not_null null
+    Scenario: composer: null null and decomposer: not_null null
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -649,7 +709,7 @@ Feature: single property consistency
         }
         """
 
-    Scenario: Same property + same type, composer: null not_null and decomposer: null null
+    Scenario: composer: null not_null and decomposer: null null
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -702,7 +762,7 @@ Feature: single property consistency
         }
         """
 
-    Scenario: Same property + same type, composer: not_null null and decomposer: null null
+    Scenario: composer: not_null null and decomposer: null null
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -755,7 +815,7 @@ Feature: single property consistency
         }
         """
 
-    Scenario: Same property + same type, composer: not_null null and decomposer: not_null null
+    Scenario: composer: not_null null and decomposer: not_null null
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -809,7 +869,7 @@ Feature: single property consistency
         }
         """
 
-    Scenario: Same property + same type, composer: null not_null and decomposer: null not_null
+    Scenario: composer: null not_null and decomposer: null not_null
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -859,6 +919,290 @@ Feature: single property consistency
         : {
           str1: hello
           str2: /^str2.*/
+          str3: hello
+        }
+        """
+
+  Rule: Same property + different type no merge
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+
+    Scenario: composer: null null and decomposer: null null
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                .<String>property("str1")
+                .direct("str2");
+
+              consistent(StringBuilder.class)
+                .property("str1")
+                .<String>property("str3")
+                  .read(StringBuilder::new)
+                  .write(StringBuilder::toString);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: /^str2.*/
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: /^str2.*/
+          str3: hello
+        }
+        """
+
+    Scenario: composer: null null and decomposer: null not_null
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                  .<String>property("str1")
+                  .direct("str2");
+
+              consistent(StringBuilder.class)
+                  .property("str1")
+                    .write(StringBuilder::toString)
+                  .<String>property("str3")
+                    .read(StringBuilder::new)
+                    .write(StringBuilder::toString);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: /^str2.*/
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str3.*/
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: /^str2.*/
+          str3: hello
+        }
+        """
+
+    Scenario: composer: null null and decomposer: not_null null
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                  .<String>property("str1")
+                      .write(s->s)
+                  .direct("str2");
+
+              consistent(StringBuilder.class)
+                  .property("str1")
+                  .<String>property("str3")
+                      .read(StringBuilder::new)
+                      .write(StringBuilder::toString);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: /^str2.*/
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str2.*/
+          str2: /^str2.*/
+          str3: hello
+        }
+        """
+
+    Scenario: composer: null not_null and decomposer: null null
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                  .property("str1")
+                  .direct("str2");
+
+              consistent(StringBuilder.class)
+                  .<String>property("str1")
+                      .read(StringBuilder::new)
+                  .<String>property("str3")
+                      .read(StringBuilder::new)
+                      .write(StringBuilder::toString);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: /^str2.*/
+          str3: hello
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: hello
+          str3: /^str1.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: /^str2.*/
+          str3: hello
+        }
+        """
+
+    Scenario: composer: not_null null and decomposer: null null
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                  .<String>property("str1")
+                    .read(s->s)
+                  .direct("str2");
+
+              consistent(StringBuilder.class)
+                  .property("str1")
+                  .<String>property("str3")
+                      .read(StringBuilder::new)
+                      .write(StringBuilder::toString);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: /^str1.*/
           str3: hello
         }
         """
@@ -931,5 +1275,6 @@ Feature: single property consistency
 #        |            | .read(any) |             | .write(any) |
         | .read(any) |            |             | .write(any) |
         |            | .read(any) | .write(any) |             |
+
 #        | .read(any) |            | .write(any) |             |
 

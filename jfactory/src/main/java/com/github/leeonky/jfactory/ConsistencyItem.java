@@ -68,10 +68,10 @@ public class ConsistencyItem<T> {
                         || isBothNull(composer, another.composer) && isSame(decomposer, another.decomposer)
                         || isSame(composer, another.composer) && isBothNull(decomposer, another.decomposer);
             } else {
-                if (composer == null && another.composer != null || decomposer == null && another.decomposer != null)
-                    return false;
-                throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, consistency type mismatch:\n%s",
-                        propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+                if ((composer != null && another.composer != null) || (decomposer != null && another.decomposer != null))
+                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, consistency type mismatch:\n%s",
+                            propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+                return false;
             }
         } else {
             if (propertyChains.stream().anyMatch(another.propertyChains::contains)) {
@@ -82,7 +82,7 @@ public class ConsistencyItem<T> {
                             toTable(another, "  ")));
             }
         }
-        return sameProperty;
+        return false;
     }
 
     private String toTable(ConsistencyItem<?> another, String linePrefix) {
