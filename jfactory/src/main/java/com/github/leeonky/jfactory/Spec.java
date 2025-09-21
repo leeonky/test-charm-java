@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.stream.Collectors.toList;
@@ -148,12 +147,10 @@ public class Spec<T> {
 
     public Spec<T> linkNew(String propertyChain1, String propertyChain2, String... others) {
         Consistency<?> consistency = consistent(Object.class);
-        concat(Stream.of(propertyChain1, propertyChain2), Stream.of(others))
-                .forEach(consistency::direct);
-        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        for (ConsistencyItem<?> item : ((DefaultConsistency<?>) consistency).items()) {
-            item.changeLocation(stackTrace[1]).changeComposerLocation(stackTrace[1]).changeDecomposerLocation(stackTrace[1]);
-        }
+        consistency.direct(propertyChain1)
+                .direct(propertyChain2);
+        for (String string : others)
+            consistency.direct(string);
         return this;
     }
 

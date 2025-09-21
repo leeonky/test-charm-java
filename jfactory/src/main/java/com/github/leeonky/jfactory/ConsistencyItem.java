@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,20 +19,22 @@ import static java.util.stream.Collectors.toList;
 public class ConsistencyItem<T> {
     private final List<PropertyChain> propertyChains;
     private final Consistency<T> consistency;
-    private StackTraceElement location, composerLocation, decomposerLocation;
+    private final StackTraceElement location;
+    private StackTraceElement composerLocation;
+    private StackTraceElement decomposerLocation;
     private Consistency.Composer<T> composer;
     private Consistency.Decomposer<T> decomposer;
 
     public ConsistencyItem(List<PropertyChain> propertyChains, Consistency<T> consistency) {
-        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        location = stackTrace[2];
+        location = guessCustomerPositionStackTrace();
         this.propertyChains = propertyChains;
         this.consistency = consistency;
     }
 
-    public ConsistencyItem<T> changeLocation(StackTraceElement location) {
-        this.location = location;
-        return this;
+    static StackTraceElement guessCustomerPositionStackTrace() {
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        return Arrays.stream(stackTrace).filter(s -> !s.getClassName().startsWith("com.github.leeonky.jfactory"))
+                .findFirst().orElse(stackTrace[0]);
     }
 
     public void setComposer(DefaultConsistency.Composer<T> composer) {
@@ -115,16 +118,6 @@ public class ConsistencyItem<T> {
     private String decomposerLocation() {
         return decomposerLocation == null ? "null" :
                 "(" + decomposerLocation.getFileName() + ":" + decomposerLocation.getLineNumber() + ")";
-    }
-
-    public ConsistencyItem<T> changeComposerLocation(StackTraceElement stackTraceElement) {
-        composerLocation = stackTraceElement;
-        return this;
-    }
-
-    public ConsistencyItem<T> changeDecomposerLocation(StackTraceElement stackTraceElement) {
-        decomposerLocation = stackTraceElement;
-        return this;
     }
 
     public boolean dependsOn(ConsistencyItem<?> another) {

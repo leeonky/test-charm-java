@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -95,10 +96,7 @@ public interface Consistency<T> {
 
         @Override
         public <P> C1<T, P> property(String property) {
-            StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-            C1<T, P> c1 = consistency.property(property);
-            c1.lastItem.changeLocation(stackTrace[1]);
-            return c1;
+            return consistency.property(property);
         }
 
         @Override
@@ -170,12 +168,11 @@ public interface Consistency<T> {
 
 class IdentityAction implements Consistency.Identity {
     protected final Object identity;
-    protected StackTraceElement location;
+    private final StackTraceElement location;
 
     public IdentityAction(Object identity) {
         this.identity = Objects.requireNonNull(identity);
-        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        location = stackTrace[3];
+        location = guessCustomerPositionStackTrace();
     }
 
     @Override

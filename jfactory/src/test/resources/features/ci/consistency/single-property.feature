@@ -1380,5 +1380,5 @@ Feature: single property consistency
         """
 
       # recursive dependent in Consistency list
-      # conflict dependent in ConsistencyItem list
+      # conflict dependent in ConsistencyItem list - done
       # multi properties dependency check
