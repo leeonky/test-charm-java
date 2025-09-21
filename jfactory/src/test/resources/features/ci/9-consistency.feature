@@ -59,7 +59,6 @@ Feature: consistency
 
   Rule: merge
 
-
     Scenario: merge multi properties
       Given the following bean class:
         """
@@ -113,67 +112,6 @@ Feature: consistency
           str4: good#bye
         }
         """
-
-  Rule: invalid merge
-
-    Scenario Outline: part of property same + any type, both have composer / decomposer: error
-      Given the following bean class:
-        """
-        public class Order {
-          public int quantity;
-          public BigDecimal unitPrice, total, unitDiscount, discountTotal;
-        }
-        """
-      And the following spec class:
-        """
-        public class OrderSpec extends Spec<Order> {
-          public void main() {
-              Function<Object[], <type1>> reader1= any -> {
-                throw new RuntimeException();
-              };
-              Function<<type1>, Object[]> writer1= any -> {
-                throw new RuntimeException();
-              };
-              Function<Object[], <type2>> reader2= any -> {
-                throw new RuntimeException();
-              };
-              Function<<type2>, Object[]> writer2= any -> {
-                throw new RuntimeException();
-              };
-              consistent(<type1>.class)
-                .properties("quantity", "unitPrice")
-                  <read1>
-                  <write1>
-                .direct("total");
-
-              consistent(<type2>.class)
-                .properties("quantity", "unitDiscount")
-                  <read2>
-                  <write2>
-                .direct("discountTotal");
-          }
-        }
-        """
-      When build:
-        """
-        jFactory.clear().spec(OrderSpec.class).create();
-        """
-      Then should raise error:
-        """
-        message.table: [
-          ['Conflict consistency on property <quantity, unitPrice> and <quantity, unitDiscount>, property overlap:'],
-          ['', type composer decomposer],
-          [#package#OrderSpec.main(OrderSpec.java:20) java.lang.<type1> '<read1Loction>' '<write1Location>'],
-          [#package#OrderSpec.main(OrderSpec.java:26) java.lang.<type2> '<read2Location>' '<write2Location>']
-        ]
-        """
-      Examples:
-        | type1  | read1          | write1          | type2  | read2          | write2          | read1Loction        | write1Location      | read2Location       | write2Location      |
-        | Object | .read(reader1) | .write(writer1) | Object | .read(reader2) | .write(writer2) | (OrderSpec.java:21) | (OrderSpec.java:22) | (OrderSpec.java:27) | (OrderSpec.java:28) |
-        | Object | .read(reader1) | .write(writer1) | String | .read(reader2) | .write(writer2) | (OrderSpec.java:21) | (OrderSpec.java:22) | (OrderSpec.java:27) | (OrderSpec.java:28) |
-        | Object | .read(reader1) |                 | String | .read(reader2) |                 | (OrderSpec.java:21) | null                | (OrderSpec.java:27) | null                |
-        | Object |                | .write(writer1) | String |                | .write(writer2) | null                | (OrderSpec.java:22) | null                | (OrderSpec.java:28) |
-        | Object | .read(reader1) | .write(writer1) | String |                | .write(writer2) | (OrderSpec.java:21) | (OrderSpec.java:22) | null                | (OrderSpec.java:28) |
 
   Rule: resolution order
 

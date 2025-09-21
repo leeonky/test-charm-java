@@ -1275,6 +1275,102 @@ Feature: single property consistency
 #        |            | .read(any) |             | .write(any) |
         | .read(any) |            |             | .write(any) |
         |            | .read(any) | .write(any) |             |
-
 #        | .read(any) |            | .write(any) |             |
 
+  Rule: resolution order
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+
+    Scenario: should resolve property which has writer first and reader last
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                .<String>property("str1")
+                  .read(s->s)
+                .direct("str2");
+
+              consistent(String.class)
+                .<String>property("str1")
+                  .write(s->s)
+                .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str3.*/
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: hello
+          str3: hello
+        }
+        """
+
+    Scenario: raise error when conflict dependent between two consistencies
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                .<String>property("str1")
+                  .read(s->s)
+                .<String>property("str2")
+                  .write(s->s)
+                .direct("str3");
+
+              consistent(String.class)
+                .<String>property("str1")
+                  .write(s->s)
+                .<String>property("str2")
+                  .read(s->s)
+                .direct("str4");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then should raise error:
+        """
+
+        """
+
+      # recursive dependent in Consistency list
+      # conflict dependent in ConsistencyItem list
+      # multi properties dependency check

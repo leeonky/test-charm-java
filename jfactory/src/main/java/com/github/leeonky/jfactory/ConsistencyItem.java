@@ -127,6 +127,11 @@ public class ConsistencyItem<T> {
         return this;
     }
 
+    public boolean dependsOn(ConsistencyItem another) {
+        return propertyChains.equals(another.propertyChains)
+                && composer != null && another.decomposer != null;
+    }
+
     class Resolving {
         final Producer<?> beanProducer;
         private final List<Producer<?>> propertyProducers;

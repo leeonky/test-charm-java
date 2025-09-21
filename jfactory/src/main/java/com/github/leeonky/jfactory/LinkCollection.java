@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 class LinkCollection {
     private final List<DefaultConsistency<?>> consistencies = new ArrayList<>();
@@ -12,14 +13,26 @@ class LinkCollection {
     }
 
     public void applyLink(Producer<?> producer) {
-        for (DefaultConsistency<?> consistency : merge()) {
-            consistency.apply(producer);
-        }
+        LinkedList<DefaultConsistency<?>> merged = merged();
+        while (!merged.isEmpty())
+            popRootDependency(merged).apply(producer);
     }
 
-    private List<DefaultConsistency<?>> merge() {
+    private DefaultConsistency<?> popRootDependency(LinkedList<DefaultConsistency<?>> merged) {
+        ListIterator<DefaultConsistency<?>> iterator = merged.listIterator();
+        while (iterator.hasNext()) {
+            DefaultConsistency<?> candidate = iterator.next();
+            if (merged.stream().filter(c -> c != candidate).noneMatch(candidate::dependsOn)) {
+                iterator.remove();
+                return candidate;
+            }
+        }
+        return merged.pop();
+    }
+
+    private LinkedList<DefaultConsistency<?>> merged() {
         LinkedList<DefaultConsistency<?>> left = new LinkedList<>(consistencies);
-        List<DefaultConsistency<?>> merged = new ArrayList<>();
+        LinkedList<DefaultConsistency<?>> merged = new LinkedList<>();
         while (!left.isEmpty()) {
             DefaultConsistency<?> popped = left.pop();
             left.removeIf(popped::merge);
