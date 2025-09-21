@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.leeonky.util.function.Extension.not;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -68,10 +69,22 @@ public class DefaultConsistency<T> implements Consistency<T> {
     }
 
     public boolean dependsOn(DefaultConsistency<?> another) {
-        for (ConsistencyItem item : items)
-            for (ConsistencyItem anotherItem : another.items)
+        List<ConsistencyItem<?>> dependencyPair = dependencyPair(another);
+        if (dependencyPair.isEmpty())
+            return false;
+        List<ConsistencyItem<?>> reversePair = another.dependencyPair(this);
+        if (!reversePair.isEmpty())
+            throw new ConflictConsistencyException(format("Conflict dependency between consistencies:\n%s\n%s",
+                    dependencyPair.get(0).toTable(dependencyPair.get(1), "  "),
+                    reversePair.get(0).toTable(reversePair.get(1), "  ")));
+        return true;
+    }
+
+    private List<ConsistencyItem<?>> dependencyPair(DefaultConsistency<?> another) {
+        for (ConsistencyItem<?> item : items)
+            for (ConsistencyItem<?> anotherItem : another.items)
                 if (item.dependsOn(anotherItem))
-                    return true;
-        return false;
+                    return asList(item, anotherItem);
+        return Collections.emptyList();
     }
 }

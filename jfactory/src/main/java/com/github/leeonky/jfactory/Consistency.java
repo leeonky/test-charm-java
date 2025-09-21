@@ -95,7 +95,10 @@ public interface Consistency<T> {
 
         @Override
         public <P> C1<T, P> property(String property) {
-            return consistency.property(property);
+            StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+            C1<T, P> c1 = consistency.property(property);
+            c1.lastItem.changeLocation(stackTrace[1]);
+            return c1;
         }
 
         @Override

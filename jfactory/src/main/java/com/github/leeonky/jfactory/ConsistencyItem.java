@@ -85,7 +85,7 @@ public class ConsistencyItem<T> {
         return false;
     }
 
-    private String toTable(ConsistencyItem<?> another, String linePrefix) {
+    public String toTable(ConsistencyItem<?> another, String linePrefix) {
         List<List<String>> data = new ArrayList<>();
         data.add(asList("", "type", "composer", "decomposer"));
         data.add(asList(getPosition(), consistency.type().getName(), composerLocation(), decomposerLocation()));
@@ -127,7 +127,7 @@ public class ConsistencyItem<T> {
         return this;
     }
 
-    public boolean dependsOn(ConsistencyItem another) {
+    public boolean dependsOn(ConsistencyItem<?> another) {
         return propertyChains.equals(another.propertyChains)
                 && composer != null && another.decomposer != null;
     }

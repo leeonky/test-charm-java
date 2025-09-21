@@ -1368,7 +1368,15 @@ Feature: single property consistency
         """
       Then should raise error:
         """
-
+        message.table: [
+          ['Conflict dependency between consistencies:'],
+          ['', type composer decomposer],
+          [#package#ABean.main(ABean.java:8) java.lang.String '(ABean.java:9)' 'null'],
+          [#package#ABean.main(ABean.java:15) java.lang.String 'null' '(ABean.java:16)'],
+          ['', type composer decomposer],
+          [#package#ABean.main(ABean.java:17) java.lang.String '(ABean.java:18)' 'null'],
+          [#package#ABean.main(ABean.java:10) java.lang.String 'null' '(ABean.java:11)'],
+        ]
         """
 
       # recursive dependent in Consistency list
