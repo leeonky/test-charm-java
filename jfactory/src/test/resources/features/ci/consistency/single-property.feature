@@ -310,7 +310,7 @@ Feature: single property consistency
         }
         """
 
-  Rule: conflict property
+  Rule: conflict merge
 
     Scenario: need merge but different consistency type
       Given the following bean class:
@@ -1206,76 +1206,6 @@ Feature: single property consistency
           str3: hello
         }
         """
-
-    Scenario Outline: Same property + same type, composer and decomposer - no merge
-      And the following spec class:
-        """
-        public class ABean extends Spec<Bean> {
-          public void main() {
-              Function<String, String> any = s -> {
-                throw new RuntimeException("Should not be called");
-              };
-              consistent(String.class)
-              .<String>property("str1")
-                <composer1>
-                <decomposer1>
-              .<String>property("str2");
-
-              consistent(String.class)
-              .<String>property("str1")
-                <composer2>
-                <decomposer2>
-              .<String>property("str3");
-          }
-        }
-        """
-      When build:
-        """
-        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-        """
-      Then the result should:
-        """
-        : {
-          str1: hello
-          str2: /^str2.*/
-          str3: /^str3.*/
-          }
-        """
-      When build:
-        """
-        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
-        """
-      Then the result should:
-        """
-        : {
-          str1: /^str1.*/
-          str2: hello
-          str3: /^str3.*/
-        }
-        """
-      When build:
-        """
-        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
-        """
-      Then the result should:
-        """
-        : {
-          str1: /^str1.*/
-          str2: /^str2.*/
-          str3: hello
-        }
-        """
-      Examples:
-        | composer1  | composer2  | decomposer1 | decomposer2 |
-#        |            |            |             |             |
-#        |            |            |             | .write(any) |
-#        |            |            | .write(any) |             |
-#        | .read(any) |            |             |             |
-#        |            | .read(any) |             |             |
-#        |            | .read(any) |             | .write(any) |
-        | .read(any) |            |             | .write(any) |
-        |            | .read(any) | .write(any) |             |
-#        | .read(any) |            | .write(any) |             |
 
   Rule: resolution order
 

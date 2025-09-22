@@ -1,9 +1,6 @@
 package com.github.leeonky.jfactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -17,7 +14,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class ConsistencyItem<T> {
-    private final List<PropertyChain> propertyChains;
+    private final Set<PropertyChain> propertyChains;
     private final Consistency<T> consistency;
     private final StackTraceElement location;
     private StackTraceElement composerLocation;
@@ -25,9 +22,9 @@ public class ConsistencyItem<T> {
     private Consistency.Composer<T> composer;
     private Consistency.Decomposer<T> decomposer;
 
-    public ConsistencyItem(List<PropertyChain> propertyChains, Consistency<T> consistency) {
+    public ConsistencyItem(Collection<PropertyChain> propertyChains, Consistency<T> consistency) {
         location = guessCustomerPositionStackTrace();
-        this.propertyChains = propertyChains;
+        this.propertyChains = new LinkedHashSet<>(propertyChains);
         this.consistency = consistency;
     }
 
