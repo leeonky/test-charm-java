@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
 import static com.github.leeonky.util.function.Extension.not;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -23,9 +24,11 @@ public class DefaultConsistency<T> implements Consistency<T> {
 
     private final List<ConsistencyItem<T>> items = new ArrayList<>();
     private final BeanClass<T> type;
+    private final List<StackTraceElement> locations = new ArrayList<>();
 
     public DefaultConsistency(Class<T> type) {
         this.type = BeanClass.create(type);
+        locations.add(guessCustomerPositionStackTrace());
     }
 
     @Override
@@ -86,5 +89,15 @@ public class DefaultConsistency<T> implements Consistency<T> {
                 if (item.dependsOn(anotherItem))
                     return asList(item, anotherItem);
         return Collections.emptyList();
+    }
+
+    public String info() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("  ").append(type().getName()).append(":");
+        for (StackTraceElement location : locations) {
+            builder.append("\n    ").append(location.getClassName()).append(".").append(location.getMethodName())
+                    .append("(").append(location.getFileName()).append(":").append(location.getLineNumber()).append(")");
+        }
+        return builder.toString();
     }
 }

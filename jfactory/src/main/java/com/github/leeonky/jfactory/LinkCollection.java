@@ -27,7 +27,10 @@ class LinkCollection {
                 return candidate;
             }
         }
-        return merged.pop();
+        StringBuilder builder = new StringBuilder("Circular dependency detected between:");
+        for (DefaultConsistency<?> defaultConsistency : merged)
+            builder.append("\n").append(defaultConsistency.info());
+        throw new ConflictConsistencyException(builder.toString());
     }
 
     private LinkedList<DefaultConsistency<?>> merged() {

@@ -1379,6 +1379,46 @@ Feature: single property consistency
         ]
         """
 
-      # recursive dependent in Consistency list
-      # conflict dependent in ConsistencyItem list - done
+    Scenario: raise error when recursive dependent between consistencies
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                .<String>property("str1")
+                  .read(s->s)
+                .<String>property("str2")
+                  .write(s->s);
+
+              consistent(String.class)
+                .<String>property("str1")
+                  .write(s->s)
+                .<String>property("str3")
+                  .read(s->s);
+
+              consistent(String.class)
+                .<String>property("str2")
+                  .read(s->s)
+                .<String>property("str3")
+                  .write(s->s);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then should raise error:
+        """
+        message: ```
+                 Circular dependency detected between:
+                   java.lang.String:
+                     #package#ABean.main(ABean.java:7)
+                   java.lang.String:
+                     #package#ABean.main(ABean.java:13)
+                   java.lang.String:
+                     #package#ABean.main(ABean.java:19)
+                 ```
+        """
+
       # multi properties dependency check
