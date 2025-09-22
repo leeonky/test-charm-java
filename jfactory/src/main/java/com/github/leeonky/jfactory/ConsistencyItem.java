@@ -134,7 +134,7 @@ public class ConsistencyItem<T> {
         }
 
         boolean isProducerType(Class<?> type) {
-            return type.isInstance(propertyProducers.get(0));
+            return propertyProducers.stream().anyMatch(type::isInstance);
         }
 
         @SuppressWarnings("unchecked")

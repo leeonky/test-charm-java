@@ -1350,5 +1350,3 @@ Feature: single property consistency
                      #package#ABean.main(ABean.java:19)
                  ```
         """
-
-      # multi properties dependency check

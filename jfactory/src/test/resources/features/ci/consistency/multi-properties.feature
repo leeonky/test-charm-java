@@ -57,6 +57,41 @@ Feature: multi properties consistency
         }
         """
 
+    Scenario: one of properties has higher priority then consistency item has higher priority
+      Given the following bean class:
+        """
+        public class Person {
+          public String fullName, firstName, lastName, familyName, givenName;
+        }
+        """
+      And the following spec class:
+        """
+        public class APerson extends Spec<Person> {
+          public void main() {
+            consistent(String.class)
+              .direct("fullName")
+              .properties("firstName", "lastName")
+                .read((first,last) -> first+" "+last).write(s -> s.split(" "))
+              .properties("familyName", "givenName")
+                .read(names -> names[0]+" "+names[1]).write(s->s.split(" ")[0], s->s.split(" ")[1]);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(APerson.class).property("givenName", "Tom").create();
+        """
+      Then the result should:
+        """
+        : {
+          fullName: /^familyName.* Tom/
+          firstName: /^familyName.*/
+          lastName: Tom
+          familyName: /^familyName.*/
+          givenName: Tom
+        }
+        """
+
   Rule: need merge
 
     Scenario: merge multi properties
@@ -113,9 +148,130 @@ Feature: multi properties consistency
         }
         """
 
-  Rule: part of properties matched no merge
+  Rule: part of properties matched for merge
 
     Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4, str5, str6;
+        }
+        """
+
+    Scenario: no merge compose: null not_null and decomposer: not_null null
+      And the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> {
+            public void main() {
+              consistent(String.class)
+                .<String, String>properties("str1", "str2")
+                  .write(s -> new Object[]{s, s})
+                .direct("str4");
+
+              consistent(String.class)
+                .<String, String>properties("str1", "str3")
+                  .read((s1, s2) -> s1+"#"+s2)
+                .direct("str5");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= /^str4.*/, str3= /^str3.*/, str4= /^str4.*/, str5= /^hello#str3.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str4.*/, str2= hello, str3= /^str3.*/, str4= /^str4.*/, str5= /^str4.*#str3.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str4", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= hello, str3= /^str3.*/, str4= hello, str5= /^hello#str3.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str4.*/, str2= /^str4.*/, str3= hello, str4= /^str4.*/, str5= /^str4.*#hello/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str5", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str4.*/, str2= /^str4.*/, str3= /^str3.*/, str4= /^str4.*/, str5= hello
+        """
+
+    Scenario Outline: property overlap composer and decomposer conflict - raise error
+      And the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> {
+            public void main() {
+              Function<Object[], String> reader1 = s -> {
+                  throw new RuntimeException("Should not be called");
+              };
+              Function<Object[], String> reader2 = s -> {
+                  throw new RuntimeException("Should not be called");
+              };
+              Function<String, Object[]> writer1 = s -> {
+                  throw new RuntimeException("Should not be called");
+              };
+              Function<String, Object[]> writer2 = s -> {
+                  throw new RuntimeException("Should not be called");
+              };
+
+              consistent(String.class)
+                .<String, String>properties("str1", "str2")
+                  <composer1>
+                  <decomposer1>
+                .direct("str4");
+
+              consistent(String.class)
+                .<String, String>properties("str1", "str3")
+                  <composer2>
+                  <decomposer2>
+                .direct("str5");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).create();
+        """
+      Then should raise error:
+        """
+        message.table: [
+          ['Conflict consistency on property <str1, str2> and <str1, str3>, property overlap:'],
+          ['', type composer decomposer],
+          [#package#BeanSpec.main(BeanSpec.java:21) java.lang.String '<composer1Pos>' '<decomposer1Pos>'],
+          [#package#BeanSpec.main(BeanSpec.java:27) java.lang.String '<composer2Pos>' '<decomposer2Pos>']
+        ]
+        """
+      Examples:
+        | composer1      | composer2      | decomposer1     | decomposer2     | composer1Pos       | composer2Pos       | decomposer1Pos     | decomposer2Pos     |
+        |                |                | .write(writer1) | .write(writer2) | null               | null               | (BeanSpec.java:23) | (BeanSpec.java:29) |
+        | .read(reader1) | .read(reader2) |                 |                 | (BeanSpec.java:22) | (BeanSpec.java:28) | null               | null               |
+        | .read(reader1) | .read(reader2) | .write(writer1) | .write(writer2) | (BeanSpec.java:22) | (BeanSpec.java:28) | (BeanSpec.java:23) | (BeanSpec.java:29) |
+        | .read(reader1) | .read(reader2) |                 | .write(writer2) | (BeanSpec.java:22) | (BeanSpec.java:28) | null               | (BeanSpec.java:29) |
+        | .read(reader1) | .read(reader2) | .write(writer1) |                 | (BeanSpec.java:22) | (BeanSpec.java:28) | (BeanSpec.java:23) | null               |
+        | .read(reader1) |                | .write(writer1) | .write(writer2) | (BeanSpec.java:22) | null               | (BeanSpec.java:23) | (BeanSpec.java:29) |
+        |                | .read(reader2) | .write(writer1) | .write(writer2) | null               | (BeanSpec.java:28) | (BeanSpec.java:23) | (BeanSpec.java:29) |
+
+    Scenario: property overlap, different type, compose: null not_null and decomposer: not_null null no merge
       Given the following bean class:
         """
         public class Order {
@@ -123,8 +279,6 @@ Feature: multi properties consistency
           public BigDecimal unitPrice, total, unitDiscount, discountTotal;
         }
         """
-
-    Scenario: compose: null not_null and decomposer: not_null null
       And the following spec class:
         """
         public class OrderSpec extends Spec<Order> {
@@ -212,10 +366,70 @@ Feature: multi properties consistency
         }
         """
 
+  Rule: resolution order
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4, str5;
+        }
+        """
+
+    Scenario: should resolve property which has writer first and reader last
+      And the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> {
+            public void main() {
+            consistent(String.class)
+                .<String, String>properties("str1", "str2")
+                .read((s1, s2) -> s1+"#"+s2)
+                .direct("str4");
+
+            consistent(String.class)
+                .<String, String>properties("str1", "str2")
+                .write(s -> new Object[]{s, s})
+                .direct("str5");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= /^str5.*/,  str4= /^hello#str5.*/, str5= /^str5.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str5.*/, str2= hello,  str4= /^str5.*#hello/, str5= /^str5.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str4", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str5.*/, str2= /^str5.*/,  str4= hello, str5= /^str5.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str5", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= hello,  str4= hello#hello, str5= hello
+        """
+
 # TODO 2/3/4 properties
 # TODO merge multi properties
-# TODO multi properties select first item
 #  TODO  should merge when only composen and only decomposer in same type
 #  TODO  should raise error when only composen and only decomposer in same type
 #  TOOD resolve order
 #  TODO merge item in list
+      # multi properties dependency check
