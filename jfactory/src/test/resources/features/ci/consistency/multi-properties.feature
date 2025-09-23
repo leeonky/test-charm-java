@@ -56,6 +56,20 @@ Feature: multi properties consistency
           givenName: Anderson
         }
         """
+      When build:
+        """
+        jFactory.clear().spec(APerson.class).property("firstName", "James").property("givenName", "Anderson").create();
+        """
+      Then the result should:
+        """
+        : {
+          fullName: /^James lastName.*/
+          firstName: James
+          lastName: /^lastName.*/
+          familyName: James
+          givenName: Anderson
+        }
+        """
 
     Scenario: one of properties has higher priority then consistency item has higher priority
       Given the following bean class:
@@ -89,6 +103,58 @@ Feature: multi properties consistency
           lastName: Tom
           familyName: /^familyName.*/
           givenName: Tom
+        }
+        """
+
+    Scenario: three properties consistency
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4, str5, str6;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+                consistent(String.class)
+                .<String, String, String>properties("str1", "str2", "str3")
+                    .read((s1,s2,s3)->s1+s2+s3)
+                    .write(s->s.substring(0,1), s->s.substring(1,2), s->s.substring(2,3))
+                .<String, String, String>properties("str4", "str5", "str6")
+                    .read((s1,s2,s3)->s1+s2+s3)
+                    .write(s->s.substring(0,1), s->s.substring(1,2), s->s.substring(2,3));
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: /^str2.*/
+          str3: /^str3.*/
+          str4: s
+          str5: t
+          str6: r
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "x").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: x
+          str2: /^str2.*/
+          str3: /^str3.*/
+          str4: x
+          str5: s
+          str6: t
         }
         """
 
@@ -483,6 +549,3 @@ Feature: multi properties consistency
         """
         str1= hello, str2= /^str2.*/, str3= hello,  str4= /hello#str2.*/, str5= hello
         """
-
-# TODO 2/3/4 properties
-#  TODO merge item in list

@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.function.TriFunction;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -35,6 +36,10 @@ public interface Consistency<T> {
 
     default <P1, P2> C2<T, P1, P2> properties(String property1, String property2) {
         return new C2<>(this, new ConsistencyItem<>(asList(propertyChain(property1), propertyChain(property2)), this));
+    }
+
+    default <P1, P2, P3> C3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+        return new C3<>(this, new ConsistencyItem<>(asList(propertyChain(property1), propertyChain(property2), propertyChain(property3)), this));
     }
 
     interface Identity {
@@ -161,6 +166,25 @@ public interface Consistency<T> {
         public C2<T, P1, P2> write(Function<T, P1> decompose1, Function<T, P2> decompose2) {
             lastItem.setDecomposer(new DecomposerWrapper<>(
                     t -> new Object[]{decompose1.apply(t), decompose2.apply(t)}, asList(decompose1, decompose2)));
+            return this;
+        }
+    }
+
+    class C3<T, P1, P2, P3> extends MultiPropertyConsistency<T, C3<T, P1, P2, P3>> {
+        public C3(Consistency<T> origin, ConsistencyItem<T> lastItem) {
+            super(origin, lastItem);
+        }
+
+        @SuppressWarnings("unchecked")
+        public C3<T, P1, P2, P3> read(TriFunction<P1, P2, P3, T> composer) {
+            lastItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P1) objs[0], (P2) objs[1], (P3) objs[2]), composer));
+            return this;
+        }
+
+        public C3<T, P1, P2, P3> write(Function<T, P1> decompose1, Function<T, P2> decompose2, Function<T, P3> decompose3) {
+            lastItem.setDecomposer(new DecomposerWrapper<>(
+                    t -> new Object[]{decompose1.apply(t), decompose2.apply(t), decompose3.apply(t)},
+                    asList(decompose1, decompose2, decompose3)));
             return this;
         }
     }
