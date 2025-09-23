@@ -426,10 +426,63 @@ Feature: multi properties consistency
         str1= hello, str2= hello,  str4= hello#hello, str5= hello
         """
 
+    Scenario: overlap property resolution order
+      And the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> {
+            public void main() {
+            consistent(String.class)
+                .<String, String>properties("str1", "str2")
+                .read((s1, s2) -> s1+"#"+s2)
+                .direct("str4");
+
+            consistent(String.class)
+                .<String, String>properties("str1", "str3")
+                .write(s -> new Object[]{s, s})
+                .direct("str5");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= /^str2.*/, str3=/^str5.*/, str4= /^hello#str2.*/, str5= /^str5.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str5.*/, str2= hello, str3=/^str5.*/, str4= /^str5.*#hello/, str5= /^str5.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str5.*/, str2= /^str2.*/, str3=hello,  str4= /^str5.*#str2.*/, str5= /^str5.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str4", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str5.*/, str2= /^str2.*/, str3=/^str5.*/,  str4= hello, str5= /^str5.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str5", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= /^str2.*/, str3= hello,  str4= /hello#str2.*/, str5= hello
+        """
+
 # TODO 2/3/4 properties
-# TODO merge multi properties
-#  TODO  should merge when only composen and only decomposer in same type
-#  TODO  should raise error when only composen and only decomposer in same type
-#  TOOD resolve order
 #  TODO merge item in list
-      # multi properties dependency check

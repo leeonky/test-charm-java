@@ -59,12 +59,23 @@ public class DefaultConsistency<T> implements Consistency<T> {
     }
 
     public boolean merge(DefaultConsistency<?> another) {
-        if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::sameProperty))) {
+        if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::needMerge))) {
             for (ConsistencyItem item : another.items)
                 items.add(item);
             return true;
         }
         return false;
+    }
+
+    public DefaultConsistency<T> distinct() {
+        List<ConsistencyItem<T>> merged = new ArrayList<>();
+        for (ConsistencyItem<T> item : items) {
+            if (merged.stream().noneMatch(item::needMerge))
+                merged.add(item);
+        }
+        items.clear();
+        items.addAll(merged);
+        return this;
     }
 
     public List<ConsistencyItem<T>> items() {

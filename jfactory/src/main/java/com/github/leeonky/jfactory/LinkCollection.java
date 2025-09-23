@@ -39,7 +39,7 @@ class LinkCollection {
         while (!left.isEmpty()) {
             DefaultConsistency<?> popped = left.pop();
             left.removeIf(popped::merge);
-            merged.add(popped);
+            merged.add(popped.distinct());
         }
         return merged;
     }

@@ -10,35 +10,35 @@ Feature: single property consistency
 
     Scenario: link property with the same type directly
       Given the following bean class:
-          """
-          public class Bean {
-            public String str1, str2;
-          }
-          """
+        """
+        public class Bean {
+          public String str1, str2;
+        }
+        """
       And the following spec class:
-          """
-          public class ABean extends Spec<Bean> {
-            public void main() {
-              linkNew("str1", "str2");
-            }
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            linkNew("str1", "str2");
           }
-          """
+        }
+        """
       When build:
-          """
-          jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-          """
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
       Then the result should:
-          """
-          <<str1,str2>>= hello
-          """
+        """
+        <<str1,str2>>= hello
+        """
       When build:
-          """
-          jFactory.clear().spec(ABean.class).property("str2", "hello").create();
-          """
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
       Then the result should:
-          """
-          <<str1,str2>>= hello
-          """
+        """
+        <<str1,str2>>= hello
+        """
 
     Scenario: consistency in different type
       Given the following bean class:
@@ -79,6 +79,42 @@ Feature: single property consistency
           str: '50'
           i: 50
         }
+        """
+
+    Scenario: remove duplicated item
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            property("str1").value("foo");
+
+            Function<String,String> f = s->s;
+            Function<String,String> f2 = s->s+"hello";
+
+            consistent(String.class)
+              .<String>property("str1")
+                .read(f)
+                .write(f2)
+              .<String>property("str1")
+                .read(f)
+                .write(f2)
+              .direct("str2");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        str1= foo, str2= foo
         """
 
   Rule: need merge

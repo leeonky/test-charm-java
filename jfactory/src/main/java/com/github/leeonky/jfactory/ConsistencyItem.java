@@ -48,7 +48,7 @@ public class ConsistencyItem<T> {
         return new Resolving(producer);
     }
 
-    boolean sameProperty(ConsistencyItem<?> another) {
+    boolean needMerge(ConsistencyItem<?> another) {
         boolean sameProperty = propertyChains.equals(another.propertyChains);
         if (sameProperty) {
             if (another.consistency.type().equals(consistency.type())) {
@@ -118,7 +118,7 @@ public class ConsistencyItem<T> {
     }
 
     public boolean dependsOn(ConsistencyItem<?> another) {
-        return propertyChains.equals(another.propertyChains)
+        return propertyChains.stream().anyMatch(another.propertyChains::contains)
                 && composer != null && another.decomposer != null;
     }
 
