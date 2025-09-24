@@ -146,7 +146,7 @@ public class ConsistencyItem<T> {
     }
 
     class Resolving {
-        final Producer<?> beanProducer;
+        private final Producer<?> beanProducer;
         private final List<Producer<?>> propertyProducers;
         private Object[] decomposedCachedValues;
         private Object[] cachedValuesForComposing;
@@ -184,6 +184,10 @@ public class ConsistencyItem<T> {
 
         public boolean hasComposer() {
             return composer != null;
+        }
+
+        public boolean hasFixedProducer() {
+            return propertyProducers.stream().anyMatch(Producer::isFixed);
         }
     }
 }

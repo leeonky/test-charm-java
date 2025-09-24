@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static com.github.leeonky.util.function.Extension.not;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -60,12 +61,15 @@ public class DefaultConsistency<T> implements Consistency<T> {
     }
 
     private Optional<ConsistencyItem<T>.Resolving> guessDependency(List<ConsistencyItem<T>.Resolving> resolvingList) {
-        resolvingList = resolvingList.stream().filter(ConsistencyItem.Resolving::hasComposer).collect(toList());
-        for (Class<?> type : TYPE_PRIORITY)
-            for (ConsistencyItem<T>.Resolving resolving : resolvingList)
-                if (resolving.isProducerType(type))
-                    return of(resolving);
-        return resolvingList.stream().findFirst();
+        List<ConsistencyItem<T>.Resolving> candidates = resolvingList.stream().filter(ConsistencyItem.Resolving::hasComposer).collect(toList());
+        return getFirstPresent(() -> candidates.stream().filter(ConsistencyItem.Resolving::hasFixedProducer).findFirst(),
+                () -> {
+                    for (Class<?> type : TYPE_PRIORITY)
+                        for (ConsistencyItem<T>.Resolving resolving : candidates)
+                            if (resolving.isProducerType(type))
+                                return of(resolving);
+                    return candidates.stream().findFirst();
+                });
     }
 
     public boolean merge(DefaultConsistency<?> another) {
