@@ -1481,5 +1481,58 @@ Feature: single property consistency
         str1= hello?, str2= hello?, str3= hello
         """
 
-#TODO allow multi reader to different properties
+  Rule: choose decomposer
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+
+#    Scenario: should choose use higher priority decomposer when not merge
+#      And the following spec class:
+#        """
+#        public class ABean extends Spec<Bean> {
+#          public void main() {
+#            consistent(String.class)
+#              .<String>property("str1")
+#                .read(s->s)
+#                .write(s->s)
+#              .direct("str2");
+#
+#            consistent(String.class)
+#              .<String>property("str1")
+#                .read(s->s)
+#                .write(s->s)
+#              .direct("str3");
+#          }
+#        }
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1, str2, str3>>= hello
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1, str2, str3>>= hello
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1, str2, str3>>= hello
+#        """
+
 #TODO choose multi writer through all readers priority
