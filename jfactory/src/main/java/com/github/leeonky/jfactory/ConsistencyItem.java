@@ -28,6 +28,12 @@ public class ConsistencyItem<T> {
         this.consistency = consistency;
     }
 
+    ConsistencyItem(Collection<PropertyChain> propertyChains, Consistency<T> consistency, StackTraceElement location) {
+        this.propertyChains = new LinkedHashSet<>(propertyChains);
+        this.consistency = consistency;
+        this.location = location;
+    }
+
     static StackTraceElement guessCustomerPositionStackTrace() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         return Arrays.stream(stackTrace).filter(s -> !s.getClassName().startsWith("com.github.leeonky.jfactory"))
@@ -120,6 +126,15 @@ public class ConsistencyItem<T> {
     public boolean dependsOn(ConsistencyItem<?> another) {
         return propertyChains.stream().anyMatch(another.propertyChains::contains)
                 && composer != null && another.decomposer != null;
+    }
+
+    public ConsistencyItem<T> absoluteProperty(PropertyChain base) {
+        ConsistencyItem<T> absolute = new ConsistencyItem<>(propertyChains.stream().map(base::concat).collect(toList()), consistency, location);
+        absolute.decomposer = decomposer;
+        absolute.composer = composer;
+        absolute.decomposerLocation = decomposerLocation;
+        absolute.composerLocation = composerLocation;
+        return absolute;
     }
 
     class Resolving {

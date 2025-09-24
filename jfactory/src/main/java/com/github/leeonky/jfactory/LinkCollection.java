@@ -43,4 +43,14 @@ class LinkCollection {
         }
         return merged;
     }
+
+    public LinkCollection absoluteProperty(PropertyChain base) {
+        LinkCollection linkCollection = new LinkCollection();
+        consistencies.forEach(consistency -> linkCollection.add(consistency.absoluteProperty(base)));
+        return linkCollection;
+    }
+
+    public void addAll(LinkCollection linkCollection) {
+        consistencies.addAll(linkCollection.consistencies);
+    }
 }

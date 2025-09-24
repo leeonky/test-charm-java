@@ -137,7 +137,9 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected void collectLinks(Producer<?> root, PropertyChain base) {
+    protected void collectLinks(ObjectProducer<?> root, PropertyChain base) {
+        if (root != this)
+            root.links.addAll(links.absoluteProperty(base));
         children.forEach((property, producer) -> producer.collectLinks(root, base.concat(property)));
         linkSpecCollection.processLinks(root, base);
     }

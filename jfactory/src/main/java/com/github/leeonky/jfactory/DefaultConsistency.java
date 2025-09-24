@@ -11,6 +11,7 @@ import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionS
 import static com.github.leeonky.util.function.Extension.not;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
@@ -27,9 +28,18 @@ public class DefaultConsistency<T> implements Consistency<T> {
     private final List<StackTraceElement> locations = new ArrayList<>();
 
     public DefaultConsistency(Class<T> type) {
-        this.type = BeanClass.create(type);
-        locations.add(guessCustomerPositionStackTrace());
+        this(BeanClass.create(type));
     }
+
+    public DefaultConsistency(BeanClass<T> type) {
+        this(type, singletonList(guessCustomerPositionStackTrace()));
+    }
+
+    DefaultConsistency(BeanClass<T> type, List<StackTraceElement> locations) {
+        this.type = type;
+        this.locations.addAll(locations);
+    }
+
 
     @Override
     public BeanClass<T> type() {
@@ -110,5 +120,11 @@ public class DefaultConsistency<T> implements Consistency<T> {
                     .append("(").append(location.getFileName()).append(":").append(location.getLineNumber()).append(")");
         }
         return builder.toString();
+    }
+
+    public DefaultConsistency<T> absoluteProperty(PropertyChain base) {
+        DefaultConsistency<T> absolute = new DefaultConsistency<>(type(), locations);
+        items.forEach(item -> absolute.items.add(item.absoluteProperty(base)));
+        return absolute;
     }
 }

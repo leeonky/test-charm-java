@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.function.TriFunction;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -11,6 +12,7 @@ import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionS
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 public interface Consistency<T> {
     Function<Object[], ?> LINK_COMPOSER = objs -> objs[0];
@@ -40,6 +42,10 @@ public interface Consistency<T> {
 
     default <P1, P2, P3> C3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
         return new C3<>(this, new ConsistencyItem<>(asList(propertyChain(property1), propertyChain(property2), propertyChain(property3)), this));
+    }
+
+    default CN<T> properties(String... properties) {
+        return new CN<>(this, new ConsistencyItem<>(Arrays.stream(properties).map(PropertyChain::propertyChain).collect(toList()), this));
     }
 
     interface Identity {
@@ -186,6 +192,12 @@ public interface Consistency<T> {
                     t -> new Object[]{decompose1.apply(t), decompose2.apply(t), decompose3.apply(t)},
                     asList(decompose1, decompose2, decompose3)));
             return this;
+        }
+    }
+
+    class CN<T> extends MultiPropertyConsistency<T, CN<T>> {
+        public CN(Consistency<T> origin, ConsistencyItem<T> lastItem) {
+            super(origin, lastItem);
         }
     }
 }
