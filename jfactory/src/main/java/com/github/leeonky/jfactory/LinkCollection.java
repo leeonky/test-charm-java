@@ -34,14 +34,16 @@ class LinkCollection {
     }
 
     private LinkedList<DefaultConsistency<?>> merged() {
-        LinkedList<DefaultConsistency<?>> left = new LinkedList<>(consistencies);
+        return mergeOnce(consistencies);
+    }
+
+    private LinkedList<DefaultConsistency<?>> mergeOnce(List<DefaultConsistency<?>> list) {
         LinkedList<DefaultConsistency<?>> merged = new LinkedList<>();
-        while (!left.isEmpty()) {
-            DefaultConsistency<?> popped = left.pop();
-            left.removeIf(popped::merge);
-            merged.add(popped.distinct());
-        }
-        return merged;
+        for (DefaultConsistency<?> consistency : list)
+            if (merged.stream().noneMatch(e -> e.merge(consistency)))
+                merged.add(consistency);
+        merged.forEach(DefaultConsistency::distinct);
+        return merged.size() == list.size() ? merged : mergeOnce(merged);
     }
 
     public LinkCollection absoluteProperty(PropertyChain base) {

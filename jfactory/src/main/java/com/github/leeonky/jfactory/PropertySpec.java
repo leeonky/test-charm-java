@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 public class PropertySpec<T> {
     private final Spec<T> spec;
@@ -88,9 +88,16 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> dependsOn(List<String> dependencies, Function<Object[], Object> rule) {
+//        spec.consistent(Object.class)
+//                .property(property.toString())
+//                .write(s -> s)
+//                .properties(dependencies.toArray(new String[0]))
+//                .read(rule);
+//        return spec;
+
         return spec.append((jFactory, objectProducer) ->
                 objectProducer.addDependency(property, rule,
-                        dependencies.stream().map(PropertyChain::propertyChain).collect(Collectors.toList())));
+                        dependencies.stream().map(PropertyChain::propertyChain).collect(toList())));
     }
 
     private Spec<T> appendProducer(Fuc<JFactory, Producer<?>, String, Producer<?>> producerFactory) {

@@ -84,6 +84,7 @@ public class Spec<T> {
     public Spec<T> link(String property, String... others) {
         List<PropertyChain> linkProperties = concat(of(property), of(others)).map(PropertyChain::propertyChain).collect(toList());
         append((jFactory, objectProducer) -> objectProducer.link(linkProperties));
+//        linkNew(property, others[0], others.length > 1 ? of(others).skip(1).toArray(String[]::new) : new String[]{});
         return this;
     }
 

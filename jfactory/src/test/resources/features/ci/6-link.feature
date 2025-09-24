@@ -39,9 +39,9 @@ Feature: define link
       And register:
       """
       jFactory.factory(Bean.class).spec(instance -> instance.spec()
-          .link("str1", "str2")
-          .link("str3", "str4")
-          .link("str2", "str3"));
+          .linkNew("str1", "str2")
+          .linkNew("str3", "str4")
+          .linkNew("str2", "str3"));
       """
       When build:
       """

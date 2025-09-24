@@ -137,6 +137,14 @@ public class ConsistencyItem<T> {
         return absolute;
     }
 
+    @Override
+    public String toString() {
+        return propertyChains.stream().map(Objects::toString).collect(joining(", ")) +
+                " => " + consistency.type().getName() +
+                (composer != null ? " with composer" : "") +
+                (decomposer != null ? " with decomposer" : "");
+    }
+
     class Resolving {
         final Producer<?> beanProducer;
         private final List<Producer<?>> propertyProducers;
