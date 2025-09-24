@@ -62,9 +62,9 @@ public class ConsistencyItem<T> {
                     throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer and decomposer mismatch:\n%s",
                             propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
 
-                if (isNotSame(composer, another.composer))
-                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
-                            propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+//                if (isNotSame(composer, another.composer))
+//                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
+//                            propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
 
                 if (isNotSame(decomposer, another.decomposer))
                     throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, decomposer mismatch:\n%s",

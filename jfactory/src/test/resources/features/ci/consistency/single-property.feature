@@ -117,6 +117,54 @@ Feature: single property consistency
         str1= foo, str2= foo
         """
 
+    Scenario: allow same property for different composer in different consistency
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(String.class)
+              .<String>property("str1")
+                .read(s->s)
+              .direct("str2");
+
+            consistent(String.class)
+              .<String>property("str1")
+                .read(s->s+"!")
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= hello, str3= hello!
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= hello, str3= /^str1.*!/
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= /^str1.*/, str3= hello
+        """
+
   Rule: need merge
 
     Background:
@@ -471,12 +519,9 @@ Feature: single property consistency
       Examples:
         | composer1   | composer2   | decomposer1  | decomposer2  | composer1Pos    | composer2Pos    | decomposer1Pos  | decomposer2Pos  | error                            |
         |             |             | .write(any1) | .write(any2) | null            | null            | (ABean.java:16) | (ABean.java:22) | decomposer mismatch              |
-        | .read(any1) | .read(any2) |              |              | (ABean.java:15) | (ABean.java:21) | null            | null            | composer mismatch                |
         | .read(any1) | .read(any2) | .write(any1) | .write(any2) | (ABean.java:15) | (ABean.java:21) | (ABean.java:16) | (ABean.java:22) | composer and decomposer mismatch |
         | .read(any1) |             | .write(any1) | .write(any2) | (ABean.java:15) | null            | (ABean.java:16) | (ABean.java:22) | decomposer mismatch              |
         |             | .read(any2) | .write(any1) | .write(any2) | null            | (ABean.java:21) | (ABean.java:16) | (ABean.java:22) | decomposer mismatch              |
-        | .read(any1) | .read(any2) |              | .write(any2) | (ABean.java:15) | (ABean.java:21) | null            | (ABean.java:22) | composer mismatch                |
-        | .read(any1) | .read(any2) | .write(any1) |              | (ABean.java:15) | (ABean.java:21) | (ABean.java:16) | null            | composer mismatch                |
 
     Scenario: raise error when composer and decompose is not the same lambda instance
       Given the following bean class:
@@ -1387,3 +1432,54 @@ Feature: single property consistency
                  ```
         """
 
+    Scenario: resolve property which has writer first and both have composer
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(String.class)
+              .<String>property("str1")
+                .read(s->s)
+              .direct("str2");
+
+            consistent(String.class)
+              .<String>property("str1")
+                .read(s->s+"!")
+                .write(s->s+"?")
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= hello, str3= hello!
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= hello, str3= /^str1.*!/
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello?, str2= hello?, str3= hello
+        """
+
+#TODO allow multi reader to different properties
+#TODO choose multi writer through all readers priority
