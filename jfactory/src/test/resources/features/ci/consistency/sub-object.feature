@@ -177,3 +177,56 @@ Feature: sub object consistency
           }
         }
         """
+
+  Rule: resolution order
+
+    Background:
+      Given the following bean class:
+        """
+        public class SubBean {
+          public String str;
+          public SubBean() {}
+          public SubBean(String s) {str=s;}
+        }
+        """
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str;
+          public SubBean subBean1 = new SubBean();
+          public SubBean subBean2 = new SubBean();
+        }
+        """
+
+    Scenario: should resolve consistency with parent property before with sub property
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              property("subBean1").byFactory();
+              property("subBean2").byFactory();
+
+              consistent(String.class)
+                .direct("str")
+                .direct("subBean1.str");
+
+              consistent(SubBean.class)
+                .direct("subBean1")
+                .direct("subBean2");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("subBean2", new SubBean("hello")).create();
+        """
+      Then the result should:
+        """
+        : {
+          str: hello
+
+          <<subBean1, subBean2>>.str: hello
+
+          subBean1= .subBean2
+        }
+        """

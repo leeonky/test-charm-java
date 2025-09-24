@@ -124,7 +124,7 @@ public class ConsistencyItem<T> {
     }
 
     public boolean dependsOn(ConsistencyItem<?> another) {
-        return propertyChains.stream().anyMatch(another.propertyChains::contains)
+        return propertyChains.stream().anyMatch(o -> another.propertyChains.stream().anyMatch(o::contains))
                 && composer != null && another.decomposer != null;
     }
 

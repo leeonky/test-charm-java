@@ -100,7 +100,7 @@ public class PropertyChain {
         return empty();
     }
 
-    private boolean contains(PropertyChain propertyChain) {
+    public boolean contains(PropertyChain propertyChain) {
         return propertyChain.property.size() <= property.size()
                 && range(0, propertyChain.property.size())
                 .allMatch(i -> Objects.equals(propertyChain.property.get(i), property.get(i)));
