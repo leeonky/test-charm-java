@@ -12,10 +12,13 @@ class LinkCollection {
         consistencies.add(consistency);
     }
 
-    public void applyLink(Producer<?> producer) {
+    public void applyLink(ObjectProducer<?> producer) {
         LinkedList<DefaultConsistency<?>> merged = merged();
-        while (!merged.isEmpty())
-            popRootDependency(merged).apply(producer);
+        for (DefaultConsistency<?> defaultConsistency : merged) {
+            defaultConsistency.apply(producer);
+        }
+//        while (!merged.isEmpty())
+//            popRootDependency(merged).apply(producer);
     }
 
     private DefaultConsistency<?> popRootDependency(LinkedList<DefaultConsistency<?>> merged) {
@@ -34,7 +37,8 @@ class LinkCollection {
     }
 
     private LinkedList<DefaultConsistency<?>> merged() {
-        return mergeOnce(consistencies);
+        return new LinkedList<>(consistencies);
+//        return mergeOnce(consistencies);
     }
 
     private LinkedList<DefaultConsistency<?>> mergeOnce(List<DefaultConsistency<?>> list) {

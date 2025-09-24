@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
-import static com.github.leeonky.util.function.Extension.not;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -24,7 +23,7 @@ public class DefaultConsistency<T> implements Consistency<T> {
             UnFixedValueProducer.class
     );
 
-    private final List<ConsistencyItem<T>> items = new ArrayList<>();
+    final List<ConsistencyItem<T>> items = new ArrayList<>();
     private final BeanClass<T> type;
     private final List<StackTraceElement> locations = new ArrayList<>();
 
@@ -53,11 +52,15 @@ public class DefaultConsistency<T> implements Consistency<T> {
         return this;
     }
 
-    @Override
-    public void apply(Producer<?> producer) {
-        List<ConsistencyItem<T>.Resolving> resolvingList = items.stream().map(i -> i.resolving(producer)).collect(toList());
-        guessDependency(resolvingList).ifPresent(dependency -> resolvingList.stream().filter(not(dependency::equals))
-                .forEach(dependent -> dependent.resolve(dependency)));
+    void apply(ObjectProducer<?> producer) {
+        Executor executor = executor(producer);
+        for (ConsistencyItem<T> item : items)
+            item.resolve(producer, executor);
+
+//        List<ConsistencyItem<T>.Resolving> resolvingList = items.stream().map(i -> i.resolving(producer)).collect(toList());
+//
+//        guessDependency(resolvingList).ifPresent(dependency -> resolvingList.stream().filter(not(dependency::equals))
+//                .forEach(dependent -> dependent.resolve(dependency)));
     }
 
     private Optional<ConsistencyItem<T>.Resolving> guessDependency(List<ConsistencyItem<T>.Resolving> resolvingList) {
@@ -130,5 +133,33 @@ public class DefaultConsistency<T> implements Consistency<T> {
         DefaultConsistency<T> absolute = new DefaultConsistency<>(type(), locations);
         items.forEach(item -> absolute.items.add(item.absoluteProperty(base)));
         return absolute;
+    }
+
+    public Executor executor(ObjectProducer<?> rootProducer) {
+        return new Executor(rootProducer);
+    }
+
+    public class Executor {
+        private final ObjectProducer<?> rootProducer;
+
+        public Executor(ObjectProducer<?> rootProducer) {
+            this.rootProducer = rootProducer;
+        }
+
+        T compose() {
+            List<ConsistencyItem<T>.Resolving> resolvingList = items.stream().map(item -> item.resolving(rootProducer)).collect(toList());
+            Optional<ConsistencyItem<T>.Resolving> optResolving = resolvingList.stream()
+                    .filter(resolving -> {
+                        for (Producer<?> propertyProducer : resolving.propertyProducers) {
+                            if (propertyProducer instanceof FixedValueProducer)
+                                return true;
+                        }
+                        return false;
+                    }).findFirst();
+            if (optResolving.isPresent()) {
+                return optResolving.get().compose();
+            }
+            return resolvingList.get(0).compose();
+        }
     }
 }

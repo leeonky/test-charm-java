@@ -20,7 +20,7 @@ public interface Consistency<T> {
 
     Consistency<T> link(ConsistencyItem<T> item);
 
-    void apply(Producer<?> producer);
+//    void apply(Producer<?> producer);
 
     BeanClass<T> type();
 
@@ -88,11 +88,6 @@ public interface Consistency<T> {
         @Override
         public Consistency<T> link(ConsistencyItem<T> item) {
             return consistency.link(item);
-        }
-
-        @Override
-        public void apply(Producer<?> producer) {
-            consistency.apply(producer);
         }
 
         @Override
