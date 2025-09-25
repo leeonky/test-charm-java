@@ -52,6 +52,7 @@ public class DefaultConsistency<T> implements Consistency<T> {
         return this;
     }
 
+    @Deprecated
     void apply(ObjectProducer<?> producer) {
         Executor executor = executor(producer);
         for (ConsistencyItem<T> item : items)
@@ -63,20 +64,20 @@ public class DefaultConsistency<T> implements Consistency<T> {
 //                .forEach(dependent -> dependent.resolve(dependency)));
     }
 
-    private Optional<ConsistencyItem<T>.Resolving> guessDependency(List<ConsistencyItem<T>.Resolving> resolvingList) {
-        List<ConsistencyItem<T>.Resolving> candidates = resolvingList.stream().filter(ConsistencyItem.Resolving::hasComposer).collect(toList());
-        return getFirstPresent(() -> candidates.stream().filter(ConsistencyItem.Resolving::hasFixedProducer).findFirst(),
+    private Optional<ConsistencyItem<T>.ResolverBk> guessDependency(List<ConsistencyItem<T>.ResolverBk> resolverBkList) {
+        List<ConsistencyItem<T>.ResolverBk> candidates = resolverBkList.stream().filter(ConsistencyItem.ResolverBk::hasComposer).collect(toList());
+        return getFirstPresent(() -> candidates.stream().filter(ConsistencyItem.ResolverBk::hasFixedProducer).findFirst(),
                 () -> {
                     for (Class<?> type : TYPE_PRIORITY)
-                        for (ConsistencyItem<T>.Resolving resolving : candidates)
-                            if (resolving.isProducerType(type))
-                                return of(resolving);
+                        for (ConsistencyItem<T>.ResolverBk resolverBk : candidates)
+                            if (resolverBk.isProducerType(type))
+                                return of(resolverBk);
                     return candidates.stream().findFirst();
                 });
     }
 
     public boolean merge(DefaultConsistency<?> another) {
-        if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::needMerge))) {
+        if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::same))) {
             for (ConsistencyItem item : another.items)
                 items.add(item);
             return true;
@@ -85,18 +86,15 @@ public class DefaultConsistency<T> implements Consistency<T> {
     }
 
     public DefaultConsistency<T> distinct() {
+//        return this;
         List<ConsistencyItem<T>> merged = new ArrayList<>();
         for (ConsistencyItem<T> item : items) {
-            if (merged.stream().noneMatch(item::needMerge))
+            if (merged.stream().noneMatch(item::same))
                 merged.add(item);
         }
         items.clear();
         items.addAll(merged);
         return this;
-    }
-
-    public List<ConsistencyItem<T>> items() {
-        return Collections.unmodifiableList(items);
     }
 
     public boolean dependsOn(DefaultConsistency<?> another) {
@@ -139,27 +137,59 @@ public class DefaultConsistency<T> implements Consistency<T> {
         return new Executor(rootProducer);
     }
 
+    public Resolver resolver(ObjectProducer<?> root) {
+        return new Resolver(root);
+    }
+
+    public class Resolver {
+        public final List<ConsistencyItem<T>.Resolver> items;
+
+        public Resolver(ObjectProducer<?> root) {
+            items = DefaultConsistency.this.items.stream().map(i -> i.resolver(root, this)).collect(toList());
+        }
+
+        public void resolve(ConsistencyItem<T>.Resolver resolver, ObjectProducer<?> root) {
+            for (ConsistencyItem<T>.Resolver item : items) {
+                if (item != resolver) {
+                    for (PropertyChain property : item.properties()) {
+                        root.changeDescendant(property, (producer, s) ->
+                                new ConsistencyProducer<>(root.descendant(property).getType(), resolver, item));
+                    }
+                }
+            }
+
+//            for (ConsistencyItem<T> item : items) {
+//                if (provider.isNot(item)) {
+//                    ConsistencyItem<T>.Consumer consumer = item.consumer(provider);
+//                    for (PropertyChain property : item.properties) {
+//                        root.changeDescendant(property, (producer, s) ->
+//                                new ConsistencyProducer<>(root.descendant(property).getType(), consumer));
+//                    }
+//                }
+//            }
+        }
+    }
+
+    @Deprecated
     public class Executor {
         private final ObjectProducer<?> rootProducer;
+        private List<ConsistencyItem<T>.ResolverBk> composeResolverBks;
 
         public Executor(ObjectProducer<?> rootProducer) {
             this.rootProducer = rootProducer;
         }
 
         T compose() {
-            List<ConsistencyItem<T>.Resolving> resolvingList = items.stream().map(item -> item.resolving(rootProducer)).collect(toList());
-            Optional<ConsistencyItem<T>.Resolving> optResolving = resolvingList.stream()
-                    .filter(resolving -> {
-                        for (Producer<?> propertyProducer : resolving.propertyProducers) {
-                            if (propertyProducer instanceof FixedValueProducer)
-                                return true;
-                        }
-                        return false;
-                    }).findFirst();
-            if (optResolving.isPresent()) {
-                return optResolving.get().compose();
-            }
-            return resolvingList.get(0).compose();
+            Optional<ConsistencyItem<T>.ResolverBk> optResolving = composeResolvers().stream().findFirst();
+            return optResolving.orElseGet(() -> composeResolvers().get(0)).compose();
         }
+
+        private List<ConsistencyItem<T>.ResolverBk> composeResolvers() {
+            if (composeResolverBks == null)
+                composeResolverBks = items.stream().filter(item -> item.composer != null)
+                        .map(item -> item.resolving(rootProducer)).collect(toList());
+            return composeResolverBks;
+        }
+
     }
 }

@@ -1,32 +1,19 @@
 package com.github.leeonky.jfactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.github.leeonky.util.BeanClass;
 
-public class ConsistencyProducer<T> extends Producer<T> {
-    private final Producer<T> originProducer;
-    private final int index;
-    private final List<DecomposerExecutor<T>> decomposerExecutors = new ArrayList<>();
+public class ConsistencyProducer<T, CT> extends Producer<T> {
+    private final ConsistencyItem<CT>.Resolver resolver;
+    private final ConsistencyItem<CT>.Resolver item;
 
-    public ConsistencyProducer(Producer<T> originProducer, int index, DecomposerExecutor<T> decomposerExecutor) {
-        super(originProducer.getType());
-        this.originProducer = originProducer;
-        this.index = index;
-        decomposerExecutors.add(decomposerExecutor);
+    public ConsistencyProducer(BeanClass<T> type, ConsistencyItem<CT>.Resolver resolver, ConsistencyItem<CT>.Resolver item) {
+        super(type);
+        this.resolver = resolver;
+        this.item = item;
     }
 
     @Override
     protected T produce() {
-        try {
-            return decomposerExecutors.get(0).getValue(index);
-        } catch (ConsistencyCircularityException e) {
-            return originProducer.getValue();
-        }
+        return (T) item.decompose(resolver.compose())[0];
     }
 }
-
-//TODO real ConsistencyProducer
-//TODO origin is also a SubConsistentProducer
-//TODO resolve order: fixed, readonly, value, default
-//TODO changeDescendant consistentProducer to readonly
-//TODO stackoverflow

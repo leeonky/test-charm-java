@@ -1,13 +1,13 @@
 Feature: multi properties consistency
 
-#  Background:
-#    Given declaration jFactory =
-#    """
-#    new JFactory();
-#    """
-#
-#  Rule: multiple properties consistency
-#
+  Background:
+    Given declaration jFactory =
+    """
+    new JFactory();
+    """
+
+  Rule: multiple properties consistency
+
 #    Scenario: two properties consistency
 #      Given the following bean class:
 #        """

@@ -13,7 +13,7 @@ Feature: single property consistency
       Given the following bean class:
         """
         public class Bean {
-          public String str1, str2;
+          public String str1, str2, str3, str4;
         }
         """
 
@@ -85,7 +85,63 @@ Feature: single property consistency
         """
         <<str1,str2>>= /^str1.*/
         """
-
+#
+#    Scenario: separated two consistencies
+#      And the following spec class:
+#        """
+#        public class ABean extends Spec<Bean> {
+#          public void main() {
+#            linkNew("str1", "str2");
+#            linkNew("str3", "str4");
+#          }
+#        }
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1,str2>>= hello,
+#        <<str3,str4>>= /^str3.*/
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1,str2>>= hello,
+#        <<str3,str4>>= /^str3.*/
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1,str2>>= /^str1.*/,
+#        <<str3,str4>>= /^str3.*/
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1,str2>>= /^str1.*/,
+#        <<str3,str4>>= hello
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).property("str4", "hello").create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1,str2>>= /^str1.*/,
+#        <<str3,str4>>= hello
+#        """
+#
 #    Scenario: consistency in different type
 #      Given the following bean class:
 #        """
@@ -325,7 +381,7 @@ Feature: single property consistency
 #          str3= HELLO
 #        }
 #        """
-#
+
 #    Scenario: same property, same type, same composer, no decomposer merge
 #      Given the following spec class:
 #        """
@@ -439,7 +495,7 @@ Feature: single property consistency
 #          str3= HELLO
 #        }
 #        """
-#
+
 #  Rule: conflict merge
 #
 #    Scenario: need merge but different consistency type
@@ -1581,4 +1637,35 @@ Feature: single property consistency
 ##        <<str1, str2, str3>>= hello
 ##        """
 #
+
+#  Rule: data source dependency order
+#
+#    Background:
+#      Given the following bean class:
+#        """
+#        public class Bean {
+#          public String str1, str2, str3, str4;
+#        }
+#        """
+#
+#    Scenario: use value first than default value
+#      And the following spec class:
+#        """
+#        public class ABean extends Spec<Bean> {
+#          public void main() {
+#            property("str2").value("foo");
+#            linkNew("str1", "str2");
+#          }
+#        }
+#        """
+#      When build:
+#        """
+#        jFactory.clear().spec(ABean.class).create();
+#        """
+#      Then the result should:
+#        """
+#        <<str1,str2>>= foo
+#        """
+
+
 ##TODO choose multi writer through all readers priority

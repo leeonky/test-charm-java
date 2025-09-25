@@ -14,11 +14,24 @@ class LinkCollection {
 
     public void applyLink(ObjectProducer<?> producer) {
         LinkedList<DefaultConsistency<?>> merged = merged();
-        for (DefaultConsistency<?> defaultConsistency : merged) {
-            defaultConsistency.apply(producer);
-        }
+        selectInputItem(merged, producer).resolve();
+
+//        for (DefaultConsistency<?> defaultConsistency : merged) {
+//            defaultConsistency.apply(producer);
+//        }
 //        while (!merged.isEmpty())
 //            popRootDependency(merged).apply(producer);
+    }
+
+    private ConsistencyItem<?>.Resolver selectInputItem(LinkedList<DefaultConsistency<?>> merged, ObjectProducer<?> producer) {
+        DefaultConsistency<?> consistency = merged.pop();
+        DefaultConsistency<?>.Resolver consistencyResolver = consistency.resolver(producer);
+
+        for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.items) {
+            if (itemResolver.hasTypeOf(FixedValueProducer.class))
+                return itemResolver;
+        }
+        return consistencyResolver.items.get(0);
     }
 
     private DefaultConsistency<?> popRootDependency(LinkedList<DefaultConsistency<?>> merged) {

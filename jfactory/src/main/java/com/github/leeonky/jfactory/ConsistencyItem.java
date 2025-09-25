@@ -15,22 +15,22 @@ import static java.util.stream.Collectors.toList;
 
 class ConsistencyItem<T> {
     final Set<PropertyChain> properties;
-    private final Consistency<T> consistency;
+    private final DefaultConsistency<T> consistency;
     private final StackTraceElement location;
     private StackTraceElement composerLocation;
     private StackTraceElement decomposerLocation;
     Consistency.Composer<T> composer;
-    private Consistency.Decomposer<T> decomposer;
+    Consistency.Decomposer<T> decomposer;
 
     public ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency) {
         location = guessCustomerPositionStackTrace();
         this.properties = new LinkedHashSet<>(properties);
-        this.consistency = consistency;
+        this.consistency = (DefaultConsistency<T>) consistency;
     }
 
     ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency, StackTraceElement location) {
         this.properties = new LinkedHashSet<>(properties);
-        this.consistency = consistency;
+        this.consistency = (DefaultConsistency<T>) consistency;
         this.location = location;
     }
 
@@ -50,21 +50,29 @@ class ConsistencyItem<T> {
         decomposerLocation = decomposer.getLocation();
     }
 
-    Resolving resolving(Producer<?> producer) {
-        return new Resolving(producer);
+    ResolverBk resolving(Producer<?> producer) {
+        return new ResolverBk(producer);
+    }
+
+    public boolean same(ConsistencyItem<?> another) {
+        return properties.equals(another.properties) &&
+                (isSame(composer, another.composer) && isSame(decomposer, another.decomposer)
+                        || isBothNull(composer, another.composer) && isSame(decomposer, another.decomposer)
+                        || isSame(composer, another.composer) && isBothNull(decomposer, another.decomposer));
     }
 
     boolean needMerge(ConsistencyItem<?> another) {
         boolean sameProperty = properties.equals(another.properties);
+
         if (sameProperty) {
             if (another.consistency.type().equals(consistency.type())) {
                 if (isNotSame(composer, another.composer) && isNotSame(decomposer, another.decomposer))
                     throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer and decomposer mismatch:\n%s",
                             properties.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
 
-//                if (isNotSame(composer, another.composer))
-//                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
-//                            propertyChains.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
+                if (isNotSame(composer, another.composer))
+                    throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, composer mismatch:\n%s",
+                            properties.stream().map(Objects::toString).collect(joining(", ")), toTable(another, "  ")));
 
                 if (isNotSame(decomposer, another.decomposer))
                     throw new ConflictConsistencyException(format("Conflict consistency on property <%s>, decomposer mismatch:\n%s",
@@ -145,6 +153,7 @@ class ConsistencyItem<T> {
                 (decomposer != null ? " with decomposer" : "");
     }
 
+    @Deprecated
     public void resolve(ObjectProducer<?> producer, DefaultConsistency<T>.Executor executor) {
         if (decomposer != null) {
             int i = 0;
@@ -152,19 +161,53 @@ class ConsistencyItem<T> {
                 int propertyIndex = i++;
                 DecomposerExecutor<T> decomposerExecutor = new DecomposerExecutor<>(decomposer, executor);
                 producer.changeDescendant(desProperty, (parent, property) ->
-                        new ConsistencyProducer<>(cast(producer.descendant(desProperty)), propertyIndex, decomposerExecutor));
+                        new ConsistencyProducerBk<>(cast(producer.descendant(desProperty)), propertyIndex, decomposerExecutor));
             }
         }
     }
 
+    public Resolver resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
+        return new Resolver(root, consistency);
+    }
+
+    class Resolver {
+        private final ObjectProducer<?> root;
+        private final DefaultConsistency<T>.Resolver consistency;
+
+        public Resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
+            this.root = root;
+            this.consistency = consistency;
+        }
+
+        public boolean hasTypeOf(Class<?> type) {
+            return properties.stream().map(root::descendant).anyMatch(type::isInstance);
+        }
+
+        public void resolve() {
+            consistency.resolve(this, root);
+        }
+
+        public Set<PropertyChain> properties() {
+            return properties;
+        }
+
+        public T compose() {
+            return composer.apply(properties.stream().map(root::descendant).map(Producer::getValue).toArray());
+        }
+
+        public Object[] decompose(T compose) {
+            return decomposer.apply(compose);
+        }
+    }
+
     @Deprecated
-    class Resolving {
+    class ResolverBk {
         private final Producer<?> beanProducer;
         final List<Producer<?>> propertyProducers;
         private Object[] decomposedCachedValues;
         private Object[] cachedValuesForComposing;
 
-        Resolving(Producer<?> beanProducer) {
+        ResolverBk(Producer<?> beanProducer) {
             this.beanProducer = beanProducer;
             propertyProducers = properties.stream().map(beanProducer::descendant).collect(toList());
         }
@@ -174,7 +217,7 @@ class ConsistencyItem<T> {
         }
 
         @SuppressWarnings("unchecked")
-        void resolve(Resolving dependency) {
+        void resolve(ResolverBk dependency) {
             zip(properties, propertyProducers).forEachElementWithIndex((index, propertyChain, propertyProducer) -> {
                 if (decomposer != null)
                     beanProducer.changeDescendant(propertyChain, (parent, property) -> new DependencyProducer<>(
@@ -203,4 +246,5 @@ class ConsistencyItem<T> {
             return propertyProducers.stream().anyMatch(Producer::isFixed);
         }
     }
+
 }
