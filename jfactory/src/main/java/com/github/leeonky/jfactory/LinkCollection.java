@@ -13,7 +13,7 @@ class LinkCollection {
     }
 
     public void applyLink(ObjectProducer<?> producer) {
-        LinkedList<DefaultConsistency<?>> merged = merged();
+        LinkedList<DefaultConsistency<?>> merged = merge(consistencies);
         selectInputItem(merged, producer).resolve();
 
 //        for (DefaultConsistency<?> defaultConsistency : merged) {
@@ -31,7 +31,7 @@ class LinkCollection {
             if (itemResolver.hasTypeOf(FixedValueProducer.class))
                 return itemResolver;
         }
-        return consistencyResolver.providers.get(0);
+        return consistencyResolver.providers.iterator().next();
     }
 
     private DefaultConsistency<?> popRootDependency(LinkedList<DefaultConsistency<?>> merged) {
@@ -49,18 +49,12 @@ class LinkCollection {
         throw new ConflictConsistencyException(builder.toString());
     }
 
-    private LinkedList<DefaultConsistency<?>> merged() {
-//        return new LinkedList<>(consistencies);
-        return mergeOnce(consistencies);
-    }
-
-    private LinkedList<DefaultConsistency<?>> mergeOnce(List<DefaultConsistency<?>> list) {
+    private LinkedList<DefaultConsistency<?>> merge(List<DefaultConsistency<?>> list) {
         LinkedList<DefaultConsistency<?>> merged = new LinkedList<>();
         for (DefaultConsistency<?> consistency : list)
             if (merged.stream().noneMatch(e -> e.merge(consistency)))
                 merged.add(consistency);
-        merged.forEach(DefaultConsistency::distinct);
-        return merged.size() == list.size() ? merged : mergeOnce(merged);
+        return merged.size() == list.size() ? merged : merge(merged);
     }
 
     public LinkCollection absoluteProperty(PropertyChain base) {

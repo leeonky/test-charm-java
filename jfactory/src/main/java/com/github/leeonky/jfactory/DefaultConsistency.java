@@ -2,10 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
@@ -13,6 +10,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 public class DefaultConsistency<T> implements Consistency<T> {
@@ -85,18 +83,6 @@ public class DefaultConsistency<T> implements Consistency<T> {
         return false;
     }
 
-    public DefaultConsistency<T> distinct() {
-//        return this;
-        List<ConsistencyItem<T>> merged = new ArrayList<>();
-        for (ConsistencyItem<T> item : items) {
-            if (merged.stream().noneMatch(item::same))
-                merged.add(item);
-        }
-        items.clear();
-        items.addAll(merged);
-        return this;
-    }
-
     public boolean dependsOn(DefaultConsistency<?> another) {
         List<ConsistencyItem<?>> dependencyPair = dependencyPair(another);
         if (dependencyPair.isEmpty())
@@ -142,13 +128,13 @@ public class DefaultConsistency<T> implements Consistency<T> {
     }
 
     public class Resolver {
-        final List<ConsistencyItem<T>.Resolver> providers;
-        private final List<ConsistencyItem<T>.Resolver> consumers;
+        final Set<ConsistencyItem<T>.Resolver> providers;
+        private final Set<ConsistencyItem<T>.Resolver> consumers;
 
         public Resolver(ObjectProducer<?> root) {
             List<ConsistencyItem<T>.Resolver> itemResolvers = items.stream().map(i -> i.resolver(root, this)).collect(toList());
-            providers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasComposer).collect(toList());
-            consumers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasDecomposer).collect(toList());
+            providers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasComposer).collect(toCollection(LinkedHashSet::new));
+            consumers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasDecomposer).collect(toCollection(LinkedHashSet::new));
         }
 
         public void resolve(ConsistencyItem<T>.Resolver provider) {

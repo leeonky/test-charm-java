@@ -211,6 +211,28 @@ class ConsistencyItem<T> {
                         new ConsistencyProducer<>(root.descendant(property).getType(), provider, this, index));
             }
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(properties, composer == null ? null : composer.identity(),
+                    decomposer == null ? null : decomposer.identity());
+        }
+
+        private ConsistencyItem<T> outer() {
+            return ConsistencyItem.this;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ConsistencyItem.Resolver) {
+                ConsistencyItem<T> another = ((Resolver) o).outer();
+                return properties.equals(another.properties) &&
+                        (isSame(composer, another.composer) && isSame(decomposer, another.decomposer)
+                                || isBothNull(composer, another.composer) && isSame(decomposer, another.decomposer)
+                                || isSame(composer, another.composer) && isBothNull(decomposer, another.decomposer));
+            }
+            return false;
+        }
     }
 
     @Deprecated
