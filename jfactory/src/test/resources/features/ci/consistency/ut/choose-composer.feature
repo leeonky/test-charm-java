@@ -34,4 +34,3 @@ Feature: choose consistency input item
         """
         <<str1,str2>>= foo
         """
-
