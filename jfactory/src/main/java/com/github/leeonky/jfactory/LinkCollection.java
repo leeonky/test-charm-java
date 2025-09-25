@@ -27,11 +27,11 @@ class LinkCollection {
         DefaultConsistency<?> consistency = merged.pop();
         DefaultConsistency<?>.Resolver consistencyResolver = consistency.resolver(producer);
 
-        for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.items) {
+        for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
             if (itemResolver.hasTypeOf(FixedValueProducer.class))
                 return itemResolver;
         }
-        return consistencyResolver.items.get(0);
+        return consistencyResolver.providers.get(0);
     }
 
     private DefaultConsistency<?> popRootDependency(LinkedList<DefaultConsistency<?>> merged) {
@@ -50,8 +50,8 @@ class LinkCollection {
     }
 
     private LinkedList<DefaultConsistency<?>> merged() {
-        return new LinkedList<>(consistencies);
-//        return mergeOnce(consistencies);
+//        return new LinkedList<>(consistencies);
+        return mergeOnce(consistencies);
     }
 
     private LinkedList<DefaultConsistency<?>> mergeOnce(List<DefaultConsistency<?>> list) {

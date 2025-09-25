@@ -25,10 +25,3 @@ public class ConsistencyProducerBk<T> extends Producer<T> {
         }
     }
 }
-
-//TODO real ConsistencyProducer
-//TODO origin is also a SubConsistentProducer
-//TODO resolve order: fixed, readonly, value, default
-//TODO changeDescendant consistentProducer to readonly
-//TODO stackoverflow
-//TODO compute once

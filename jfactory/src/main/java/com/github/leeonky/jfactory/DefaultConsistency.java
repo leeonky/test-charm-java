@@ -142,31 +142,21 @@ public class DefaultConsistency<T> implements Consistency<T> {
     }
 
     public class Resolver {
-        public final List<ConsistencyItem<T>.Resolver> items;
+        final List<ConsistencyItem<T>.Resolver> providers;
+        private final List<ConsistencyItem<T>.Resolver> consumers;
 
         public Resolver(ObjectProducer<?> root) {
-            items = DefaultConsistency.this.items.stream().map(i -> i.resolver(root, this)).collect(toList());
+            List<ConsistencyItem<T>.Resolver> itemResolvers = items.stream().map(i -> i.resolver(root, this)).collect(toList());
+            providers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasComposer).collect(toList());
+            consumers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasDecomposer).collect(toList());
         }
 
-        public void resolve(ConsistencyItem<T>.Resolver resolver, ObjectProducer<?> root) {
-            for (ConsistencyItem<T>.Resolver item : items) {
-                if (item != resolver) {
-                    for (PropertyChain property : item.properties()) {
-                        root.changeDescendant(property, (producer, s) ->
-                                new ConsistencyProducer<>(root.descendant(property).getType(), resolver, item));
-                    }
+        public void resolve(ConsistencyItem<T>.Resolver provider) {
+            for (ConsistencyItem<T>.Resolver consumer : consumers) {
+                if (consumer != provider) {
+                    consumer.extracted(provider);
                 }
             }
-
-//            for (ConsistencyItem<T> item : items) {
-//                if (provider.isNot(item)) {
-//                    ConsistencyItem<T>.Consumer consumer = item.consumer(provider);
-//                    for (PropertyChain property : item.properties) {
-//                        root.changeDescendant(property, (producer, s) ->
-//                                new ConsistencyProducer<>(root.descendant(property).getType(), consumer));
-//                    }
-//                }
-//            }
         }
     }
 

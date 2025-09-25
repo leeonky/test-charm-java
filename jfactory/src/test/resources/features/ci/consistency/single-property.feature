@@ -142,47 +142,47 @@ Feature: single property consistency
 #        <<str3,str4>>= hello
 #        """
 #
-#    Scenario: consistency in different type
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#          public String str;
-#          public int i;
-#        }
-#        """
-#      And the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#            consistent(String.class)
-#              .direct("str")
-#              .property("i").read(Object::toString).write(Integer::parseInt);
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str", "100").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str: '100'
-#          i: 100
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("i", 50).create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str: '50'
-#          i: 50
-#        }
-#        """
-#
+    Scenario: consistency in different type
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str;
+          public int i;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(String.class)
+              .direct("str")
+              .property("i").read(Object::toString).write(Integer::parseInt);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str", "100").create();
+        """
+      Then the result should:
+        """
+        : {
+          str: '100'
+          i: 100
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("i", 50).create();
+        """
+      Then the result should:
+        """
+        : {
+          str: '50'
+          i: 50
+        }
+        """
+
 #    Scenario: remove duplicated item
 #      Given the following bean class:
 #        """
@@ -267,234 +267,234 @@ Feature: single property consistency
 #        str1= /^str1.*/, str2= /^str1.*/, str3= hello
 #        """
 #
-#  Rule: need merge
-#
-#    Background:
-#
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#          public String str1, str2, str3;
-#        }
-#        """
-#
-#    Scenario: merge in the same property with the same link
-#      Given the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#            linkNew("str1", "str2");
-#            linkNew("str2", "str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
-#
-#    Scenario: same property, same type, same composer, same decomposer merge
-#      Given the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#              Function<String,String> toUpper = String::toUpperCase;
-#              Function<String,String> toLower = String::toLowerCase;
-#
-#              consistent(String.class)
-#              .<String>property("str1")
-#                .read(toUpper).write(toLower)
-#              .direct("str2");
-#
-#              consistent(String.class)
-#              .<String>property("str1")
-#                .read(toUpper).write(toLower)
-#              .direct("str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= hello
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str1", "HELLO").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= HELLO
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= hello
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "HELLO").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= hello
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
+  Rule: need merge
 
-#    Scenario: same property, same type, same composer, no decomposer merge
-#      Given the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#              Function<String,String> toUpper = String::toUpperCase;
-#              Function<String,String> toLower = String::toLowerCase;
-#
-#              consistent(String.class)
-#              .<String>property("str1")
-#                .read(toUpper)
-#              .direct("str2");
-#
-#              consistent(String.class)
-#              .<String>property("str1")
-#                .read(toUpper)
-#              .direct("str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= hello
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= /^str1.*/
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "HELLO").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= /^str1.*/
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
-#
-#    Scenario: same property, same type, no composer, same decomposer merge
-#      Given the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#              Function<String,String> toUpper = String::toUpperCase;
-#              Function<String,String> toLower = String::toLowerCase;
-#
-#              consistent(String.class)
-#              .<String>property("str1")
-#                .write(toLower)
-#              .direct("str2");
-#
-#              consistent(String.class)
-#              .<String>property("str1")
-#                .write(toLower)
-#              .direct("str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= hello
-#          str2= /^str2.*/
-#          str3= /^str2.*/
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= hello
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "HELLO").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1= hello
-#          str2= HELLO
-#          str3= HELLO
-#        }
-#        """
+    Background:
+
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+
+    Scenario: merge in the same property with the same link
+      Given the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            linkNew("str1", "str2");
+            linkNew("str2", "str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3>>= hello
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3>>= hello
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3>>= hello
+        """
+
+    Scenario: same property, same type, same composer, same decomposer merge
+      Given the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              Function<String,String> toUpper = String::toUpperCase;
+              Function<String,String> toLower = String::toLowerCase;
+
+              consistent(String.class)
+              .<String>property("str1")
+                .read(toUpper).write(toLower)
+              .direct("str2");
+
+              consistent(String.class)
+              .<String>property("str1")
+                .read(toUpper).write(toLower)
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= HELLO
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+
+    Scenario: same property, same type, same composer, no decomposer merge
+      Given the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              Function<String,String> toUpper = String::toUpperCase;
+              Function<String,String> toLower = String::toLowerCase;
+
+              consistent(String.class)
+              .<String>property("str1")
+                .read(toUpper)
+              .direct("str2");
+
+              consistent(String.class)
+              .<String>property("str1")
+                .read(toUpper)
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= /^str1.*/
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= /^str1.*/
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+
+    Scenario: same property, same type, no composer, same decomposer merge
+      Given the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              Function<String,String> toUpper = String::toUpperCase;
+              Function<String,String> toLower = String::toLowerCase;
+
+              consistent(String.class)
+              .<String>property("str1")
+                .write(toLower)
+              .direct("str2");
+
+              consistent(String.class)
+              .<String>property("str1")
+                .write(toLower)
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= /^str2.*/
+          str3= /^str2.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= HELLO
+          str3= HELLO
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= HELLO
+          str3= HELLO
+        }
+        """
 
 #  Rule: conflict merge
 #
@@ -1669,3 +1669,10 @@ Feature: single property consistency
 
 
 ##TODO choose multi writer through all readers priority
+
+#    //TODO real ConsistencyProducer
+#    //TODO origin is also a SubConsistentProducer
+#    //TODO resolve order: fixed, readonly, value, default
+#    //TODO changeDescendant consistentProducer to readonly
+#    //TODO stackoverflow
+#    //TODO compute once

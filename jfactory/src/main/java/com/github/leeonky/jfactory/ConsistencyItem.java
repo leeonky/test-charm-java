@@ -184,11 +184,7 @@ class ConsistencyItem<T> {
         }
 
         public void resolve() {
-            consistency.resolve(this, root);
-        }
-
-        public Set<PropertyChain> properties() {
-            return properties;
+            consistency.resolve(this);
         }
 
         public T compose() {
@@ -197,6 +193,23 @@ class ConsistencyItem<T> {
 
         public Object[] decompose(T compose) {
             return decomposer.apply(compose);
+        }
+
+        public boolean hasComposer() {
+            return composer != null;
+        }
+
+        public boolean hasDecomposer() {
+            return decomposer != null;
+        }
+
+        public void extracted(Resolver provider) {
+            int i = 0;
+            for (PropertyChain property : properties) {
+                int index = i++;
+                root.changeDescendant(property, (producer, s) ->
+                        new ConsistencyProducer<>(root.descendant(property).getType(), provider, this, index));
+            }
         }
     }
 
