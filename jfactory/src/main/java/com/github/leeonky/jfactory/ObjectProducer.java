@@ -22,7 +22,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final Set<String> ignorePropertiesInSpec = new HashSet<>();
     private Persistable persistable;
     private Function<PropertyWriter<?>, Producer<?>> defaultListElementValueProducerFactory;
-    private final LinkCollection links = new LinkCollection();
+    private final ConsistencySet links = new ConsistencySet();
 
     public JFactory jFactory() {
         return jFactory;
@@ -132,7 +132,7 @@ class ObjectProducer<T> extends Producer<T> {
     public ObjectProducer<T> doDependenciesAndLinks() {
         doDependencies();
         collectLinks(this, propertyChain(""));
-        links.applyLink(this);
+        links.apply(this);
         return this;
     }
 

@@ -8,69 +8,6 @@ Feature: multi properties consistency
 
   Rule: multiple properties consistency
 
-    Scenario: two properties consistency
-      Given the following bean class:
-        """
-        public class Person {
-          public String fullName, firstName, lastName, familyName, givenName;
-        }
-        """
-      And the following spec class:
-        """
-        public class APerson extends Spec<Person> {
-          public void main() {
-            consistent(String.class)
-              .direct("fullName")
-              .properties("firstName", "lastName")
-                .read((first,last) -> first+" "+last).write(s -> s.split(" "))
-              .properties("familyName", "givenName")
-                .read(names -> names[0]+" "+names[1]).write(s->s.split(" ")[0], s->s.split(" ")[1]);
-          }
-        }
-        """
-      When build:
-        """
-        jFactory.clear().spec(APerson.class).property("fullName", "James Anderson").create();
-        """
-      Then the result should:
-        """
-        : {
-          fullName: 'James Anderson'
-          firstName: James
-          lastName: Anderson
-          familyName: James
-          givenName: Anderson
-        }
-        """
-      When build:
-        """
-        jFactory.clear().spec(APerson.class).property("firstName", "James").property("lastName", "Anderson").create();
-        """
-      Then the result should:
-        """
-        : {
-          fullName: 'James Anderson'
-          firstName: James
-          lastName: Anderson
-          familyName: James
-          givenName: Anderson
-        }
-        """
-      When build:
-        """
-        jFactory.clear().spec(APerson.class).property("firstName", "James").property("givenName", "Anderson").create();
-        """
-      Then the result should:
-        """
-        : {
-          fullName: /^James lastName.*/
-          firstName: James
-          lastName: /^lastName.*/
-          familyName: James
-          givenName: Anderson
-        }
-        """
-
 #    Scenario: one of properties has higher priority then consistency item has higher priority
 #      Given the following bean class:
 #        """

@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-class LinkCollection {
+class ConsistencySet {
     private final List<DefaultConsistency<?>> consistencies = new ArrayList<>();
 
     public void add(DefaultConsistency<?> consistency) {
         consistencies.add(consistency);
     }
 
-    public void applyLink(ObjectProducer<?> producer) {
+    public void apply(ObjectProducer<?> producer) {
         LinkedList<DefaultConsistency<?>> merged = merge(consistencies);
         while (!merged.isEmpty())
             selectInputItem(merged, producer).resolve();
@@ -21,9 +21,12 @@ class LinkCollection {
     private ConsistencyItem<?>.Resolver selectInputItem(LinkedList<DefaultConsistency<?>> merged, ObjectProducer<?> producer) {
         DefaultConsistency<?> consistency = merged.pop();
         DefaultConsistency<?>.Resolver consistencyResolver = consistency.resolver(producer);
-
         for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
             if (itemResolver.hasTypeOf(FixedValueProducer.class))
+                return itemResolver;
+        }
+        for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
+            if (itemResolver.hasTypeOf(UnFixedValueProducer.class))
                 return itemResolver;
         }
         return consistencyResolver.providers.iterator().next();
@@ -52,13 +55,13 @@ class LinkCollection {
         return merged.size() == list.size() ? merged : merge(merged);
     }
 
-    public LinkCollection absoluteProperty(PropertyChain base) {
-        LinkCollection linkCollection = new LinkCollection();
-        consistencies.forEach(consistency -> linkCollection.add(consistency.absoluteProperty(base)));
-        return linkCollection;
+    public ConsistencySet absoluteProperty(PropertyChain base) {
+        ConsistencySet consistencySet = new ConsistencySet();
+        consistencies.forEach(consistency -> consistencySet.add(consistency.absoluteProperty(base)));
+        return consistencySet;
     }
 
-    public void addAll(LinkCollection linkCollection) {
-        consistencies.addAll(linkCollection.consistencies);
+    public void addAll(ConsistencySet consistencySet) {
+        consistencies.addAll(consistencySet.consistencies);
     }
 }

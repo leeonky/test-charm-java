@@ -140,7 +140,7 @@ public class DefaultConsistency<T> implements Consistency<T> {
         public void resolve(ConsistencyItem<T>.Resolver provider) {
             for (ConsistencyItem<T>.Resolver consumer : consumers) {
                 if (consumer != provider) {
-                    consumer.extracted(provider);
+                    consumer.resolve(provider);
                 }
             }
         }

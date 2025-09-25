@@ -203,7 +203,7 @@ class ConsistencyItem<T> {
             return decomposer != null;
         }
 
-        public void extracted(Resolver provider) {
+        public void resolve(Resolver provider) {
             int i = 0;
             for (PropertyChain property : properties) {
                 int index = i++;
