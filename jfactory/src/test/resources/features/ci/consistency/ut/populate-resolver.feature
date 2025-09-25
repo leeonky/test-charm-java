@@ -1,4 +1,4 @@
-Feature: resolve consistency and item
+Feature: populate consistency and item resolver
 
   Background:
     Given declaration jFactory =

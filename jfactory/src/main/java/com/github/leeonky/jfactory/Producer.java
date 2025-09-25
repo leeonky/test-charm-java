@@ -101,6 +101,10 @@ abstract class Producer<T> {
         return this;
     }
 
+    protected Producer<T> changeTo(ConsistencyProducer<T, ?> newProducer) {
+        return newProducer;
+    }
+
     protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
     }
 

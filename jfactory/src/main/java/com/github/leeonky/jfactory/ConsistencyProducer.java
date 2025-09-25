@@ -26,4 +26,14 @@ public class ConsistencyProducer<T, CT> extends Producer<T> {
         stack.add(this);
         return (T) consumer.decompose(provider.compose())[index];
     }
+
+    @Override
+    protected Producer<T> changeFrom(Producer<T> producer) {
+        return producer.changeTo(this);
+    }
+
+    @Override
+    protected Producer<T> changeTo(ConsistencyProducer<T, ?> newProducer) {
+        return this;
+    }
 }
