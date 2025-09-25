@@ -496,9 +496,6 @@ Feature: single property consistency
         }
         """
 
-
-
-
 #  Rule: conflict merge
 #
 #    Scenario: need merge but different consistency type
@@ -1393,6 +1390,45 @@ Feature: single property consistency
 #        }
 #        """
 #
+
+  Rule: circular dependency
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+
+    Scenario: simple circular dependency
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                .<String>property("str1")
+                  .read(s->s)
+                .<String>property("str2")
+                  .write(s->s);
+
+              consistent(String.class)
+                .<String>property("str1")
+                  .write(s->s)
+                .<String>property("str2")
+                  .read(s->s);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= /^str1.*/
+        """
+
   Rule: without merge
 
     Background:
@@ -1485,31 +1521,7 @@ Feature: single property consistency
         str1= /^str1.*/, str2= /^str1.*_r1/, str3= /^str1.*_r2/
         """
 
-#    Scenario: raise error when conflict dependent between two consistencies
-#      And the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#              consistent(String.class)
-#                .<String>property("str1")
-#                  .read(s->s)
-#                .<String>property("str2")
-#                  .write(s->s)
-#                .direct("str3");
-#
-#              consistent(String.class)
-#                .<String>property("str1")
-#                  .write(s->s)
-#                .<String>property("str2")
-#                  .read(s->s)
-#                .direct("str4");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).create();
-#        """
+
 #      Then should raise error:
 #        """
 #        message.table: [
@@ -1669,16 +1681,16 @@ Feature: single property consistency
 ##        """
 #
 
-#  Rule: data source dependency order
-#
-#    Background:
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#          public String str1, str2, str3, str4;
-#        }
-#        """
-#
+  Rule: data source dependency order
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+
 #    Scenario: use value first than default value
 #      And the following spec class:
 #        """
@@ -1699,11 +1711,10 @@ Feature: single property consistency
 #        """
 
 
-##TODO choose multi writer through all readers priority
 
-#    //TODO real ConsistencyProducer
-#    //TODO origin is also a SubConsistentProducer
-#    //TODO resolve order: fixed, readonly, value, default
+
+#    //TODO origin is also a ConsistencyProducer (nested ConsistencyProducer)
+#    //TODO select Consistency in order: fixed, readonly, value, default
 #    //TODO changeDescendant consistentProducer to readonly
 #    //TODO stackoverflow
 #    //TODO compute once

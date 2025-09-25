@@ -208,7 +208,7 @@ class ConsistencyItem<T> {
             for (PropertyChain property : properties) {
                 int index = i++;
                 root.changeDescendant(property, (producer, s) ->
-                        new ConsistencyProducer<>(root.descendant(property).getType(), provider, this, index));
+                        new ConsistencyProducer<>(root.descendant(property), provider, this, index));
             }
         }
 
