@@ -219,54 +219,54 @@ Feature: single property consistency
         str1= foo, str2= foo
         """
 
-#    Scenario: allow same property for different composer in different consistency
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#          public String str1, str2, str3;
-#        }
-#        """
-#      And the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#            consistent(String.class)
-#              .<String>property("str1")
-#                .read(s->s)
-#              .direct("str2");
-#
-#            consistent(String.class)
-#              .<String>property("str1")
-#                .read(s->s+"!")
-#              .direct("str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        str1= hello, str2= hello, str3= hello!
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        str1= /^str1.*/, str2= hello, str3= /^str1.*!/
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        str1= /^str1.*/, str2= /^str1.*/, str3= hello
-#        """
-#
+    Scenario: allow same property for different composer in different consistency
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(String.class)
+              .<String>property("str1")
+                .read(s->s)
+              .direct("str2");
+
+            consistent(String.class)
+              .<String>property("str1")
+                .read(s->s+"!")
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= hello, str3= hello!
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= hello, str3= /^str1.*!/
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= /^str1.*/, str3= hello
+        """
+
   Rule: need merge
 
     Background:
@@ -495,6 +495,9 @@ Feature: single property consistency
           str3= HELLO
         }
         """
+
+
+
 
 #  Rule: conflict merge
 #
@@ -1390,70 +1393,98 @@ Feature: single property consistency
 #        }
 #        """
 #
-#  Rule: resolution order
-#
-#    Background:
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#          public String str1, str2, str3, str4;
-#        }
-#        """
-#
-#    Scenario: should resolve property which has writer first and reader last
-#      And the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#              consistent(String.class)
-#                .<String>property("str1")
-#                  .read(s->s)
-#                .direct("str2");
-#
-#              consistent(String.class)
-#                .<String>property("str1")
-#                  .write(s->s)
-#                .direct("str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1: hello
-#          str2: hello
-#          str3: /^str3.*/
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1: /^str3.*/
-#          str2: hello
-#          str3: /^str3.*/
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        : {
-#          str1: hello
-#          str2: hello
-#          str3: hello
-#        }
-#        """
-#
+  Rule: without merge
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+
+    Scenario: should resolve property which has writer first and reader last
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                .<String>property("str1")
+                  .read(s->s)
+                .direct("str2");
+
+              consistent(String.class)
+                .<String>property("str1")
+                  .write(s->s)
+                .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str3.*/
+          str2: hello
+          str3: /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: hello
+          str3: hello
+        }
+        """
+
+    Scenario: not same lambda instance no merge
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              consistent(String.class)
+                .<String>property("str1")
+                  .read(s->s+"_r1")
+                  .write(s->s+"_w1")
+                .direct("str2");
+
+              consistent(String.class)
+                .<String>property("str1")
+                  .write(s->s+"_w2")
+                  .read(s->s+"_r2")
+                .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= /^str1.*_r1/, str3= /^str1.*_r2/
+        """
+
 #    Scenario: raise error when conflict dependent between two consistencies
 #      And the following spec class:
 #        """
