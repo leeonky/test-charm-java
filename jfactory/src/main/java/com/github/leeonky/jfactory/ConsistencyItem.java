@@ -233,6 +233,10 @@ class ConsistencyItem<T> {
             }
             return false;
         }
+
+        public boolean hasReadonly() {
+            return properties.stream().map(root::descendant).anyMatch(Producer::isFixed);
+        }
     }
 
     @Deprecated

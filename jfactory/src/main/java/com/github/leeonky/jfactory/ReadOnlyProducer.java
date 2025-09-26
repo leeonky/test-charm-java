@@ -25,4 +25,9 @@ class ReadOnlyProducer<T, P> extends Producer<T> {
     protected T produce() {
         return (T) ofNullable(parent.getValue()).map(reader::getValue).orElseGet(() -> reader.getType().createDefault());
     }
+
+    @Override
+    protected boolean isFixed() {
+        return true;
+    }
 }

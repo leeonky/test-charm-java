@@ -22,7 +22,7 @@ class ConsistencySet {
         DefaultConsistency<?> consistency = merged.pop();
         DefaultConsistency<?>.Resolver consistencyResolver = consistency.resolver(producer);
         for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
-            if (itemResolver.hasTypeOf(FixedValueProducer.class))
+            if (itemResolver.hasReadonly())
                 return itemResolver;
         }
         for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
