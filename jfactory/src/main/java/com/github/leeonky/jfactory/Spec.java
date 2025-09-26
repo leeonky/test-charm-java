@@ -84,7 +84,6 @@ public class Spec<T> {
         return this;
     }
 
-
     Spec<T> setInstance(Instance<T> instance) {
         this.instance = instance;
         return this;

@@ -35,7 +35,7 @@ Feature: choose consistency input item
         <<str1,str2>>= foo
         """
 
-    Scenario: readonly > default value
+    Scenario: readonly > unfixed value
       Given the following bean class:
         """
         public class SubBean {
@@ -71,4 +71,45 @@ Feature: choose consistency input item
       Then the result should:
         """
         <<str, subBean.str>>= hello
+        """
+
+    Scenario: fixed value > readonly
+      Given the following bean class:
+        """
+        public class SubBean {
+          public String str;
+          public SubBean() {}
+          public SubBean(String s) {str=s;}
+        }
+        """
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str;
+          public SubBean subBean = new SubBean();
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              property("subBean").byFactory();
+              property("str").value("any");
+
+              consistent(String.class)
+                .direct("str")
+                .direct("subBean.str");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class)
+          .property("str", "fixed")
+          .property("subBean", new SubBean("hello"))
+          .create();
+        """
+      Then the result should:
+        """
+        str= fixed, subBean.str= hello
         """
