@@ -232,7 +232,7 @@ class ConsistencyItem<T> {
                     same(((Resolver) o).outer());
         }
 
-        public boolean hasReadonly() {
+        public boolean hasFixed() {
             return properties.stream().map(root::descendant).anyMatch(Producer::isFixed);
         }
 

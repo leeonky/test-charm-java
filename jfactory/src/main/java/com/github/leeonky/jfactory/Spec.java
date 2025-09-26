@@ -10,8 +10,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class Spec<T> {
@@ -82,11 +80,10 @@ public class Spec<T> {
 
     @Deprecated
     public Spec<T> link(String property, String... others) {
-        List<PropertyChain> linkProperties = concat(of(property), of(others)).map(PropertyChain::propertyChain).collect(toList());
-        append((jFactory, objectProducer) -> objectProducer.link(linkProperties));
-//        linkNew(property, others[0], others.length > 1 ? of(others).skip(1).toArray(String[]::new) : new String[]{});
+        linkNew(property, others[0], others.length > 1 ? of(others).skip(1).toArray(String[]::new) : new String[]{});
         return this;
     }
+
 
     Spec<T> setInstance(Instance<T> instance) {
         this.instance = instance;

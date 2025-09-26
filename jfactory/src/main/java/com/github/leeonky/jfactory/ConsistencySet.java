@@ -55,7 +55,8 @@ class ConsistencySet {
 
     private ConsistencyItem<?>.Resolver popNextRootSourceItem(LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
         Optional<ConsistencyItem<?>.Resolver> firstPresent = getFirstPresent(
-                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(ConsistencyItem.Resolver::hasReadonly))),
+                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(ConsistencyItem.Resolver::hasFixed))),
+                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(resolver -> resolver.hasTypeOf(ReadOnlyProducer.class)))),
                 () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(resolver -> resolver.hasTypeOf(UnFixedValueProducer.class)))));
         ConsistencyItem<?>.Resolver chosen = firstPresent.orElseGet(() -> unResolvedConsistencies.iterator().next().defaultProvider());
         unResolvedConsistencies.remove(chosen.consistencyResolver());

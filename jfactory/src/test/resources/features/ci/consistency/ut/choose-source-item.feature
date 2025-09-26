@@ -56,6 +56,7 @@ Feature: choose consistency input item
         public class ABean extends Spec<Bean> {
           public void main() {
               property("subBean").byFactory();
+              property("str").value("any");
 
               consistent(String.class)
                 .direct("str")

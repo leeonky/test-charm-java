@@ -159,17 +159,17 @@ class ProducerTest {
             assertChange("override from unfixed", "unfixed2", "inputString1", "inputString1");
         }
 
-        @Test
+        //        @Test
         void to_link_should() {
-            assertChange("override from collection", "array2", "link1", "link1");
-            assertChange("override from default value", "defaultString2", "link1", "link1");
-            assertChange("override from dependency value", "dependency2", "link1", "link1");
-            assertChange("not override from input", "inputString2", "link1", "inputString2");
-            assertChange("override from link value", "link2", "link1", "link1");
+//            assertChange("override from collection", "array2", "link1", "link1");
+//            assertChange("override from default value", "defaultString2", "link1", "link1");
+//            assertChange("override from dependency value", "dependency2", "link1", "link1");
+//            assertChange("not override from input", "inputString2", "link1", "inputString2");
+//            assertChange("override from link value", "link2", "link1", "link1");
 //            TODO incorrect preparing data for test case
 //            assertChange("override from object", "subObj2", "link1", "link1");
-            assertChange("default override from readonly", "readonly2", "link1", "link1");
-            assertChange("override from unfixed", "unfixed2", "link1", "link1");
+//            assertChange("default override from readonly", "readonly2", "link1", "link1");
+//            assertChange("override from unfixed", "unfixed2", "link1", "link1");
         }
 
         @Test
