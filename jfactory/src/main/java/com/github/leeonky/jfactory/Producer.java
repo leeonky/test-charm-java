@@ -97,11 +97,11 @@ abstract class Producer<T> {
         return this;
     }
 
-    protected Producer<T> changeTo(DefaultValueProducer<T> newProducer) {
+    protected Producer<T> reChangeTo(DefaultValueProducer<T> newProducer) {
         return this;
     }
 
-    protected Producer<T> changeTo(ConsistencyProducer<T, ?> newProducer) {
+    protected Producer<T> reChangeTo(ConsistencyProducer<T, ?> newProducer) {
         return newProducer;
     }
 
