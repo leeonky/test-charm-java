@@ -1,9 +1,9 @@
 package com.github.leeonky.jfactory;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
+
+import static java.util.Optional.of;
+import static java.util.stream.Collectors.toCollection;
 
 class ConsistencySet {
     private final List<DefaultConsistency<?>> consistencies = new ArrayList<>();
@@ -13,14 +13,36 @@ class ConsistencySet {
     }
 
     public void apply(ObjectProducer<?> producer) {
-        LinkedList<DefaultConsistency<?>> merged = merge(consistencies);
-        while (!merged.isEmpty())
-            nextRootSource(merged, producer).resolve();
+        LinkedList<DefaultConsistency<?>.Resolver> consistencyResolvers = mergeBySameItem(consistencies)
+                .stream().map(c -> c.resolver(producer)).collect(toCollection(LinkedList::new));
+        while (!consistencyResolvers.isEmpty()) {
+            Set<PropertyChain> resolved = popNextRootSourceItem(consistencyResolvers).resolve();
+            resolveCascaded(resolved, consistencyResolvers);
+        }
     }
 
-    private ConsistencyItem<?>.Resolver nextRootSource(LinkedList<DefaultConsistency<?>> merged, ObjectProducer<?> producer) {
-        DefaultConsistency<?> consistency = merged.pop();
-        DefaultConsistency<?>.Resolver consistencyResolver = consistency.resolver(producer);
+    private void resolveCascaded(Set<PropertyChain> resolved,
+                                 LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
+        for (PropertyChain property : resolved)
+            popNextRelatedItem(property, unResolvedConsistencies).ifPresent(itemResolver ->
+                    resolveCascaded(itemResolver.resolve(), unResolvedConsistencies));
+    }
+
+    private Optional<ConsistencyItem<?>.Resolver> popNextRelatedItem(
+            PropertyChain property, LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
+        for (DefaultConsistency<?>.Resolver consistencyResolver : unResolvedConsistencies) {
+            for (ConsistencyItem<?>.Resolver provider : consistencyResolver.providers) {
+                if (provider.containsProperty(property)) {
+                    unResolvedConsistencies.remove(consistencyResolver);
+                    return of(provider);
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private ConsistencyItem<?>.Resolver popNextRootSourceItem(LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
+        DefaultConsistency<?>.Resolver consistencyResolver = unResolvedConsistencies.pop();
         for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
             if (itemResolver.hasReadonly())
                 return itemResolver;
@@ -47,12 +69,12 @@ class ConsistencySet {
         throw new ConflictConsistencyException(builder.toString());
     }
 
-    private LinkedList<DefaultConsistency<?>> merge(List<DefaultConsistency<?>> list) {
-        LinkedList<DefaultConsistency<?>> merged = new LinkedList<>();
+    private List<DefaultConsistency<?>> mergeBySameItem(List<DefaultConsistency<?>> list) {
+        List<DefaultConsistency<?>> merged = new ArrayList<>();
         for (DefaultConsistency<?> consistency : list)
             if (merged.stream().noneMatch(e -> e.merge(consistency)))
                 merged.add(consistency);
-        return merged.size() == list.size() ? merged : merge(merged);
+        return merged.size() == list.size() ? merged : mergeBySameItem(merged);
     }
 
     public ConsistencySet absoluteProperty(PropertyChain base) {

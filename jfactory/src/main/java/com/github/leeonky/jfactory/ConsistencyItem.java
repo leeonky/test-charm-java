@@ -183,8 +183,8 @@ class ConsistencyItem<T> {
             return properties.stream().map(root::descendant).anyMatch(type::isInstance);
         }
 
-        public void resolve() {
-            consistency.resolve(this);
+        public Set<PropertyChain> resolve() {
+            return consistency.resolve(this);
         }
 
         public T compose() {
@@ -203,13 +203,14 @@ class ConsistencyItem<T> {
             return decomposer != null;
         }
 
-        public void resolve(Resolver provider) {
+        public Set<PropertyChain> resolve(Resolver provider) {
             int i = 0;
             for (PropertyChain property : properties) {
                 int index = i++;
                 root.changeDescendant(property, (producer, s) ->
                         new ConsistencyProducer<>(root.descendant(property), provider, this, index));
             }
+            return properties;
         }
 
         @Override
@@ -236,6 +237,10 @@ class ConsistencyItem<T> {
 
         public boolean hasReadonly() {
             return properties.stream().map(root::descendant).anyMatch(Producer::isFixed);
+        }
+
+        public boolean containsProperty(PropertyChain property) {
+            return properties.contains(property);
         }
     }
 

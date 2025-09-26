@@ -137,12 +137,14 @@ public class DefaultConsistency<T> implements Consistency<T> {
             consumers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasDecomposer).collect(toCollection(LinkedHashSet::new));
         }
 
-        public void resolve(ConsistencyItem<T>.Resolver provider) {
+        public Set<PropertyChain> resolve(ConsistencyItem<T>.Resolver provider) {
+            Set<PropertyChain> resolved = new HashSet<>();
             for (ConsistencyItem<T>.Resolver consumer : consumers) {
                 if (consumer != provider) {
-                    consumer.resolve(provider);
+                    resolved.addAll(consumer.resolve(provider));
                 }
             }
+            return resolved;
         }
     }
 
