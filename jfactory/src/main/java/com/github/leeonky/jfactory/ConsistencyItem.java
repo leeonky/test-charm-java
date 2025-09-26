@@ -173,6 +173,7 @@ class ConsistencyItem<T> {
     class Resolver {
         private final ObjectProducer<?> root;
         final DefaultConsistency<T>.Resolver consistency;
+        Object[] cached;
 
         public Resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
             this.root = root;
@@ -187,12 +188,14 @@ class ConsistencyItem<T> {
             return consistency.resolve(this);
         }
 
-        public T compose() {
+        private T compose() {
             return composer.apply(properties.stream().map(root::descendant).map(Producer::getValue).toArray());
         }
 
-        public Object[] decompose(T compose) {
-            return decomposer.apply(compose);
+        public Object[] decompose(Resolver provider) {
+            if (cached == null)
+                cached = decomposer.apply(provider.compose());
+            return cached;
         }
 
         public boolean hasComposer() {
@@ -225,14 +228,8 @@ class ConsistencyItem<T> {
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof ConsistencyItem.Resolver) {
-                ConsistencyItem<T> another = ((Resolver) o).outer();
-                return properties.equals(another.properties) &&
-                        (isSame(composer, another.composer) && isSame(decomposer, another.decomposer)
-                                || isBothNull(composer, another.composer) && isSame(decomposer, another.decomposer)
-                                || isSame(composer, another.composer) && isBothNull(decomposer, another.decomposer));
-            }
-            return false;
+            return o instanceof ConsistencyItem.Resolver &&
+                    same(((Resolver) o).outer());
         }
 
         public boolean hasReadonly() {

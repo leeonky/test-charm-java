@@ -204,3 +204,32 @@ Feature: compose decompose
           givenName: Anderson
         }
         """
+
+    Scenario: all composer and decomposer should computer only once
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+      And the following spec class:
+        """
+        public class APerson extends Spec<Bean> {
+          int w=0, r=10;
+          public void main() {
+            consistent(String.class)
+              .property("str3")
+                .read(s->{r++; return r+"_"+s;})
+              .properties("str1", "str2")
+                .write(s -> { w++; return new String[]{w+"_"+s,w+"_"+s}; });
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(APerson.class).create();
+        """
+      Then the result should:
+        """
+        <<str1,str2>>= /^1_11_str3.*/, str3= /^str3.*/
+        """

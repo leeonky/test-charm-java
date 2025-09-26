@@ -24,7 +24,7 @@ public class ConsistencyProducer<T, CT> extends Producer<T> {
         if (stack.contains(this))
             return origin.produce();
         stack.add(this);
-        return (T) consumer.decompose(provider.compose())[index];
+        return (T) consumer.decompose(provider)[index];
     }
 
     @Override
