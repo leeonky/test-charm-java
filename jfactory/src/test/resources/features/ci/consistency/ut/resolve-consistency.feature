@@ -92,25 +92,16 @@ Feature: resolve consistency
         """
         <<str1, str2, str3>>= hello
         """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1, str2, str3>>= hello
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1, str2, str3>>= hello
-#        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1, str2, str3>>= hello
+        """
 
-
-  Rule: basic usage in same bean
+  Rule: consistency priority
 
     Background:
       Given the following bean class:
@@ -119,28 +110,29 @@ Feature: resolve consistency
           public String str1, str2, str3, str4;
         }
         """
-#    Scenario: choose consistency with higher priority of input data
-#      And the following spec class:
-#        """
-#        public class ABean extends Spec<Bean> {
-#          public void main() {
-#            consistent(String.class)
-#              .direct("str2")
-#              .direct("str1");
-#
-#            consistent(String.class)
-#              .<String>property("str1")
-#                .read(s->s)
-#                .write(s->s)
-#              .direct("str3");
-#          }
-#        }
-#        """
-#      When build:
-#        """
-#        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
-#        """
-#      Then the result should:
-#        """
-#        <<str1,str2,str3>>= hello
-#        """
+
+    Scenario: choose consistency with higher priority of input data
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(String.class)
+              .direct("str2")
+              .direct("str1");
+
+            consistent(String.class)
+              .<String>property("str1")
+                .read(s->s)
+                .write(s->s)
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3>>= hello
+        """

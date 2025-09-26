@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
@@ -139,12 +140,18 @@ public class DefaultConsistency<T> implements Consistency<T> {
 
         public Set<PropertyChain> resolve(ConsistencyItem<T>.Resolver provider) {
             Set<PropertyChain> resolved = new HashSet<>();
-            for (ConsistencyItem<T>.Resolver consumer : consumers) {
-                if (consumer != provider) {
+            for (ConsistencyItem<T>.Resolver consumer : consumers)
+                if (consumer != provider)
                     resolved.addAll(consumer.resolve(provider));
-                }
-            }
             return resolved;
+        }
+
+        Optional<ConsistencyItem<T>.Resolver> searchProvider(Predicate<ConsistencyItem<?>.Resolver> condition) {
+            return providers.stream().filter(condition).findFirst();
+        }
+
+        ConsistencyItem<?>.Resolver defaultProvider() {
+            return providers.iterator().next();
         }
     }
 

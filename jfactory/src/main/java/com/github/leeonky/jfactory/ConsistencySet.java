@@ -2,6 +2,8 @@ package com.github.leeonky.jfactory;
 
 import java.util.*;
 
+import static com.github.leeonky.util.function.Extension.firstPresent;
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toCollection;
 
@@ -12,7 +14,17 @@ class ConsistencySet {
         consistencies.add(consistency);
     }
 
-    public void apply(ObjectProducer<?> producer) {
+    public void addAll(ConsistencySet consistencySet) {
+        consistencies.addAll(consistencySet.consistencies);
+    }
+
+    public ConsistencySet absoluteProperty(PropertyChain base) {
+        ConsistencySet consistencySet = new ConsistencySet();
+        consistencies.forEach(consistency -> consistencySet.add(consistency.absoluteProperty(base)));
+        return consistencySet;
+    }
+
+    public void resolve(ObjectProducer<?> producer) {
         LinkedList<DefaultConsistency<?>.Resolver> consistencyResolvers = mergeBySameItem(consistencies)
                 .stream().map(c -> c.resolver(producer)).collect(toCollection(LinkedList::new));
         while (!consistencyResolvers.isEmpty()) {
@@ -42,31 +54,12 @@ class ConsistencySet {
     }
 
     private ConsistencyItem<?>.Resolver popNextRootSourceItem(LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
-        DefaultConsistency<?>.Resolver consistencyResolver = unResolvedConsistencies.pop();
-        for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
-            if (itemResolver.hasReadonly())
-                return itemResolver;
-        }
-        for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
-            if (itemResolver.hasTypeOf(UnFixedValueProducer.class))
-                return itemResolver;
-        }
-        return consistencyResolver.providers.iterator().next();
-    }
-
-    private DefaultConsistency<?> popRootDependency(LinkedList<DefaultConsistency<?>> merged) {
-        ListIterator<DefaultConsistency<?>> iterator = merged.listIterator();
-        while (iterator.hasNext()) {
-            DefaultConsistency<?> candidate = iterator.next();
-            if (merged.stream().filter(c -> c != candidate).noneMatch(candidate::dependsOn)) {
-                iterator.remove();
-                return candidate;
-            }
-        }
-        StringBuilder builder = new StringBuilder("Circular dependency detected between:");
-        for (DefaultConsistency<?> defaultConsistency : merged)
-            builder.append("\n").append(defaultConsistency.info());
-        throw new ConflictConsistencyException(builder.toString());
+        Optional<ConsistencyItem<?>.Resolver> firstPresent = getFirstPresent(
+                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(ConsistencyItem.Resolver::hasReadonly))),
+                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(resolver -> resolver.hasTypeOf(UnFixedValueProducer.class)))));
+        ConsistencyItem<?>.Resolver chosen = firstPresent.orElseGet(() -> unResolvedConsistencies.iterator().next().defaultProvider());
+        unResolvedConsistencies.remove(chosen.consistencyResolver());
+        return chosen;
     }
 
     private List<DefaultConsistency<?>> mergeBySameItem(List<DefaultConsistency<?>> list) {
@@ -75,15 +68,5 @@ class ConsistencySet {
             if (merged.stream().noneMatch(e -> e.merge(consistency)))
                 merged.add(consistency);
         return merged.size() == list.size() ? merged : mergeBySameItem(merged);
-    }
-
-    public ConsistencySet absoluteProperty(PropertyChain base) {
-        ConsistencySet consistencySet = new ConsistencySet();
-        consistencies.forEach(consistency -> consistencySet.add(consistency.absoluteProperty(base)));
-        return consistencySet;
-    }
-
-    public void addAll(ConsistencySet consistencySet) {
-        consistencies.addAll(consistencySet.consistencies);
     }
 }

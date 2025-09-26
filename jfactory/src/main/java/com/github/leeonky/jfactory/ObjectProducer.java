@@ -132,7 +132,7 @@ class ObjectProducer<T> extends Producer<T> {
     public ObjectProducer<T> doDependenciesAndLinks() {
         doDependencies();
         collectLinks(this, propertyChain(""));
-        consistencySet.apply(this);
+        consistencySet.resolve(this);
         return this;
     }
 

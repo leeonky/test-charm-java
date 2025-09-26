@@ -1064,7 +1064,6 @@ Feature: single property consistency
 
 #TDOO two consistency with same property writer
 
-#    //TODO origin is also a ConsistencyProducer (nested ConsistencyProducer)
 #    //TODO select Consistency in order: fixed, readonly, value, default
 #    //TODO changeDescendant consistentProducer to readonly
 #    //TODO stackoverflow

@@ -172,7 +172,7 @@ class ConsistencyItem<T> {
 
     class Resolver {
         private final ObjectProducer<?> root;
-        private final DefaultConsistency<T>.Resolver consistency;
+        final DefaultConsistency<T>.Resolver consistency;
 
         public Resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
             this.root = root;
@@ -241,6 +241,10 @@ class ConsistencyItem<T> {
 
         public boolean containsProperty(PropertyChain property) {
             return properties.contains(property);
+        }
+
+        public DefaultConsistency<T>.Resolver consistencyResolver() {
+            return consistency;
         }
     }
 
