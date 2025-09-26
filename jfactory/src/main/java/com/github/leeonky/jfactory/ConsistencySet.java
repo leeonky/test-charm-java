@@ -15,10 +15,10 @@ class ConsistencySet {
     public void apply(ObjectProducer<?> producer) {
         LinkedList<DefaultConsistency<?>> merged = merge(consistencies);
         while (!merged.isEmpty())
-            selectInputItem(merged, producer).resolve();
+            nextRootSource(merged, producer).resolve();
     }
 
-    private ConsistencyItem<?>.Resolver selectInputItem(LinkedList<DefaultConsistency<?>> merged, ObjectProducer<?> producer) {
+    private ConsistencyItem<?>.Resolver nextRootSource(LinkedList<DefaultConsistency<?>> merged, ObjectProducer<?> producer) {
         DefaultConsistency<?> consistency = merged.pop();
         DefaultConsistency<?>.Resolver consistencyResolver = consistency.resolver(producer);
         for (ConsistencyItem<?>.Resolver itemResolver : consistencyResolver.providers) {
