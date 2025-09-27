@@ -10,7 +10,7 @@ Feature: circular dependency
         }
         """
 
-    Scenario: simple circular dependency
+    Scenario: str1 <-> str2
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -38,7 +38,7 @@ Feature: circular dependency
         str1= /^str1.*/, str2= /^str1.*/
         """
 
-    Scenario: three consistencies circular dependency
+    Scenario: str1 -> str2 -> str3 -> str1
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {
@@ -96,3 +96,31 @@ Feature: circular dependency
         """
         <<str1,str2,str3>>= hello
         """
+
+    Scenario: whole collection and readonly item
+      Given the following bean class:
+      """
+      public class Bean {
+        public String strings[];
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("strings[2]").dependsOn("strings[1]", obj -> obj);
+          property("strings[1]").dependsOn("strings[0]", obj -> obj);
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(ABean.class)
+        .property("strings[0]", "hello")
+      .create();
+      """
+      Then the result should:
+      """
+      strings= [hello hello hello]
+      """

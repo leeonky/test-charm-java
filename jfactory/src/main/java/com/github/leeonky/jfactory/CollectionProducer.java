@@ -37,7 +37,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     @SuppressWarnings("unchecked")
     protected C produce() {
-        return (C) getType().createCollection(children.stream().map(Producer::produce).collect(toList()));
+        return (C) getType().createCollection(children.stream().map(Producer::getValue).collect(toList()));
     }
 
     @Override
@@ -110,5 +110,10 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     public int childrenCount() {
         return children.size();
+    }
+
+    @Override
+    protected boolean isFixed() {
+        return children.stream().anyMatch(Producer::isFixed);
     }
 }

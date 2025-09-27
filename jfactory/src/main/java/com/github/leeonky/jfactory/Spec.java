@@ -10,7 +10,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
-import static java.util.stream.Stream.of;
 
 public class Spec<T> {
     private final List<BiConsumer<JFactory, ObjectProducer<T>>> operations = new ArrayList<>();
@@ -78,12 +77,6 @@ public class Spec<T> {
         return getClass().getSimpleName();
     }
 
-    @Deprecated
-    public Spec<T> link(String property, String... others) {
-        linkNew(property, others[0], others.length > 1 ? of(others).skip(1).toArray(String[]::new) : new String[]{});
-        return this;
-    }
-
     Spec<T> setInstance(Instance<T> instance) {
         this.instance = instance;
         return this;
@@ -142,7 +135,7 @@ public class Spec<T> {
         invalidIsSpecs.addAll(spec.invalidIsSpecs);
     }
 
-    public Spec<T> linkNew(String propertyChain1, String propertyChain2, String... others) {
+    public Spec<T> link(String propertyChain1, String propertyChain2, String... others) {
         Consistency<?> consistency = consistent(Object.class);
         consistency.direct(propertyChain1)
                 .direct(propertyChain2);

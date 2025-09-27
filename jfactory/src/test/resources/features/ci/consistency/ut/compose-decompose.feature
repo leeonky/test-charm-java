@@ -22,7 +22,7 @@ Feature: compose decompose
         """
         public class ABean extends Spec<Bean> {
           public void main() {
-            linkNew("str1", "str2");
+            link("str1", "str2");
           }
         }
         """

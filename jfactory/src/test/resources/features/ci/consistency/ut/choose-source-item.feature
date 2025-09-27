@@ -22,7 +22,7 @@ Feature: choose consistency input item
         public class ABean extends Spec<Bean> {
           public void main() {
             property("str2").value("foo");
-            linkNew("str1", "str2");
+            link("str1", "str2");
           }
         }
         """

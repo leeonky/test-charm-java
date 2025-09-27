@@ -22,8 +22,8 @@ Feature: consistency merge
         """
         public class ABean extends Spec<Bean> {
           public void main() {
-            linkNew("str1", "str2");
-            linkNew("str2", "str3");
+            link("str1", "str2");
+            link("str2", "str3");
           }
         }
         """
@@ -57,9 +57,9 @@ Feature: consistency merge
         """
         public class ABean extends Spec<Bean> {
           public void main() {
-            linkNew("str1", "str2");
-            linkNew("str3", "str4");
-            linkNew("str2", "str3");
+            link("str1", "str2");
+            link("str3", "str4");
+            link("str2", "str3");
           }
         }
         """

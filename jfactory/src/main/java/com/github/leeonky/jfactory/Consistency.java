@@ -109,6 +109,16 @@ public interface Consistency<T> {
         public <P1, P2> C2<T, P1, P2> properties(String property1, String property2) {
             return consistency.properties(property1, property2);
         }
+
+        @Override
+        public <P1, P2, P3> C3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+            return consistency.properties(property1, property2, property3);
+        }
+
+        @Override
+        public CN<T> properties(String... properties) {
+            return consistency.properties(properties);
+        }
     }
 
     class C1<T, P> extends DecorateConsistency<T> {

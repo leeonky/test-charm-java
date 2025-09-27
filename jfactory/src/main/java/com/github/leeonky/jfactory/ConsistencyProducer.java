@@ -28,8 +28,13 @@ public class ConsistencyProducer<T, CT> extends Producer<T> {
     }
 
     @Override
-    protected Producer<T> changeFrom(Producer<T> producer) {
+    protected Producer<T> reChangeFrom(Producer<T> producer) {
         return producer.reChangeTo(this);
+    }
+
+    @Override
+    protected Producer<T> changeFrom(ObjectProducer<T> producer) {
+        return producer.isFixed() ? producer : this;
     }
 
     @Override

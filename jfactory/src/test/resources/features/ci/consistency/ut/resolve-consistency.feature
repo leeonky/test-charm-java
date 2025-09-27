@@ -16,8 +16,8 @@ Feature: resolve consistency
         """
         public class ABean extends Spec<Bean> {
           public void main() {
-            linkNew("str1", "str2");
-            linkNew("str3", "str4");
+            link("str1", "str2");
+            link("str3", "str4");
           }
         }
         """

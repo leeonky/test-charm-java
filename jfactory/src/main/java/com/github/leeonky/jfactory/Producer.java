@@ -86,10 +86,10 @@ abstract class Producer<T> {
     }
 
     public Producer<T> changeTo(Producer<T> newProducer) {
-        return newProducer.changeFrom(this);
+        return newProducer.reChangeFrom(this);
     }
 
-    protected Producer<T> changeFrom(Producer<T> producer) {
+    protected Producer<T> reChangeFrom(Producer<T> producer) {
         return this;
     }
 
