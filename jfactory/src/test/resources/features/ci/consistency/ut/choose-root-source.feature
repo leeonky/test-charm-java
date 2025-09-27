@@ -1,4 +1,4 @@
-Feature: choose consistency input item
+Feature: choose consistency root source provider
 
   Background:
     Given declaration jFactory =
@@ -161,4 +161,39 @@ Feature: choose consistency input item
       Then the result should:
         """
         <<str1,str3>>= world, str2= hello
+        """
+
+    Scenario: one of properties has higher priority then consistency item has higher priority
+      Given the following bean class:
+        """
+        public class Person {
+          public String fullName, firstName, lastName, familyName, givenName;
+        }
+        """
+      And the following spec class:
+        """
+        public class APerson extends Spec<Person> {
+          public void main() {
+            consistent(String.class)
+              .direct("fullName")
+              .properties("firstName", "lastName")
+                .read((first,last) -> first+" "+last).write(s -> s.split(" "))
+              .properties("familyName", "givenName")
+                .read(names -> names[0]+" "+names[1]).write(s->s.split(" ")[0], s->s.split(" ")[1]);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(APerson.class).property("givenName", "Tom").create();
+        """
+      Then the result should:
+        """
+        : {
+          fullName: /^familyName.* Tom/
+          firstName: /^familyName.*/
+          lastName: Tom
+          familyName: /^familyName.*/
+          givenName: Tom
+        }
         """

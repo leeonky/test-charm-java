@@ -66,7 +66,7 @@ Feature: resolve consistency
         <<str3,str4>>= hello
         """
 
-    Scenario: resolve cascade consistencies after one consistent resolved
+    Scenario: should resolve cascaded impacts after one consistency is resolved
       And the following spec class:
         """
         public class ABean extends Spec<Bean> {

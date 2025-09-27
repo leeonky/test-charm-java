@@ -5,7 +5,6 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Order;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
-import com.github.leeonky.dal.runtime.inspector.DumperFactory;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import java.lang.reflect.Type;
@@ -30,22 +29,17 @@ public class Dumpers implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerDumper(CharSequence.class, data -> STRING_DUMPER)
                 .registerDumper(StackTraceElement[].class, data -> STACK_TRACE_DUMPER)
-                .registerDumper(MetaShould.PredicateMethod.class, new DumperFactory<MetaShould.PredicateMethod>() {
+                .registerDumper(MetaShould.PredicateMethod.class, predicateMethodData -> new Dumper<MetaShould.PredicateMethod>() {
                     @Override
-                    public Dumper<MetaShould.PredicateMethod> apply(Data<MetaShould.PredicateMethod> predicateMethodData) {
-                        return new Dumper<MetaShould.PredicateMethod>() {
-                            @Override
-                            public void dump(Data<MetaShould.PredicateMethod> data, DumpingBuffer dumpingBuffer) {
-                                dumpingBuffer.append(data.value().getClass().getName()).append(" {")
-                                        .indent(data.value().curryingMethodGroup()::dumpCandidates)
-                                        .newLine().append("}");
-                            }
+                    public void dump(Data<MetaShould.PredicateMethod> data, DumpingBuffer dumpingBuffer) {
+                        dumpingBuffer.append(data.value().getClass().getName()).append(" {")
+                                .indent(data.value().curryingMethodGroup()::dumpCandidates)
+                                .newLine().append("}");
+                    }
 
-                            @Override
-                            public void dumpValue(Data<MetaShould.PredicateMethod> data, DumpingBuffer dumpingBuffer) {
-                                Dumper.super.dumpValue(data, dumpingBuffer);
-                            }
-                        };
+                    @Override
+                    public void dumpValue(Data<MetaShould.PredicateMethod> data, DumpingBuffer dumpingBuffer) {
+                        Dumper.super.dumpValue(data, dumpingBuffer);
                     }
                 })
         ;

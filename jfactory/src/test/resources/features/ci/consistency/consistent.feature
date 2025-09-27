@@ -1,4 +1,4 @@
-Feature: compose decompose
+Feature: basic
 
   Background:
     Given declaration jFactory =
@@ -205,6 +205,58 @@ Feature: compose decompose
         }
         """
 
+    Scenario: three properties consistency
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4, str5, str6;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+                consistent(String.class)
+                .<String, String, String>properties("str1", "str2", "str3")
+                    .read((s1,s2,s3)->s1+s2+s3)
+                    .write(s->s.substring(0,1), s->s.substring(1,2), s->s.substring(2,3))
+                .<String, String, String>properties("str4", "str5", "str6")
+                    .read((s1,s2,s3)->s1+s2+s3)
+                    .write(s->s.substring(0,1), s->s.substring(1,2), s->s.substring(2,3));
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: /^str1.*/
+          str2: /^str2.*/
+          str3: /^str3.*/
+          str4: s
+          str5: t
+          str6: r
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "x").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: x
+          str2: /^str2.*/
+          str3: /^str3.*/
+          str4: x
+          str5: s
+          str6: t
+        }
+        """
+
     Scenario: all composer and decomposer should computer only once
       Given the following bean class:
         """
@@ -232,4 +284,99 @@ Feature: compose decompose
       Then the result should:
         """
         <<str1,str2>>= /^1_11_str3.*/, str3= /^str3.*/
+        """
+
+    Scenario: properties reader writer overlap
+      Given the following bean class:
+        """
+        public class Order {
+          public int quantity;
+          public BigDecimal unitPrice, total, unitDiscount, discountTotal;
+        }
+        """
+      And the following spec class:
+        """
+        public class OrderSpec extends Spec<Order> {
+            public void main() {
+              consistent(BigDecimal.class)
+                .<Integer, BigDecimal>properties("quantity", "unitPrice")
+                  .write(total -> new Object[]{2, total.divide(BigDecimal.valueOf(2))})
+                .direct("total");
+
+              consistent(BigDecimal.class)
+                .<Integer, BigDecimal>properties("quantity", "unitDiscount")
+                  .read((qty, discount) -> discount.multiply(BigDecimal.valueOf(qty)))
+                .direct("discountTotal");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(OrderSpec.class).property("total", 100).create();
+        """
+      Then the result should:
+        """
+        : {
+          quantity: 2
+          unitPrice: 50
+          total: 100
+          unitDiscount: 1
+          discountTotal: 2
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(OrderSpec.class).property("quantity", 50).create();
+        """
+      Then the result should:
+        """
+        : {
+          quantity: 50
+          unitPrice: 1
+          total: 2
+          unitDiscount: 2
+          discountTotal: 100
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(OrderSpec.class).property("unitPrice", 50).create();
+        """
+      Then the result should:
+        """
+        : {
+          quantity: 2
+          unitPrice: 50
+          total: 3
+          unitDiscount: 3
+          discountTotal: 6
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(OrderSpec.class).property("discountTotal", 50).create();
+        """
+      Then the result should:
+        """
+        : {
+          quantity: 2
+          unitPrice: 2
+          total:  4
+          unitDiscount: 4
+          discountTotal: 50
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(OrderSpec.class).property("unitDiscount", 10).create();
+        """
+      Then the result should:
+        """
+        : {
+          quantity: 2
+          unitPrice: 2.5
+          total:  5
+          unitDiscount: 10
+          discountTotal: 20
+        }
         """

@@ -169,11 +169,10 @@ Feature: define link
       """
       jFactory.type(Beans.class).property("bean.value", "hello").create();
       """
-#      TODO BUG not implement
-#      Then the result should:
-#      """
-#      <<beans[0], beans[1], bean>>.value= hello
-#      """
+      Then the result should:
+      """
+      <<beans[0], beans[1], bean>>.value= hello
+      """
 
     Scenario: link element and input object
       Given the following bean class:

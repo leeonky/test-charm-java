@@ -63,6 +63,34 @@ Feature: consistency producer replacement
       <<str1,str2>>= hello, str3= /^str3.*/
       """
 
+  Scenario: should keep original parent fixed value producer
+    Given the following bean class:
+    """
+      public class Bean {
+        public String str;
+      }
+    """
+    And the following bean class:
+    """
+      public class Beans {
+        public Bean bean1, bean2;
+      }
+    """
+    And register:
+    """
+      jFactory.factory(Beans.class).spec(ins-> {
+        ins.spec().link("bean1.str", "bean2.str");
+      });
+    """
+    When build:
+      """
+      jFactory.type(Beans.class).property("bean1", new Bean()).property("bean2.str", "world").create();
+      """
+    Then the result should:
+      """
+      bean1.str: null, bean2.str: world
+      """
+
   Scenario: should keep fixed object producer
     Given the following bean class:
     """

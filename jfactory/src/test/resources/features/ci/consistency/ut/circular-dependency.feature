@@ -124,3 +124,22 @@ Feature: circular dependency
       """
       strings= [hello hello hello]
       """
+
+    Scenario: depends on api
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            property("str1").dependsOn("str2");
+            property("str2").dependsOn("str1");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        str1= /^str1.*/, str2= /^str1.*/
+        """

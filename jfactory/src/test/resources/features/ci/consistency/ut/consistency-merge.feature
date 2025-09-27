@@ -279,13 +279,67 @@ Feature: consistency merge
         }
         """
 
+    Scenario: merge multi properties
+      Given the following bean class:
+        """
+        public class Bean {
+          public String str1, str2, str3, str4;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+            public void main() {
+                BiFunction<String,String,String> join = (s1, s2)-> s1+"#"+s2;
+                Function<String,Object[]> divide = s->s.split("#");
+                consistent(String.class)
+                  .<String, String>properties("str1", "str2")
+                    .read(join)
+                    .write(divide)
+                  .direct("str3");
+
+                consistent(String.class)
+                  .<String, String>properties("str1", "str2")
+                    .read(join)
+                    .write(divide)
+                  .direct("str4");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str4", "hello#world").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: hello
+          str2: world
+          str3: hello#world
+          str4: hello#world
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "good#bye").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: good
+          str2: bye
+          str3: good#bye
+          str4: good#bye
+        }
+        """
+
   Rule: without merge
 
     Background:
       Given the following bean class:
         """
         public class Bean {
-          public String str1, str2, str3, str4;
+          public String str1, str2, str3, str4, str5;
         }
         """
 
@@ -341,4 +395,62 @@ Feature: consistency merge
           str2: hello
           str3: hello
         }
+        """
+
+    Scenario: multi properties single reader and single writer not merge
+      And the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> {
+            public void main() {
+              consistent(String.class)
+                .<String, String>properties("str1", "str2")
+                  .write(s -> new Object[]{s, s})
+                .direct("str4");
+
+              consistent(String.class)
+                .<String, String>properties("str1", "str3")
+                  .read((s1, s2) -> s1+"#"+s2)
+                .direct("str5");
+            }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str1", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= /^str4.*/, str3= /^str3.*/, str4= /^str4.*/, str5= /^hello#str3.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str2", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str4.*/, str2= hello, str3= /^str3.*/, str4= /^str4.*/, str5= /^str4.*#str3.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str4", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= hello, str2= hello, str3= /^str3.*/, str4= hello, str5= /^hello#str3.*/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str4.*/, str2= /^str4.*/, str3= hello, str4= /^str4.*/, str5= /^str4.*#hello/
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanSpec.class).property("str5", "hello").create();
+        """
+      Then the result should:
+        """
+        str1= /^str4.*/, str2= /^str4.*/, str3= /^str3.*/, str4= /^str4.*/, str5= hello
         """
