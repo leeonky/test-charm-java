@@ -15,9 +15,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final DefaultBuilder<T> builder;
     private final RootInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
-    private final Map<PropertyChain, Dependency<?>> dependencies = new LinkedHashMap<>();
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
-    private final LinkSpecCollection linkSpecCollection = new LinkSpecCollection();
     private final ListPersistable cachedChildren = new ListPersistable();
     private final Set<String> ignorePropertiesInSpec = new HashSet<>();
     private Persistable persistable;
@@ -125,33 +123,17 @@ class ObjectProducer<T> extends Producer<T> {
         return Optional.ofNullable(children.get(property));
     }
 
-    public void addDependency(PropertyChain property, Function<Object[], Object> rule, List<PropertyChain> dependencies) {
-        this.dependencies.put(property, new Dependency<>(property, dependencies, rule));
-    }
-
-    public ObjectProducer<T> doDependenciesAndLinks() {
-        doDependencies();
-        collectLinks(this, propertyChain(""));
+    public ObjectProducer<T> processConsistent() {
+        collectConsistent(this, propertyChain(""));
         consistencySet.resolve(this);
         return this;
     }
 
     @Override
-    protected void collectLinks(ObjectProducer<?> root, PropertyChain base) {
+    protected void collectConsistent(ObjectProducer<?> root, PropertyChain base) {
         if (root != this)
             root.consistencySet.addAll(consistencySet.absoluteProperty(base));
-        children.forEach((property, producer) -> producer.collectLinks(root, base.concat(property)));
-        linkSpecCollection.processLinks(root, base);
-    }
-
-    @Override
-    protected void doDependencies() {
-        children.values().forEach(Producer::doDependencies);
-        dependencies.values().forEach(dependency -> dependency.process(this));
-    }
-
-    public void link(List<PropertyChain> properties) {
-        linkSpecCollection.link(properties);
+        children.forEach((property, producer) -> producer.collectConsistent(root, base.concat(property)));
     }
 
     private void createDefaultValueProducers() {

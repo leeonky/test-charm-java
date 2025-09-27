@@ -34,7 +34,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return createProducer().doDependenciesAndLinks().getValue();
+        return createProducer().processConsistent().getValue();
     }
 
     @Override

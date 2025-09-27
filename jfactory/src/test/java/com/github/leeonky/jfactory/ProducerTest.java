@@ -33,7 +33,7 @@ class ProducerTest {
                 .property("subObj1.defaultString1", "1")
                 .property("subObj2.defaultString1", "2")
                 .createProducer();
-        beanProducer.doDependenciesAndLinks();
+        beanProducer.processConsistent();
     }
 
     @SuppressWarnings("unchecked")

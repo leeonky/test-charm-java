@@ -85,14 +85,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected void doDependencies() {
-        children.forEach(Producer::doDependencies);
-    }
-
-    @Override
-    protected void collectLinks(ObjectProducer<?> root, PropertyChain base) {
+    protected void collectConsistent(ObjectProducer<?> root, PropertyChain base) {
         range(0, children.size()).forEach(i ->
-                children.get(i).collectLinks(root, base.concat(String.valueOf(i))));
+                children.get(i).collectConsistent(root, base.concat(String.valueOf(i))));
     }
 
     @Override

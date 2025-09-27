@@ -5,9 +5,7 @@ import com.github.leeonky.util.PropertyWriter;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.stream.Stream;
 
-import static com.github.leeonky.jfactory.Link.Reference.defaultLinkerReference;
 import static java.util.function.Function.identity;
 
 abstract class Producer<T> {
@@ -34,10 +32,7 @@ abstract class Producer<T> {
         return valueCache.cache(this::produce);
     }
 
-    protected void doDependencies() {
-    }
-
-    protected void collectLinks(ObjectProducer<?> root, PropertyChain base) {
+    protected void collectConsistent(ObjectProducer<?> root, PropertyChain base) {
     }
 
     public void setChild(String property, Producer<?> producer) {
@@ -71,10 +66,6 @@ abstract class Producer<T> {
 
     public BeanClass<?> getPropertyWriterType(String property) {
         return getType().getPropertyWriter(property).getType();
-    }
-
-    public Stream<Link.Reference<T>> allLinkerReferences(Producer<?> root, PropertyChain absoluteCurrent) {
-        return Stream.of(defaultLinkerReference(root, absoluteCurrent));
     }
 
     public Optional<Producer<?>> createPropertyDefaultValueProducer(PropertyWriter<?> property) {
