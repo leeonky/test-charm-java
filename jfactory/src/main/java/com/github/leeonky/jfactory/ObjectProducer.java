@@ -89,6 +89,9 @@ class ObjectProducer<T> extends Producer<T> {
             if (force || propertyWriter.getType().isCollection())
                 setChild(propertyWriter.getName(), producer = new CollectionProducer<>(getType(), propertyWriter.getType(),
                         instance.sub(propertyWriter), factory.getFactorySet()));
+            else if (!propertyWriter.getType().isCollection())
+                producer = createPropertyDefaultValueProducer(propertyWriter)
+                        .orElse(new DefaultValueProducer<>(propertyWriter.getType(), () -> null));
         }
         return producer;
     }
