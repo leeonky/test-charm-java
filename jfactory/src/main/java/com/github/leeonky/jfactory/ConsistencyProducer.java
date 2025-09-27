@@ -3,15 +3,15 @@ package com.github.leeonky.jfactory;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ConsistencyProducer<T, CT> extends Producer<T> {
+class ConsistencyProducer<T, CT> extends Producer<T> {
     private final Producer<T> origin;
     private final ConsistencyItem<CT>.Resolver provider;
     private final ConsistencyItem<CT>.Resolver consumer;
     private final int index;
     private final Set<Producer<?>> stack = new HashSet<>();
 
-    public ConsistencyProducer(Producer<T> origin, ConsistencyItem<CT>.Resolver provider,
-                               ConsistencyItem<CT>.Resolver consumer, int index) {
+    ConsistencyProducer(Producer<T> origin, ConsistencyItem<CT>.Resolver provider,
+                        ConsistencyItem<CT>.Resolver consumer, int index) {
         super(origin.getType());
         this.origin = origin;
         this.provider = provider;
@@ -20,6 +20,7 @@ public class ConsistencyProducer<T, CT> extends Producer<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected T produce() {
         if (stack.contains(this))
             return origin.produce();

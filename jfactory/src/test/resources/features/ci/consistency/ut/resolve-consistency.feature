@@ -1,6 +1,5 @@
 Feature: resolve consistency
 
-
   Rule: cascade processing consistency
 
     Background:
@@ -81,6 +80,12 @@ Feature: resolve consistency
               .<String>property("str2")
                 .read(s->s)
                 .write(s->s);
+
+            consistent(String.class)
+              .direct("str4")
+              .<String>property("str2")
+                .read(s->s)
+                .write(s->s);
           }
         }
         """
@@ -90,7 +95,7 @@ Feature: resolve consistency
         """
       Then the result should:
         """
-        <<str1, str2, str3>>= hello
+        <<str1, str2, str3, str4>>= hello
         """
       When build:
         """
@@ -98,7 +103,7 @@ Feature: resolve consistency
         """
       Then the result should:
         """
-        <<str1, str2, str3>>= hello
+        <<str1, str2, str3, str4>>= hello
         """
 
   Rule: consistency priority

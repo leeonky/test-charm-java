@@ -1,73 +1,77 @@
 package com.github.leeonky.jfactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
-import static com.github.leeonky.util.function.Extension.firstPresent;
-import static com.github.leeonky.util.function.Extension.getFirstPresent;
-import static java.util.Optional.of;
+import static com.github.leeonky.util.Sneaky.cast;
+import static com.github.leeonky.util.function.Extension.*;
 import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 class ConsistencySet {
     private final List<DefaultConsistency<?>> consistencies = new ArrayList<>();
 
-    public void add(DefaultConsistency<?> consistency) {
+    void add(DefaultConsistency<?> consistency) {
         consistencies.add(consistency);
     }
 
-    public void addAll(ConsistencySet consistencySet) {
+    void addAll(ConsistencySet consistencySet) {
         consistencies.addAll(consistencySet.consistencies);
     }
 
-    public ConsistencySet absoluteProperty(PropertyChain base) {
+    ConsistencySet absoluteProperty(PropertyChain base) {
         ConsistencySet consistencySet = new ConsistencySet();
         consistencies.forEach(consistency -> consistencySet.add(consistency.absoluteProperty(base)));
         return consistencySet;
     }
 
-    public void resolve(ObjectProducer<?> producer) {
-        LinkedList<DefaultConsistency<?>.Resolver> consistencyResolvers = mergeBySameItem(consistencies)
-                .stream().map(c -> c.resolver(producer)).collect(toCollection(LinkedList::new));
-        while (!consistencyResolvers.isEmpty()) {
-            Set<PropertyChain> resolved = popNextRootSourceItem(consistencyResolvers).resolve();
-            resolveCascaded(resolved, consistencyResolvers);
+    void resolve(ObjectProducer<?> producer) {
+        new Resolver(producer).resolve();
+    }
+
+    class Resolver {
+        private final LinkedList<DefaultConsistency<?>.Resolver> unResolved;
+
+        Resolver(ObjectProducer<?> producer) {
+            unResolved = mergeBySameItem(consistencies).stream().map(c -> c.resolver(producer))
+                    .collect(toCollection(LinkedList::new));
         }
-    }
 
-    private void resolveCascaded(Set<PropertyChain> resolved,
-                                 LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
-        for (PropertyChain property : resolved)
-            popNextRelatedItem(property, unResolvedConsistencies).ifPresent(itemResolver ->
-                    resolveCascaded(itemResolver.resolve(), unResolvedConsistencies));
-    }
+        private List<DefaultConsistency<?>> mergeBySameItem(List<DefaultConsistency<?>> list) {
+            List<DefaultConsistency<?>> merged = new ArrayList<>();
+            for (DefaultConsistency<?> consistency : list)
+                if (merged.stream().noneMatch(e -> e.merge(consistency)))
+                    merged.add(consistency);
+            return merged.size() == list.size() ? merged : mergeBySameItem(merged);
+        }
 
-    private Optional<ConsistencyItem<?>.Resolver> popNextRelatedItem(
-            PropertyChain property, LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
-        for (DefaultConsistency<?>.Resolver consistencyResolver : unResolvedConsistencies) {
-            for (ConsistencyItem<?>.Resolver provider : consistencyResolver.providers) {
-                if (provider.containsProperty(property)) {
-                    unResolvedConsistencies.remove(consistencyResolver);
-                    return of(provider);
-                }
+        @SafeVarargs
+        private final ConsistencyItem<?>.Resolver searchNextRootSourceItem(Predicate<ConsistencyItem<?>.Resolver>... conditions) {
+            return mapFirst(conditions, c -> firstPresent(unResolved.stream().map(cr -> cr.searchProvider(c))))
+                    .orElseGet(() -> cast(unResolved.iterator().next().defaultProvider()));
+        }
+
+        private void resolveCascaded(Set<PropertyChain> resolved) {
+            for (PropertyChain property : resolved)
+                mapPresent(unResolved, consistencyResolver -> consistencyResolver.propertyRelated(property))
+                        .collect(toList()).forEach(itemResolver -> resolveCascaded(pop(itemResolver).resolveAsProvider()));
+        }
+
+        private ConsistencyItem<?>.Resolver pop(ConsistencyItem<?>.Resolver itemResolver) {
+            unResolved.remove(itemResolver.consistencyResolver());
+            return itemResolver;
+        }
+
+        void resolve() {
+            while (!unResolved.isEmpty()) {
+                ConsistencyItem<?>.Resolver nextRoot = searchNextRootSourceItem(ConsistencyItem.Resolver::hasFixed,
+                        resolver -> resolver.hasTypeOf(ReadOnlyProducer.class),
+                        resolver -> resolver.hasTypeOf(UnFixedValueProducer.class));
+                resolveCascaded(pop(nextRoot).resolveAsProvider());
             }
         }
-        return Optional.empty();
-    }
-
-    private ConsistencyItem<?>.Resolver popNextRootSourceItem(LinkedList<DefaultConsistency<?>.Resolver> unResolvedConsistencies) {
-        Optional<ConsistencyItem<?>.Resolver> firstPresent = getFirstPresent(
-                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(ConsistencyItem.Resolver::hasFixed))),
-                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(resolver -> resolver.hasTypeOf(ReadOnlyProducer.class)))),
-                () -> firstPresent(unResolvedConsistencies.stream().map(cr -> cr.searchProvider(resolver -> resolver.hasTypeOf(UnFixedValueProducer.class)))));
-        ConsistencyItem<?>.Resolver chosen = firstPresent.orElseGet(() -> unResolvedConsistencies.iterator().next().defaultProvider());
-        unResolvedConsistencies.remove(chosen.consistencyResolver());
-        return chosen;
-    }
-
-    private List<DefaultConsistency<?>> mergeBySameItem(List<DefaultConsistency<?>> list) {
-        List<DefaultConsistency<?>> merged = new ArrayList<>();
-        for (DefaultConsistency<?> consistency : list)
-            if (merged.stream().noneMatch(e -> e.merge(consistency)))
-                merged.add(consistency);
-        return merged.size() == list.size() ? merged : mergeBySameItem(merged);
     }
 }

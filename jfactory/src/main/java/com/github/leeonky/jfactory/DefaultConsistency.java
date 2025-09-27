@@ -6,21 +6,21 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
+import static com.github.leeonky.util.Sneaky.cast;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
-public class DefaultConsistency<T> implements Consistency<T> {
-
-    final List<ConsistencyItem<T>> items = new ArrayList<>();
+class DefaultConsistency<T> extends AbstractConsistency<T> {
+    private final List<ConsistencyItem<T>> items = new ArrayList<>();
     private final BeanClass<T> type;
     private final List<StackTraceElement> locations = new ArrayList<>();
 
-    public DefaultConsistency(Class<T> type) {
+    DefaultConsistency(Class<T> type) {
         this(BeanClass.create(type));
     }
 
-    public DefaultConsistency(BeanClass<T> type) {
+    DefaultConsistency(BeanClass<T> type) {
         this(type, singletonList(guessCustomerPositionStackTrace()));
     }
 
@@ -29,22 +29,20 @@ public class DefaultConsistency<T> implements Consistency<T> {
         this.locations.addAll(locations);
     }
 
-
     @Override
-    public BeanClass<T> type() {
+    BeanClass<T> type() {
         return type;
     }
 
     @Override
-    public Consistency<T> link(ConsistencyItem<T> item) {
+    Consistency<T> link(ConsistencyItem<T> item) {
         items.add(item);
         return this;
     }
 
     public boolean merge(DefaultConsistency<?> another) {
         if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::same))) {
-            for (ConsistencyItem item : another.items)
-                items.add(item);
+            another.items.forEach(item -> items.add(cast(item)));
             return true;
         }
         return false;
@@ -70,17 +68,17 @@ public class DefaultConsistency<T> implements Consistency<T> {
         return new Resolver(root);
     }
 
-    public class Resolver {
-        final Set<ConsistencyItem<T>.Resolver> providers;
+    class Resolver {
+        private final Set<ConsistencyItem<T>.Resolver> providers;
         private final Set<ConsistencyItem<T>.Resolver> consumers;
 
-        public Resolver(ObjectProducer<?> root) {
+        Resolver(ObjectProducer<?> root) {
             List<ConsistencyItem<T>.Resolver> itemResolvers = items.stream().map(i -> i.resolver(root, this)).collect(toList());
             providers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasComposer).collect(toCollection(LinkedHashSet::new));
             consumers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasDecomposer).collect(toCollection(LinkedHashSet::new));
         }
 
-        public Set<PropertyChain> resolve(ConsistencyItem<T>.Resolver provider) {
+        Set<PropertyChain> resolve(ConsistencyItem<T>.Resolver provider) {
             Set<PropertyChain> resolved = new HashSet<>();
             for (ConsistencyItem<T>.Resolver consumer : consumers)
                 if (consumer != provider)
@@ -92,8 +90,12 @@ public class DefaultConsistency<T> implements Consistency<T> {
             return providers.stream().filter(condition).findFirst();
         }
 
-        ConsistencyItem<?>.Resolver defaultProvider() {
+        ConsistencyItem<T>.Resolver defaultProvider() {
             return providers.iterator().next();
+        }
+
+        Optional<ConsistencyItem<T>.Resolver> propertyRelated(PropertyChain property) {
+            return providers.stream().filter(p -> p.containsProperty(property)).findFirst();
         }
     }
 }

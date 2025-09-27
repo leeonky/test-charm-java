@@ -2,24 +2,22 @@ package com.github.leeonky.jfactory;
 
 import java.util.*;
 
-import static com.github.leeonky.jfactory.Consistency.Identity.isBothNull;
-import static com.github.leeonky.jfactory.Consistency.Identity.isSame;
+import static com.github.leeonky.jfactory.AbstractConsistency.Identity.isBothNull;
+import static com.github.leeonky.jfactory.AbstractConsistency.Identity.isSame;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 class ConsistencyItem<T> {
-    final Set<PropertyChain> properties;
+    private final Set<PropertyChain> properties;
     private final DefaultConsistency<T> consistency;
     private final StackTraceElement location;
     private StackTraceElement composerLocation;
     private StackTraceElement decomposerLocation;
-    Consistency.Composer<T> composer;
-    Consistency.Decomposer<T> decomposer;
+    private AbstractConsistency.Composer<T> composer;
+    private AbstractConsistency.Decomposer<T> decomposer;
 
-    public ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency) {
-        location = guessCustomerPositionStackTrace();
-        this.properties = new LinkedHashSet<>(properties);
-        this.consistency = (DefaultConsistency<T>) consistency;
+    ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency) {
+        this(properties, consistency, guessCustomerPositionStackTrace());
     }
 
     ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency, StackTraceElement location) {
@@ -89,19 +87,19 @@ class ConsistencyItem<T> {
 
     class Resolver {
         private final ObjectProducer<?> root;
-        final DefaultConsistency<T>.Resolver consistency;
-        Object[] cached;
+        private final DefaultConsistency<T>.Resolver consistency;
+        private Object[] cached;
 
-        public Resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
+        Resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
             this.root = root;
             this.consistency = consistency;
         }
 
-        public boolean hasTypeOf(Class<?> type) {
+        boolean hasTypeOf(Class<?> type) {
             return properties.stream().map(root::descendant).anyMatch(type::isInstance);
         }
 
-        public Set<PropertyChain> resolve() {
+        Set<PropertyChain> resolveAsProvider() {
             return consistency.resolve(this);
         }
 
@@ -109,21 +107,21 @@ class ConsistencyItem<T> {
             return composer.apply(properties.stream().map(root::descendant).map(Producer::getValue).toArray());
         }
 
-        public Object[] decompose(Resolver provider) {
+        Object[] decompose(Resolver provider) {
             if (cached == null)
                 cached = decomposer.apply(provider.compose());
             return cached;
         }
 
-        public boolean hasComposer() {
+        boolean hasComposer() {
             return composer != null;
         }
 
-        public boolean hasDecomposer() {
+        boolean hasDecomposer() {
             return decomposer != null;
         }
 
-        public Set<PropertyChain> resolve(Resolver provider) {
+        Set<PropertyChain> resolve(Resolver provider) {
             int i = 0;
             for (PropertyChain property : properties) {
                 int index = i++;
@@ -144,20 +142,20 @@ class ConsistencyItem<T> {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public boolean equals(Object o) {
-            return o instanceof ConsistencyItem.Resolver &&
-                    same(((Resolver) o).outer());
+            return o instanceof ConsistencyItem.Resolver && same(((Resolver) o).outer());
         }
 
-        public boolean hasFixed() {
+        boolean hasFixed() {
             return properties.stream().map(root::descendant).anyMatch(Producer::isFixed);
         }
 
-        public boolean containsProperty(PropertyChain property) {
+        boolean containsProperty(PropertyChain property) {
             return properties.contains(property);
         }
 
-        public DefaultConsistency<T>.Resolver consistencyResolver() {
+        DefaultConsistency<T>.Resolver consistencyResolver() {
             return consistency;
         }
     }
