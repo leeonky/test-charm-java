@@ -113,3 +113,52 @@ Feature: choose consistency input item
         """
         str= fixed, subBean.str= hello
         """
+
+    Scenario: prefer item only has reader first - default value
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(Object.class)
+              .property("str1")
+                .write(s->s)
+                .read(s->s)
+              .property("str2")
+                .read(s->s);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        <<str1,str2>>= /^str2.*/
+        """
+
+    Scenario: prefer item only has reader first - given value
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            consistent(Object.class)
+              .property("str1")
+                .write(s->s)
+                .read(s->s)
+              .property("str2")
+                .write(s->s)
+                .read(s->s)
+              .property("str3")
+                .read(s->s);
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "hello").property("str3", "world").create();
+        """
+      Then the result should:
+        """
+        <<str1,str3>>= world, str2= hello
+        """

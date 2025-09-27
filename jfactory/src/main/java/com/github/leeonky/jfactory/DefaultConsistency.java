@@ -87,11 +87,17 @@ class DefaultConsistency<T> extends AbstractConsistency<T> {
         }
 
         Optional<ConsistencyItem<T>.Resolver> searchProvider(Predicate<ConsistencyItem<?>.Resolver> condition) {
-            return providers.stream().filter(condition).findFirst();
+            return providers.stream().filter(condition).min(this::onlyComposerFirstOrder);
         }
 
         ConsistencyItem<T>.Resolver defaultProvider() {
-            return providers.iterator().next();
+            return providers.stream().min(this::onlyComposerFirstOrder).get();
+        }
+
+        private int onlyComposerFirstOrder(ConsistencyItem<T>.Resolver r1, ConsistencyItem<T>.Resolver r2) {
+            if (!r1.hasDecomposer())
+                return -1;
+            return !r2.hasDecomposer() ? 1 : 0;
         }
 
         Optional<ConsistencyItem<T>.Resolver> propertyRelated(PropertyChain property) {
