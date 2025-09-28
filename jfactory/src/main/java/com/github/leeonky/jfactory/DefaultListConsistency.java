@@ -1,39 +1,53 @@
 package com.github.leeonky.jfactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 
 class DefaultListConsistency<T> implements ListConsistency<T> {
-    private final PropertyChain property;
+    private final PropertyChain listProperty;
     private final DefaultConsistency<T> consistency;
-    private final List<Consumer<Integer>> actions = new ArrayList<>();
+    private String property;
+    private AbstractConsistency.Composer<T> composer;
+    private AbstractConsistency.Decomposer<T> decomposer;
 
-    public DefaultListConsistency(String property, DefaultConsistency<T> consistency) {
-        this.property = propertyChain(property);
+    public DefaultListConsistency(String listProperty, DefaultConsistency<T> consistency) {
+        this.listProperty = propertyChain(listProperty);
         this.consistency = consistency;
     }
 
     @Override
     public Consistency<T> direct(String property) {
-        actions.add(index -> consistency.direct(combine(index, property)));
+        this.<T>property(property).read(s -> s).write(s -> s);
         return consistency;
     }
 
+    public void setComposer(ComposerWrapper<T> composer) {
+        this.composer = composer;
+    }
+
+    public void setDecomposer(DecomposerWrapper<T> decomposer) {
+        this.decomposer = decomposer;
+    }
+
+    @Override
+    public <P> AbstractConsistency.LC1<T, P> property(String property) {
+        this.property = property;
+        return new AbstractConsistency.LC1<>(consistency, this);
+    }
+
     private String combine(int index, String property) {
-        return this.property.toString() + String.format("[%d].", index) + property;
+        return listProperty.toString() + String.format("[%d].", index) + property;
     }
 
     public void resolveToItems(ObjectProducer<?> producer) {
-        Producer<?> descendant = producer.descendant(property);
+        Producer<?> descendant = producer.descendant(listProperty);
         if (descendant instanceof CollectionProducer) {
             CollectionProducer<?, ?> collectionProducer = (CollectionProducer) descendant;
             int count = collectionProducer.childrenCount();
             for (int i = 0; i < count; i++) {
                 int index = i;
-                actions.forEach(action -> action.accept(index));
+                consistency.property(combine(index, property))
+                        .read(s -> composer.apply(new Object[]{s}))
+                        .write(t -> decomposer.apply(t)[0]);
             }
         } else
             throw new IllegalStateException();

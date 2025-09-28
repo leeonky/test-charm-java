@@ -72,43 +72,48 @@ Feature: list consistency
         <<beans[1], ::root>>.status= new
         """
 
-#  Rule: reader and writer in list
-#
-#    Background:
-#      Given the following bean class:
-#        """
-#        public class Bean {
-#            public String status;
-#        }
-#        """
-#      And the following bean class:
-#        """
-#        public class BeanList {
-#            public List<Bean> beans;
-#            public String status;
-#        }
-#        """
-#
-#    Scenario: define reader and writer in list property
-#      And operate:
-#        """
-#        jFactory.factory(BeanList.class).spec(ins -> {
-#            Spec<BeanList> spec = ins.spec();
-#            spec.consistent(String.class)
-#                    .list("beans").property("status")
-#                      .read(s->s)
-#                      .write(s->s)
-#                    .direct("status");
-#        });
-#        """
-#      When build:
-#        """
-#        jFactory.type(BeanList.class)
-#                .property("beans[0]!", null)
-#                .property("beans[1]!", null)
-#                .property("status", "new").create();
-#        """
-#      Then the result should:
-#        """
-#        <<beans<<0, 1>>, ::root>>.status= new
-#        """
+  Rule: reader and writer in list
+
+    Background:
+      Given the following bean class:
+        """
+        public class Bean {
+            public String status;
+        }
+        """
+      And the following bean class:
+        """
+        public class BeanList {
+            public List<Bean> beans;
+            public String status;
+        }
+        """
+
+    Scenario: define reader and writer in list property
+      And operate:
+        """
+        jFactory.factory(BeanList.class).spec(ins -> {
+            Spec<BeanList> spec = ins.spec();
+            spec.consistent(Object.class)
+                    .list("beans").property("status")
+                      .read(s->s)
+                      .write(s->s)
+                    .direct("status");
+        });
+        """
+      When build:
+        """
+        jFactory.type(BeanList.class)
+                .property("beans[0]!", null)
+                .property("beans[1]!", null)
+                .property("status", "new").create();
+        """
+      Then the result should:
+        """
+        <<beans<<0, 1>>, ::root>>.status= new
+        """
+
+#TODO multi list in one consistent
+#TODO multi group property in one list
+#TODO tow properties three properties array properties api for list
+#TODO reverseAssociations

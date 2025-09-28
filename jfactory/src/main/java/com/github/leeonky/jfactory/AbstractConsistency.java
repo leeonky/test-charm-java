@@ -209,6 +209,25 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
             super(origin, lastItem);
         }
     }
+
+    public static class LC1<T, P> extends DecorateConsistency<T> {
+        private final DefaultListConsistency<T> lastListConsistency;
+
+        LC1(AbstractConsistency<T> origin, DefaultListConsistency<T> lastListConsistency) {
+            super(origin);
+            this.lastListConsistency = lastListConsistency;
+        }
+
+        public LC1<T, P> read(Function<P, T> composer) {
+            lastListConsistency.setComposer(new ComposerWrapper<>(objs -> composer.apply((P) objs[0]), composer));
+            return this;
+        }
+
+        public LC1<T, P> write(Function<T, P> decomposer) {
+            lastListConsistency.setDecomposer(new DecomposerWrapper<>(t -> new Object[]{decomposer.apply(t)}, decomposer));
+            return this;
+        }
+    }
 }
 
 class IdentityAction implements AbstractConsistency.Identity {
