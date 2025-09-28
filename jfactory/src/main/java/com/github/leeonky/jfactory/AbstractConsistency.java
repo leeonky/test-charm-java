@@ -118,6 +118,11 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
         public CN<T> properties(String... properties) {
             return consistency.properties(properties);
         }
+
+        @Override
+        public ListConsistency<T> list(String property) {
+            return consistency.list(property);
+        }
     }
 
     public static class C1<T, P> extends DecorateConsistency<T> {

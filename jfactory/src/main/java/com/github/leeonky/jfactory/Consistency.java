@@ -10,4 +10,6 @@ public interface Consistency<T> {
     <P1, P2, P3> AbstractConsistency.C3<T, P1, P2, P3> properties(String property1, String property2, String property3);
 
     AbstractConsistency.CN<T> properties(String... properties);
+
+    ListConsistency<T> list(String property);
 }

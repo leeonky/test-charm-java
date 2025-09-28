@@ -13,6 +13,8 @@ import static java.util.stream.Collectors.toList;
 
 class DefaultConsistency<T> extends AbstractConsistency<T> {
     private final List<ConsistencyItem<T>> items = new ArrayList<>();
+    private final List<DefaultListConsistency<T>> list = new ArrayList<>();
+
     private final BeanClass<T> type;
     private final List<StackTraceElement> locations = new ArrayList<>();
 
@@ -66,6 +68,19 @@ class DefaultConsistency<T> extends AbstractConsistency<T> {
 
     public Resolver resolver(ObjectProducer<?> root) {
         return new Resolver(root);
+    }
+
+    @Override
+    public ListConsistency<T> list(String property) {
+        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, this);
+        list.add(listConsistency);
+        return listConsistency;
+    }
+
+    public DefaultConsistency<T> processListConsistency(ObjectProducer<?> producer) {
+        for (DefaultListConsistency<T> listConsistency : list)
+            listConsistency.resolveToItems(producer);
+        return this;
     }
 
     class Resolver {
