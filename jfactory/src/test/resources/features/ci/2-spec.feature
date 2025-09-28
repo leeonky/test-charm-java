@@ -2041,27 +2041,50 @@ Feature: use spec
         | List<Object> |
         | List<Bean>   |
 
-#  Rule: default sub spec
-#
-#    Background:
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public SubBean sub;
-#      }
-#      """
-#      Given the following bean class:
-#      """
-#      public class SubBean {
-#        public String value1, value2;
-#      }
-#      """
-#      And the following spec class:
-#      """
-#      public class BeanSpec extends Spec<Bean> {
-#        @Override
-#        public void main() {
-#          property("sub")("SubBeanSpec");
-#        }
-#      }
-#      """
+  Rule: default sub spec
+
+    Scenario: support define default spec (not default value, default value is null)
+      Given the following bean class:
+      """
+      public class Bean {
+        public SubBean sub;
+      }
+      """
+      Given the following bean class:
+      """
+      public class SubBean {
+        public String value1, value2;
+        public String value;
+      }
+      """
+      And the following spec class:
+      """
+      public class SubBeanSpec extends Spec<SubBean> {
+        @Override
+        public void main() {
+          property("value1").value("hello");
+        }
+
+        @Trait()
+        public void Default() {
+          property("value2").value("world");
+        }
+      }
+      """
+      And register:
+      """
+        jFactory.factory(Bean.class).spec(ins ->
+          ins.spec().property("sub").optional("Default", "SubBeanSpec"));
+      """
+      When build:
+        """
+        jFactory.type(Bean.class).property("sub.value", "bye").create();
+        """
+      Then the result should:
+        """
+        sub: {
+          value1= hello
+          value2= world
+          value= bye
+        }
+        """

@@ -48,6 +48,16 @@ public class PropertySpec<T> {
         return spec.newIsSpec(traitsAndSpec, this);
     }
 
+    public Spec<T> optional(String... traitsAndSpec) {
+        if (property.isSingle()) {
+            return spec.append((jFactory, objectProducer) -> {
+                PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter(property.toString());
+                objectProducer.changeChild(property.toString(), new OptionalSpecDefaultValueProducer<>(propertyWriter.getType(), traitsAndSpec));
+            });
+        }
+        throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
+    }
+
     @Deprecated
     /**
      * reference spec and trait via string

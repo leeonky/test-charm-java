@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
+import static com.github.leeonky.util.Sneaky.cast;
 import static java.util.stream.IntStream.range;
 
 class ObjectProducer<T> extends Producer<T> {
@@ -21,6 +22,7 @@ class ObjectProducer<T> extends Producer<T> {
     private Persistable persistable;
     private Function<PropertyWriter<?>, Producer<?>> defaultListElementValueProducerFactory;
     private final ConsistencySet consistencySet = new ConsistencySet();
+    private final Map<String, String[]> optionalSpecs = new HashMap<>();
 
     public JFactory jFactory() {
         return jFactory;
@@ -91,7 +93,7 @@ class ObjectProducer<T> extends Producer<T> {
                         instance.sub(propertyWriter), factory.getFactorySet()));
             else if (!propertyWriter.getType().isCollection())
                 producer = createPropertyDefaultValueProducer(propertyWriter)
-                        .orElse(new DefaultValueProducer<>(propertyWriter.getType(), () -> null));
+                        .orElse(new DefaultValueProducer<>(propertyWriter.getType(), () -> cast(propertyWriter.getType().createDefault())));
         }
         return producer;
     }
@@ -161,6 +163,14 @@ class ObjectProducer<T> extends Producer<T> {
         return origin.builder.marge(builder).createProducer();
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    protected Producer<T> changeFrom(OptionalSpecDefaultValueProducer<T> producer) {
+        if (producer.getTraitsAndSpec() != null)
+            return ((DefaultBuilder<T>) jFactory.spec(producer.getTraitsAndSpec())).marge(builder).createProducer();
+        return this;
+    }
+
     public void appendReverseAssociation(PropertyChain property, String association) {
         reverseAssociations.put(property, association);
     }
@@ -196,5 +206,9 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void appendLink(DefaultConsistency<?> consistency) {
         consistencySet.add(consistency);
+    }
+
+    public void addOptionalSpec(String property, String[] traitsAndSpec) {
+        optionalSpecs.put(property, traitsAndSpec);
     }
 }
