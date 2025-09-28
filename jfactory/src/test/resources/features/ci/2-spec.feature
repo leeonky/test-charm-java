@@ -1700,6 +1700,57 @@ Feature: use spec
         | Object[]     |
         | List<Object> |
 
+    Scenario: create generic bean
+      Given the following bean class:
+      """
+      public class Bean<T> {
+        public T bean;
+      }
+      """
+      Given the following bean class:
+      """
+      public class BeanData {
+        public String value1, value2;
+      }
+      """
+      Given the following spec class:
+      """
+      @Global
+      public class BeanDataSpec extends Spec<BeanData> {
+        @Override
+        public void main() {
+          property("value2").value("world");
+        }
+
+        @Trait
+        public void hello() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      Given the following spec class:
+      """
+      public class BeanSpec extends Spec<Bean<BeanData>> {
+        @Override
+        public void main() {
+          property("bean").is("BeanDataSpec");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.spec(BeanSpec.class).create();
+      """
+      Then the result should:
+      """
+      : {
+        bean : {
+          class.simpleName= BeanData
+          value2= world
+        }
+      }
+      """
+
   Rule: create top list
 
     Scenario: create from list spec

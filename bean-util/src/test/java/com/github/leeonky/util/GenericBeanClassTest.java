@@ -32,4 +32,22 @@ class GenericBeanClassTest {
 
     public static class StringList extends ArrayList<String> {
     }
+
+//    TODO
+//    public static class Bean<T> {
+//        public List<T> list;
+//    }
+//
+//    @Nested
+//    class GuessMemberGenericType {
+//
+//        @Test
+//        void support_member_generic_type_from_instance() {
+//            Bean<String> stringBean = new Bean<String>() {
+//            };
+//            BeanClass<?> from = GenericBeanClass.create(GenericType.createGenericType(stringBean.getClass().getGenericSuperclass()));
+//            assertThat(from.getPropertyReader("list").getType().getTypeArguments(0))
+//                    .hasValue(BeanClass.create(String.class));
+//        }
+//    }
 }

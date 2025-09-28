@@ -2,6 +2,7 @@ package com.github.leeonky.util;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +23,8 @@ public class GenericType {
     public Class<?> getRawType() {
         if (type instanceof ParameterizedType)
             return (Class<?>) ((ParameterizedType) type).getRawType();
+        if (type instanceof TypeVariable)
+            return Object.class;
         return (Class<?>) type;
     }
 
