@@ -22,7 +22,6 @@ class ObjectProducer<T> extends Producer<T> {
     private Persistable persistable;
     private Function<PropertyWriter<?>, Producer<?>> defaultListElementValueProducerFactory;
     private final ConsistencySet consistencySet = new ConsistencySet();
-    private final Map<String, String[]> optionalSpecs = new HashMap<>();
 
     public JFactory jFactory() {
         return jFactory;
@@ -206,9 +205,5 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void appendLink(DefaultConsistency<?> consistency) {
         consistencySet.add(consistency);
-    }
-
-    public void addOptionalSpec(String property, String[] traitsAndSpec) {
-        optionalSpecs.put(property, traitsAndSpec);
     }
 }

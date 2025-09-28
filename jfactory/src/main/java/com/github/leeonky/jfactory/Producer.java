@@ -10,12 +10,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 
 abstract class Producer<T> {
-    public static final Producer PLACE_HOLDER = new Producer<Object>(BeanClass.create(Object.class)) {
-        @Override
-        protected Object produce() {
-            throw new IllegalStateException("This is a place holder producer, can not produce any value");
-        }
-    };
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
 

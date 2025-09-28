@@ -130,9 +130,7 @@ Feature: define link
       And register:
       """
       jFactory.factory(Beans.class).spec(instance -> instance.spec()
-          .property("beans[0]").byFactory()
-          .property("beans[1]").byFactory()
-          .property("beans[2]").byFactory()
+          .property("beans[]").byFactory()
           .link("beans[0].value", "beans[1].value", "beans[2].value"));
       """
       When build:
@@ -161,8 +159,7 @@ Feature: define link
       And register:
       """
       jFactory.factory(Beans.class).spec(instance -> instance.spec()
-          .property("beans[0]").byFactory()
-          .property("beans[1]").byFactory()
+          .property("beans[]").byFactory()
           .link("beans[0]", "beans[1]", "bean"));
       """
       When build:
@@ -195,8 +192,7 @@ Feature: define link
       And register:
       """
       jFactory.factory(Beans.class).spec(instance -> instance.spec()
-          .property("beans[0]").byFactory()
-          .property("beans[1]").byFactory()
+          .property("beans[]").byFactory()
           .link("beans[0]", "beans[1]", "bean"));
       """
       When build:
@@ -229,8 +225,7 @@ Feature: define link
       And register:
       """
       jFactory.factory(Beans.class).spec(instance -> instance.spec()
-          .property("beans[0]").byFactory()
-          .property("beans[1]").byFactory()
+          .property("beans[]").byFactory()
           .link("beans[0].value", "beans[1].value", "value"));
       """
       When build:
@@ -564,7 +559,7 @@ Feature: define link
       <<bean.value, value>>= hello
       """
 
-    Scenario: use default value(null) when parent object is null
+    Scenario: keep original when parent object is null
       Given the following bean class:
       """
       public class Bean {
@@ -590,7 +585,10 @@ Feature: define link
       """
       Then the result should:
       """
-      <<bean, value>>= null
+      : {
+        bean= null
+        value= /^value.*/
+      }
       """
 
     Scenario: link with read only value from suppose object

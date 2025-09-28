@@ -100,6 +100,8 @@ class ConsistencyItem<T> {
         }
 
         Set<PropertyChain> resolveAsProvider() {
+            if (hasTypeOf(PlaceHolderProducer.class))
+                return Collections.emptySet();
             return consistency.resolve(this);
         }
 

@@ -113,7 +113,7 @@ Feature: choose consistency root source provider
         str= fixed, subBean.str= hello
         """
 
-    Scenario: object producer > default value
+    Scenario: object producer > default value (consider empty producer child as default value producer)
       Given the following bean class:
         """
         public class SubBean {
@@ -230,5 +230,76 @@ Feature: choose consistency root source provider
           lastName: Tom
           familyName: /^familyName.*/
           givenName: Tom
+        }
+        """
+
+    Scenario: consider sub property of default value producer is also a default value producer
+      Given the following bean class:
+        """
+        public class SubBean {
+          public String str;
+          public SubBean() {}
+          public SubBean(String s) {str=s;}
+        }
+        """
+      Given the following bean class:
+        """
+        public class Bean {
+          public SubBean subBean1, subBean2;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              property("subBean2").byFactory();
+              link("subBean1.str", "subBean2.str");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          subBean1: null
+          subBean2.str: /^str.*/
+        }
+        """
+
+    Scenario: placeholder producer;
+      Given the following bean class:
+        """
+        public class SubBean {
+          public String str;
+          public SubBean() {}
+          public SubBean(String s) {str=s;}
+        }
+        """
+      Given the following bean class:
+        """
+        public class Bean {
+          public SubBean subBean1, subBean2;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              link("subBean1.str", "subBean2.str");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          subBean1: null
+          subBean2: null
         }
         """

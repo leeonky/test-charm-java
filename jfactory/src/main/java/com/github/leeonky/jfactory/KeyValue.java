@@ -58,7 +58,7 @@ class KeyValue {
                 ((CollectionProducer<?, ?>) subProducer).changeElementDefaultValueProducerFactory(i ->
                         traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
             if (subProducer == null)
-                subProducer = Producer.PLACE_HOLDER;
+                subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else if (traitsSpec.isCollectionSpec() && producer instanceof ObjectProducer && property.getWriterType().isCollection()) {
             SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
             subProducer = ((ObjectProducer) producer).childOrDefaultCollection(property.getWriter(), false);
@@ -66,9 +66,9 @@ class KeyValue {
                 ((CollectionProducer<?, ?>) subProducer).changeElementDefaultValueProducerFactory(i ->
                         traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
             if (subProducer == null)
-                subProducer = Producer.PLACE_HOLDER;
+                subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else {
-            subProducer = producer.child(propertyName).orElse(Producer.PLACE_HOLDER);
+            subProducer = producer.child(propertyName).orElse(PlaceHolderProducer.PLACE_HOLDER);
             if (subProducer instanceof ObjectProducer ||
                     subProducer instanceof CollectionProducer && property.getWriterType().is(Object.class)) {
                 BeanClass<? extends T> type = (BeanClass<? extends T>) subProducer.getType();
@@ -93,7 +93,7 @@ class KeyValue {
                 propertySub = propertySub.decorateWriterType(type).decorateReaderType(type);
             }
         } else
-            subProducer = collectionProducer.child(index).orElse(Producer.PLACE_HOLDER);
+            subProducer = collectionProducer.child(index).orElse(PlaceHolderProducer.PLACE_HOLDER);
         TraitsSpec elementTraitSpec = new TraitsSpec(matcher.group(GROUP_ELEMENT_TRAIT) != null ?
                 matcher.group(GROUP_ELEMENT_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_ELEMENT_SPEC));
         return new CollectionExpression<>(property, intIndex,

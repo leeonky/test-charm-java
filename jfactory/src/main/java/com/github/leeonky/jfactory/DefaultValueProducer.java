@@ -2,7 +2,10 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.Optional;
 import java.util.function.Supplier;
+
+import static java.util.Optional.of;
 
 class DefaultValueProducer<V> extends Producer<V> {
     private final Supplier<V> value;
@@ -30,5 +33,10 @@ class DefaultValueProducer<V> extends Producer<V> {
     @Override
     protected Producer<V> changeFrom(ObjectProducer<V> producer) {
         return producer;
+    }
+
+    @Override
+    public Optional<Producer<?>> child(String property) {
+        return of(PlaceHolderProducer.PLACE_HOLDER);
     }
 }

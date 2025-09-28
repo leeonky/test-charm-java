@@ -501,8 +501,7 @@ Feature: define dependency
       And register:
       """
       jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
-          .property("beans[0]").byFactory()
-          .property("beans[1]").byFactory()
+          .property("beans[]").byFactory()
           .property("beans[0].stringValue").dependsOn("beans[1].stringValue", obj -> obj));
       """
 
@@ -880,8 +879,7 @@ Feature: define dependency
       <<beans1, beans2>>[0].value= hello
       """
 
-    Scenario: should use default value(null) when depended value parent object is null
-
+    Scenario: keep default when depended value parent object is null
       Given the following bean class:
       """
       public class Bean {
@@ -915,7 +913,7 @@ Feature: define dependency
       Then the result should:
       """
       : {
-        bean1.value= null
+        bean1.value= /^value.*/
         bean2= null
       }
       """
