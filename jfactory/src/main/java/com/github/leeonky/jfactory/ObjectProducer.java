@@ -85,7 +85,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     public Producer<?> childOrDefaultCollection(PropertyWriter<T> propertyWriter, boolean force) {
         Producer<?> producer = children.get(propertyWriter.getName());
-        if (producer == null) {
+        if (producer == null && !ignorePropertiesInSpec.contains(propertyWriter.getName())) {
             if (force || propertyWriter.getType().isCollection())
                 setChild(propertyWriter.getName(), producer = new CollectionProducer<>(getType(), propertyWriter.getType(),
                         instance.sub(propertyWriter), factory.getFactorySet()));

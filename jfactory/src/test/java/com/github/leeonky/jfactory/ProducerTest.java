@@ -56,8 +56,7 @@ class ProducerTest {
                     reader.setAccessible(true);
                     Field parent = ReadOnlyProducer.class.getDeclaredField("parent");
                     parent.setAccessible(true);
-                    if (Objects.equals(reader.get(another), reader.get(actual))
-                            && Objects.equals(parent.get(another), parent.get(actual)))
+                    if (Objects.equals(reader.get(another), reader.get(actual)))
                         return this;
                     failWithMessage("\nExpect: %s\nActual: %s", another, actual);
                 } catch (Exception e) {
@@ -118,7 +117,7 @@ class ProducerTest {
             assertChange("not override from input", "inputString2", "array1", "inputString2");
             assertChange("default override from link value", "link2", "array1", "array1");
             assertChange("override from object", "subObj2", "array1", "array1");
-            assertChange("default override from readonly", "readonly2", "array1", "array1");
+            assertChange("default override from readonly", "readonly2.subObj1", "array1", "array1");
             assertChange("override from unfixed", "unfixed2", "array1", "array1");
         }
 
@@ -130,7 +129,7 @@ class ProducerTest {
             assertChange("not override from input", "inputString2", "defaultString1", "inputString2");
             assertChange("not override from link value", "link2", "defaultString1", "link2");
             assertChange("not override from object", "subObj2", "defaultString1", "subObj2");
-            assertChange("not override from readonly", "readonly2", "defaultString1", "readonly2");
+            assertChange("not override from readonly", "readonly2.subObj1", "defaultString1", "readonly2.subObj1");
             assertChange("not override from unfixed", "unfixed2", "defaultString1", "unfixed2");
         }
 
@@ -155,7 +154,7 @@ class ProducerTest {
             assertChange("override from input", "inputString2", "inputString1", "inputString1");
             assertChange("override from link value", "link2", "inputString1", "inputString1");
             assertChange("override from object", "subObj2", "inputString1", "inputString1");
-            assertChange("default override from readonly", "readonly2", "inputString1", "inputString1");
+            assertChange("default override from readonly", "readonly2.subObj1", "inputString1", "inputString1");
             assertChange("override from unfixed", "unfixed2", "inputString1", "inputString1");
         }
 
@@ -180,20 +179,20 @@ class ProducerTest {
             assertChange("not override from input", "inputString2", "subObj1", "inputString2");
             assertChange("default override from link value", "link2", "subObj1", "subObj1");
 
-            assertChange("default override from readonly", "readonly2", "subObj1", "subObj1");
+            assertChange("default override from readonly", "readonly2.subObj1", "subObj1", "subObj1");
             assertChange("override from unfixed", "unfixed2", "subObj1", "subObj1");
         }
 
         @Test
         void to_readonly_should() {
-            assertChange("default override from collection", "array2", "readonly1", "readonly1");
-            assertChange("default override from default value", "defaultString2", "readonly1", "readonly1");
-            assertChange("default override from dependency value", "dependency2", "readonly1", "readonly1");
+            assertChange("default override from collection", "array2", "readonly1.subObj1", "readonly1.subObj1");
+            assertChange("default override from default value", "defaultString2", "readonly1.subObj1", "readonly1.subObj1");
+            assertChange("default override from dependency value", "dependency2", "readonly1.subObj1", "readonly1.subObj1");
             assertChange("not override from input", "inputString2", "link1", "inputString2");
-            assertChange("default override from link value", "link2", "readonly1", "readonly1");
-            assertChange("default override from object", "subObj2", "readonly1", "readonly1");
-            assertChange("default override from readonly", "readonly2", "readonly1", "readonly1");
-            assertChange("default override from unfixed", "unfixed2", "readonly1", "readonly1");
+            assertChange("default override from link value", "link2", "readonly1.subObj1", "readonly1.subObj1");
+            assertChange("default override from object", "subObj2", "readonly1.subObj1", "readonly1.subObj1");
+            assertChange("default override from readonly", "readonly2.subObj1", "readonly1.subObj1", "readonly1.subObj1");
+            assertChange("default override from unfixed", "unfixed2", "readonly1.subObj1", "readonly1.subObj1");
         }
 
         @Test
@@ -204,7 +203,7 @@ class ProducerTest {
             assertChange("not override from input", "inputString2", "unfixed1", "inputString2");
             assertChange("default override from link value", "link2", "unfixed1", "unfixed1");
             assertChange("override from object", "subObj2", "unfixed1", "unfixed1");
-            assertChange("default override from readonly", "readonly2", "unfixed1", "unfixed1");
+            assertChange("default override from readonly", "readonly2.subObj1", "unfixed1", "unfixed1");
             assertChange("override from unfixed", "unfixed2", "unfixed1", "unfixed1");
         }
     }

@@ -55,7 +55,6 @@ Feature: choose consistency root source provider
         """
         public class ABean extends Spec<Bean> {
           public void main() {
-              property("subBean").byFactory();
               property("str").value("any");
 
               consistent(String.class)
@@ -112,6 +111,42 @@ Feature: choose consistency root source provider
       Then the result should:
         """
         str= fixed, subBean.str= hello
+        """
+
+    Scenario: object producer > default value
+      Given the following bean class:
+        """
+        public class SubBean {
+          public String str;
+          public SubBean() {}
+          public SubBean(String s) {str=s;}
+        }
+        """
+      Given the following bean class:
+        """
+        public class Bean {
+          public SubBean subBean1, subBean2;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              property("subBean2").byFactory();
+              link("subBean1", "subBean2");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          subBean1= .subBean2
+          subBean1: {...}
+        }
         """
 
     Scenario: prefer item only has reader first - default value

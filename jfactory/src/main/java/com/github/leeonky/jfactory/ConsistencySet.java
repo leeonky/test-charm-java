@@ -49,7 +49,7 @@ class ConsistencySet {
         }
 
         @SafeVarargs
-        private final ConsistencyItem<?>.Resolver searchNextRootSourceItem(Predicate<ConsistencyItem<?>.Resolver>... conditions) {
+        private final ConsistencyItem<?>.Resolver searchNextRootSourceProvider(Predicate<ConsistencyItem<?>.Resolver>... conditions) {
             return mapFirst(conditions, c -> firstPresent(unResolved.stream().map(cr -> cr.searchProvider(c))))
                     .orElseGet(() -> cast(unResolved.iterator().next().defaultProvider()));
         }
@@ -67,10 +67,11 @@ class ConsistencySet {
 
         void resolve() {
             while (!unResolved.isEmpty()) {
-                ConsistencyItem<?>.Resolver nextRoot = searchNextRootSourceItem(ConsistencyItem.Resolver::hasFixed,
+                ConsistencyItem<?>.Resolver nextRootProvider = searchNextRootSourceProvider(ConsistencyItem.Resolver::hasFixed,
                         resolver -> resolver.hasTypeOf(ReadOnlyProducer.class),
-                        resolver -> resolver.hasTypeOf(UnFixedValueProducer.class));
-                resolveCascaded(pop(nextRoot).resolveAsProvider());
+                        resolver -> resolver.hasTypeOf(UnFixedValueProducer.class),
+                        resolver -> resolver.hasTypeOf(ObjectProducer.class));
+                resolveCascaded(pop(nextRootProvider).resolveAsProvider());
             }
         }
     }

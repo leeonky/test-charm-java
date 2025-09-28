@@ -824,6 +824,7 @@ Feature: define dependency
       jFactory.factory(Beans.class)
           .constructor(instance -> new Beans().setBean2(new Bean().setValue("hello")))
           .spec(instance -> instance.spec()
+          .property("bean2").ignore()
           .property("bean1").byFactory()
           .property("bean1.value").dependsOn("bean2.value", obj -> obj));
       """
@@ -866,6 +867,7 @@ Feature: define dependency
             return beans;
           })
           .spec(instance -> instance.spec()
+          .property("beans2").ignore()
           .property("beans1[0]").byFactory()
           .property("beans1[0].value").dependsOn("beans2[0].value", obj -> obj));
       """

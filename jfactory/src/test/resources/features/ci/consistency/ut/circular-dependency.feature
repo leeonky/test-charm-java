@@ -69,8 +69,10 @@ Feature: circular dependency
         """
       Then the result should:
         """
-        str1= .str2,
-        str2= .str3
+        : {
+          str1= .str2
+          str2= .str3
+        }
         """
       When build:
         """

@@ -1733,7 +1733,7 @@ Feature: use spec
       public class BeanSpec extends Spec<Bean<BeanData>> {
         @Override
         public void main() {
-          property("bean").is("BeanDataSpec");
+          property("bean").is("hello", "BeanDataSpec");
         }
       }
       """
@@ -1746,6 +1746,7 @@ Feature: use spec
       : {
         bean : {
           class.simpleName= BeanData
+          value1= hello
           value2= world
         }
       }
@@ -2039,3 +2040,28 @@ Feature: use spec
         | List         |
         | List<Object> |
         | List<Bean>   |
+
+#  Rule: default sub spec
+#
+#    Background:
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public SubBean sub;
+#      }
+#      """
+#      Given the following bean class:
+#      """
+#      public class SubBean {
+#        public String value1, value2;
+#      }
+#      """
+#      And the following spec class:
+#      """
+#      public class BeanSpec extends Spec<Bean> {
+#        @Override
+#        public void main() {
+#          property("sub")("SubBeanSpec");
+#        }
+#      }
+#      """

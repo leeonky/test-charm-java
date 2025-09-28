@@ -6,6 +6,7 @@ import com.github.leeonky.util.PropertyWriter;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
+import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 
 abstract class Producer<T> {
@@ -47,7 +48,7 @@ abstract class Producer<T> {
     }
 
     public Producer<?> descendant(PropertyChain property) {
-        return property.access(this, (producer, subProperty) -> producer.child(subProperty)
+        return property.access(this, (producer, subProperty) -> ofNullable(producer.childOrDefault(subProperty))
                 .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), identity());
     }
 
