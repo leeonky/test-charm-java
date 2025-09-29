@@ -254,6 +254,43 @@ Feature: list consistency
         }
         """
 
+  Rule: list and list
+
+    Background:
+      And the following bean class:
+        """
+        public class BeanList {
+            public List<Bean> beans1, beans2;
+            public String status1, status2, status3;
+        }
+        """
+
+    Scenario: list effect list property
+      And operate:
+        """
+        jFactory.factory(BeanList.class).spec(ins -> {
+            ins.spec().consistent(String.class)
+                    .list("beans1").consistent(beans -> beans
+                      .direct("status1"))
+                    .list("beans2").consistent(beans -> beans
+                      .direct("status1"))
+                    .direct("status1");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(BeanList.class)
+                .property("beans1[0]!", null)
+                .property("beans1[1]!", null)
+                .property("beans2[0]!", null)
+                .property("beans2[1]!", null)
+                .property("status1", "new").create();
+        """
+      Then the result should:
+        """
+        <<beans1<<0, 1>>, beans2<<0, 1>>, ::root>>.status1= new
+        """
+
 #TODO multi list in one consistent
 #TODO reverseAssociations
 #TODO nested list consistent

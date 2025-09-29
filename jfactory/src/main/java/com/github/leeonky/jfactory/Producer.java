@@ -30,15 +30,22 @@ abstract class Producer<T> {
     protected void collectConsistent(ObjectProducer<?> root, PropertyChain base) {
     }
 
-    public void setChild(String property, Producer<?> producer) {
-    }
-
     public Optional<Producer<?>> child(String property) {
         return Optional.empty();
     }
 
     public Producer<?> childOrDefault(String property) {
         return child(property).orElse(null);
+    }
+
+    public void setChild(String property, Producer<?> producer) {
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> void changeChild(String property, Producer<T> producer) {
+        Producer<T> origin = (Producer<T>) childOrDefault(property);
+        if (origin != producer)
+            setChild(property, origin == null ? producer : origin.changeTo(producer));
     }
 
     public Producer<?> descendant(PropertyChain property) {
@@ -50,13 +57,6 @@ abstract class Producer<T> {
         String tail = property.tail();
         property.removeTail().access(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(lastObjectProducer ->
                 lastObjectProducer.changeChild(tail, producerFactory.apply(lastObjectProducer, tail)));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> void changeChild(String property, Producer<T> producer) {
-        Producer<T> origin = (Producer<T>) childOrDefault(property);
-        if (origin != producer)
-            setChild(property, origin == null ? producer : origin.changeTo(producer));
     }
 
     public BeanClass<?> getPropertyWriterType(String property) {
