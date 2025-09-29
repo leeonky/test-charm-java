@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 class DefaultListConsistency<T> implements ListConsistency<T> {
     private final PropertyChain listProperty;
@@ -23,9 +25,16 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
 
     @Override
     public <P> AbstractConsistency.LC1<T, P> property(String property) {
-        ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(property);
+        ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(singletonList(property));
         items.add(listConsistencyItem);
         return new AbstractConsistency.LC1<>(consistency, this, listConsistencyItem);
+    }
+
+    @Override
+    public <P1, P2> AbstractConsistency.LC2<T, P1, P2> properties(String property1, String property2) {
+        ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(asList(property1, property2));
+        items.add(listConsistencyItem);
+        return new AbstractConsistency.LC2<>(consistency, this, listConsistencyItem);
     }
 
     private String combine(int index, String property) {
@@ -40,9 +49,9 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
             for (int i = 0; i < count; i++) {
                 int index = i;
                 for (ListConsistencyItem<T> listConsistencyItem : items) {
-                    consistency.property(combine(index, listConsistencyItem.property))
-                            .read(s -> listConsistencyItem.composer.apply(new Object[]{s}))
-                            .write(t -> listConsistencyItem.decomposer.apply(t)[0]);
+                    consistency.properties(listConsistencyItem.property.stream().map(p -> combine(index, p)).toArray(String[]::new))
+                            .read(listConsistencyItem.composer)
+                            .write(listConsistencyItem.decomposer);
                 }
             }
         } else

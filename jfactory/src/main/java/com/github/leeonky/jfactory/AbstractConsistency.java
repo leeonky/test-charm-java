@@ -230,6 +230,26 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
             return this;
         }
     }
+
+    public static class LC2<T, P1, P2> extends DecorateConsistency<T> {
+        private final ListConsistencyItem<T> listConsistencyItem;
+
+        LC2(AbstractConsistency<T> consistency, DefaultListConsistency listConsistency, ListConsistencyItem<T> listConsistencyItem) {
+            super(consistency);
+            this.listConsistencyItem = listConsistencyItem;
+        }
+
+        public LC2<T, P1, P2> read(BiFunction<P1, P2, T> composer) {
+            listConsistencyItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P1) objs[0], (P2) objs[1]), composer));
+            return this;
+        }
+
+        public LC2<T, P1, P2> write(Function<T, P1> decompose1, Function<T, P2> decompose2) {
+            listConsistencyItem.setDecomposer(new DecomposerWrapper<>(
+                    t -> new Object[]{decompose1.apply(t), decompose2.apply(t)}, asList(decompose1, decompose2)));
+            return this;
+        }
+    }
 }
 
 class IdentityAction implements AbstractConsistency.Identity {

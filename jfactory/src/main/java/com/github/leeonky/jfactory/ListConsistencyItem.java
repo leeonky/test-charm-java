@@ -1,12 +1,16 @@
 package com.github.leeonky.jfactory;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 class ListConsistencyItem<T> {
-    String property;
+    Set<String> property = new LinkedHashSet<>();
     AbstractConsistency.Composer<T> composer;
     AbstractConsistency.Decomposer<T> decomposer;
 
-    public ListConsistencyItem(String property) {
-        this.property = property;
+    public ListConsistencyItem(Collection<String> property) {
+        this.property = new LinkedHashSet<>(property);
     }
 
     public void setComposer(AbstractConsistency.Composer<T> composer) {
