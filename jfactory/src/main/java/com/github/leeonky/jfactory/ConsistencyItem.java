@@ -2,8 +2,8 @@ package com.github.leeonky.jfactory;
 
 import java.util.*;
 
-import static com.github.leeonky.jfactory.AbstractConsistency.Identity.isBothNull;
-import static com.github.leeonky.jfactory.AbstractConsistency.Identity.isSame;
+import static com.github.leeonky.jfactory.AbstractConsistency.isBothNull;
+import static com.github.leeonky.jfactory.AbstractConsistency.isSame;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 

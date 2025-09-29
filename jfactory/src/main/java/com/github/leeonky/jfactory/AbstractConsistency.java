@@ -19,6 +19,14 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
     static final Function<Object[], ?> LINK_COMPOSER = objs -> objs[0];
     static final Function<?, Object[]> LINK_DECOMPOSER = t -> new Object[]{t};
 
+    public static boolean isSame(Identity identity1, Identity identity2) {
+        return identity1 != null && identity2 != null && identity1.same(identity2);
+    }
+
+    public static boolean isBothNull(Identity identity1, Identity identity2) {
+        return identity1 == null && identity2 == null;
+    }
+
     abstract Consistency<T> link(ConsistencyItem<T> item);
 
     abstract BeanClass<T> type();
@@ -51,7 +59,7 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
         return new CN<>(this, new ConsistencyItem<>(Arrays.stream(properties).map(PropertyChain::propertyChain).collect(toList()), this));
     }
 
-    public interface Identity {
+    interface Identity {
         default Object identity() {
             return this;
         }
@@ -61,20 +69,12 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
         }
 
         StackTraceElement getLocation();
-
-        static boolean isSame(Identity identity1, Identity identity2) {
-            return identity1 != null && identity2 != null && identity1.same(identity2);
-        }
-
-        static boolean isBothNull(Identity identity1, Identity identity2) {
-            return identity1 == null && identity2 == null;
-        }
     }
 
-    public interface Composer<T> extends Function<Object[], T>, Identity {
+    interface Composer<T> extends Function<Object[], T>, Identity {
     }
 
-    public interface Decomposer<T> extends Function<T, Object[]>, Identity {
+    interface Decomposer<T> extends Function<T, Object[]>, Identity {
     }
 
     public static class DecorateConsistency<T> extends AbstractConsistency<T> {

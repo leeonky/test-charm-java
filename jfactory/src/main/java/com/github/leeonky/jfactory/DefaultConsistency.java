@@ -85,7 +85,6 @@ class DefaultConsistency<T> extends AbstractConsistency<T> {
         return this;
     }
 
-
     class Resolver {
         private final Set<ConsistencyItem<T>.Resolver> providers;
         private final Set<ConsistencyItem<T>.Resolver> consumers;
