@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.toList;
 
 class DefaultConsistency<T> extends AbstractConsistency<T> {
     private final List<ConsistencyItem<T>> items = new ArrayList<>();
-    private final List<DefaultListConsistency<T>> list = new ArrayList<>();
+    final List<DefaultListConsistency<T>> list = new ArrayList<>();
 
     private final BeanClass<T> type;
     private final List<StackTraceElement> locations = new ArrayList<>();
@@ -42,7 +42,11 @@ class DefaultConsistency<T> extends AbstractConsistency<T> {
         return this;
     }
 
-    public boolean merge(DefaultConsistency<?> another) {
+    void link(DefaultListConsistency<T> listConsistency) {
+        list.add(listConsistency);
+    }
+
+    boolean merge(DefaultConsistency<?> another) {
         if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::same))) {
             another.items.forEach(item -> items.add(cast(item)));
             return true;
@@ -50,7 +54,7 @@ class DefaultConsistency<T> extends AbstractConsistency<T> {
         return false;
     }
 
-    public String info() {
+    String info() {
         StringBuilder builder = new StringBuilder();
         builder.append("  ").append(type().getName()).append(":");
         for (StackTraceElement location : locations) {
@@ -60,28 +64,27 @@ class DefaultConsistency<T> extends AbstractConsistency<T> {
         return builder.toString();
     }
 
-    public DefaultConsistency<T> absoluteProperty(PropertyChain base) {
+    DefaultConsistency<T> absoluteProperty(PropertyChain base) {
         DefaultConsistency<T> absolute = new DefaultConsistency<>(type(), locations);
         items.forEach(item -> absolute.items.add(item.absoluteProperty(base)));
         return absolute;
     }
 
-    public Resolver resolver(ObjectProducer<?> root) {
+    Resolver resolver(ObjectProducer<?> root) {
         return new Resolver(root);
     }
 
     @Override
-    public ListConsistency<T> list(String property) {
-        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, this);
-        list.add(listConsistency);
-        return listConsistency;
+    public ListConsistencyBuilder<T> list(String property) {
+        return new DefaultListConsistencyBuilder<>(property, this);
     }
 
-    public DefaultConsistency<T> processListConsistency(ObjectProducer<?> producer) {
+    DefaultConsistency<T> processListConsistency(ObjectProducer<?> producer) {
         for (DefaultListConsistency<T> listConsistency : list)
             listConsistency.resolveToItems(producer);
         return this;
     }
+
 
     class Resolver {
         private final Set<ConsistencyItem<T>.Resolver> providers;

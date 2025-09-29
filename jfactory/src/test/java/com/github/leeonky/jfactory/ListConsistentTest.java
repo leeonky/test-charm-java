@@ -14,7 +14,7 @@ class TestConsistentListWithSingle {
         jFactory.factory(BeanList.class).spec(ins -> {
             Spec<BeanList> spec = ins.spec();
             spec.consistent(String.class)
-                    .list("beans").direct("status")
+                    .list("beans").consistent(c -> c.direct("status"))
                     .direct("status");
         });
 
@@ -31,8 +31,8 @@ class TestConsistentListWithSingle {
         jFactory.factory(BeanList.class).spec(ins -> {
             Spec<BeanList> spec = ins.spec();
             spec.consistent(Object.class)
-                    .list("beans").property("status")
-                    .read(s -> s).write(s -> s)
+                    .list("beans").consistent(c -> c
+                            .property("status").read(s -> s).write(s -> s))
                     .direct("status");
         });
 

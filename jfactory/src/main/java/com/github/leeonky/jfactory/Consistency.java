@@ -11,5 +11,5 @@ public interface Consistency<T> {
 
     AbstractConsistency.CN<T> properties(String... properties);
 
-    ListConsistency<T> list(String property);
+    ListConsistencyBuilder<T> list(String property);
 }

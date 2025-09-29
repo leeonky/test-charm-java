@@ -120,7 +120,7 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
         }
 
         @Override
-        public ListConsistency<T> list(String property) {
+        public ListConsistencyBuilder<T> list(String property) {
             return consistency.list(property);
         }
     }
@@ -212,19 +212,21 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
 
     public static class LC1<T, P> extends DecorateConsistency<T> {
         private final DefaultListConsistency<T> lastListConsistency;
+        private final ListConsistencyItem<T> lastListConsistencyItem;
 
-        LC1(AbstractConsistency<T> origin, DefaultListConsistency<T> lastListConsistency) {
+        LC1(AbstractConsistency<T> origin, DefaultListConsistency<T> lastListConsistency, ListConsistencyItem<T> lastListConsistencyItem) {
             super(origin);
             this.lastListConsistency = lastListConsistency;
+            this.lastListConsistencyItem = lastListConsistencyItem;
         }
 
         public LC1<T, P> read(Function<P, T> composer) {
-            lastListConsistency.setComposer(new ComposerWrapper<>(objs -> composer.apply((P) objs[0]), composer));
+            lastListConsistencyItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P) objs[0]), composer));
             return this;
         }
 
         public LC1<T, P> write(Function<T, P> decomposer) {
-            lastListConsistency.setDecomposer(new DecomposerWrapper<>(t -> new Object[]{decomposer.apply(t)}, decomposer));
+            lastListConsistencyItem.setDecomposer(new DecomposerWrapper<>(t -> new Object[]{decomposer.apply(t)}, decomposer));
             return this;
         }
     }
