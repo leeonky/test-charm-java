@@ -93,7 +93,7 @@ Feature: list consistency
         <<beans[1], ::root>>.status1= new
         """
 
-    Scenario: consistent with different property in element
+    Scenario: different property in list consistent
       And operate:
         """
         jFactory.factory(BeanList.class).spec(ins -> {
@@ -188,9 +188,39 @@ Feature: list consistency
         }
         """
 
+    Scenario: more properties
+      And operate:
+        """
+        jFactory.factory(BeanList.class).spec(ins -> {
+            Spec<BeanList> spec = ins.spec();
+            spec.consistent(Object[].class)
+                    .list("beans").consistent(beans-> beans
+                      .properties("status1", "status2")
+                        .read(ps -> ps)
+                        .write(ps -> ps))
+                    .properties("status1", "status2")
+                      .read((s1,s2)->new Object[]{s1,s2})
+                        .write(s->s[0], s->s[1]);
+        });
+        """
+      When build:
+        """
+        jFactory.type(BeanList.class)
+                .property("beans[0]!", null)
+                .property("beans[1]!", null)
+                .property("status1", "new")
+                .property("status2", "world")
+                .create();
+        """
+      Then the result should:
+        """
+        : {
+          <<beans<<0, 1>>, ::this>>.status1= new
+          <<beans<<0, 1>>, ::this>>.status2= world
+        }
+        """
 
 #TODO multi list in one consistent
-#TODO multi group property in one list
-#TODO tow properties three properties array properties api for list
+#TODO three properties array properties api for list
 #TODO reverseAssociations
 #TODO nested list consistent

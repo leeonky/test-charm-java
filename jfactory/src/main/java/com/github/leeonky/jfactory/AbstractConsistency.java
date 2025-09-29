@@ -78,50 +78,50 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
     }
 
     public static class DecorateConsistency<T> extends AbstractConsistency<T> {
-        private final AbstractConsistency<T> consistency;
+        private final AbstractConsistency<T> delegate;
 
-        DecorateConsistency(AbstractConsistency<T> consistency) {
-            this.consistency = consistency;
+        DecorateConsistency(AbstractConsistency<T> delegate) {
+            this.delegate = delegate;
         }
 
         @Override
         Consistency<T> link(ConsistencyItem<T> item) {
-            return consistency.link(item);
+            return delegate.link(item);
         }
 
         @Override
         BeanClass<T> type() {
-            return consistency.type();
+            return delegate.type();
         }
 
         @Override
         public Consistency<T> direct(String property) {
-            return consistency.direct(property);
+            return delegate.direct(property);
         }
 
         @Override
         public <P> C1<T, P> property(String property) {
-            return consistency.property(property);
+            return delegate.property(property);
         }
 
         @Override
         public <P1, P2> C2<T, P1, P2> properties(String property1, String property2) {
-            return consistency.properties(property1, property2);
+            return delegate.properties(property1, property2);
         }
 
         @Override
         public <P1, P2, P3> C3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
-            return consistency.properties(property1, property2, property3);
+            return delegate.properties(property1, property2, property3);
         }
 
         @Override
         public CN<T> properties(String... properties) {
-            return consistency.properties(properties);
+            return delegate.properties(properties);
         }
 
         @Override
         public ListConsistencyBuilder<T> list(String property) {
-            return consistency.list(property);
+            return delegate.list(property);
         }
     }
 
@@ -207,47 +207,6 @@ abstract class AbstractConsistency<T> implements Consistency<T> {
     public static class CN<T> extends MultiPropertyConsistency<T, CN<T>> {
         CN(AbstractConsistency<T> origin, ConsistencyItem<T> lastItem) {
             super(origin, lastItem);
-        }
-    }
-
-    public static class LC1<T, P> extends DecorateConsistency<T> {
-        private final DefaultListConsistency<T> lastListConsistency;
-        private final ListConsistencyItem<T> lastListConsistencyItem;
-
-        LC1(AbstractConsistency<T> origin, DefaultListConsistency<T> lastListConsistency, ListConsistencyItem<T> lastListConsistencyItem) {
-            super(origin);
-            this.lastListConsistency = lastListConsistency;
-            this.lastListConsistencyItem = lastListConsistencyItem;
-        }
-
-        public LC1<T, P> read(Function<P, T> composer) {
-            lastListConsistencyItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P) objs[0]), composer));
-            return this;
-        }
-
-        public LC1<T, P> write(Function<T, P> decomposer) {
-            lastListConsistencyItem.setDecomposer(new DecomposerWrapper<>(t -> new Object[]{decomposer.apply(t)}, decomposer));
-            return this;
-        }
-    }
-
-    public static class LC2<T, P1, P2> extends DecorateConsistency<T> {
-        private final ListConsistencyItem<T> listConsistencyItem;
-
-        LC2(AbstractConsistency<T> consistency, DefaultListConsistency listConsistency, ListConsistencyItem<T> listConsistencyItem) {
-            super(consistency);
-            this.listConsistencyItem = listConsistencyItem;
-        }
-
-        public LC2<T, P1, P2> read(BiFunction<P1, P2, T> composer) {
-            listConsistencyItem.setComposer(new ComposerWrapper<>(objs -> composer.apply((P1) objs[0], (P2) objs[1]), composer));
-            return this;
-        }
-
-        public LC2<T, P1, P2> write(Function<T, P1> decompose1, Function<T, P2> decompose2) {
-            listConsistencyItem.setDecomposer(new DecomposerWrapper<>(
-                    t -> new Object[]{decompose1.apply(t), decompose2.apply(t)}, asList(decompose1, decompose2)));
-            return this;
         }
     }
 }
