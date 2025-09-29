@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
@@ -35,6 +36,13 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(asList(property1, property2));
         items.add(listConsistencyItem);
         return new DefaultListConsistency.LC2<>(this, listConsistencyItem);
+    }
+
+    @Override
+    public <P1, P2, P3> LC3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+        ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(asList(property1, property2, property3));
+        items.add(listConsistencyItem);
+        return new LC3<>(this, listConsistencyItem);
     }
 
     private String combine(int index, String property) {
@@ -79,5 +87,31 @@ class DecorateListConsistency<T> implements ListConsistency<T> {
     @Override
     public <P1, P2> ListConsistency.LC2<T, P1, P2> properties(String property1, String property2) {
         return delegate.properties(property1, property2);
+    }
+
+    @Override
+    public <P1, P2, P3> LC3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+        return delegate.properties(property1, property2, property3);
+    }
+}
+
+class MultiPropertyConsistency<T, C extends MultiPropertyConsistency<T, C>> extends DecorateListConsistency<T> {
+    final ListConsistencyItem<T> last;
+
+    MultiPropertyConsistency(ListConsistency<T> delegate, ListConsistencyItem<T> last) {
+        super(delegate);
+        this.last = last;
+    }
+
+    @SuppressWarnings("unchecked")
+    public C read(Function<Object[], T> composer) {
+        last.setComposer(new ComposerWrapper<>(composer, composer));
+        return (C) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public C write(Function<T, Object[]> decomposer) {
+        last.setDecomposer(new DecomposerWrapper<>(decomposer, decomposer));
+        return (C) this;
     }
 }

@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.function.TriFunction;
+
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -8,30 +10,11 @@ import static java.util.Arrays.asList;
 public interface ListConsistency<T> {
     ListConsistency<T> direct(String property);
 
-    <P> DefaultListConsistency.LC1<T, P> property(String property);
+    <P> ListConsistency.LC1<T, P> property(String property);
 
-    <P1, P2> DefaultListConsistency.LC2<T, P1, P2> properties(String property1, String property2);
+    <P1, P2> ListConsistency.LC2<T, P1, P2> properties(String property1, String property2);
 
-    class MultiPropertyConsistency<T, C extends MultiPropertyConsistency<T, C>> extends DecorateListConsistency<T> {
-        final ListConsistencyItem<T> last;
-
-        MultiPropertyConsistency(ListConsistency<T> delegate, ListConsistencyItem<T> last) {
-            super(delegate);
-            this.last = last;
-        }
-
-        @SuppressWarnings("unchecked")
-        public C read(Function<Object[], T> composer) {
-            last.setComposer(new ComposerWrapper<>(composer, composer));
-            return (C) this;
-        }
-
-        @SuppressWarnings("unchecked")
-        public C write(Function<T, Object[]> decomposer) {
-            last.setDecomposer(new DecomposerWrapper<>(decomposer, decomposer));
-            return (C) this;
-        }
-    }
+    <P1, P2, P3> ListConsistency.LC3<T, P1, P2, P3> properties(String property1, String property2, String property3);
 
     class LC1<T, P> extends DecorateListConsistency<T> {
         private final ListConsistencyItem<T> lastListConsistencyItem;
@@ -65,6 +48,24 @@ public interface ListConsistency<T> {
         public LC2<T, P1, P2> write(Function<T, P1> decompose1, Function<T, P2> decompose2) {
             last.setDecomposer(new DecomposerWrapper<>(
                     t -> new Object[]{decompose1.apply(t), decompose2.apply(t)}, asList(decompose1, decompose2)));
+            return this;
+        }
+    }
+
+    class LC3<T, P1, P2, P3> extends MultiPropertyConsistency<T, LC3<T, P1, P2, P3>> {
+        LC3(ListConsistency<T> consistency, ListConsistencyItem<T> listConsistencyItem) {
+            super(consistency, listConsistencyItem);
+        }
+
+        public LC3<T, P1, P2, P3> read(TriFunction<P1, P2, P3, T> composer) {
+            last.setComposer(new ComposerWrapper<>(objs -> composer.apply((P1) objs[0], (P2) objs[1], (P3) objs[2]), composer));
+            return this;
+        }
+
+        public LC3<T, P1, P2, P3> write(Function<T, P1> decompose1, Function<T, P2> decompose2, Function<T, P3> decompose3) {
+            last.setDecomposer(new DecomposerWrapper<>(
+                    t -> new Object[]{decompose1.apply(t), decompose2.apply(t), decompose3.apply(t)},
+                    asList(decompose1, decompose2, decompose3)));
             return this;
         }
     }

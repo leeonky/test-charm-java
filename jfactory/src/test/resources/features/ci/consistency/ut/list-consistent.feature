@@ -188,6 +188,40 @@ Feature: list consistency
         }
         """
 
+    Scenario: three properties
+      And operate:
+        """
+        jFactory.factory(BeanList.class).spec(ins -> {
+            Spec<BeanList> spec = ins.spec();
+            spec.consistent(Object[].class)
+                    .list("beans").consistent(beans-> beans
+                      .properties("status1", "status2", "status3")
+                        .read((s1,s2,s3)->new Object[]{s1,s2,s3})
+                        .write(s->s[0], s->s[1], s->s[2]))
+                    .properties("status1", "status2", "status3")
+                      .read((s1,s2,s3)->new Object[]{s1,s2,s3})
+                        .write(s->s[0], s->s[1], s->s[2]);
+        });
+        """
+      When build:
+        """
+        jFactory.type(BeanList.class)
+                .property("beans[0]!", null)
+                .property("beans[1]!", null)
+                .property("status1", "hello")
+                .property("status2", "new")
+                .property("status3", "world")
+                .create();
+        """
+      Then the result should:
+        """
+        : {
+          <<beans<<0, 1>>, ::this>>.status1= hello
+          <<beans<<0, 1>>, ::this>>.status2= new
+          <<beans<<0, 1>>, ::this>>.status3= world
+        }
+        """
+
     Scenario: more properties
       And operate:
         """
