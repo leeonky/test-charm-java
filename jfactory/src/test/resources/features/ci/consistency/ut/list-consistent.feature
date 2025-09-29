@@ -255,6 +255,5 @@ Feature: list consistency
         """
 
 #TODO multi list in one consistent
-#TODO three properties array properties api for list
 #TODO reverseAssociations
 #TODO nested list consistent

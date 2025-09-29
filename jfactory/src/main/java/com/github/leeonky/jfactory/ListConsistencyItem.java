@@ -6,18 +6,18 @@ import java.util.Set;
 
 class ListConsistencyItem<T> {
     Set<String> property = new LinkedHashSet<>();
-    AbstractConsistency.Composer<T> composer;
-    AbstractConsistency.Decomposer<T> decomposer;
+    DefaultConsistency.Composer<T> composer;
+    DefaultConsistency.Decomposer<T> decomposer;
 
     public ListConsistencyItem(Collection<String> property) {
         this.property = new LinkedHashSet<>(property);
     }
 
-    public void setComposer(AbstractConsistency.Composer<T> composer) {
+    public void setComposer(DefaultConsistency.Composer<T> composer) {
         this.composer = composer;
     }
 
-    public void setDecomposer(AbstractConsistency.Decomposer<T> decomposer) {
+    public void setDecomposer(DefaultConsistency.Decomposer<T> decomposer) {
         this.decomposer = decomposer;
     }
 }

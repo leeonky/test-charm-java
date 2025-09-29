@@ -67,10 +67,6 @@ abstract class Producer<T> {
         return Optional.empty();
     }
 
-    public Producer<T> getLinkOrigin() {
-        return this;
-    }
-
     public Producer<T> changeTo(Producer<T> newProducer) {
         return newProducer.reChangeFrom(this);
     }

@@ -2,19 +2,17 @@ package com.github.leeonky.jfactory;
 
 import java.util.*;
 
-import static com.github.leeonky.jfactory.AbstractConsistency.isBothNull;
-import static com.github.leeonky.jfactory.AbstractConsistency.isSame;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 class ConsistencyItem<T> {
     private final Set<PropertyChain> properties;
-    private final DefaultConsistency<T> consistency;
+    private final Consistency<T> consistency;
     private final StackTraceElement location;
     private StackTraceElement composerLocation;
     private StackTraceElement decomposerLocation;
-    private AbstractConsistency.Composer<T> composer;
-    private AbstractConsistency.Decomposer<T> decomposer;
+    private DefaultConsistency.Composer<T> composer;
+    private DefaultConsistency.Decomposer<T> decomposer;
 
     ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency) {
         this(properties, consistency, guessCustomerPositionStackTrace());
@@ -22,7 +20,7 @@ class ConsistencyItem<T> {
 
     ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency, StackTraceElement location) {
         this.properties = new LinkedHashSet<>(properties);
-        this.consistency = (DefaultConsistency<T>) consistency;
+        this.consistency = consistency;
         this.location = location;
     }
 
@@ -32,17 +30,25 @@ class ConsistencyItem<T> {
                 .findFirst().orElse(stackTrace[0]);
     }
 
-    public void setComposer(DefaultConsistency.Composer<T> composer) {
+    private static boolean isSame(DefaultConsistency.Identity identity1, DefaultConsistency.Identity identity2) {
+        return identity1 != null && identity2 != null && identity1.same(identity2);
+    }
+
+    private static boolean isBothNull(DefaultConsistency.Identity identity1, DefaultConsistency.Identity identity2) {
+        return identity1 == null && identity2 == null;
+    }
+
+    void setComposer(DefaultConsistency.Composer<T> composer) {
         this.composer = composer;
         composerLocation = composer.getLocation();
     }
 
-    public void setDecomposer(DefaultConsistency.Decomposer<T> decomposer) {
+    void setDecomposer(DefaultConsistency.Decomposer<T> decomposer) {
         this.decomposer = decomposer;
         decomposerLocation = decomposer.getLocation();
     }
 
-    public boolean same(ConsistencyItem<?> another) {
+    boolean same(ConsistencyItem<?> another) {
         return properties.equals(another.properties) &&
                 (isSame(composer, another.composer) && isSame(decomposer, another.decomposer)
                         || isBothNull(composer, another.composer) && isSame(decomposer, another.decomposer)
@@ -81,7 +87,7 @@ class ConsistencyItem<T> {
                 (decomposer != null ? " with decomposer" : "");
     }
 
-    public Resolver resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
+    Resolver resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
         return new Resolver(root, consistency);
     }
 

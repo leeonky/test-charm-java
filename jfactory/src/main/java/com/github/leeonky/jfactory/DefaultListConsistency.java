@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.github.leeonky.jfactory.DefaultConsistency.LINK_COMPOSER;
+import static com.github.leeonky.jfactory.DefaultConsistency.LINK_DECOMPOSER;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -19,9 +21,9 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ListConsistency<T> direct(String property) {
-        this.<T>property(property).read(s -> s).write(s -> s);
-        return this;
+        return property(property).read((Function<Object, T>) LINK_COMPOSER).write((Function<T, Object>) LINK_DECOMPOSER);
     }
 
     @Override
@@ -95,10 +97,10 @@ class DecorateListConsistency<T> implements ListConsistency<T> {
     }
 }
 
-class MultiPropertyConsistency<T, C extends MultiPropertyConsistency<T, C>> extends DecorateListConsistency<T> {
+class MultiPropertyListConsistency<T, C extends MultiPropertyListConsistency<T, C>> extends DecorateListConsistency<T> {
     final ListConsistencyItem<T> last;
 
-    MultiPropertyConsistency(ListConsistency<T> delegate, ListConsistencyItem<T> last) {
+    MultiPropertyListConsistency(ListConsistency<T> delegate, ListConsistencyItem<T> last) {
         super(delegate);
         this.last = last;
     }

@@ -35,7 +35,7 @@ public interface ListConsistency<T> {
         }
     }
 
-    class LC2<T, P1, P2> extends MultiPropertyConsistency<T, LC2<T, P1, P2>> {
+    class LC2<T, P1, P2> extends MultiPropertyListConsistency<T, LC2<T, P1, P2>> {
         LC2(ListConsistency<T> consistency, ListConsistencyItem<T> listConsistencyItem) {
             super(consistency, listConsistencyItem);
         }
@@ -52,7 +52,7 @@ public interface ListConsistency<T> {
         }
     }
 
-    class LC3<T, P1, P2, P3> extends MultiPropertyConsistency<T, LC3<T, P1, P2, P3>> {
+    class LC3<T, P1, P2, P3> extends MultiPropertyListConsistency<T, LC3<T, P1, P2, P3>> {
         LC3(ListConsistency<T> consistency, ListConsistencyItem<T> listConsistencyItem) {
             super(consistency, listConsistencyItem);
         }
