@@ -102,7 +102,7 @@ class ConsistencyItem<T> {
         }
 
         boolean hasTypeOf(Class<?> type) {
-            return properties.stream().map(root::descendantForUpdate).anyMatch(type::isInstance);
+            return properties.stream().map(root::descendantForRead).anyMatch(type::isInstance);
         }
 
         Set<PropertyChain> resolveAsProvider() {
@@ -112,7 +112,7 @@ class ConsistencyItem<T> {
         }
 
         private T compose() {
-            return composer.apply(properties.stream().map(root::descendantForUpdate).map(Producer::getValue).toArray());
+            return composer.apply(properties.stream().map(root::descendantForRead).map(Producer::getValue).toArray());
         }
 
         Object[] decompose(Resolver provider) {
@@ -156,7 +156,7 @@ class ConsistencyItem<T> {
         }
 
         boolean hasFixed() {
-            return properties.stream().map(root::descendantForUpdate).anyMatch(Producer::isFixed);
+            return properties.stream().map(root::descendantForRead).anyMatch(Producer::isFixed);
         }
 
         boolean containsProperty(PropertyChain property) {

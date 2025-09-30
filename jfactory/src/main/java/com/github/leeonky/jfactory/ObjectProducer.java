@@ -99,6 +99,18 @@ class ObjectProducer<T> extends Producer<T> {
         });
     }
 
+    @Override
+    public Producer<?> childForRead(String property) {
+        PropertyWriter<T> propertyWriter = getType().getPropertyWriter(property);
+        return getFirstPresent(() -> getChild(propertyWriter.getName()),
+                () -> newDefaultValueProducerForRead(propertyWriter)).orElseGet(() -> {
+            if (ignorePropertiesInSpec.contains(propertyWriter.getName()))
+                return new ReadOnlyProducer<>(this, propertyWriter.getName());
+            return new DefaultValueProducer<>(propertyWriter.getType(),
+                    () -> cast(propertyWriter.getType().createDefault()));
+        });
+    }
+
     public Producer<?> forceChildOrDefaultCollection(PropertyWriter<T> propertyWriter) {
         return getChild(propertyWriter.getName()).orElseGet(() -> createCollectionProducer(propertyWriter));
     }
@@ -155,6 +167,14 @@ class ObjectProducer<T> extends Producer<T> {
         if (property.getType().isCollection()) {
             return of(createCollectionProducer(property));
         } else
+            return factory.getFactorySet().queryDefaultValueFactory(property.getType())
+                    .map(builder -> new DefaultValueFactoryProducer<>(getType(), builder, instance.sub(property)));
+    }
+
+    public Optional<Producer<?>> newDefaultValueProducerForRead(PropertyWriter<?> property) {
+        if (ignorePropertiesInSpec.contains(property.getName()))
+            return empty();
+        else
             return factory.getFactorySet().queryDefaultValueFactory(property.getType())
                     .map(builder -> new DefaultValueFactoryProducer<>(getType(), builder, instance.sub(property)));
     }

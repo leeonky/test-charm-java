@@ -12,6 +12,80 @@ Feature: list consistency
     }
     """
 
+  Rule: between list element
+
+    Background:
+      Given the following bean class:
+      """
+      public class Bean {
+        public String status1, status2;
+      }
+      """
+      Given the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+        public String status1, status2;
+      }
+      """
+
+    Scenario: with out default collection element. provider not work
+      And the following spec class:
+        """
+        public class BeansSpec extends Spec<Beans> {
+          public void main() {
+            property("status1").dependsOn("beans[0].status1");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeansSpec.class).create();
+        """
+      Then the result should:
+        """
+        : {beans: null, status1: /^status1.*/}
+        """
+
+    Scenario: with out default collection element. provider and consumer not work
+      And the following spec class:
+        """
+        public class BeansSpec extends Spec<Beans> {
+          public void main() {
+            property("beans[1].status1").dependsOn("beans[0].status1");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeansSpec.class).create();
+        """
+      Then the result should:
+        """
+        : {beans: null}
+        """
+
+    Scenario: with out default collection element. consumer not work
+      And the following spec class:
+        """
+        public class BeansSpec extends Spec<Beans> {
+          public void main() {
+            link("beans[1].status1", "status1");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeansSpec.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          beans: [null, null]
+          status1= /^status1.*/
+        }
+        """
+
   Rule: single and list
 
     Background:

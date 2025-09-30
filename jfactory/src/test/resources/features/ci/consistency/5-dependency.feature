@@ -512,7 +512,7 @@ Feature: define dependency
       """
       Then the result should:
       """
-      beans[0].stringValue = .beans[1].stringValue
+      beans= []
       """
 
     Scenario: depends on input value between sub collection element
@@ -534,27 +534,17 @@ Feature: define dependency
       """
       beans: [{
         stringValue= hello
-      }, {
-        stringValue= /stringValue#.*/
       }]
       """
 
     Scenario: ignore dependency when parent object was replaced by input property in collection
-      Given the following bean class:
-      """
-      public class BeanArrays {
-        public BeanArray[] beanArrays;
-      }
-      """
       When build:
       """
       jFactory.type(BeanArray.class).property("beans[0]", null).create();
       """
       Then the result should:
       """
-      beans: [null, {
-        stringValue= /stringValue#.*/
-      }]
+      beans: [null]
       """
 
   Rule: sub level dependency

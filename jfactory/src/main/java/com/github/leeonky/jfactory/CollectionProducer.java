@@ -87,6 +87,11 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
+    public Producer<?> childForRead(String property) {
+        return getChild(property).orElse(PlaceHolderProducer.PLACE_HOLDER);
+    }
+
+    @Override
     protected void collectConsistent(ObjectProducer<?> root, PropertyChain base) {
         range(0, children.size()).forEach(i ->
                 children.get(i).collectConsistent(root, base.concat(String.valueOf(i))));

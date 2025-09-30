@@ -41,11 +41,19 @@ abstract class Producer<T> {
         return getChild(property).orElse(null);
     }
 
+    public Producer<?> childForRead(String property) {
+        return getChild(property).orElseGet(() -> new ReadOnlyProducer<>(this, property));
+    }
+
     @SuppressWarnings("unchecked")
     public <T> void changeChild(String property, Producer<T> producer) {
         Producer<T> origin = (Producer<T>) childForUpdate(property);
         if (origin != producer)
             setChild(property, origin == null ? producer : origin.changeTo(producer));
+    }
+
+    public Producer<?> descendantForRead(PropertyChain property) {
+        return property.access(this, Producer::childForRead, identity());
     }
 
     public Producer<?> descendantForUpdate(PropertyChain property) {
