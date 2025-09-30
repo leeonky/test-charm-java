@@ -80,13 +80,13 @@ public class PropertySpec<T> {
 
     public Spec<T> byFactory() {
         return appendProducer((jFactory, producer, property) ->
-                producer.createPropertyDefaultValueProducer(producer.getType().getPropertyWriter(property)).orElseGet(() ->
+                producer.newDefaultValueProducer(producer.getType().getPropertyWriter(property)).orElseGet(() ->
                         createCreateProducer(jFactory.type(producer.getPropertyWriterType(property).getType()))));
     }
 
     public Spec<T> byFactory(Function<Builder<?>, Builder<?>> builder) {
         return appendProducer((jFactory, producer, property) ->
-                producer.createPropertyDefaultValueProducer(producer.getType().getPropertyWriter(property))
+                producer.newDefaultValueProducer(producer.getType().getPropertyWriter(property))
                         .orElseGet(() -> createQueryOrCreateProducer(builder.apply(jFactory.type(
                                 producer.getPropertyWriterType(property).getType())))));
     }
@@ -124,11 +124,11 @@ public class PropertySpec<T> {
                     Producer<?> element = producerFactory.apply(jFactory, objectProducer, "0");
                     propertyWriter = propertyWriter.decorateType(GenericBeanClass.create(List.class, element.getType().getGenericType()));
                 }
-                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.childOrDefaultCollection(propertyWriter, true),
+                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
                         CollectionProducer.class).orElseThrow(() ->
                         new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
-                collectionProducer.changeElementDefaultValueProducerFactory(index ->
-                        producerFactory.apply(jFactory, collectionProducer, index.toString()));
+                collectionProducer.changeElementDefaultProducerFactory(index ->
+                        producerFactory.apply(jFactory, collectionProducer, index.getName()));
             });
         }
         if (property.isTopLevelDefaultPropertyCollection()) {

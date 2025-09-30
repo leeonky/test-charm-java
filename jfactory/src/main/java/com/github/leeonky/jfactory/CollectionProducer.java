@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.jfactory.DefaultValueFactories.DefaultTypeFactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
@@ -8,8 +9,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.Integer.max;
 import static java.lang.Integer.parseInt;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
@@ -18,7 +21,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     private final BeanClass<T> parentType;
     private final CollectionInstance<T> collection;
     private final FactorySet factorySet;
-    private Function<Integer, Producer<?>> elementDefaultValueProducerFactory;
+    private Function<PropertyWriter<C>, Producer<?>> elementDefaultProducerFactory = any -> null;
 
     public CollectionProducer(BeanClass<T> parentType, BeanClass<C> collectionType,
                               SubInstance<T> instance, FactorySet factorySet) {
@@ -26,12 +29,10 @@ class CollectionProducer<T, C> extends Producer<C> {
         this.parentType = parentType;
         collection = instance.inCollection();
         this.factorySet = factorySet;
-        elementDefaultValueProducerFactory = index -> new DefaultValueFactoryProducer<>(parentType,
-                factorySet.getDefaultValueFactory(collectionType.getElementType()), collection.element(index));
     }
 
-    public void changeElementDefaultValueProducerFactory(Function<Integer, Producer<?>> factory) {
-        elementDefaultValueProducerFactory = factory;
+    public void changeElementDefaultProducerFactory(Function<PropertyWriter<C>, Producer<?>> factory) {
+        elementDefaultProducerFactory = factory;
     }
 
     @Override
@@ -41,44 +42,45 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Optional<Producer<?>> child(String property) {
+    public Optional<Producer<?>> getChild(String property) {
         int index = parseInt(property);
         index = transformNegativeIndex(index);
-        return Optional.ofNullable(index < children.size() ? children.get(index) : null);
+        return ofNullable(index < children.size() ? children.get(index) : null);
     }
 
     @Override
-    public void setChild(String property, Producer<?> producer) {
+    protected void setChild(String property, Producer<?> producer) {
         int index = parseInt(property);
         fillCollectionWithDefaultValue(index);
         children.set(transformNegativeIndex(index), producer);
     }
 
     private int transformNegativeIndex(int index) {
-        if (index < 0)
-            index = children.size() + index;
-        return index;
+        return index < 0 ? children.size() + index : index;
     }
 
     public int fillCollectionWithDefaultValue(int index) {
         int changed = 0;
         if (index >= 0) {
             for (int i = children.size(); i <= index; i++, changed++)
-                children.add(defaultElementProducer(i));
+                children.add(newDefaultElementProducer(getType().getPropertyWriter(String.valueOf(i))));
         } else {
             int count = max(children.size(), -index) - children.size();
             for (int i = 0; i < count; i++, changed++)
-                children.add(i, defaultElementProducer(i));
+                children.add(i, newDefaultElementProducer(getType().getPropertyWriter(String.valueOf(i))));
         }
         return changed;
     }
 
-    public Producer<?> defaultElementProducer(int i) {
-        return elementDefaultValueProducerFactory.apply(i);
+    public Producer<?> newDefaultElementProducer(PropertyWriter<C> propertyWriter) {
+        return getFirstPresent(() -> ofNullable(elementDefaultProducerFactory.apply(propertyWriter)),
+                () -> newDefaultValueProducer(propertyWriter)).orElseGet(() ->
+                new DefaultValueFactoryProducer<>(parentType, new DefaultTypeFactory<>(getType().getElementType()),
+                        collection.element(parseInt(propertyWriter.getName()))));
     }
 
     @Override
-    public Producer<?> childOrDefault(String property) {
+    public Producer<?> childForUpdate(String property) {
         int index = parseInt(property);
         fillCollectionWithDefaultValue(index);
         return children.get(transformNegativeIndex(index));
@@ -91,16 +93,15 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Optional<Producer<?>> createPropertyDefaultValueProducer(PropertyWriter<?> property) {
+    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<?> property) {
         return factorySet.queryDefaultValueFactory(getType().getElementType()).map(builder ->
                 new DefaultValueFactoryProducer<>(parentType, builder, collection.element(parseInt(property.getName()))));
     }
 
     @Override
-    protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
+    protected <R> void setupAssociation(String association, RootInstance<R> instance, ListPersistable cachedChildren) {
         children.stream().filter(ObjectProducer.class::isInstance).map(ObjectProducer.class::cast).forEach(objectProducer ->
                 objectProducer.setupAssociation(association, instance, cachedChildren));
-
     }
 
     public int childrenCount() {

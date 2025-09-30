@@ -30,32 +30,32 @@ abstract class Producer<T> {
     protected void collectConsistent(ObjectProducer<?> root, PropertyChain base) {
     }
 
-    public Optional<Producer<?>> child(String property) {
+    public Optional<Producer<?>> getChild(String property) {
         return Optional.empty();
     }
 
-    public Producer<?> childOrDefault(String property) {
-        return child(property).orElse(null);
+    protected void setChild(String property, Producer<?> producer) {
     }
 
-    public void setChild(String property, Producer<?> producer) {
+    public Producer<?> childForUpdate(String property) {
+        return getChild(property).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     public <T> void changeChild(String property, Producer<T> producer) {
-        Producer<T> origin = (Producer<T>) childOrDefault(property);
+        Producer<T> origin = (Producer<T>) childForUpdate(property);
         if (origin != producer)
             setChild(property, origin == null ? producer : origin.changeTo(producer));
     }
 
-    public Producer<?> descendant(PropertyChain property) {
-        return property.access(this, (producer, subProperty) -> ofNullable(producer.childOrDefault(subProperty))
+    public Producer<?> descendantForUpdate(PropertyChain property) {
+        return property.access(this, (producer, subProperty) -> ofNullable(producer.childForUpdate(subProperty))
                 .orElseGet(() -> new ReadOnlyProducer<>(producer, subProperty)), identity());
     }
 
     public void changeDescendant(PropertyChain property, BiFunction<Producer<?>, String, Producer<?>> producerFactory) {
         String tail = property.tail();
-        property.removeTail().access(this, Producer::childOrDefault, Optional::ofNullable).ifPresent(lastObjectProducer ->
+        property.removeTail().access(this, Producer::childForUpdate, Optional::ofNullable).ifPresent(lastObjectProducer ->
                 lastObjectProducer.changeChild(tail, producerFactory.apply(lastObjectProducer, tail)));
     }
 
@@ -63,7 +63,7 @@ abstract class Producer<T> {
         return getType().getPropertyWriter(property).getType();
     }
 
-    public Optional<Producer<?>> createPropertyDefaultValueProducer(PropertyWriter<?> property) {
+    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<?> property) {
         return Optional.empty();
     }
 
@@ -91,7 +91,7 @@ abstract class Producer<T> {
         return newProducer;
     }
 
-    protected <T> void setupAssociation(String association, RootInstance<T> instance, ListPersistable cachedChildren) {
+    protected <R> void setupAssociation(String association, RootInstance<R> instance, ListPersistable cachedChildren) {
     }
 
     protected boolean isFixed() {

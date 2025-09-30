@@ -36,7 +36,7 @@ class DefaultValueProducer<V> extends Producer<V> {
     }
 
     @Override
-    public Optional<Producer<?>> child(String property) {
+    public Optional<Producer<?>> getChild(String property) {
         return of(PlaceHolderProducer.PLACE_HOLDER);
     }
 }

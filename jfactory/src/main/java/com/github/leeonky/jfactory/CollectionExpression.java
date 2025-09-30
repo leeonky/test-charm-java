@@ -33,7 +33,7 @@ class CollectionExpression<P, E> extends Expression<P> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(JFactory jFactory, Producer<P> parent) {
-        Producer value = parent.childOrDefault(property.getName());
+        Producer value = parent.childForUpdate(property.getName());
         if (value instanceof CollectionProducer) {
             CollectionProducer<?, E> producer = (CollectionProducer<?, E>) value;
             groupByAdjustedPositiveAndNegativeIndexExpression(producer).forEach((index, expressions) ->

@@ -19,7 +19,7 @@ class PlaceHolderProducer extends Producer<Object> {
     }
 
     @Override
-    public Optional<Producer<?>> child(String property) {
+    public Optional<Producer<?>> getChild(String property) {
         return of(PLACE_HOLDER);
     }
 }

@@ -52,7 +52,7 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
     }
 
     void resolveToItems(ObjectProducer<?> producer) {
-        Producer<?> descendant = producer.descendant(listProperty);
+        Producer<?> descendant = producer.descendantForUpdate(listProperty);
         if (descendant instanceof CollectionProducer) {
             CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) descendant;
             int count = collectionProducer.childrenCount();
