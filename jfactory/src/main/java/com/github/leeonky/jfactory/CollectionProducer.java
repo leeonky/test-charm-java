@@ -21,18 +21,20 @@ class CollectionProducer<T, C> extends Producer<C> {
     private final BeanClass<T> parentType;
     private final CollectionInstance<T> collection;
     private final FactorySet factorySet;
-    private Function<PropertyWriter<C>, Producer<?>> elementDefaultProducerFactory = any -> null;
+    private final JFactory jFactory;
+    private Function<PropertyWriter<C>, Producer<?>> elementPopulationFactory = any -> null;
 
     public CollectionProducer(BeanClass<T> parentType, BeanClass<C> collectionType,
-                              SubInstance<T> instance, FactorySet factorySet) {
+                              SubInstance<T> instance, FactorySet factorySet, JFactory jFactory) {
         super(collectionType);
         this.parentType = parentType;
         collection = instance.inCollection();
         this.factorySet = factorySet;
+        this.jFactory = jFactory;
     }
 
-    public void changeElementDefaultProducerFactory(Function<PropertyWriter<C>, Producer<?>> factory) {
-        elementDefaultProducerFactory = factory;
+    public void changeElementPopulationFactory(Function<PropertyWriter<C>, Producer<?>> factory) {
+        elementPopulationFactory = factory;
     }
 
     @Override
@@ -45,7 +47,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     public Optional<Producer<?>> getChild(String property) {
         int index = parseInt(property);
         index = transformNegativeIndex(index);
-        return ofNullable(index < children.size() ? children.get(index) : null);
+        return ofNullable(index < children.size() && index >= 0 ? children.get(index) : null);
     }
 
     @Override
@@ -63,27 +65,35 @@ class CollectionProducer<T, C> extends Producer<C> {
         int changed = 0;
         if (index >= 0) {
             for (int i = children.size(); i <= index; i++, changed++)
-                children.add(newDefaultElementProducer(getType().getPropertyWriter(String.valueOf(i))));
+                children.add(newElementPopulationProducer(getType().getPropertyWriter(String.valueOf(i))));
         } else {
             int count = max(children.size(), -index) - children.size();
             for (int i = 0; i < count; i++, changed++)
-                children.add(i, newDefaultElementProducer(getType().getPropertyWriter(String.valueOf(i))));
+                children.add(i, newElementPopulationProducer(getType().getPropertyWriter(String.valueOf(i))));
         }
         return changed;
     }
 
-    public Producer<?> newDefaultElementProducer(PropertyWriter<C> propertyWriter) {
-        return getFirstPresent(() -> ofNullable(elementDefaultProducerFactory.apply(propertyWriter)),
+    public Producer<?> newElementPopulationProducer(PropertyWriter<C> propertyWriter) {
+        return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
                 () -> newDefaultValueProducer(propertyWriter)).orElseGet(() ->
                 new DefaultValueFactoryProducer<>(parentType, new DefaultTypeFactory<>(getType().getElementType()),
                         collection.element(parseInt(propertyWriter.getName()))));
     }
 
+    public Producer<?> newDefaultElementProducer(PropertyWriter<C> propertyWriter) {
+        return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
+                () -> newDefaultValueProducer(propertyWriter))
+                .orElseGet(() -> jFactory.type(propertyWriter.getType()).createProducer());
+    }
+
     @Override
     public Producer<?> childForUpdate(String property) {
-        int index = parseInt(property);
-        fillCollectionWithDefaultValue(index);
-        return children.get(transformNegativeIndex(index));
+        return getChild(property).orElseGet(() -> {
+            Producer<?> producer = newDefaultElementProducer(getType().getPropertyWriter(property));
+            setChild(property, producer);
+            return producer;
+        });
     }
 
     @Override

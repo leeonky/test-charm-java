@@ -56,7 +56,7 @@ class KeyValue {
             property = property.decorateWriterType(newType).decorateReaderType(newType);
             subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
             if (subProducer instanceof CollectionProducer)
-                ((CollectionProducer<?, ?>) subProducer).changeElementDefaultProducerFactory(i ->
+                ((CollectionProducer<?, ?>) subProducer).changeElementPopulationFactory(i ->
                         traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
             if (subProducer == null)
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
@@ -64,7 +64,7 @@ class KeyValue {
             SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
             subProducer = producer.childForUpdate(property.getWriter().getName());
             if (subProducer instanceof CollectionProducer)
-                ((CollectionProducer<?, ?>) subProducer).changeElementDefaultProducerFactory(i ->
+                ((CollectionProducer<?, ?>) subProducer).changeElementPopulationFactory(i ->
                         traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
             if (subProducer == null)
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
@@ -88,7 +88,7 @@ class KeyValue {
         int intIndex = parseInt(index);
         Producer<?> subProducer;
         if (collectionProducer instanceof CollectionProducer) {
-            subProducer = ((CollectionProducer<?, ?>) collectionProducer).newDefaultElementProducer(cast(collectionProducer.getType().getPropertyWriter(String.valueOf(intIndex))));
+            subProducer = ((CollectionProducer<?, ?>) collectionProducer).newElementPopulationProducer(cast(collectionProducer.getType().getPropertyWriter(String.valueOf(intIndex))));
             if (subProducer instanceof ObjectProducer) {
                 BeanClass type = subProducer.getType();
                 propertySub = propertySub.decorateWriterType(type).decorateReaderType(type);

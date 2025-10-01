@@ -181,7 +181,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     private Producer<?> createCollectionProducer(PropertyWriter<?> property) {
         Producer<?> producer = new CollectionProducer<>(getType(), property.getType(), instance.sub(property),
-                factory.getFactorySet());
+                factory.getFactorySet(), jFactory);
         setChild(property.getName(), producer);
         return producer;
     }

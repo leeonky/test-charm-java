@@ -81,8 +81,8 @@ Feature: list consistency
       Then the result should:
         """
         : {
-          beans: [null, null]
-          status1= /^status1.*/
+          beans: [null, {status1= /^status1.*/}]
+          status1= .beans[1].status1
         }
         """
 

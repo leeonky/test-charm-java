@@ -127,7 +127,7 @@ public class PropertySpec<T> {
                 CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
                         CollectionProducer.class).orElseThrow(() ->
                         new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
-                collectionProducer.changeElementDefaultProducerFactory(index ->
+                collectionProducer.changeElementPopulationFactory(index ->
                         producerFactory.apply(jFactory, collectionProducer, index.getName()));
             });
         }
