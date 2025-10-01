@@ -12,6 +12,7 @@ import java.util.function.Function;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.lang.Integer.max;
 import static java.lang.Integer.parseInt;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -45,8 +46,12 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     public Optional<Producer<?>> getChild(String property) {
-        int index = parseInt(property);
-        index = transformNegativeIndex(index);
+        int index;
+        try {
+            index = transformNegativeIndex(parseInt(property));
+        } catch (NumberFormatException ignore) {
+            return of(new ReadOnlyProducer<>(this, property));
+        }
         return ofNullable(index < children.size() && index >= 0 ? children.get(index) : null);
     }
 

@@ -7,7 +7,9 @@ Feature: choose consistency root source provider
     """
 
   Rule: basic order
-
+  order: fixed > readonly > unfixed > object producer > default
+  ignore placeholder
+  primary.sub(DefaultValueFactoryProducer) is readonly
     Background:
       Given the following bean class:
         """
@@ -269,7 +271,7 @@ Feature: choose consistency root source provider
         }
         """
 
-    Scenario: placeholder producer;
+    Scenario: property of default value(not DefaultValueFactoryProducer) producer is placeholder;
       Given the following bean class:
         """
         public class SubBean {
@@ -301,5 +303,65 @@ Feature: choose consistency root source provider
         : {
           subBean1: null
           subBean2: null
+        }
+        """
+
+    Scenario: depends on primitive default value sub property
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            property("str1").dependsOn("str2.empty", s -> String.valueOf(s));
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          str1: 'false'
+          str2: /^str2.*/
+        }
+        """
+
+    Scenario: depends on list of ObjectProducer means list spec/value not list original value
+      Given the following bean class:
+        """
+        public class Bean {
+          public List<Bean> beans=new ArrayList<>();
+          public String str;
+        }
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+            property("str").dependsOn("beans.empty", s -> String.valueOf(s));
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("beans[0]", null).create();
+        """
+      Then the result should:
+        """
+        : {
+          str: 'false'
+          beans: [null]
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          str: /^str.*/
+          beans: []
         }
         """

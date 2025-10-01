@@ -26,4 +26,13 @@ class CollectionInstance<T> extends SubInstance<T> {
         collection.indexes.add(index);
         return collection;
     }
+
+    @Override
+    public SubInstance<T> sub(PropertyWriter<?> property) {
+        try {
+            return element(Integer.parseInt(property.getName()));
+        } catch (NumberFormatException ignore) {
+            return super.sub(property);
+        }
+    }
 }
