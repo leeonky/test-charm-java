@@ -121,4 +121,8 @@ public class PropertyChain {
     public boolean isTopLevelDefaultPropertyCollection() {
         return property.size() == 1 && property.get(0).equals("[]");
     }
+
+    public PropertyChain concat(int index) {
+        return concat(new PropertyChain(Collections.singletonList(index)));
+    }
 }

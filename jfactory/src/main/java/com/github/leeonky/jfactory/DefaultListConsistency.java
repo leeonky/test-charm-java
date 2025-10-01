@@ -9,11 +9,13 @@ import static com.github.leeonky.jfactory.DefaultConsistency.LINK_DECOMPOSER;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.IntStream.range;
 
 class DefaultListConsistency<T> implements ListConsistency<T> {
     private final PropertyChain listProperty;
     private final Consistency<T> consistency;
     private final List<ListConsistencyItem<T>> items = new ArrayList<>();
+    private final List<DefaultListConsistency<?>> list = new ArrayList<>();
 
     DefaultListConsistency(String listProperty, Consistency<T> consistency) {
         this.listProperty = propertyChain(listProperty);
@@ -47,25 +49,25 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         return new LC3<>(this, listConsistencyItem);
     }
 
-    private String combine(int index, String property) {
-        return listProperty.toString() + String.format("[%d].", index) + property;
+    void populateConsistencies(ObjectProducer<?> producer, PropertyChain parentList) {
+        PropertyChain listProperty = parentList.concat(this.listProperty);
+        Producer<?> descendant = producer.descendantForUpdate(listProperty);
+        if (!(descendant instanceof CollectionProducer))
+            throw new IllegalStateException(listProperty + " is not List");
+        range(0, ((CollectionProducer<?, ?>) descendant).childrenCount()).mapToObj(listProperty::concat)
+                .forEach(elementProperty -> populateElementConsistency(producer, elementProperty));
     }
 
-    void resolveToItems(ObjectProducer<?> producer) {
-        Producer<?> descendant = producer.descendantForUpdate(listProperty);
-        if (descendant instanceof CollectionProducer) {
-            CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) descendant;
-            int count = collectionProducer.childrenCount();
-            for (int i = 0; i < count; i++) {
-                int index = i;
-                for (ListConsistencyItem<T> listConsistencyItem : items) {
-                    consistency.properties(listConsistencyItem.property.stream().map(p -> combine(index, p)).toArray(String[]::new))
-                            .read(listConsistencyItem.composer)
-                            .write(listConsistencyItem.decomposer);
-                }
-            }
-        } else
-            throw new IllegalStateException();
+    private void populateElementConsistency(ObjectProducer<?> producer, PropertyChain elementProperty) {
+        items.forEach(item -> item.populateConsistency(elementProperty, consistency));
+        list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, elementProperty));
+    }
+
+    @Override
+    public NestedListConsistencyBuilder<T> list(String property) {
+        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, consistency);
+        list.add(listConsistency);
+        return new NestedListConsistencyBuilder<>(this, listConsistency);
     }
 }
 
@@ -94,6 +96,11 @@ class DecorateListConsistency<T> implements ListConsistency<T> {
     @Override
     public <P1, P2, P3> LC3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
         return delegate.properties(property1, property2, property3);
+    }
+
+    @Override
+    public NestedListConsistencyBuilder<T> list(String property) {
+        return delegate.list(property);
     }
 }
 

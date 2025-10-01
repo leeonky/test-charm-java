@@ -20,4 +20,9 @@ class ListConsistencyItem<T> {
     public void setDecomposer(DefaultConsistency.Decomposer<T> decomposer) {
         this.decomposer = decomposer;
     }
+
+    void populateConsistency(PropertyChain elementProperty, Consistency<T> consistency) {
+        consistency.properties(property.stream().map(p -> elementProperty.concat(p).toString()).toArray(String[]::new))
+                .read(composer).write(decomposer);
+    }
 }

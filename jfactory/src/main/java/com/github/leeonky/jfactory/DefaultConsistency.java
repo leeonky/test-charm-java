@@ -111,8 +111,7 @@ class DefaultConsistency<T> implements Consistency<T> {
     }
 
     DefaultConsistency<T> processListConsistency(ObjectProducer<?> producer) {
-        for (DefaultListConsistency<T> listConsistency : list)
-            listConsistency.resolveToItems(producer);
+        list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, propertyChain("")));
         return this;
     }
 

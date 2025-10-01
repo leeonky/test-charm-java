@@ -69,4 +69,6 @@ public interface ListConsistency<T> {
             return this;
         }
     }
+
+    NestedListConsistencyBuilder<T> list(String property);
 }
