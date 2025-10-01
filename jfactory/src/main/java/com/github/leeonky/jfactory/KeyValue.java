@@ -75,6 +75,11 @@ class KeyValue {
                 BeanClass<? extends T> type = (BeanClass<? extends T>) subProducer.getType();
                 property = property.decorateWriterType(type).decorateReaderType(type);
             }
+            if (subProducer instanceof CollectionProducer && property.getWriterType().isCollection()
+                    && property.getWriterType().getElementType().is(Object.class)) {
+                property = property.decorateWriterType((BeanClass<? extends T>) subProducer.getType())
+                        .decorateReaderType((BeanClass<? extends T>) subProducer.getType());
+            }
         }
         Property<T> finalSubProperty = property;
         Producer<T> finalSubProducer = (Producer<T>) subProducer;

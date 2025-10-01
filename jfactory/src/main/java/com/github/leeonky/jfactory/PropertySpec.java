@@ -50,9 +50,24 @@ public class PropertySpec<T> {
 
     public Spec<T> optional(String... traitsAndSpec) {
         if (property.isSingle()) {
+            return spec.append((jFactory, objectProducer) -> objectProducer.changeChild(property.toString(),
+                    new OptionalSpecDefaultValueProducer<>(objectProducer.getPropertyWriterType(property.toString()), traitsAndSpec)));
+        } else if (property.isDefaultPropertyCollection()) {
             return spec.append((jFactory, objectProducer) -> {
-                PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter(property.toString());
-                objectProducer.changeChild(property.toString(), new OptionalSpecDefaultValueProducer<>(propertyWriter.getType(), traitsAndSpec));
+                PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
+                if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
+                    Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
+                    propertyWriter = propertyWriter.decorateType(GenericBeanClass.create(List.class, factory.getType().getGenericType()));
+                } else if (propertyWriter.getType().isCollection() && propertyWriter.getType().getElementType().is(Object.class)) {
+                    Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
+                    propertyWriter = propertyWriter.decorateType(GenericBeanClass.create(propertyWriter.getType().getType(), factory.getType().getGenericType()));
+                }
+                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
+                        CollectionProducer.class).orElseThrow(() ->
+                        new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
+                OptionalSpecDefaultValueProducer<?> optionalSpecDefaultValueProducer =
+                        new OptionalSpecDefaultValueProducer<>(propertyWriter.getType(), traitsAndSpec);
+                collectionProducer.changeElementPopulationFactory(index -> optionalSpecDefaultValueProducer);
             });
         }
         throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));

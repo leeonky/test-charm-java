@@ -1390,7 +1390,7 @@ Feature: input property
       }]
       """
 
-  Rule: try to use a collection element spec
+  Rule: list element default value
 
     Scenario: element value of all list without index
       Given the following bean class:
@@ -1731,6 +1731,52 @@ Feature: input property
       """
       message: '#package#Bean.value is not list'
       """
+
+  Rule: optional spec for list element
+
+    Scenario Outline: define optional spec of list
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And the following bean class:
+      """
+      public class BeanList {
+        public <type> beans;
+      }
+      """
+      And the following spec class:
+      """
+      public class ABean extends Spec<Bean> {
+        public void main() {
+          property("value1").value("hello");
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+        .property("beans[]").optional("ABean"));
+      """
+      When build:
+      """
+      jFactory.type(BeanList.class).property("beans[1].value2", "world").create();
+      """
+      Then the result should:
+      """
+      beans: [null, {
+        value1= hello
+        value2= world
+      }]
+      """
+      Examples:
+        | type       |
+        | Bean[]     |
+        | List<Bean> |
+        | List       |
+        | Object     |
 
   Rule: property in structured way
 
