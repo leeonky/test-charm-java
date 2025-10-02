@@ -195,6 +195,39 @@ Feature: list consistency
         }
         """
 
+    Scenario: single and multi list
+      And the following bean class:
+        """
+        public class BeanList {
+            public List<Bean> beans1, beans2;
+            public String status1, status2, status3;
+        }
+        """
+      And operate:
+        """
+        jFactory.factory(BeanList.class).spec(ins -> {
+            ins.spec().consistent(String.class)
+                    .list("beans1").consistent(beans -> beans
+                      .direct("status1"))
+                    .list("beans2").consistent(beans -> beans
+                      .direct("status1"))
+                    .direct("status1");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(BeanList.class)
+                .property("beans1[0]!", null)
+                .property("beans1[1]!", null)
+                .property("beans2[0]!", null)
+                .property("beans2[1]!", null)
+                .property("status1", "new").create();
+        """
+      Then the result should:
+        """
+        <<beans1<<0, 1>>, beans2<<0, 1>>, ::root>>.status1= new
+        """
+
   Rule: reader and writer in list
 
     Background:
@@ -339,31 +372,34 @@ Feature: list consistency
         }
         """
 
-    Scenario: list effect list property
-      And operate:
-        """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            ins.spec().consistent(String.class)
-                    .list("beans1").consistent(beans -> beans
-                      .direct("status1"))
-                    .list("beans2").consistent(beans -> beans
-                      .direct("status1"))
-                    .direct("status1");
-        });
-        """
-      When build:
-        """
-        jFactory.clear().type(BeanList.class)
-                .property("beans1[0]!", null)
-                .property("beans1[1]!", null)
-                .property("beans2[0]!", null)
-                .property("beans2[1]!", null)
-                .property("status1", "new").create();
-        """
-      Then the result should:
-        """
-        <<beans1<<0, 1>>, beans2<<0, 1>>, ::root>>.status1= new
-        """
+#    Scenario: list beans1[0] -> beans2[0], beans2[1] -> beans1[1]
+#      And operate:
+#            """
+#            jFactory.factory(BeanList.class).spec(ins -> {
+#                ins.spec().consistent(String.class)
+#                    .list("beans1").consistent(beans1 -> beans1
+#                      .direct("status1"))
+#                    .list("beans2").consistent(beans2 -> beans2
+#                      .direct("status1"))
+#                    .direct("status1");
+#            });
+#            """
+#      When build:
+#            """
+#            jFactory.clear().type(BeanList.class)
+#                    .property("beans1[0]!.status1", "a")
+#                    .property("beans1[1]!", "")
+#                    .property("beans2[0]!", "")
+#                    .property("beans2[1]!.status1", "a")
+#                    .create();
+#            """
+#      Then the result should:
+#            """
+#            : {
+#              <<beans1[0], beans2[0]>>.status1= a
+#              <<beans1[1], beans2[1]>>.status1= b
+#            }
+#            """
 
   Rule: nested list
 
@@ -413,6 +449,37 @@ Feature: list consistency
         <<beansList1[0]<<beans1[0], beans1[1]>>, beansList1[0], beansList2[0]<<beans2[0], beans2[1]>>, beansList2[0], ::root>>.status1= new
         """
 
-#TODO list link list lista[0] -> listb[0], listb[1] -> lista[1]
+  Rule: depends on list
+
+    Background:
+      And the following bean class:
+        """
+        public class Beans {
+            public List<Bean> beans;
+            public int size;
+        }
+        """
+
+    Scenario: depends on list size
+      And the following spec class:
+        """
+        public class BeansSpec extends Spec<Beans> {
+          public void main() {
+            property("size").dependsOn("beans", l-> ((List)l).size());
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeansSpec.class).property("beans[0]", null).create();
+        """
+      Then the result should:
+        """
+        : {
+          beans= [null]
+          size= 1
+        }
+        """
+
 #TODO reverseAssociations
-#TODO nested list consistent
+#TODO list link

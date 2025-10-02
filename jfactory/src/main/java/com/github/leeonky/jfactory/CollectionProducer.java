@@ -1,6 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.jfactory.DefaultValueFactories.DefaultTypeFactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
@@ -81,9 +80,8 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     public Producer<?> newElementPopulationProducer(PropertyWriter<C> propertyWriter) {
         return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
-                () -> newDefaultValueProducer(propertyWriter)).orElseGet(() ->
-                new DefaultValueFactoryProducer<>(parentType, new DefaultTypeFactory<>(getType().getElementType()),
-                        collection.sub(propertyWriter)));
+                () -> newDefaultValueProducer(propertyWriter))
+                .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
     }
 
     public Producer<?> newDefaultElementProducer(PropertyWriter<C> propertyWriter) {

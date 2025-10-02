@@ -148,7 +148,7 @@ public class PropertySpec<T> {
         }
         if (property.isTopLevelDefaultPropertyCollection()) {
             return spec.append((jFactory, objectProducer) -> {
-                objectProducer.changeElementDefaultValueProducerFactory(propertyWriter ->
+                objectProducer.changeElementPopulationFactory(propertyWriter ->
                         producerFactory.apply(jFactory, objectProducer, propertyWriter.getName()));
             });
         }

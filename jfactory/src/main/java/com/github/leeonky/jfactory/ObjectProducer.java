@@ -8,8 +8,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.util.Optional.*;
 import static java.util.stream.IntStream.range;
 
 class ObjectProducer<T> extends Producer<T> {
@@ -22,7 +21,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final ListPersistable cachedChildren = new ListPersistable();
     private final Set<String> ignorePropertiesInSpec = new HashSet<>();
     private Persistable persistable;
-    private Function<PropertyWriter<?>, Producer<?>> defaultListElementValueProducerFactory;
+    private Function<PropertyWriter<T>, Producer<?>> elementPopulationFactory = any -> null;
     private final ConsistencySet consistencySet = new ConsistencySet();
 
     public JFactory jFactory() {
@@ -40,14 +39,17 @@ class ObjectProducer<T> extends Producer<T> {
         this.builder = builder;
         instance = factory.createInstance(builder.getArguments());
         persistable = jFactory.getDataRepository();
-        defaultListElementValueProducerFactory = propertyWriter -> new DefaultValueFactoryProducer<>(factory.getType(),
-                factory.getFactorySet().getDefaultValueFactory(propertyWriter.getType()),
-                instance.sub(propertyWriter));
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
         builder.processInputProperty(this, forQuery);
         setupReverseAssociations();
         resolveBuilderProducers();
+    }
+
+    public Producer<?> newElementPopulationProducer(PropertyWriter<T> propertyWriter) {
+        return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
+                () -> newDefaultValueProducer(propertyWriter))
+                .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
     }
 
     protected void resolveBuilderProducers() {
@@ -65,7 +67,7 @@ class ObjectProducer<T> extends Producer<T> {
                         .filter(index -> children.get(index) == null)
                         .map(index -> getType().getPropertyWriter(index))
                         .forEach((PropertyWriter<T> propertyWriter) ->
-                                setChild(propertyWriter.getName(), defaultListElementValueProducerFactory.apply(propertyWriter)));
+                                setChild(propertyWriter.getName(), newElementPopulationProducer(propertyWriter)));
             });
         } catch (Exception ignore) {
         }
@@ -83,7 +85,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public Optional<Producer<?>> getChild(String property) {
-        return Optional.ofNullable(children.get(property));
+        return ofNullable(children.get(property));
     }
 
     @Override
@@ -227,8 +229,8 @@ class ObjectProducer<T> extends Producer<T> {
         return children.values().stream().anyMatch(Producer::isFixed);
     }
 
-    public void changeElementDefaultValueProducerFactory(Function<PropertyWriter<?>, Producer<?>> factory) {
-        defaultListElementValueProducerFactory = factory;
+    public void changeElementPopulationFactory(Function<PropertyWriter<T>, Producer<?>> factory) {
+        elementPopulationFactory = factory;
     }
 
     public void appendLink(DefaultConsistency<?> consistency) {
