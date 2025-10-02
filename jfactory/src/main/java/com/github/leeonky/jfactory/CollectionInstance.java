@@ -21,16 +21,12 @@ class CollectionInstance<T> extends SubInstance<T> {
                 indexes.stream().map(i -> String.format("[%d]", i)).collect(Collectors.joining()));
     }
 
-    public CollectionInstance<T> element(int index) {
-        CollectionInstance<T> collection = new CollectionInstance<>(indexes, getProperty(), spec, arguments, sequence);
-        collection.indexes.add(index);
-        return collection;
-    }
-
     @Override
     public SubInstance<T> sub(PropertyWriter<?> property) {
         try {
-            return element(Integer.parseInt(property.getName()));
+            CollectionInstance<T> collection = new CollectionInstance<>(indexes, getProperty(), spec, arguments, sequence);
+            collection.indexes.add(Integer.parseInt(property.getName()));
+            return collection;
         } catch (NumberFormatException ignore) {
             return super.sub(property);
         }

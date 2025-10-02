@@ -71,7 +71,7 @@ abstract class Producer<T> {
         return getType().getPropertyWriter(property).getType();
     }
 
-    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<?> property) {
+    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<T> property) {
         return Optional.empty();
     }
 

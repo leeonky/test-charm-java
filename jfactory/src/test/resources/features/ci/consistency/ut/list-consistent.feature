@@ -413,5 +413,6 @@ Feature: list consistency
         <<beansList1[0]<<beans1[0], beans1[1]>>, beansList1[0], beansList2[0]<<beans2[0], beans2[1]>>, beansList2[0], ::root>>.status1= new
         """
 
+#TODO list link list lista[0] -> listb[0], listb[1] -> lista[1]
 #TODO reverseAssociations
 #TODO nested list consistent

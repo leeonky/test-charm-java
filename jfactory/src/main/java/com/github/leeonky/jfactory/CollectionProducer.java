@@ -83,7 +83,7 @@ class CollectionProducer<T, C> extends Producer<C> {
         return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
                 () -> newDefaultValueProducer(propertyWriter)).orElseGet(() ->
                 new DefaultValueFactoryProducer<>(parentType, new DefaultTypeFactory<>(getType().getElementType()),
-                        collection.element(parseInt(propertyWriter.getName()))));
+                        collection.sub(propertyWriter)));
     }
 
     public Producer<?> newDefaultElementProducer(PropertyWriter<C> propertyWriter) {
@@ -113,9 +113,8 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<?> property) {
-        return factorySet.queryDefaultValueFactory(getType().getElementType()).map(builder ->
-                new DefaultValueFactoryProducer<>(parentType, builder, collection.element(parseInt(property.getName()))));
+    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<C> property) {
+        return factorySet.newDefaultValueFactoryProducer(parentType, property, collection);
     }
 
     @Override

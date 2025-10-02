@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Classes;
+import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -86,5 +87,14 @@ class FactorySet {
 
     public Set<String> specNames() {
         return new HashSet<>(specClassFactoriesWithName.keySet());
+    }
+
+    public <T> Optional<Producer<?>> newDefaultValueFactoryProducer(PropertyWriter<T> property, RootInstance<T> instance) {
+        return newDefaultValueFactoryProducer(property.getBeanType(), property, instance);
+    }
+
+    public <T> Optional<Producer<?>> newDefaultValueFactoryProducer(BeanClass<T> beanType, PropertyWriter<?> property, RootInstance<T> instance) {
+        return queryDefaultValueFactory(property.getType()).map(valueFactory ->
+                new DefaultValueFactoryProducer<>(beanType, valueFactory, instance.sub(property)));
     }
 }
