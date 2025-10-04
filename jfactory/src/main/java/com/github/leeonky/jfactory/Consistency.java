@@ -23,6 +23,8 @@ public interface Consistency<T> {
 
     ListConsistencyBuilder<T> list(String property);
 
+    ListConsistencyBuilder<T> list(String property1, String property2);
+
     class C1<T, P> extends DecorateConsistency<T> {
         private final ConsistencyItem<T> lastItem;
 

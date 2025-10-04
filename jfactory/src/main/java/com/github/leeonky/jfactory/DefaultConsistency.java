@@ -15,10 +15,10 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 class DefaultConsistency<T> implements Consistency<T> {
-    private final List<ConsistencyItem<T>> items = new ArrayList<>();
-    private final List<DefaultListConsistency<T>> list = new ArrayList<>();
+    final List<ConsistencyItem<T>> items = new ArrayList<>();
+    final List<DefaultListConsistency<T>> list = new ArrayList<>();
     private final BeanClass<T> type;
-    private final List<StackTraceElement> locations = new ArrayList<>();
+    final List<StackTraceElement> locations = new ArrayList<>();
 
     static final Function<Object, Object> LINK_COMPOSER = s -> s;
     static final Function<Object, Object> LINK_DECOMPOSER = s -> s;
@@ -105,7 +105,14 @@ class DefaultConsistency<T> implements Consistency<T> {
 
     @Override
     public ListConsistencyBuilder<T> list(String property) {
-        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, this);
+        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(singletonList(property), this);
+        list.add(listConsistency);
+        return new ListConsistencyBuilder<>(this, listConsistency);
+    }
+
+    @Override
+    public ListConsistencyBuilder<T> list(String property1, String property2) {
+        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(asList(property1, property2), this);
         list.add(listConsistency);
         return new ListConsistencyBuilder<>(this, listConsistency);
     }
@@ -116,38 +123,29 @@ class DefaultConsistency<T> implements Consistency<T> {
         return this;
     }
 
-    public Collection<? extends DefaultConsistency<?>> populateListConsistencies(ObjectProducer<?> producer) {
+
+    public List<DefaultConsistency<T>> populateListConsistencies(ObjectProducer<?> producer) {
         if (list.isEmpty())
             return singletonList(this);
-
-        List<DefaultConsistency<?>> consistencies = new ArrayList<>();
-
+        List<DefaultConsistency<T>> consistencies = new ArrayList<>();
         for (DefaultListConsistency<T> indexSource : list) {
-            CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) producer.descendantForUpdate(indexSource.listProperty);
-
-            for (int i = 0; i < collectionProducer.childrenCount(); i++) {
-                Index index = new Index();
-                index.index = i;
-                index.size = collectionProducer.childrenCount();
-
-                Coordinate coordinate = new Coordinate(index);
-
-                DefaultConsistency<T> newConsistency = new DefaultConsistency<>(type(), locations);
-                consistencies.add(newConsistency);
-
-                for (DefaultListConsistency<T> listConsistency : list) {
-                    PropertyChain elementProperty = listConsistency.listProperty.concat(coordinate.index.index);
-                    for (ListConsistencyItem<T> item : listConsistency.items) {
-                        item.populateConsistency(elementProperty, newConsistency);
-                    }
-                }
-
-                for (ConsistencyItem<T> item : items) {
-                    newConsistency.items.add(item.copy(newConsistency));
-                }
-            }
+            consistencies.addAll(indexSource.collectCoordinateAndProcess(producer, new ArrayList<>(), 0, propertyChain("")));
         }
         return consistencies;
+    }
+
+    DefaultConsistency<T> populateConsistencyWithList(Coordinate coordinate) {
+        DefaultConsistency<T> newConsistency = new DefaultConsistency<>(type(), locations);
+        for (DefaultListConsistency<T> listConsistency : list) {
+            PropertyChain elementProperty = listConsistency.toProperty(coordinate);
+            for (ListConsistencyItem<T> item : listConsistency.items) {
+                item.populateConsistency(elementProperty, newConsistency);
+            }
+        }
+        for (ConsistencyItem<T> item : items) {
+            newConsistency.items.add(item.copy(newConsistency));
+        }
+        return newConsistency;
     }
 
     interface Identity {
@@ -246,6 +244,11 @@ class DecorateConsistency<T> implements Consistency<T> {
     @Override
     public ListConsistencyBuilder<T> list(String property) {
         return delegate.list(property);
+    }
+
+    @Override
+    public ListConsistencyBuilder<T> list(String property1, String property2) {
+        return delegate.list(property1, property2);
     }
 }
 

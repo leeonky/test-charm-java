@@ -1,9 +1,12 @@
 package com.github.leeonky.jfactory;
 
-public class Coordinate {
-    final Index index;
+import java.util.ArrayList;
+import java.util.List;
 
-    public Coordinate(Index index) {
-        this.index = index;
+public class Coordinate {
+    final List<Index> index = new ArrayList<>();
+
+    public Coordinate(List<Index> indexes) {
+        index.addAll(indexes);
     }
 }

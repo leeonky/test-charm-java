@@ -3,22 +3,25 @@ package com.github.leeonky.jfactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.DefaultConsistency.LINK_COMPOSER;
 import static com.github.leeonky.jfactory.DefaultConsistency.LINK_DECOMPOSER;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
+import static com.github.leeonky.util.Zipped.zip;
+import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.IntStream.range;
 
 class DefaultListConsistency<T> implements ListConsistency<T> {
-    final PropertyChain listProperty;
-    private final Consistency<T> consistency;
+    final List<PropertyChain> listProperty;
+    private final DefaultConsistency<T> consistency;
     final List<ListConsistencyItem<T>> items = new ArrayList<>();
     private final List<DefaultListConsistency<?>> list = new ArrayList<>();
 
-    DefaultListConsistency(String listProperty, Consistency<T> consistency) {
-        this.listProperty = propertyChain(listProperty);
+    DefaultListConsistency(List<String> listProperty, DefaultConsistency<T> consistency) {
+        this.listProperty = listProperty.stream().map(PropertyChain::propertyChain).collect(Collectors.toList());
         this.consistency = consistency;
     }
 
@@ -51,7 +54,7 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
 
     @Deprecated
     void populateConsistencies(ObjectProducer<?> producer, PropertyChain parentList) {
-        PropertyChain listProperty = parentList.concat(this.listProperty);
+        PropertyChain listProperty = parentList.concat(this.listProperty.get(0));
         Producer<?> descendant = producer.descendantForUpdate(listProperty);
         if (!(descendant instanceof CollectionProducer))
             throw new IllegalStateException(listProperty + " is not List");
@@ -64,7 +67,31 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, elementProperty));
     }
 
-//    @Override
+    PropertyChain toProperty(Coordinate coordinate) {
+        return zip(listProperty, coordinate.index).stream().reduce(propertyChain(""),
+                (p, z) -> p.concat(z.left()).concat(z.right().index), notAllowParallelReduce());
+    }
+
+    List<DefaultConsistency<T>> collectCoordinateAndProcess(ObjectProducer<?> producer, List<Index> baseIndex,
+                                                            int l, PropertyChain baseProperty) {
+        List<DefaultConsistency<T>> results = new ArrayList<>();
+        PropertyChain list = baseProperty.concat(listProperty.get(l++));
+        CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) producer.descendantForUpdate(list);
+        for (int i = 0; i < collectionProducer.childrenCount(); i++) {
+            Index index = new Index();
+            index.index = i;
+            index.size = collectionProducer.childrenCount();
+            List<Index> indexes = new ArrayList<>(baseIndex);
+            indexes.add(index);
+            if (listProperty.size() > l)
+                results.addAll(collectCoordinateAndProcess(producer, indexes, l, list.concat(i)));
+            else
+                results.add(consistency.populateConsistencyWithList(new Coordinate(indexes)));
+        }
+        return results;
+    }
+
+    //    @Override
 //    public NestedListConsistencyBuilder<T> list(String property) {
 //        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, consistency);
 //        list.add(listConsistency);

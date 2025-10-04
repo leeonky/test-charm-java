@@ -372,82 +372,90 @@ Feature: list consistency
         }
         """
 
-#    Scenario: list beans1[0] -> beans2[0], beans2[1] -> beans1[1]
-#      And operate:
-#            """
-#            jFactory.factory(BeanList.class).spec(ins -> {
-#                ins.spec().consistent(String.class)
-#                    .list("beans1").consistent(beans1 -> beans1
-#                      .direct("status1"))
-#                    .list("beans2").consistent(beans2 -> beans2
-#                      .direct("status1"))
-#                    .direct("status1");
-#            });
-#            """
-#      When build:
-#            """
-#            jFactory.clear().type(BeanList.class)
-#                    .property("beans1[0]!.status1", "a")
-#                    .property("beans1[1]!", "")
-#                    .property("beans2[0]!", "")
-#                    .property("beans2[1]!.status1", "a")
-#                    .create();
-#            """
-#      Then the result should:
-#            """
-#            : {
-#              <<beans1[0], beans2[0]>>.status1= a
-#              <<beans1[1], beans2[1]>>.status1= b
-#            }
-#            """
+    Scenario: list beans1[0] -> beans2[0], beans2[1] -> beans1[1]
+      And operate:
+            """
+            jFactory.factory(BeanList.class).spec(ins -> {
+                ins.spec().consistent(String.class)
+                    .list("beans1").consistent(beans1 -> beans1
+                      .direct("status1"))
+                    .list("beans2").consistent(beans2 -> beans2
+                      .direct("status1"));
+            });
+            """
+      When build:
+            """
+            jFactory.clear().type(BeanList.class)
+                    .property("beans1[0]!.status1", "a")
+                    .property("beans1[1]!", "")
+                    .property("beans2[0]!", "")
+                    .property("beans2[1]!.status1", "b")
+                    .create();
+            """
+      Then the result should:
+            """
+            : {
+              <<beans1[0], beans2[0]>>.status1= a
+              <<beans1[1], beans2[1]>>.status1= b
+            }
+            """
 
-#  Rule: nested list
-#
-#    Background:
-#      And the following bean class:
-#        """
-#        public class BeanList {
-#            public List<Bean> beans1, beans2;
-#            public String status1, status2, status3;
-#        }
-#        """
-#      And the following bean class:
-#        """
-#        public class BeanListList {
-#            public List<BeanList> beansList1, beansList2;
-#            public String status1, status2;
-#        }
-#        """
-#
-#    Scenario: nested list and list consistency
-#      And operate:
-#        """
-#        jFactory.factory(BeanListList.class).spec(ins -> {
-#            ins.spec().consistent(String.class)
-#                    .list("beansList1").consistent(beansList1 -> beansList1
-#                      .list("beans1").consistent(beans1-> beans1
-#                        .direct("status1"))
-#                      .direct("status1"))
-#                    .list("beansList2").consistent(beansList2 -> beansList2
-#                      .list("beans2").consistent(beans2-> beans2
-#                        .direct("status1"))
-#                      .direct("status1"))
-#                    .direct("status1");
-#        });
-#        """
-#      When build:
-#        """
-#        jFactory.clear().type(BeanListList.class)
-#                .property("beansList1[0]!.beans1[0]!", null)
-#                .property("beansList1[0]!.beans1[1]!", null)
-#                .property("beansList2[0]!.beans2[0]!", null)
-#                .property("beansList2[0]!.beans2[1]!", null)
-#                .property("status1", "new").create();
-#        """
-#      Then the result should:
-#        """
-#        <<beansList1[0]<<beans1[0], beans1[1]>>, beansList1[0], beansList2[0]<<beans2[0], beans2[1]>>, beansList2[0], ::root>>.status1= new
-#        """
+  Rule: nested list
+
+    Background:
+      And the following bean class:
+        """
+        public class BeanList {
+            public List<Bean> beans1, beans2;
+            public String status1, status2, status3;
+        }
+        """
+      And the following bean class:
+        """
+        public class BeanListList {
+            public List<BeanList> beansList1, beansList2;
+            public String status1, status2;
+        }
+        """
+
+    Scenario: nested list and list consistency
+      And operate:
+        """
+        jFactory.factory(BeanListList.class).spec(ins -> {
+            ins.spec().consistent(String.class)
+                    .list("beansList1", "beans1").consistent(beansList1Beans1 -> beansList1Beans1
+                      .direct("status1"))
+                    .list("beansList2", "beans1").consistent(beansList1Beans1 -> beansList1Beans1
+                      .direct("status1"));
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(BeanListList.class)
+                .property("beansList1[0]!.beans1[0]!.status1", "a")
+                .property("beansList1[0]!.beans1[1]!", null)
+                .property("beansList1[1]!.beans1[0]!", null)
+                .property("beansList1[1]!.beans1[1]!.status1", "d")
+
+                .property("beansList2[0]!.beans1[0]!", null)
+                .property("beansList2[0]!.beans1[1]!.status1", "b")
+                .property("beansList2[1]!.beans1[0]!.status1", "c")
+                .property("beansList2[1]!.beans1[1]!", null)
+                .create();
+        """
+      Then the result should:
+        """
+        : {
+          beansList1: [
+            {beans1.status1[]= [a b]}
+            {beans1.status1[]= [c d]}
+          ]
+          beansList2: [
+            {beans1.status1[]= [a b]}
+            {beans1.status1[]= [c d]}
+          ]
+        }
+        """
 
   Rule: depends on list
 
@@ -483,3 +491,8 @@ Feature: list consistency
 
 #TODO reverseAssociations
 #TODO list link
+
+#TODO list index mapping
+#TODO nested list index mapping
+#TODO different size list consistent
+#TODO different size different level list consistent
