@@ -41,7 +41,12 @@ class ConsistencySet {
         }
 
         private List<DefaultConsistency<?>> processListConsistency(ObjectProducer<?> producer) {
-            return consistencies.stream().map(dc -> dc.processListConsistency(producer)).collect(toList());
+            List<DefaultConsistency<?>> consistencies = new ArrayList<>();
+            for (DefaultConsistency<?> consistency : ConsistencySet.this.consistencies) {
+                consistencies.addAll(consistency.populateListConsistencies(producer));
+            }
+            return consistencies;
+//            return consistencies.stream().map(dc -> dc.processListConsistency(producer)).collect(toList());
         }
 
         private List<DefaultConsistency<?>> mergeBySameItem(List<DefaultConsistency<?>> list) {

@@ -110,9 +110,44 @@ class DefaultConsistency<T> implements Consistency<T> {
         return new ListConsistencyBuilder<>(this, listConsistency);
     }
 
+    @Deprecated
     DefaultConsistency<T> processListConsistency(ObjectProducer<?> producer) {
         list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, propertyChain("")));
         return this;
+    }
+
+    public Collection<? extends DefaultConsistency<?>> populateListConsistencies(ObjectProducer<?> producer) {
+        if (list.isEmpty())
+            return singletonList(this);
+
+        List<DefaultConsistency<?>> consistencies = new ArrayList<>();
+
+        for (DefaultListConsistency<T> indexSource : list) {
+            CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) producer.descendantForUpdate(indexSource.listProperty);
+
+            for (int i = 0; i < collectionProducer.childrenCount(); i++) {
+                Index index = new Index();
+                index.index = i;
+                index.size = collectionProducer.childrenCount();
+
+                Coordinate coordinate = new Coordinate(index);
+
+                DefaultConsistency<T> newConsistency = new DefaultConsistency<>(type(), locations);
+                consistencies.add(newConsistency);
+
+                for (DefaultListConsistency<T> listConsistency : list) {
+                    PropertyChain elementProperty = listConsistency.listProperty.concat(coordinate.index.index);
+                    for (ListConsistencyItem<T> item : listConsistency.items) {
+                        item.populateConsistency(elementProperty, newConsistency);
+                    }
+                }
+
+                for (ConsistencyItem<T> item : items) {
+                    newConsistency.items.add(item.copy(newConsistency));
+                }
+            }
+        }
+        return consistencies;
     }
 
     interface Identity {

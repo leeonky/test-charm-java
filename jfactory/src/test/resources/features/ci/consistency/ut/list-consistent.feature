@@ -401,53 +401,53 @@ Feature: list consistency
 #            }
 #            """
 
-  Rule: nested list
-
-    Background:
-      And the following bean class:
-        """
-        public class BeanList {
-            public List<Bean> beans1, beans2;
-            public String status1, status2, status3;
-        }
-        """
-      And the following bean class:
-        """
-        public class BeanListList {
-            public List<BeanList> beansList1, beansList2;
-            public String status1, status2;
-        }
-        """
-
-    Scenario: nested list and list consistency
-      And operate:
-        """
-        jFactory.factory(BeanListList.class).spec(ins -> {
-            ins.spec().consistent(String.class)
-                    .list("beansList1").consistent(beansList1 -> beansList1
-                      .list("beans1").consistent(beans1-> beans1
-                        .direct("status1"))
-                      .direct("status1"))
-                    .list("beansList2").consistent(beansList2 -> beansList2
-                      .list("beans2").consistent(beans2-> beans2
-                        .direct("status1"))
-                      .direct("status1"))
-                    .direct("status1");
-        });
-        """
-      When build:
-        """
-        jFactory.clear().type(BeanListList.class)
-                .property("beansList1[0]!.beans1[0]!", null)
-                .property("beansList1[0]!.beans1[1]!", null)
-                .property("beansList2[0]!.beans2[0]!", null)
-                .property("beansList2[0]!.beans2[1]!", null)
-                .property("status1", "new").create();
-        """
-      Then the result should:
-        """
-        <<beansList1[0]<<beans1[0], beans1[1]>>, beansList1[0], beansList2[0]<<beans2[0], beans2[1]>>, beansList2[0], ::root>>.status1= new
-        """
+#  Rule: nested list
+#
+#    Background:
+#      And the following bean class:
+#        """
+#        public class BeanList {
+#            public List<Bean> beans1, beans2;
+#            public String status1, status2, status3;
+#        }
+#        """
+#      And the following bean class:
+#        """
+#        public class BeanListList {
+#            public List<BeanList> beansList1, beansList2;
+#            public String status1, status2;
+#        }
+#        """
+#
+#    Scenario: nested list and list consistency
+#      And operate:
+#        """
+#        jFactory.factory(BeanListList.class).spec(ins -> {
+#            ins.spec().consistent(String.class)
+#                    .list("beansList1").consistent(beansList1 -> beansList1
+#                      .list("beans1").consistent(beans1-> beans1
+#                        .direct("status1"))
+#                      .direct("status1"))
+#                    .list("beansList2").consistent(beansList2 -> beansList2
+#                      .list("beans2").consistent(beans2-> beans2
+#                        .direct("status1"))
+#                      .direct("status1"))
+#                    .direct("status1");
+#        });
+#        """
+#      When build:
+#        """
+#        jFactory.clear().type(BeanListList.class)
+#                .property("beansList1[0]!.beans1[0]!", null)
+#                .property("beansList1[0]!.beans1[1]!", null)
+#                .property("beansList2[0]!.beans2[0]!", null)
+#                .property("beansList2[0]!.beans2[1]!", null)
+#                .property("status1", "new").create();
+#        """
+#      Then the result should:
+#        """
+#        <<beansList1[0]<<beans1[0], beans1[1]>>, beansList1[0], beansList2[0]<<beans2[0], beans2[1]>>, beansList2[0], ::root>>.status1= new
+#        """
 
   Rule: depends on list
 

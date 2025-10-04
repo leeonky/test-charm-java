@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import java.util.function.Consumer;
 
+@Deprecated
 public class NestedListConsistencyBuilder<T> {
 
     private final ListConsistency<T> main;

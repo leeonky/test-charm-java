@@ -24,6 +24,15 @@ class ConsistencyItem<T> {
         this.location = location;
     }
 
+    public ConsistencyItem<T> copy(DefaultConsistency<T> newConsistency) {
+        ConsistencyItem<T> item = new ConsistencyItem<>(properties, newConsistency, location);
+        item.decomposer = decomposer;
+        item.composer = composer;
+        item.decomposerLocation = decomposerLocation;
+        item.composerLocation = composerLocation;
+        return item;
+    }
+
     static StackTraceElement guessCustomerPositionStackTrace() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         return Arrays.stream(stackTrace).filter(s -> !s.getClassName().startsWith("com.github.leeonky.jfactory"))

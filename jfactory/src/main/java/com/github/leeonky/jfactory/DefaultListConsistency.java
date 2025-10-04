@@ -12,9 +12,9 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.IntStream.range;
 
 class DefaultListConsistency<T> implements ListConsistency<T> {
-    private final PropertyChain listProperty;
+    final PropertyChain listProperty;
     private final Consistency<T> consistency;
-    private final List<ListConsistencyItem<T>> items = new ArrayList<>();
+    final List<ListConsistencyItem<T>> items = new ArrayList<>();
     private final List<DefaultListConsistency<?>> list = new ArrayList<>();
 
     DefaultListConsistency(String listProperty, Consistency<T> consistency) {
@@ -49,6 +49,7 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         return new LC3<>(this, listConsistencyItem);
     }
 
+    @Deprecated
     void populateConsistencies(ObjectProducer<?> producer, PropertyChain parentList) {
         PropertyChain listProperty = parentList.concat(this.listProperty);
         Producer<?> descendant = producer.descendantForUpdate(listProperty);
@@ -63,12 +64,12 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, elementProperty));
     }
 
-    @Override
-    public NestedListConsistencyBuilder<T> list(String property) {
-        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, consistency);
-        list.add(listConsistency);
-        return new NestedListConsistencyBuilder<>(this, listConsistency);
-    }
+//    @Override
+//    public NestedListConsistencyBuilder<T> list(String property) {
+//        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, consistency);
+//        list.add(listConsistency);
+//        return new NestedListConsistencyBuilder<>(this, listConsistency);
+//    }
 }
 
 class DecorateListConsistency<T> implements ListConsistency<T> {
@@ -98,10 +99,10 @@ class DecorateListConsistency<T> implements ListConsistency<T> {
         return delegate.properties(property1, property2, property3);
     }
 
-    @Override
-    public NestedListConsistencyBuilder<T> list(String property) {
-        return delegate.list(property);
-    }
+//    @Override
+//    public NestedListConsistencyBuilder<T> list(String property) {
+//        return delegate.list(property);
+//    }
 }
 
 class MultiPropertyListConsistency<T, C extends MultiPropertyListConsistency<T, C>> extends DecorateListConsistency<T> {
