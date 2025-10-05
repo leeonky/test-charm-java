@@ -83,12 +83,18 @@ class DefaultConsistency<T> implements Consistency<T> {
         return false;
     }
 
-    String info() {
+
+    @Override
+    public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("  ").append(type().getName()).append(":");
         for (StackTraceElement location : locations) {
             builder.append("\n    ").append(location.getClassName()).append(".").append(location.getMethodName())
                     .append("(").append(location.getFileName()).append(":").append(location.getLineNumber()).append(")");
+        }
+
+        for (ConsistencyItem<T> item : items) {
+            builder.append("\n    - ").append(item);
         }
         return builder.toString();
     }
@@ -104,17 +110,17 @@ class DefaultConsistency<T> implements Consistency<T> {
     }
 
     @Override
-    public ListConsistencyBuilder<T> list(String property) {
+    public ListConsistencyBuilderA1<T> list(String property) {
         DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(singletonList(property), this);
         list.add(listConsistency);
-        return new ListConsistencyBuilder<>(this, listConsistency);
+        return new ListConsistencyBuilderA1<>(this, listConsistency);
     }
 
     @Override
-    public ListConsistencyBuilder<T> list(String property1, String property2) {
+    public ListConsistencyBuilderA1<T> list(String property1, String property2) {
         DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(asList(property1, property2), this);
         list.add(listConsistency);
-        return new ListConsistencyBuilder<>(this, listConsistency);
+        return new ListConsistencyBuilderA1<>(this, listConsistency);
     }
 
     @Deprecated
@@ -242,12 +248,12 @@ class DecorateConsistency<T> implements Consistency<T> {
     }
 
     @Override
-    public ListConsistencyBuilder<T> list(String property) {
+    public ListConsistencyBuilderA1<T> list(String property) {
         return delegate.list(property);
     }
 
     @Override
-    public ListConsistencyBuilder<T> list(String property1, String property2) {
+    public ListConsistencyBuilderA1<T> list(String property1, String property2) {
         return delegate.list(property1, property2);
     }
 }

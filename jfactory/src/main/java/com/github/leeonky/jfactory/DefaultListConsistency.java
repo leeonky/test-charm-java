@@ -19,6 +19,8 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
     private final DefaultConsistency<T> consistency;
     final List<ListConsistencyItem<T>> items = new ArrayList<>();
     private final List<DefaultListConsistency<?>> list = new ArrayList<>();
+    private Function<Coordinate, Coordinate> aligner = Function.identity();
+    private Function<Coordinate, Coordinate> inverseAligner = Function.identity();
 
     DefaultListConsistency(List<String> listProperty, DefaultConsistency<T> consistency) {
         this.listProperty = listProperty.stream().map(PropertyChain::propertyChain).collect(Collectors.toList());
@@ -68,8 +70,8 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
     }
 
     PropertyChain toProperty(Coordinate coordinate) {
-        return zip(listProperty, coordinate.index).stream().reduce(propertyChain(""),
-                (p, z) -> p.concat(z.left()).concat(z.right().index), notAllowParallelReduce());
+        return zip(listProperty, inverseAligner.apply(coordinate).indexes).stream().reduce(propertyChain(""),
+                (p, z) -> p.concat(z.left()).concat(z.right().index()), notAllowParallelReduce());
     }
 
     List<DefaultConsistency<T>> collectCoordinateAndProcess(ObjectProducer<?> producer, List<Index> baseIndex,
@@ -78,17 +80,21 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         PropertyChain list = baseProperty.concat(listProperty.get(l++));
         CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) producer.descendantForUpdate(list);
         for (int i = 0; i < collectionProducer.childrenCount(); i++) {
-            Index index = new Index();
-            index.index = i;
-            index.size = collectionProducer.childrenCount();
+            Index index = new Index(collectionProducer.childrenCount(), i);
             List<Index> indexes = new ArrayList<>(baseIndex);
             indexes.add(index);
             if (listProperty.size() > l)
                 results.addAll(collectCoordinateAndProcess(producer, indexes, l, list.concat(i)));
             else
-                results.add(consistency.populateConsistencyWithList(new Coordinate(indexes)));
+                results.add(consistency.populateConsistencyWithList(aligner.apply(new Coordinate(indexes))));
         }
         return results;
+    }
+
+    @Override
+    public void normalize(Function<Coordinate, Coordinate> aligner, Function<Coordinate, Coordinate> inverseAligner) {
+        this.aligner = aligner;
+        this.inverseAligner = inverseAligner;
     }
 
     //    @Override
@@ -126,7 +132,12 @@ class DecorateListConsistency<T> implements ListConsistency<T> {
         return delegate.properties(property1, property2, property3);
     }
 
-//    @Override
+    @Override
+    public void normalize(Function<Coordinate, Coordinate> aligner, Function<Coordinate, Coordinate> inverseAligner) {
+        delegate.normalize(aligner, inverseAligner);
+    }
+
+    //    @Override
 //    public NestedListConsistencyBuilder<T> list(String property) {
 //        return delegate.list(property);
 //    }
