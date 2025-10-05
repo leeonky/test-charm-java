@@ -14,25 +14,27 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
-class DefaultConsistency<T> implements Consistency<T> {
+class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
     final List<ConsistencyItem<T>> items = new ArrayList<>();
-    final List<DefaultListConsistency<T>> list = new ArrayList<>();
+    final List<DefaultListConsistency<T, C>> list = new ArrayList<>();
     private final BeanClass<T> type;
+    private final BeanClass<C> coordinateType;
     final List<StackTraceElement> locations = new ArrayList<>();
 
     static final Function<Object, Object> LINK_COMPOSER = s -> s;
     static final Function<Object, Object> LINK_DECOMPOSER = s -> s;
 
-    DefaultConsistency(Class<T> type) {
-        this(BeanClass.create(type));
+    DefaultConsistency(Class<T> type, Class<C> cType) {
+        this(BeanClass.create(type), BeanClass.create(cType));
     }
 
-    DefaultConsistency(BeanClass<T> type) {
-        this(type, singletonList(guessCustomerPositionStackTrace()));
+    DefaultConsistency(BeanClass<T> type, BeanClass<C> cType) {
+        this(type, cType, singletonList(guessCustomerPositionStackTrace()));
     }
 
-    DefaultConsistency(BeanClass<T> type, List<StackTraceElement> locations) {
+    DefaultConsistency(BeanClass<T> type, BeanClass<C> cType, List<StackTraceElement> locations) {
         this.type = type;
+        coordinateType = cType;
         this.locations.addAll(locations);
     }
 
@@ -43,39 +45,39 @@ class DefaultConsistency<T> implements Consistency<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Consistency<T> direct(String property) {
+    public Consistency<T, C> direct(String property) {
         return property(property).read((Function<Object, T>) LINK_COMPOSER).write((Function<T, Object>) LINK_DECOMPOSER);
     }
 
     @Override
-    public <P> C1<T, P> property(String property) {
+    public <P> C1<T, P, C> property(String property) {
         ConsistencyItem<T> item = new ConsistencyItem<>(singletonList(propertyChain(property)), this);
         items.add(item);
         return new C1<>(this, item);
     }
 
     @Override
-    public <P1, P2> C2<T, P1, P2> properties(String property1, String property2) {
+    public <P1, P2> C2<T, P1, P2, C> properties(String property1, String property2) {
         ConsistencyItem<T> item = new ConsistencyItem<>(asList(propertyChain(property1), propertyChain(property2)), this);
         items.add(item);
         return new C2<>(this, item);
     }
 
     @Override
-    public <P1, P2, P3> C3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+    public <P1, P2, P3> C3<T, P1, P2, P3, C> properties(String property1, String property2, String property3) {
         ConsistencyItem<T> item = new ConsistencyItem<>(asList(propertyChain(property1), propertyChain(property2), propertyChain(property3)), this);
         items.add(item);
         return new C3<>(this, item);
     }
 
     @Override
-    public CN<T> properties(String... properties) {
+    public CN<T, C> properties(String... properties) {
         ConsistencyItem<T> item = new ConsistencyItem<>(Arrays.stream(properties).map(PropertyChain::propertyChain).collect(toList()), this);
         items.add(item);
         return new CN<>(this, item);
     }
 
-    boolean merge(DefaultConsistency<?> another) {
+    boolean merge(DefaultConsistency<?, ?> another) {
         if (items.stream().anyMatch(item -> another.items.stream().anyMatch(item::same))) {
             another.items.forEach(item -> items.add(Sneaky.cast(item)));
             return true;
@@ -98,8 +100,8 @@ class DefaultConsistency<T> implements Consistency<T> {
         return builder.toString();
     }
 
-    DefaultConsistency<T> absoluteProperty(PropertyChain base) {
-        DefaultConsistency<T> absolute = new DefaultConsistency<>(type(), locations);
+    DefaultConsistency<T, C> absoluteProperty(PropertyChain base) {
+        DefaultConsistency<T, C> absolute = new DefaultConsistency<>(type(), coordinateType(), locations);
         items.forEach(item -> absolute.items.add(item.absoluteProperty(base)));
         return absolute;
     }
@@ -109,38 +111,38 @@ class DefaultConsistency<T> implements Consistency<T> {
     }
 
     @Override
-    public ListConsistencyBuilder.D1<T> list(String property) {
-        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(singletonList(property), this);
+    public ListConsistencyBuilder.D1<T, C> list(String property) {
+        DefaultListConsistency<T, C> listConsistency = new DefaultListConsistency<>(singletonList(property), this);
         list.add(listConsistency);
         return new ListConsistencyBuilder.D1<>(this, listConsistency);
     }
 
     @Override
-    public ListConsistencyBuilder<T> list(String property1, String property2) {
-        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(asList(property1, property2), this);
+    public ListConsistencyBuilder<T, C> list(String property1, String property2) {
+        DefaultListConsistency<T, C> listConsistency = new DefaultListConsistency<>(asList(property1, property2), this);
         list.add(listConsistency);
         return new ListConsistencyBuilder<>(this, listConsistency);
     }
 
     @Deprecated
-    DefaultConsistency<T> processListConsistency(ObjectProducer<?> producer) {
+    DefaultConsistency<T, C> processListConsistency(ObjectProducer<?> producer) {
         list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, propertyChain("")));
         return this;
     }
 
-    public List<DefaultConsistency<T>> populateListConsistencies(ObjectProducer<?> producer) {
+    public List<DefaultConsistency<T, C>> populateListConsistencies(ObjectProducer<?> producer) {
         if (list.isEmpty())
             return singletonList(this);
-        List<DefaultConsistency<T>> consistencies = new ArrayList<>();
-        for (DefaultListConsistency<T> indexSource : list) {
+        List<DefaultConsistency<T, C>> consistencies = new ArrayList<>();
+        for (DefaultListConsistency<T, C> indexSource : list) {
             consistencies.addAll(indexSource.collectCoordinateAndProcess(producer, new ArrayList<>(), 0, propertyChain("")));
         }
         return consistencies;
     }
 
-    DefaultConsistency<T> populateConsistencyWithList(Coordinate coordinate) {
-        DefaultConsistency<T> newConsistency = new DefaultConsistency<>(type(), locations);
-        for (DefaultListConsistency<T> listConsistency : list) {
+    DefaultConsistency<T, C> populateConsistencyWithList(C coordinate) {
+        DefaultConsistency<T, C> newConsistency = new DefaultConsistency<>(type(), coordinateType(), locations);
+        for (DefaultListConsistency<T, C> listConsistency : list) {
             listConsistency.toProperty(coordinate).ifPresent(elementProperty -> {
                 for (ListConsistencyItem<T> item : listConsistency.items)
                     item.populateConsistency(elementProperty, newConsistency);
@@ -150,6 +152,10 @@ class DefaultConsistency<T> implements Consistency<T> {
             newConsistency.items.add(item.copy(newConsistency));
         }
         return newConsistency;
+    }
+
+    public BeanClass<C> coordinateType() {
+        return coordinateType;
     }
 
     interface Identity {
@@ -208,10 +214,10 @@ class DefaultConsistency<T> implements Consistency<T> {
     }
 }
 
-class DecorateConsistency<T> implements Consistency<T> {
-    private final Consistency<T> delegate;
+class DecorateConsistency<T, C extends Coordinate> implements Consistency<T, C> {
+    private final Consistency<T, C> delegate;
 
-    DecorateConsistency(Consistency<T> delegate) {
+    DecorateConsistency(Consistency<T, C> delegate) {
         this.delegate = delegate;
     }
 
@@ -221,37 +227,37 @@ class DecorateConsistency<T> implements Consistency<T> {
     }
 
     @Override
-    public Consistency<T> direct(String property) {
+    public Consistency<T, C> direct(String property) {
         return delegate.direct(property);
     }
 
     @Override
-    public <P> C1<T, P> property(String property) {
+    public <P> C1<T, P, C> property(String property) {
         return delegate.property(property);
     }
 
     @Override
-    public <P1, P2> C2<T, P1, P2> properties(String property1, String property2) {
+    public <P1, P2> C2<T, P1, P2, C> properties(String property1, String property2) {
         return delegate.properties(property1, property2);
     }
 
     @Override
-    public <P1, P2, P3> C3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+    public <P1, P2, P3> C3<T, P1, P2, P3, C> properties(String property1, String property2, String property3) {
         return delegate.properties(property1, property2, property3);
     }
 
     @Override
-    public CN<T> properties(String... properties) {
+    public CN<T, C> properties(String... properties) {
         return delegate.properties(properties);
     }
 
     @Override
-    public ListConsistencyBuilder.D1<T> list(String property) {
+    public ListConsistencyBuilder.D1<T, C> list(String property) {
         return delegate.list(property);
     }
 
     @Override
-    public ListConsistencyBuilder<T> list(String property1, String property2) {
+    public ListConsistencyBuilder<T, C> list(String property1, String property2) {
         return delegate.list(property1, property2);
     }
 }
@@ -304,10 +310,11 @@ class DecomposerWrapper<T> extends IdentityAction implements DefaultConsistency.
     }
 }
 
-class MultiPropertyConsistency<T, M extends MultiPropertyConsistency<T, M>> extends DecorateConsistency<T> {
+class MultiPropertyConsistency<T, M extends MultiPropertyConsistency<T, M, C>, C extends Coordinate>
+        extends DecorateConsistency<T, C> {
     final ConsistencyItem<T> lastItem;
 
-    MultiPropertyConsistency(Consistency<T> origin, ConsistencyItem<T> lastItem) {
+    MultiPropertyConsistency(Consistency<T, C> origin, ConsistencyItem<T> lastItem) {
         super(origin);
         this.lastItem = lastItem;
     }

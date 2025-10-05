@@ -136,7 +136,7 @@ public class Spec<T> {
     }
 
     public Spec<T> link(String propertyChain1, String propertyChain2, String... others) {
-        Consistency<?> consistency = consistent(Object.class);
+        Consistency<?, ?> consistency = consistent(Object.class);
         consistency.direct(propertyChain1)
                 .direct(propertyChain2);
         for (String string : others)
@@ -144,8 +144,14 @@ public class Spec<T> {
         return this;
     }
 
-    public <V> Consistency<V> consistent(Class<V> type) {
-        DefaultConsistency<V> consistency = new DefaultConsistency<>(type);
+    public <V> Consistency<V, Coordinate> consistent(Class<V> type) {
+        DefaultConsistency<V, Coordinate> consistency = new DefaultConsistency<>(type, Coordinate.class);
+        append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        return consistency;
+    }
+
+    public <V, C extends Coordinate> Consistency<V, C> consistent(Class<V> type, Class<C> cType) {
+        DefaultConsistency<V, C> consistency = new DefaultConsistency<>(type, cType);
         append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
         return consistency;
     }

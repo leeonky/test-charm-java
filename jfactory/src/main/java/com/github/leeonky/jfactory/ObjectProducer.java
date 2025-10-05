@@ -233,7 +233,7 @@ class ObjectProducer<T> extends Producer<T> {
         elementPopulationFactory = factory;
     }
 
-    public void appendLink(DefaultConsistency<?> consistency) {
+    public void appendLink(DefaultConsistency<?, ?> consistency) {
         consistencySet.add(consistency);
     }
 }

@@ -7,24 +7,24 @@ import static java.util.stream.Collectors.toList;
 
 class ConsistencyItem<T> {
     private final Set<PropertyChain> properties;
-    private final Consistency<T> consistency;
+    private final Consistency<T, ?> consistency;
     private final StackTraceElement location;
     private StackTraceElement composerLocation;
     private StackTraceElement decomposerLocation;
     private DefaultConsistency.Composer<T> composer;
     private DefaultConsistency.Decomposer<T> decomposer;
 
-    ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency) {
+    ConsistencyItem(Collection<PropertyChain> properties, Consistency<T, ?> consistency) {
         this(properties, consistency, guessCustomerPositionStackTrace());
     }
 
-    ConsistencyItem(Collection<PropertyChain> properties, Consistency<T> consistency, StackTraceElement location) {
+    ConsistencyItem(Collection<PropertyChain> properties, Consistency<T, ?> consistency, StackTraceElement location) {
         this.properties = new LinkedHashSet<>(properties);
         this.consistency = consistency;
         this.location = location;
     }
 
-    public ConsistencyItem<T> copy(DefaultConsistency<T> newConsistency) {
+    public ConsistencyItem<T> copy(DefaultConsistency<T, ?> newConsistency) {
         ConsistencyItem<T> item = new ConsistencyItem<>(properties, newConsistency, location);
         item.decomposer = decomposer;
         item.composer = composer;
@@ -96,16 +96,16 @@ class ConsistencyItem<T> {
                 (decomposer != null ? " with decomposer" : "");
     }
 
-    Resolver resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
+    Resolver resolver(ObjectProducer<?> root, DefaultConsistency<T, ?>.Resolver consistency) {
         return new Resolver(root, consistency);
     }
 
     class Resolver {
         private final ObjectProducer<?> root;
-        private final DefaultConsistency<T>.Resolver consistency;
+        private final DefaultConsistency<T, ?>.Resolver consistency;
         private Object[] cached;
 
-        Resolver(ObjectProducer<?> root, DefaultConsistency<T>.Resolver consistency) {
+        Resolver(ObjectProducer<?> root, DefaultConsistency<T, ?>.Resolver consistency) {
             this.root = root;
             this.consistency = consistency;
         }
@@ -172,7 +172,7 @@ class ConsistencyItem<T> {
             return properties.contains(property);
         }
 
-        DefaultConsistency<T>.Resolver consistencyResolver() {
+        DefaultConsistency<T, ?>.Resolver consistencyResolver() {
             return consistency;
         }
     }

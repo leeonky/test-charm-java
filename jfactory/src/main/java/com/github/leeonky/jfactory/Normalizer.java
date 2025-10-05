@@ -1,12 +1,12 @@
 package com.github.leeonky.jfactory;
 
-public interface Normalizer {
-    Coordinate align(Coordinate coordinate);
+public interface Normalizer<C> {
+    C align(Coordinate coordinate);
 
-    Coordinate deAlign(Coordinate coordinate);
+    Coordinate deAlign(C coordinate);
 
-    static Normalizer reverse() {
-        return new Normalizer() {
+    static Normalizer<Coordinate> reverse() {
+        return new Normalizer<Coordinate>() {
             @Override
             public Coordinate align(Coordinate coordinate) {
                 return coordinate.reverse();

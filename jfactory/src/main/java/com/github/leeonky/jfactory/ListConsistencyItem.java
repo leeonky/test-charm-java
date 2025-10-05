@@ -21,7 +21,7 @@ class ListConsistencyItem<T> {
         this.decomposer = decomposer;
     }
 
-    void populateConsistency(PropertyChain elementProperty, Consistency<T> consistency) {
+    void populateConsistency(PropertyChain elementProperty, Consistency<T, ?> consistency) {
         consistency.properties(property.stream().map(p -> elementProperty.concat(p).toString()).toArray(String[]::new))
                 .read(composer).write(decomposer);
     }

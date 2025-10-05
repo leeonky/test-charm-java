@@ -16,41 +16,46 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.IntStream.range;
 
-class DefaultListConsistency<T> implements ListConsistency<T> {
+class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency<T, C> {
     final List<PropertyChain> listProperty;
-    private final DefaultConsistency<T> consistency;
+    private final DefaultConsistency<T, C> consistency;
     final List<ListConsistencyItem<T>> items = new ArrayList<>();
-    private final List<DefaultListConsistency<?>> list = new ArrayList<>();
-    private Function<Coordinate, Coordinate> aligner = Function.identity();
-    private Function<Coordinate, Coordinate> inverseAligner = Function.identity();
+    private final List<DefaultListConsistency<?, ?>> list = new ArrayList<>();
+    private Function<Coordinate, C> aligner = this::convert;
 
-    DefaultListConsistency(List<String> listProperty, DefaultConsistency<T> consistency) {
+    private C convert(Coordinate e) {
+        return e.convertTo(consistency.coordinateType());
+    }
+
+    private Function<C, Coordinate> inverseAligner = e -> e;
+
+    DefaultListConsistency(List<String> listProperty, DefaultConsistency<T, C> consistency) {
         this.listProperty = listProperty.stream().map(PropertyChain::propertyChain).collect(Collectors.toList());
         this.consistency = consistency;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public ListConsistency<T> direct(String property) {
+    public ListConsistency<T, C> direct(String property) {
         return property(property).read((Function<Object, T>) LINK_COMPOSER).write((Function<T, Object>) LINK_DECOMPOSER);
     }
 
     @Override
-    public <P> ListConsistency.LC1<T, P> property(String property) {
+    public <P> ListConsistency.LC1<T, P, C> property(String property) {
         ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(singletonList(property));
         items.add(listConsistencyItem);
         return new DefaultListConsistency.LC1<>(this, listConsistencyItem);
     }
 
     @Override
-    public <P1, P2> ListConsistency.LC2<T, P1, P2> properties(String property1, String property2) {
+    public <P1, P2> ListConsistency.LC2<T, P1, P2, C> properties(String property1, String property2) {
         ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(asList(property1, property2));
         items.add(listConsistencyItem);
         return new DefaultListConsistency.LC2<>(this, listConsistencyItem);
     }
 
     @Override
-    public <P1, P2, P3> LC3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+    public <P1, P2, P3> LC3<T, P1, P2, P3, C> properties(String property1, String property2, String property3) {
         ListConsistencyItem<T> listConsistencyItem = new ListConsistencyItem<>(asList(property1, property2, property3));
         items.add(listConsistencyItem);
         return new LC3<>(this, listConsistencyItem);
@@ -71,14 +76,14 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, elementProperty));
     }
 
-    Optional<PropertyChain> toProperty(Coordinate coordinate) {
+    Optional<PropertyChain> toProperty(C coordinate) {
         return ofNullable(inverseAligner.apply(coordinate)).map(co -> zip(listProperty, co.indexes()).stream().reduce(propertyChain(""),
                 (p, z) -> p.concat(z.left()).concat(z.right().index()), notAllowParallelReduce()));
     }
 
-    List<DefaultConsistency<T>> collectCoordinateAndProcess(ObjectProducer<?> producer, List<Index> baseIndex,
-                                                            int l, PropertyChain baseProperty) {
-        List<DefaultConsistency<T>> results = new ArrayList<>();
+    List<DefaultConsistency<T, C>> collectCoordinateAndProcess(ObjectProducer<?> producer, List<Index> baseIndex,
+                                                               int l, PropertyChain baseProperty) {
+        List<DefaultConsistency<T, C>> results = new ArrayList<>();
         PropertyChain list = baseProperty.concat(listProperty.get(l++));
         CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) producer.descendantForUpdate(list);
         for (int i = 0; i < collectionProducer.childrenCount(); i++) {
@@ -94,8 +99,8 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         return results;
     }
 
-    public void normalize(Function<Coordinate, Coordinate> aligner,
-                          Function<Coordinate, Coordinate> inverseAligner) {
+    public void normalize(Function<Coordinate, C> aligner,
+                          Function<C, Coordinate> inverseAligner) {
         this.aligner = aligner;
         this.inverseAligner = inverseAligner;
     }
@@ -108,30 +113,30 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
 //    }
 }
 
-class DecorateListConsistency<T> implements ListConsistency<T> {
-    private final ListConsistency<T> delegate;
+class DecorateListConsistency<T, C extends Coordinate> implements ListConsistency<T, C> {
+    private final ListConsistency<T, C> delegate;
 
-    public DecorateListConsistency(ListConsistency<T> delegate) {
+    public DecorateListConsistency(ListConsistency<T, C> delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public ListConsistency<T> direct(String property) {
+    public ListConsistency<T, C> direct(String property) {
         return delegate.direct(property);
     }
 
     @Override
-    public <P> ListConsistency.LC1<T, P> property(String property) {
+    public <P> ListConsistency.LC1<T, P, C> property(String property) {
         return delegate.property(property);
     }
 
     @Override
-    public <P1, P2> ListConsistency.LC2<T, P1, P2> properties(String property1, String property2) {
+    public <P1, P2> ListConsistency.LC2<T, P1, P2, C> properties(String property1, String property2) {
         return delegate.properties(property1, property2);
     }
 
     @Override
-    public <P1, P2, P3> LC3<T, P1, P2, P3> properties(String property1, String property2, String property3) {
+    public <P1, P2, P3> LC3<T, P1, P2, P3, C> properties(String property1, String property2, String property3) {
         return delegate.properties(property1, property2, property3);
     }
 
@@ -141,10 +146,11 @@ class DecorateListConsistency<T> implements ListConsistency<T> {
 //    }
 }
 
-class MultiPropertyListConsistency<T, M extends MultiPropertyListConsistency<T, M>> extends DecorateListConsistency<T> {
+class MultiPropertyListConsistency<T, M extends MultiPropertyListConsistency<T, M, C>, C extends Coordinate>
+        extends DecorateListConsistency<T, C> {
     final ListConsistencyItem<T> last;
 
-    MultiPropertyListConsistency(ListConsistency<T> delegate, ListConsistencyItem<T> last) {
+    MultiPropertyListConsistency(ListConsistency<T, C> delegate, ListConsistencyItem<T> last) {
         super(delegate);
         this.last = last;
     }

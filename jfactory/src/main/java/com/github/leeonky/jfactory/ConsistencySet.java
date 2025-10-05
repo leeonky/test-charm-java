@@ -12,9 +12,9 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 class ConsistencySet {
-    private final List<DefaultConsistency<?>> consistencies = new ArrayList<>();
+    private final List<DefaultConsistency<?, ?>> consistencies = new ArrayList<>();
 
-    void add(DefaultConsistency<?> consistency) {
+    void add(DefaultConsistency<?, ?> consistency) {
         consistencies.add(consistency);
     }
 
@@ -33,25 +33,25 @@ class ConsistencySet {
     }
 
     class Resolver {
-        private final LinkedList<DefaultConsistency<?>.Resolver> unResolved;
+        private final LinkedList<DefaultConsistency<?, ?>.Resolver> unResolved;
 
         Resolver(ObjectProducer<?> producer) {
             unResolved = mergeBySameItem(processListConsistency(producer)).stream().map(c -> c.resolver(producer))
                     .collect(toCollection(LinkedList::new));
         }
 
-        private List<DefaultConsistency<?>> processListConsistency(ObjectProducer<?> producer) {
-            List<DefaultConsistency<?>> consistencies = new ArrayList<>();
-            for (DefaultConsistency<?> consistency : ConsistencySet.this.consistencies) {
+        private List<DefaultConsistency<?, ?>> processListConsistency(ObjectProducer<?> producer) {
+            List<DefaultConsistency<?, ?>> consistencies = new ArrayList<>();
+            for (DefaultConsistency<?, ?> consistency : ConsistencySet.this.consistencies) {
                 consistencies.addAll(consistency.populateListConsistencies(producer));
             }
             return consistencies;
 //            return consistencies.stream().map(dc -> dc.processListConsistency(producer)).collect(toList());
         }
 
-        private List<DefaultConsistency<?>> mergeBySameItem(List<DefaultConsistency<?>> list) {
-            List<DefaultConsistency<?>> merged = new ArrayList<>();
-            for (DefaultConsistency<?> consistency : list)
+        private List<DefaultConsistency<?, ?>> mergeBySameItem(List<DefaultConsistency<?, ?>> list) {
+            List<DefaultConsistency<?, ?>> merged = new ArrayList<>();
+            for (DefaultConsistency<?, ?> consistency : list)
                 if (merged.stream().noneMatch(e -> e.merge(consistency)))
                     merged.add(consistency);
             return merged.size() == list.size() ? merged : mergeBySameItem(merged);
