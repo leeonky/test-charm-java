@@ -15,4 +15,8 @@ public class Index {
     public int index() {
         return index;
     }
+
+    public Index adjust(int i) {
+        return new Index(size, (index + i) % size);
+    }
 }
