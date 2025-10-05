@@ -21,9 +21,9 @@ public interface Consistency<T> {
 
     Consistency.CN<T> properties(String... properties);
 
-    ListConsistencyBuilderA1<T> list(String property);
+    ListConsistencyBuilder.D1<T> list(String property);
 
-    ListConsistencyBuilderA1<T> list(String property1, String property2);
+    ListConsistencyBuilder<T> list(String property1, String property2);
 
     class C1<T, P> extends DecorateConsistency<T> {
         private final ConsistencyItem<T> lastItem;

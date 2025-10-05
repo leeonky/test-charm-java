@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import static com.github.leeonky.util.Zipped.zip;
 import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.IntStream.range;
 
 class DefaultListConsistency<T> implements ListConsistency<T> {
@@ -69,9 +71,9 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
         list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, elementProperty));
     }
 
-    PropertyChain toProperty(Coordinate coordinate) {
-        return zip(listProperty, inverseAligner.apply(coordinate).indexes).stream().reduce(propertyChain(""),
-                (p, z) -> p.concat(z.left()).concat(z.right().index()), notAllowParallelReduce());
+    Optional<PropertyChain> toProperty(Coordinate coordinate) {
+        return ofNullable(inverseAligner.apply(coordinate)).map(co -> zip(listProperty, co.indexes()).stream().reduce(propertyChain(""),
+                (p, z) -> p.concat(z.left()).concat(z.right().index()), notAllowParallelReduce()));
     }
 
     List<DefaultConsistency<T>> collectCoordinateAndProcess(ObjectProducer<?> producer, List<Index> baseIndex,
@@ -86,13 +88,14 @@ class DefaultListConsistency<T> implements ListConsistency<T> {
             if (listProperty.size() > l)
                 results.addAll(collectCoordinateAndProcess(producer, indexes, l, list.concat(i)));
             else
-                results.add(consistency.populateConsistencyWithList(aligner.apply(new Coordinate(indexes))));
+                ofNullable(aligner.apply(new Coordinate(indexes))).ifPresent(c ->
+                        results.add(consistency.populateConsistencyWithList(c)));
         }
         return results;
     }
 
-    @Override
-    public void normalize(Function<Coordinate, Coordinate> aligner, Function<Coordinate, Coordinate> inverseAligner) {
+    public void normalize(Function<Coordinate, Coordinate> aligner,
+                          Function<Coordinate, Coordinate> inverseAligner) {
         this.aligner = aligner;
         this.inverseAligner = inverseAligner;
     }
@@ -132,18 +135,13 @@ class DecorateListConsistency<T> implements ListConsistency<T> {
         return delegate.properties(property1, property2, property3);
     }
 
-    @Override
-    public void normalize(Function<Coordinate, Coordinate> aligner, Function<Coordinate, Coordinate> inverseAligner) {
-        delegate.normalize(aligner, inverseAligner);
-    }
-
     //    @Override
 //    public NestedListConsistencyBuilder<T> list(String property) {
 //        return delegate.list(property);
 //    }
 }
 
-class MultiPropertyListConsistency<T, C extends MultiPropertyListConsistency<T, C>> extends DecorateListConsistency<T> {
+class MultiPropertyListConsistency<T, M extends MultiPropertyListConsistency<T, M>> extends DecorateListConsistency<T> {
     final ListConsistencyItem<T> last;
 
     MultiPropertyListConsistency(ListConsistency<T> delegate, ListConsistencyItem<T> last) {
@@ -152,14 +150,14 @@ class MultiPropertyListConsistency<T, C extends MultiPropertyListConsistency<T, 
     }
 
     @SuppressWarnings("unchecked")
-    public C read(Function<Object[], T> composer) {
+    public M read(Function<Object[], T> composer) {
         last.setComposer(new ComposerWrapper<>(composer, composer));
-        return (C) this;
+        return (M) this;
     }
 
     @SuppressWarnings("unchecked")
-    public C write(Function<T, Object[]> decomposer) {
+    public M write(Function<T, Object[]> decomposer) {
         last.setDecomposer(new DecomposerWrapper<>(decomposer, decomposer));
-        return (C) this;
+        return (M) this;
     }
 }

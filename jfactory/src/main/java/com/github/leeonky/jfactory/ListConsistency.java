@@ -16,8 +16,8 @@ public interface ListConsistency<T> {
 
     <P1, P2, P3> ListConsistency.LC3<T, P1, P2, P3> properties(String property1, String property2, String property3);
 
-    void normalize(Function<Coordinate, Coordinate> aligner,
-                   Function<Coordinate, Coordinate> inverseAligner);
+//    void normalize(Function<Coordinate, Coordinate> aligner,
+//                   Function<Coordinate, Coordinate> inverseAligner);
 
     class LC1<T, P> extends DecorateListConsistency<T> {
         private final ListConsistencyItem<T> lastListConsistencyItem;

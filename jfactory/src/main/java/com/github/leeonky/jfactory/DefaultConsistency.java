@@ -83,7 +83,6 @@ class DefaultConsistency<T> implements Consistency<T> {
         return false;
     }
 
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -110,17 +109,17 @@ class DefaultConsistency<T> implements Consistency<T> {
     }
 
     @Override
-    public ListConsistencyBuilderA1<T> list(String property) {
+    public ListConsistencyBuilder.D1<T> list(String property) {
         DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(singletonList(property), this);
         list.add(listConsistency);
-        return new ListConsistencyBuilderA1<>(this, listConsistency);
+        return new ListConsistencyBuilder.D1<>(this, listConsistency);
     }
 
     @Override
-    public ListConsistencyBuilderA1<T> list(String property1, String property2) {
+    public ListConsistencyBuilder<T> list(String property1, String property2) {
         DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(asList(property1, property2), this);
         list.add(listConsistency);
-        return new ListConsistencyBuilderA1<>(this, listConsistency);
+        return new ListConsistencyBuilder<>(this, listConsistency);
     }
 
     @Deprecated
@@ -128,7 +127,6 @@ class DefaultConsistency<T> implements Consistency<T> {
         list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, propertyChain("")));
         return this;
     }
-
 
     public List<DefaultConsistency<T>> populateListConsistencies(ObjectProducer<?> producer) {
         if (list.isEmpty())
@@ -143,10 +141,10 @@ class DefaultConsistency<T> implements Consistency<T> {
     DefaultConsistency<T> populateConsistencyWithList(Coordinate coordinate) {
         DefaultConsistency<T> newConsistency = new DefaultConsistency<>(type(), locations);
         for (DefaultListConsistency<T> listConsistency : list) {
-            PropertyChain elementProperty = listConsistency.toProperty(coordinate);
-            for (ListConsistencyItem<T> item : listConsistency.items) {
-                item.populateConsistency(elementProperty, newConsistency);
-            }
+            listConsistency.toProperty(coordinate).ifPresent(elementProperty -> {
+                for (ListConsistencyItem<T> item : listConsistency.items)
+                    item.populateConsistency(elementProperty, newConsistency);
+            });
         }
         for (ConsistencyItem<T> item : items) {
             newConsistency.items.add(item.copy(newConsistency));
@@ -248,12 +246,12 @@ class DecorateConsistency<T> implements Consistency<T> {
     }
 
     @Override
-    public ListConsistencyBuilderA1<T> list(String property) {
+    public ListConsistencyBuilder.D1<T> list(String property) {
         return delegate.list(property);
     }
 
     @Override
-    public ListConsistencyBuilderA1<T> list(String property1, String property2) {
+    public ListConsistencyBuilder<T> list(String property1, String property2) {
         return delegate.list(property1, property2);
     }
 }
@@ -306,7 +304,7 @@ class DecomposerWrapper<T> extends IdentityAction implements DefaultConsistency.
     }
 }
 
-class MultiPropertyConsistency<T, C extends MultiPropertyConsistency<T, C>> extends DecorateConsistency<T> {
+class MultiPropertyConsistency<T, M extends MultiPropertyConsistency<T, M>> extends DecorateConsistency<T> {
     final ConsistencyItem<T> lastItem;
 
     MultiPropertyConsistency(Consistency<T> origin, ConsistencyItem<T> lastItem) {
@@ -315,14 +313,14 @@ class MultiPropertyConsistency<T, C extends MultiPropertyConsistency<T, C>> exte
     }
 
     @SuppressWarnings("unchecked")
-    public C read(Function<Object[], T> composer) {
+    public M read(Function<Object[], T> composer) {
         lastItem.setComposer(new ComposerWrapper<>(composer, composer));
-        return (C) this;
+        return (M) this;
     }
 
     @SuppressWarnings("unchecked")
-    public C write(Function<T, Object[]> decomposer) {
+    public M write(Function<T, Object[]> decomposer) {
         lastItem.setDecomposer(new DecomposerWrapper<>(decomposer, decomposer));
-        return (C) this;
+        return (M) this;
     }
 }
