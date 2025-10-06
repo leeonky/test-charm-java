@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 public class Coordinate {
@@ -57,8 +58,26 @@ public class Coordinate {
         }
     }
 
+    public static class D2 extends Coordinate {
+        public D2(List<Index> index) {
+            super(require(index, 2));
+        }
+
+        public Index index0() {
+            return indexes().get(0);
+        }
+
+        public Index index1() {
+            return indexes().get(1);
+        }
+    }
+
     public static D1 d1(Index index) {
         return new D1(singletonList(index));
+    }
+
+    public static D2 d2(Index index0, Index index1) {
+        return new D2(asList(index0, index1));
     }
 
     private static List<Index> require(List<Index> indexes, int size) {

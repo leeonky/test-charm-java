@@ -20,6 +20,7 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
     final List<PropertyChain> listProperty;
     private final DefaultConsistency<T, C> consistency;
     final List<ListConsistencyItem<T>> items = new ArrayList<>();
+    @Deprecated
     private final List<DefaultListConsistency<?, ?>> list = new ArrayList<>();
     private Function<Coordinate, C> aligner = this::convert;
 
