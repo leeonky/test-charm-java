@@ -74,9 +74,11 @@ class ConsistencySet {
 
         void resolve() {
             while (!unResolved.isEmpty()) {
-                ConsistencyItem<?>.Resolver nextRootProvider = searchNextRootSourceProvider(ConsistencyItem.Resolver::hasFixed,
+                ConsistencyItem<?>.Resolver nextRootProvider = searchNextRootSourceProvider(
+                        resolver -> resolver.hasTypeOf(FixedValueProducer.class),
                         resolver -> resolver.hasTypeOf(ReadOnlyProducer.class),
                         resolver -> resolver.hasTypeOf(UnFixedValueProducer.class),
+                        ConsistencyItem.Resolver::hasFixed,
                         resolver -> resolver.hasTypeOf(ObjectProducer.class),
                         resolver -> resolver.hasTypeOf(DefaultValueProducer.class));
                 resolveCascaded(pop(nextRootProvider).resolveAsProvider());
