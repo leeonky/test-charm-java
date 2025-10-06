@@ -16,7 +16,15 @@ public class Index {
         return index;
     }
 
-    public Index adjust(int i) {
+    public Index shift(int i) {
         return new Index(size, (index + i) % size);
+    }
+
+    public Index sample(int period, int offset) {
+        return index % period == offset ? new Index(size / period, index / period) : null;
+    }
+
+    public Index interpolate(int period, int offset) {
+        return new Index(size * period, index * period + offset);
     }
 }

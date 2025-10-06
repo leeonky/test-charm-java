@@ -6,8 +6,8 @@ import java.util.List;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.jfactory.Coordinate.d1;
-import static com.github.leeonky.jfactory.Normalizer.adjust;
 import static com.github.leeonky.jfactory.Normalizer.reverse;
+import static com.github.leeonky.jfactory.Normalizer.shift;
 
 class ListConsistencyTest {
 
@@ -71,7 +71,7 @@ class ListConsistencyTest {
 
         jFactory.factory(BeanList.class).spec(ins ->
                 ins.spec().consistent(String.class)
-                        .list("beans1").normalize(adjust(1))
+                        .list("beans1").normalize(shift(1))
                         .consistent(beans1 -> beans1
                                 .direct("status1"))
                         .list("beans2").consistent(beans2 -> beans2
@@ -96,7 +96,7 @@ class ListConsistencyTest {
 
         jFactory.factory(BeanList.class).spec(ins ->
                 ins.spec().consistent(String.class, Coordinate.D1.class)
-                        .list("beans1").normalize(d1 -> d1(d1.index().adjust(1)), d1 -> d1(d1.index().adjust(-1)))
+                        .list("beans1").normalize(d1 -> d1(d1.index().shift(1)), d1 -> d1(d1.index().shift(-1)))
                         .consistent(beans1 -> beans1
                                 .direct("status1"))
                         .list("beans2").consistent(beans2 -> beans2

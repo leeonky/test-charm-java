@@ -429,7 +429,7 @@ Feature: list consistency
         }
         """
 
-    Scenario: depends on list size
+    Scenario: depends on list size with fixed element value
       And the following spec class:
         """
         public class BeansSpec extends Spec<Beans> {
@@ -447,6 +447,28 @@ Feature: list consistency
         : {
           beans= [null]
           size= 1
+        }
+        """
+
+    Scenario: depends on list size without input value
+      And the following spec class:
+        """
+        public class BeansSpec extends Spec<Beans> {
+          public void main() {
+            property("beans[]").byFactory();
+            property("size").dependsOn("beans", l-> ((List)l).size());
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeansSpec.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          beans= []
+          size= 0
         }
         """
 

@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,26 +16,35 @@ public class Coordinate {
         this.indexes.addAll(indexes);
     }
 
-    public Coordinate reverse() {
-        return new Coordinate(indexes.stream().map(Index::reverse).collect(Collectors.toList()));
-    }
-
     public List<Index> indexes() {
         return indexes;
-    }
-
-    public static D1 d1(Index index) {
-        return new D1(singletonList(index));
     }
 
     public <C extends Coordinate> C convertTo(BeanClass<C> type) {
         return type.newInstance(indexes());
     }
 
-    private static List<Index> require(List<Index> indexes, int size) {
-        if (indexes.size() != size)
-            throw new IllegalArgumentException("Coordinate size not match");
-        return indexes;
+    public Coordinate reverse() {
+        return new Coordinate(indexes.stream().map(Index::reverse).collect(Collectors.toList()));
+    }
+
+    public Coordinate shift(int adjust) {
+        return new Coordinate(indexes().stream().map(i -> i.shift(adjust)).collect(Collectors.toList()));
+    }
+
+    public Coordinate sample(int period, int offset) {
+        List<Index> indexes = indexes().stream().map(i -> i.sample(period, offset)).collect(Collectors.toList());
+        return indexes.contains(null) ? null : new Coordinate(indexes);
+    }
+
+    public Coordinate interpolate(int period, int offset) {
+        return new Coordinate(indexes().stream().map(i -> i.interpolate(period, offset)).collect(Collectors.toList()));
+    }
+
+    public Coordinate transpose() {
+        List<Index> indexes = new ArrayList<>(indexes());
+        Collections.reverse(indexes);
+        return new Coordinate(indexes);
     }
 
     public static class D1 extends Coordinate {
@@ -45,5 +55,15 @@ public class Coordinate {
         public Index index() {
             return indexes().get(0);
         }
+    }
+
+    public static D1 d1(Index index) {
+        return new D1(singletonList(index));
+    }
+
+    private static List<Index> require(List<Index> indexes, int size) {
+        if (indexes.size() != size)
+            throw new IllegalArgumentException("Coordinate size not match");
+        return indexes;
     }
 }

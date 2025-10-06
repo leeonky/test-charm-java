@@ -1,7 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import java.util.stream.Collectors;
-
 public interface Normalizer<C> {
     C align(Coordinate coordinate);
 
@@ -21,16 +19,44 @@ public interface Normalizer<C> {
         };
     }
 
-    static Normalizer<Coordinate> adjust(int adjust) {
+    static Normalizer<Coordinate> shift(int adjust) {
         return new Normalizer<Coordinate>() {
             @Override
             public Coordinate align(Coordinate coordinate) {
-                return new Coordinate(coordinate.indexes().stream().map(i -> i.adjust(adjust)).collect(Collectors.toList()));
+                return coordinate.shift(adjust);
             }
 
             @Override
             public Coordinate deAlign(Coordinate coordinate) {
-                return new Coordinate(coordinate.indexes().stream().map(i -> i.adjust(-adjust)).collect(Collectors.toList()));
+                return coordinate.shift(-adjust);
+            }
+        };
+    }
+
+    static Normalizer<Coordinate> sample(int period, int offset) {
+        return new Normalizer<Coordinate>() {
+            @Override
+            public Coordinate align(Coordinate coordinate) {
+                return coordinate.sample(period, offset);
+            }
+
+            @Override
+            public Coordinate deAlign(Coordinate coordinate) {
+                return coordinate.interpolate(period, offset);
+            }
+        };
+    }
+
+    static Normalizer<Coordinate> transpose() {
+        return new Normalizer<Coordinate>() {
+            @Override
+            public Coordinate align(Coordinate coordinate) {
+                return coordinate.transpose();
+            }
+
+            @Override
+            public Coordinate deAlign(Coordinate coordinate) {
+                return coordinate.transpose();
             }
         };
     }
