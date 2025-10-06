@@ -14,14 +14,11 @@ import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.IntStream.range;
 
 class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency<T, C> {
     final List<PropertyChain> listProperty;
     private final DefaultConsistency<T, C> consistency;
     final List<ListConsistencyItem<T>> items = new ArrayList<>();
-    @Deprecated
-    private final List<DefaultListConsistency<?, ?>> list = new ArrayList<>();
     private Function<Coordinate, C> aligner = this::convert;
 
     private C convert(Coordinate e) {
@@ -62,21 +59,6 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
         return new LC3<>(this, listConsistencyItem);
     }
 
-    @Deprecated
-    void populateConsistencies(ObjectProducer<?> producer, PropertyChain parentList) {
-        PropertyChain listProperty = parentList.concat(this.listProperty.get(0));
-        Producer<?> descendant = producer.descendantForUpdate(listProperty);
-        if (!(descendant instanceof CollectionProducer))
-            throw new IllegalStateException(listProperty + " is not List");
-        range(0, ((CollectionProducer<?, ?>) descendant).childrenCount()).mapToObj(listProperty::concat)
-                .forEach(elementProperty -> populateElementConsistency(producer, elementProperty));
-    }
-
-    private void populateElementConsistency(ObjectProducer<?> producer, PropertyChain elementProperty) {
-        items.forEach(item -> item.populateConsistency(elementProperty, consistency));
-        list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, elementProperty));
-    }
-
     Optional<PropertyChain> toProperty(C coordinate) {
         return ofNullable(inverseAligner.apply(coordinate)).map(co -> zip(listProperty, co.indexes()).stream().reduce(propertyChain(""),
                 (p, z) -> p.concat(z.left()).concat(z.right().index()), notAllowParallelReduce()));
@@ -105,13 +87,6 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
         this.aligner = aligner;
         this.inverseAligner = inverseAligner;
     }
-
-    //    @Override
-//    public NestedListConsistencyBuilder<T> list(String property) {
-//        DefaultListConsistency<T> listConsistency = new DefaultListConsistency<>(property, consistency);
-//        list.add(listConsistency);
-//        return new NestedListConsistencyBuilder<>(this, listConsistency);
-//    }
 }
 
 class DecorateListConsistency<T, C extends Coordinate> implements ListConsistency<T, C> {
@@ -140,11 +115,6 @@ class DecorateListConsistency<T, C extends Coordinate> implements ListConsistenc
     public <P1, P2, P3> LC3<T, P1, P2, P3, C> properties(String property1, String property2, String property3) {
         return delegate.properties(property1, property2, property3);
     }
-
-    //    @Override
-//    public NestedListConsistencyBuilder<T> list(String property) {
-//        return delegate.list(property);
-//    }
 }
 
 class MultiPropertyListConsistency<T, M extends MultiPropertyListConsistency<T, M, C>, C extends Coordinate>

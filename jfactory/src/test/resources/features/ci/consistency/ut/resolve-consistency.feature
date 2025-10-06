@@ -141,3 +141,21 @@ Feature: resolve consistency
         """
         <<str1,str2,str3>>= hello
         """
+
+    Scenario: dependency order in consistency definition should not impact the result
+      And register:
+        """
+        jFactory.factory(Bean.class).spec(ins -> {
+          ins.spec().property("str1").dependsOn("str2");
+          ins.spec().property("str3").dependsOn("str4");
+          ins.spec().property("str2").dependsOn("str3");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(Bean.class).create();
+        """
+      Then the result should:
+        """
+        <<str1,str2,str3, str4>>= /^str4.*/
+        """

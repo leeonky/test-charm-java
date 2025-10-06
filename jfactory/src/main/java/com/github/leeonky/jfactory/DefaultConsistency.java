@@ -124,12 +124,6 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
         return new ListConsistencyBuilder<>(this, listConsistency);
     }
 
-    @Deprecated
-    DefaultConsistency<T, C> processListConsistency(ObjectProducer<?> producer) {
-        list.forEach(listConsistency -> listConsistency.populateConsistencies(producer, propertyChain("")));
-        return this;
-    }
-
     public List<DefaultConsistency<T, C>> populateListConsistencies(ObjectProducer<?> producer) {
         if (list.isEmpty())
             return singletonList(this);

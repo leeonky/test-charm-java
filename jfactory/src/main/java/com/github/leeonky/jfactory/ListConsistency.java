@@ -16,9 +16,6 @@ public interface ListConsistency<T, C extends Coordinate> {
 
     <P1, P2, P3> ListConsistency.LC3<T, P1, P2, P3, C> properties(String property1, String property2, String property3);
 
-//    void normalize(Function<Coordinate, Coordinate> aligner,
-//                   Function<Coordinate, Coordinate> inverseAligner);
-
     class LC1<T, P, C extends Coordinate> extends DecorateListConsistency<T, C> {
         private final ListConsistencyItem<T> lastListConsistencyItem;
 
@@ -72,6 +69,4 @@ public interface ListConsistency<T, C extends Coordinate> {
             return this;
         }
     }
-
-//    NestedListConsistencyBuilder<T> list(String property);
 }
