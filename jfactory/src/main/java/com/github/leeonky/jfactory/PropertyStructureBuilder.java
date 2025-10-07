@@ -1,15 +1,20 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.function.TriConsumer;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import static com.github.leeonky.util.Zipped.zip;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 public class PropertyStructureBuilder<T> {
     private final Spec<T> spec;
@@ -112,8 +117,29 @@ class PropertyStructureDefinition<T> {
 
     void apply(Spec<T> spec, ObjectProducer<?> rootProducer) {
         Object[] dependents = this.dependents.stream().map(rootProducer::descendantForRead).map(Producer::getValue).toArray();
+        Map<String, Object> propertyAndValue = zip(this.dependents, asList(dependents)).stream().collect(toMap(e -> e.left().toString(), e -> e.right()));
+
+        rootProducer.lock(new PropertyStructureDependent(propertyAndValue));
+
         if (condition.test(dependents)) {
             definition.accept(spec.property(property), dependents);
         }
+    }
+}
+
+class PropertyStructureDependent {
+    private final Map<String, Object> propertyAndValue;
+
+    public PropertyStructureDependent(Map<String, Object> propertyAndValue) {
+        this.propertyAndValue = propertyAndValue;
+    }
+
+    public void verify(Object value) {
+        BeanClass<Object> type = BeanClass.createFrom(value);
+        propertyAndValue.forEach((p, v) -> {
+            if (type.getPropertyChainValue(value, p) != v)
+                throw new IllegalStateException(
+                        format("The value of %s.%s changed after the structure was populated.", type.getName(), p));
+        });
     }
 }

@@ -15,7 +15,7 @@ Feature: object population depends on another property
       """
       public class Beans {
         public Bean bean;
-        public String flag1, value, flag2, flag3;
+        public String flag1, value, flag2, flag3, flag4;
       }
       """
 
@@ -122,4 +122,39 @@ Feature: object population depends on another property
       }
       """
 
-#TODO  raise error when property value changed (single, multi properties)
+  Scenario: raise error when dependent value changed
+    And the following spec class:
+      """
+      public class BeansSpec extends Spec<Beans>{
+        public void main() {
+          structure("value").dependsOn("flag1", "flag2", "flag3").when(fs-> fs[0].equals("yes") && fs[1].equals("Y")).populate((s, fs) -> {
+            s.value(""+fs[0]+fs[1]+fs[2]);
+          });
+          link("flag3", "flag4");
+        }
+      }
+      """
+    When build:
+      """
+      jFactory.clear().spec(BeansSpec.class).property("flag1", "yes").property("flag2", "Y").create();
+      """
+    Then the result should:
+      """
+      : {
+        flag1: yes
+        flag2: Y
+        value: /^yesYflag3.*/
+      }
+      """
+    When build:
+      """
+      jFactory.clear().spec(BeansSpec.class).property("flag1", "yes").property("flag2", "Y").property("flag4", "any").create();
+      """
+    Then should raise error:
+      """
+      message: ```
+               The value of #package#Beans.flag3 changed after the structure was populated.
+               ```
+      """
+
+#TODO sub obj

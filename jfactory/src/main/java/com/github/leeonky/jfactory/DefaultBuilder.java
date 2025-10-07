@@ -34,7 +34,10 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        return createProducer().processConsistent().getValue();
+        ObjectProducer<T> producer = createProducer();
+        T value = producer.processConsistent().getValue();
+        producer.verifyPropertyStructureDependent(value);
+        return value;
     }
 
     @Override

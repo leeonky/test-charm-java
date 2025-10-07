@@ -23,6 +23,7 @@ class ObjectProducer<T> extends Producer<T> {
     private Persistable persistable;
     private Function<PropertyWriter<T>, Producer<?>> elementPopulationFactory = any -> null;
     private final ConsistencySet consistencySet = new ConsistencySet();
+    private final List<PropertyStructureDependent> propertyStructureDependents = new ArrayList<>();
 
     public JFactory jFactory() {
         return jFactory;
@@ -146,6 +147,12 @@ class ObjectProducer<T> extends Producer<T> {
         return this;
     }
 
+    public void verifyPropertyStructureDependent(T value) {
+        for (PropertyStructureDependent propertyStructureDependent : propertyStructureDependents) {
+            propertyStructureDependent.verify(value);
+        }
+    }
+
     @Override
     protected void collectConsistent(ObjectProducer<?> root, PropertyChain base) {
         if (root != this)
@@ -236,5 +243,9 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void appendLink(DefaultConsistency<?, ?> consistency) {
         consistencySet.add(consistency);
+    }
+
+    public void lock(PropertyStructureDependent propertyStructureDependent) {
+        propertyStructureDependents.add(propertyStructureDependent);
     }
 }
