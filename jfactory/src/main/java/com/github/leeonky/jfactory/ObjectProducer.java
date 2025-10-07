@@ -42,6 +42,7 @@ class ObjectProducer<T> extends Producer<T> {
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
         builder.processInputProperty(this, forQuery);
+        instance.spec.applyPropertyStructureDefinitions(jFactory, this);
         setupReverseAssociations();
         resolveBuilderProducers();
     }

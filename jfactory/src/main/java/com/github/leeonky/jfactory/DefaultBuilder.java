@@ -156,7 +156,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     public void collectSpec(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
         objectFactory.collectSpec(traits, instance);
-        instance.spec().apply(jFactory, objectProducer);
+        instance.spec().applySpecs(jFactory, objectProducer);
         objectProducer.processSpecIgnoreProperties();
     }
 

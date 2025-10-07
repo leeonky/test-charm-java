@@ -51,10 +51,10 @@ public class PropertySpec<T> {
 
     public Spec<T> optional(String... traitsAndSpec) {
         if (property.isSingle()) {
-            return spec.append((jFactory, objectProducer) -> objectProducer.changeChild(property.toString(),
+            return spec.appendSpec((jFactory, objectProducer) -> objectProducer.changeChild(property.toString(),
                     new OptionalSpecDefaultValueProducer<>(objectProducer.getPropertyWriterType(property.toString()), traitsAndSpec)));
         } else if (property.isDefaultPropertyCollection()) {
-            return spec.append((jFactory, objectProducer) -> {
+            return spec.appendSpec((jFactory, objectProducer) -> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
@@ -130,10 +130,10 @@ public class PropertySpec<T> {
 
     private Spec<T> appendProducer(Fuc<JFactory, Producer<?>, String, Producer<?>> producerFactory) {
         if (property.isSingle() || property.isTopLevelPropertyCollection())
-            return spec.append((jFactory, objectProducer) -> objectProducer.changeDescendant(property,
+            return spec.appendSpec((jFactory, objectProducer) -> objectProducer.changeDescendant(property,
                     ((nextToLast, property) -> producerFactory.apply(jFactory, nextToLast, property))));
         if (property.isDefaultPropertyCollection()) {
-            return spec.append((jFactory, objectProducer) -> {
+            return spec.appendSpec((jFactory, objectProducer) -> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Producer<?> element = producerFactory.apply(jFactory, objectProducer, "0");
@@ -147,7 +147,7 @@ public class PropertySpec<T> {
             });
         }
         if (property.isTopLevelDefaultPropertyCollection()) {
-            return spec.append((jFactory, objectProducer) -> {
+            return spec.appendSpec((jFactory, objectProducer) -> {
                 objectProducer.changeElementPopulationFactory(propertyWriter ->
                         producerFactory.apply(jFactory, objectProducer, propertyWriter.getName()));
             });
@@ -172,11 +172,11 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> reverseAssociation(String association) {
-        return spec.append((jFactory, producer) -> producer.appendReverseAssociation(property, association));
+        return spec.appendSpec((jFactory, producer) -> producer.appendReverseAssociation(property, association));
     }
 
     public Spec<T> ignore() {
-        return spec.append((jFactory, objectProducer) -> objectProducer.ignoreProperty(property.toString()));
+        return spec.appendSpec((jFactory, objectProducer) -> objectProducer.ignoreProperty(property.toString()));
     }
 
     @FunctionalInterface

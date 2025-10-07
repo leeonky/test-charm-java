@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 
 public class Spec<T> {
-    private final List<BiConsumer<JFactory, ObjectProducer<T>>> operations = new ArrayList<>();
+    private final List<BiConsumer<JFactory, ObjectProducer<T>>> specDefinitions = new ArrayList<>();
+    private final List<PropertyStructureDefinition<T>> propertyStructureDefinitions = new ArrayList<>();
     private final Set<PropertySpec<T>.IsSpec<?, ? extends Spec<?>>> invalidIsSpecs = new LinkedHashSet<>();
     private final Set<PropertySpec<T>.IsSpec2<?>> invalidIsSpec2s = new LinkedHashSet<>();
 
@@ -43,13 +44,13 @@ public class Spec<T> {
         return new PropertySpec<>(this, propertyChain(property));
     }
 
-    Spec<T> append(BiConsumer<JFactory, ObjectProducer<T>> operation) {
-        operations.add(operation);
+    Spec<T> appendSpec(BiConsumer<JFactory, ObjectProducer<T>> operation) {
+        specDefinitions.add(operation);
         return this;
     }
 
-    void apply(JFactory jFactory, ObjectProducer<T> producer) {
-        operations.forEach(o -> o.accept(jFactory, producer));
+    void applySpecs(JFactory jFactory, ObjectProducer<T> producer) {
+        specDefinitions.forEach(o -> o.accept(jFactory, producer));
         type = producer.getType();
         if (!invalidIsSpecs.isEmpty())
             throw new InvalidSpecException("Invalid property spec:\n\t"
@@ -64,6 +65,13 @@ public class Spec<T> {
                     + "\nShould finish method chain with `and`:\n"
                     + "\tproperty().from().and()\n"
                     + "Or use property().is() to create object with only spec directly.");
+    }
+
+    void applyPropertyStructureDefinitions(JFactory jFactory, ObjectProducer<T> producer) {
+        specDefinitions.clear();
+        for (PropertyStructureDefinition<T> propertyStructureDefinition : propertyStructureDefinitions)
+            propertyStructureDefinition.apply(this, producer);
+        applySpecs(jFactory, producer);
     }
 
     @SuppressWarnings("unchecked")
@@ -131,7 +139,7 @@ public class Spec<T> {
     }
 
     void append(Spec<T> spec) {
-        operations.addAll(spec.operations);
+        specDefinitions.addAll(spec.specDefinitions);
         invalidIsSpecs.addAll(spec.invalidIsSpecs);
     }
 
@@ -146,13 +154,21 @@ public class Spec<T> {
 
     public <V> Consistency<V, Coordinate> consistent(Class<V> type) {
         DefaultConsistency<V, Coordinate> consistency = new DefaultConsistency<>(type, Coordinate.class);
-        append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        appendSpec((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
         return consistency;
     }
 
     public <V, C extends Coordinate> Consistency<V, C> consistent(Class<V> type, Class<C> cType) {
         DefaultConsistency<V, C> consistency = new DefaultConsistency<>(type, cType);
-        append((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        appendSpec((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
         return consistency;
+    }
+
+    public PropertyStructureBuilder<T> structure(String property) {
+        return new PropertyStructureBuilder<>(this, property);
+    }
+
+    void appendStructureDefinition(PropertyStructureDefinition<T> propertyStructureDefinition) {
+        propertyStructureDefinitions.add(propertyStructureDefinition);
     }
 }
