@@ -131,10 +131,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void verifyPropertyStructureDependent(C value) {
-        BeanClass<C> type = BeanClass.createFrom(value);
-        for (int i = 0; i < children.size(); i++)
-            ((Producer<Object>) children.get(i)).verifyPropertyStructureDependent(type.getPropertyValue(value, String.valueOf(i)));
+    public void verifyPropertyStructureDependent() {
+        children.forEach(Producer::verifyPropertyStructureDependent);
     }
 }

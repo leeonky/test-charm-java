@@ -36,7 +36,7 @@ class DefaultBuilder<T> implements Builder<T> {
     public T create() {
         ObjectProducer<T> producer = createProducer();
         T value = producer.processConsistent().getValue();
-        producer.verifyPropertyStructureDependent(value);
+        producer.verifyPropertyStructureDependent();
         return value;
     }
 

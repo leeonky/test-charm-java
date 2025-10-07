@@ -106,6 +106,6 @@ abstract class Producer<T> {
         return false;
     }
 
-    public void verifyPropertyStructureDependent(T value) {
+    public void verifyPropertyStructureDependent() {
     }
 }
