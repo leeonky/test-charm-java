@@ -15,7 +15,7 @@ Feature: object population depends on another property
       """
       public class Beans {
         public Bean bean;
-        public String flag1, value, flag2;
+        public String flag1, value, flag2, flag3;
       }
       """
 
@@ -88,5 +88,38 @@ Feature: object population depends on another property
       }
       """
 
-#TODO  depends on multi properties
+  Scenario: object population depends on property array
+    And register:
+      """
+      jFactory.factory(Beans.class).spec(ins -> {
+        ins.spec().structure("value").dependsOn("flag1", "flag2", "flag3").when(fs-> fs[0].equals("yes") && fs[1].equals("Y")).populate((s, fs) -> {
+          s.value(""+fs[0]+fs[1]+fs[2]);
+        });
+      });
+      """
+    When build:
+      """
+      jFactory.clear().type(Beans.class).property("flag1", "no").property("flag2", "any").create();
+      """
+    Then the result should:
+      """
+      : {
+        flag1: no
+        flag2: any
+        value: /^value.*/
+      }
+      """
+    When build:
+      """
+      jFactory.clear().type(Beans.class).property("flag1", "yes").property("flag2", "Y").create();
+      """
+    Then the result should:
+      """
+      : {
+        flag1: yes
+        flag2: Y
+        value: /^yesYflag3.*/
+      }
+      """
+
 #TODO  raise error when property value changed (single, multi properties)
