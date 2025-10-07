@@ -105,4 +105,7 @@ abstract class Producer<T> {
     protected boolean isFixed() {
         return false;
     }
+
+    public void verifyPropertyStructureDependent(T value) {
+    }
 }

@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
@@ -147,10 +148,15 @@ class ObjectProducer<T> extends Producer<T> {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public void verifyPropertyStructureDependent(T value) {
         for (PropertyStructureDependent propertyStructureDependent : propertyStructureDependents) {
             propertyStructureDependent.verify(value);
         }
+        BeanClass<T> type = BeanClass.createFrom(value);
+
+        children.forEach((property, producer) ->
+                ((Producer<Object>) producer).verifyPropertyStructureDependent(type.getPropertyValue(value, property)));
     }
 
     @Override

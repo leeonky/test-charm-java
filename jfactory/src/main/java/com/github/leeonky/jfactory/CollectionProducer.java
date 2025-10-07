@@ -129,4 +129,12 @@ class CollectionProducer<T, C> extends Producer<C> {
     protected boolean isFixed() {
         return children.stream().anyMatch(Producer::isFixed);
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void verifyPropertyStructureDependent(C value) {
+        BeanClass<C> type = BeanClass.createFrom(value);
+        for (int i = 0; i < children.size(); i++)
+            ((Producer<Object>) children.get(i)).verifyPropertyStructureDependent(type.getPropertyValue(value, String.valueOf(i)));
+    }
 }
