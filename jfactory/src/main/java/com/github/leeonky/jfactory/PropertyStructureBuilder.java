@@ -5,6 +5,7 @@ import com.github.leeonky.util.function.TriConsumer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -84,8 +85,8 @@ public class PropertyStructureBuilder<T> {
         private BiPredicate<D1, D2> condition = (any1, any2) -> true;
 
         public DependsOn2(String property1, String property2) {
-            this.dependent1 = property1;
-            this.dependent2 = property2;
+            dependent1 = property1;
+            dependent2 = property2;
         }
 
         public DependsOn2<D1, D2> when(BiPredicate<D1, D2> condition) {
@@ -109,7 +110,7 @@ class PropertyStructureDefinition<T> {
     final Predicate<Object[]> condition;
 
     PropertyStructureDefinition(List<String> dependent1, String property, Predicate<Object[]> condition, BiConsumer<PropertySpec<T>, Object[]> definition) {
-        this.dependents = dependent1.stream().map(PropertyChain::propertyChain).collect(toList());
+        dependents = dependent1.stream().map(PropertyChain::propertyChain).collect(toList());
         this.property = property;
         this.definition = definition;
         this.condition = condition;
@@ -137,9 +138,9 @@ class PropertyStructureDependent {
     public void verify(Object value) {
         BeanClass<Object> type = BeanClass.createFrom(value);
         propertyAndValue.forEach((p, v) -> {
-            if (type.getPropertyChainValue(value, p) != v)
-                throw new IllegalStateException(
-                        format("The value of %s.%s changed after the structure was populated.", type.getName(), p));
+            if (!(v instanceof Number && Objects.equals(type.getPropertyChainValue(value, p), v))
+                    && type.getPropertyChainValue(value, p) != v) throw new IllegalStateException(
+                    format("The value of %s.%s changed after the structure was populated.", type.getName(), p));
         });
     }
 }

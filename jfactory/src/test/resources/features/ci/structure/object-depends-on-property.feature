@@ -239,4 +239,30 @@ Feature: object population depends on another property
                ```
       """
 
-#TODO sub obj
+  Scenario: list population depends on another property
+    Given the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+        public int size;
+      }
+      """
+    And register:
+      """
+      jFactory.factory(Beans.class).spec(ins -> {
+        ins.spec().structure("beans").<Integer>dependsOn("size").populate((s, f) -> {
+          for(int i=0; i<f; i++)
+            s.element(i).byFactory();
+        });
+      });
+      """
+    When build:
+      """
+      jFactory.clear().type(Beans.class).property("size", 5).create();
+      """
+    Then the result should:
+      """
+      : {
+        beans.class[].simpleName= [Bean Bean Bean Bean Bean ]
+      }
+      """

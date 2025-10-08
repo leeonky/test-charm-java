@@ -179,6 +179,10 @@ public class PropertySpec<T> {
         return spec.appendSpec((jFactory, objectProducer) -> objectProducer.ignoreProperty(property.toString()));
     }
 
+    public PropertySpec<T> element(int index) {
+        return spec.property(property.toString() + "[" + index + "]");
+    }
+
     @FunctionalInterface
     interface Fuc<P1, P2, P3, R> {
         R apply(P1 p1, P2 p2, P3 p3);
