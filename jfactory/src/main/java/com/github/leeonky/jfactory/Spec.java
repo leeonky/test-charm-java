@@ -169,7 +169,11 @@ public class Spec<T> {
     }
 
     public ListStructure<T, Coordinate> structure() {
-        ListStructure<T, Coordinate> listStructure = new ListStructure<>(Coordinate.class);
+        return structure(Coordinate.class);
+    }
+
+    public <C extends Coordinate> ListStructure<T, C> structure(Class<C> coordinateType) {
+        DefaultListStructure<T, C> listStructure = new DefaultListStructure<>(coordinateType);
         appendSpec((jFactory, objectProducer) -> objectProducer.appendListStructure(listStructure));
         return listStructure;
     }

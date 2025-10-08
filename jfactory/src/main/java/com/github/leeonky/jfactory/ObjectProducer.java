@@ -24,7 +24,7 @@ class ObjectProducer<T> extends Producer<T> {
     private Function<PropertyWriter<T>, Producer<?>> elementPopulationFactory = any -> null;
     private final ConsistencySet consistencySet = new ConsistencySet();
     private final List<PropertyStructureDependent> propertyStructureDependents = new ArrayList<>();
-    private final List<ListStructure<T, ?>> listStructures = new ArrayList<>();
+    private final List<DefaultListStructure<T, ?>> listStructures = new ArrayList<>();
 
     public JFactory jFactory() {
         return jFactory;
@@ -257,7 +257,7 @@ class ObjectProducer<T> extends Producer<T> {
         propertyStructureDependents.add(propertyStructureDependent);
     }
 
-    public void appendListStructure(ListStructure<T, ?> listStructure) {
+    public void appendListStructure(DefaultListStructure<T, ?> listStructure) {
         listStructures.add(listStructure);
     }
 }

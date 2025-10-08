@@ -172,8 +172,41 @@ Feature: populate list depends on another list
         }
         """
 
+    Scenario: custom normalizer
+      And register:
+        """
+        jFactory.factory(BeanLists.class).spec(ins -> {
+          ins.spec().structure(Coordinate.D2.class)
+            .list("beansList1", "beans").normalize(d2->Coordinate.d2(d2.index1(), d2.index0()),
+              d2->Coordinate.d2(d2.index1(), d2.index0()))
+            .list("beansList2", "beans");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(BeanLists.class)
+          .property("beansList1[0].beans[0].str", "a")
+          .property("beansList1[0].beans[1].str", "b")
+          .property("beansList1[0].beans[2].str", "c")
+          .property("beansList1[1].beans[0].str", "d")
+          .property("beansList1[1].beans[1].str", "e")
+          .property("beansList1[1].beans[2].str", "f")
+          .create();
+        """
+      Then the result should:
+        """
+        : {
+          beansList1: | beans.str[] |
+                      | [a b c]     |
+                      | [d e f]     |
+
+          beansList2: | beans         |
+                      | [{...} {...}] |
+                      | [{...} {...}] |
+                      | [{...} {...}] |
+        }
+        """
+
 # TODO multi dimensional list
-# TODO custom normalizer for index mapping - *
-# TODO custom normalized coordinate type
 # TODO populate by spec
 # TODO reverseAssociation
