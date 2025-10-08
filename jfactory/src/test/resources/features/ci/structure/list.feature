@@ -161,6 +161,36 @@ Feature: populate list depends on another list
         }
         """
 
+    Scenario: reverseAssociation should work after population
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+        public int num;
+        public Beans beans;
+      }
+      """
+      And register:
+        """
+        jFactory.factory(Beans.class).spec(ins -> {
+          ins.spec().structure()
+            .list("beans1")
+            .list("beans2");
+          ins.spec().property("beans2").reverseAssociation("beans");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(Beans.class).property("beans1[0].str", "world").create();
+        """
+      Then the result should:
+        """
+        : {
+          beans1: [{str= world}]
+          beans2: [{beans: ::root}]
+        }
+        """
+
   Rule: two dimensional list
 
     Background:
@@ -241,5 +271,3 @@ Feature: populate list depends on another list
                       | [{...} {...}] |
         }
         """
-
-# TODO reverseAssociation
