@@ -12,6 +12,8 @@ public interface ListStructure<T, C extends Coordinate> {
 
     ListStructure<T, C> normalize(Normalizer<C> normalizer);
 
+    ListStructure<T, C> spec(String... traitAndSpec);
+
     class D1<T, C extends Coordinate> extends DecoratedListStructure<T, C> {
 
         public D1(DefaultListStructure<T, C> delegate) {

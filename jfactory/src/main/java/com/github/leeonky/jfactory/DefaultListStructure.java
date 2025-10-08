@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,10 +48,21 @@ public class DefaultListStructure<T, C extends Coordinate> implements ListStruct
         last.inverseAligner = inverseAligner;
     }
 
+    @Override
+    public ListStructure<T, C> spec(String... traitAndSpec) {
+        last.changeProducerCreator((jFactory, beanClass) -> jFactory.spec(traitAndSpec));
+        return this;
+    }
+
     class Item {
         private final List<PropertyChain> properties;
         private Function<Coordinate, C> aligner = this::convert;
         private Function<C, Coordinate> inverseAligner = e -> e;
+        private BiFunction<JFactory, BeanClass<?>, Builder<?>> producerCreator = JFactory::type;
+
+        void changeProducerCreator(BiFunction<JFactory, BeanClass<?>, Builder<?>> producerCreator) {
+            this.producerCreator = producerCreator;
+        }
 
         void normalize(Function<Coordinate, C> aligner,
                        Function<C, Coordinate> inverseAligner) {
@@ -100,7 +112,7 @@ public class DefaultListStructure<T, C extends Coordinate> implements ListStruct
                     Optional<Producer<?>> child = producer.getChild(property.tail());
                     if (!child.isPresent() || child.get() instanceof DefaultValueProducer)
                         producer.changeChild(property.tail(),
-                                jFactory.type(producer.getType().getElementType()).createProducer());
+                                producerCreator.apply(jFactory, producer.getType().getElementType()).createProducer());
                 }
             }
         }
@@ -138,5 +150,10 @@ class DecoratedListStructure<T, C extends Coordinate> implements ListStructure<T
     @Override
     public ListStructure<T, C> normalize(Normalizer<C> normalizer) {
         return delegate.normalize(normalizer);
+    }
+
+    @Override
+    public ListStructure<T, C> spec(String... traitAndSpec) {
+        return delegate.spec(traitAndSpec);
     }
 }

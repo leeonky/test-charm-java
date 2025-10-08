@@ -9,6 +9,7 @@ Feature: populate list depends on another list
       """
       public class Bean {
         public String str;
+        public int num;
       }
       """
 
@@ -126,6 +127,40 @@ Feature: populate list depends on another list
         }
         """
 
+    Scenario: populate by spec
+      And the following spec class:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          public void main() {
+            property("str").value("hello");
+          }
+
+          @Trait
+          public void Default() {
+            property("num").value(100);
+          }
+        }
+        """
+      And register:
+        """
+        jFactory.factory(Beans.class).spec(ins -> {
+          ins.spec().structure()
+            .list("beans1")
+            .list("beans2").spec("Default", "BeanSpec");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(Beans.class).property("beans1[0].str", "world").create();
+        """
+      Then the result should:
+        """
+        : {
+          beans1: [{str= world}]
+          beans2: [{str= hello, num= 100}]
+        }
+        """
+
   Rule: two dimensional list
 
     Background:
@@ -207,6 +242,4 @@ Feature: populate list depends on another list
         }
         """
 
-# TODO multi dimensional list
-# TODO populate by spec
 # TODO reverseAssociation
