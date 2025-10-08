@@ -24,6 +24,7 @@ class ObjectProducer<T> extends Producer<T> {
     private Function<PropertyWriter<T>, Producer<?>> elementPopulationFactory = any -> null;
     private final ConsistencySet consistencySet = new ConsistencySet();
     private final List<PropertyStructureDependent> propertyStructureDependents = new ArrayList<>();
+    private final List<ListStructure<T, ?>> listStructures = new ArrayList<>();
 
     public JFactory jFactory() {
         return jFactory;
@@ -44,8 +45,13 @@ class ObjectProducer<T> extends Producer<T> {
         builder.collectSpec(this, instance);
         builder.processInputProperty(this, forQuery);
         instance.spec.applyPropertyStructureDefinitions(jFactory, this);
+        processListStructures();
         setupReverseAssociations();
         resolveBuilderProducers();
+    }
+
+    private void processListStructures() {
+        listStructures.forEach(listStructure -> listStructure.process(this, jFactory));
     }
 
     public Producer<?> newElementPopulationProducer(PropertyWriter<T> propertyWriter) {
@@ -249,5 +255,9 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void lock(PropertyStructureDependent propertyStructureDependent) {
         propertyStructureDependents.add(propertyStructureDependent);
+    }
+
+    public void appendListStructure(ListStructure<T, ?> listStructure) {
+        listStructures.add(listStructure);
     }
 }
