@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Collections.singletonList;
@@ -26,20 +27,20 @@ public class ListStructure<T, C extends Coordinate> {
             List<Coordinate> coordinates = new ArrayList<>();
             CollectionProducer<?, ?> producer = (CollectionProducer<?, ?>) objectProducer.descendantForRead(property);
             for (int i = 0; i < producer.childrenCount(); i++) {
-                int index = i;
-                producer.getChild(String.valueOf(index)).ifPresent(p -> {
-                    if (!(p instanceof DefaultValueProducer)) {
-                        coordinates.add(new Coordinate(singletonList(new Index(producer.childrenCount(), index))));
-                    }
-                });
+                Optional<Producer<?>> child = producer.getChild(String.valueOf(i));
+                if (child.isPresent() && !(child.get() instanceof DefaultValueProducer))
+                    coordinates.add(new Coordinate(singletonList(new Index(producer.childrenCount(), i))));
             }
             return coordinates;
         }
 
         public void populate(List<Coordinate> coordinates, ObjectProducer<T> objectProducer, JFactory jFactory) {
             for (Coordinate coordinate : coordinates) {
-                objectProducer.changeDescendant(property.concat(coordinate.indexes().get(0).index()),
-                        (p, s) -> jFactory.type(p.getType().getElementType()).createProducer());
+                Producer<?> producer = objectProducer.descendantForUpdate(property);
+                Optional<Producer<?>> child = producer.getChild(String.valueOf(coordinate.indexes().get(0).index()));
+                if (!child.isPresent() || child.get() instanceof DefaultValueProducer)
+                    producer.changeChild(String.valueOf(coordinate.indexes().get(0).index()),
+                            jFactory.type(producer.getType().getElementType()).createProducer());
             }
         }
     }
