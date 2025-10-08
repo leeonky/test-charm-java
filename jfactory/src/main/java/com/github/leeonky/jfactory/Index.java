@@ -27,4 +27,9 @@ public class Index {
     public Index interpolate(int period, int offset) {
         return new Index(size * period, index * period + offset);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d(%d)", index, size);
+    }
 }

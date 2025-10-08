@@ -1,12 +1,15 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Zipped;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
+import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -48,6 +51,11 @@ public class Coordinate {
         return new Coordinate(indexes);
     }
 
+    PropertyChain join(List<PropertyChain> properties) {
+        return Zipped.zip(properties, indexes()).stream().reduce(propertyChain(""),
+                (p, z) -> p.concat(z.left()).concat(z.right().index()), notAllowParallelReduce());
+    }
+
     public static class D1 extends Coordinate {
         public D1(List<Index> index) {
             super(require(index, 1));
@@ -84,5 +92,10 @@ public class Coordinate {
         if (indexes.size() != size)
             throw new IllegalArgumentException("Coordinate size not match");
         return indexes;
+    }
+
+    @Override
+    public String toString() {
+        return indexes.stream().map(Index::toString).collect(Collectors.joining(","));
     }
 }

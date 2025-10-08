@@ -24,7 +24,6 @@ public class ListConsistencyBuilder<T, C extends Coordinate> {
         return this;
     }
 
-
     public static class D1<T, C extends Coordinate> extends ListConsistencyBuilder<T, C> {
         D1(Consistency<T, C> main, DefaultListConsistency<T, C> listConsistency) {
             super(main, listConsistency);

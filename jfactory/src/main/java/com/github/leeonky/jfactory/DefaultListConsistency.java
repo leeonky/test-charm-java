@@ -8,9 +8,6 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.DefaultConsistency.LINK_COMPOSER;
 import static com.github.leeonky.jfactory.DefaultConsistency.LINK_DECOMPOSER;
-import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
-import static com.github.leeonky.util.Zipped.zip;
-import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
@@ -60,8 +57,7 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
     }
 
     Optional<PropertyChain> toProperty(C coordinate) {
-        return ofNullable(inverseAligner.apply(coordinate)).map(co -> zip(listProperty, co.indexes()).stream().reduce(propertyChain(""),
-                (p, z) -> p.concat(z.left()).concat(z.right().index()), notAllowParallelReduce()));
+        return ofNullable(inverseAligner.apply(coordinate)).map(co -> co.join(listProperty));
     }
 
     List<DefaultConsistency<T, C>> collectCoordinateAndProcess(ObjectProducer<?> producer, List<Index> baseIndex,

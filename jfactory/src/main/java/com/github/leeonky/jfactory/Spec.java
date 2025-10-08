@@ -168,8 +168,8 @@ public class Spec<T> {
         return new PropertyStructureBuilder<>(this, property);
     }
 
-    public <C extends Coordinate> ListStructure<T, C> structure() {
-        ListStructure<T, C> listStructure = new ListStructure<>();
+    public ListStructure<T, Coordinate> structure() {
+        ListStructure<T, Coordinate> listStructure = new ListStructure<>(Coordinate.class);
         appendSpec((jFactory, objectProducer) -> objectProducer.appendListStructure(listStructure));
         return listStructure;
     }

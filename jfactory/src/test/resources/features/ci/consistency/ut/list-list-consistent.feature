@@ -318,5 +318,3 @@ Feature: list - list consistency
                       | [c g ]           |
         }
         """
-
-#TODO consistency on collection not allowed

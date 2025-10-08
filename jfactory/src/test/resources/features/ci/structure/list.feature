@@ -86,40 +86,94 @@ Feature: populate list depends on another list
         }
         """
 
-#  Rule: two dimensional list
-#
-#    Background:
-#      Given the following bean class:
-#        """
-#        public class Beans {
-#          public Bean beans[]
-#        }
-#        """
-#      Given the following bean class:
-#        """
-#        public class BeanLists {
-#          public Beans beansList1[], beansList2[];
-#        }
-#        """
-#      And register:
-#        """
-#        jFactory.factory(Beans.class).spec(ins -> {
-#          ins.spec().structure()
-#            .list("beansList1", "beans")
-#            .list("beansList2", "beans");
-#        });
-#        """
-#      When build:
-#        """
-#        jFactory.clear().type(Beans.class)
-#          .property("beansList1[0].beans[0].str", "a")
-#          .property("beansList1[0].beans[1].str", "b")
-#          .property("beansList1[1].beans[0].str", "c")
-#          .property("beansList1[1].beans[1].str", "d").create();
-#        """
+    Scenario: custom normalizer
+      And register:
+        """
+        jFactory.factory(Beans.class).spec(ins -> {
+          ins.spec().structure()
+            .list("beans1").normalize(Normalizer.sample(2, 0))
+            .list("beans2");
+          ins.spec().structure()
+            .list("beans1").normalize(Normalizer.sample(2, 1))
+            .list("beans2");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(Beans.class)
+          .property("beans1[0].str", "hello")
+          .property("beans1[1].str", "world")
+          .create();
+        """
+      Then the result should:
+        """
+        : {
+            beans1: [{str= hello} {str= world}]
+            beans2: [{...}]
+        }
+        """
+      When build:
+        """
+        jFactory.clear().type(Beans.class)
+          .property("beans2[0].str", "hello")
+          .create();
+        """
+      Then the result should:
+        """
+        : {
+            beans1: [{...} {...}]
+            beans2: [{str= hello}]
+        }
+        """
+
+  Rule: two dimensional list
+
+    Background:
+      Given the following bean class:
+        """
+        public class Beans {
+          public Bean beans[];
+        }
+        """
+      Given the following bean class:
+        """
+        public class BeanLists {
+          public Beans beansList1[], beansList2[];
+        }
+        """
+
+    Scenario: two dimensional list population
+      And register:
+        """
+        jFactory.factory(BeanLists.class).spec(ins -> {
+          ins.spec().structure()
+            .list("beansList1", "beans")
+            .list("beansList2", "beans");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(BeanLists.class)
+          .property("beansList1[0].beans[0].str", "a")
+          .property("beansList1[0].beans[1].str", "b")
+          .property("beansList1[1].beans[0].str", "c")
+          .property("beansList1[1].beans[1].str", "d").create();
+        """
+      Then the result should:
+        """
+        : {
+          beansList1: | beans.str[] |
+                      | [a b]       |
+                      | [c d]       |
+
+          beansList2: | beans         |
+                      | [{...} {...}] |
+                      | [{...} {...}] |
+        }
+        """
 
 # TODO multi dimensional list
-# TODO custom normalizer for index mapping
+# TODO custom normalizer for index mapping - *
 # TODO custom normalized coordinate type
 # TODO populate by spec
 # TODO reverseAssociation
