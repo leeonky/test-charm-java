@@ -615,6 +615,35 @@ Feature: basic use
       }]
       """
 
+    Scenario: raise error when there are than one matched elements during query with condition
+      And the following bean class:
+      """
+      public class Bean {
+        public String stringValue;
+      }
+      """
+      And register:
+      """
+      jFactory.type(Bean.class).property("stringValue", "hello").create();
+      jFactory.type(Bean.class).property("stringValue", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).query();
+      """
+      Then the result should:
+      """
+      stringValue= hello
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("stringValue", "hello").query();
+      """
+      Then should raise error:
+      """
+      message= 'There are multiple elements in the query result.'
+      """
+
   Rule: spec
 
     Scenario: in lambda - define spec and naming spec(trait) in lambda
@@ -993,4 +1022,42 @@ Feature: basic use
       Then the result should:
       """
       = [{value= hello}]
+      """
+
+  Rule: sequence
+
+    Scenario: reset sequence
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      When build:
+      """
+      jFactory.create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= 'value#1'
+      """
+      When build:
+      """
+      jFactory.clear().create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= 'value#1'
+      """
+      When register:
+      """
+      jFactory.clear().setSequenceStart(100);
+      """
+      When build:
+      """
+      jFactory.create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= 'value#100'
       """

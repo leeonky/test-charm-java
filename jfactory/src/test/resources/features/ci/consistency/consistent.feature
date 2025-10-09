@@ -332,10 +332,10 @@ Feature: basic
         """
         : {
           quantity: 50
-          unitPrice: 1
-          total: 2
-          unitDiscount: 2
-          discountTotal: 100
+          unitPrice: 0.5
+          total: 1
+          unitDiscount: 1
+          discountTotal: 50
         }
         """
       When build:
@@ -347,9 +347,9 @@ Feature: basic
         : {
           quantity: 2
           unitPrice: 50
-          total: 3
-          unitDiscount: 3
-          discountTotal: 6
+          total: 1
+          unitDiscount: 1
+          discountTotal: 2
         }
         """
       When build:
@@ -360,9 +360,9 @@ Feature: basic
         """
         : {
           quantity: 2
-          unitPrice: 2
-          total:  4
-          unitDiscount: 4
+          unitPrice: 0.5
+          total:  1
+          unitDiscount: 1
           discountTotal: 50
         }
         """
@@ -374,8 +374,8 @@ Feature: basic
         """
         : {
           quantity: 2
-          unitPrice: 2.5
-          total:  5
+          unitPrice: 0.5
+          total:  1
           unitDiscount: 10
           discountTotal: 20
         }

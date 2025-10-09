@@ -20,9 +20,7 @@ public interface Builder<T> {
 
     Builder<T> properties(Map<String, ?> properties);
 
-    default T query() {
-        return queryAll().stream().findFirst().orElse(null);
-    }
+    T query();
 
     Collection<T> queryAll();
 

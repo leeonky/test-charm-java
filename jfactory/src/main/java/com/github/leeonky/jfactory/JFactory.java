@@ -168,6 +168,16 @@ public class JFactory {
 
     public JFactory clear() {
         getDataRepository().clear();
+        return resetSequence();
+    }
+
+    public JFactory resetSequence() {
+        factorySet.resetSequences();
+        return this;
+    }
+
+    public JFactory setSequenceStart(int start) {
+        factorySet.setSequenceStart(start);
         return this;
     }
 }

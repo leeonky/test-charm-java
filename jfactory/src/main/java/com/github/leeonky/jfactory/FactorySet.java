@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 class FactorySet {
-    public final TypeSequence typeSequence = new TypeSequence();
+    private final TypeSequence typeSequence = new TypeSequence();
     private final DefaultValueFactories defaultValueFactories = new DefaultValueFactories();
     private final Map<BeanClass<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
@@ -75,6 +75,14 @@ class FactorySet {
 
     public TypeSequence.Sequence sequence(Class<?> type) {
         return typeSequence.register(type);
+    }
+
+    public void resetSequences() {
+        typeSequence.reset();
+    }
+
+    public void setSequenceStart(int start) {
+        typeSequence.setStart(start);
     }
 
     public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {

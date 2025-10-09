@@ -35,13 +35,6 @@ Feature: input property
         email= tom@gmail.com
       }
       """
-      And operate:
-      """
-      jFactory.type(Book.class)
-        .property("author.contact.name", "Tom")
-        .property("author.contact.email", "tom@gmail.com")
-        .create();
-      """
       When build:
       """
       jFactory.type(Book.class)

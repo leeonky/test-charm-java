@@ -101,4 +101,8 @@ public class KeyValueCollection {
             return expressions.stream().allMatch(e -> e.isMatch(object));
         }
     }
+
+    public boolean isEmpty() {
+        return keyValues.isEmpty();
+    }
 }

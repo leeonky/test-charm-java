@@ -145,6 +145,14 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public T query() {
+        List<T> list = new ArrayList<>(queryAll());
+        if (!properties.isEmpty() && list.size() > 1)
+            throw new IllegalStateException("There are multiple elements in the query result.");
+        return list.stream().findFirst().orElse(null);
+    }
+
+    @Override
     public int hashCode() {
         return hash(DefaultBuilder.class, objectFactory, properties, traits);
     }
