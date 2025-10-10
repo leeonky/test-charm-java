@@ -235,7 +235,7 @@ Feature: choose consistency root source provider
         }
         """
 
-    Scenario: consider sub property of default value producer is also a default value producer
+    Scenario: consider sub property of default type value producer is a place holder producer
       Given the following bean class:
         """
         public class SubBean {
@@ -363,5 +363,45 @@ Feature: choose consistency root source provider
         : {
           str: /^str.*/
           beans: []
+        }
+        """
+
+    Scenario: should consider optional spec default value producer sub property as PlaceHolderProducer
+      Given the following bean class:
+        """
+        public class SubBean {
+          public String str;
+        }
+        """
+      Given the following bean class:
+        """
+        public class Bean {
+          public SubBean subBean;
+          public Bean bean;
+        }
+        """
+      And the following spec class:
+        """
+        public class SubBeanSpec extends Spec<SubBean> {}
+        """
+      And the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              property("subBean").byFactory();
+              property("bean").optional("SubBeanSpec");
+              link("subBean", "bean.subBean");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          subBean: {...}
+          bean: null
         }
         """

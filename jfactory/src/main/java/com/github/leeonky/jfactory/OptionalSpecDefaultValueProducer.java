@@ -2,11 +2,11 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-class OptionalSpecDefaultValueProducer<V> extends DefaultValueProducer<V> {
+class OptionalSpecDefaultValueProducer<V> extends DefaultTypeValueProducer<V> {
     private final String[] traitsAndSpec;
 
     public OptionalSpecDefaultValueProducer(BeanClass<V> type, String[] traitsAndSpec) {
-        super(type, type::createDefault);
+        super(type);
         this.traitsAndSpec = traitsAndSpec;
     }
 
