@@ -85,21 +85,23 @@ public class DefaultListStructure<T, C extends Coordinate> implements ListStruct
 
         private List<C> getCoordinates(ObjectProducer<T> objectProducer, List<C> coordinates, int l, PropertyChain base, List<Index> indexes) {
             PropertyChain property = base.concat(properties.get(l++));
-            CollectionProducer<?, ?> producer = (CollectionProducer<?, ?>) objectProducer.descendantForUpdate(property);
-            for (int i = 0; i < producer.childrenCount(); i++) {
-                List<Index> newIndexes = new ArrayList<>(indexes);
-                newIndexes.add(new Index(producer.childrenCount(), i));
-                if (l < properties.size())
-                    getCoordinates(objectProducer, coordinates, l, property.concat(i), newIndexes);
-                else {
-                    Optional<Producer<?>> child = producer.getChild(String.valueOf(i));
-                    if (child.isPresent() && !(child.get() instanceof DefaultValueProducer)) {
-                        C aligned = aligner.apply(new Coordinate(newIndexes));
-                        if (aligned != null)
-                            coordinates.add(aligned);
+            int nextList = l;
+            BeanClass.cast(objectProducer.descendantForUpdate(property), CollectionProducer.class).ifPresent(producer -> {
+                for (int i = 0; i < producer.childrenCount(); i++) {
+                    List<Index> newIndexes = new ArrayList<>(indexes);
+                    newIndexes.add(new Index(producer.childrenCount(), i));
+                    if (nextList < properties.size())
+                        getCoordinates(objectProducer, coordinates, nextList, property.concat(i), newIndexes);
+                    else {
+                        Optional<Producer<?>> child = producer.getChild(String.valueOf(i));
+                        if (child.isPresent() && !(child.get() instanceof DefaultValueProducer)) {
+                            C aligned = aligner.apply(new Coordinate(newIndexes));
+                            if (aligned != null)
+                                coordinates.add(aligned);
+                        }
                     }
                 }
-            }
+            });
             return coordinates;
         }
 

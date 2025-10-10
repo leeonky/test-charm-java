@@ -1,5 +1,7 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,17 +66,19 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
                                                                int l, PropertyChain baseProperty) {
         List<DefaultConsistency<T, C>> results = new ArrayList<>();
         PropertyChain list = baseProperty.concat(listProperty.get(l++));
-        CollectionProducer<?, ?> collectionProducer = (CollectionProducer<?, ?>) producer.descendantForUpdate(list);
-        for (int i = 0; i < collectionProducer.childrenCount(); i++) {
-            Index index = new Index(collectionProducer.childrenCount(), i);
-            List<Index> indexes = new ArrayList<>(baseIndex);
-            indexes.add(index);
-            if (listProperty.size() > l)
-                results.addAll(collectCoordinateAndProcess(producer, indexes, l, list.concat(i)));
-            else
-                ofNullable(aligner.apply(new Coordinate(indexes))).ifPresent(c ->
-                        results.add(consistency.populateConsistencyWithList(c)));
-        }
+        int nextList = l;
+        BeanClass.cast(producer.descendantForUpdate(list), CollectionProducer.class).ifPresent(collectionProducer -> {
+            for (int i = 0; i < collectionProducer.childrenCount(); i++) {
+                Index index = new Index(collectionProducer.childrenCount(), i);
+                List<Index> indexes = new ArrayList<>(baseIndex);
+                indexes.add(index);
+                if (listProperty.size() > nextList)
+                    results.addAll(collectCoordinateAndProcess(producer, indexes, nextList, list.concat(i)));
+                else
+                    ofNullable(aligner.apply(new Coordinate(indexes))).ifPresent(c ->
+                            results.add(consistency.populateConsistencyWithList(c)));
+            }
+        });
         return results;
     }
 

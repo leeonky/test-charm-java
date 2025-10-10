@@ -191,6 +191,34 @@ Feature: populate list depends on another list
         }
         """
 
+    Scenario: ignore when the owner object of list property has no given value
+      Given the following bean class:
+      """
+      public class BeansWrapper {
+        public Beans beans;
+      }
+      """
+      And the following spec class:
+        """
+        public class BeansWrapperSpec extends Spec<BeansWrapper> {
+          public void main() {
+            structure()
+              .list("beans.beans1")
+              .list("beans.beans2");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeansWrapperSpec.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          beans: null
+        }
+        """
+
   Rule: two dimensional list
 
     Background:

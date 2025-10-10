@@ -471,6 +471,3 @@ Feature: list consistency
           size= 0
         }
         """
-
-#TODO reverseAssociations
-

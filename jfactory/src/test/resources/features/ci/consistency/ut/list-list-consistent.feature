@@ -97,6 +97,36 @@ Feature: list - list consistency
         }
         """
 
+    Scenario: ignore when the owner object of list property has no given value
+      Given the following bean class:
+      """
+      public class BeanListWrapper {
+        public BeanList beansList;
+      }
+      """
+      And the following spec class:
+        """
+        public class BeanListWrapperSpec extends Spec<BeanListWrapper> {
+          public void main() {
+            consistent(String.class)
+              .list("beansList.beans1").consistent(beans1 -> beans1
+                .direct("status1"))
+              .list("beansList.beans2").consistent(beans2 -> beans2
+                .direct("status1"));
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(BeanListWrapperSpec.class).create();
+        """
+      Then the result should:
+        """
+        : {
+          beansList: null
+        }
+        """
+
   Rule: custom index and coordinate mapping
 
     Background:
