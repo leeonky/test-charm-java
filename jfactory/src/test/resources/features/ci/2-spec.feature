@@ -138,7 +138,7 @@ Feature: use spec
       }
       """
 
-    Scenario: single property with reverseAssociation, string spec: should reference parent instance
+    Scenario: create parent, child is single property with reverseAssociation, string spec: should reference parent instance
       Given the following bean class:
       """
       public class Order {
@@ -171,7 +171,7 @@ Feature: use spec
       line.order=::this
       """
 
-    Scenario: single property with reverseAssociation, string spec query/create: should reference parent instance
+    Scenario: create parent, child is single property with reverseAssociation, string spec query/create: should reference parent instance
       Given the following bean class:
       """
       public class Order {
@@ -204,7 +204,7 @@ Feature: use spec
       line.order=::this
       """
 
-    Scenario: single property with reverseAssociation, class spec: should reference parent instance
+    Scenario: create parent, child is single property with reverseAssociation, class spec: should reference parent instance
       Given the following bean class:
       """
       public class Order {
@@ -237,7 +237,7 @@ Feature: use spec
       line.order=::this
       """
 
-    Scenario: single property with reverseAssociation, class spec query/create: should reference parent instance
+    Scenario: create parent, child is single property with reverseAssociation, class spec query/create: should reference parent instance
       Given the following bean class:
       """
       public class Order {
@@ -270,7 +270,7 @@ Feature: use spec
       line.order=::this
       """
 
-    Scenario: single property with reverseAssociation, class trait spec: should reference parent instance
+    Scenario: create parent, child is single property with reverseAssociation, class trait spec: should reference parent instance
       Given the following bean class:
       """
       public class Order {
@@ -303,7 +303,7 @@ Feature: use spec
       line.order=::this
       """
 
-    Scenario: single property with reverseAssociation, by factory: should reference parent instance
+    Scenario: create parent, child is single property with reverseAssociation, by factory: should reference parent instance
       Given the following bean class:
       """
       public class Order {
@@ -332,6 +332,70 @@ Feature: use spec
       Then the result should:
       """
       line.order=::this
+      """
+
+    Scenario: create parent, child is single property with reverseAssociation, by factory query/create: should reference parent instance
+      Given the following bean class:
+      """
+      public class Order {
+        public OrderLine line;
+      }
+      """
+      And the following spec class:
+      """
+      public class OrderLineSpec extends Spec<OrderLine> {
+        public void main() {
+          property("order").byFactory(b->b);
+        }
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Order.class).spec(ins-> ins.spec()
+          .property("line").reverseAssociation("order")
+          .property("line").is("OrderLineSpec")
+      );
+      """
+      When build:
+      """
+      jFactory.clear().create(Order.class);
+      """
+      Then the result should:
+      """
+      line.order=::this
+      """
+
+    Scenario: create child, parent with reverseAssociation, string spec: should reference child instance
+      Given the following bean class:
+      """
+      public class Order {
+        public OrderLine line;
+      }
+      """
+      And the following spec class:
+      """
+      public class OrderLineSpec extends Spec<OrderLine> {
+        public void main() {
+          property("order").is("OrderSpec");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class OrderSpec extends Spec<Order> {
+        public void main() {
+          property("line").reverseAssociation("order");
+          property("line").is("OrderLineSpec");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.clear().spec(OrderLineSpec.class).create();
+      """
+      Then the result should:
+      """
+      order.line=::this
       """
 
   Rule: spec inherit

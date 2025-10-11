@@ -115,9 +115,13 @@ class ObjectFactory<T> implements Factory<T> {
     protected void collectSubSpec(RootInstance<T> instance) {
     }
 
-    public RootInstance<T> createInstance(Arguments argument, Optional<Association> association) {
+    public RootInstance<T> createInstance(Arguments argument, Optional<Association> association,
+                                          Optional<ReverseAssociation> reverseAssociation,
+                                          ObjectProducer<?> objectProducer) {
         Spec<T> spec = createSpec();
         spec.association = association;
+        spec.reverseAssociation = reverseAssociation;
+        spec.objectProducer = objectProducer;
         RootInstance<T> rootInstance = new RootInstance<>(spec, argument,
                 factorySet.sequence(getType().getType()));
         spec.setInstance(rootInstance);

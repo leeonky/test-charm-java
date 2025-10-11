@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 import static com.github.leeonky.util.Sneaky.cast;
 import static java.lang.String.format;
+import static java.util.Optional.of;
 
 public class PropertySpec<T> {
     private final Spec<T> spec;
@@ -45,7 +46,7 @@ public class PropertySpec<T> {
     }
 
     private boolean isAssociation() {
-        return spec.isAssociation(property.toString());
+        return spec.isAssociation(property.toString()) || spec.isReverseAssociation(property);
     }
 
     public Spec<T> is(String... traitsAndSpec) {
@@ -112,6 +113,8 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> byFactory(Function<Builder<?>, Builder<?>> builder) {
+        if (isAssociation())
+            return spec;
         return appendProducer(context ->
                 context.producer.newDefaultValueProducer(cast(context.producer.getType().getPropertyWriter(context.property))).orElseGet(() ->
                         createQueryOrCreateProducer(builder.apply(context.jFactory.type(
@@ -176,11 +179,13 @@ public class PropertySpec<T> {
     }
 
     private <V> Producer<V> createCreateProducer(Builder<V> builder, Optional<Association> association) {
-        return builder.args(spec.params(property.toString())).createProducer(association);
+        return builder.args(spec.params(property.toString())).createProducer(association,
+                of(new ReverseAssociation(property.toString(), spec.instance())));
     }
 
     public Spec<T> reverseAssociation(String association) {
-        return spec.appendSpec((jFactory, producer) -> producer.appendReverseAssociation(property, association));
+        spec.objectProducer.appendReverseAssociation(property, association);
+        return spec;
     }
 
     public Spec<T> ignore() {

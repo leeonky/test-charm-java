@@ -16,7 +16,10 @@ public class Spec<T> {
 
     private Instance<T> instance;
     private BeanClass<T> type = null;
+    //    TODO to private
     Optional<Association> association = Optional.empty();
+    Optional<ReverseAssociation> reverseAssociation = Optional.empty();
+    ObjectProducer<?> objectProducer;
 
     private ObjectFactory<T> objectFactory;
 
@@ -182,5 +185,11 @@ public class Spec<T> {
 
     boolean isAssociation(String property) {
         return association.map(a -> a.matches(property)).orElse(false);
+    }
+
+    boolean isReverseAssociation(PropertyChain property) {
+        return objectProducer.reverseAssociation(property)
+                .map(s -> reverseAssociation.map(a -> a.matches(s)).orElse(false))
+                .orElse(false);
     }
 }

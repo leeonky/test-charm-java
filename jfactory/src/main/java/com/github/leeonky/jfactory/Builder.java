@@ -27,11 +27,11 @@ public interface Builder<T> {
 
     Builder<T> traits(String... traits);
 
-    Producer<T> createProducer(Optional<Association> association);
+    Producer<T> createProducer(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation);
 
     @Deprecated
     default Producer<T> createProducer() {
-        return createProducer(Optional.empty());
+        return createProducer(Optional.empty(), Optional.empty());
     }
 
     Builder<T> arg(String key, Object value);

@@ -30,16 +30,18 @@ class ObjectProducer<T> extends Producer<T> {
         return jFactory;
     }
 
-    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, Optional<Association> association) {
-        this(jFactory, factory, builder, false, association);
+    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder,
+                          Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
+        this(jFactory, factory, builder, false, association, reverseAssociation);
     }
 
-    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean forQuery, Optional<Association> association) {
+    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean forQuery,
+                          Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
         super(factory.getType());
         this.factory = factory;
         this.jFactory = jFactory;
         this.builder = builder;
-        instance = factory.createInstance(builder.getArguments(), association);
+        instance = factory.createInstance(builder.getArguments(), association, reverseAssociation, this);
         persistable = jFactory.getDataRepository();
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
@@ -48,6 +50,11 @@ class ObjectProducer<T> extends Producer<T> {
         processListStructures();
         setupReverseAssociations();
         resolveBuilderProducers();
+
+        reverseAssociation.ifPresent(reverseAssociation1 -> reverseAssociations.forEach((r, a) -> {
+            if (reverseAssociation1.matches(a)) changeDescendant(r, (producer, s) ->
+                    new UnFixedValueProducer(reverseAssociation1.instance.reference(), reverseAssociation1.instance.spec().getType()));
+        }));
     }
 
     private void processListStructures() {
@@ -265,13 +272,32 @@ class ObjectProducer<T> extends Producer<T> {
         return ofNullable(reverseAssociations.get(propertyChain(string)))
                 .map(p -> new Association(p, instance));
     }
+
+    public Optional<String> reverseAssociation(PropertyChain property) {
+        return Optional.ofNullable(reverseAssociations.get(property));
+    }
 }
 
 class Association {
     private final String property;
     private final RootInstance<?> instance;
 
-    public Association(String property, RootInstance<?> instance) {
+    Association(String property, RootInstance<?> instance) {
+        this.property = property;
+        this.instance = instance;
+    }
+
+    boolean matches(String property) {
+        return this.property.equals(property);
+    }
+}
+
+class ReverseAssociation {
+    private final String property;
+    //    TODO refactor
+    final Instance<?> instance;
+
+    ReverseAssociation(String property, Instance<?> instance) {
         this.property = property;
         this.instance = instance;
     }
