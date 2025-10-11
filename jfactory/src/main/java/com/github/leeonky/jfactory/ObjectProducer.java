@@ -30,16 +30,16 @@ class ObjectProducer<T> extends Producer<T> {
         return jFactory;
     }
 
-    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder) {
-        this(jFactory, factory, builder, false);
+    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, Optional<Association> association) {
+        this(jFactory, factory, builder, false, association);
     }
 
-    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean forQuery) {
+    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean forQuery, Optional<Association> association) {
         super(factory.getType());
         this.factory = factory;
         this.jFactory = jFactory;
         this.builder = builder;
-        instance = factory.createInstance(builder.getArguments());
+        instance = factory.createInstance(builder.getArguments(), association);
         persistable = jFactory.getDataRepository();
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
@@ -259,5 +259,24 @@ class ObjectProducer<T> extends Producer<T> {
 
     public void appendListStructure(DefaultListStructure<T, ?> listStructure) {
         listStructures.add(listStructure);
+    }
+
+    public Optional<Association> association(String string) {
+        return ofNullable(reverseAssociations.get(propertyChain(string)))
+                .map(p -> new Association(p, instance));
+    }
+}
+
+class Association {
+    private final String property;
+    private final RootInstance<?> instance;
+
+    public Association(String property, RootInstance<?> instance) {
+        this.property = property;
+        this.instance = instance;
+    }
+
+    public boolean matches(String property) {
+        return this.property.equals(property);
     }
 }

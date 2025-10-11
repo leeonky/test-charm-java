@@ -2,10 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -19,6 +16,7 @@ public class Spec<T> {
 
     private Instance<T> instance;
     private BeanClass<T> type = null;
+    Optional<Association> association = Optional.empty();
 
     private ObjectFactory<T> objectFactory;
 
@@ -180,5 +178,9 @@ public class Spec<T> {
 
     void appendStructureDefinition(PropertyStructureDefinition<T> propertyStructureDefinition) {
         propertyStructureDefinitions.add(propertyStructureDefinition);
+    }
+
+    boolean isAssociation(String property) {
+        return association.map(a -> a.matches(property)).orElse(false);
     }
 }

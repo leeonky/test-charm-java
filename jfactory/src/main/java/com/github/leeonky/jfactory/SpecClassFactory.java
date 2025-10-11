@@ -60,7 +60,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    protected void collectSubSpec(Instance<T> instance) {
+    protected void collectSubSpec(RootInstance<T> instance) {
         getBase().collectSpec(Collections.emptyList(), instance);
         collectClassSpec(instance, Spec::main);
     }

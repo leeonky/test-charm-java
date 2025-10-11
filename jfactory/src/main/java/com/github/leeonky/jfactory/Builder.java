@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public interface Builder<T> {
 
@@ -26,7 +27,12 @@ public interface Builder<T> {
 
     Builder<T> traits(String... traits);
 
-    Producer<T> createProducer();
+    Producer<T> createProducer(Optional<Association> association);
+
+    @Deprecated
+    default Producer<T> createProducer() {
+        return createProducer(Optional.empty());
+    }
 
     Builder<T> arg(String key, Object value);
 

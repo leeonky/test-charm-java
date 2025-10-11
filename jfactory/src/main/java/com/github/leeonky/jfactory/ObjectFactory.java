@@ -91,7 +91,7 @@ class ObjectFactory<T> implements Factory<T> {
         }
     }
 
-    public void collectSpec(Collection<String> traits, Instance<T> instance) {
+    public void collectSpec(Collection<String> traits, RootInstance<T> instance) {
         spec.accept(instance);
         collectSubSpec(instance);
         for (String name : traits)
@@ -112,11 +112,12 @@ class ObjectFactory<T> implements Factory<T> {
         throw new IllegalArgumentException("Trait `" + name + "` not exist");
     }
 
-    protected void collectSubSpec(Instance<T> instance) {
+    protected void collectSubSpec(RootInstance<T> instance) {
     }
 
-    public RootInstance<T> createInstance(Arguments argument) {
+    public RootInstance<T> createInstance(Arguments argument, Optional<Association> association) {
         Spec<T> spec = createSpec();
+        spec.association = association;
         RootInstance<T> rootInstance = new RootInstance<>(spec, argument,
                 factorySet.sequence(getType().getType()));
         spec.setInstance(rootInstance);

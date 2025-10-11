@@ -34,7 +34,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        ObjectProducer<T> producer = createProducer();
+        ObjectProducer<T> producer = createProducer(Optional.empty());
         T value = producer.processConsistent().getValue();
         producer.verifyPropertyStructureDependent();
         return value;
@@ -46,8 +46,8 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
-    public ObjectProducer<T> createProducer() {
-        return new ObjectProducer<>(jFactory, objectFactory, this);
+    public ObjectProducer<T> createProducer(Optional<Association> association) {
+        return new ObjectProducer<>(jFactory, objectFactory, this, association);
     }
 
     @Override
@@ -138,7 +138,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Collection<T> queryAll() {
-        ObjectProducer<T> producer = new ObjectProducer<>(jFactory, objectFactory, this, true);
+        ObjectProducer<T> producer = new ObjectProducer<>(jFactory, objectFactory, this, true, Optional.empty());
         KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType(), objectFactory, producer);
         return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
                 .filter(matcher::matches).collect(Collectors.toList());
