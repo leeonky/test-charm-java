@@ -49,12 +49,18 @@ class ObjectProducer<T> extends Producer<T> {
         instance.spec.applyPropertyStructureDefinitions(jFactory, this);
         processListStructures();
         setupReverseAssociations();
-        resolveBuilderProducers();
 
-        reverseAssociation.ifPresent(reverseAssociation1 -> reverseAssociations.forEach((r, a) -> {
-            if (reverseAssociation1.matches(a)) changeDescendant(r, (producer, s) ->
-                    new UnFixedValueProducer(reverseAssociation1.instance.reference(), reverseAssociation1.instance.spec().getType()));
-        }));
+        reverseAssociation.ifPresent(reverseAssociation1 -> {
+            reverseAssociations.forEach((r, a) -> {
+                if (reverseAssociation1.matches(a)) {
+                    if (descendantForRead(r) instanceof CollectionProducer) {
+                        changeDescendant(r.concat(0), (producer, s) -> reverseAssociation1.buildUnFixedValueProducer());
+                    } else
+                        changeDescendant(r, (producer, s) -> reverseAssociation1.buildUnFixedValueProducer());
+                }
+            });
+        });
+        resolveBuilderProducers();
     }
 
     private void processListStructures() {
@@ -270,7 +276,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     public Optional<Association> association(String string) {
         return ofNullable(reverseAssociations.get(propertyChain(string)))
-                .map(p -> new Association(p, instance));
+                .map(p -> new Association(p));
     }
 
     public Optional<String> reverseAssociation(PropertyChain property) {
@@ -278,13 +284,12 @@ class ObjectProducer<T> extends Producer<T> {
     }
 }
 
+//TODO refactor
 class Association {
-    private final String property;
-    private final RootInstance<?> instance;
+    final String property;
 
-    Association(String property, RootInstance<?> instance) {
+    Association(String property) {
         this.property = property;
-        this.instance = instance;
     }
 
     boolean matches(String property) {
@@ -304,5 +309,9 @@ class ReverseAssociation {
 
     public boolean matches(String property) {
         return this.property.equals(property);
+    }
+
+    UnFixedValueProducer buildUnFixedValueProducer() {
+        return new UnFixedValueProducer(instance.reference(), instance.spec().getType());
     }
 }

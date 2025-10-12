@@ -143,6 +143,7 @@ Feature: use spec
       """
       public class Order {
         public OrderLine line;
+        public String value;
       }
       """
       And the following spec class:
@@ -169,6 +170,17 @@ Feature: use spec
       Then the result should:
       """
       line.order=::this
+      """
+      When build:
+      """
+      jFactory.clear().spec(OrderSpec.class).property("line.value", "hello").create();
+      """
+      Then the result should:
+      """
+      line: {
+        order= ::root
+        value= hello
+      }
       """
 
     Scenario: create parent, child is single property with reverseAssociation, string spec query/create: should reference parent instance
@@ -370,6 +382,7 @@ Feature: use spec
       """
       public class Order {
         public OrderLine line;
+        public String value;
       }
       """
       And the following spec class:
@@ -396,6 +409,112 @@ Feature: use spec
       Then the result should:
       """
       order.line=::this
+      """
+      When build:
+      """
+      jFactory.clear().type(Order.class).property("value", "hello").create();
+      """
+      Then the result should:
+      """
+      : {
+        line= null
+        value= hello
+      }
+      """
+      When build:
+      """
+      jFactory.spec(OrderLineSpec.class).property("order.value", "hello").create();
+      """
+      Then the result should:
+      """
+      order: {
+        line= null
+        value= hello
+      }
+      """
+
+    Scenario: create parent, child is collection with reverseAssociation, string spec: should reference parent instance
+      Given the following bean class:
+      """
+      public class Order {
+        public OrderLine line[];
+      }
+      """
+      And the following spec class:
+      """
+      public class OrderLineSpec extends Spec<OrderLine> {
+        public void main() {
+          property("order").is("OrderSpec");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class OrderSpec extends Spec<Order> {
+        public void main() {
+          property("line").reverseAssociation("order");
+          property("line[]").is("OrderLineSpec");
+          property("line[0]").is("OrderLineSpec");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.clear().spec(OrderSpec.class).create();
+      """
+      Then the result should:
+      """
+      line: [{order= ::root}]
+      """
+
+    Scenario: create child, parent is collection with reverseAssociation, string spec: should reference parent instance
+      Given the following bean class:
+      """
+      public class Order {
+        public OrderLine line[];
+        public String value;
+      }
+      """
+      And the following spec class:
+      """
+      public class OrderLineSpec extends Spec<OrderLine> {
+        public void main() {
+          property("order").is("OrderSpec");
+        }
+      }
+      """
+      And the following spec class:
+      """
+      public class OrderSpec extends Spec<Order> {
+        public void main() {
+          property("line").reverseAssociation("order");
+          property("line[]").is("OrderLineSpec");
+          property("line[0]").is("OrderLineSpec");
+        }
+      }
+      """
+      When build:
+      """
+      jFactory.clear().spec(OrderLineSpec.class).create();
+      """
+      Then the result should:
+      """
+      order.line: [::root]
+      """
+      When build:
+      """
+      jFactory.clear().type(Order.class).property("value", "hello").create();
+      """
+      When build:
+      """
+      jFactory.spec(OrderLineSpec.class).property("order.value", "hello").create();
+      """
+      Then the result should:
+      """
+      order: {
+        line: null
+        value: hello
+      }
       """
 
   Rule: spec inherit
