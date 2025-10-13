@@ -87,11 +87,11 @@ class ObjectFactory<T> implements Factory<T> {
         }
 
         public void execute(Instance<T> instance) {
-            ((RootInstance<T>) instance).runTraitWithParams(args.toArray(), action);
+            ((ObjectInstance<T>) instance).runTraitWithParams(args.toArray(), action);
         }
     }
 
-    public void collectSpec(Collection<String> traits, RootInstance<T> instance) {
+    public void collectSpec(Collection<String> traits, ObjectInstance<T> instance) {
         spec.accept(instance);
         collectSubSpec(instance);
         for (String name : traits)
@@ -112,20 +112,20 @@ class ObjectFactory<T> implements Factory<T> {
         throw new IllegalArgumentException("Trait `" + name + "` not exist");
     }
 
-    protected void collectSubSpec(RootInstance<T> instance) {
+    protected void collectSubSpec(ObjectInstance<T> instance) {
     }
 
-    public RootInstance<T> createInstance(Arguments argument, Optional<Association> association,
-                                          Optional<ReverseAssociation> reverseAssociation,
-                                          ObjectProducer<?> objectProducer) {
+    public ObjectInstance<T> createInstance(Arguments argument, Optional<Association> association,
+                                            Optional<ReverseAssociation> reverseAssociation,
+                                            ObjectProducer<?> objectProducer) {
         Spec<T> spec = createSpec();
         spec.association = association;
         spec.reverseAssociation = reverseAssociation;
         spec.objectProducer = objectProducer;
-        RootInstance<T> rootInstance = new RootInstance<>(spec, argument,
+        ObjectInstance<T> objectInstance = new ObjectInstance<>(spec, argument,
                 factorySet.sequence(getType().getType()));
-        spec.setInstance(rootInstance);
-        return rootInstance;
+        spec.setInstance(objectInstance);
+        return objectInstance;
     }
 
     public FactorySet getFactorySet() {

@@ -5,7 +5,7 @@ import com.github.leeonky.util.PropertyWriter;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-class RootInstance<T> implements Instance<T> {
+class ObjectInstance<T> implements Instance<T> {
     private static final Object[] NO_TRAIT_PARAMS = new Object[0];
     protected final Spec<T> spec;
     protected final Arguments arguments;
@@ -14,7 +14,7 @@ class RootInstance<T> implements Instance<T> {
     private int collectionSize = 0;
     private Object[] traitParams = NO_TRAIT_PARAMS;
 
-    public RootInstance(Spec<T> spec, Arguments arguments, TypeSequence.Sequence sequence) {
+    public ObjectInstance(Spec<T> spec, Arguments arguments, TypeSequence.Sequence sequence) {
         this.spec = spec;
         this.arguments = arguments;
         this.sequence = sequence;
@@ -25,8 +25,8 @@ class RootInstance<T> implements Instance<T> {
         return sequence.get();
     }
 
-    SubInstance<T> sub(PropertyWriter<?> property) {
-        return new SubInstance<>(property, spec, arguments, sequence);
+    ObjectProperty<T> sub(PropertyWriter<?> property) {
+        return new ObjectProperty<>(property, this);
     }
 
     @Override

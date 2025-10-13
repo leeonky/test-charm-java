@@ -19,7 +19,7 @@ public class SpecFactory<T, S extends Spec<T>> extends SpecClassFactory<T> {
     }
 
     @Override
-    protected void collectSubSpec(RootInstance<T> instance) {
+    protected void collectSubSpec(ObjectInstance<T> instance) {
         super.collectSubSpec(instance);
         collectClassSpec(instance, spec -> trait.accept((S) spec));
     }

@@ -165,7 +165,7 @@ class DefaultBuilder<T> implements Builder<T> {
                 .orElseGet(() -> super.equals(another));
     }
 
-    public void collectSpec(ObjectProducer<T> objectProducer, RootInstance<T> instance) {
+    public void collectSpec(ObjectProducer<T> objectProducer, ObjectInstance<T> instance) {
         objectFactory.collectSpec(traits, instance);
         instance.spec().applySpecs(jFactory, objectProducer);
         objectProducer.processSpecIgnoreProperties();

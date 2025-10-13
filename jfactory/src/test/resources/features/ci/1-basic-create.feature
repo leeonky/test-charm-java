@@ -300,7 +300,7 @@ Feature: basic use
       """
       jFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
         @Override
-          public <T> String create(BeanClass<T> beanType, SubInstance<T> instance) {
+          public <T> String create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
             return "hello";
           }
         });

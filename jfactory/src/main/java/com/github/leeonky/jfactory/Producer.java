@@ -99,7 +99,7 @@ abstract class Producer<T> {
         return newProducer;
     }
 
-    protected <R> void setupAssociation(String association, RootInstance<R> instance, ListPersistable cachedChildren) {
+    protected <R> void setupAssociation(String association, ObjectInstance<R> instance, ListPersistable cachedChildren) {
     }
 
     protected boolean isFixed() {

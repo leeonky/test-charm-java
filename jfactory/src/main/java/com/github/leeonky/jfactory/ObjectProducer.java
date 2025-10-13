@@ -15,7 +15,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
     private final JFactory jFactory;
     private final DefaultBuilder<T> builder;
-    private final RootInstance<T> instance;
+    private final ObjectInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
     private final ListPersistable cachedChildren = new ListPersistable();
@@ -183,7 +183,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     private void createDefaultValueProducers() {
         getType().getPropertyWriters().values().stream().filter(jFactory::shouldCreateDefaultValue)
-                .forEach(propertyWriter -> factory.getFactorySet().newDefaultValueFactoryProducer(propertyWriter, instance)
+                .forEach(propertyWriter -> factory.getFactorySet().newDefaultValueFactoryProducer(propertyWriter, instance.sub(propertyWriter))
                         .ifPresent(producer -> setChild(propertyWriter.getName(), producer)));
     }
 
@@ -194,14 +194,14 @@ class ObjectProducer<T> extends Producer<T> {
         if (property.getType().isCollection()) {
             return of(createCollectionProducer(property));
         } else
-            return factory.getFactorySet().newDefaultValueFactoryProducer(property, instance);
+            return factory.getFactorySet().newDefaultValueFactoryProducer(property, instance.sub(property));
     }
 
     public Optional<Producer<?>> newDefaultValueProducerForRead(PropertyWriter<T> property) {
         if (ignorePropertiesInSpec.contains(property.getName()))
             return empty();
         else
-            return factory.getFactorySet().newDefaultValueFactoryProducer(property, instance);
+            return factory.getFactorySet().newDefaultValueFactoryProducer(property, instance.sub(property));
     }
 
     private Producer<?> createCollectionProducer(PropertyWriter<T> property) {
@@ -234,7 +234,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected <R> void setupAssociation(String association, RootInstance<R> instance, ListPersistable cachedChildren) {
+    protected <R> void setupAssociation(String association, ObjectInstance<R> instance, ListPersistable cachedChildren) {
         setChild(association, new UnFixedValueProducer<>(instance.reference(), instance.spec().getType()));
         persistable = cachedChildren;
     }

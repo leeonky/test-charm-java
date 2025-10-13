@@ -19,16 +19,16 @@ import static java.util.stream.IntStream.range;
 class CollectionProducer<T, C> extends Producer<C> {
     private final List<Producer<?>> children = new ArrayList<>();
     private final BeanClass<T> parentType;
-    private final CollectionInstance<T> collection;
+    private final ObjectCollection<T> collection;
     private final FactorySet factorySet;
     private final JFactory jFactory;
     private Function<PropertyWriter<C>, Producer<?>> elementPopulationFactory = any -> null;
 
     public CollectionProducer(BeanClass<T> parentType, BeanClass<C> collectionType,
-                              SubInstance<T> instance, FactorySet factorySet, JFactory jFactory) {
+                              ObjectProperty<T> instance, FactorySet factorySet, JFactory jFactory) {
         super(collectionType);
         this.parentType = parentType;
-        collection = instance.inCollection();
+        collection = instance.asCollection();
         this.factorySet = factorySet;
         this.jFactory = jFactory;
     }
@@ -112,11 +112,11 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     @Override
     public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<C> property) {
-        return factorySet.newDefaultValueFactoryProducer(parentType, property, collection);
+        return factorySet.newDefaultValueFactoryProducer(parentType, property, collection.sub(property));
     }
 
     @Override
-    protected <R> void setupAssociation(String association, RootInstance<R> instance, ListPersistable cachedChildren) {
+    protected <R> void setupAssociation(String association, ObjectInstance<R> instance, ListPersistable cachedChildren) {
         children.stream().filter(ObjectProducer.class::isInstance).map(ObjectProducer.class::cast).forEach(objectProducer ->
                 objectProducer.setupAssociation(association, instance, cachedChildren));
     }
