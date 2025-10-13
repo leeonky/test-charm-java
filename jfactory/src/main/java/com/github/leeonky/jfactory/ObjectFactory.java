@@ -37,6 +37,14 @@ class ObjectFactory<T> implements Factory<T> {
         return new Spec<>();
     }
 
+    final public Spec<T> createSpecWithContext(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation, ObjectProducer<?> objectProducer) {
+        Spec<T> spec = createSpec();
+        spec.association = association;
+        spec.reverseAssociation = reverseAssociation;
+        spec.objectProducer = objectProducer;
+        return spec;
+    }
+
     @Override
     public final Factory<T> constructor(Function<Instance<T>, T> constructor) {
         this.constructor = Objects.requireNonNull(constructor);
@@ -118,10 +126,7 @@ class ObjectFactory<T> implements Factory<T> {
     public ObjectInstance<T> createInstance(Arguments argument, Optional<Association> association,
                                             Optional<ReverseAssociation> reverseAssociation,
                                             ObjectProducer<?> objectProducer) {
-        Spec<T> spec = createSpec();
-        spec.association = association;
-        spec.reverseAssociation = reverseAssociation;
-        spec.objectProducer = objectProducer;
+        Spec<T> spec = createSpecWithContext(association, reverseAssociation, objectProducer);
         ObjectInstance<T> objectInstance = new ObjectInstance<>(spec, argument,
                 factorySet.sequence(getType().getType()));
         spec.setInstance(objectInstance);

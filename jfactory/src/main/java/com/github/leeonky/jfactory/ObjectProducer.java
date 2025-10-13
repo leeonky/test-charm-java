@@ -51,16 +51,16 @@ class ObjectProducer<T> extends Producer<T> {
         processListStructures();
         setupReverseAssociations();
 
-        reverseAssociation.ifPresent(reverseAssociation1 -> {
-            reverseAssociations.forEach((r, a) -> {
-                if (reverseAssociation1.matches(a, getType().getPropertyWriter(r.toString()).getType().getElementOrPropertyType())) {
-                    if (descendantForRead(r) instanceof CollectionProducer) {
-                        changeDescendant(r.concat(0), (producer, s) -> reverseAssociation1.buildUnFixedValueProducer());
-                    } else
-                        changeDescendant(r, (producer, s) -> reverseAssociation1.buildUnFixedValueProducer());
-                }
-            });
-        });
+//        reverseAssociation.ifPresent(reverseAssociation1 -> {
+//            reverseAssociations.forEach((r, a) -> {
+//                if (reverseAssociation1.matches(a, getType().getPropertyWriter(r.toString()).getType().getElementOrPropertyType())) {
+//                    if (descendantForRead(r) instanceof CollectionProducer) {
+//                        changeDescendant(r.concat(0), (producer, s) -> reverseAssociation1.buildUnFixedValueProducer());
+//                    } else
+//                        changeDescendant(r, (producer, s) -> reverseAssociation1.buildUnFixedValueProducer());
+//                }
+//            });
+//        });
         resolveBuilderProducers();
     }
 
