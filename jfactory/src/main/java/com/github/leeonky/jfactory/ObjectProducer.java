@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
@@ -52,7 +53,7 @@ class ObjectProducer<T> extends Producer<T> {
 
         reverseAssociation.ifPresent(reverseAssociation1 -> {
             reverseAssociations.forEach((r, a) -> {
-                if (reverseAssociation1.matches(a)) {
+                if (reverseAssociation1.matches(a, getType().getPropertyWriter(r.toString()).getType().getElementOrPropertyType())) {
                     if (descendantForRead(r) instanceof CollectionProducer) {
                         changeDescendant(r.concat(0), (producer, s) -> reverseAssociation1.buildUnFixedValueProducer());
                     } else
@@ -307,8 +308,8 @@ class ReverseAssociation {
         this.instance = instance;
     }
 
-    public boolean matches(String property) {
-        return this.property.equals(property);
+    public boolean matches(String property, BeanClass<?> type) {
+        return this.property.equals(property) && instance.spec().getType().equals(type);
     }
 
     UnFixedValueProducer buildUnFixedValueProducer() {

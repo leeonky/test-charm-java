@@ -189,7 +189,8 @@ public class Spec<T> {
 
     boolean isReverseAssociation(PropertyChain property) {
         return objectProducer.reverseAssociation(property)
-                .map(s -> reverseAssociation.map(a -> a.matches(s)).orElse(false))
+                .map(s -> reverseAssociation.map(a -> a.matches(s,
+                        getType().getPropertyWriter(property.toString()).getType().getElementOrPropertyType())).orElse(false))
                 .orElse(false);
     }
 }

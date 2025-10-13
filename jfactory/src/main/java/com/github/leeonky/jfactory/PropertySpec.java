@@ -46,7 +46,8 @@ public class PropertySpec<T> {
     }
 
     private boolean isAssociation() {
-        return spec.isAssociation(property.toString()) || spec.isReverseAssociation(property.removeTail());
+        return spec.isAssociation(property.toString())
+                || spec.isReverseAssociation(property.isTopLevelPropertyCollection() ? property.removeTail() : property);
     }
 
     public Spec<T> is(String... traitsAndSpec) {
