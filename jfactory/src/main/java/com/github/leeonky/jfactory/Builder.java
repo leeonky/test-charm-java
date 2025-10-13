@@ -27,6 +27,7 @@ public interface Builder<T> {
 
     Builder<T> traits(String... traits);
 
+    @Deprecated
     Producer<T> createProducer(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation);
 
     @Deprecated

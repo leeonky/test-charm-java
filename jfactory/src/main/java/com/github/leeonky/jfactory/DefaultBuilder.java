@@ -102,8 +102,7 @@ class DefaultBuilder<T> implements Builder<T> {
     public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> newBuilder = clone();
         properties.forEach((key, value) -> {
-            String property;
-            property = replaceStartsWithIndexBracket(jFactory.aliasSetStore.resolve(
+            String property = replaceStartsWithIndexBracket(jFactory.aliasSetStore.resolve(
                     objectFactory, key, isCollection(value)), newBuilder);
             if (isCollection(value)) {
                 List<Object> objects = CollectionHelper.toStream(value).collect(Collectors.toList());

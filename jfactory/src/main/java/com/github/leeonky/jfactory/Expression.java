@@ -24,6 +24,7 @@ abstract class Expression<P> {
 
     protected abstract boolean isPropertyMatch(Object propertyValue);
 
+    @Deprecated
     public abstract Producer<?> buildProducer(JFactory jFactory, Producer<P> parent);
 
     static <T> Expression<T> merge(List<Expression<T>> expressions) {
