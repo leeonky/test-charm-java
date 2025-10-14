@@ -44,7 +44,7 @@ public interface Property<T> {
         return (P) getReader().getValue(instance);
     }
 
-    default Property<T> decorateReaderType(BeanClass<? extends T> newType) {
+    default Property<T> decorateReaderType(BeanClass<?> newType) {
         PropertyReader<T> reader = getReader();
         if (reader.getType().equals(newType))
             return this;
@@ -59,7 +59,7 @@ public interface Property<T> {
         throw new IllegalStateException("Type " + newType.getType() + " is not inherited from " + type);
     }
 
-    default Property<T> decorateWriterType(BeanClass<? extends T> newType) {
+    default Property<T> decorateWriterType(BeanClass<?> newType) {
         PropertyWriter<T> writer = getWriter();
         if (writer.getType().equals(newType))
             return this;
@@ -72,5 +72,9 @@ public interface Property<T> {
                 }
             };
         throw new IllegalStateException("Type " + newType.getType() + " is not inherited from " + type);
+    }
+
+    default Property<T> decorateType(BeanClass<?> newType) {
+        return decorateWriterType(newType).decorateReaderType(newType);
     }
 }

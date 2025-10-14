@@ -20,7 +20,7 @@ public interface PropertyWriter<T> extends PropertyAccessor<T> {
         }
     }
 
-    default PropertyWriter<T> decorateType(BeanClass<? extends T> newType) {
+    default PropertyWriter<T> decorateType(BeanClass<?> newType) {
         if (newType == getType())
             return this;
         return new PropertyWriterDecorator<T>(this) {

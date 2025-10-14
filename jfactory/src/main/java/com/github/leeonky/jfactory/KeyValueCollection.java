@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.Property;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -38,30 +37,6 @@ public class KeyValueCollection {
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
                 .map(Expression::merge)
                 .collect(Collectors.toList());
-    }
-
-    <H> Expression<H> createExpression(Property<H> property, TraitsSpec traitsSpec, Property<?> parentProperty, ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery) {
-        if (isSingleValue()) {
-            Object value = transform(property, parentProperty, objectFactory);
-            if (createOrLinkAnyExist(value))
-                return new SubObjectExpression<>(new KeyValueCollection(), traitsSpec, property, objectFactory, subProducer, forQuery);
-            return new SingleValueExpression<>(value, traitsSpec, property, forQuery);
-        }
-        return new SubObjectExpression<>(this, traitsSpec, property, objectFactory, subProducer, forQuery);
-    }
-
-    private boolean createOrLinkAnyExist(Object value) {
-        return value instanceof Map && ((Map<?, ?>) value).isEmpty();
-    }
-
-    private <H> Object transform(Property<H> property, Property<?> parentProperty, ObjectFactory<?> objectFactory) {
-        String transformerName = parentProperty != null && property.getBeanType().isCollection()
-                ? parentProperty.getName() + "[]" : property.getName();
-        return objectFactory.transform(transformerName, keyValues.values().iterator().next().getValue());
-    }
-
-    private boolean isSingleValue() {
-        return keyValues.size() == 1 && keyValues.values().iterator().next().nullKey();
     }
 
     public KeyValueCollection append(String key, Object value) {

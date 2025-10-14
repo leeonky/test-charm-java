@@ -20,7 +20,7 @@ public interface PropertyReader<T> extends PropertyAccessor<T> {
         return reader;
     }
 
-    default PropertyReader<T> decorateType(BeanClass<? extends T> newType) {
+    default PropertyReader<T> decorateType(BeanClass<?> newType) {
         if (newType == getType())
             return this;
         return new PropertyReaderDecorator<T>(this) {
