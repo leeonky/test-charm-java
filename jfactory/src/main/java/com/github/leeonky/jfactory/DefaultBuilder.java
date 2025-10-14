@@ -28,7 +28,7 @@ class DefaultBuilder<T> implements Builder<T> {
     public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory, BuildFrom buildFrom) {
         this.jFactory = jFactory;
         this.objectFactory = objectFactory;
-        properties = new KeyValueCollection(objectFactory.getFactorySet());
+        properties = new KeyValueCollection();
         this.buildFrom = buildFrom;
     }
 

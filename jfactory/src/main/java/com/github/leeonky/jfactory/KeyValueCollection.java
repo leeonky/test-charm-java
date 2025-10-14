@@ -10,12 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class KeyValueCollection {
-    private final FactorySet factorySet;
     private final Map<String, KeyValue> keyValues = new LinkedHashMap<>();
-
-    public KeyValueCollection(FactorySet factorySet) {
-        this.factorySet = factorySet;
-    }
 
     public void insertAll(KeyValueCollection another) {
         LinkedHashMap<String, KeyValue> merged = new LinkedHashMap<String, KeyValue>() {{
@@ -49,7 +44,7 @@ public class KeyValueCollection {
         if (isSingleValue()) {
             Object value = transform(property, parentProperty, objectFactory);
             if (createOrLinkAnyExist(value))
-                return new SubObjectExpression<>(new KeyValueCollection(factorySet), traitsSpec, property, objectFactory, subProducer, forQuery);
+                return new SubObjectExpression<>(new KeyValueCollection(), traitsSpec, property, objectFactory, subProducer, forQuery);
             return new SingleValueExpression<>(value, traitsSpec, property, forQuery);
         }
         return new SubObjectExpression<>(this, traitsSpec, property, objectFactory, subProducer, forQuery);
@@ -70,7 +65,7 @@ public class KeyValueCollection {
     }
 
     public KeyValueCollection append(String key, Object value) {
-        keyValues.put(key, new KeyValue(key, value, factorySet));
+        keyValues.put(key, new KeyValue(key, value));
         return this;
     }
 

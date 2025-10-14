@@ -35,12 +35,10 @@ class KeyValue {
     private static final int GROUP_CLAUSE = 11 + 5;
     private final String key;
     private final Object value;
-    private final FactorySet factorySet;
 
-    public KeyValue(String key, Object value, FactorySet factorySet) {
+    public KeyValue(String key, Object value) {
         this.key = key;
         this.value = value;
-        this.factorySet = factorySet;
     }
 
     public <T> Expression<T> createExpression(BeanClass<T> beanClass, ObjectFactory<T> objectFactory, Producer<T> producer, boolean forQuery) {
@@ -112,7 +110,7 @@ class KeyValue {
 
     private <T> Expression<T> createSubExpression(Matcher matcher, Property<T> property, Property<?> parentProperty,
                                                   ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery, TraitsSpec traitsSpec) {
-        KeyValueCollection properties = new KeyValueCollection(factorySet).append(matcher.group(GROUP_CLAUSE), value);
+        KeyValueCollection properties = new KeyValueCollection().append(matcher.group(GROUP_CLAUSE), value);
         return properties.createExpression(traitsSpec.guessPropertyType(objectFactory)
                         .map(type -> property.decorateWriterType(type).decorateReaderType(type)).orElse(property),
                 traitsSpec, parentProperty, objectFactory, subProducer, forQuery).setIntently(matcher.group(GROUP_INTENTLY) != null);
