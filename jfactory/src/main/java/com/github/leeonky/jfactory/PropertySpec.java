@@ -63,7 +63,7 @@ public class PropertySpec<T> {
     public Spec<T> optional(String... traitsAndSpec) {
         if (property.isSingle()) {
             return spec.appendSpec((jFactory, objectProducer) -> objectProducer.changeChild(property.toString(),
-                    new OptionalSpecDefaultValueProducer<>(objectProducer.getPropertyWriterType(property.toString()), traitsAndSpec)));
+                    new OptionalSpecDefaultValueProducer<>(traitsAndSpec, jFactory, jFactory.spec(traitsAndSpec))));
         } else if (property.isDefaultPropertyCollection()) {
             return spec.appendSpec((jFactory, objectProducer) -> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
@@ -78,7 +78,7 @@ public class PropertySpec<T> {
                         CollectionProducer.class).orElseThrow(() ->
                         new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
                 OptionalSpecDefaultValueProducer<?> optionalSpecDefaultValueProducer =
-                        new OptionalSpecDefaultValueProducer<>(propertyWriter.getType(), traitsAndSpec);
+                        new OptionalSpecDefaultValueProducer<>(traitsAndSpec, jFactory, jFactory.spec(traitsAndSpec));
                 collectionProducer.changeElementPopulationFactory(index -> optionalSpecDefaultValueProducer);
             });
         }

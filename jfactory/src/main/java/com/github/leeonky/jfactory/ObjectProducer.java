@@ -48,7 +48,7 @@ class ObjectProducer<T> extends Producer<T> {
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
         builder.processInputProperty(this, forQuery);
-        resolveBuilderProducers();
+        changeToLast();
         instance.spec.applyPropertyStructureDefinitions(jFactory, this);
         processListStructures();
         setupReverseAssociations();
@@ -75,10 +75,12 @@ class ObjectProducer<T> extends Producer<T> {
                 .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
     }
 
-    protected void resolveBuilderProducers() {
-        List<Map.Entry<String, Producer<?>>> buildValueProducers = children.entrySet().stream()
-                .filter(entry -> entry.getValue() instanceof BuilderValueProducer).collect(Collectors.toList());
-        buildValueProducers.forEach(e -> setChild(e.getKey(), ((BuilderValueProducer) e.getValue()).getProducer()));
+    //    TODO rename
+    @Override
+    protected Producer<?> changeToLast() {
+        for (Map.Entry<String, Producer<?>> kv : children.entrySet())
+            setChild(kv.getKey(), kv.getValue().changeToLast());
+        return this;
     }
 
     private void createElementDefaultValueProducersWhenBuildListAsRoot() {
@@ -215,20 +217,16 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public Producer<T> changeTo(Producer<T> newProducer) {
+//        TODO move logic to merge BuilderValueProducer
+        if (newProducer instanceof BuilderValueProducer) {
+            return new BuilderValueProducer<>(builder.marge(((BuilderValueProducer) newProducer).builder), ((BuilderValueProducer) newProducer).queryFirst);
+        }
         return newProducer.changeFrom(this);
     }
 
     @Override
     protected Producer<T> changeFrom(ObjectProducer<T> origin) {
         return origin.builder.marge(builder).createProducer();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected Producer<T> changeFrom(OptionalSpecDefaultValueProducer<T> producer) {
-        if (producer.getTraitsAndSpec() != null)
-            return ((DefaultBuilder<T>) jFactory.spec(producer.getTraitsAndSpec())).marge(builder).createProducer();
-        return this;
     }
 
     public void appendReverseAssociation(PropertyChain property, String association) {

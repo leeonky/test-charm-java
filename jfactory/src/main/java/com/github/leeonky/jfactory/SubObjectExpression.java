@@ -1,23 +1,22 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Property;
-
-import java.util.Optional;
 
 class SubObjectExpression<P> extends Expression<P> {
     private final KeyValueCollection properties;
     private final TraitsSpec traitsSpec;
     private final ObjectFactory objectFactory;
     private final Producer<?> subProducer;
+    private final boolean forQuery;
 
     public SubObjectExpression(KeyValueCollection properties, TraitsSpec traitsSpec, Property<P> property,
                                ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery) {
-        super(property, forQuery);
+        super(property);
         this.properties = properties;
         this.traitsSpec = traitsSpec;
         this.objectFactory = objectFactory;
         this.subProducer = subProducer;
+        this.forQuery = forQuery;
     }
 
     @Override
@@ -27,19 +26,8 @@ class SubObjectExpression<P> extends Expression<P> {
 
     @Override
     public Producer<?> buildProducer(JFactory jFactory, Producer<P> parent) {
-        Builder<?> builder = toBuilder(jFactory, property.getWriterType());
-        return query(jFactory).<Producer<?>>map(object -> new BuilderValueProducer<>(builder, true))
-                .orElseGet(builder::createProducer);
-    }
-
-    private Optional<?> query(JFactory jFactory) {
-        if (intently || forQuery)
-            return Optional.empty();
-        return toBuilder(jFactory, property.getReaderType()).queryAll().stream().findFirst();
-    }
-
-    private Builder<?> toBuilder(JFactory jFactory, BeanClass<?> propertyType) {
-        return properties.apply(traitsSpec.toBuilder(jFactory, propertyType));
+        return new BuilderValueProducer<>(properties.apply(traitsSpec.toBuilder(jFactory, property.getWriterType())),
+                !(intently || forQuery));
     }
 
     @Override

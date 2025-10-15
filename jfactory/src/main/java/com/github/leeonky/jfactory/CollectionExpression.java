@@ -13,7 +13,7 @@ class CollectionExpression<P, E> extends Expression<P> {
     private final Map<Integer, Expression<E>> children = new LinkedHashMap<>();
 
     public CollectionExpression(Property<P> property, int index, Expression<E> elementExpression, boolean forQuery) {
-        super(property, forQuery);
+        super(property);
         children.put(index, elementExpression);
     }
 

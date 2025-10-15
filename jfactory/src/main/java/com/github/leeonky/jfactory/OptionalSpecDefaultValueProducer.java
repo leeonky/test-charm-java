@@ -1,13 +1,16 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
-
 class OptionalSpecDefaultValueProducer<V> extends DefaultTypeValueProducer<V> {
     private final String[] traitsAndSpec;
+    final JFactory jFactory;
+    private final DefaultBuilder<V> builder;
 
-    public OptionalSpecDefaultValueProducer(BeanClass<V> type, String[] traitsAndSpec) {
-        super(type);
+    //    TODO refactor pass builder instead of traitsAndSpec and jFactory
+    public OptionalSpecDefaultValueProducer(String[] traitsAndSpec, JFactory jFactory, Builder<V> builder) {
+        super(builder.getType());
         this.traitsAndSpec = traitsAndSpec;
+        this.jFactory = jFactory;
+        this.builder = (DefaultBuilder<V>) builder;
     }
 
     @Override
@@ -17,5 +20,9 @@ class OptionalSpecDefaultValueProducer<V> extends DefaultTypeValueProducer<V> {
 
     public String[] getTraitsAndSpec() {
         return traitsAndSpec;
+    }
+
+    public DefaultBuilder<V> builder() {
+        return builder;
     }
 }

@@ -10,7 +10,7 @@ class SingleValueExpression<P> extends Expression<P> {
     private final TraitsSpec traitsSpec;
 
     public SingleValueExpression(Object value, TraitsSpec traitsSpec, Property<P> property, boolean forQuery) {
-        super(property, forQuery);
+        super(property);
         this.value = value;
         this.traitsSpec = traitsSpec;
     }

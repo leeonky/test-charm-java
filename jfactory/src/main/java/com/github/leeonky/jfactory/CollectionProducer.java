@@ -134,4 +134,10 @@ class CollectionProducer<T, C> extends Producer<C> {
     public void verifyPropertyStructureDependent() {
         children.forEach(Producer::verifyPropertyStructureDependent);
     }
+
+    @Override
+    protected Producer<?> changeToLast() {
+        children.replaceAll(Producer::changeToLast);
+        return this;
+    }
 }

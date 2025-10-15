@@ -108,4 +108,9 @@ abstract class Producer<T> {
 
     public void verifyPropertyStructureDependent() {
     }
+
+    //    TODO use T
+    protected Producer<?> changeToLast() {
+        return this;
+    }
 }
