@@ -119,7 +119,7 @@ public class PropertySpec<T> {
         return appendProducer(context ->
                 context.producer.newDefaultValueProducer(cast(context.producer.getType().getPropertyWriter(context.property))).orElseGet(() ->
                         createQueryOrCreateProducer(builder.apply(context.jFactory.type(
-                                context.producer.getPropertyWriterType(context.property).getType())))));
+                                context.producer.getPropertyWriterType(context.property).getType())), context.association)));
     }
 
     public Spec<T> dependsOn(String dependency) {
@@ -171,16 +171,18 @@ public class PropertySpec<T> {
         throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
     }
 
-    @SuppressWarnings("unchecked")
-    private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder) {
-        Builder<V> builderWithArgs = builder.args(spec.params(property.toString()));
-        return builderWithArgs.queryAll().stream().findFirst().<Producer<V>>map(object ->
-                        new BuilderValueProducer<>((BeanClass<V>) BeanClass.create(object.getClass()), builderWithArgs))
+    private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder, Optional<Association> association) {
+        DefaultBuilder<V> builderWithArgs = ((DefaultBuilder<V>) builder.args(spec.params(property.toString())))
+                .setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance())));
+        return builderWithArgs.queryAll().stream().findFirst()
+                .<Producer<V>>map(object -> new BuilderValueProducer<>(builderWithArgs, true))
                 .orElseGet(builderWithArgs::createProducer);
     }
 
     private <V> Producer<V> createCreateProducer(Builder<V> builder, Optional<Association> association) {
-        return builder.args(spec.params(property.toString())).createProducer(association,
+        DefaultBuilder<V> args = (DefaultBuilder<V>) builder.args(spec.params(property.toString()));
+        args = args.setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance())));
+        return args.createProducer(association,
                 of(new ReverseAssociation(property.toString(), spec.instance())));
     }
 
@@ -222,7 +224,7 @@ public class PropertySpec<T> {
             spec.consume(this);
             if (isAssociation())
                 return spec;
-            return appendProducer(context -> createQueryOrCreateProducer(builder.apply(context.jFactory.spec(specClass))));
+            return appendProducer(context -> createQueryOrCreateProducer(builder.apply(context.jFactory.spec(specClass)), context.association));
         }
 
         public String getPosition() {
@@ -243,7 +245,7 @@ public class PropertySpec<T> {
             PropertySpec.this.spec.consume(this);
             if (isAssociation())
                 return PropertySpec.this.spec;
-            return appendProducer(context -> createQueryOrCreateProducer(builder.apply(context.jFactory.spec(spec))));
+            return appendProducer(context -> createQueryOrCreateProducer(builder.apply(context.jFactory.spec(spec)), context.association));
         }
 
         public String getPosition() {

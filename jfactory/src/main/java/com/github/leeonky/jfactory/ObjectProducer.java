@@ -15,7 +15,8 @@ import static java.util.stream.IntStream.range;
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
     private final JFactory jFactory;
-    private final DefaultBuilder<T> builder;
+    //    TODO refactor
+    final DefaultBuilder<T> builder;
     private final ObjectInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();

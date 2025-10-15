@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.DefaultBuilder.BuildFrom.SPEC;
 import static com.github.leeonky.util.BeanClass.cast;
+import static com.github.leeonky.util.function.Extension.firstPresent;
 import static java.util.Arrays.asList;
 import static java.util.Objects.hash;
 
@@ -24,6 +25,22 @@ class DefaultBuilder<T> implements Builder<T> {
     private final DefaultArguments arguments = new DefaultArguments();
     private int collectionSize = 0;
     private final BuildFrom buildFrom;
+
+    private Optional<Association> association = Optional.empty();
+    private Optional<ReverseAssociation> reverseAssociation = Optional.empty();
+
+    //    TODO refactor
+    DefaultBuilder<T> setAssociation(Optional<Association> association) {
+        DefaultBuilder<T> clone = clone();
+        clone.association = association;
+        return clone;
+    }
+
+    DefaultBuilder<T> setReverseAssociation(Optional<ReverseAssociation> reverseAssociation) {
+        DefaultBuilder<T> clone = clone();
+        clone.reverseAssociation = reverseAssociation;
+        return clone;
+    }
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory, BuildFrom buildFrom) {
         this.jFactory = jFactory;
@@ -46,7 +63,13 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    @Deprecated
     public ObjectProducer<T> createProducer(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
+        return new ObjectProducer<>(jFactory, objectFactory, this, association, reverseAssociation);
+    }
+
+    @Override
+    public Producer<T> createProducer() {
         return new ObjectProducer<>(jFactory, objectFactory, this, association, reverseAssociation);
     }
 
@@ -95,6 +118,8 @@ class DefaultBuilder<T> implements Builder<T> {
         builder.properties.appendAll(properties);
         builder.traits.addAll(traits);
         builder.arguments.merge(arguments);
+        builder.reverseAssociation = reverseAssociation;
+        builder.association = association;
         return builder;
     }
 
@@ -187,6 +212,8 @@ class DefaultBuilder<T> implements Builder<T> {
         newBuilder.properties.appendAll(another.properties);
         newBuilder.traits.addAll(another.traits);
         newBuilder.collectionSize = collectionSize;
+        newBuilder.association = firstPresent(association, another.association);
+        newBuilder.reverseAssociation = firstPresent(reverseAssociation, another.reverseAssociation);
         return newBuilder;
     }
 
