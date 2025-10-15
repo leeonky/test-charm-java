@@ -7,12 +7,12 @@ import com.github.leeonky.util.Property;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.leeonky.util.Sneaky.cast;
 import static java.lang.Integer.parseInt;
+import static java.util.Optional.ofNullable;
 
 //TODO use a parser to parse this
 class KeyValue {
@@ -37,34 +37,48 @@ class KeyValue {
 
     private final String key;
     private final Object value;
-    private final Matcher matcher;
     private final String propertyName;
     private final String clause;
+    private final TraitsSpec traitsSpec;
+    private final TraitsSpec elementTraitSpec;
+    private final boolean intently;
+    private final String index;
 
     public KeyValue(String key, Object value) {
         this.key = key;
         this.value = value;
         if (key != null) {
-            matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_TRAIT_SPEC + PATTERN_COLLECTION_INDEX +
+            Matcher matcher = Pattern.compile(PATTERN_PROPERTY + PATTERN_TRAIT_SPEC + PATTERN_COLLECTION_INDEX +
                     PATTERN_TRAIT_SPEC + PATTERN_INTENTLY + PATTERN_CLAUSE).matcher(key);
             if (!matcher.matches())
                 throw new IllegalArgumentException(String.format("The format of property `%s` is invalid.", key));
             propertyName = matcher.group(GROUP_PROPERTY);
             clause = matcher.group(GROUP_CLAUSE);
+            traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
+                    matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
+            elementTraitSpec = new TraitsSpec(matcher.group(GROUP_ELEMENT_TRAIT) != null ?
+                    matcher.group(GROUP_ELEMENT_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_ELEMENT_SPEC));
+            intently = matcher.group(GROUP_INTENTLY) != null;
+            index = matcher.group(GROUP_COLLECTION_INDEX);
         } else {
-            matcher = null;
             propertyName = null;
             clause = null;
+            traitsSpec = null;
+            elementTraitSpec = null;
+            intently = false;
+            index = null;
         }
     }
 
     public <T> Expression<T> createExpression(BeanClass<T> beanClass, ObjectFactory<T> objectFactory, Producer<T> producer, boolean forQuery) {
         Property<T> property = beanClass.getProperty(propertyName);
-        TraitsSpec traitsSpec = new TraitsSpec(matcher.group(GROUP_TRAIT) != null ?
-                matcher.group(GROUP_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_SPEC));
         Producer<?> subProducer;
-        if (traitsSpec.isCollectionSpec() && producer instanceof ObjectProducer &&
-                (property.getWriterType().is(Object.class) || property.getWriterType().isCollection())) {
+
+        if (traitsSpec.isCollectionSpec()
+//        TODO raise error when spec and property type conflicted
+//                && producer instanceof ObjectProducer
+//                && (property.getWriterType().is(Object.class) || property.getWriterType().isCollection())
+        ) {
             SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
             property = property.decorateType(GenericBeanClass.create(
                     property.getWriterType().isCollection() ? property.getWriterType().getType() :
@@ -77,19 +91,12 @@ class KeyValue {
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else {
             subProducer = producer.getChild(propertyName).orElse(PlaceHolderProducer.PLACE_HOLDER);
-            if (subProducer instanceof ObjectProducer ||
-                    subProducer instanceof CollectionProducer && property.getWriterType().is(Object.class)) {
+            if (subProducer instanceof ObjectProducer || subProducer instanceof CollectionProducer)
                 property = property.decorateType(subProducer.getType());
-            }
-//       for optional spec: type is List,  optional spec in spec
-            if (subProducer instanceof CollectionProducer && property.getWriterType().isCollection()
-                    && property.getWriterType().getElementType().is(Object.class)) {
-                property = property.decorateType(subProducer.getType());
-            }
         }
         Property<T> finalSubProperty = property;
         Producer<T> finalSubProducer = (Producer<T>) subProducer;
-        return hasIndex().map(index -> createCollectionExpression(finalSubProperty, index, objectFactory, finalSubProducer, forQuery))
+        return ofNullable(index).map(index -> createCollectionExpression(finalSubProperty, index, objectFactory, finalSubProducer, forQuery))
                 .orElseGet(() -> createSubExpression(finalSubProperty, null, objectFactory, finalSubProducer, forQuery, traitsSpec));
     }
 
@@ -105,14 +112,8 @@ class KeyValue {
             }
         } else
             subProducer = collectionProducer.getChild(index).orElse(PlaceHolderProducer.PLACE_HOLDER);
-        TraitsSpec elementTraitSpec = new TraitsSpec(matcher.group(GROUP_ELEMENT_TRAIT) != null ?
-                matcher.group(GROUP_ELEMENT_TRAIT).split(", |,| ") : new String[0], matcher.group(GROUP_ELEMENT_SPEC));
         return new CollectionExpression<>(property, intIndex,
                 createSubExpression(propertySub, property, objectFactory, subProducer, forQuery, elementTraitSpec), forQuery);
-    }
-
-    private Optional<String> hasIndex() {
-        return Optional.ofNullable(matcher.group(GROUP_COLLECTION_INDEX));
     }
 
 
@@ -134,7 +135,7 @@ class KeyValue {
                 result = new SingleValueExpression<>(value, traitsSpec, decoratedProperty, forQuery);
         } else
             result = new SubObjectExpression<>(new KeyValueCollection().append(clause, value), traitsSpec, decoratedProperty, objectFactory, subProducer, forQuery);
-        return result.setIntently(matcher.group(GROUP_INTENTLY) != null);
+        return result.setIntently(intently);
     }
 
     public <T> Builder<T> apply(Builder<T> builder) {
