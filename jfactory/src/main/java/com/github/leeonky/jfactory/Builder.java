@@ -30,10 +30,7 @@ public interface Builder<T> {
     @Deprecated
     Producer<T> createProducer(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation);
 
-    @Deprecated
-    default Producer<T> createProducer() {
-        return createProducer(Optional.empty(), Optional.empty());
-    }
+    Producer<T> createProducer();
 
     Builder<T> arg(String key, Object value);
 

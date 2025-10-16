@@ -174,9 +174,7 @@ public class PropertySpec<T> {
     private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder, Optional<Association> association) {
         DefaultBuilder<V> builderWithArgs = ((DefaultBuilder<V>) builder.args(spec.params(property.toString())))
                 .setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance())));
-        return builderWithArgs.queryAll().stream().findFirst()
-                .<Producer<V>>map(object -> new BuilderValueProducer<>(builderWithArgs, true))
-                .orElseGet(builderWithArgs::createProducer);
+        return new BuilderValueProducer<>(builderWithArgs, true);
     }
 
     private <V> Producer<V> createCreateProducer(Builder<V> builder, Optional<Association> association) {

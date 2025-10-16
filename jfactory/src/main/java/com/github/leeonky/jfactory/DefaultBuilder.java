@@ -51,7 +51,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T create() {
-        ObjectProducer<T> producer = createProducer(Optional.empty(), Optional.empty());
+        ObjectProducer<T> producer = createProducer();
         T value = producer.processConsistent().getValue();
         producer.verifyPropertyStructureDependent();
         return value;
@@ -69,7 +69,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
-    public Producer<T> createProducer() {
+    public ObjectProducer<T> createProducer() {
         return new ObjectProducer<>(jFactory, objectFactory, this, association, reverseAssociation);
     }
 
