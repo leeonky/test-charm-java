@@ -23,6 +23,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     private final FactorySet factorySet;
     private final JFactory jFactory;
     private Function<PropertyWriter<C>, Producer<?>> elementPopulationFactory = any -> null;
+    private boolean autoResolveBuilderValueProducer = false;
 
     public CollectionProducer(BeanClass<T> parentType, BeanClass<C> collectionType,
                               ObjectProperty<T> instance, FactorySet factorySet, JFactory jFactory) {
@@ -55,16 +56,20 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected void setChild(String property, Producer<?> producer) {
+    protected Producer<?> setChild(String property, Producer<?> producer) {
+        if (autoResolveBuilderValueProducer)
+            producer = producer.resolveBuilderValueProducer(false);
         int index = parseInt(property);
         fillCollectionWithDefaultValue(index);
         children.set(transformNegativeIndex(index), producer);
+        return producer;
     }
 
     private int transformNegativeIndex(int index) {
         return index < 0 ? children.size() + index : index;
     }
 
+    //    TODO use recursion in setChild
     public int fillCollectionWithDefaultValue(int index) {
         int changed = 0;
         if (index >= 0) {
@@ -82,32 +87,16 @@ class CollectionProducer<T, C> extends Producer<C> {
         Producer<?> producer = getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
                 () -> newDefaultValueProducer(propertyWriter))
                 .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
-        if (isAutoProduce()) {
-            Producer<?> producer1 = producer.changeToLast(false);
-            producer1.autoProduce();
-            return producer1;
-        }
-        return producer;
-    }
-
-    public Producer<?> newDefaultElementProducer(PropertyWriter<C> propertyWriter) {
-        Producer<?> producer = getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
-                () -> newDefaultValueProducer(propertyWriter))
-                .orElseGet(() -> jFactory.type(propertyWriter.getType()).createProducer());
-        if (isAutoProduce()) {
-            Producer<?> producer1 = producer.changeToLast(false);
-            producer1.autoProduce();
-            return producer1;
-        }
-        return producer;
+        return autoResolveBuilderValueProducer ? producer.resolveBuilderValueProducer(false) : producer;
     }
 
     @Override
     public Producer<?> childForUpdate(String property) {
         return getChild(property).orElseGet(() -> {
-            Producer<?> producer = newDefaultElementProducer(getType().getPropertyWriter(property));
-            setChild(property, producer);
-            return producer;
+            PropertyWriter<C> propertyWriter = getType().getPropertyWriter(property);
+            return setChild(property, getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
+                    () -> newDefaultValueProducer(propertyWriter))
+                    .orElseGet(() -> jFactory.type(propertyWriter.getType()).createProducer()));
         });
     }
 
@@ -148,14 +137,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected Producer<?> changeToLast(boolean forQuery) {
-        children.replaceAll(producer -> producer.changeToLast(forQuery));
+    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
+        autoResolveBuilderValueProducer = true;
+        children.replaceAll(producer -> producer.resolveBuilderValueProducer(forQuery));
         return this;
-    }
-
-    @Override
-    protected void autoProduce() {
-        super.autoProduce();
-        children.forEach(Producer::autoProduce);
     }
 }

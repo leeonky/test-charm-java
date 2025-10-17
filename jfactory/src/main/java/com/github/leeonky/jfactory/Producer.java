@@ -13,14 +13,8 @@ abstract class Producer<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
 
-    private boolean autoProduce = false;
-
     protected Producer(BeanClass<T> type) {
         this.type = type;
-    }
-
-    protected void autoProduce() {
-        autoProduce = true;
     }
 
     public BeanClass<T> getType() {
@@ -40,11 +34,10 @@ abstract class Producer<T> {
         return Optional.empty();
     }
 
-    protected void setChild(String property, Producer<?> producer) {
-    }
-
-    protected boolean isAutoProduce() {
-        return autoProduce;
+    //TODO return new producer
+//    TODO  move Auto resolve builder in objectProducer / collectionProducer setchild
+    protected Producer<?> setChild(String property, Producer<?> producer) {
+        return producer;
     }
 
     public Producer<?> childForUpdate(String property) {
@@ -120,7 +113,7 @@ abstract class Producer<T> {
     }
 
     //    TODO use T
-    protected Producer<?> changeToLast(boolean forQuery) {
+    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
         return this;
     }
 }

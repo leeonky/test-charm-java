@@ -43,7 +43,7 @@ public class BuilderValueProducer<T> extends Producer<T> {
     //    TODO need test missing all test of this method() query in spec and should be created after merge input property
 //    TODO forQuery for builder.queryAll()
     @Override
-    protected Producer<?> changeToLast(boolean forQuery) {
+    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
         if (!forQuery && queryFirst) {
             T result = builder.query();
             if (result != null)

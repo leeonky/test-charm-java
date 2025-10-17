@@ -17,6 +17,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final JFactory jFactory;
     //    TODO refactor
     final DefaultBuilder<T> builder;
+    private final boolean forQuery;
     private final ObjectInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
@@ -27,6 +28,7 @@ class ObjectProducer<T> extends Producer<T> {
     private final ConsistencySet consistencySet = new ConsistencySet();
     private final List<PropertyStructureDependent> propertyStructureDependents = new ArrayList<>();
     private final List<DefaultListStructure<T, ?>> listStructures = new ArrayList<>();
+    private boolean autoResolveBuilderValueProducer = false;
 
     public JFactory jFactory() {
         return jFactory;
@@ -43,17 +45,17 @@ class ObjectProducer<T> extends Producer<T> {
         this.factory = factory;
         this.jFactory = jFactory;
         this.builder = builder;
+        this.forQuery = forQuery;
         instance = factory.createInstance(builder.getArguments(), association, reverseAssociation, this);
         persistable = jFactory.getDataRepository();
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
         builder.processInputProperty(this, forQuery);
-        changeToLast(forQuery);
+        resolveBuilderValueProducer(forQuery);
         instance.spec.applyPropertyStructureDefinitions(jFactory, this);
         processListStructures();
-        changeToLast(forQuery);
+//        resolveBuilderValueProducer(forQuery);
         setupReverseAssociations();
-        autoProduce();
 
 //        reverseAssociation.ifPresent(reverseAssociation1 -> {
 //            reverseAssociations.forEach((r, a) -> {
@@ -77,12 +79,12 @@ class ObjectProducer<T> extends Producer<T> {
                 .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
     }
 
-    //    TODO rename
-//        TODO refactor duplicated call
+    //        TODO refactor duplicated call
     @Override
-    protected Producer<?> changeToLast(boolean forQuery) {
+    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
+        autoResolveBuilderValueProducer = true;
         for (Map.Entry<String, Producer<?>> kv : children.entrySet())
-            setChild(kv.getKey(), kv.getValue().changeToLast(forQuery));
+            setChild(kv.getKey(), kv.getValue());
         return this;
     }
 
@@ -97,7 +99,7 @@ class ObjectProducer<T> extends Producer<T> {
                         .forEach((PropertyWriter<T> propertyWriter) ->
                                 setChild(propertyWriter.getName(), newElementPopulationProducer(propertyWriter)));
             });
-            changeToLast(false);
+//            resolveBuilderValueProducer(false);
         } catch (Exception ignore) {
         }
     }
@@ -108,8 +110,11 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     @Override
-    protected void setChild(String property, Producer<?> producer) {
+    protected Producer<?> setChild(String property, Producer<?> producer) {
+        if (autoResolveBuilderValueProducer)
+            producer = producer.resolveBuilderValueProducer(forQuery);
         children.put(property, producer);
+        return producer;
     }
 
     @Override
@@ -178,7 +183,6 @@ class ObjectProducer<T> extends Producer<T> {
     public void verifyPropertyStructureDependent() {
         for (PropertyStructureDependent propertyStructureDependent : propertyStructureDependents)
             propertyStructureDependent.verify(getValue());
-
         children.values().forEach(Producer::verifyPropertyStructureDependent);
     }
 
@@ -213,12 +217,8 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private Producer<?> createCollectionProducer(PropertyWriter<T> property) {
-        Producer<?> producer = new CollectionProducer<>(getType(), property.getType(), instance.sub(property),
-                factory.getFactorySet(), jFactory);
-        if (isAutoProduce())
-            producer.autoProduce();
-        setChild(property.getName(), producer);
-        return producer;
+        return setChild(property.getName(), new CollectionProducer<>(getType(), property.getType(), instance.sub(property),
+                factory.getFactorySet(), jFactory));
     }
 
     @Override
@@ -287,12 +287,6 @@ class ObjectProducer<T> extends Producer<T> {
 
     public Optional<String> reverseAssociation(PropertyChain property) {
         return Optional.ofNullable(reverseAssociations.get(property));
-    }
-
-    @Override
-    protected void autoProduce() {
-        super.autoProduce();
-        children.values().forEach(Producer::autoProduce);
     }
 }
 
