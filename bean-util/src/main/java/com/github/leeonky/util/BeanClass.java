@@ -226,4 +226,9 @@ public class BeanClass<T> {
     public boolean is(Class<?> clazz) {
         return getType().equals(clazz);
     }
+
+    @Override
+    public String toString() {
+        return getType().toString();
+    }
 }

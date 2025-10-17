@@ -79,15 +79,27 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     public Producer<?> newElementPopulationProducer(PropertyWriter<C> propertyWriter) {
-        return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
+        Producer<?> producer = getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
                 () -> newDefaultValueProducer(propertyWriter))
                 .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
+        if (isAutoProduce()) {
+            Producer<?> producer1 = producer.changeToLast(false);
+            producer1.autoProduce();
+            return producer1;
+        }
+        return producer;
     }
 
     public Producer<?> newDefaultElementProducer(PropertyWriter<C> propertyWriter) {
-        return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
+        Producer<?> producer = getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
                 () -> newDefaultValueProducer(propertyWriter))
                 .orElseGet(() -> jFactory.type(propertyWriter.getType()).createProducer());
+        if (isAutoProduce()) {
+            Producer<?> producer1 = producer.changeToLast(false);
+            producer1.autoProduce();
+            return producer1;
+        }
+        return producer;
     }
 
     @Override
@@ -136,8 +148,14 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected Producer<?> changeToLast() {
-        children.replaceAll(Producer::changeToLast);
+    protected Producer<?> changeToLast(boolean forQuery) {
+        children.replaceAll(producer -> producer.changeToLast(forQuery));
         return this;
+    }
+
+    @Override
+    protected void autoProduce() {
+        super.autoProduce();
+        children.forEach(Producer::autoProduce);
     }
 }

@@ -1,6 +1,7 @@
 package com.github.leeonky.util;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -76,5 +77,13 @@ public class CollectionHelper {
         if (obj1 == null || obj2 == null)
             return Objects.equals(obj1, obj2);
         return convert(obj1, create(List.class)).equals(convert(obj2, create(List.class)));
+    }
+
+    //    TODO missing test
+    @SuppressWarnings("unchecked")
+    public static <T> BeanClass<T> reify(Class<?> original, Type elementType) {
+        if (original.isArray())
+            return (BeanClass<T>) create(Array.newInstance((Class<?>) elementType, 0).getClass());
+        return GenericBeanClass.create(original, elementType);
     }
 }

@@ -34,7 +34,12 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     protected Spec<T> createSpec() {
-        return new Spec<>();
+        return new Spec<T>() {
+            @Override
+            public BeanClass<T> getType() {
+                return type;
+            }
+        };
     }
 
     final public Spec<T> createSpecWithContext(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation, ObjectProducer<?> objectProducer) {

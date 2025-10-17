@@ -33,17 +33,16 @@ class CollectionExpression<P, E> extends Expression<P> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(JFactory jFactory, Producer<P> parent) {
-        Producer value = parent.childForUpdate(property.getName());
-        if (value instanceof CollectionProducer) {
-            CollectionProducer<?, E> producer = (CollectionProducer<?, E>) value;
-            groupByAdjustedPositiveAndNegativeIndexExpression(producer).forEach((index, expressions) ->
-                    producer.changeChild(index.toString(), merge(expressions).buildProducer(jFactory, producer)));
-            return producer;
-        } else {
-            children.forEach((index, expression) ->
-                    value.changeChild(index.toString(), expression.buildProducer(jFactory, value)));
-        }
-        return value;
+//        if (parent.childForUpdate(property.getName()) instanceof CollectionProducer) {
+        CollectionProducer<?, E> producer = (CollectionProducer<?, E>) parent.childForUpdate(property.getName());
+        groupByAdjustedPositiveAndNegativeIndexExpression(producer).forEach((index, expressions) ->
+                producer.changeChild(index.toString(), merge(expressions).buildProducer(jFactory, producer)));
+        return producer;
+//        } else {
+//            children.forEach((index, expression) ->
+//                    value.changeChild(index.toString(), expression.buildProducer(jFactory, value)));
+//        }
+//        return parent.childForUpdate(property.getName());
     }
 
     private Map<Integer, List<Expression<E>>> groupByAdjustedPositiveAndNegativeIndexExpression(

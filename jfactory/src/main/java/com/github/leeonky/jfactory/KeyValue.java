@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.GenericBeanClass;
 import com.github.leeonky.util.Property;
 
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.github.leeonky.util.CollectionHelper.reify;
 import static com.github.leeonky.util.Sneaky.cast;
 import static java.lang.Integer.parseInt;
 import static java.util.Optional.ofNullable;
@@ -80,7 +80,8 @@ class KeyValue {
 //                && (property.getWriterType().is(Object.class) || property.getWriterType().isCollection())
         ) {
             SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
-            property = property.decorateType(GenericBeanClass.create(
+//            TODO decorateType to List<T> Set<T> T[]?
+            property = property.decorateType(reify(
                     property.getWriterType().isCollection() ? property.getWriterType().getType() :
                             List.class, specFactory.getType().getGenericType()));
             subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
@@ -91,7 +92,10 @@ class KeyValue {
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else {
             subProducer = producer.getChild(propertyName).orElse(PlaceHolderProducer.PLACE_HOLDER);
-            if (subProducer instanceof ObjectProducer || subProducer instanceof CollectionProducer)
+            if (subProducer instanceof ObjectProducer
+                    || subProducer instanceof CollectionProducer
+                    || subProducer instanceof BuilderValueProducer
+            )
                 property = property.decorateType(subProducer.getType());
         }
         Property<T> finalSubProperty = property;
@@ -100,6 +104,7 @@ class KeyValue {
                 .orElseGet(() -> createSubExpression(finalSubProperty, null, objectFactory, finalSubProducer, forQuery, traitsSpec));
     }
 
+    //    TODO refactor
     private <T> Expression<T> createCollectionExpression(Property<T> property, String index,
                                                          ObjectFactory<T> objectFactory, Producer<?> collectionProducer, boolean forQuery) {
         Property<?> propertySub = property.getWriter().getType().getProperty(index);
@@ -107,11 +112,14 @@ class KeyValue {
         Producer<?> subProducer;
         if (collectionProducer instanceof CollectionProducer) {
             subProducer = ((CollectionProducer<?, ?>) collectionProducer).newElementPopulationProducer(cast(collectionProducer.getType().getPropertyWriter(index)));
-            if (subProducer instanceof ObjectProducer) {
+            if (subProducer instanceof ObjectProducer || subProducer instanceof BuilderValueProducer) {
                 propertySub = propertySub.decorateType(subProducer.getType());
             }
         } else
             subProducer = collectionProducer.getChild(index).orElse(PlaceHolderProducer.PLACE_HOLDER);
+        if (collectionProducer instanceof BuilderValueProducer) {
+            return new SubObjectExpression<>(new KeyValueCollection().append(index + "." + clause, value), elementTraitSpec, property, objectFactory, subProducer, forQuery);
+        }
         return new CollectionExpression<>(property, intIndex,
                 createSubExpression(propertySub, property, objectFactory, subProducer, forQuery, elementTraitSpec), forQuery);
     }

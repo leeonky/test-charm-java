@@ -48,10 +48,12 @@ class ObjectProducer<T> extends Producer<T> {
         createDefaultValueProducers();
         builder.collectSpec(this, instance);
         builder.processInputProperty(this, forQuery);
-        changeToLast();
+        changeToLast(forQuery);
         instance.spec.applyPropertyStructureDefinitions(jFactory, this);
         processListStructures();
+        changeToLast(forQuery);
         setupReverseAssociations();
+        autoProduce();
 
 //        reverseAssociation.ifPresent(reverseAssociation1 -> {
 //            reverseAssociations.forEach((r, a) -> {
@@ -76,10 +78,11 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     //    TODO rename
+//        TODO refactor duplicated call
     @Override
-    protected Producer<?> changeToLast() {
+    protected Producer<?> changeToLast(boolean forQuery) {
         for (Map.Entry<String, Producer<?>> kv : children.entrySet())
-            setChild(kv.getKey(), kv.getValue().changeToLast());
+            setChild(kv.getKey(), kv.getValue().changeToLast(forQuery));
         return this;
     }
 
@@ -94,6 +97,7 @@ class ObjectProducer<T> extends Producer<T> {
                         .forEach((PropertyWriter<T> propertyWriter) ->
                                 setChild(propertyWriter.getName(), newElementPopulationProducer(propertyWriter)));
             });
+            changeToLast(false);
         } catch (Exception ignore) {
         }
     }
@@ -211,6 +215,8 @@ class ObjectProducer<T> extends Producer<T> {
     private Producer<?> createCollectionProducer(PropertyWriter<T> property) {
         Producer<?> producer = new CollectionProducer<>(getType(), property.getType(), instance.sub(property),
                 factory.getFactorySet(), jFactory);
+        if (isAutoProduce())
+            producer.autoProduce();
         setChild(property.getName(), producer);
         return producer;
     }
@@ -281,6 +287,12 @@ class ObjectProducer<T> extends Producer<T> {
 
     public Optional<String> reverseAssociation(PropertyChain property) {
         return Optional.ofNullable(reverseAssociations.get(property));
+    }
+
+    @Override
+    protected void autoProduce() {
+        super.autoProduce();
+        children.values().forEach(Producer::autoProduce);
     }
 }
 

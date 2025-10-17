@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.GenericBeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.util.CollectionHelper.reify;
 import static com.github.leeonky.util.Sneaky.cast;
 import static java.lang.String.format;
 import static java.util.Optional.of;
@@ -69,10 +69,12 @@ public class PropertySpec<T> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
-                    propertyWriter = propertyWriter.decorateType(GenericBeanClass.create(List.class, factory.getType().getGenericType()));
+//            TODO decorateType to List<T> Set<T> T[]?
+                    propertyWriter = propertyWriter.decorateType(reify(List.class, factory.getType().getGenericType()));
                 } else if (propertyWriter.getType().isCollection() && propertyWriter.getType().getElementType().is(Object.class)) {
                     Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
-                    propertyWriter = propertyWriter.decorateType(GenericBeanClass.create(propertyWriter.getType().getType(), factory.getType().getGenericType()));
+//            TODO decorateType to List<T> Set<T> T[]?
+                    propertyWriter = propertyWriter.decorateType(reify(propertyWriter.getType().getType(), factory.getType().getGenericType()));
                 }
                 CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
                         CollectionProducer.class).orElseThrow(() ->
@@ -153,7 +155,8 @@ public class PropertySpec<T> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Producer<?> element = producerFactory.apply(new ProducerFactoryContext(jFactory, objectProducer, "0", objectProducer.association(property.head().toString()), objectProducer));
-                    propertyWriter = propertyWriter.decorateType(GenericBeanClass.create(List.class, element.getType().getGenericType()));
+//            TODO decorateType to List<T> Set<T> T[]?
+                    propertyWriter = propertyWriter.decorateType(reify(List.class, element.getType().getGenericType()));
                 }
                 CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
                         CollectionProducer.class).orElseThrow(() ->
@@ -180,8 +183,7 @@ public class PropertySpec<T> {
     private <V> Producer<V> createCreateProducer(Builder<V> builder, Optional<Association> association) {
         DefaultBuilder<V> args = (DefaultBuilder<V>) builder.args(spec.params(property.toString()));
         args = args.setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance())));
-        return args.createProducer(association,
-                of(new ReverseAssociation(property.toString(), spec.instance())));
+        return new BuilderValueProducer<>(args, false);
     }
 
     public Spec<T> reverseAssociation(String association) {

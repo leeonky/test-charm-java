@@ -1,7 +1,6 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.GenericBeanClass;
 import com.github.leeonky.util.PropertyWriter;
 import com.github.leeonky.util.TypeReference;
 
@@ -12,6 +11,7 @@ import java.util.function.Predicate;
 
 import static com.github.leeonky.jfactory.DefaultBuilder.BuildFrom.SPEC;
 import static com.github.leeonky.jfactory.DefaultBuilder.BuildFrom.TYPE;
+import static com.github.leeonky.util.CollectionHelper.reify;
 
 public class JFactory {
     final AliasSetStore aliasSetStore = new AliasSetStore();
@@ -69,7 +69,7 @@ public class JFactory {
 
     public <T, S extends Spec<T>, L extends List<T>> Builder<L> specs(Class<L> collectionType, Class<S> specClass) {
         Factory<T> specFactory = specFactory(specClass);
-        ObjectFactory<L> listFactory = new ObjectFactory<>(GenericBeanClass.create(collectionType,
+        ObjectFactory<L> listFactory = new ObjectFactory<>(reify(collectionType,
                 specFactory.getType().getType()), factorySet);
         listFactory.spec(ins -> ins.spec().property("[]").is(specClass));
         return new DefaultBuilder<>(listFactory, this, TYPE);
@@ -80,7 +80,7 @@ public class JFactory {
         if (specName.endsWith("[]")) {
             specName = specName.replace("[]", "");
             Factory<Object> specFactory = specFactory(specName);
-            ObjectFactory<?> listFactory = new ObjectFactory<>(GenericBeanClass.create(List.class, specFactory.getType().getType()), factorySet);
+            ObjectFactory<?> listFactory = new ObjectFactory<>(reify(List.class, specFactory.getType().getType()), factorySet);
             traitsAndSpec[traitsAndSpec.length - 1] = specName;
             listFactory.spec(ins -> ins.spec().property("[]").is(traitsAndSpec));
             return new DefaultBuilder(listFactory, this, TYPE);

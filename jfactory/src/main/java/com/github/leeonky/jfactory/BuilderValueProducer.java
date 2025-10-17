@@ -1,7 +1,5 @@
 package com.github.leeonky.jfactory;
 
-import com.github.leeonky.util.BeanClass;
-
 public class BuilderValueProducer<T> extends Producer<T> {
     //    TODO refactor
     final DefaultBuilder<T> builder;
@@ -15,9 +13,10 @@ public class BuilderValueProducer<T> extends Producer<T> {
 
     @Override
     protected T produce() {
-        return BeanClass.getConverter().convert(getType().getType(), builder.query());
+        throw new IllegalStateException("Should not produce any value");
     }
 
+    //    TODO full test for merge( queryFirst and !queryFirst, forQuery and !forQuery)
     @Override
     public Producer<T> changeTo(Producer<T> newProducer) {
         if (newProducer instanceof BuilderValueProducer) {
@@ -31,7 +30,7 @@ public class BuilderValueProducer<T> extends Producer<T> {
         if (newProducer instanceof ObjectProducer)
             return builder.marge(((ObjectProducer<T>) newProducer).builder).createProducer();
 //        TODO need test
-        return this;
+        return super.changeTo(newProducer);
     }
 
     @Override
@@ -42,9 +41,10 @@ public class BuilderValueProducer<T> extends Producer<T> {
     }
 
     //    TODO need test missing all test of this method() query in spec and should be created after merge input property
+//    TODO forQuery for builder.queryAll()
     @Override
-    protected Producer<?> changeToLast() {
-        if (queryFirst) {
+    protected Producer<?> changeToLast(boolean forQuery) {
+        if (!forQuery && queryFirst) {
             T result = builder.query();
             if (result != null)
                 return new FixedValueProducer<>(getType(), result);
