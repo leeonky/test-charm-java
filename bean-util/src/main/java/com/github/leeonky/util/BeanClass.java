@@ -171,7 +171,7 @@ public class BeanClass<T> {
 
     @Override
     public boolean equals(Object obj) {
-        return obj.getClass().equals(BeanClass.class) && Objects.equals(((BeanClass<?>) obj).getType(), type);
+        return obj != null && obj.getClass().equals(BeanClass.class) && Objects.equals(((BeanClass<?>) obj).getType(), type);
     }
 
     @SuppressWarnings("unchecked")

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 class CollectionExpression<P, E> extends Expression<P> {
     private final Map<Integer, Expression<E>> children = new LinkedHashMap<>();
 
-    public CollectionExpression(Property<P> property, int index, Expression<E> elementExpression, boolean forQuery) {
+    public CollectionExpression(Property<P> property, int index, Expression<E> elementExpression) {
         super(property);
         children.put(index, elementExpression);
     }
@@ -33,18 +33,13 @@ class CollectionExpression<P, E> extends Expression<P> {
     @Override
     @SuppressWarnings("unchecked")
     public Producer<?> buildProducer(JFactory jFactory, Producer<P> parent) {
-//        if (parent.childForUpdate(property.getName()) instanceof CollectionProducer) {
         CollectionProducer<?, E> producer = (CollectionProducer<?, E>) parent.childForUpdate(property.getName());
         groupByAdjustedPositiveAndNegativeIndexExpression(producer).forEach((index, expressions) ->
                 producer.changeChild(index.toString(), merge(expressions).buildProducer(jFactory, producer)));
         return producer;
-//        } else {
-//            children.forEach((index, expression) ->
-//                    value.changeChild(index.toString(), expression.buildProducer(jFactory, value)));
-//        }
-//        return parent.childForUpdate(property.getName());
     }
 
+    // TODO missing test [-1] [3] should process positive index first?  but [0] [-2] also incorrect
     private Map<Integer, List<Expression<E>>> groupByAdjustedPositiveAndNegativeIndexExpression(
             CollectionProducer<?, E> collectionProducer) {
         Map<Integer, List<Expression<E>>> result = new LinkedHashMap<>();

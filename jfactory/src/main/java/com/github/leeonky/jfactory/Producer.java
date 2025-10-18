@@ -34,8 +34,7 @@ abstract class Producer<T> {
         return Optional.empty();
     }
 
-    //TODO return new producer
-//    TODO  move Auto resolve builder in objectProducer / collectionProducer setchild
+    //    TODO  move Auto resolve builder in objectProducer / collectionProducer setchild
     protected Producer<?> setChild(String property, Producer<?> producer) {
         return producer;
     }

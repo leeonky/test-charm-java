@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.util.CollectionHelper.convert;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.util.Arrays.asList;
@@ -125,6 +126,31 @@ public class CollectionHelperTest {
         void array_and_list() {
             assertThat(CollectionHelper.equals(new int[]{1, 2}, asList(1, 2))).isTrue();
             assertThat(CollectionHelper.equals(new int[]{1, 2}, asList(1, 3))).isFalse();
+        }
+    }
+
+    @Nested
+    class Reify {
+
+        @Test
+        void reify_array() {
+            BeanClass<?> reify = CollectionHelper.reify(Object[].class, Integer.class);
+
+            expect(reify).should(": {collection: true, elementType.type.simpleName= Integer, type.array: true}");
+        }
+
+        @Test
+        void reify_list() {
+            BeanClass<?> reify = CollectionHelper.reify(List.class, String.class);
+
+            expect(reify).should(": {collection: true, elementType.type.simpleName= String, type.simpleName= List}");
+        }
+
+        @Test
+        void reify_set() {
+            BeanClass<?> reify = CollectionHelper.reify(Set.class, String.class);
+
+            expect(reify).should(": {collection: true, elementType.type.simpleName= String, type.simpleName= Set}");
         }
     }
 }

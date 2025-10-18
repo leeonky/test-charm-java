@@ -79,7 +79,6 @@ public class CollectionHelper {
         return convert(obj1, create(List.class)).equals(convert(obj2, create(List.class)));
     }
 
-    //    TODO missing test
     @SuppressWarnings("unchecked")
     public static <T> BeanClass<T> reify(Class<?> original, Type elementType) {
         if (original.isArray())

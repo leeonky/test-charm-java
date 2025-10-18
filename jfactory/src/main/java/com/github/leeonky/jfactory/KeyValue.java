@@ -80,7 +80,6 @@ class KeyValue {
 //                && (property.getWriterType().is(Object.class) || property.getWriterType().isCollection())
         ) {
             SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
-//            TODO decorateType to List<T> Set<T> T[]?
             property = property.decorateType(reify(
                     property.getWriterType().isCollection() ? property.getWriterType().getType() :
                             List.class, specFactory.getType().getGenericType()));
@@ -121,7 +120,7 @@ class KeyValue {
             return new SubObjectExpression<>(new KeyValueCollection().append(index + "." + clause, value), elementTraitSpec, property, objectFactory, subProducer, forQuery);
         }
         return new CollectionExpression<>(property, intIndex,
-                createSubExpression(propertySub, property, objectFactory, subProducer, forQuery, elementTraitSpec), forQuery);
+                createSubExpression(propertySub, property, objectFactory, subProducer, forQuery, elementTraitSpec));
     }
 
 

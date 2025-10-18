@@ -69,7 +69,6 @@ class CollectionProducer<T, C> extends Producer<C> {
         return index < 0 ? children.size() + index : index;
     }
 
-    //    TODO use recursion in setChild
     public int fillCollectionWithDefaultValue(int index) {
         int changed = 0;
         if (index >= 0) {

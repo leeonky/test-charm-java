@@ -69,11 +69,9 @@ public class PropertySpec<T> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
-//            TODO decorateType to List<T> Set<T> T[]?
                     propertyWriter = propertyWriter.decorateType(reify(List.class, factory.getType().getGenericType()));
                 } else if (propertyWriter.getType().isCollection() && propertyWriter.getType().getElementType().is(Object.class)) {
                     Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
-//            TODO decorateType to List<T> Set<T> T[]?
                     propertyWriter = propertyWriter.decorateType(reify(propertyWriter.getType().getType(), factory.getType().getGenericType()));
                 }
                 CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
@@ -155,7 +153,6 @@ public class PropertySpec<T> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Producer<?> element = producerFactory.apply(new ProducerFactoryContext(jFactory, objectProducer, "0", objectProducer.association(property.head().toString()), objectProducer));
-//            TODO decorateType to List<T> Set<T> T[]?
                     propertyWriter = propertyWriter.decorateType(reify(List.class, element.getType().getGenericType()));
                 }
                 CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
