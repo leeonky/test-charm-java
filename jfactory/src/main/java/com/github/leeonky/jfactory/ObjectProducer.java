@@ -54,7 +54,6 @@ class ObjectProducer<T> extends Producer<T> {
         resolveBuilderValueProducer(forQuery);
         instance.spec.applyPropertyStructureDefinitions(jFactory, this);
         processListStructures();
-//        resolveBuilderValueProducer(forQuery);
         setupReverseAssociations();
 
 //        reverseAssociation.ifPresent(reverseAssociation1 -> {
@@ -99,7 +98,6 @@ class ObjectProducer<T> extends Producer<T> {
                         .forEach((PropertyWriter<T> propertyWriter) ->
                                 setChild(propertyWriter.getName(), newElementPopulationProducer(propertyWriter)));
             });
-//            resolveBuilderValueProducer(false);
         } catch (Exception ignore) {
         }
     }
@@ -223,16 +221,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     public Producer<T> changeTo(Producer<T> newProducer) {
-//        TODO move logic to merge BuilderValueProducer
-        if (newProducer instanceof BuilderValueProducer) {
-            return new BuilderValueProducer<>(builder.marge(((BuilderValueProducer) newProducer).builder), ((BuilderValueProducer) newProducer).queryFirst);
-        }
         return newProducer.changeFrom(this);
-    }
-
-    @Override
-    protected Producer<T> changeFrom(ObjectProducer<T> origin) {
-        return origin.builder.marge(builder).createProducer();
     }
 
     public void appendReverseAssociation(PropertyChain property, String association) {

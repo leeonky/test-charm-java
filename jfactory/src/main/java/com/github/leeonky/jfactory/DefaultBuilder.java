@@ -62,13 +62,6 @@ class DefaultBuilder<T> implements Builder<T> {
         return objectFactory.getType();
     }
 
-    @Override
-    @Deprecated
-    public ObjectProducer<T> createProducer(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
-        return new ObjectProducer<>(jFactory, objectFactory, this, association, reverseAssociation);
-    }
-
-    @Override
     public ObjectProducer<T> createProducer() {
         return new ObjectProducer<>(jFactory, objectFactory, this, association, reverseAssociation);
     }

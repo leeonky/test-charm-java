@@ -95,7 +95,7 @@ class CollectionProducer<T, C> extends Producer<C> {
             PropertyWriter<C> propertyWriter = getType().getPropertyWriter(property);
             return setChild(property, getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
                     () -> newDefaultValueProducer(propertyWriter))
-                    .orElseGet(() -> jFactory.type(propertyWriter.getType()).createProducer()));
+                    .orElseGet(() -> new BuilderValueProducer<>(jFactory.type(propertyWriter.getType()), false)));
         });
     }
 

@@ -114,7 +114,7 @@ public class DefaultListStructure<T, C extends Coordinate> implements ListStruct
                     Optional<Producer<?>> child = producer.getChild(property.tail());
                     if (!child.isPresent() || child.get() instanceof DefaultValueProducer)
                         producer.changeChild(property.tail(),
-                                producerCreator.apply(jFactory, producer.getType().getElementType()).createProducer());
+                                new BuilderValueProducer<>(producerCreator.apply(jFactory, producer.getType().getElementType()), false));
                 }
             }
         }

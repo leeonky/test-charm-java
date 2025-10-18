@@ -5,7 +5,6 @@ import com.github.leeonky.util.BeanClass;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public interface Builder<T> {
 
@@ -26,11 +25,6 @@ public interface Builder<T> {
     Collection<T> queryAll();
 
     Builder<T> traits(String... traits);
-
-    @Deprecated
-    Producer<T> createProducer(Optional<Association> association, Optional<ReverseAssociation> reverseAssociation);
-
-    Producer<T> createProducer();
 
     Builder<T> arg(String key, Object value);
 

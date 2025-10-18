@@ -27,13 +27,13 @@ class ProducerTest {
                 .property("unfixed2").value("")
                 .link("link1", "link2")
         );
-        beanProducer = (ObjectProducer<Bean>) JFactory.type(Bean.class)
+        beanProducer = ((DefaultBuilder<Bean>) JFactory.type(Bean.class)
                 .property("inputString1", "a string")
                 .property("inputString2", "a string")
                 .property("subObj1.defaultString1", "1")
                 .property("subObj2.defaultString1", "2")
                 .property("readonly1", new Bean())
-                .property("readonly2", new Bean())
+                .property("readonly2", new Bean()))
                 .createProducer();
         beanProducer.processConsistent();
     }

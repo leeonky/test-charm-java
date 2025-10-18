@@ -86,7 +86,10 @@ class KeyValue {
             subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
             if (subProducer instanceof CollectionProducer)
                 ((CollectionProducer<?, ?>) subProducer).changeElementPopulationFactory(i ->
-                        traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()).createProducer());
+                                new BuilderValueProducer<>(
+                                        traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()), true)
+//                                .createProducer()
+                );
             if (subProducer == null)
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else {

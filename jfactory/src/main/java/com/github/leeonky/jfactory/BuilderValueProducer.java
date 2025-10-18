@@ -1,9 +1,8 @@
 package com.github.leeonky.jfactory;
 
 public class BuilderValueProducer<T> extends Producer<T> {
-    //    TODO refactor
-    final DefaultBuilder<T> builder;
-    final boolean queryFirst;
+    private final DefaultBuilder<T> builder;
+    private final boolean queryFirst;
 
     public BuilderValueProducer(Builder<T> builder, boolean queryFirst) {
         super(builder.getType());
@@ -20,15 +19,9 @@ public class BuilderValueProducer<T> extends Producer<T> {
     @Override
     public Producer<T> changeTo(Producer<T> newProducer) {
         if (newProducer instanceof BuilderValueProducer) {
-            if (builder instanceof DefaultBuilder && ((BuilderValueProducer<Object>) newProducer).builder instanceof DefaultBuilder) {
-                DefaultBuilder<T> marge = builder.marge((DefaultBuilder<T>) ((BuilderValueProducer<Object>) newProducer).builder);
-                return new BuilderValueProducer<>(marge, true);
-            }
-//        TODO need test
-            return newProducer;
+            DefaultBuilder<T> marge = builder.marge(((BuilderValueProducer<T>) newProducer).builder);
+            return new BuilderValueProducer<>(marge, true);
         }
-        if (newProducer instanceof ObjectProducer)
-            return builder.marge(((ObjectProducer<T>) newProducer).builder).createProducer();
 //        TODO need test
         return super.changeTo(newProducer);
     }
@@ -36,7 +29,7 @@ public class BuilderValueProducer<T> extends Producer<T> {
     @Override
     protected Producer<T> changeFrom(OptionalSpecDefaultValueProducer<T> producer) {
         if (producer.getTraitsAndSpec() != null)
-            return producer.builder().marge(builder).createProducer();
+            return new BuilderValueProducer<>(producer.builder().marge(builder), queryFirst);
         return this;
     }
 
