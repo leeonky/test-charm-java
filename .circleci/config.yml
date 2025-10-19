@@ -57,7 +57,7 @@ jobs:
               exit 0
             fi
             echo "====== Release and tag new version $PUB_VERSION ======"
-            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+            ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository --info
             git config --global user.email "leeonky@gmail.com"
             git config --global user.name "leeonky"
             git tag ${PUB_VERSION} -a -m 'CI Release'
