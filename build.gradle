@@ -7,7 +7,7 @@ plugins {
 
 task currentVersion {
     doLast {
-        println libs.versions.project
+        println libs.versions.project.get()
     }
 }
 
