@@ -24,10 +24,6 @@ nexusPublishing {
 }
 
 subprojects {
-    ext {
-        projectName = project.projectDir.name
-    }
-
     jacoco {
         toolVersion = "0.8.2"
     }
@@ -99,9 +95,9 @@ subprojects {
 //                artifact sourcesJar
 //                artifact javadocJar
                 pom {
-                    name = projectName
-                    description = projectName
-                    url = 'https://github.com/leeonky/test-charm-java/' + projectName
+                    name = project.name
+                    description = project.name
+                    url = 'https://github.com/leeonky/test-charm-java/' + project.name
 
                     licenses {
                         license {
@@ -137,7 +133,7 @@ subprojects {
     }
 
     def enablePitest = { name, target, excluded ->
-        if (projectName == name) {
+        if (project.name == name) {
             project.apply plugin: 'info.solidsoft.pitest'
 
             project.dependencies {
@@ -155,9 +151,9 @@ subprojects {
             task uploadPitestReport {
                 doLast {
                     def baseUrl = 'https://dashboard.stryker-mutator.io'
-                    def url = new URL("${baseUrl}/api/reports/github.com/leeonky/test-charm-java/main?module=${projectName}")
+                    def url = new URL("${baseUrl}/api/reports/github.com/leeonky/test-charm-java/main?module=${project.name}")
                     def connection = url.openConnection() as HttpURLConnection
-                    def reportFile = new File("${projectName}/build/reports/pitest/html2/report.js")
+                    def reportFile = new File("${project.name}/build/reports/pitest/html2/report.js")
                     def reportJson = reportFile.text.substring(60)
 
                     connection.requestMethod = "PUT"
@@ -189,7 +185,7 @@ subprojects {
     }
 
     def configCucumber = { name, glues ->
-        if (projectName == name) {
+        if (project.name == name) {
             dependencies {
                 testImplementation libs.test.cucumber
             }
@@ -205,7 +201,7 @@ subprojects {
                 cucumberArgs.add('--glue')
                 cucumberArgs.add(glue)
             }
-            cucumberArgs.add(projectName + '/src/test/resources/features')
+            cucumberArgs.add(project.name + '/src/test/resources/features')
 
             task cucumber() {
                 dependsOn assemble, testClasses
