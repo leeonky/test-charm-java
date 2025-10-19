@@ -1,9 +1,3 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
@@ -48,17 +42,20 @@ subprojects {
         toolchain {
             languageVersion = JavaLanguageVersion.of(8)
         }
+
+        withJavadocJar()
+        withSourcesJar()
     }
 
-    task javadocJar(type: Jar, dependsOn: classes) {
-        archiveClassifier.set('javadoc')
-        from javadoc.destinationDir
-    }
-
-    task sourcesJar(type: Jar, dependsOn: javadoc) {
-        archiveClassifier.set('sources')
-        from sourceSets.main.allSource
-    }
+//    task javadocJar(type: Jar, dependsOn: classes) {
+//        archiveClassifier.set('javadoc')
+//        from javadoc.destinationDir
+//    }
+//
+//    task sourcesJar(type: Jar, dependsOn: javadoc) {
+//        archiveClassifier.set('sources')
+//        from sourceSets.main.allSource
+//    }
 
     group = 'com.github.leeonky'
     version = libs.versions.project
@@ -72,7 +69,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
@@ -98,10 +94,10 @@ subprojects {
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                artifactId = projectName
                 from(components.java)
-                artifact sourcesJar
-                artifact javadocJar
+                artifactId = project.name
+//                artifact sourcesJar
+//                artifact javadocJar
                 pom {
                     name = projectName
                     description = projectName
