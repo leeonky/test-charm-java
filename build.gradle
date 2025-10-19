@@ -20,11 +20,11 @@ buildscript {
                         cucumber         : '6.10.4',
                         jackson          : '2.13.1',
                         jsonassert       : '1.5.0',
-                        pitest           : [
-                                plugin  : '1.19.0',
-                                elements: '1.19.0',
-                                junit5  : '1.2.1'
-                        ],
+//                        pitest           : [
+//                                plugin  : '1.15.0',
+//                                elements: '1.6.3',
+//                                junit5  : '1.2.1'
+//                        ],
                         zip4j            : '2.10.0',
                         awaitility       : '3.0.0',
                         cucumberJunit    : '5.1.1',
@@ -110,6 +110,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
