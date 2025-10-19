@@ -1,6 +1,5 @@
 plugins {
     id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.8.2'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 //    id "info.solidsoft.pitest" version '1.19.0-rc.2'
 }
@@ -32,7 +31,6 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'maven-publish'
     apply plugin: 'jacoco'
-    apply plugin: 'com.github.kt3k.coveralls'
 
     java {
         toolchain {
@@ -43,22 +41,12 @@ subprojects {
         withSourcesJar()
     }
 
-//    task javadocJar(type: Jar, dependsOn: classes) {
-//        archiveClassifier.set('javadoc')
-//        from javadoc.destinationDir
-//    }
-//
-//    task sourcesJar(type: Jar, dependsOn: javadoc) {
-//        archiveClassifier.set('sources')
-//        from sourceSets.main.allSource
-//    }
-
     group = 'com.github.leeonky'
     version = libs.versions.project.get()
 
     jacocoTestReport {
         reports {
-            xml.required = true // for coveralls
+            xml.required = true // for coverage tool
             html.required = true
         }
     }
@@ -131,10 +119,6 @@ subprojects {
                 System.getenv("SIGNING_PASSWORD")
         )
         sign publishing.publications.mavenJava
-    }
-
-    tasks.coveralls {
-        dependsOn jacocoTestReport
     }
 
     def enablePitest = { name, target, excluded ->
@@ -269,4 +253,13 @@ project(":page-flow") {
         mustRunAfter(":page-flow-playwright:test")
         mustRunAfter(":page-flow-selenium:test")
     }
+}
+
+task uploadCodecov(type: Exec) {
+    dependsOn subprojects.test, subprojects.jacocoTestReport
+
+    commandLine 'bash', '-c', '''
+        bash <(curl -s https://uploader.codecov.io/latest/linux/codecov) \
+        -t ${CODECOV_TOKEN}
+    '''
 }

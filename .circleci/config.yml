@@ -9,7 +9,7 @@ jobs:
           name: test
           command: |
             echo '127.0.0.1 www.a.com' >> /etc/hosts
-            ./gradlew testModuleSafe -x test
+            ./gradlew testModuleSafe
       - store_artifacts:
           path: build/tests-module-safe/
           destination: build-reports-java9-module-safe
@@ -23,7 +23,7 @@ jobs:
           name: test
           command: |
             echo '127.0.0.1 www.a.com' >> /etc/hosts
-            ./gradlew testRequiresAddOpens -x test
+            ./gradlew testRequiresAddOpens
       - store_artifacts:
           path: build/tests-requires-add-open/
           destination: build-reports-java9-requires-add-opens
@@ -50,7 +50,7 @@ jobs:
           command: |
             export CI=true
             export DAL_INSPECTOR_WAITING_TIME=30000
-            ./gradlew test build -x test --parallel
+            ./gradlew test build uploadCodecov --parallel
             export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
               echo "====== Still version ${PUB_VERSION}, CI done ======"
