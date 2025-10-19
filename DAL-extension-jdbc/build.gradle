@@ -1,18 +1,15 @@
 dependencies {
     implementation project(':DAL-java')
-    implementation "org.javalite:javalite-common:${versions.prod.javalite}"
+    implementation libs.prod.javalite
+
     testImplementation project(':jfactory')
     testImplementation project(':jfactory-cucumber')
     testImplementation project(':jfactory-repo-jpa')
-
-    testImplementation "io.cucumber:cucumber-junit:${versions.test.cucumberJunit}"
-    testImplementation "io.cucumber:cucumber-picocontainer:${versions.test.cucumberJunit}"
-
-    testImplementation "com.h2database:h2:${versions.test.h2}"
-
-    testImplementation "javax.persistence:javax.persistence-api:${versions.test.jpa}"
-    testImplementation "org.hibernate:hibernate-core:${versions.test.hibernate}"
-    testImplementation "org.hibernate:hibernate-entitymanager:${versions.test.hibernate}"
-
     testImplementation project(':DAL-extension-basic')
+    testImplementation libs.test.cucumber.junit
+    testImplementation libs.test.cucumber.picocontainer
+    testImplementation libs.test.h2
+    testImplementation libs.test.jpa
+    testImplementation libs.test.hibernate
+    testImplementation libs.test.hibernate.entitymanager
 }

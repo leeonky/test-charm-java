@@ -1,5 +1,5 @@
 dependencies {
-    implementation "ma.glasnost.orika:orika-core:${versions.prod.orika}"
-    implementation "org.reflections:reflections:${versions.prod.reflections}"
+    implementation libs.prod.orika
+    implementation libs.prod.reflections
     implementation project(':bean-util')
 }

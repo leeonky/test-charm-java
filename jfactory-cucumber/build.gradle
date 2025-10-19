@@ -3,16 +3,15 @@ dependencies {
     api project(':DAL-java')
     implementation project(':jfactory-property-value')
     implementation project(':DAL-extension-jfactory')
-
-    implementation "io.cucumber:cucumber-java:${versions.prod.cucumber}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:${versions.prod.jackson}"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${versions.prod.jackson}"
+    implementation libs.prod.cucumber
+    implementation libs.prod.jackson.databind
+    implementation libs.prod.jackson.yaml
 
     testImplementation project(':jfactory-repo-jpa')
-    testImplementation "io.cucumber:cucumber-junit:${versions.test.cucumberJunit}"
-    testImplementation "io.cucumber:cucumber-picocontainer:${versions.test.cucumberJunit}"
-    testImplementation "org.hibernate:hibernate-core:${versions.test.hibernate}"
-    testImplementation "org.hibernate:hibernate-entitymanager:${versions.test.hibernate}"
-    testImplementation "com.h2database:h2:${versions.test.h2}"
-    testImplementation("com.google.guava:guava:${versions.test.guava}")
+    testImplementation libs.test.cucumber.junit
+    testImplementation libs.test.cucumber.picocontainer
+    testImplementation libs.test.h2
+    testImplementation libs.test.hibernate
+    testImplementation libs.test.hibernate.entitymanager
+    testImplementation libs.test.guava
 }

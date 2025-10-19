@@ -2,10 +2,7 @@ dependencies {
     api project(':bean-util')
     api project(':interpreter-core')
 
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:${versions.test.jackson}"
-
-//    TODO remove
-    testImplementation "org.skyscreamer:jsonassert:${versions.test.jsonassert}"
-
     testImplementation project(':java-compiler-util')
+    testImplementation libs.test.jackson.databind
+    testImplementation libs.test.jsonassert
 }

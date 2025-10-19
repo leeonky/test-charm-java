@@ -1,9 +1,10 @@
 dependencies {
     implementation project(':DAL-java')
-    implementation "com.jcraft:jsch:${versions.prod.jsch}"
-    implementation "org.yaml:snakeyaml:${versions.prod.snakeyaml}"
-    testImplementation "net.lingala.zip4j:zip4j:${versions.test.zip4j}"
-    testImplementation "org.awaitility:awaitility:${versions.test.awaitility}"
+    implementation libs.prod.jsch
+    implementation libs.prod.snakeyaml
+
+    testImplementation libs.test.zip4j
+    testImplementation libs.test.awaitility
     testImplementation project(':java-compiler-util')
 }
 

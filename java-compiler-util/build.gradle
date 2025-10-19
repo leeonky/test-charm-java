@@ -1,5 +1,6 @@
 dependencies {
     api project(':bean-util')
-    annotationProcessor "org.projectlombok:lombok:${versions.test.lombok}"
-    api "org.projectlombok:lombok:${versions.test.lombok}"
+
+    annotationProcessor libs.test.lombok
+    api libs.test.lombok
 }

@@ -1,8 +1,8 @@
 dependencies {
     implementation project(':jfactory')
-    implementation "javax.persistence:javax.persistence-api:${versions.test.jpa}"
+    implementation libs.prod.jpa
 
-    testImplementation "org.hibernate:hibernate-core:${versions.test.hibernate}"
-    testImplementation "org.hibernate:hibernate-entitymanager:${versions.test.hibernate}"
-    testImplementation "com.h2database:h2:${versions.test.h2}"
+    testImplementation libs.test.h2
+    testImplementation libs.test.hibernate
+    testImplementation libs.test.hibernate.entitymanager
 }

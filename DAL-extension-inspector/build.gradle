@@ -1,11 +1,12 @@
 dependencies {
     implementation project(':DAL-java')
-    implementation 'io.javalin:javalin:4.6.8'
-    implementation("org.apache.tika:tika-core:1.28.5")
-    testImplementation 'org.slf4j:slf4j-simple:2.0.17'
+    implementation libs.prod.javalin
+    implementation libs.prod.tika.core
+
     testImplementation project(':DAL-extension-basic')
     testImplementation project(':RESTful-cucumber')
     testImplementation project(':page-flow-selenium')
     testImplementation project(':page-flow-playwright')
-    testImplementation "org.awaitility:awaitility:4.0.2"
+    testImplementation libs.test.awaitility
+    testImplementation libs.test.slf4j.simple
 }

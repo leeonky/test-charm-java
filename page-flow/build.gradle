@@ -1,11 +1,11 @@
 dependencies {
     api project(':DAL-java')
-    api 'org.slf4j:slf4j-api:2.0.17'
     api project(':DAL-extension-basic')
+    api libs.prod.slf4j.api
 
-    testImplementation("com.github.valfirst:slf4j-test:3.0.0")
     testImplementation project(':page-flow-playwright')
     testImplementation project(':page-flow-selenium')
-    testImplementation 'io.javalin:javalin:4.6.8'
-    testImplementation group: 'de.neuland-bfi', name: 'pug4j', version: '2.3.1'
+    testImplementation libs.test.javalin
+    testImplementation libs.test.slf4j.test
+    testImplementation libs.test.pug4j
 }

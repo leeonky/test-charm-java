@@ -1,42 +1,4 @@
 buildscript {
-    ext {
-        versions = [
-                project: '0.8.1-alpha.24',
-                prod   : [
-                        jsch       : '0.1.55',
-                        snakeyaml  : '2.0',
-                        javalite   : '1.2.2',
-                        jpa        : '2.2',
-                        cucumber   : '6.10.4',
-                        jackson    : '2.9.0',
-                        orika      : '1.5.4',
-                        reflections: '0.9.11'
-                ],
-                test   : [
-                        junit            : '5.3.1',
-                        assertj          : '3.21.0',
-                        mockito          : '4.0.0',
-                        lombok           : '1.18.4',
-                        cucumber         : '6.10.4',
-                        jackson          : '2.13.1',
-                        jsonassert       : '1.5.0',
-//                        pitest           : [
-//                                plugin  : '1.15.0',
-//                                elements: '1.6.3',
-//                                junit5  : '1.2.1'
-//                        ],
-                        zip4j            : '2.10.0',
-                        awaitility       : '3.0.0',
-                        cucumberJunit    : '5.1.1',
-                        h2               : '1.4.200',
-                        jpa              : '2.2',
-                        hibernate        : '5.4.0.Final',
-                        guava            : '20.0',
-                        mockserver       : '5.11.2',
-                        commonsFileupload: '1.4',
-                ]
-        ]
-    }
     repositories {
         mavenCentral()
     }
@@ -51,7 +13,7 @@ plugins {
 
 task currentVersion {
     doLast {
-        println versions.project
+        println libs.versions.project
     }
 }
 
@@ -99,7 +61,7 @@ subprojects {
     }
 
     group = 'com.github.leeonky'
-    version = versions.project
+    version = libs.versions.project
 
     jacocoTestReport {
         reports {
@@ -114,17 +76,16 @@ subprojects {
     }
 
     dependencies {
-        testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.test.junit}"
-        testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.test.junit}"
-        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.test.junit}"
-        testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.3.1"
+        testImplementation libs.test.junit
+        testImplementation libs.test.junit.params
+        testRuntimeOnly libs.test.junit.engine
+        testRuntimeOnly libs.test.junit.platform.launcher
 
-        testImplementation "org.mockito:mockito-inline:${versions.test.mockito}"
+        testImplementation libs.test.mockito.inline
+        testImplementation libs.test.assertj
 
-        testImplementation "org.assertj:assertj-core:${versions.test.assertj}"
-
-        testAnnotationProcessor "org.projectlombok:lombok:${versions.test.lombok}"
-        testImplementation "org.projectlombok:lombok:${versions.test.lombok}"
+        testImplementation libs.test.lombok
+        testAnnotationProcessor libs.test.lombok
     }
 
     test {
@@ -234,7 +195,7 @@ subprojects {
     def configCucumber = { name, glues ->
         if (projectName == name) {
             dependencies {
-                testImplementation "io.cucumber:cucumber-java:${versions.test.cucumber}"
+                testImplementation libs.test.cucumber
             }
 
             configurations {
