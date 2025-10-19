@@ -21,9 +21,9 @@ buildscript {
                         jackson          : '2.13.1',
                         jsonassert       : '1.5.0',
                         pitest           : [
-                                plugin  : '1.15.0',
-                                elements: '0.6.3',
-                                junit5  : '1.0.0'
+                                plugin  : '1.19.0',
+                                elements: '1.19.0',
+                                junit5  : '1.2.1'
                         ],
                         zip4j            : '2.10.0',
                         awaitility       : '3.0.0',
@@ -40,15 +40,13 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath "info.solidsoft.gradle.pitest:gradle-pitest-plugin:${versions.test.pitest.plugin}"
-    }
 }
 
 plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
+//    id "info.solidsoft.pitest" version '1.19.0-rc.2'
 }
 
 task currentVersion {
@@ -78,30 +76,35 @@ subprojects {
         toolVersion = "0.8.2"
     }
 
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'signing'
     apply plugin: 'maven-publish'
     apply plugin: 'jacoco'
     apply plugin: 'com.github.kt3k.coveralls'
 
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(8)
+        }
+    }
+
     task javadocJar(type: Jar, dependsOn: classes) {
-        classifier 'javadoc'
+        archiveClassifier.set('javadoc')
         from javadoc.destinationDir
     }
 
     task sourcesJar(type: Jar, dependsOn: javadoc) {
-        classifier 'sources'
+        archiveClassifier.set('sources')
         from sourceSets.main.allSource
     }
 
     group = 'com.github.leeonky'
     version = versions.project
-    sourceCompatibility = 1.8
 
     jacocoTestReport {
         reports {
-            xml.enabled = true // for coveralls
-            html.enabled = true
+            xml.required = true // for coveralls
+            html.required = true
         }
     }
 
@@ -113,13 +116,14 @@ subprojects {
         testImplementation "org.junit.jupiter:junit-jupiter-api:${versions.test.junit}"
         testImplementation "org.junit.jupiter:junit-jupiter-params:${versions.test.junit}"
         testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${versions.test.junit}"
+        testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.3.1"
 
         testImplementation "org.mockito:mockito-inline:${versions.test.mockito}"
 
         testImplementation "org.assertj:assertj-core:${versions.test.assertj}"
 
         testAnnotationProcessor "org.projectlombok:lombok:${versions.test.lombok}"
-        testCompile "org.projectlombok:lombok:${versions.test.lombok}"
+        testImplementation "org.projectlombok:lombok:${versions.test.lombok}"
     }
 
     test {
@@ -259,8 +263,8 @@ subprojects {
         }
     }
 
-    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
-    enablePitest('interpreter-core', ['com.github.leeonky.interpreter.*'], [])
+//    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
+//    enablePitest('interpreter-core', ['com.github.leeonky.interpreter.*'], [])
 //    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
 //    enablePitest('DAL-extension-basic', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.cucumber.*'])
 //    enablePitest('DAL-extension-jdbc', ['com.github.leeonky.dal.*'], [])
@@ -286,8 +290,11 @@ subprojects {
 
     test {
         reports {
-            html.destination = file("${rootProject.buildDir}/tests/${project.name}")
-            junitXml.destination = file("${rootProject.buildDir}/tests/${project.name}")
+            html.required.set(true)
+            html.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}/html"))
+
+            junitXml.required.set(true)
+            junitXml.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}/xml"))
         }
     }
 }

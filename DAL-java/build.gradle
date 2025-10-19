@@ -1,6 +1,6 @@
 dependencies {
-    compile project(':bean-util')
-    compile project(':interpreter-core')
+    api project(':bean-util')
+    api project(':interpreter-core')
 
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${versions.test.jackson}"
 

@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':bean-util')
+    api project(':bean-util')
 
     testImplementation project(':DAL-java')
     testImplementation project(':DAL-extension-basic')

@@ -1,6 +1,6 @@
 dependencies {
-    compile project(':jfactory')
-    compile project(':DAL-java')
+    api project(':jfactory')
+    api project(':DAL-java')
     implementation project(':jfactory-property-value')
     implementation project(':DAL-extension-jfactory')
 

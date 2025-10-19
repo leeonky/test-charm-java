@@ -1,7 +1,7 @@
 dependencies {
-    compile project(':DAL-java')
-    compile 'org.slf4j:slf4j-api:2.0.17'
-    compile project(':DAL-extension-basic')
+    api project(':DAL-java')
+    api 'org.slf4j:slf4j-api:2.0.17'
+    api project(':DAL-extension-basic')
 
     testImplementation("com.github.valfirst:slf4j-test:3.0.0")
     testImplementation project(':page-flow-playwright')
