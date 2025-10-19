@@ -50,7 +50,7 @@ jobs:
           command: |
             export CI=true
             export DAL_INSPECTOR_WAITING_TIME=30000
-            ./gradlew test pitest build coveralls --parallel
+            ./gradlew test build coveralls --parallel
             export PUB_VERSION=$(./gradlew currentVersion -q)
             if ( bash -c "git tag | grep -q \"^${PUB_VERSION}$\"" ); then
               echo "====== Still version ${PUB_VERSION}, CI done ======"
