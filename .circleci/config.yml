@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   test-in-java9-module-safe:
     docker:
-      - image: openjdk:9
+      - image: openjdk:17
     steps:
       - checkout
       - run:
@@ -16,7 +16,7 @@ jobs:
 
   test-in-java9-requires-add-opens:
     docker:
-      - image: openjdk:9
+      - image: openjdk:17
     steps:
       - checkout
       - run:
