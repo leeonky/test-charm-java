@@ -1,0 +1,141 @@
+subprojects {
+    dependencies {
+        testImplementation libs.test.junit
+        testImplementation libs.test.junit.params
+        testRuntimeOnly libs.test.junit.engine
+        testRuntimeOnly libs.test.junit.platform.launcher
+
+        testImplementation libs.test.mockito.inline
+        testImplementation libs.test.assertj
+
+        testImplementation libs.test.lombok
+        testAnnotationProcessor libs.test.lombok
+    }
+
+    test {
+        systemProperty("cucumber.publish.quiet", true)
+        useJUnitPlatform {
+            excludeTags("disabled")
+        }
+    }
+//    def enablePitest = { name, target, excluded ->
+//        if (project.name == name) {
+//            project.apply plugin: 'info.solidsoft.pitest'
+//
+//            project.dependencies {
+//                pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:${versions.test.pitest.elements}"
+//            }
+//
+//            project.pitest {
+//                targetClasses = target
+//                excludedClasses = excluded
+//                outputFormats = ['HTML', 'HTML2']
+//                threads = 8
+//                junit5PluginVersion = versions.test.pitest.junit5
+//            }
+//
+//            task uploadPitestReport {
+//                doLast {
+//                    def baseUrl = 'https://dashboard.stryker-mutator.io'
+//                    def url = new URL("${baseUrl}/api/reports/github.com/leeonky/test-charm-java/main?module=${project.name}")
+//                    def connection = url.openConnection() as HttpURLConnection
+//                    def reportFile = new File("${project.name}/build/reports/pitest/html2/report.js")
+//                    def reportJson = reportFile.text.substring(60)
+//
+//                    connection.requestMethod = "PUT"
+//                    connection.doOutput = true
+//                    connection.setRequestProperty("Content-Type", "application/json")
+//                    connection.setRequestProperty("Host", "dashboard.stryker-mutator.io")
+//                    connection.setRequestProperty("X-Api-Key", System.env.PI_KEY)
+//
+//                    connection.outputStream.withWriter("UTF-8") { writer ->
+//                        writer.write(reportJson)
+//                    }
+//
+//                    println "Response Code: ${connection.responseCode}"
+//                    println "Response Message: ${connection.responseMessage}"
+//
+//                    if (connection.responseCode == HttpURLConnection.HTTP_OK || connection.responseCode == HttpURLConnection.HTTP_CREATED) {
+//                        println 'Response content:'
+//                        println connection.inputStream.text
+//                    }
+//
+//                    connection.disconnect()
+//                }
+//            }
+//
+//            tasks.named('pitest').configure {
+//                finalizedBy 'uploadPitestReport'
+//            }
+//        }
+//    }
+
+//    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
+//    enablePitest('interpreter-core', ['com.github.leeonky.interpreter.*'], [])
+//    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
+//    enablePitest('DAL-extension-basic', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.cucumber.*'])
+//    enablePitest('DAL-extension-jdbc', ['com.github.leeonky.dal.*'], [])
+//    enablePitest('DAL-extension-jfactory', ['com.github.leeonky.dal.*'], [])
+//    enablePitest('jfactory', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.spec.*'])
+//    enablePitest('jfactory-repo-jpa', ['com.github.leeonky.jfactory.repo*'], ['com.github.leeonky.jfactory.repo.beans.*'])
+//    enablePitest('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber*'], ['com.github.leeonky.jfactory.cucumber.entity.*'])
+//    enablePitest('jfactory-property-value', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.specs.*', 'com.github.leeonky.jfactory.entity'])
+//    enablePitest('RESTful-cucumber', ['com.github.leeonky.cucumber.restful*'], [])
+
+    def configCucumber = { name, glues ->
+        if (project.name == name) {
+            dependencies {
+                testImplementation libs.test.cucumber
+            }
+
+            configurations {
+                cucumberRuntime {
+                    extendsFrom testImplementation
+                }
+            }
+
+            def cucumberArgs = ['--plugin', 'pretty']
+            for (glue in glues) {
+                cucumberArgs.add('--glue')
+                cucumberArgs.add(glue)
+            }
+            cucumberArgs.add(file("src/test/resources/features").absolutePath)
+            tasks.register('cucumber', JavaExec) {
+                dependsOn assemble, testClasses
+                environment('CUCUMBER_PUBLISH_QUIET', true)
+                mainClass = "io.cucumber.core.cli.Main"
+
+                classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+
+                args = cucumberArgs
+                standardInput = System.in
+            }
+        }
+    }
+
+    configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
+    configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
+    configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
+    configCucumber('DAL-extension-debugger', ['com.github.leeonky.dal.cucumber'])
+    configCucumber('DAL-extension-jdbc', ['com.github.leeonky'])
+    configCucumber('DAL-extension-jfactory', ['com.github.leeonky'])
+    configCucumber('DAL-extension-inspector', ['com.github.leeonky'])
+    configCucumber('jfactory', ['com.github.leeonky'])
+    configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
+    configCucumber('jfactory-property-value', ['com.github.leeonky'])
+    configCucumber('RESTful-cucumber', ['com.github.leeonky.cucumber.restful'])
+    configCucumber('page-flow', ['com.github.leeonky.pf.cucumber'])
+}
+
+project(":DAL-extension-inspector") {
+    tasks.named("test") {
+        mustRunAfter(":page-flow:test")
+    }
+}
+
+project(":page-flow") {
+    tasks.named("test") {
+        mustRunAfter(":page-flow-playwright:test")
+        mustRunAfter(":page-flow-selenium:test")
+    }
+}

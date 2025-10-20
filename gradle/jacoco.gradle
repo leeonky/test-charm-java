@@ -1,0 +1,68 @@
+subprojects {
+    apply plugin: 'jacoco'
+
+    jacoco {
+        toolVersion = libs.versions.jacoco.get()
+    }
+
+    tasks.withType(Test).configureEach {
+        finalizedBy(tasks.withType(JacocoReport))
+    }
+
+    tasks.withType(JacocoReport).configureEach {
+        reports {
+            xml.required = true
+            csv.required = false
+            html.required = true
+        }
+    }
+}
+
+tasks.register('jacocoRootReport', JacocoReport) {
+    group = "verification"
+    description = "Merge all subproject Jacoco reports into one."
+
+    dependsOn(subprojects.collect { it.tasks.withType(Test) })
+
+    def execFiles = files(subprojects.collect {
+        fileTree(dir: "${it.buildDir}", includes: ["jacoco/test.exec", "jacoco/test.exec.*"])
+    }).filter { it.exists() }
+
+    def allSourceDirs = files(subprojects.collect { it.sourceSets.main.allSource.srcDirs })
+    def allClassDirs = files(subprojects.collect { it.sourceSets.main.output })
+
+    executionData.from(execFiles)
+    additionalSourceDirs.from(allSourceDirs)
+    sourceDirectories.from(allSourceDirs)
+    classDirectories.from(allClassDirs)
+
+    reports {
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/jacocoRootReport.xml")
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir("reports/jacoco/html")
+    }
+}
+
+tasks.register("uploadCoverage", Exec) {
+    group = "verification"
+    description = "Upload merged Jacoco coverage report to Codecov"
+    dependsOn("jacocoRootReport")
+
+    def reportFile = layout.buildDirectory.file("reports/jacoco/jacocoRootReport.xml")
+    def token = System.getenv("CODECOV_TOKEN")
+
+    doFirst {
+        if (!reportFile.get().asFile.exists())
+            throw new GradleException("Coverage report not found: ${reportFile.get().asFile}")
+        if (!token)
+            throw new GradleException("Missing CODECOV_TOKEN environment variable")
+
+        def uploaderFile = file("${buildDir}/codecov")
+        ant.get(src: "https://uploader.codecov.io/latest/linux/codecov", dest: uploaderFile)
+        uploaderFile.setExecutable(true)
+
+        println "Uploading merged coverage report to Codecov..."
+        commandLine uploaderFile.absolutePath, "-t", token, "-f", reportFile.get().asFile, "-Z", "-F", "gradle"
+    }
+}

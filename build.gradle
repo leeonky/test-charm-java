@@ -1,36 +1,38 @@
 plugins {
     id 'jacoco'
-    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
+    alias(libs.plugins.nexus.publish)
 //    id "info.solidsoft.pitest" version '1.19.0-rc.2'
 }
+apply from: "$rootDir/gradle/jacoco.gradle"
+apply from: "$rootDir/gradle/publish.gradle"
+apply from: "$rootDir/gradle/test.gradle"
 
-task currentVersion {
-    doLast {
-        println libs.versions.project.get()
-    }
+tasks.register("currentVersion") {
+    doLast { println libs.versions.project.get() }
 }
 
 group = 'com.github.leeonky'
 
-nexusPublishing {
+//nexusPublishing {
+//    repositories {
+//        sonatype {
+//            username = System.env.ossrhUsername
+//            password = System.env.ossrhPassword
+//            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+//        }
+//    }
+//}
+
+allprojects {
     repositories {
-        sonatype {
-            username = System.env.ossrhUsername
-            password = System.env.ossrhPassword
-            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
-        }
+        mavenCentral()
     }
 }
 
 subprojects {
-    jacoco {
-        toolVersion = "0.8.2"
-    }
-
     apply plugin: 'java-library'
-    apply plugin: 'signing'
-    apply plugin: 'maven-publish'
-    apply plugin: 'jacoco'
+//    apply plugin: 'signing'
+//    apply plugin: 'maven-publish'
 
     java {
         toolchain {
@@ -44,222 +46,200 @@ subprojects {
     group = 'com.github.leeonky'
     version = libs.versions.project.get()
 
-    jacocoTestReport {
-        reports {
-            xml.required = true // for coverage tool
-            html.required = true
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
     dependencies {
-        testImplementation libs.test.junit
-        testImplementation libs.test.junit.params
-        testRuntimeOnly libs.test.junit.engine
-        testRuntimeOnly libs.test.junit.platform.launcher
-
-        testImplementation libs.test.mockito.inline
-        testImplementation libs.test.assertj
-
-        testImplementation libs.test.lombok
-        testAnnotationProcessor libs.test.lombok
+//        testImplementation libs.test.junit
+//        testImplementation libs.test.junit.params
+//        testRuntimeOnly libs.test.junit.engine
+//        testRuntimeOnly libs.test.junit.platform.launcher
+//
+//        testImplementation libs.test.mockito.inline
+//        testImplementation libs.test.assertj
+//
+//        testImplementation libs.test.lombok
+//        testAnnotationProcessor libs.test.lombok
     }
 
-    test {
-        systemProperty("cucumber.publish.quiet", true)
-        useJUnitPlatform {
-            excludeTags("disabled")
-        }
-    }
+//    test {
+//        systemProperty("cucumber.publish.quiet", true)
+//        useJUnitPlatform {
+//            excludeTags("disabled")
+//        }
+//    }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from(components.java)
-                artifactId = project.name
-//                artifact sourcesJar
-//                artifact javadocJar
-                pom {
-                    name = project.name
-                    description = project.name
-                    url = 'https://github.com/leeonky/test-charm-java/' + project.name
+//    publishing {
+//        publications {
+//            mavenJava(MavenPublication) {
+//                from(components.java)
+//                artifactId = project.name
+//                pom {
+//                    name = project.name
+//                    description = project.name
+//                    url = 'https://github.com/leeonky/test-charm-java/' + project.name
+//
+//                    licenses {
+//                        license {
+//                            name = 'The Apache License, Version 2.0'
+//                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                        }
+//                    }
+//
+//                    developers {
+//                        developer {
+//                            id = 'leeonky'
+//                            name = 'Liangchen'
+//                            email = 'leeonky@gmail.com'
+//                        }
+//                    }
+//
+//                    scm {
+//                        connection = 'scm:git:https://github.com/leeonky/test-charm-java.git'
+//                        developerConnection = 'scm:git:git@github.com:leeonky/test-charm-java.git'
+//                        url = 'https://github.com/leeonky/test-charm-java.git'
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
+//    signing {
+//        useInMemoryPgpKeys(
+//                System.getenv("SIGNING_KEY_ID"),
+//                System.getenv("SIGNING_KEY_IN_BASE64"),
+//                System.getenv("SIGNING_PASSWORD")
+//        )
+//        sign publishing.publications.mavenJava
+//    }
 
-                    developers {
-                        developer {
-                            id = 'leeonky'
-                            name = 'Liangchen'
-                            email = 'leeonky@gmail.com'
-                        }
-                    }
-
-                    scm {
-                        connection = 'scm:git:https://github.com/leeonky/test-charm-java.git'
-                        developerConnection = 'scm:git:git@github.com:leeonky/test-charm-java.git'
-                        url = 'https://github.com/leeonky/test-charm-java.git'
-                    }
-                }
-            }
-        }
-    }
-
-    signing {
-        useInMemoryPgpKeys(
-                System.getenv("SIGNING_KEY_ID"),
-                System.getenv("SIGNING_KEY_IN_BASE64"),
-                System.getenv("SIGNING_PASSWORD")
-        )
-        sign publishing.publications.mavenJava
-    }
-
-    def enablePitest = { name, target, excluded ->
-        if (project.name == name) {
-            project.apply plugin: 'info.solidsoft.pitest'
-
-            project.dependencies {
-                pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:${versions.test.pitest.elements}"
-            }
-
-            project.pitest {
-                targetClasses = target
-                excludedClasses = excluded
-                outputFormats = ['HTML', 'HTML2']
-                threads = 8
-                junit5PluginVersion = versions.test.pitest.junit5
-            }
-
-            task uploadPitestReport {
-                doLast {
-                    def baseUrl = 'https://dashboard.stryker-mutator.io'
-                    def url = new URL("${baseUrl}/api/reports/github.com/leeonky/test-charm-java/main?module=${project.name}")
-                    def connection = url.openConnection() as HttpURLConnection
-                    def reportFile = new File("${project.name}/build/reports/pitest/html2/report.js")
-                    def reportJson = reportFile.text.substring(60)
-
-                    connection.requestMethod = "PUT"
-                    connection.doOutput = true
-                    connection.setRequestProperty("Content-Type", "application/json")
-                    connection.setRequestProperty("Host", "dashboard.stryker-mutator.io")
-                    connection.setRequestProperty("X-Api-Key", System.env.PI_KEY)
-
-                    connection.outputStream.withWriter("UTF-8") { writer ->
-                        writer.write(reportJson)
-                    }
-
-                    println "Response Code: ${connection.responseCode}"
-                    println "Response Message: ${connection.responseMessage}"
-
-                    if (connection.responseCode == HttpURLConnection.HTTP_OK || connection.responseCode == HttpURLConnection.HTTP_CREATED) {
-                        println 'Response content:'
-                        println connection.inputStream.text
-                    }
-
-                    connection.disconnect()
-                }
-            }
-
-            tasks.named('pitest').configure {
-                finalizedBy 'uploadPitestReport'
-            }
-        }
-    }
-
-    def configCucumber = { name, glues ->
-        if (project.name == name) {
-            dependencies {
-                testImplementation libs.test.cucumber
-            }
-
-            configurations {
-                cucumberRuntime {
-                    extendsFrom testImplementation
-                }
-            }
-
-            def cucumberArgs = ['--plugin', 'pretty']
-            for (glue in glues) {
-                cucumberArgs.add('--glue')
-                cucumberArgs.add(glue)
-            }
-            cucumberArgs.add(project.name + '/src/test/resources/features')
-
-            task cucumber() {
-                dependsOn assemble, testClasses
-                doLast {
-                    javaexec {
-                        environment('CUCUMBER_PUBLISH_QUIET', true)
-                        main = "io.cucumber.core.cli.Main"
-                        classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
-                        args = cucumberArgs
-                    }
-                }
-            }
-        }
-    }
-
-//    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
-//    enablePitest('interpreter-core', ['com.github.leeonky.interpreter.*'], [])
-//    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
-//    enablePitest('DAL-extension-basic', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.cucumber.*'])
-//    enablePitest('DAL-extension-jdbc', ['com.github.leeonky.dal.*'], [])
-//    enablePitest('DAL-extension-jfactory', ['com.github.leeonky.dal.*'], [])
-//    enablePitest('jfactory', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.spec.*'])
-//    enablePitest('jfactory-repo-jpa', ['com.github.leeonky.jfactory.repo*'], ['com.github.leeonky.jfactory.repo.beans.*'])
-//    enablePitest('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber*'], ['com.github.leeonky.jfactory.cucumber.entity.*'])
-//    enablePitest('jfactory-property-value', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.specs.*', 'com.github.leeonky.jfactory.entity'])
-//    enablePitest('RESTful-cucumber', ['com.github.leeonky.cucumber.restful*'], [])
-
-    configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
-    configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
-    configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
-    configCucumber('DAL-extension-debugger', ['com.github.leeonky.dal.cucumber'])
-    configCucumber('DAL-extension-jdbc', ['com.github.leeonky'])
-    configCucumber('DAL-extension-jfactory', ['com.github.leeonky'])
-    configCucumber('DAL-extension-inspector', ['com.github.leeonky'])
-    configCucumber('jfactory', ['com.github.leeonky'])
-    configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
-    configCucumber('jfactory-property-value', ['com.github.leeonky'])
-    configCucumber('RESTful-cucumber', ['com.github.leeonky.cucumber.restful'])
-    configCucumber('page-flow', ['com.github.leeonky.pf.cucumber'])
-
-    test {
-        reports {
-            html.required.set(true)
-            html.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}/html"))
-
-            junitXml.required.set(true)
-            junitXml.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}/xml"))
-        }
-    }
+//    def enablePitest = { name, target, excluded ->
+//        if (project.name == name) {
+//            project.apply plugin: 'info.solidsoft.pitest'
+//
+//            project.dependencies {
+//                pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:${versions.test.pitest.elements}"
+//            }
+//
+//            project.pitest {
+//                targetClasses = target
+//                excludedClasses = excluded
+//                outputFormats = ['HTML', 'HTML2']
+//                threads = 8
+//                junit5PluginVersion = versions.test.pitest.junit5
+//            }
+//
+//            task uploadPitestReport {
+//                doLast {
+//                    def baseUrl = 'https://dashboard.stryker-mutator.io'
+//                    def url = new URL("${baseUrl}/api/reports/github.com/leeonky/test-charm-java/main?module=${project.name}")
+//                    def connection = url.openConnection() as HttpURLConnection
+//                    def reportFile = new File("${project.name}/build/reports/pitest/html2/report.js")
+//                    def reportJson = reportFile.text.substring(60)
+//
+//                    connection.requestMethod = "PUT"
+//                    connection.doOutput = true
+//                    connection.setRequestProperty("Content-Type", "application/json")
+//                    connection.setRequestProperty("Host", "dashboard.stryker-mutator.io")
+//                    connection.setRequestProperty("X-Api-Key", System.env.PI_KEY)
+//
+//                    connection.outputStream.withWriter("UTF-8") { writer ->
+//                        writer.write(reportJson)
+//                    }
+//
+//                    println "Response Code: ${connection.responseCode}"
+//                    println "Response Message: ${connection.responseMessage}"
+//
+//                    if (connection.responseCode == HttpURLConnection.HTTP_OK || connection.responseCode == HttpURLConnection.HTTP_CREATED) {
+//                        println 'Response content:'
+//                        println connection.inputStream.text
+//                    }
+//
+//                    connection.disconnect()
+//                }
+//            }
+//
+//            tasks.named('pitest').configure {
+//                finalizedBy 'uploadPitestReport'
+//            }
+//        }
+//    }
+//
+//    def configCucumber = { name, glues ->
+//        if (project.name == name) {
+//            dependencies {
+//                testImplementation libs.test.cucumber
+//            }
+//
+//            configurations {
+//                cucumberRuntime {
+//                    extendsFrom testImplementation
+//                }
+//            }
+//
+//            def cucumberArgs = ['--plugin', 'pretty']
+//            for (glue in glues) {
+//                cucumberArgs.add('--glue')
+//                cucumberArgs.add(glue)
+//            }
+//            cucumberArgs.add(project.name + '/src/test/resources/features')
+//
+//            task cucumber() {
+//                dependsOn assemble, testClasses
+//                doLast {
+//                    javaexec {
+//                        environment('CUCUMBER_PUBLISH_QUIET', true)
+//                        main = "io.cucumber.core.cli.Main"
+//                        classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+//                        args = cucumberArgs
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+////    enablePitest('bean-util', ['com.github.leeonky.util.*'], [])
+////    enablePitest('interpreter-core', ['com.github.leeonky.interpreter.*'], [])
+////    enablePitest('DAL-java', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema'])
+////    enablePitest('DAL-extension-basic', ['com.github.leeonky.dal.*'], ['com.github.leeonky.dal.cucumber.*'])
+////    enablePitest('DAL-extension-jdbc', ['com.github.leeonky.dal.*'], [])
+////    enablePitest('DAL-extension-jfactory', ['com.github.leeonky.dal.*'], [])
+////    enablePitest('jfactory', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.spec.*'])
+////    enablePitest('jfactory-repo-jpa', ['com.github.leeonky.jfactory.repo*'], ['com.github.leeonky.jfactory.repo.beans.*'])
+////    enablePitest('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber*'], ['com.github.leeonky.jfactory.cucumber.entity.*'])
+////    enablePitest('jfactory-property-value', ['com.github.leeonky.jfactory.*'], ['com.github.leeonky.jfactory.specs.*', 'com.github.leeonky.jfactory.entity'])
+////    enablePitest('RESTful-cucumber', ['com.github.leeonky.cucumber.restful*'], [])
+//
+//    configCucumber('interpreter-core', ['com.github.leeonky.interpreter'])
+//    configCucumber('DAL-java', ['com.github.leeonky.dal.cucumber'])
+//    configCucumber('DAL-extension-basic', ['com.github.leeonky.dal.cucumber'])
+//    configCucumber('DAL-extension-debugger', ['com.github.leeonky.dal.cucumber'])
+//    configCucumber('DAL-extension-jdbc', ['com.github.leeonky'])
+//    configCucumber('DAL-extension-jfactory', ['com.github.leeonky'])
+//    configCucumber('DAL-extension-inspector', ['com.github.leeonky'])
+//    configCucumber('jfactory', ['com.github.leeonky'])
+//    configCucumber('jfactory-cucumber', ['com.github.leeonky.jfactory.cucumber'])
+//    configCucumber('jfactory-property-value', ['com.github.leeonky'])
+//    configCucumber('RESTful-cucumber', ['com.github.leeonky.cucumber.restful'])
+//    configCucumber('page-flow', ['com.github.leeonky.pf.cucumber'])
+////
+////    test {
+////        reports {
+////            html.required.set(true)
+////            html.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}/html"))
+////
+////            junitXml.required.set(true)
+////            junitXml.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}/xml"))
+////        }
+////    }
 }
 
-project(":DAL-extension-inspector") {
-    tasks.named("test") {
-        mustRunAfter(":page-flow:test")
-    }
-}
-
-project(":page-flow") {
-    tasks.named("test") {
-        mustRunAfter(":page-flow-playwright:test")
-        mustRunAfter(":page-flow-selenium:test")
-    }
-}
-
-task uploadCodecov(type: Exec) {
-    dependsOn subprojects.test, subprojects.jacocoTestReport
-
-    commandLine 'bash', '-c', '''
-        bash <(curl -s https://uploader.codecov.io/latest/linux/codecov) \
-        -t ${CODECOV_TOKEN}
-    '''
-}
+//project(":DAL-extension-inspector") {
+//    tasks.named("test") {
+//        mustRunAfter(":page-flow:test")
+//    }
+//}
+//
+//project(":page-flow") {
+//    tasks.named("test") {
+//        mustRunAfter(":page-flow-playwright:test")
+//        mustRunAfter(":page-flow-selenium:test")
+//    }
+//}
