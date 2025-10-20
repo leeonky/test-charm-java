@@ -41,7 +41,7 @@ jobs:
           name: env
           command: |
             sudo apt-get update
-            sudo apt-get install openjdk-8-jdk openjdk-17-jdk 
+            sudo apt-get install openjdk-17-jdk
             sudo docker-compose up -d
             sudo bash -c "echo '127.0.0.1 www.s.com' >> /etc/hosts"
             sudo bash -c "echo '127.0.0.1 www.a.com' >> /etc/hosts"
