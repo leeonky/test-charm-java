@@ -690,12 +690,12 @@ Feature: list
       """
       No such element in list: [
           {
-              name: java.lang.String <Tom>,
-              age: java.lang.Integer <18>
+              age: java.lang.Integer <18>,
+              name: java.lang.String <Tom>
           },
           {
-              name: java.lang.String <John>,
-              age: java.lang.Integer <20>
+              age: java.lang.Integer <20>,
+              name: java.lang.String <John>
           }
       ]
       """

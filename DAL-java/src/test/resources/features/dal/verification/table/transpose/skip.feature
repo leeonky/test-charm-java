@@ -276,16 +276,16 @@ Feature: skip
     """
     No such element in list: [
         {
-            name: java.lang.String <Tom>,
-            age: java.lang.Integer <10>
+            age: java.lang.Integer <10>,
+            name: java.lang.String <Tom>
         },
         {
-            name: java.lang.String <John>,
-            age: java.lang.Integer <20>
+            age: java.lang.Integer <20>,
+            name: java.lang.String <John>
         },
         {
-            name: java.lang.String <Lily>,
-            age: java.lang.Integer <15>
+            age: java.lang.Integer <15>,
+            name: java.lang.String <Lily>
         }
     ]
     """

@@ -177,8 +177,8 @@ Feature: dump-data
     Then dumped instance of java class "Data" should be:
     """
     #package#Data {
-        value: java.lang.Integer <1>,
-        this: *reference* root
+        this: *reference* root,
+        value: java.lang.Integer <1>
     }
     """
 
@@ -202,11 +202,11 @@ Feature: dump-data
     Then dumped instance of java class "Data" should be:
     """
     #package#Data {
-        value: java.lang.Integer <1>,
         subData: #package#SubData {
-            value: java.lang.Integer <2>,
-            this: *reference* root.subData
-        }
+            this: *reference* root.subData,
+            value: java.lang.Integer <2>
+        },
+        value: java.lang.Integer <1>
     }
     """
 
@@ -318,16 +318,16 @@ Feature: dump-data
     #package#Data {
         booleanValue: java.lang.Boolean <true>,
         boxedBoolean: java.lang.Boolean <false>,
-        uuid: java.util.UUID <00000000-0000-0000-0000-000000000000>,
-        instant: java.time.Instant <2000-01-01T00:00:00Z>,
         date: java.util.Date <Sun Jan 02 00:00:00 UTC 2000>,
-        localTime: java.time.LocalTime <12:00>,
+        instant: java.time.Instant <2000-01-01T00:00:00Z>,
         localDate: java.time.LocalDate <2000-12-01>,
         localDateTime: java.time.LocalDateTime <2000-12-01T12:00>,
+        localTime: java.time.LocalTime <12:00>,
         offsetDateTime: java.time.OffsetDateTime <1996-01-23T00:00:01+08:00>,
-        zonedDateTime: java.time.ZonedDateTime <1996-01-23T00:00:01+08:00[Asia/Shanghai]>,
+        type: java.lang.Class <class java.lang.String>,
+        uuid: java.util.UUID <00000000-0000-0000-0000-000000000000>,
         yearMonth: java.time.YearMonth <2000-12>,
-        type: java.lang.Class <class java.lang.String>
+        zonedDateTime: java.time.ZonedDateTime <1996-01-23T00:00:01+08:00[Asia/Shanghai]>
     }
     """
 
@@ -344,8 +344,8 @@ Feature: dump-data
     Then dumped instance of java class "Data" should be:
     """
     #package#Data {
-        value: java.lang.Integer <2>,
-        error: *throw* java.lang.RuntimeException: error
+        error: *throw* java.lang.RuntimeException: error,
+        value: java.lang.Integer <2>
     }
     """
 
@@ -380,8 +380,8 @@ Feature: dump-data
     Then dumped data under 3 lines should be:
     """
     {
-        name: java.lang.String <John>,
-        age: java.lang.Integer <18>
+        age: java.lang.Integer <18>,
+        comments: java.lang.String <blabla>
     ...
     """
 

@@ -16,7 +16,7 @@ public class KeyValueDumper<T> implements Dumper.Cacheable<T> {
 
     private void dumpBody(Data<T> data, DumpingBuffer dumpingBuffer) {
         DumpingBuffer indentContext = dumpingBuffer.append("{").indent();
-        getFieldNames(data).forEach(fieldName -> {
+        getFieldNames(data).stream().sorted().forEach(fieldName -> {
             dumpField(data, fieldName, indentContext.sub(fieldName).newLine());
             indentContext.appendThen(",");
         });

@@ -2,12 +2,13 @@ package com.github.leeonky.dal.extensions.jfactory;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.KeyValueDumper;
 import com.github.leeonky.jfactory.JFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toSet;
 
 public class JFactoryExtension implements Extension {
     @Override
@@ -26,17 +27,10 @@ public class JFactoryExtension implements Extension {
                     }
                 });
         runtimeContextBuilder.registerDumper(JFactory.class, data -> new KeyValueDumper<JFactory>() {
+
             @Override
-            protected void dumpField(Data<JFactory> data, Object field, DumpingBuffer context) {
-                try {
-                    Data<?> value = data.property(field);
-                    if (value.list().size() != 0) {
-                        context.append(key(field)).append(": ");
-                        context.dumpValue(value);
-                    }
-                } catch (Throwable e) {
-                    context.append(key(field)).append(": ").append(e);
-                }
+            protected Set<?> getFieldNames(Data<JFactory> data) {
+                return super.getFieldNames(data).stream().filter(p -> !data.property(p).list().isEmpty()).collect(toSet());
             }
         });
     }
