@@ -21,6 +21,7 @@ public abstract class NodeBase<C extends RuntimeContext, N extends NodeBase<C, N
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public N setIndent(int indent) {
         this.indent = indent;
         return (N) this;

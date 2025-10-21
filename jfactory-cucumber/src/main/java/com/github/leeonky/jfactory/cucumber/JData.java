@@ -123,11 +123,12 @@ public class JData {
         return prepareAttachments(beanProperty, traitsSpec, asList(data));
     }
 
+    @SuppressWarnings("unchecked")
     public <T> List<T> prepareAttachments(String beanProperty, String traitsSpec, List<? extends Map<String, ?>> data) {
         List<T> attachments = prepare(traitsSpec, data);
         int index = beanProperty.lastIndexOf('.');
         Object bean = query(beanProperty.substring(0, index));
-        Property property = BeanClass.create(bean.getClass()).getProperty(beanProperty.substring(index + 1));
+        Property<Object> property = (Property<Object>) BeanClass.create(bean.getClass()).getProperty(beanProperty.substring(index + 1));
         if (Collection.class.isAssignableFrom(property.getReaderType().getType()))
             ((Collection<T>) property.getValue(bean)).addAll(attachments);
         else {

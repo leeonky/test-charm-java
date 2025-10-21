@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 public interface If {
 
+    @SafeVarargs
     static <T> T firstNonNull(T... inputs) {
         for (T other : inputs) {
             if (other != null)
