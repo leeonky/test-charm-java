@@ -5,7 +5,9 @@ import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONAr
 import com.github.leeonky.dal.extensions.basic.string.jsonsource.org.json.JSONObject;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.cucumber.Table;
-import com.github.leeonky.util.*;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyReader;
+import com.github.leeonky.util.Sneaky;
 import io.cucumber.docstring.DocString;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Then;
@@ -45,7 +47,7 @@ public class RestfulStep {
 
     private static Stream<String> getParamString(Map.Entry<String, Object> entry) {
         if (entry.getValue() instanceof List) {
-            return ((List) entry.getValue()).stream().map(value -> entry.getKey() + "[]=" + value);
+            return ((List<?>) entry.getValue()).stream().map(value -> entry.getKey() + "[]=" + value);
         } else {
             return Stream.of(entry.getKey() + "=" + entry.getValue());
         }
@@ -122,6 +124,7 @@ public class RestfulStep {
 
     @When("POST form {string} {string}:")
     @Then("POST form {string} to {string}:")
+    @SuppressWarnings("unchecked")
     public void postForm(String spec, String path, String form) throws IOException, URISyntaxException {
         Map<String, Object>[] maps = Table.create(evaluator.eval(form)).flatSub();
         String[] delimiters = spec.split("[ ,]");
@@ -266,11 +269,11 @@ public class RestfulStep {
 
     @When("POST {string} {string}:")
     @Then("POST {string} to {string}:")
-    public void postWithSpec(String spec, String path, String body) throws IOException {
+    public void postWithSpec(String spec, String path, String body) {
         requestWithSpec(spec, path, body, this::silentPost);
     }
 
-    private void requestWithSpec(String spec, String path, String body, BiConsumer<String, String> method) throws IOException {
+    private void requestWithSpec(String spec, String path, String body, BiConsumer<String, String> method) {
         Object json = new JSONArray("[" + body + "]").get(0);
         Map<String, Object>[] maps = Table.create(evaluator.eval(body)).flatSub();
         String[] delimiters = spec.split("[ ,]");
@@ -293,7 +296,7 @@ public class RestfulStep {
 
     @When("PUT {string} {string}:")
     @Then("PUT {string} to {string}:")
-    public void putWithSpec(String spec, String path, String body) throws IOException {
+    public void putWithSpec(String spec, String path, String body) {
         requestWithSpec(spec, path, body, this::silentPut);
     }
 
@@ -307,7 +310,7 @@ public class RestfulStep {
 
     @When("PATCH {string} {string}:")
     @Then("PATCH {string} to {string}:")
-    public void patchWithSpec(String spec, String path, String body) throws IOException {
+    public void patchWithSpec(String spec, String path, String body) {
         requestWithSpec(spec, path, body, this::silentPatch);
     }
 
@@ -378,11 +381,11 @@ public class RestfulStep {
         }
     }
 
-    private Field getField(Class clazz, String fieldName) {
+    private Field getField(Class<?> clazz, String fieldName) {
         try {
             return clazz.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
-            Class superClass = clazz.getSuperclass();
+            Class<?> superClass = clazz.getSuperclass();
             if (superClass == null) {
                 throw new RuntimeException("Failed to get field " + fieldName + " from " + clazz, e);
             } else {
@@ -435,6 +438,7 @@ public class RestfulStep {
             }
         }
 
+        @SuppressWarnings("unchecked")
         private HttpURLConnection applyHeader(HttpURLConnection connection) {
             headers.forEach((key, value) -> {
                 if (value instanceof String)

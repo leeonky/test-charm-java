@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.Sneaky.cast;
 import static java.util.stream.StreamSupport.stream;
 
 public class JDBCExtension implements Extension {
@@ -27,15 +28,15 @@ public class JDBCExtension implements Extension {
                 .registerMetaProperty(DataBase.Row.class, "hasOne", MetaProperties::hasOne)
                 .registerMetaProperty(Association.class, "through", MetaProperties::through)
 
-                .registerDumper(DataBase.Table.class, data -> new TableDumper())
+                .registerDumper(DataBase.Table.class, data -> cast(new TableDumper()))
                 .registerDumper(DataBase.class, data -> new DataBaseDumper())
         ;
     }
 
-    private static class TableDumper<T extends DataBase.Table<T>> implements Dumper<DataBase.Table<T>> {
+    private static class TableDumper implements Dumper<DataBase.Table<?>> {
 
         @Override
-        public void dump(Data<DataBase.Table<T>> data, DumpingBuffer dumpingBuffer) {
+        public void dump(Data<DataBase.Table<?>> data, DumpingBuffer dumpingBuffer) {
             List<List<String>> tableData = getData(data);
             if (tableData.isEmpty())
                 dumpingBuffer.append("[]");
@@ -49,7 +50,7 @@ public class JDBCExtension implements Extension {
             }
         }
 
-        private List<List<String>> getData(Data<DataBase.Table<T>> data) {
+        private List<List<String>> getData(Data<DataBase.Table<?>> data) {
             List<List<String>> tableData = new ArrayList<>();
             stream(data.value().spliterator(), false).limit(100).forEach(row -> {
                 if (tableData.isEmpty())

@@ -9,12 +9,18 @@ subprojects {
         finalizedBy(tasks.withType(JacocoReport))
     }
 
-    tasks.withType(JacocoReport).configureEach {
+    tasks.withType(JacocoReport).configureEach { jacocoReportTask ->
         reports {
             xml.required = true
             csv.required = false
             html.required = true
         }
+
+        jacocoReportTask.classDirectories.setFrom(
+                project.sourceSets.main.output.asFileTree.matching {
+                    exclude 'com/github/leeonky/dal/extensions/basic/string/jsonsource/**'
+                }
+        )
     }
 }
 
