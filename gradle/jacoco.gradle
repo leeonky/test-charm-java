@@ -15,12 +15,6 @@ subprojects {
             csv.required = false
             html.required = true
         }
-
-        jacocoReportTask.classDirectories.setFrom(
-                project.sourceSets.main.output.asFileTree.matching {
-                    exclude 'com/github/leeonky/dal/extensions/basic/string/jsonsource/**'
-                }
-        )
     }
 }
 

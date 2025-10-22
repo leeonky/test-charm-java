@@ -8,3 +8,16 @@ dependencies {
     testImplementation project(':java-compiler-util')
 }
 
+tasks.withType(JacocoReport).configureEach { JacocoReport reportTask ->
+    if (reportTask.project == project) {
+        def excludes = [
+                'com/github/leeonky/dal/extensions/basic/string/jsonsource/**'
+        ]
+        def originalClassDirs = reportTask.classDirectories
+        def filtered = files(originalClassDirs.files.collect { dir ->
+            fileTree(dir: dir, excludes: excludes)
+        })
+        reportTask.classDirectories.setFrom(filtered)
+    }
+}
+
