@@ -31,10 +31,19 @@ tasks.register('jacocoRootReport', JacocoReport) {
     def allSourceDirs = files(subprojects.collect { it.sourceSets.main.allSource.srcDirs })
     def allClassDirs = files(subprojects.collect { it.sourceSets.main.output })
 
+    def excludes = [
+            'com/github/leeonky/dal/extensions/basic/string/jsonsource/**'
+    ]
+
     executionData.from(execFiles)
     additionalSourceDirs.from(allSourceDirs)
     sourceDirectories.from(allSourceDirs)
-    classDirectories.from(allClassDirs)
+
+    def filteredClassDirs = files(allClassDirs.files.collect { dir ->
+        fileTree(dir: dir, excludes: excludes)
+    })
+
+    classDirectories.from(filteredClassDirs)
 
     reports {
         xml.required = true
