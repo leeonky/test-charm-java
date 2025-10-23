@@ -7,7 +7,7 @@ import com.github.leeonky.dal.cucumber.JSONArrayDALCollectionFactory;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.IterableDALCollection;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerLegacy;
 import com.github.leeonky.util.JavaCompilerPool;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Deprecated
 public class CucumberContextBak {
-    private final JavaCompiler javaCompiler;
+    private final JavaCompilerLegacy javaCompilerLegacy;
 
     DAL dal = new DAL().extend();
 
@@ -46,11 +46,11 @@ public class CucumberContextBak {
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory())
         ;
-        javaCompiler = JAVA_COMPILER_POOL.take();
+        javaCompilerLegacy = JAVA_COMPILER_POOL.take();
     }
 
     public void release() {
-        JAVA_COMPILER_POOL.giveBack(javaCompiler);
+        JAVA_COMPILER_POOL.giveBack(javaCompilerLegacy);
     }
 
     public void giveDalSourceCode(String code) {
@@ -77,7 +77,7 @@ public class CucumberContextBak {
     public void assertInputData(String assertion) {
         giveDalSourceCode(assertion);
         try {
-            javaCompiler.compileToClasses(schemas.stream().map(s ->
+            javaCompilerLegacy.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
                                             "import com.github.leeonky.dal.runtime.*;\n" +
                                             "import java.util.*;\n" + s)
@@ -136,7 +136,7 @@ public class CucumberContextBak {
     public void assertJavaClass(String className, String assertion) {
         giveDalSourceCode(assertion);
         try {
-            List<Class<?>> classes = javaCompiler.compileToClasses(javaClasses.stream().map(s ->
+            List<Class<?>> classes = javaCompilerLegacy.compileToClasses(javaClasses.stream().map(s ->
                     "import java.math.*;\n" + s).collect(Collectors.toList()));
             Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException

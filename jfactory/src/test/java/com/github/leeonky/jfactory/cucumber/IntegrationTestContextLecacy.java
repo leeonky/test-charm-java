@@ -3,7 +3,7 @@ package com.github.leeonky.jfactory.cucumber;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerLegacy;
 import com.github.leeonky.util.JavaCompilerPool;
 
 import java.util.*;
@@ -16,7 +16,7 @@ import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class IntegrationTestContext {
+public class IntegrationTestContextLecacy {
     private final Map<String, String> classCodes = new HashMap<>();
     private final List<String> registers = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
@@ -35,7 +35,7 @@ public class IntegrationTestContext {
 
     private static final JavaCompilerPool JAVA_COMPILER_POOL =
             new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
-    private final JavaCompiler compiler = JAVA_COMPILER_POOL.take();
+    private final JavaCompilerLegacy compiler = JAVA_COMPILER_POOL.take();
     private List list;
     private JFactory jFactory = new JFactory();
     private int snippetIndex = 0;
@@ -77,7 +77,7 @@ public class IntegrationTestContext {
     }
 
     private void addClass(String snipCode) {
-        classCodes.put(JavaCompiler.guessClassName(snipCode), snipCode);
+        classCodes.put(JavaCompilerLegacy.guessClassName(snipCode), snipCode);
     }
 
     private void compileAll() {

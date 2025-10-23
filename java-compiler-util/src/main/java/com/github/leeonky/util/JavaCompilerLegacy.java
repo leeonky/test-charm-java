@@ -20,12 +20,13 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.groupingBy;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
 
-public class JavaCompiler {
+@Deprecated
+public class JavaCompilerLegacy {
     private final URLClassLoader loader = getUrlClassLoader();
     private final String packageName;
     private final int id;
 
-    public JavaCompiler(String packageName, int id) {
+    public JavaCompilerLegacy(String packageName, int id) {
         this.packageName = packageName + id;
         this.id = id;
     }

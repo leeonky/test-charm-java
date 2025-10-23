@@ -8,7 +8,7 @@ import com.github.leeonky.dal.extensions.basic.sync.Eventually;
 import com.github.leeonky.dal.extensions.basic.sync.Retryer;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerLegacy;
 import com.github.leeonky.util.JavaCompilerPool;
 import com.github.leeonky.util.Sneaky;
 import io.cucumber.datatable.DataTable;
@@ -51,7 +51,7 @@ public class Steps {
     private Object input;
     private DAL dal = new DAL().extend();
 
-    private JavaCompiler javaCompiler;
+    private JavaCompilerLegacy javaCompilerLegacy;
     private static final JavaCompilerPool JAVA_COMPILER_POOL = new JavaCompilerPool(2, "src.test.generate.ws");
 
     @Before
@@ -62,7 +62,7 @@ public class Steps {
         dal = new DAL();
         dal.getRuntimeContextBuilder().setConverter(Converter.createDefault().extend());
         dal.extend();
-        javaCompiler = JAVA_COMPILER_POOL.take();
+        javaCompilerLegacy = JAVA_COMPILER_POOL.take();
         Eventually.setDefaultWaitingTime(5000);
         Await.setDefaultWaitingTime(5000);
         Retryer.setDefaultTimeout(36000 * 1000);
@@ -216,7 +216,7 @@ public class Steps {
     public void closeFtp() {
         if (sFtp != null)
             sFtp.close();
-        JAVA_COMPILER_POOL.giveBack(javaCompiler);
+        JAVA_COMPILER_POOL.giveBack(javaCompilerLegacy);
     }
 
 
@@ -236,7 +236,7 @@ public class Steps {
 
     @Then("failed with the message:")
     public void failedWithTheMessage(String message) {
-        assertThat(assertionError.getMessage()).startsWith(message.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(assertionError.getMessage()).startsWith(message.replace("#package#", javaCompilerLegacy.packagePrefix()));
     }
 
     private String left, right;
@@ -276,7 +276,7 @@ public class Steps {
     @SneakyThrows
     @Given("the following java class:")
     public void theFollowingJavaClass(String code) {
-        input = javaCompiler.compileToClasses(Collections.singletonList(
+        input = javaCompilerLegacy.compileToClasses(Collections.singletonList(
                 "import com.github.leeonky.dal.*;\n" +
                         "import com.github.leeonky.dal.type.*;\n" +
                         "import com.github.leeonky.util.*;\n" +

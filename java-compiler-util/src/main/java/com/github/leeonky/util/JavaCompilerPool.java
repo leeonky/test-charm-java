@@ -15,11 +15,11 @@ public class JavaCompilerPool {
         this.generatePackage = generatePackage;
     }
 
-    public JavaCompiler take() {
-        return new JavaCompiler(generatePackage, Sneaky.get(workspaces::takeFirst));
+    public JavaCompilerLegacy take() {
+        return new JavaCompilerLegacy(generatePackage, Sneaky.get(workspaces::takeFirst));
     }
 
-    public void giveBack(JavaCompiler compiler) {
+    public void giveBack(JavaCompilerLegacy compiler) {
         Sneaky.run(() -> workspaces.putLast(compiler.getId()));
     }
 }

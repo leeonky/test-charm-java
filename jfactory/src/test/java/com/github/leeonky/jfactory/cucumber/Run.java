@@ -2,7 +2,7 @@ package com.github.leeonky.jfactory.cucumber;
 
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.jfactory.cucumber.IntegrationTestContext.threadsCount;
+import static com.github.leeonky.jfactory.cucumber.IntegrationTestContextLecacy.threadsCount;
 import static io.cucumber.core.cli.Main.run;
 import static org.assertj.core.api.Assertions.assertThat;
 

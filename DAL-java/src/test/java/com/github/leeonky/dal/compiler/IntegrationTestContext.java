@@ -11,7 +11,7 @@ import com.github.leeonky.dal.runtime.inspector.ValueDumper;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerLegacy;
 import com.github.leeonky.util.JavaCompilerPool;
 import com.github.leeonky.util.Sneaky;
 import lombok.SneakyThrows;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.cucumber.TestTask.threadsCount;
-import static com.github.leeonky.util.JavaCompiler.guessClassName;
+import static com.github.leeonky.util.JavaCompilerLegacy.guessClassName;
 import static java.util.Arrays.asList;
 import static java.util.stream.Stream.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +58,7 @@ public class IntegrationTestContext {
     private DALNode dalNode = null;
     private final Map<String, Integer> firstIndexes = new HashMap<>();
     private final List<Class<?>> classes = new ArrayList<>();
-    private final JavaCompiler javaCompiler;
+    private final JavaCompilerLegacy javaCompilerLegacy;
     private static final JavaCompilerPool JAVA_COMPILER_POOL =
             new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
     private String registerCode = "";
@@ -68,12 +68,12 @@ public class IntegrationTestContext {
         dal = new DAL().extend();
         waringOutput = new ByteArrayOutputStream();
         dal.getRuntimeContextBuilder().setWarningOutput(new PrintStream(waringOutput));
-        javaCompiler = JAVA_COMPILER_POOL.take();
+        javaCompilerLegacy = JAVA_COMPILER_POOL.take();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     public void release() {
-        JAVA_COMPILER_POOL.giveBack(javaCompiler);
+        JAVA_COMPILER_POOL.giveBack(javaCompilerLegacy);
         assertThat(waringOutput.toString()).isEqualTo("");
     }
 
@@ -88,7 +88,7 @@ public class IntegrationTestContext {
         exception = null;
         result = null;
         try {
-            javaCompiler.compileToClasses(schemas.stream().map(s ->
+            javaCompilerLegacy.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
                                             "import com.github.leeonky.dal.runtime.*;\n" +
                                             "import java.util.*;\n" + s)
@@ -164,7 +164,7 @@ public class IntegrationTestContext {
                     "        %s\n" +
                     "    }\n" +
                     "}\n", registerCode);
-            classes.addAll(javaCompiler.compileToClasses(Stream.concat(javaClasses.stream(), of(code)).map(s ->
+            classes.addAll(javaCompilerLegacy.compileToClasses(Stream.concat(javaClasses.stream(), of(code)).map(s ->
                     "import com.github.leeonky.dal.*;\n" +
                             "import com.github.leeonky.dal.type.*;\n" +
                             "import com.github.leeonky.util.*;\n" +
@@ -201,7 +201,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldFailedWith(String message) {
-        assertThat(exception.getMessage()).startsWith(message.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(exception.getMessage()).startsWith(message.replace("#package#", javaCompilerLegacy.packagePrefix()));
     }
 
     public void shouldHaveNotation(String notation) {
@@ -270,7 +270,7 @@ public class IntegrationTestContext {
 
     public void should(String expression) {
         try {
-            expect(input).should(expression.replace("#package#", javaCompiler.packagePrefix()));
+            expect(input).should(expression.replace("#package#", javaCompilerLegacy.packagePrefix()));
         } catch (Throwable e) {
             bizException = e;
         }
@@ -308,7 +308,7 @@ public class IntegrationTestContext {
     public void verifyDumpedData(String verification) {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input);
 
-        assertThat(runtimeContext.getThis().dumpValue()).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(runtimeContext.getThis().dumpValue()).isEqualTo(verification.replace("#package#", javaCompilerLegacy.packagePrefix()));
     }
 
     public void verifyDumpedData(String verification, int maxCount) {
@@ -316,7 +316,7 @@ public class IntegrationTestContext {
         builder.setMaxDumpingLineSize(maxCount);
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = builder.build(input);
         String dump = runtimeContext.getThis().dumpValue();
-        assertThat(dump).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(dump).isEqualTo(verification.replace("#package#", javaCompilerLegacy.packagePrefix()));
     }
 
     private Class<?> getClass(String s) {
@@ -354,7 +354,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldAssertException(String expression) {
-        expect(bizException).should(expression.replace("#package#", javaCompiler.packagePrefix()));
+        expect(bizException).should(expression.replace("#package#", javaCompilerLegacy.packagePrefix()));
     }
 
     public void givenTextFormatter(String name, String code) {
@@ -387,7 +387,7 @@ public class IntegrationTestContext {
                 "    }", inputCode);
 
         return ((Supplier<Assertions>) Sneaky.get(() ->
-                javaCompiler.compileToClasses(asList(assertionCode)).get(0).newInstance())).get();
+                javaCompilerLegacy.compileToClasses(asList(assertionCode)).get(0).newInstance())).get();
     }
 
     public void runShould(String code) {
@@ -421,7 +421,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldAssertError(String verification) {
-        expect(bizException).should(verification.replace("#package#", javaCompiler.packagePrefix()));
+        expect(bizException).should(verification.replace("#package#", javaCompilerLegacy.packagePrefix()));
     }
 
     public static class Empty {
