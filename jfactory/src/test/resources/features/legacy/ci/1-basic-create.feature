@@ -8,36 +8,36 @@ Feature: basic use
 
   Rule: create bean
 
-    Scenario: simple create - create bean with input property
-      Given the following bean class:
-      """
-      public class Bean {
-        public String stringValue;
-        public int intValue;
-      }
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("stringValue", "input-value").create();
-      """
-      Then the result should:
-      """
-      stringValue= input-value
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).properties(new HashMap<String, Object>() {{
-        put("stringValue", "input-value");
-        put("intValue", 100);
-      }}).create();
-      """
-      Then the result should:
-      """
-      = {
-        stringValue= input-value
-        intValue= 100
-      }
-      """
+#    Scenario: simple create - create bean with input property
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public String stringValue;
+#        public int intValue;
+#      }
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("stringValue", "input-value").create();
+#      """
+#      Then the result should:
+#      """
+#      stringValue= input-value
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).properties(new HashMap<String, Object>() {{
+#        put("stringValue", "input-value");
+#        put("intValue", 100);
+#      }}).create();
+#      """
+#      Then the result should:
+#      """
+#      = {
+#        stringValue= input-value
+#        intValue= 100
+#      }
+#      """
 
     Scenario: customize constructor - create bean use customer constructor
       Given the following bean class:

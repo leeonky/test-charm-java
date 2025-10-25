@@ -1,9 +1,7 @@
 package com.github.leeonky.util;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,6 +26,8 @@ public class JavaExecutor {
     private Context context = new Context();
 
     public void addClass(String sourceCode) {
+//        if (!findDefinition(allCompiled, guessClassName(sourceCode))
+//                .map(d -> d.getMainCode().equals(sourceCode)).orElse(false))
         unCompiled.add(sourceCode);
     }
 
@@ -35,10 +35,15 @@ public class JavaExecutor {
         return context.executorMain;
     }
 
-    public Class<?> classFor(String className) {
-        return Sneaky.get(() -> allCompiled().stream().filter(a -> a.getSimpleClassName().equals(className))
-                .map(d -> d.loadClass(context.classLoader))
-                .findFirst().orElseThrow(() -> new ClassNotFoundException(className)));
+    public Class<?> classFor(String className, ClassLoader classLoader) {
+        return Sneaky.get(() -> findDefinition(allCompiled(), className)
+                .map(d -> d.loadClass(classLoader))
+                .orElseThrow(() -> new ClassNotFoundException(className)));
+    }
+
+    private Optional<Definition> findDefinition(Set<Definition> definitions, String className) {
+        return definitions.stream().filter(a -> a.getSimpleClassName().equals(className))
+                .findFirst();
     }
 
     private Set<Definition> allCompiled() {
@@ -49,8 +54,11 @@ public class JavaExecutor {
         return allCompiled;
     }
 
+    public void reset() {
+        context = new Context();
+    }
+
     class Context {
         private final ExecutorMain executorMain = new ExecutorMain(JavaExecutor.this);
-        private final URLClassLoader classLoader = URLClassLoader.newInstance(Sneaky.get(() -> new URL[]{new File("").toURI().toURL()}));
     }
 }

@@ -25,13 +25,13 @@ public class Definition extends SimpleJavaFileObject {
 
     @Override
     public int hashCode() {
-        return Objects.hash(Definition.class, packageName, mainCode);
+        return Objects.hash(Definition.class, packageName, simpleName);
     }
 
     @Override
     public boolean equals(Object o) {
         return o instanceof Definition && Objects.equals(packageName, ((Definition) o).packageName)
-                && Objects.equals(mainCode, ((Definition) o).mainCode);
+                && Objects.equals(simpleName, ((Definition) o).simpleName);
     }
 
     public String getSimpleClassName() {
@@ -41,5 +41,9 @@ public class Definition extends SimpleJavaFileObject {
     @SneakyThrows
     public Class<?> loadClass(ClassLoader classLoader) {
         return classLoader.loadClass(packageName + "." + simpleName);
+    }
+
+    public String getMainCode() {
+        return mainCode;
     }
 }

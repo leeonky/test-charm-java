@@ -1,5 +1,8 @@
 package com.github.leeonky.util;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.function.Supplier;
 
 public class ExecutorMain {
@@ -19,6 +22,7 @@ public class ExecutorMain {
         return new StringBuilder()
                 .append("import java.util.function.Supplier;\n")
                 .append("import com.github.leeonky.jfactory.JFactory;\n")
+                .append("import java.util.*;\n")
                 .append("public class " + CLASS_NAME + " implements Supplier {\n")
                 .append("public Object get() {")
                 .append("return ").append(returnExpression).append(";\n")
@@ -28,6 +32,6 @@ public class ExecutorMain {
 
     public Object evaluate() {
         javaExecutor.addClass(asCode());
-        return ((Supplier<?>) (Sneaky.get(() -> javaExecutor.classFor(CLASS_NAME).newInstance()))).get();
+        return ((Supplier<?>) (Sneaky.get(() -> javaExecutor.classFor(CLASS_NAME, URLClassLoader.newInstance(Sneaky.get(() -> new URL[]{new File("").toURI().toURL()}))).newInstance()))).get();
     }
 }

@@ -85,6 +85,13 @@ public class JavaCompiler {
             javax.tools.JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
             StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
             standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(new File("./")));
+
+            List<File> classPath = new ArrayList<>();
+            String currentCp = System.getProperty("java.class.path");
+            for (String path : currentCp.split(File.pathSeparator))
+                classPath.add(new File(path));
+            classPath.add(new File("./"));
+            standardFileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
             if (!systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, definitions).call()) {
                 System.out.println(diagnostics.getDiagnostics().stream().filter(d -> d.getSource() != null).collect(groupingBy(Diagnostic::getSource))
                         .entrySet().stream().map(this::compileResults).collect(Collectors.joining("\n")));
