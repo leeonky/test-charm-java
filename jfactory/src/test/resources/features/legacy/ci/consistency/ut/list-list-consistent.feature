@@ -51,6 +51,33 @@ Feature: list - list consistency
             }
             """
 
+#      TODO bug?
+#    Scenario: list beans1[0] -> beans2[0], beans2[1] -> beans1[1] - bug ?
+#      And operate:
+#            """
+#            jFactory.factory(BeanList.class).spec(ins -> {
+#                ins.spec().consistent(String.class)
+#                    .list("beans1").consistent(beans1 -> beans1
+#                      .direct("status1"))
+#                    .list("beans2").consistent(beans2 -> beans2
+#                      .direct("status1"));
+#            });
+#            """
+#      When build:
+#            """
+#            jFactory.clear().type(BeanList.class)
+#                    .property("beans1[0]!.status1", "a")
+#                    .property("beans2[1]!.status1", "b")
+#                    .create();
+#            """
+#      Then the result should:
+#            """
+#            : {
+#              <<beans1[0], beans2[0]>>.status1= a
+#              <<beans1[1], beans2[1]>>.status1= b
+#            }
+#            """
+
     Scenario: signature of nested list
       And the following bean class:
         """

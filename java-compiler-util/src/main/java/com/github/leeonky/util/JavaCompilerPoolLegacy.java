@@ -6,20 +6,21 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toCollection;
 
-public class JavaCompilerPool {
+@Deprecated
+public class JavaCompilerPoolLegacy {
     private final BlockingDeque<Integer> workspaces;
     private final String generatePackage;
 
-    public JavaCompilerPool(int maxCount, String generatePackage) {
+    public JavaCompilerPoolLegacy(int maxCount, String generatePackage) {
         workspaces = IntStream.range(0, maxCount).boxed().collect(toCollection(LinkedBlockingDeque::new));
         this.generatePackage = generatePackage;
     }
 
-    public JavaCompilerLegacy take() {
-        return new JavaCompilerLegacy(generatePackage, Sneaky.get(workspaces::takeFirst));
+    public JavaCompiler take() {
+        return new JavaCompiler(generatePackage, Sneaky.get(workspaces::takeFirst));
     }
 
-    public void giveBack(JavaCompilerLegacy compiler) {
+    public void giveBack(JavaCompiler compiler) {
         Sneaky.run(() -> workspaces.putLast(compiler.getId()));
     }
 }

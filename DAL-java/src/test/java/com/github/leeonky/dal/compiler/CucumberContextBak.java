@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
+import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerPoolLegacy;
 import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALNode;
@@ -7,8 +9,6 @@ import com.github.leeonky.dal.cucumber.JSONArrayDALCollectionFactory;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.IterableDALCollection;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.util.JavaCompilerLegacy;
-import com.github.leeonky.util.JavaCompilerPool;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Deprecated
 public class CucumberContextBak {
-    private final JavaCompilerLegacy javaCompilerLegacy;
+    private final JavaCompiler javaCompiler;
 
     DAL dal = new DAL().extend();
 
@@ -38,19 +38,19 @@ public class CucumberContextBak {
     DALNode node = null;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
-    private static final JavaCompilerPool JAVA_COMPILER_POOL =
-            new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.wsbk");
+    private static final JavaCompilerPoolLegacy JAVA_COMPILER_POOL =
+            new JavaCompilerPoolLegacy(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.wsbk");
 
     public CucumberContextBak() {
         dal.getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory())
         ;
-        javaCompilerLegacy = JAVA_COMPILER_POOL.take();
+        javaCompiler = JAVA_COMPILER_POOL.take();
     }
 
     public void release() {
-        JAVA_COMPILER_POOL.giveBack(javaCompilerLegacy);
+        JAVA_COMPILER_POOL.giveBack(javaCompiler);
     }
 
     public void giveDalSourceCode(String code) {
@@ -77,7 +77,7 @@ public class CucumberContextBak {
     public void assertInputData(String assertion) {
         giveDalSourceCode(assertion);
         try {
-            javaCompilerLegacy.compileToClasses(schemas.stream().map(s ->
+            javaCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
                                             "import com.github.leeonky.dal.runtime.*;\n" +
                                             "import java.util.*;\n" + s)
@@ -136,7 +136,7 @@ public class CucumberContextBak {
     public void assertJavaClass(String className, String assertion) {
         giveDalSourceCode(assertion);
         try {
-            List<Class<?>> classes = javaCompilerLegacy.compileToClasses(javaClasses.stream().map(s ->
+            List<Class<?>> classes = javaCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import java.math.*;\n" + s).collect(Collectors.toList()));
             Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException

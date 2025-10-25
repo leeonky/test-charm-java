@@ -7,10 +7,7 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -20,13 +17,13 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.groupingBy;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
 
-@Deprecated
-public class JavaCompilerLegacy {
+public class JavaCompiler {
+    @Deprecated
     private final URLClassLoader loader = getUrlClassLoader();
     private final String packageName;
     private final int id;
 
-    public JavaCompilerLegacy(String packageName, int id) {
+    public JavaCompiler(String packageName, int id) {
         this.packageName = packageName + id;
         this.id = id;
     }
@@ -58,6 +55,7 @@ public class JavaCompilerLegacy {
     }
 
     @SneakyThrows
+    @Deprecated
     public List<Class<?>> compileToClasses(List<String> classCodes) {
         if (classCodes.isEmpty())
             return emptyList();
@@ -74,6 +72,31 @@ public class JavaCompilerLegacy {
             throw new IllegalStateException("Failed to compile java code: \n");
         }
         return files.stream().map(f -> f.name).map(this::loadClass).collect(Collectors.toList());
+    }
+
+    @SneakyThrows
+    public List<Compiled> compile(Collection<String> classCodes) {
+        return Sneaky.get(() -> {
+            if (classCodes.isEmpty())
+                return emptyList();
+            DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+            List<JavaSourceFromString> files = classCodes.stream().map(code ->
+                            new JavaSourceFromString(guessClassName(code).replaceAll("<.*>", ""), declarePackage() + code))
+                    .collect(Collectors.toList());
+            javax.tools.JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
+            StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
+            standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(new File("./")));
+            if (!systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, files).call()) {
+                System.out.println(diagnostics.getDiagnostics().stream().filter(d -> d.getSource() != null).collect(groupingBy(Diagnostic::getSource))
+                        .entrySet().stream().map(this::compileResults).collect(Collectors.joining("\n")));
+                throw new IllegalStateException("Failed to compile java code: \n");
+            }
+            return files.stream().map(this::loadCompiledResult).collect(Collectors.toList());
+        });
+    }
+
+    private Compiled loadCompiledResult(JavaSourceFromString javaSourceFromString) {
+        return new Compiled(javaSourceFromString.name, javaSourceFromString.code, packagePrefix());
     }
 
     private String declarePackage() {
@@ -102,7 +125,8 @@ public class JavaCompilerLegacy {
     }
 
     @SneakyThrows
-    private Class<?> loadClass(String name) {
+    @Deprecated
+    public Class<?> loadClass(String name) {
         return Class.forName(packagePrefix() + name, true, loader);
     }
 
@@ -117,7 +141,7 @@ public class JavaCompilerLegacy {
 
 class JavaSourceFromString extends SimpleJavaFileObject {
     final String name;
-    private final String code;
+    final String code;
 
     JavaSourceFromString(String name, String code) {
         super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);

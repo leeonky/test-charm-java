@@ -1,10 +1,10 @@
 package com.github.leeonky.jfactory.cucumber;
 
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerPoolLegacy;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.JavaCompilerLegacy;
-import com.github.leeonky.util.JavaCompilerPool;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -16,7 +16,8 @@ import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class IntegrationTestContextLecacy {
+@Deprecated
+public class IntegrationTestContextLegacy {
     private final Map<String, String> classCodes = new HashMap<>();
     private final List<String> registers = new ArrayList<>();
     private final List<Class> classes = new ArrayList<>();
@@ -33,9 +34,9 @@ public class IntegrationTestContextLecacy {
         return Integer.parseInt(value);
     }
 
-    private static final JavaCompilerPool JAVA_COMPILER_POOL =
-            new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
-    private final JavaCompilerLegacy compiler = JAVA_COMPILER_POOL.take();
+    private static final JavaCompilerPoolLegacy JAVA_COMPILER_POOL =
+            new JavaCompilerPoolLegacy(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
+    private final JavaCompiler compiler = JAVA_COMPILER_POOL.take();
     private List list;
     private JFactory jFactory = new JFactory();
     private int snippetIndex = 0;
@@ -77,7 +78,7 @@ public class IntegrationTestContextLecacy {
     }
 
     private void addClass(String snipCode) {
-        classCodes.put(JavaCompilerLegacy.guessClassName(snipCode), snipCode);
+        classCodes.put(JavaCompiler.guessClassName(snipCode), snipCode);
     }
 
     private void compileAll() {

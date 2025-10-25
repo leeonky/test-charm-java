@@ -7,12 +7,13 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+@Deprecated
 public class StepsLegacy {
-    private IntegrationTestContextLecacy integrationTestContextLecacy;
+    private IntegrationTestContextLegacy integrationTestContextLecacy;
 
     @Before
     public void reset() {
-        integrationTestContextLecacy = new IntegrationTestContextLecacy();
+        integrationTestContextLecacy = new IntegrationTestContextLegacy();
     }
 
     @After
