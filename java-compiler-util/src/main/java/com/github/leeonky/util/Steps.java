@@ -12,6 +12,6 @@ public class Steps {
 
     @When("evaluating the following code:")
     public void executingTheFollowingCode(String expression) {
-        JavaExecutor.executor().setValueEvaluator(expression);
+        JavaExecutor.executor().main().returnExpression(expression);
     }
 }

@@ -60,8 +60,8 @@ public class JavaCompiler {
         if (classCodes.isEmpty())
             return emptyList();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        List<JavaSourceFromString> files = classCodes.stream().map(code ->
-                        new JavaSourceFromString(guessClassName(code).replaceAll("<.*>", ""), declarePackage() + code))
+        List<JavaSourceFromStringLegacy> files = classCodes.stream().map(code ->
+                        new JavaSourceFromStringLegacy(guessClassName(code).replaceAll("<.*>", ""), declarePackage() + code))
                 .collect(Collectors.toList());
         javax.tools.JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
         StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
@@ -75,30 +75,26 @@ public class JavaCompiler {
     }
 
     @SneakyThrows
-    public List<Compiled> compile(Collection<String> classCodes) {
+    public List<Definition> compile(Collection<String> classCodes) {
         return Sneaky.get(() -> {
             if (classCodes.isEmpty())
                 return emptyList();
             DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-            List<JavaSourceFromString> files = classCodes.stream().map(code ->
-                            new JavaSourceFromString(guessClassName(code).replaceAll("<.*>", ""), declarePackage() + code))
+            List<Definition> definitions = classCodes.stream().map(code -> new Definition(packageName, guessClassName(code).replaceAll("<.*>", ""), code))
                     .collect(Collectors.toList());
             javax.tools.JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
             StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
             standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(new File("./")));
-            if (!systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, files).call()) {
+            if (!systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, definitions).call()) {
                 System.out.println(diagnostics.getDiagnostics().stream().filter(d -> d.getSource() != null).collect(groupingBy(Diagnostic::getSource))
                         .entrySet().stream().map(this::compileResults).collect(Collectors.joining("\n")));
                 throw new IllegalStateException("Failed to compile java code: \n");
             }
-            return files.stream().map(this::loadCompiledResult).collect(Collectors.toList());
+            return definitions;
         });
     }
 
-    private Compiled loadCompiledResult(JavaSourceFromString javaSourceFromString) {
-        return new Compiled(javaSourceFromString.name, javaSourceFromString.code, packagePrefix());
-    }
-
+    @Deprecated
     private String declarePackage() {
         return packageName.isEmpty() ? "" : "package " + packageName + ";";
     }
@@ -127,7 +123,11 @@ public class JavaCompiler {
     @SneakyThrows
     @Deprecated
     public Class<?> loadClass(String name) {
-        return Class.forName(packagePrefix() + name, true, loader);
+        return Class.forName(fullName(name), true, loader);
+    }
+
+    public String fullName(String name) {
+        return packagePrefix() + name;
     }
 
     public String packagePrefix() {
@@ -139,11 +139,12 @@ public class JavaCompiler {
     }
 }
 
-class JavaSourceFromString extends SimpleJavaFileObject {
+@Deprecated
+class JavaSourceFromStringLegacy extends SimpleJavaFileObject {
     final String name;
     final String code;
 
-    JavaSourceFromString(String name, String code) {
+    JavaSourceFromStringLegacy(String name, String code) {
         super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
         this.name = name;
         this.code = code;
