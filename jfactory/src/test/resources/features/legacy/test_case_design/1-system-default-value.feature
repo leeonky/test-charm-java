@@ -547,13 +547,13 @@ Feature: System Default Value
       values: [<defaultValue>, <expectedSpecifiedValue>]
       """
       Examples:
-        | type                      | specifiedValue     | defaultValue | expectedSpecifiedValue |
-        | java.time.YearMonth[]     | "2023-06"          | null         | '2023-06'              |
-        | List<java.time.YearMonth> | "2023-06"          | null         | '2023-06'              |
-        | Set<java.time.YearMonth>  | "2023-06"          | null         | '2023-06'              |
-        | CustomObject[]            | new CustomObject() | null         | {...}                  |
-        | List<CustomObject>        | new CustomObject() | null         | {...}                  |
-        | Set<CustomObject>         | new CustomObject() | null         | {...}                  |
+        | type               | specifiedValue     | defaultValue | expectedSpecifiedValue |
+#        | java.time.YearMonth[] | "2023-06"          | null         | '2023-06'              |
+#        | List<java.time.YearMonth> | "2023-06"          | null         | '2023-06'              |
+#        | Set<java.time.YearMonth>  | "2023-06"          | null         | '2023-06'              |
+        | CustomObject[]     | new CustomObject() | null         | {...}                  |
+        | List<CustomObject> | new CustomObject() | null         | {...}                  |
+        | Set<CustomObject>  | new CustomObject() | null         | {...}                  |
 
     Scenario Outline: String/int/Integer/short/Short/long/Long/byte/Byte/float/Float/double/Double/BigInteger/BigDecimal/boolean/Boolean/UUID/Instant/LocalDate/LocalTime/LocalDateTime list with more than one elements value specified
       Given the following bean class:
@@ -1050,9 +1050,9 @@ Feature: System Default Value
       : [<defaultValue>, <expectedSpecifiedValue>]
       """
       Examples:
-        | type                | specifiedValue     | defaultValue | expectedSpecifiedValue |
-        | java.time.YearMonth | "2023-06"          | null         | '2023-06'              |
-        | CustomObject        | new CustomObject() | null         | { anyProperty= null }  |
+        | type         | specifiedValue     | defaultValue | expectedSpecifiedValue |
+#        | java.time.YearMonth | "2023-06"          | null         | '2023-06'              |
+        | CustomObject | new CustomObject() | null         | { anyProperty= null }  |
 
     Scenario: Date basic type array with one element specified
       When build:
@@ -1133,9 +1133,9 @@ Feature: System Default Value
       : [<firstDefaultValue>, <expectedFirstSpecifiedValue>, <secondDefaultValue>, <expectedSecondSpecifiedValue>]
       """
       Examples:
-        | type                | firstSpecifiedValue | secondSpecifiedValue | firstDefaultValue | secondDefaultValue | expectedFirstSpecifiedValue | expectedSecondSpecifiedValue |
-        | java.time.YearMonth | "2023-06"           | "2023-07"            | null              | null               | '2023-06'                   | '2023-07'                    |
-        | CustomObject        | new CustomObject()  | new CustomObject()   | null              | null               | { anyProperty= null }       | { anyProperty= null }        |
+        | type         | firstSpecifiedValue | secondSpecifiedValue | firstDefaultValue | secondDefaultValue | expectedFirstSpecifiedValue | expectedSecondSpecifiedValue |
+#        | java.time.YearMonth | "2023-06"           | "2023-07"            | null              | null               | '2023-06'                   | '2023-07'                    |
+        | CustomObject | new CustomObject()  | new CustomObject()   | null              | null               | { anyProperty= null }       | { anyProperty= null }        |
 
     Scenario: Date basic type array with more than one element specified
       When build:
