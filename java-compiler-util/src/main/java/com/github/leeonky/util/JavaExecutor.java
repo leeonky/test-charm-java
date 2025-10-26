@@ -56,6 +56,14 @@ public class JavaExecutor {
 
     public void reset() {
         context = new Context();
+        unCompiled.clear();
+    }
+
+    public JavaExecutor resetAll() {
+        reset();
+        unCompiled.clear();
+        allCompiled.clear();
+        return this;
     }
 
     class Context {

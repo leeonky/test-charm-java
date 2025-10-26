@@ -5,4 +5,7 @@ dependencies {
 
     annotationProcessor libs.test.lombok
     api libs.test.lombok
+
+    testImplementation project(':DAL-java')
+    testImplementation project(':DAL-extension-basic')
 }

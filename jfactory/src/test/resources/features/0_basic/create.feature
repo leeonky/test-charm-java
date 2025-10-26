@@ -1,3 +1,4 @@
+@import(com.github.leeonky.jfactory.*)
 Feature: Create Test Objects Using JFactory
 
   Rule: Simple Bean Creation
@@ -24,6 +25,7 @@ Feature: Create Test Objects Using JFactory
         }
         """
 
+    @import(java.util.*)
     Scenario: Property-Based Creation - Create an Object with One or More Specified Property Values
       When evaluating the following code:
         """
@@ -226,6 +228,7 @@ Feature: Create Test Objects Using JFactory
         str= 'str#100'
         """
 
+    @import(com.github.leeonky.util.*)
     Scenario: Custom Default Value Strategy - Define a Custom Default Value Factory by Type
       Given the following bean definition:
         """
