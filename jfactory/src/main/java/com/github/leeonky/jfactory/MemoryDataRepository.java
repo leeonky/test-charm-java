@@ -3,7 +3,7 @@ package com.github.leeonky.jfactory;
 import java.util.*;
 
 public class MemoryDataRepository implements DataRepository {
-    private Map<Class<?>, Set<Object>> repo = new HashMap<>();
+    private final Map<Class<?>, Set<Object>> repo = new HashMap<>();
 
     @Override
     public void save(Object object) {
