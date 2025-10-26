@@ -10,32 +10,6 @@ import java.util.UUID;
 
 import static com.github.leeonky.dal.Assertions.expect;
 
-class ResetSequence {
-
-    public static class Bean {
-        public String str;
-    }
-
-    private final JFactory jFactory = new JFactory();
-
-    @Test
-    void set_sequence_start() {
-        jFactory.setSequenceStart(100);
-
-        expect(jFactory.create(Bean.class)).should("str= str#100");
-    }
-
-    @Test
-    void should_use_new_sequence_start_after_sequence_reset() {
-        jFactory.setSequenceStart(100);
-        jFactory.create(Bean.class);
-
-        jFactory.resetSequence();
-
-        expect(jFactory.create(Bean.class)).should("str= str#100");
-    }
-}
-
 class SupportedBuildInDefaultValueTypes {
 
     public static class Bean {
@@ -152,5 +126,91 @@ class OtherTypeOfDefaultValue {
         Bean bean = jFactory.create(Bean.class);
 
         expect(bean).should("anyType= null");
+    }
+}
+
+class ResetSequence {
+    private final JFactory jFactory = new JFactory();
+
+    public static class Bean {
+        public String str;
+    }
+
+    @Test
+    void set_sequence_start() {
+        jFactory.setSequenceStart(100);
+
+        expect(jFactory.create(Bean.class)).should("str= str#100");
+    }
+
+    @Test
+    void should_use_new_sequence_start_after_sequence_reset() {
+        jFactory.setSequenceStart(100);
+        jFactory.create(Bean.class);
+
+        jFactory.resetSequence();
+
+        expect(jFactory.create(Bean.class)).should("str= str#100");
+    }
+}
+
+class SequenceWrapAround {
+    private final JFactory jFactory = new JFactory();
+
+    public static class Bean {
+        public byte b;
+        public short s;
+        public int i;
+        public long l;
+        public E e;
+        public boolean bool;
+
+        public enum E {A, B}
+    }
+
+    @Test
+    void byte_property() {
+        jFactory.setSequenceStart(Byte.MAX_VALUE);
+
+        expect(jFactory.create(Bean.class)).should("b= 127y");
+        expect(jFactory.create(Bean.class)).should("b= -128y");
+    }
+
+    @Test
+    void short_property() {
+        jFactory.setSequenceStart(Short.MAX_VALUE);
+
+        expect(jFactory.create(Bean.class)).should("s= 32767s");
+        expect(jFactory.create(Bean.class)).should("s= -32768s");
+    }
+
+    @Test
+    void int_property() {
+        jFactory.setSequenceStart(Integer.MAX_VALUE);
+
+        expect(jFactory.create(Bean.class)).should("i= 2147483647");
+        expect(jFactory.create(Bean.class)).should("i= -2147483648");
+    }
+
+    @Test
+    void long_property() {
+        jFactory.setSequenceStart(Integer.MAX_VALUE);
+
+        expect(jFactory.create(Bean.class)).should("l= 2147483647L");
+        expect(jFactory.create(Bean.class)).should("l= -2147483648L");
+    }
+
+    @Test
+    void enum_property() {
+        expect(jFactory.create(Bean.class)).should("e: A");
+        expect(jFactory.create(Bean.class)).should("e: B");
+        expect(jFactory.create(Bean.class)).should("e: A");
+    }
+
+    @Test
+    void boolean_property() {
+        expect(jFactory.create(Bean.class)).should("bool= true");
+        expect(jFactory.create(Bean.class)).should("bool= false");
+        expect(jFactory.create(Bean.class)).should("bool= true");
     }
 }
