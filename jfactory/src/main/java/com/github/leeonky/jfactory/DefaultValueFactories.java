@@ -44,6 +44,7 @@ public class DefaultValueFactories {
         register(OffsetDateTime.class, new DefaultOffsetDateTimeFactory());
         register(ZonedDateTime.class, new DefaultZoneDateTimeFactory());
         register(Enum.class, new DefaultEnumFactory());
+        register(YearMonth.class, new DefaultYearMonthFactory());
     }
 
     public void register(Class<?> type, DefaultValueFactory<?> factory) {
@@ -61,155 +62,162 @@ public class DefaultValueFactories {
     public static class DefaultStringFactory implements DefaultValueFactory<String> {
 
         @Override
-        public <T> String create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return property.propertyInfo();
+        public <T> String create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return objectProperty.propertyInfo();
         }
     }
 
     public static class DefaultLongFactory implements DefaultValueFactory<Long> {
 
         @Override
-        public <T> Long create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return (long) property.instance().getSequence();
+        public <T> Long create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return (long) objectProperty.instance().getSequence();
         }
     }
 
     public static class DefaultIntegerFactory implements DefaultValueFactory<Integer> {
 
         @Override
-        public <T> Integer create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return property.instance().getSequence();
+        public <T> Integer create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return objectProperty.instance().getSequence();
         }
     }
 
     public static class DefaultShortFactory implements DefaultValueFactory<Short> {
 
         @Override
-        public <T> Short create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return (short) property.instance().getSequence();
+        public <T> Short create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return (short) objectProperty.instance().getSequence();
         }
     }
 
     public static class DefaultByteFactory implements DefaultValueFactory<Byte> {
 
         @Override
-        public <T> Byte create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return (byte) property.instance().getSequence();
+        public <T> Byte create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return (byte) objectProperty.instance().getSequence();
         }
     }
 
     public static class DefaultDoubleFactory implements DefaultValueFactory<Double> {
 
         @Override
-        public <T> Double create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return (double) property.instance().getSequence();
+        public <T> Double create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return (double) objectProperty.instance().getSequence();
         }
     }
 
     public static class DefaultFloatFactory implements DefaultValueFactory<Float> {
 
         @Override
-        public <T> Float create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return (float) property.instance().getSequence();
+        public <T> Float create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return (float) objectProperty.instance().getSequence();
         }
     }
 
     public static class DefaultBooleanFactory implements DefaultValueFactory<Boolean> {
 
         @Override
-        public <T> Boolean create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return (property.instance().getSequence() % 2) == 1;
+        public <T> Boolean create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return (objectProperty.instance().getSequence() % 2) == 1;
         }
     }
 
     public static class DefaultBigIntegerFactory implements DefaultValueFactory<BigInteger> {
 
         @Override
-        public <T> BigInteger create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return BigInteger.valueOf(property.instance().getSequence());
+        public <T> BigInteger create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return BigInteger.valueOf(objectProperty.instance().getSequence());
         }
     }
 
     public static class DefaultBigDecimalFactory implements DefaultValueFactory<BigDecimal> {
 
         @Override
-        public <T> BigDecimal create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return BigDecimal.valueOf(property.instance().getSequence());
+        public <T> BigDecimal create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return BigDecimal.valueOf(objectProperty.instance().getSequence());
         }
     }
 
     public static class DefaultUUIDFactory implements DefaultValueFactory<UUID> {
 
         @Override
-        public <T> UUID create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return UUID.fromString(String.format("00000000-0000-0000-0000-%012d", property.instance().getSequence()));
+        public <T> UUID create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return UUID.fromString(String.format("00000000-0000-0000-0000-%012d", objectProperty.instance().getSequence()));
         }
     }
 
     public static class DefaultDateFactory implements DefaultValueFactory<Date> {
 
         @Override
-        public <T> Date create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return Date.from(INSTANT_START.plus(property.instance().getSequence(), ChronoUnit.DAYS));
+        public <T> Date create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return Date.from(INSTANT_START.plus(objectProperty.instance().getSequence(), ChronoUnit.DAYS));
         }
     }
 
     public static class DefaultInstantFactory implements DefaultValueFactory<Instant> {
 
         @Override
-        public <T> Instant create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return INSTANT_START.plusSeconds(property.instance().getSequence());
+        public <T> Instant create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return INSTANT_START.plusSeconds(objectProperty.instance().getSequence());
         }
     }
 
     public static class DefaultLocalTimeFactory implements DefaultValueFactory<LocalTime> {
 
         @Override
-        public <T> LocalTime create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return LOCAL_TIME_START.plusSeconds(property.instance().getSequence());
+        public <T> LocalTime create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return LOCAL_TIME_START.plusSeconds(objectProperty.instance().getSequence());
         }
     }
 
     public static class DefaultLocalDateFactory implements DefaultValueFactory<LocalDate> {
 
         @Override
-        public <T> LocalDate create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return LOCAL_DATE_START.plusDays(property.instance().getSequence());
+        public <T> LocalDate create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return LOCAL_DATE_START.plusDays(objectProperty.instance().getSequence());
         }
     }
 
     public static class DefaultLocalDateTimeFactory implements DefaultValueFactory<LocalDateTime> {
 
         @Override
-        public <T> LocalDateTime create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return LOCAL_DATE_TIME_START.plusSeconds(property.instance().getSequence());
+        public <T> LocalDateTime create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return LOCAL_DATE_TIME_START.plusSeconds(objectProperty.instance().getSequence());
         }
     }
 
     public static class DefaultOffsetDateTimeFactory implements DefaultValueFactory<OffsetDateTime> {
 
         @Override
-        public <T> OffsetDateTime create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return INSTANT_START.plusSeconds(property.instance().getSequence()).atZone(ZoneId.systemDefault()).toOffsetDateTime();
+        public <T> OffsetDateTime create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return INSTANT_START.plusSeconds(objectProperty.instance().getSequence()).atZone(ZoneId.systemDefault()).toOffsetDateTime();
         }
     }
 
     public static class DefaultZoneDateTimeFactory implements DefaultValueFactory<ZonedDateTime> {
 
         @Override
-        public <T> ZonedDateTime create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            return INSTANT_START.plusSeconds(property.instance().getSequence()).atZone(ZoneId.systemDefault());
+        public <T> ZonedDateTime create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return INSTANT_START.plusSeconds(objectProperty.instance().getSequence()).atZone(ZoneId.systemDefault());
+        }
+    }
+
+    public static class DefaultYearMonthFactory implements DefaultValueFactory<YearMonth> {
+        @Override
+        public <T> YearMonth create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return YearMonth.from(LOCAL_DATE_START.plusMonths(objectProperty.instance().getSequence()));
         }
     }
 
     public static class DefaultEnumFactory implements DefaultValueFactory<Object> {
 
         @Override
-        public <T> Object create(BeanClass<T> beanType, ObjectProperty<T> property) {
-            BeanClass<?> propertyType = property.getProperty().getType();
+        public <T> Object create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            BeanClass<?> propertyType = objectProperty.getProperty().getType();
             Object[] enumConstants = (propertyType.isCollection() ? propertyType.getElementType() : propertyType)
                     .getType().getEnumConstants();
-            return enumConstants[(property.instance().getSequence() - 1) % enumConstants.length];
+            return enumConstants[(objectProperty.instance().getSequence() - 1) % enumConstants.length];
         }
     }
 
@@ -221,7 +229,7 @@ public class DefaultValueFactories {
         }
 
         @Override
-        public <T> V create(BeanClass<T> beanType, ObjectProperty<T> property) {
+        public <T> V create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
             return type.createDefault();
         }
 

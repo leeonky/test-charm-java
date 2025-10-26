@@ -104,6 +104,7 @@ Feature: Create Test Objects Using JFactory
           public java.time.LocalDateTime localDateTime;
           public java.time.OffsetDateTime offsetDateTime;
           public java.time.ZonedDateTime zonedDateTime;
+          public java.time.YearMonth yearMonth;
           public EnumType enumValue;
 
           public enum EnumType {
@@ -143,6 +144,7 @@ Feature: Create Test Objects Using JFactory
           localDateTime: '1996-01-23T00:00:01'
           offsetDateTime.toInstant: '1996-01-23T00:00:01Z'
           zonedDateTime.toInstant: '1996-01-23T00:00:01Z'
+          yearMonth: '1996-02'
           enumValue: A
         }
         """
@@ -178,6 +180,7 @@ Feature: Create Test Objects Using JFactory
           localDateTime: '1996-01-23T00:00:02'
           offsetDateTime.toInstant: '1996-01-23T00:00:02Z'
           zonedDateTime.toInstant: '1996-01-23T00:00:02Z'
+          yearMonth: '1996-03'
           enumValue: B
         }
         """
