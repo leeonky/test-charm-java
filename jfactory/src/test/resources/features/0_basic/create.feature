@@ -274,6 +274,26 @@ Feature: Create Test Objects Using JFactory
         str= null
         """
 
+    Scenario: Ignore Property - Ignoring Default Value Generation in Spec
+      Given the following bean definition:
+        """
+        public class Bean {
+          public String str;
+        }
+        """
+      When register as follows:
+        """
+        jFactory.factory(Bean.class).spec(ins -> ins.spec().ignore("str"));
+        """
+      And evaluating the following code:
+        """
+        jFactory.type(Bean.class).create();
+        """
+      Then the result should be:
+        """
+        str= null
+        """
+
   Rule: Specify a custom constructor
 
     Background:

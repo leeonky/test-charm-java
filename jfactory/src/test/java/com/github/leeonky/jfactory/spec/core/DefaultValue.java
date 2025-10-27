@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory.spec.core;
 
 import com.github.leeonky.jfactory.JFactory;
+import com.github.leeonky.jfactory.Spec;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -109,6 +110,7 @@ class SupportedBuildInDefaultValueTypes {
                         "  enumValue: B\n" +
                         "}");
     }
+
 }
 
 class OtherTypeOfDefaultValue {
@@ -212,5 +214,151 @@ class SequenceWrapAround {
         expect(jFactory.create(Bean.class)).should("bool= true");
         expect(jFactory.create(Bean.class)).should("bool= false");
         expect(jFactory.create(Bean.class)).should("bool= true");
+    }
+}
+
+class IgnoreDefaultValue {
+
+    public static class Bean {
+        public String stringValue;
+        public int intValue;
+        public Integer boxedIntValue;
+        public short shortValue;
+        public Short boxedShortValue;
+        public byte byteValue;
+        public Byte boxedByteValue;
+        public long longValue;
+        public Long boxedLongValue;
+        public float floatValue;
+        public Float boxedFloatValue;
+        public double doubleValue;
+        public Double boxedDoubleValue;
+        public boolean boolValue;
+        public Boolean boxedBoolValue;
+        public BigInteger bigInt;
+        public BigDecimal bigDec;
+        public UUID uuid;
+        public Date date;
+        public java.time.Instant instant;
+        public java.time.LocalDate localDate;
+        public java.time.LocalTime localTime;
+        public java.time.LocalDateTime localDateTime;
+        public java.time.OffsetDateTime offsetDateTime;
+        public java.time.ZonedDateTime zonedDateTime;
+        public EnumType enumValue;
+
+        public enum EnumType {
+            A, B
+        }
+    }
+
+    private final JFactory jFactory = new JFactory();
+
+    @Test
+    void default_value_when_ignore_supported_build_in_default_value_types() {
+        jFactory.ignoreDefaultValue(p -> true);
+
+        expect(jFactory.create(Bean.class))
+                .should("= {\n" +
+                        "  stringValue= null\n" +
+                        "  intValue= 0\n" +
+                        "  boxedIntValue= null\n" +
+                        "  shortValue= 0s\n" +
+                        "  boxedShortValue= null\n" +
+                        "  byteValue= 0y\n" +
+                        "  boxedByteValue= null\n" +
+                        "  longValue= 0L\n" +
+                        "  boxedLongValue= null\n" +
+                        "  floatValue= 0.0f\n" +
+                        "  boxedFloatValue= null\n" +
+                        "  doubleValue= 0.0d\n" +
+                        "  boxedDoubleValue= null\n" +
+                        "  boolValue= false\n" +
+                        "  boxedBoolValue= null\n" +
+                        "  bigInt= null\n" +
+                        "  bigDec= null\n" +
+                        "  uuid: null\n" +
+                        "  date: null\n" +
+                        "  instant: null\n" +
+                        "  localDate: null\n" +
+                        "  localTime: null\n" +
+                        "  localDateTime: null\n" +
+                        "  offsetDateTime: null\n" +
+                        "  zonedDateTime: null\n" +
+                        "  enumValue: null\n" +
+                        "}");
+
+    }
+
+    @Test
+    void ignore_specific_one() {
+        jFactory.ignoreDefaultValue(p -> p.getName().equals("stringValue"));
+
+        expect(jFactory.create(Bean.class))
+                .should(": {\n" +
+                        "  stringValue: null\n" +
+                        "  intValue= 1\n" +
+                        "}");
+    }
+
+    @Test
+    void ignore_in_type_spec() {
+        jFactory.factory(Bean.class).spec(ins -> {
+            ins.spec().property("stringValue").ignore();
+        });
+
+        expect(jFactory.create(Bean.class))
+                .should(": {\n" +
+                        "  stringValue: null\n" +
+                        "  intValue= 1\n" +
+                        "}");
+    }
+
+    @Test
+    void ignore_some_in_type_spec() {
+        jFactory.factory(Bean.class).spec(ins ->
+                ins.spec().ignore("stringValue", "boxedIntValue"));
+
+        expect(jFactory.create(Bean.class))
+                .should(": {\n" +
+                        "  stringValue: null\n" +
+                        "  boxedIntValue: null\n" +
+                        "  intValue= 1\n" +
+                        "}");
+    }
+
+    public static class IgnoreStringValue extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            property("stringValue").ignore();
+        }
+    }
+
+    public static class IgnoreStringValueAndBoxedIntValue extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            ignore("stringValue", "boxedIntValue");
+        }
+    }
+
+    @Test
+    void ignore_in_class_spec() {
+        expect(jFactory.createAs(IgnoreStringValue.class))
+                .should(": {\n" +
+                        "  stringValue: null\n" +
+                        "  intValue= 1\n" +
+                        "}");
+    }
+
+    @Test
+    void ignore_some_in_class_spec() {
+        expect(jFactory.createAs(IgnoreStringValueAndBoxedIntValue.class))
+                .should(": {\n" +
+                        "  stringValue: null\n" +
+                        "  boxedIntValue: null\n" +
+                        "  intValue= 1\n" +
+                        "}");
     }
 }
