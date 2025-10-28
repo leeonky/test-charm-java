@@ -1,7 +1,10 @@
 package com.github.leeonky.jfactory.spec.core;
 
+import com.github.leeonky.jfactory.DefaultValueFactory;
 import com.github.leeonky.jfactory.JFactory;
+import com.github.leeonky.jfactory.ObjectProperty;
 import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.util.BeanClass;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -360,5 +363,43 @@ class IgnoreDefaultValue {
                         "  boxedIntValue: null\n" +
                         "  intValue= 1\n" +
                         "}");
+    }
+}
+
+class DefineDefaultValue {
+    public static class Bean {
+        public String str;
+    }
+
+    @Test
+    void define_default_value_by_type_from_bean_type_and_property_name() {
+        JFactory jFactory = new JFactory();
+
+        jFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
+            @Override
+            public <T> String create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+                return beanType.getSimpleName() + "_" + objectProperty.getProperty().getName();
+            }
+        });
+
+        expect(jFactory.create(Bean.class)).should("str= Bean_str");
+    }
+
+    @Test
+    void define_property_default_value() {
+        JFactory jFactory = new JFactory();
+
+        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue("hello"));
+
+        expect(jFactory.create(Bean.class)).should("str= hello");
+    }
+
+    @Test
+    void define_property_default_value_by_lambda() {
+        JFactory jFactory = new JFactory();
+
+        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue(() -> "seq" + ins.getSequence()));
+
+        expect(jFactory.create(Bean.class)).should("str= seq1");
     }
 }
