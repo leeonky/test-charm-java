@@ -127,7 +127,7 @@ Feature: define spec
       """
       Then should raise error:
       """
-      message: "Not support property chain 'bean.value' in current operation"
+      message: 'Property chain `bean.value` is not supported in the current operation'
       """
 
   Rule: default value

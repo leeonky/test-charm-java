@@ -168,7 +168,7 @@ public class PropertySpec<T> {
                         producerFactory.apply(new ProducerFactoryContext(jFactory, objectProducer, propertyWriter.getName(), Optional.empty(), objectProducer)));
             });
         }
-        throw new IllegalArgumentException(format("Not support property chain '%s' in current operation", property));
+        throw new IllegalArgumentException(format("Property chain `%s` is not supported in the current operation", property));
     }
 
     private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder, Optional<Association> association) {

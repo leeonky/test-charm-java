@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static com.github.leeonky.dal.Assertions.expectRun;
 
 class SupportedBuildInDefaultValueTypes {
 
@@ -371,6 +372,10 @@ class DefineDefaultValue {
         public String str;
     }
 
+    public static class BeanHolder {
+        public Bean bean;
+    }
+
     @Test
     void define_default_value_by_type_from_bean_type_and_property_name() {
         JFactory jFactory = new JFactory();
@@ -389,17 +394,26 @@ class DefineDefaultValue {
     void define_property_default_value() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue("hello"));
+        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue("hello_" + ins.getSequence()));
 
-        expect(jFactory.create(Bean.class)).should("str= hello");
+        expect(jFactory.create(Bean.class)).should("str= hello_1");
     }
 
     @Test
     void define_property_default_value_by_lambda() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue(() -> "seq" + ins.getSequence()));
+        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue(() -> "from_lambda"));
 
-        expect(jFactory.create(Bean.class)).should("str= seq1");
+        expect(jFactory.create(Bean.class)).should("str= from_lambda");
+    }
+
+    @Test
+    void do_not_allow_define_sub_property_default_value() {
+        JFactory jFactory = new JFactory();
+
+        jFactory.factory(BeanHolder.class).spec(ins -> ins.spec().property("bean.str").defaultValue("hello"));
+
+        expectRun(() -> jFactory.create(BeanHolder.class)).should("::throw.message: 'Property chain `bean.str` is not supported in the current operation'");
     }
 }

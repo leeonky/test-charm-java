@@ -194,7 +194,7 @@ Feature: Default Value Handling
       """
     When register as follows:
       """
-      jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue("hello"));
+      jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue("hello_" + ins.getSequence()));
       """
     And evaluating the following code:
       """
@@ -202,7 +202,27 @@ Feature: Default Value Handling
       """
     Then the result should be:
       """
-      str= hello
+      str= hello_1
+      """
+
+  Scenario: Use Lambda in Default Value - Define a Class-Specific Lambda Default Value for a Property
+    Given the following bean definition:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+    When register as follows:
+      """
+      jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue(() -> "from_lambda"));
+      """
+    And evaluating the following code:
+      """
+      jFactory.create(Bean.class);
+      """
+    Then the result should be:
+      """
+      str= from_lambda
       """
 
   Scenario: Default Value Skipping - Support Ignoring Default Value Generation
