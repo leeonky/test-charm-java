@@ -33,7 +33,7 @@ public class TablePropertyValue implements PropertyValue {
     }
 
     @Override
-    public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
+    public <T> Builder<T> applyToBuilder(String property, Builder<T> builder) {
         String[] lines = table.split(System.lineSeparator());
         String[] headers = getCells(lines[0]);
         return reduceWithIndex(Stream.of(lines).skip(1), builder, (rowIndex, rowReduceBuilder, row) -> {

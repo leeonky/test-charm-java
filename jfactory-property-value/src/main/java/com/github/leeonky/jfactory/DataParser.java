@@ -12,7 +12,7 @@ public class DataParser {
     public static PropertyValue data(String expression) {
         return new PropertyValue() {
             @Override
-            public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
+            public <T> Builder<T> applyToBuilder(String property, Builder<T> builder) {
                 Object data = parse(expression);
                 if (property.equals(""))
                     return builder.properties(tryFlat(data));

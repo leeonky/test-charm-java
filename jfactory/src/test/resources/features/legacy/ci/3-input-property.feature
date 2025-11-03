@@ -1801,7 +1801,7 @@ Feature: input property
       """
       jFactory.type(Bean[].class).properties(new PropertyValue() {
           @Override
-          public <T> Builder<T> setToBuilder(String property, Builder<T> builder) {
+          public <T> Builder<T> applyToBuilder(String property, Builder<T> builder) {
               return builder.property("[0].value", "hello");
           }
       }).create();
