@@ -56,8 +56,8 @@ public class ExecutorMain {
         return executor.execute();
     }
 
-    public void addDeclarations(String declarations) {
-        addAll(this.declarations, declarations.split(";"));
+    public void addDeclarations(String declaration) {
+        declarations.add(declaration);
         executor = null;
     }
 

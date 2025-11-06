@@ -29,6 +29,7 @@ public class Steps {
     }
 
     @And("register as follows:")
+    @And("execute as follows:")
     public void registerAsFollows(String registers) {
         JavaExecutor.executor().main().addRegisters(registers);
     }

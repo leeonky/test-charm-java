@@ -16,4 +16,10 @@ public class Steps {
     public void the_result_should_be(String expression) {
         expectRun(JavaExecutor.executor().main()::evaluate).should(expression);
     }
+
+    @Then("value of {string} should be:")
+    public void value_of_should_be(String field, String expression) {
+        JavaExecutor.executor().main().returnExpression(field);
+        expectRun(JavaExecutor.executor().main()::evaluate).should(expression);
+    }
 }
