@@ -12,10 +12,12 @@ import com.github.leeonky.util.NoSuchAccessorException;
 import com.github.leeonky.util.Sneaky;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.DALException.extractException;
 import static com.github.leeonky.dal.runtime.Operators.MATCH;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
+import static java.util.Arrays.asList;
 
 @Order(BUILD_IN)
 public class MetaProperties implements Extension {
@@ -40,6 +42,11 @@ public class MetaProperties implements Extension {
         return metaData.data().fieldNames();
     }
 
+    private static Object entries(MetaData<?> metaData) {
+        return metaData.data().fieldNames().stream().map(k ->
+                asList(k, metaData.data().property(k).value())).collect(Collectors.toList());
+    }
+
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
@@ -47,6 +54,7 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty("throw", MetaProperties::throw_)
                 .registerMetaProperty("object", MetaProperties::object_)
                 .registerMetaProperty("keys", MetaProperties::keys)
+                .registerMetaProperty("entries", MetaProperties::entries)
                 .registerMetaProperty("should", MetaShould::new)
                 .registerMetaProperty("this", (RuntimeDataHandler<MetaData<?>>) RuntimeData::data)
                 .registerMetaProperty(MetaShould.class, "not", (metaData) -> metaData.data().value().negative())
