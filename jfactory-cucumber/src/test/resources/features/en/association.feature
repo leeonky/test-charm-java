@@ -46,6 +46,36 @@ Feature: Association with Foreign Key
           }
         }
         """
+      Then All data should be:
+        """
+        Department= {
+          id: {...}
+          name= HR
+          company: {
+            id= ::root.DataBase.Company[0].id
+            name= /^name.*/
+          }
+          companyId: *
+          employees= []
+        }
+        """
+      Then All data should be:
+        """
+        Company= {
+          id: {...}
+          name= /^name.*/
+          departments= [{
+            id: {...}
+            name= HR
+            company: {
+              id= ::root.DataBase.Company[0].id
+              name= /^name.*/
+            }
+            companyId: *
+            employees= []
+          }]
+        }
+        """
 
     Scenario: With Primary Entity Property Value
       Given Exists data "Department":
@@ -65,23 +95,36 @@ Feature: Association with Foreign Key
           }
         }
         """
-#      Then All data should be:
-#        """
-#        Department: {
-#          id= *
-#          name= HR
-#  #        company: {...}
-#  #        employees= []
-#        }
-#        """
-  #    Then All data should be:
-  #      """
-  #      Company= {
-  #        id= *
-  #        name= /^name.*/
-  #        departments: [{...}]
-  #      }
-  #      """
+      Then All data should be:
+        """
+        Department= {
+          id: {...}
+          name= HR
+          company: {
+            id= ::root.DataBase.Company[0].id
+            name= Acme
+          }
+          companyId: *
+          employees= []
+        }
+        """
+      Then All data should be:
+        """
+        Company= {
+          id: {...}
+          name= Acme
+          departments= [{
+            id: {...}
+            name= HR
+            company: {
+              id= ::root.DataBase.Company[0].id
+              name= Acme
+            }
+            companyId: *
+            employees= []
+          }]
+        }
+        """
 
     Scenario: Attach the Existed Primary Entity
       Given Exists data "Company":
@@ -106,4 +149,37 @@ Feature: Association with Foreign Key
           }
         }
         """
-
+      Then All data should be:
+        """
+        Department= {
+          id: {...}
+          name= HR
+          company: {
+            id= (::root.DataBase.Company::filter: {name= Acme}).id
+            name= Acme
+          }
+          companyId: *
+          employees= []
+        }
+        """
+      Then All data should be:
+        """
+        Company= [{
+          id: {...}
+          name= Globex
+          departments= []
+        }{
+          id: {...}
+          name= Acme
+          departments= [{
+            id: {...}
+            name= HR
+            company: {
+              id= (::root.DataBase.Company::filter: {name= Acme}).id
+              name= Acme
+            }
+            companyId: *
+            employees= []
+          }]
+        }]
+        """

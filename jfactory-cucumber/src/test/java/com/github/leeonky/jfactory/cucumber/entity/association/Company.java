@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,14 +21,10 @@ public class Company {
     private String name;
 
     @Transient
-    private List<Department> departments = new ArrayList<>();
+    private List<Department> departments;
 
     public Collection<Department> getDepartments() {
-        return EntityFactory.runtimeInstance.type(Department.class).property("companyId", id).queryAll();
-    }
-
-    public Company setDepartments(List<Department> departments) {
-        this.departments = departments;
-        return this;
+//        TODO departments!=null return departments?
+        return EntityFactory.runtimeInstance.type(Department.class).property("company.id", id).queryAll();
     }
 }
