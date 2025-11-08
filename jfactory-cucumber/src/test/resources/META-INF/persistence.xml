@@ -10,6 +10,9 @@
         <class>com.github.leeonky.jfactory.cucumber.entity.Order</class>
         <class>com.github.leeonky.jfactory.cucumber.entity.SnakeCaseProduct</class>
         <class>com.github.leeonky.jfactory.cucumber.entity.Category</class>
+        <class>com.github.leeonky.jfactory.cucumber.entity.association.Company</class>
+        <class>com.github.leeonky.jfactory.cucumber.entity.association.Department</class>
+        <class>com.github.leeonky.jfactory.cucumber.entity.association.Employee</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test"/>

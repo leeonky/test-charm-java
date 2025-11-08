@@ -35,10 +35,6 @@ public class PropertySpec<T> {
                 new UnFixedValueProducer<>(value, (BeanClass<V>) context.producer.getPropertyWriterType(context.property)));
     }
 
-    @Deprecated
-    /**
-     * reference spec and trait via string
-     */
     public <V> Spec<T> is(Class<? extends Spec<V>> specClass) {
         if (isAssociation())
             return spec;

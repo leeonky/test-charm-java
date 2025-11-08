@@ -8,6 +8,8 @@ dependencies {
     implementation libs.prod.jackson.yaml
 
     testImplementation project(':jfactory-repo-jpa')
+    testImplementation project(':DAL-extension-jdbc')
+    testImplementation project(':DAL-extension-basic')
     testImplementation libs.test.cucumber.junit
     testImplementation libs.test.cucumber.picocontainer
     testImplementation libs.test.h2

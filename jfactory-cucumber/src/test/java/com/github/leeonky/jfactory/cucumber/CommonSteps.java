@@ -28,6 +28,9 @@ public class CommonSteps {
         EntityFactory.entityManager.createQuery("delete from Product").executeUpdate();
         EntityFactory.entityManager.createQuery("delete from Cart").executeUpdate();
         EntityFactory.entityManager.createQuery("delete from SnakeCaseProduct").executeUpdate();
+        EntityFactory.entityManager.createQuery("delete from Employee").executeUpdate();
+        EntityFactory.entityManager.createQuery("delete from Department").executeUpdate();
+        EntityFactory.entityManager.createQuery("delete from Company").executeUpdate();
         transaction.commit();
         EntityFactory.jpaDataRepository.clear();
     }

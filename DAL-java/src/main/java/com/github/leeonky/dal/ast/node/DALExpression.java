@@ -24,7 +24,8 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
         this.left = left;
         this.right = right;
         this.operator = operator;
-        setPositionBegin(operator.getPosition());
+        // TODO missing test, executable missing position
+        setPositionBegin(operator.getPosition() == 0 ? right.getPositionBegin() : operator.getPosition());
     }
 
     public static DALNode expression(DALNode left, DALOperator operator, DALNode right) {
@@ -103,7 +104,8 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
 
     @Override
     public int getPositionBegin() {
-        if (left == null || left instanceof InputNode) return super.getPositionBegin();
+        if (left == null || left instanceof InputNode)
+            return super.getPositionBegin();
         return Math.min(super.getPositionBegin(), left.getPositionBegin());
     }
 
