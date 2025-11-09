@@ -39,8 +39,8 @@ Feature: Association with Foreign Key
             Company= | id | name      |
                      | *  | /^name.*/ |
 
-            Department= | id | name | companyid                     |
-                        | *  | HR   | ::root.DataBase.Company[0].id |
+            Department= | id | name | companyid         |
+                        | *  | HR   | ::root.Company.id |
 
             Employee= []
           }
@@ -88,8 +88,8 @@ Feature: Association with Foreign Key
             Company= | id | name |
                      | *  | Acme |
 
-            Department= | id | name | companyid                     |
-                        | *  | HR   | ::root.DataBase.Company[0].id |
+            Department= | id | name | companyid         |
+                        | *  | HR   | ::root.Company.id |
 
             Employee= []
           }
@@ -101,7 +101,7 @@ Feature: Association with Foreign Key
           id: {...}
           name= HR
           company: {
-            id= ::root.DataBase.Company[0].id
+            id= ::root.Company.id
             name= Acme
           }
           companyId: *
@@ -117,7 +117,7 @@ Feature: Association with Foreign Key
             id: {...}
             name= HR
             company: {
-              id= ::root.DataBase.Company[0].id
+              id= ::root.Company.id
               name= Acme
             }
             companyId: *
@@ -142,8 +142,8 @@ Feature: Association with Foreign Key
                      | *  | Globex |
                      | *  | Acme   |
 
-            Department= | id | name | companyid                                          |
-                        | *  | HR   | (::root.DataBase.Company::filter: {name= Acme}).id |
+            Department= | id | name | companyid                                 |
+                        | *  | HR   | (::root.Company::filter: {name= Acme}).id |
 
             Employee= []
           }
@@ -155,7 +155,7 @@ Feature: Association with Foreign Key
           id: {...}
           name= HR
           company: {
-            id= (::root.DataBase.Company::filter: {name= Acme}).id
+            id= (::root.Company::filter: {name= Acme}).id
             name= Acme
           }
           companyId: *
@@ -175,11 +175,63 @@ Feature: Association with Foreign Key
             id: {...}
             name= HR
             company: {
-              id= (::root.DataBase.Company::filter: {name= Acme}).id
+              id= (::root.Company::filter: {name= Acme}).id
               name= Acme
             }
             companyId: *
             employees= []
           }]
         }]
+        """
+
+    Scenario: Create From Primary
+      Given Exists data "Company":
+        """
+        name: Acme
+        departments: | name |
+                     | HR   |
+        """
+      Then All data should be:
+        """
+        : {
+          DataBase: {
+            Company= | id | name |
+                     | *  | Acme |
+
+            Department= | id | name | companyid         |
+                        | *  | HR   | ::root.Company.id |
+
+            Employee= []
+          }
+        }
+        """
+      Then All data should be:
+        """
+        Department= {
+          id: {...}
+          name= HR
+          company: {
+            id= ::root.Company.id
+            name= Acme
+          }
+          companyId: *
+          employees= []
+        }
+        """
+      Then All data should be:
+        """
+        Company= {
+          id: {...}
+          name= Acme
+          departments= [{
+            id: {...}
+            name= HR
+            company: {
+              id= ::root.Company.id
+              name= Acme
+            }
+            companyId: *
+            employees= []
+          }]
+        }
         """
