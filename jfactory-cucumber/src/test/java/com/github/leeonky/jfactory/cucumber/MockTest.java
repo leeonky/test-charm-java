@@ -4,6 +4,7 @@ import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.cucumber.entity.association.Company;
 import com.github.leeonky.jfactory.cucumber.entity.association.Department;
 import com.github.leeonky.jfactory.cucumber.factory.Association;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,10 +12,30 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static com.github.leeonky.jfactory.DataParser.data;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class MockTest {
     private JFactory jFactory = new JFactory();
-    private CompanyService companyService = new CompanyService(new MockCompanyRepo(), new MockDepartmentRepo());
+    private CompanyService companyService;
+
+    @BeforeEach
+    void setUp() {
+        CompanyRepo companyRepo = mock(CompanyRepo.class);
+        when(companyRepo.findById(anyLong())).then(a ->
+                jFactory.type(Company.class).property("id", a.getArgument(0)).query());
+
+        DepartmentRepo departmentRepo = mock(DepartmentRepo.class);
+        when(departmentRepo.findByCompanyId(anyLong())).then(a ->
+                new ArrayList<>(jFactory.type(Department.class).property("company.id", a.getArgument(0)).queryAll()));
+
+        companyService = new CompanyService(companyRepo, departmentRepo);
+
+        // manual mock implement
+        // companyService = new CompanyService(new MockCompanyRepo(), new MockDepartmentRepo());
+    }
 
     @Test
     void no_departments() {
@@ -48,6 +69,45 @@ class MockTest {
         expect(companyService.dumpDepartments(100L)).isEqualTo("Acem: hr, rd");
     }
 
+    @Test
+    void no_departments_java15() {
+        jFactory.spec(Association.Company.class).properties(data("""
+                id: 100L
+                name: Acem
+                """)).create();
+
+        expect(companyService.dumpDepartments(100L))
+                .isEqualTo("Acem:");
+    }
+
+    @Test
+    void one_department_java15() {
+        jFactory.spec(Association.Department.class)
+                .properties(data("""
+                        company: {
+                            id: 100L
+                            name: Acem
+                        }
+                        name: hr
+                        """)).create();
+
+        expect(companyService.dumpDepartments(100L)).isEqualTo("Acem: hr");
+    }
+
+    @Test
+    void two_departments_java15() {
+        jFactory.spec(Association.Company.class).properties(data("""
+                id: 100L
+                name: Acem
+                departments: | name |
+                             | hr   |
+                             | rd   |
+                """)).create();
+
+        expect(companyService.dumpDepartments(100L)).isEqualTo("Acem: hr, rd");
+    }
+
+    // manual mock implement
     class MockCompanyRepo implements CompanyRepo {
         @Override
         public Company findById(long id) {
@@ -55,6 +115,7 @@ class MockTest {
         }
     }
 
+    // manual mock implement
     class MockDepartmentRepo implements DepartmentRepo {
 
         @Override
