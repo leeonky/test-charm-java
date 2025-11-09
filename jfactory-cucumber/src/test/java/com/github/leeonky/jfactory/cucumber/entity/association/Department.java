@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -50,5 +50,10 @@ public class Department {
     }
 
     @Transient
-    private List<Employee> employees = new ArrayList<>();
+    private List<Employee> employees;
+
+    public Collection<Employee> getEmployees() {
+//        TODO departments!=null return departments?
+        return EntityFactory.runtimeInstance.type(Employee.class).property("department.id", id).queryAll();
+    }
 }

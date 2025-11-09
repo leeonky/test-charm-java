@@ -15,10 +15,17 @@ public class Association {
         @Override
         public void main() {
             property("company").is(Company.class);
+
+            property("employees[]").is(Employee.class);
+            property("employees").reverseAssociation("department");
         }
     }
 
     public static class Employee extends Spec<com.github.leeonky.jfactory.cucumber.entity.association.Employee> {
 
+        @Override
+        public void main() {
+            property("department").is(Department.class);
+        }
     }
 }
