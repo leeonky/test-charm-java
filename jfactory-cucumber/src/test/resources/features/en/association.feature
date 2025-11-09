@@ -235,3 +235,33 @@ Feature: Association with Foreign Key
           }]
         }
         """
+
+    Scenario: Dirty Foreign Entity
+      Given Exists data "Department":
+        """
+          | name | company | companyId |
+          | HR   | null    | 100       |
+        """
+      Then All data should be:
+        """
+        : {
+          DataBase: {
+            Company= []
+
+            Department= | id | name | companyid |
+                        | *  | HR   | 100L      |
+
+            Employee= []
+          }
+        }
+        """
+      Then All data should be:
+        """
+        Department= {
+          id: {...}
+          name= HR
+          company: null
+          companyId: 100
+          employees= []
+        }
+        """

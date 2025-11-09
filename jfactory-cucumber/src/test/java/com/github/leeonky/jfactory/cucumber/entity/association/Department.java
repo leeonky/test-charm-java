@@ -37,7 +37,8 @@ public class Department {
      * JPA uses this getter to persist and load the foreign key column (company_id).
      */
     public long getCompanyId() {
-        return company == null ? 0 : company.getId();
+        Company company = getCompany();
+        return company != null ? company.getId() : companyId;
     }
 
     /**
@@ -45,8 +46,7 @@ public class Department {
      * based on the companyId.
      */
     public Company getCompany() {
-//        TODO company!=null return company?
-        return EntityFactory.runtimeInstance.type(Company.class).property("id", companyId).query();
+        return company != null ? company : EntityFactory.runtimeInstance.type(Company.class).property("id", companyId).query();
     }
 
     @Transient
