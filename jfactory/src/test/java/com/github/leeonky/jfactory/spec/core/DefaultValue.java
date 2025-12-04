@@ -17,39 +17,6 @@ import static com.github.leeonky.dal.Assertions.expectRun;
 
 class SupportedBuildInDefaultValueTypes {
 
-    public static class Bean {
-        public String stringValue;
-        public int intValue;
-        public Integer boxedIntValue;
-        public short shortValue;
-        public Short boxedShortValue;
-        public byte byteValue;
-        public Byte boxedByteValue;
-        public long longValue;
-        public Long boxedLongValue;
-        public float floatValue;
-        public Float boxedFloatValue;
-        public double doubleValue;
-        public Double boxedDoubleValue;
-        public boolean boolValue;
-        public Boolean boxedBoolValue;
-        public BigInteger bigInt;
-        public BigDecimal bigDec;
-        public UUID uuid;
-        public Date date;
-        public java.time.Instant instant;
-        public java.time.LocalDate localDate;
-        public java.time.LocalTime localTime;
-        public java.time.LocalDateTime localDateTime;
-        public java.time.OffsetDateTime offsetDateTime;
-        public java.time.ZonedDateTime zonedDateTime;
-        public EnumType enumValue;
-
-        public enum EnumType {
-            A, B
-        }
-    }
-
     private final JFactory jFactory = new JFactory();
 
     @Test
@@ -115,17 +82,42 @@ class SupportedBuildInDefaultValueTypes {
                         "}");
     }
 
+    public static class Bean {
+        public String stringValue;
+        public int intValue;
+        public Integer boxedIntValue;
+        public short shortValue;
+        public Short boxedShortValue;
+        public byte byteValue;
+        public Byte boxedByteValue;
+        public long longValue;
+        public Long boxedLongValue;
+        public float floatValue;
+        public Float boxedFloatValue;
+        public double doubleValue;
+        public Double boxedDoubleValue;
+        public boolean boolValue;
+        public Boolean boxedBoolValue;
+        public BigInteger bigInt;
+        public BigDecimal bigDec;
+        public UUID uuid;
+        public Date date;
+        public java.time.Instant instant;
+        public java.time.LocalDate localDate;
+        public java.time.LocalTime localTime;
+        public java.time.LocalDateTime localDateTime;
+        public java.time.OffsetDateTime offsetDateTime;
+        public java.time.ZonedDateTime zonedDateTime;
+        public EnumType enumValue;
+
+        public enum EnumType {
+            A, B
+        }
+    }
 }
 
 class OtherTypeOfDefaultValue {
     private final JFactory jFactory = new JFactory();
-
-    public static class AnyType {
-    }
-
-    public static class Bean {
-        public AnyType anyType;
-    }
 
     @Test
     void default_value_should_be_null() {
@@ -133,14 +125,17 @@ class OtherTypeOfDefaultValue {
 
         expect(bean).should("anyType= null");
     }
+
+    public static class AnyType {
+    }
+
+    public static class Bean {
+        public AnyType anyType;
+    }
 }
 
 class ResetSequence {
     private final JFactory jFactory = new JFactory();
-
-    public static class Bean {
-        public String str;
-    }
 
     @Test
     void set_sequence_start() {
@@ -158,21 +153,14 @@ class ResetSequence {
 
         expect(jFactory.create(Bean.class)).should("str= str#100");
     }
+
+    public static class Bean {
+        public String str;
+    }
 }
 
 class SequenceWrapAround {
     private final JFactory jFactory = new JFactory();
-
-    public static class Bean {
-        public byte b;
-        public short s;
-        public int i;
-        public long l;
-        public E e;
-        public boolean bool;
-
-        public enum E {A, B}
-    }
 
     @Test
     void byte_property() {
@@ -219,42 +207,20 @@ class SequenceWrapAround {
         expect(jFactory.create(Bean.class)).should("bool= false");
         expect(jFactory.create(Bean.class)).should("bool= true");
     }
+
+    public static class Bean {
+        public byte b;
+        public short s;
+        public int i;
+        public long l;
+        public E e;
+        public boolean bool;
+
+        public enum E {A, B}
+    }
 }
 
 class IgnoreDefaultValue {
-
-    public static class Bean {
-        public String stringValue;
-        public int intValue;
-        public Integer boxedIntValue;
-        public short shortValue;
-        public Short boxedShortValue;
-        public byte byteValue;
-        public Byte boxedByteValue;
-        public long longValue;
-        public Long boxedLongValue;
-        public float floatValue;
-        public Float boxedFloatValue;
-        public double doubleValue;
-        public Double boxedDoubleValue;
-        public boolean boolValue;
-        public Boolean boxedBoolValue;
-        public BigInteger bigInt;
-        public BigDecimal bigDec;
-        public UUID uuid;
-        public Date date;
-        public java.time.Instant instant;
-        public java.time.LocalDate localDate;
-        public java.time.LocalTime localTime;
-        public java.time.LocalDateTime localDateTime;
-        public java.time.OffsetDateTime offsetDateTime;
-        public java.time.ZonedDateTime zonedDateTime;
-        public EnumType enumValue;
-
-        public enum EnumType {
-            A, B
-        }
-    }
 
     private final JFactory jFactory = new JFactory();
 
@@ -331,22 +297,6 @@ class IgnoreDefaultValue {
                         "}");
     }
 
-    public static class IgnoreStringValue extends Spec<Bean> {
-
-        @Override
-        public void main() {
-            property("stringValue").ignore();
-        }
-    }
-
-    public static class IgnoreStringValueAndBoxedIntValue extends Spec<Bean> {
-
-        @Override
-        public void main() {
-            ignore("stringValue", "boxedIntValue");
-        }
-    }
-
     @Test
     void ignore_in_class_spec() {
         expect(jFactory.createAs(IgnoreStringValue.class))
@@ -365,17 +315,58 @@ class IgnoreDefaultValue {
                         "  intValue= 1\n" +
                         "}");
     }
+
+    public static class Bean {
+        public String stringValue;
+        public int intValue;
+        public Integer boxedIntValue;
+        public short shortValue;
+        public Short boxedShortValue;
+        public byte byteValue;
+        public Byte boxedByteValue;
+        public long longValue;
+        public Long boxedLongValue;
+        public float floatValue;
+        public Float boxedFloatValue;
+        public double doubleValue;
+        public Double boxedDoubleValue;
+        public boolean boolValue;
+        public Boolean boxedBoolValue;
+        public BigInteger bigInt;
+        public BigDecimal bigDec;
+        public UUID uuid;
+        public Date date;
+        public java.time.Instant instant;
+        public java.time.LocalDate localDate;
+        public java.time.LocalTime localTime;
+        public java.time.LocalDateTime localDateTime;
+        public java.time.OffsetDateTime offsetDateTime;
+        public java.time.ZonedDateTime zonedDateTime;
+        public EnumType enumValue;
+
+        public enum EnumType {
+            A, B
+        }
+    }
+
+    public static class IgnoreStringValue extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            property("stringValue").ignore();
+        }
+    }
+
+    public static class IgnoreStringValueAndBoxedIntValue extends Spec<Bean> {
+
+        @Override
+        public void main() {
+            ignore("stringValue", "boxedIntValue");
+        }
+    }
 }
 
 class DefineDefaultValue {
-    public static class Bean {
-        public String str;
-    }
-
-    public static class BeanHolder {
-        public Bean bean;
-    }
-
     @Test
     void define_default_value_by_type_from_bean_type_and_property_name() {
         JFactory jFactory = new JFactory();
@@ -415,5 +406,13 @@ class DefineDefaultValue {
         jFactory.factory(BeanHolder.class).spec(ins -> ins.spec().property("bean.str").defaultValue("hello"));
 
         expectRun(() -> jFactory.create(BeanHolder.class)).should("::throw.message: 'Property chain `bean.str` is not supported in the current operation'");
+    }
+
+    public static class Bean {
+        public String str;
+    }
+
+    public static class BeanHolder {
+        public Bean bean;
     }
 }
