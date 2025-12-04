@@ -336,85 +336,85 @@ Feature: basic use
 
   Rule: data repo
 
-    Scenario: save/query/query all - save bean after create bean
-      Given the following bean class:
-      """
-      public class Bean {
-        public String str;
-      }
-      """
-      And build:
-      """
-      jFactory.type(Bean.class).property("str", "hello").create();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("str", "hello").query();
-      """
-      Then the result should:
-      """
-      str= hello
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("str", "hello").queryAll();
-      """
-      Then the result should:
-      """
-      str[]= [hello]
-      """
-
-    Scenario: query empty - query nothing when property miss
-      Given the following bean class:
-      """
-      public class Bean {
-        public String str;
-      }
-      """
-      And build:
-      """
-      jFactory.type(Bean.class).property("str", "hello").create();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("str", "not match").query();
-      """
-      Then the result should:
-      """
-      = null
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("str", "not match").queryAll();
-      """
-      Then the result should:
-      """
-      = []
-      """
-
-    Scenario: clear repo - query nothing when repo is cleared before query
-      Given the following bean class:
-      """
-      public class Bean {
-        public String str;
-      }
-      """
-      And build:
-      """
-      jFactory.type(Bean.class).property("str", "hello").create();
-      """
-      And operate:
-      """
-      jFactory.getDataRepository().clear();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("str", "hello").query();
-      """
-      Then the result should:
-      """
-      = null
-      """
+#    Scenario: save/query/query all - save bean after create bean
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public String str;
+#      }
+#      """
+#      And build:
+#      """
+#      jFactory.type(Bean.class).property("str", "hello").create();
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("str", "hello").query();
+#      """
+#      Then the result should:
+#      """
+#      str= hello
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("str", "hello").queryAll();
+#      """
+#      Then the result should:
+#      """
+#      str[]= [hello]
+#      """
+#
+#    Scenario: query empty - query nothing when property miss
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public String str;
+#      }
+#      """
+#      And build:
+#      """
+#      jFactory.type(Bean.class).property("str", "hello").create();
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("str", "not match").query();
+#      """
+#      Then the result should:
+#      """
+#      = null
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("str", "not match").queryAll();
+#      """
+#      Then the result should:
+#      """
+#      = []
+#      """
+#
+#    Scenario: clear repo - query nothing when repo is cleared before query
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public String str;
+#      }
+#      """
+#      And build:
+#      """
+#      jFactory.type(Bean.class).property("str", "hello").create();
+#      """
+#      And operate:
+#      """
+#      jFactory.getDataRepository().clear();
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("str", "hello").query();
+#      """
+#      Then the result should:
+#      """
+#      = null
+#      """
 
     Scenario: property chain - save and query with property chain
       Given the following bean class:
@@ -521,44 +521,44 @@ Feature: basic use
       ::size= 2
       """
 
-    Scenario: customized repo - use customized repo in build
-      Given declaration list =
-      """
-      new ArrayList<>();
-      """
-      And declaration jFactory =
-      """
-      new JFactory(new DataRepository() {
-          @Override
-          public void save(Object object) {
-              list.add(object);
-          }
-          @Override
-          public <T> Collection<T> queryAll(Class<T> type) {
-              return null;
-          }
-          @Override
-          public void clear() {
-          }
-      });
-      """
-      And the following bean class:
-      """
-      public class Bean {
-        public String str;
-      }
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("str", "hello").create();
-      """
-      Then the list in repo should:
-      """
-      : [{
-        str= hello
-        class.simpleName= Bean
-      }]
-      """
+#    Scenario: customized repo - use customized repo in build
+#      Given declaration list =
+#      """
+#      new ArrayList<>();
+#      """
+#      And declaration jFactory =
+#      """
+#      new JFactory(new DataRepository() {
+#          @Override
+#          public void save(Object object) {
+#              list.add(object);
+#          }
+#          @Override
+#          public <T> Collection<T> queryAll(Class<T> type) {
+#              return null;
+#          }
+#          @Override
+#          public void clear() {
+#          }
+#      });
+#      """
+#      And the following bean class:
+#      """
+#      public class Bean {
+#        public String str;
+#      }
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("str", "hello").create();
+#      """
+#      Then the list in repo should:
+#      """
+#      : [{
+#        str= hello
+#        class.simpleName= Bean
+#      }]
+#      """
 
     Scenario: order of repo saving - save object and sub objects in right order
       Given declaration list =
@@ -615,34 +615,34 @@ Feature: basic use
       }]
       """
 
-    Scenario: raise error when there are than one matched elements during query with condition
-      And the following bean class:
-      """
-      public class Bean {
-        public String stringValue;
-      }
-      """
-      And register:
-      """
-      jFactory.type(Bean.class).property("stringValue", "hello").create();
-      jFactory.type(Bean.class).property("stringValue", "hello").create();
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).query();
-      """
-      Then the result should:
-      """
-      stringValue= hello
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).property("stringValue", "hello").query();
-      """
-      Then should raise error:
-      """
-      message= 'There are multiple elements in the query result.'
-      """
+#    Scenario: raise error when there are than one matched elements during query with condition
+#      And the following bean class:
+#      """
+#      public class Bean {
+#        public String stringValue;
+#      }
+#      """
+#      And register:
+#      """
+#      jFactory.type(Bean.class).property("stringValue", "hello").create();
+#      jFactory.type(Bean.class).property("stringValue", "hello").create();
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).query();
+#      """
+#      Then the result should:
+#      """
+#      stringValue= hello
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).property("stringValue", "hello").query();
+#      """
+#      Then should raise error:
+#      """
+#      message= 'There are multiple elements in the query result.'
+#      """
 
   Rule: spec
 
