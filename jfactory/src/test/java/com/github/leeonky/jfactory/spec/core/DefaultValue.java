@@ -20,7 +20,7 @@ class SupportedBuildInDefaultValueTypes {
     private final JFactory jFactory = new JFactory();
 
     @Test
-    void default_value_depends_on_sequence() {
+    void default_value_should_depend_on_sequence() {
         expect(jFactory.create(Bean.class))
                 .should("= {\n" +
                         "  stringValue= stringValue#1\n" +
@@ -225,7 +225,7 @@ class IgnoreDefaultValue {
     private final JFactory jFactory = new JFactory();
 
     @Test
-    void default_value_when_ignore_supported_build_in_default_value_types() {
+    void all_default_values_when_ignore_proprety() {
         jFactory.ignoreDefaultValue(p -> true);
 
         expect(jFactory.create(Bean.class))
@@ -261,7 +261,7 @@ class IgnoreDefaultValue {
     }
 
     @Test
-    void ignore_specific_one() {
+    void ignore_specific_property() {
         jFactory.ignoreDefaultValue(p -> p.getName().equals("stringValue"));
 
         expect(jFactory.create(Bean.class))
@@ -285,7 +285,7 @@ class IgnoreDefaultValue {
     }
 
     @Test
-    void ignore_some_in_type_spec() {
+    void ignore_multiple_properties_in_type_spec() {
         jFactory.factory(Bean.class).spec(ins ->
                 ins.spec().ignore("stringValue", "boxedIntValue"));
 
@@ -307,7 +307,7 @@ class IgnoreDefaultValue {
     }
 
     @Test
-    void ignore_some_in_class_spec() {
+    void ignore_multiple_properties_in_class_spec() {
         expect(jFactory.createAs(IgnoreStringValueAndBoxedIntValue.class))
                 .should(": {\n" +
                         "  stringValue: null\n" +
@@ -368,7 +368,7 @@ class IgnoreDefaultValue {
 
 class DefineDefaultValue {
     @Test
-    void define_default_value_by_type_from_bean_type_and_property_name() {
+    void define_default_value_by_type() {
         JFactory jFactory = new JFactory();
 
         jFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
@@ -391,7 +391,7 @@ class DefineDefaultValue {
     }
 
     @Test
-    void define_property_default_value_by_lambda() {
+    void define_property_default_value_with_lambda() {
         JFactory jFactory = new JFactory();
 
         jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").defaultValue(() -> "from_lambda"));
@@ -400,7 +400,7 @@ class DefineDefaultValue {
     }
 
     @Test
-    void do_not_allow_define_sub_property_default_value() {
+    void should_do_not_allow_define_sub_property_default_value() {
         JFactory jFactory = new JFactory();
 
         jFactory.factory(BeanHolder.class).spec(ins -> ins.spec().property("bean.str").defaultValue("hello"));

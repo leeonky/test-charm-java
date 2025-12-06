@@ -8,14 +8,6 @@ import static com.github.leeonky.dal.Assertions.expectRun;
 
 class SpecValue {
 
-    public static class Bean {
-        public String str;
-    }
-
-    public static class BeanHolder {
-        public Bean bean;
-    }
-
     @Test
     void define_spec_default_value() {
         JFactory jFactory = new JFactory();
@@ -26,7 +18,7 @@ class SpecValue {
     }
 
     @Test
-    void define_spec_value_by_lambda() {
+    void define_spec_value_with_lambda() {
         JFactory jFactory = new JFactory();
 
         jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").value(() -> "from_lambda"));
@@ -41,5 +33,13 @@ class SpecValue {
         jFactory.factory(BeanHolder.class).spec(ins -> ins.spec().property("bean.str").value("hello"));
 
         expectRun(() -> jFactory.create(BeanHolder.class)).should("::throw.message: 'Property chain `bean.str` is not supported in the current operation'");
+    }
+
+    public static class Bean {
+        public String str;
+    }
+
+    public static class BeanHolder {
+        public Bean bean;
     }
 }

@@ -43,7 +43,7 @@ class RepositorySave {
 class RepositoryQueryAll {
 
     @Test
-    void query_all_with_empty_repo() {
+    void query_all_with_empty_repository() {
         JFactory jFactory = new JFactory(new DataRepository() {
             @Override
             public <T> Collection<T> queryAll(Class<T> type) {
@@ -63,7 +63,7 @@ class RepositoryQueryAll {
     }
 
     @Test
-    void query_all_from_repo() {
+    void query_all() {
         Bean bean = new Bean();
         JFactory jFactory = new JFactory(new DataRepository() {
             @Override
@@ -84,7 +84,7 @@ class RepositoryQueryAll {
     }
 
     @Test
-    void query_all_from_repo_with_criteria() {
+    void query_all_with_criteria() {
         Bean bean1 = new Bean();
         bean1.str1 = "hello";
         Bean bean2 = new Bean();
@@ -109,7 +109,7 @@ class RepositoryQueryAll {
     }
 
     @Test
-    void query_all_from_repo_with_multiple_criteria() {
+    void query_all_with_multiple_criteria() {
         Bean bean1 = new Bean();
         bean1.str1 = "hello";
         bean1.str2 = "not-matched";
@@ -141,4 +141,14 @@ class RepositoryQueryAll {
     public static class Bean {
         public String str1, str2;
     }
+}
+
+class RepositoryQuery {
+}
+
+class MemoryDataRepository {
+}
+
+class RepositoryComposite {
+
 }
