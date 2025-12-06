@@ -118,6 +118,26 @@ Feature: Data Repository
       ::throw.message= 'There are multiple elements in the query result.'
       """
 
+  Scenario: Data Conversion - Automatic Data Conversion for Query Criteria
+    When execute as follows:
+      """
+      Bean bean1 = new Bean();
+      bean1.str = "100";
+      created.add(bean1);
+
+      Bean bean2 = new Bean();
+      bean2.str = "200";
+      created.add(bean2);
+      """
+    And evaluating the following code:
+      """
+      jFactory.type(Bean.class).property("str", 200).query()
+      """
+    Then the result should be:
+      """
+      = { class.simpleName= Bean, str= '200' }
+      """
+
   Scenario: Clear Repo - Clear Repository Data
     When execute as follows:
       """
@@ -141,5 +161,3 @@ Feature: Data Repository
       """
       = []
       """
-
-#  Scenario: Create and Query - Query Previous created Bean

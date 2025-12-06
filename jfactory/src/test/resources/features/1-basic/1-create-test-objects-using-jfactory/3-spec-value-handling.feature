@@ -69,3 +69,24 @@ Feature: Spec Value Handling
       """
       str= input-value
       """
+
+  Scenario: Trait - Define Naming Spec as a Trait
+    Given the following bean definition:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+    When register as follows:
+      """
+      jFactory.factory(Bean.class)
+        .spec("hello", ins -> ins.spec().property("str").value("hello"));
+      """
+    And evaluating the following code:
+      """
+      jFactory.type(Bean.class).traits("hello").create();
+      """
+    Then the result should be:
+      """
+      str= hello
+      """

@@ -644,43 +644,43 @@ Feature: basic use
 #      message= 'There are multiple elements in the query result.'
 #      """
 
-  Rule: spec
-
-    Scenario: in lambda - define spec and naming spec(trait) in lambda
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value1, value2;
-      }
-      """
-      And register:
-      """
-      jFactory.factory(Bean.class)
-        .spec("hello", instance -> instance.spec().property("value1").value("hello"))
-        .spec(instance -> instance.spec().property("value2").value("world"));
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).create();
-      """
-      Then the result should:
-      """
-      = {
-        value1= /^value1.*/
-        value2= "world"
-      }
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).traits("hello").create();
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
-      """
+#  Rule: spec
+#
+#    Scenario: in lambda - define spec and naming spec(trait) in lambda
+#      Given the following bean class:
+#      """
+#      public class Bean {
+#        public String value1, value2;
+#      }
+#      """
+#      And register:
+#      """
+#      jFactory.factory(Bean.class)
+#        .spec("hello", instance -> instance.spec().property("value1").value("hello"))
+#        .spec(instance -> instance.spec().property("value2").value("world"));
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).create();
+#      """
+#      Then the result should:
+#      """
+#      = {
+#        value1= /^value1.*/
+#        value2= "world"
+#      }
+#      """
+#      When build:
+#      """
+#      jFactory.type(Bean.class).traits("hello").create();
+#      """
+#      Then the result should:
+#      """
+#      = {
+#        value1= hello
+#        value2= world
+#      }
+#      """
 
   Rule: params
 
