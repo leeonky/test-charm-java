@@ -17,6 +17,14 @@ subprojects {
         useJUnitPlatform {
             excludeTags("disabled")
         }
+
+        reports {
+            html.required.set(true)
+            html.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}"))
+
+            junitXml.required.set(true)
+            junitXml.outputLocation.set(file("${rootProject.buildDir}/tests/${project.name}"))
+        }
     }
 //    def enablePitest = { name, target, excluded ->
 //        if (project.name == name) {
