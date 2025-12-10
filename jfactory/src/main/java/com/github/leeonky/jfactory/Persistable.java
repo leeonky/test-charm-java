@@ -1,5 +1,6 @@
 package com.github.leeonky.jfactory;
 
 public interface Persistable {
-    void save(Object object);
+    default void save(Object object) {
+    }
 }

@@ -1,9 +1,13 @@
 package com.github.leeonky.jfactory;
 
 import java.util.Collection;
+import java.util.Collections;
 
 public interface DataRepository extends Persistable {
-    <T> Collection<T> queryAll(Class<T> type);
+    default <T> Collection<T> queryAll(Class<T> type) {
+        return Collections.emptyList();
+    }
 
-    void clear();
+    default void clear() {
+    }
 }

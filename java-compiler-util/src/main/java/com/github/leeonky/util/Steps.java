@@ -14,6 +14,7 @@ public class Steps {
     }
 
     @Given("the following bean definition:")
+    @Given("the following class definition:")
     public void theFollowingBeanDefinition(String sourceCode) {
         JavaExecutor.executor().addClass(sourceCode);
     }

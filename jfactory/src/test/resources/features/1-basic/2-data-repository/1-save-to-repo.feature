@@ -13,7 +13,7 @@ Feature: Save Bean to Repository
       """
       jFactory.type(Bean.class).property("str", "hello").create();
       """
-    Then value of "jFactory" should be:
+    Then the field "jFactory" should be:
       """
       dataRepository.allData::entries: ^| {simpleName: Bean} | [{str= hello}] |
       """
@@ -47,7 +47,7 @@ Feature: Save Bean to Repository
       """
       jFactory.type(Bean.class).property("str", "hello").create();
       """
-    Then value of "created" should be:
+    Then the field "created" should be:
       """
       = [{ class.simpleName= Bean, str= hello }]
       """
@@ -55,7 +55,7 @@ Feature: Save Bean to Repository
       """
       jFactory.type(Bean.class).property("str", "world").create();
       """
-    Then value of "created" should be:
+    Then the field "created" should be:
       """
       = [{ class.simpleName= Bean, str= hello }, { class.simpleName= Bean, str= world }]
       """

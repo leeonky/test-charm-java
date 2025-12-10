@@ -19,7 +19,7 @@ public class Steps {
         expectRun(JavaExecutor.executor().main()::evaluate).should(expression);
     }
 
-    @Then("value of {string} should be:")
+    @Then("the field {string} should be:")
     public void value_of_should_be(String field, String expression) {
         JavaExecutor.executor().main().returnExpression(field);
         expectRun(JavaExecutor.executor().main()::evaluate).should(expression);
@@ -27,6 +27,8 @@ public class Steps {
 
     @Given("the following spec definition:")
     public void theFollowingSpecDefinition(String sourceCode) {
-        JavaExecutor.executor().addClass("import com.github.leeonky.jfactory.Spec;\n" + sourceCode);
+        JavaExecutor.executor().addClass(
+                "import com.github.leeonky.jfactory.Spec;\n" +
+                        "import com.github.leeonky.jfactory.Trait;\n" + sourceCode);
     }
 }
