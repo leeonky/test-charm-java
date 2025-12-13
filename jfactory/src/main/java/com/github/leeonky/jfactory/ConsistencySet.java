@@ -36,15 +36,10 @@ class ConsistencySet {
         private final LinkedList<DefaultConsistency<?, ?>.Resolver> unResolved;
 
         Resolver(ObjectProducer<?> producer) {
-            unResolved = mergeBySameItem(processListConsistency(producer)).stream().map(c -> c.resolver(producer))
+            List<DefaultConsistency<?, ?>> listConsistencies = consistencies.stream()
+                    .flatMap(consistency -> consistency.populateListConsistencies(producer)).collect(toList());
+            unResolved = mergeBySameItem(listConsistencies).stream().map(c -> c.resolver(producer))
                     .collect(toCollection(LinkedList::new));
-        }
-
-        private List<DefaultConsistency<?, ?>> processListConsistency(ObjectProducer<?> producer) {
-            List<DefaultConsistency<?, ?>> consistencies = new ArrayList<>();
-            for (DefaultConsistency<?, ?> consistency : ConsistencySet.this.consistencies)
-                consistencies.addAll(consistency.populateListConsistencies(producer));
-            return consistencies;
         }
 
         private List<DefaultConsistency<?, ?>> mergeBySameItem(List<DefaultConsistency<?, ?>> list) {

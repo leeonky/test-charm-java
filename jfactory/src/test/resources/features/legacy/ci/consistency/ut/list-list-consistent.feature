@@ -220,7 +220,7 @@ Feature: list - list consistency
         beans2 | [b a]     |
         """
 
-    Scenario: nested list and list consistency
+    Scenario: nested list and nested list consistency
       And the following bean class:
         """
         public class BeanListList {

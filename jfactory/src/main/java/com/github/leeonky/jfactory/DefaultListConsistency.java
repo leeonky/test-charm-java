@@ -10,23 +10,30 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.DefaultConsistency.LINK_COMPOSER;
 import static com.github.leeonky.jfactory.DefaultConsistency.LINK_DECOMPOSER;
+import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 
 class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency<T, C> {
-    final List<PropertyChain> listProperty;
+    private final List<PropertyChain> listProperty;
     private final DefaultConsistency<T, C> consistency;
     final List<ListConsistencyItem<T>> items = new ArrayList<>();
+    private final int dimension;
     private Function<Coordinate, C> aligner = this::convert;
 
     private C convert(Coordinate e) {
         return e.convertTo(consistency.coordinateType());
     }
 
-    private Function<C, Coordinate> inverseAligner = e -> e;
+    private Function<C, Coordinate> inverseAligner = this::defaultInverseAligner;
+
+    private C defaultInverseAligner(C e) {
+        return e.dimension() != dimension ? null : e;
+    }
 
     DefaultListConsistency(List<String> listProperty, DefaultConsistency<T, C> consistency) {
+        dimension = listProperty.size();
         this.listProperty = listProperty.stream().map(PropertyChain::propertyChain).collect(Collectors.toList());
         this.consistency = consistency;
     }
@@ -62,21 +69,23 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
         return ofNullable(inverseAligner.apply(coordinate)).map(co -> co.join(listProperty));
     }
 
-    List<DefaultConsistency<T, C>> collectCoordinateAndProcess(ObjectProducer<?> producer, List<Index> baseIndex,
-                                                               int l, PropertyChain baseProperty) {
-        List<DefaultConsistency<T, C>> results = new ArrayList<>();
+    public List<C> enumerateIndices(ObjectProducer<?> producer) {
+        return enumerateIndices(producer, new ArrayList<>(), 0, propertyChain(""));
+    }
+
+    private List<C> enumerateIndices(ObjectProducer<?> producer, List<Index> baseIndex,
+                                     int l, PropertyChain baseProperty) {
+        List<C> results = new ArrayList<>();
         PropertyChain list = baseProperty.concat(listProperty.get(l++));
         int nextList = l;
         BeanClass.cast(producer.descendantForUpdate(list), CollectionProducer.class).ifPresent(collectionProducer -> {
             for (int i = 0; i < collectionProducer.childrenCount(); i++) {
-                Index index = new Index(collectionProducer.childrenCount(), i);
                 List<Index> indexes = new ArrayList<>(baseIndex);
-                indexes.add(index);
+                indexes.add(new Index(collectionProducer.childrenCount(), i));
                 if (listProperty.size() > nextList)
-                    results.addAll(collectCoordinateAndProcess(producer, indexes, nextList, list.concat(i)));
+                    results.addAll(enumerateIndices(producer, indexes, nextList, list.concat(i)));
                 else
-                    ofNullable(aligner.apply(new Coordinate(indexes))).ifPresent(c ->
-                            results.add(consistency.populateConsistencyWithList(c)));
+                    ofNullable(aligner.apply(new Coordinate(indexes))).ifPresent(results::add);
             }
         });
         return results;

@@ -367,15 +367,15 @@ Feature: list consistency
       And the following bean class:
         """
         public class BeanList {
-            public List<Bean> beans1, beans2;
-            public String status1, status2, status3;
+            public List<Bean> beans;
         }
         """
       And the following bean class:
         """
         public class BeanListList {
-            public List<BeanList> beansList1, beansList2;
-            public String status1, status2;
+            public List<BeanList> beansList;
+            public List<Bean> beans;
+            public String status;
         }
         """
 
@@ -384,37 +384,34 @@ Feature: list consistency
         """
         jFactory.factory(BeanListList.class).spec(ins -> {
             ins.spec().consistent(String.class)
-                    .list("beansList1", "beans1").consistent(beansList1Beans1 -> beansList1Beans1
+                    .direct("status")
+                    .list("beans").consistent(beans -> beans
                       .direct("status1"))
-                    .list("beansList2", "beans1").consistent(beansList1Beans1 -> beansList1Beans1
+                    .list("beansList", "beans").consistent(beansListBeans -> beansListBeans
                       .direct("status1"));
+
         });
         """
       When build:
         """
         jFactory.clear().type(BeanListList.class)
-                .property("beansList1[0]!.beans1[0]!.status1", "a")
-                .property("beansList1[0]!.beans1[1]!", null)
-                .property("beansList1[1]!.beans1[0]!", null)
-                .property("beansList1[1]!.beans1[1]!.status1", "d")
-
-                .property("beansList2[0]!.beans1[0]!", null)
-                .property("beansList2[0]!.beans1[1]!.status1", "b")
-                .property("beansList2[1]!.beans1[0]!.status1", "c")
-                .property("beansList2[1]!.beans1[1]!", null)
+                .property("status", "a")
+                .property("beansList[0]!.beans[0]!", null)
+                .property("beansList[0]!.beans[1]!", null)
+                .property("beansList[1]!.beans[0]!", null)
+                .property("beans[0]!", null)
+                .property("beans[1]!", null)
                 .create();
         """
       Then the result should:
         """
         : {
-          beansList1: [
-            {beans1.status1[]= [a b]}
-            {beans1.status1[]= [c d]}
+          status= a
+          beansList: [
+            {beans.status1[]= [a a]}
+            {beans.status1[]= [a]}
           ]
-          beansList2: [
-            {beans1.status1[]= [a b]}
-            {beans1.status1[]= [c d]}
-          ]
+          beans.status1[]= [a a]
         }
         """
 

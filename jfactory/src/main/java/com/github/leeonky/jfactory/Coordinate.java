@@ -28,6 +28,10 @@ public class Coordinate {
         return type.newInstance(indexes());
     }
 
+    public int dimension() {
+        return indexes.size();
+    }
+
     public Coordinate reverse() {
         return new Coordinate(indexes.stream().map(Index::reverse).collect(Collectors.toList()));
     }

@@ -6,6 +6,7 @@ import com.github.leeonky.util.Sneaky;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
@@ -15,11 +16,11 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
-    final List<ConsistencyItem<T>> items = new ArrayList<>();
-    final List<DefaultListConsistency<T, C>> list = new ArrayList<>();
+    private final List<ConsistencyItem<T>> items = new ArrayList<>();
+    private final List<DefaultListConsistency<T, C>> list = new ArrayList<>();
     private final BeanClass<T> type;
     private final BeanClass<C> coordinateType;
-    final List<StackTraceElement> locations = new ArrayList<>();
+    private final List<StackTraceElement> locations = new ArrayList<>();
 
     static final Function<Object, Object> LINK_COMPOSER = s -> s;
     static final Function<Object, Object> LINK_DECOMPOSER = s -> s;
@@ -124,17 +125,14 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
         return new ListConsistencyBuilder<>(this, listConsistency);
     }
 
-    public List<DefaultConsistency<T, C>> populateListConsistencies(ObjectProducer<?> producer) {
+    public Stream<DefaultConsistency<T, C>> populateListConsistencies(ObjectProducer<?> producer) {
         if (list.isEmpty())
-            return singletonList(this);
-        List<DefaultConsistency<T, C>> consistencies = new ArrayList<>();
-        for (DefaultListConsistency<T, C> indexSource : list) {
-            consistencies.addAll(indexSource.collectCoordinateAndProcess(producer, new ArrayList<>(), 0, propertyChain("")));
-        }
-        return consistencies;
+            return Stream.of(this);
+        return list.stream().flatMap(listConsistency -> listConsistency.enumerateIndices(producer).stream())
+                .map(this::populateConsistencyAtCoordinate);
     }
 
-    DefaultConsistency<T, C> populateConsistencyWithList(C coordinate) {
+    DefaultConsistency<T, C> populateConsistencyAtCoordinate(C coordinate) {
         DefaultConsistency<T, C> newConsistency = new DefaultConsistency<>(type(), coordinateType(), locations);
         for (DefaultListConsistency<T, C> listConsistency : list) {
             listConsistency.toProperty(coordinate).ifPresent(elementProperty -> {
@@ -142,9 +140,8 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
                     item.populateConsistency(elementProperty, newConsistency);
             });
         }
-        for (ConsistencyItem<T> item : items) {
+        for (ConsistencyItem<T> item : items)
             newConsistency.items.add(item.copy(newConsistency));
-        }
         return newConsistency;
     }
 
@@ -171,29 +168,29 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
     }
 
     class Resolver {
-        private final Set<ConsistencyItem<T>.Resolver> providers;
-        private final Set<ConsistencyItem<T>.Resolver> consumers;
+        private final Set<ConsistencyItem<T>.Resolver> providerCandidates;
+        private final Set<ConsistencyItem<T>.Resolver> consumerCandidates;
 
         Resolver(ObjectProducer<?> root) {
             List<ConsistencyItem<T>.Resolver> itemResolvers = items.stream().map(i -> i.resolver(root, this)).collect(toList());
-            providers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasComposer).collect(toCollection(LinkedHashSet::new));
-            consumers = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasDecomposer).collect(toCollection(LinkedHashSet::new));
+            providerCandidates = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasComposer).collect(toCollection(LinkedHashSet::new));
+            consumerCandidates = itemResolvers.stream().filter(ConsistencyItem.Resolver::hasDecomposer).collect(toCollection(LinkedHashSet::new));
         }
 
         Set<PropertyChain> resolve(ConsistencyItem<T>.Resolver provider) {
             Set<PropertyChain> resolved = new HashSet<>();
-            for (ConsistencyItem<T>.Resolver consumer : consumers)
+            for (ConsistencyItem<T>.Resolver consumer : consumerCandidates)
                 if (consumer != provider)
                     resolved.addAll(consumer.resolve(provider));
             return resolved;
         }
 
         Optional<ConsistencyItem<T>.Resolver> searchProvider(Predicate<ConsistencyItem<?>.Resolver> condition) {
-            return providers.stream().filter(condition).min(this::onlyComposerFirstOrder);
+            return providerCandidates.stream().filter(condition).min(this::onlyComposerFirstOrder);
         }
 
         ConsistencyItem<T>.Resolver defaultProvider() {
-            return providers.stream().min(this::onlyComposerFirstOrder).get();
+            return providerCandidates.stream().min(this::onlyComposerFirstOrder).get();
         }
 
         private int onlyComposerFirstOrder(ConsistencyItem<T>.Resolver r1, ConsistencyItem<T>.Resolver r2) {
@@ -203,7 +200,7 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
         }
 
         Optional<ConsistencyItem<T>.Resolver> propertyRelated(PropertyChain property) {
-            return providers.stream().filter(p -> p.containsProperty(property)).findFirst();
+            return providerCandidates.stream().filter(p -> p.containsProperty(property)).findFirst();
         }
     }
 }
