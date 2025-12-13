@@ -4,7 +4,6 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,7 @@ import static java.util.Optional.ofNullable;
 class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency<T, C> {
     private final List<PropertyChain> listProperty;
     private final DefaultConsistency<T, C> consistency;
-    final List<ListConsistencyItem<T>> items = new ArrayList<>();
+    private final List<ListConsistencyItem<T>> items = new ArrayList<>();
     private final int dimension;
     private Function<Coordinate, C> aligner = this::convert;
 
@@ -65,10 +64,6 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
         return new LC3<>(this, listConsistencyItem);
     }
 
-    Optional<PropertyChain> toProperty(C coordinate) {
-        return ofNullable(inverseAligner.apply(coordinate)).map(co -> co.join(listProperty));
-    }
-
     public List<C> enumerateIndices(ObjectProducer<?> producer) {
         return enumerateIndices(producer, new ArrayList<>(), 0, propertyChain(""));
     }
@@ -95,6 +90,16 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
                           Function<C, Coordinate> inverseAligner) {
         this.aligner = aligner;
         this.inverseAligner = inverseAligner;
+    }
+
+    public void populateConsistencyAtCoordinate(C coordinate, DefaultConsistency<T, C> newConsistency) {
+        Coordinate co = inverseAligner.apply(coordinate);
+        if (co != null) {
+            PropertyChain elementProperty = co.join(listProperty);
+            if (elementProperty != null)
+                for (ListConsistencyItem<T> item : items)
+                    item.populateConsistency(elementProperty, newConsistency);
+        }
     }
 }
 

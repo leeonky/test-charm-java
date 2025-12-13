@@ -129,17 +129,13 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
         if (list.isEmpty())
             return Stream.of(this);
         return list.stream().flatMap(listConsistency -> listConsistency.enumerateIndices(producer).stream())
-                .map(this::populateConsistencyAtCoordinate);
+                .map(this::populateConsistencyAtCoordinateForeachList);
     }
 
-    DefaultConsistency<T, C> populateConsistencyAtCoordinate(C coordinate) {
+    private DefaultConsistency<T, C> populateConsistencyAtCoordinateForeachList(C coordinate) {
         DefaultConsistency<T, C> newConsistency = new DefaultConsistency<>(type(), coordinateType(), locations);
-        for (DefaultListConsistency<T, C> listConsistency : list) {
-            listConsistency.toProperty(coordinate).ifPresent(elementProperty -> {
-                for (ListConsistencyItem<T> item : listConsistency.items)
-                    item.populateConsistency(elementProperty, newConsistency);
-            });
-        }
+        for (DefaultListConsistency<T, C> listConsistency : list)
+            listConsistency.populateConsistencyAtCoordinate(coordinate, newConsistency);
         for (ConsistencyItem<T> item : items)
             newConsistency.items.add(item.copy(newConsistency));
         return newConsistency;
