@@ -534,6 +534,14 @@ Feature: Summary
         """
       When evaluating the following code:
         """
+        jFactory.spec(ABag.class).create();
+        """
+      Then the result should be:
+        """
+        books: []
+        """
+      When evaluating the following code:
+        """
         jFactory.spec(ABag.class).property("books[0].name", "Spring").create();
         """
       Then the result should be:
@@ -661,4 +669,147 @@ Feature: Summary
       Then the field "createdRedis" should be:
         """
         : [{class.simpleName= RedisData, value= redis}]
+        """
+
+  Rule: Save Order / Reverse Association
+
+    Background:
+      Given the following declarations:
+        """
+        List<Object> createdList = new ArrayList<>();
+        """
+      Given the following declarations:
+        """
+        JFactory jFactoryWithRepo = new JFactory(new DataRepository() {
+          @Override
+          public void save(Object object) { createdList.add(object); }
+        });
+        """
+
+    @import(java.util.*)
+    Scenario: Default Behavior - Save Child Before Parent
+      Given the following bean definition:
+        """
+        public class Car {
+          public String model;
+          public Engine engine;
+        }
+        """
+      Given the following bean definition:
+        """
+        public class Engine {
+          public Car car;
+          public String number;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactoryWithRepo.type(Car.class).property("model", "X").property("engine.number", "e01").create();
+        """
+      Then the result should be:
+        """
+        : {
+          model: X
+          engine: {
+            number: e01
+            car= null
+          }
+        }
+        """
+      And the field "createdList" should be:
+        """
+        class[].simpleName: [Engine Car]
+        """
+
+    @import(java.util.*)
+    Scenario: Reverse Association - Save Parent First, Assign Parent to Child’s Back-Reference, Then Save Child
+      Given the following bean definition:
+        """
+        public class Car {
+          public String model;
+          public Engine engine;
+        }
+        """
+      Given the following bean definition:
+        """
+        public class Engine {
+          public Car car;
+          public String number;
+        }
+        """
+      Given the following spec definition:
+        """
+        public class ACar extends Spec<Car> {
+          public void main() {
+            property("engine").reverseAssociation("car");
+          }
+        }
+        """
+      Given the following spec definition:
+        """
+        public class AnEngine extends Spec<Engine> {}
+        """
+      When evaluating the following code:
+        """
+        jFactoryWithRepo.spec(ACar.class).property("model", "X").property("engine.number", "e01").create();
+        """
+      Then the result should be:
+        """
+        : {
+          model: X
+          engine: {
+            number: e01
+            car= ::root
+          }
+        }
+        """
+      And the field "createdList" should be:
+        """
+        class[].simpleName: [Car Engine]
+        """
+
+    @import(java.util.*)
+    Scenario: Reverse Association for List - Save Parent First, Assign Parent to Each Child’s Back-Reference, Then Save All Children
+      Given the following bean definition:
+        """
+        public class Order {
+          public String id;
+          public OrderLine lines[];
+        }
+        """
+      Given the following bean definition:
+        """
+        public class OrderLine {
+          public Order order;
+          public String product;
+        }
+        """
+      Given the following spec definition:
+        """
+        public class AnOrder extends Spec<Order> {
+          public void main() {
+            property("lines").reverseAssociation("order");
+          }
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactoryWithRepo.spec(AnOrder.class)
+          .property("id", "s01")
+          .property("lines[0].product", "PC")
+          .property("lines[1].product", "IPAD")
+          .create();
+        """
+      Then the result should be:
+        """
+        : {
+          id= s01
+          lines: | product | order  |
+                 | PC      | ::root |
+                 | IPAD    | ::root |
+        }
+        """
+      And the field "createdList" should be:
+        """
+        class[].simpleName: [Order OrderLine OrderLine]
         """
