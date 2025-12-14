@@ -265,6 +265,36 @@ Feature: populate list depends on another list
         }
         """
 
+    Scenario: list population with different dimension
+      And register:
+        """
+        jFactory.factory(BeanLists.class).spec(ins -> {
+          ins.spec().structure()
+            .list("beansList1", "beans")
+            .list("beansList2");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(BeanLists.class)
+          .property("beansList1[0].beans[0].str", "a")
+          .property("beansList1[0].beans[1].str", "b")
+          .property("beansList1[1].beans[0].str", "c")
+          .property("beansList1[1].beans[1].str", "d").create();
+        """
+      Then the result should:
+        """
+        : {
+          beansList1: | beans.str[] |
+                      | [a b]       |
+                      | [c d]       |
+
+          beansList2: | beans |
+                      | null  |
+                      | null  |
+        }
+        """
+
     Scenario: custom normalizer
       And register:
         """

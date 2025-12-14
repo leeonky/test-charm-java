@@ -315,6 +315,238 @@ Feature: Summary
         ::throw.message= 'There are multiple elements in the query result.'
         """
 
+  Rule: Nested Object Creation
+
+    Background:
+      Given the following bean definition:
+        """
+        public class Author {
+          private static int count = 0;
+          public Author() { count++; }
+          public int created() { return count; }
+
+          public String name, gender;
+        }
+        """
+      And the following bean definition:
+        """
+        public class Book {
+          private static int count = 0;
+          public Book() { count++; }
+          public int created() { return count; }
+
+          public Author author;
+          public String name;
+        }
+        """
+      And the following bean definition:
+        """
+        public class Bag {
+          public Book[] books;
+        }
+        """
+
+    Scenario: Default Behavior – No Child is Created
+      When evaluating the following code:
+        """
+        jFactory.type(Book.class).create();
+        """
+      Then the result should be:
+        """
+        : {
+          name= /^name.*/
+          author= null
+        }
+        """
+
+    Scenario: Create New Child with No Spec – Based on Input Child Property Value
+      When evaluating the following code:
+        """
+        jFactory.type(Book.class).property("author.name", "tom").create();
+        """
+      Then the result should be:
+        """
+        : {
+          name= /^name.*/
+          author: {
+            name= tom
+            created= 1
+          }
+        }
+        """
+
+    Scenario: Associate Existing Child – Associate with Previously Created One When Input Child Property Matches
+      Given register as follows:
+        """
+        jFactory.type(Author.class).property("name", "tom").create();
+        """
+      And evaluating the following code:
+        """
+        jFactory.type(Book.class).property("author.name", "tom").create();
+        """
+      Then the result should be:
+        """
+        : {
+          name= /^name.*/
+          author: {
+            name= tom
+            created= 1
+          }
+        }
+        """
+
+    Scenario: Create New Child from Spec - Based on Input Child Property and Optional Property Spec
+      Given the following spec definition:
+        """
+        public class AnAuthor extends Spec<Author> {
+          public void main() {
+            property("name").value("tom");
+          }
+        }
+        """
+      And the following spec definition:
+        """
+        public class ABook extends Spec<Book> {
+          public void main() {
+            property("author").optional("AnAuthor");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(AnAuthor.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(ABook.class).create();
+        """
+      Then the result should be:
+        """
+        : {
+          name= /^name.*/
+          author: null
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(ABook.class).property("author.gender", "male").create();
+        """
+      Then the result should be:
+        """
+        : {
+          name= /^name.*/
+          author: {
+            name= tom
+            gender= male
+          }
+        }
+        """
+
+    Scenario: Auto Create New Child from Spec - Based on Property Spec Even Without Input Child Property
+      Given the following spec definition:
+        """
+        public class AnAuthor extends Spec<Author> {}
+        """
+      And the following spec definition:
+        """
+        public class ABook extends Spec<Book> {
+          public void main() {
+            property("author").is(AnAuthor.class);
+          }
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(ABook.class).create();
+        """
+      Then the result should be:
+        """
+        : {
+          name= /^name.*/
+          author: {
+            name= /^name.*/
+            gender= /^gender.*/
+          }
+        }
+        """
+
+    Scenario: Default Behavior of Child List - No Element is Created
+      When evaluating the following code:
+        """
+        jFactory.type(Bag.class).create();
+        """
+      Then the result should be:
+        """
+        books= null
+        """
+
+    Scenario: Create New Element with No Spec – Based on Input Element Property Value
+      When evaluating the following code:
+        """
+        jFactory.type(Bag.class).property("books[0].name", "Spring").create();
+        """
+      Then the result should be:
+        """
+        books: [{
+          name= Spring
+          author= null
+        }]
+        """
+
+    Scenario: Associate Existing Element – Associate with Previously Created One When Input Element Property Matches
+      Given register as follows:
+        """
+        jFactory.type(Book.class).property("name", "Spring").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bag.class).property("books[0].name", "Spring").create();
+        """
+      Then the result should be:
+        """
+        books: [{
+          name= Spring
+          author= null
+          created= 1
+        }]
+        """
+
+    Scenario: Create New Element from Spec - Based on Input Element Property and Element Spec
+      Given the following spec definition:
+        """
+        public class AnAuthor extends Spec<Author> {}
+        """
+      Given the following spec definition:
+        """
+        public class ABook extends Spec<Book> {
+          public void main() {
+            property("author").is(AnAuthor.class);
+          }
+        }
+        """
+      Given the following spec definition:
+        """
+        public class ABag extends Spec<Bag> {
+          public void main() {
+            property("books[]").is(ABook.class);
+          }
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(ABag.class).property("books[0].name", "Spring").create();
+        """
+      Then the result should be:
+        """
+        books: [{
+          name= Spring
+          author= {
+            name= /^name.*/
+            gender= /^gender.*/
+          }
+        }]
+        """
+
   Rule: Custom Repository / Data Source
 
     @import(java.util.*)
