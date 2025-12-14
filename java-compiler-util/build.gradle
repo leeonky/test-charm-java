@@ -2,10 +2,10 @@ dependencies {
     implementation libs.prod.cucumber
     implementation libs.test.cucumber.picocontainer
     api project(':bean-util')
+    api project(':DAL-java')
 
     annotationProcessor libs.test.lombok
     api libs.test.lombok
 
-    testImplementation project(':DAL-java')
     testImplementation project(':DAL-extension-basic')
 }
