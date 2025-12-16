@@ -85,3 +85,22 @@ Feature: and-or
       | 0       | \|\|     | 'hello' | hello  |
       | 0.0     | \|\|     | 'hello' | hello  |
       | 0.0BD   | \|\|     | 'hello' | hello  |
+
+  Scenario Outline: If the first expression is an assertion, the short-circuit evaluation mechanism does not apply.
+    When evaluate by:
+      """
+      <exp1> <operator> <exp2>
+      """
+    Then failed with the message:
+      """
+      Expected to be equal to: java.lang.Integer
+      <2>
+       ^
+      Actual: java.lang.Integer
+      <1>
+       ^
+      """
+    Examples:
+      | exp1       | operator | exp2 |
+      | null= null | and      | 1= 2 |
+      | null= null | &&       | 1= 2 |

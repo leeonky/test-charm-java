@@ -36,7 +36,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         return String.format("%s %s %s", node1, label, node2);
     }
 
-    public Operators overrideType() {
+    public Operators type() {
         return type;
     }
 }

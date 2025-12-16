@@ -10,6 +10,7 @@ import com.github.leeonky.dal.runtime.Operators;
 import com.github.leeonky.dal.runtime.RemarkData;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Notation;
+import com.github.leeonky.util.function.TriFunction;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -116,7 +117,7 @@ public class Factory {
     public interface ExpressionContextData extends BiFunction<DALExpression, DALRuntimeContext, Data<?>> {
         static ExpressionContextData adapt(SupplierSupplierData operation) {
             return (expression, context) -> operation.apply(() -> expression.left().evaluateData(context),
-                    () -> expression.right().evaluateData(context));
+                    () -> expression.right().evaluateData(context), expression.left().isAssertion());
         }
 
         static ExpressionContextData adapt(DataDataObject operation) {
@@ -144,7 +145,7 @@ public class Factory {
             return (expression, context) -> context.data(operation.apply(expression.right().evaluate(context)));
         }
 
-        interface SupplierSupplierData extends BiFunction<Supplier<Data<?>>, Supplier<Data<?>>, Data<?>> {
+        interface SupplierSupplierData extends TriFunction<Supplier<Data<?>>, Supplier<Data<?>>, Boolean, Data<?>> {
         }
 
         interface DataOptDataContextData extends QuadFunction<Data<?>, DALOperator, Data<?>, DALRuntimeContext, Data<?>> {

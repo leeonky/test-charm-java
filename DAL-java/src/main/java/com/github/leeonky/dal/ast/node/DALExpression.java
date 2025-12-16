@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.node.table.RowType;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ExpressionException;
+import com.github.leeonky.dal.runtime.Operators;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Expression;
 
@@ -119,5 +120,10 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     @Override
     public boolean needPostBlankWarningCheck() {
         return true;
+    }
+
+    @Override
+    public Boolean isAssertion() {
+        return operator().type() == Operators.MATCH || operator().type() == Operators.EQUAL;
     }
 }

@@ -77,4 +77,8 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     public String toString() {
         return inspect();
     }
+
+    public Boolean isAssertion() {
+        return false;
+    }
 }

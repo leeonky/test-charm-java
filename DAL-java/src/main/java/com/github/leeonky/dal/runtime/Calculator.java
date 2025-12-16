@@ -53,9 +53,9 @@ public class Calculator {
         return context.calculate(v1, opt, v2);
     }
 
-    public static Data<?> and(Supplier<Data<?>> s1, Supplier<Data<?>> s2) {
+    public static Data<?> and(Supplier<Data<?>> s1, Supplier<Data<?>> s2, Boolean isFirstExpressionAssertion) {
         Data<?> v1 = s1.get();
-        return isTrue(v1) ? s2.get() : v1;
+        return isFirstExpressionAssertion || isTrue(v1) ? s2.get() : v1;
     }
 
     private static boolean isTrue(Data<?> data) {
@@ -64,7 +64,7 @@ public class Calculator {
         ).orElseGet(() -> !data.isNull());
     }
 
-    public static Data<?> or(Supplier<Data<?>> s1, Supplier<Data<?>> s2) {
+    public static Data<?> or(Supplier<Data<?>> s1, Supplier<Data<?>> s2, Boolean isFirstExpressionAssertion) {
         Data<?> v1 = s1.get();
         return isTrue(v1) ? v1 : s2.get();
     }

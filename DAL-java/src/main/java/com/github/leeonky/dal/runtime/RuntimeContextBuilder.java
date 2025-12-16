@@ -546,10 +546,10 @@ public class RuntimeContextBuilder {
 
         @SuppressWarnings("unchecked")
         public Data<?> calculate(Data<?> v1, DALOperator opt, Data<?> v2) {
-            for (Operation operation : operations.get(opt.overrideType()))
+            for (Operation operation : operations.get(opt.type()))
                 if (operation.match(v1, opt, v2, this))
                     return operation.operateData(v1, opt, v2, this);
-            throw illegalOperation(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
+            throw illegalOperation(format("No operation `%s` between '%s' and '%s'", opt.type(),
                     getClassName(v1.value()), getClassName(v2.value())));
         }
 
