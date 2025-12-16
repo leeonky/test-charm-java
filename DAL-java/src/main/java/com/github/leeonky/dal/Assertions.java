@@ -112,8 +112,12 @@ public class Assertions {
     }
 
     public Assertions isEqualTo(Object expect) {
-        expression(InputNode.Root.INSTANCE, Factory.equal(), new ConstValueNode(expect))
-                .evaluate(getDAL().getRuntimeContextBuilder().build(inputCode));
-        return this;
+        try {
+            expression(InputNode.Root.INSTANCE, Factory.equal(), new ConstValueNode(expect))
+                    .evaluate(getDAL().getRuntimeContextBuilder().build(inputCode));
+            return this;
+        } catch (InterpreterException e) {
+            throw new AssertionError(e.getMessage());
+        }
     }
 }
