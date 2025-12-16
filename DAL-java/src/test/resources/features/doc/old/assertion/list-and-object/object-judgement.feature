@@ -21,7 +21,7 @@ Feature: verify object
     """
     Then failed with the following message:
     """
-    Unexpected fields `key1`, `key2`
+    Unexpected fields `key1`, `key2`. If you only want to check some fields, use ':' instead of '='.
     """
     And got the following source code information:
     """
@@ -229,7 +229,7 @@ Feature: verify object
     """
     Then failed with the following message:
     """
-    Unexpected fields `key2`
+    Unexpected fields `key2`. If you only want to check some fields, use ':' instead of '='.
     """
     And got the following source code information:
     """

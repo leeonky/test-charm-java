@@ -68,7 +68,7 @@ public class ObjectScopeNode extends DALNode {
                     if (!dataFields.isEmpty())
                         throw exception(expression -> {
                             String element = expression.left().inspect();
-                            return new AssertionFailure(format("Unexpected fields %s%s",
+                            return new AssertionFailure(format("Unexpected fields %s%s. If you only want to check some fields, use ':' instead of '='.",
                                     dataFields.stream().map(s -> s instanceof String ? format("`%s`", s) : s.toString())
                                             .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), expression.operator().getPosition());
                         });
