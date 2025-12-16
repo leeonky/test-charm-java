@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.nexus.publish)
 }
 
+ext.disabledPublishProjects = ['page-flow', 'page-flow-selenium', 'page-flow-playwright', 'summary']
+
 apply from: "$rootDir/gradle/jacoco.gradle"
 apply from: "$rootDir/gradle/publish.gradle"
 apply from: "$rootDir/gradle/test.gradle"

@@ -1,3 +1,8 @@
+def disabledPublishProjects = []
+if (rootProject.ext.has('disabledPublishProjects')) {
+    disabledPublishProjects = rootProject.ext.disabledPublishProjects as List
+}
+
 nexusPublishing {
     repositories {
         sonatype {
@@ -64,5 +69,14 @@ subprojects {
                 System.getenv("SIGNING_PASSWORD")
         )
         sign publishing.publications.mavenJava
+    }
+
+    if (disabledPublishProjects) {
+        def matches = disabledPublishProjects.contains(project.path) || disabledPublishProjects.contains(project.name)
+        if (matches) {
+            tasks.matching { it.name.startsWith('publish') }.configureEach {
+                enabled = false
+            }
+        }
     }
 }
