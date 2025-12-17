@@ -21,5 +21,6 @@ include(
         'page-flow-selenium',
         'page-flow-playwright',
         'page-flow',
-        'view-mapper'
+        'view-mapper',
+        'feature-summary'
 )

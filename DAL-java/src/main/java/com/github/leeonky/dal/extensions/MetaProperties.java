@@ -47,10 +47,19 @@ public class MetaProperties implements Extension {
                 asList(k, metaData.data().property(k).value())).collect(Collectors.toList());
     }
 
+    private static Object flat(MetaData<?> metaData) {
+        Object[] array = metaData.data().list().wraps().stream()
+                .flatMap(dataIndexedElement -> dataIndexedElement.value().list().values())
+                .toArray();
+        return array
+                ;
+    }
+
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("size", MetaProperties::size)
+                .registerMetaProperty("flat", MetaProperties::flat)
                 .registerMetaProperty("throw", MetaProperties::throw_)
                 .registerMetaProperty("object", MetaProperties::object_)
                 .registerMetaProperty("keys", MetaProperties::keys)

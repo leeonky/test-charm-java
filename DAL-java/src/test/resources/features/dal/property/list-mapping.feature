@@ -351,3 +351,159 @@ Feature: list mapping
     orders.product[].price.value.invalid.invalid[0]: {...}
                                                 ^
     """
+
+  Scenario: flat list[] to list
+    Given the following json:
+    """
+      {
+        "items": [[{
+          "name": "tom"
+        }, {
+          "name": "jerry"
+        }], [{
+          "name": "john"
+        }, {
+          "name": "lucy"
+        }]]
+      }
+    """
+    When evaluate by:
+    """
+      items::flat
+    """
+    Then the result should:
+    """
+    = | name  |
+      | tom   |
+      | jerry |
+      | john  |
+      | lucy  |
+    """
+    When evaluate by:
+      """
+      items::flat.name[]
+      """
+    Then the result should:
+      """
+      : [tom jerry john lucy]
+      """
+
+  Scenario: flat list[][] to list
+    Given the following json:
+      """
+      {
+        "items": [
+          [
+            [{ "name": "tom" }, { "name": "jerry" }],
+            [{ "name": "john" }, { "name": "lucy" }]
+          ],
+          [
+            [{ "name": "anna" }, { "name": "elsa" }]
+          ]
+        ]
+      }
+      """
+    When evaluate by:
+      """
+      items::flat::flat
+      """
+    Then the result should:
+      """
+      = | name  |
+        | tom   |
+        | jerry |
+        | john  |
+        | lucy  |
+        | anna  |
+        | elsa  |
+      """
+    When evaluate by:
+      """
+      items::flat::flat.name[]
+      """
+    Then the result should:
+      """
+      = [tom jerry john lucy anna elsa]
+      """
+
+  Scenario: flat error when not list
+    Given the following json:
+      """
+      {
+        "items": {
+          "id": 100
+        }
+      }
+      """
+    When evaluate by:
+      """
+      items::flat
+      """
+    Then failed with the message:
+      """
+      Invalid input value, expect a List but: {
+          id: java.lang.Integer <100>
+      }
+      """
+    And got the following notation:
+      """
+      items::flat
+             ^
+      """
+    When evaluate by:
+      """
+      items::flat.name[]
+      """
+    Then failed with the message:
+      """
+      Invalid input value, expect a List but: {
+          id: java.lang.Integer <100>
+      }
+      """
+    And got the following notation:
+      """
+      items::flat.name[]
+             ^
+      """
+
+  Scenario: flat error when not list[]
+    Given the following json:
+      """
+      {
+        "items": [{
+          "id": 1
+        }, {
+          "id": 2
+        }]
+      }
+      """
+    When evaluate by:
+      """
+      items::flat
+      """
+    Then failed with the message:
+      """
+      Invalid input value, expect a List but: {
+          id: java.lang.Integer <1>
+      }
+      """
+    And got the following notation:
+      """
+      items::flat
+             ^
+      """
+    When evaluate by:
+      """
+      items::flat.id[]
+      """
+    Then failed with the message:
+      """
+      Invalid input value, expect a List but: {
+          id: java.lang.Integer <1>
+      }
+      """
+    And got the following notation:
+      """
+      items::flat.id[]
+             ^
+      """

@@ -3,7 +3,23 @@ plugins {
     alias(libs.plugins.nexus.publish)
 }
 
-ext.disabledPublishProjects = ['page-flow', 'page-flow-selenium', 'page-flow-playwright', 'summary']
+ext.disabledPublishProjects = ['page-flow', 'page-flow-selenium', 'page-flow-playwright', 'feature-summary']
+
+ext.cucumberProjects = [
+        [name: 'interpreter-core', glues: ['com.github.leeonky.interpreter']],
+        [name: 'DAL-java', glues: ['com.github.leeonky.dal.cucumber']],
+        [name: 'DAL-extension-basic', glues: ['com.github.leeonky.dal.cucumber']],
+        [name: 'DAL-extension-debugger', glues: ['com.github.leeonky.dal.cucumber']],
+        [name: 'DAL-extension-jdbc', glues: ['com.github.leeonky']],
+        [name: 'DAL-extension-jfactory', glues: ['com.github.leeonky']],
+        [name: 'DAL-extension-inspector', glues: ['com.github.leeonky']],
+        [name: 'jfactory', glues: ['com.github.leeonky']],
+        [name: 'jfactory-cucumber', glues: ['com.github.leeonky.jfactory.cucumber']],
+        [name: 'jfactory-property-value', glues: ['com.github.leeonky']],
+        [name: 'RESTful-cucumber', glues: ['com.github.leeonky.cucumber.restful']],
+        [name: 'page-flow', glues: ['com.github.leeonky.pf.cucumber']],
+        [name: 'feature-summary', glues: ['com.github.leeonky']]
+]
 
 apply from: "$rootDir/gradle/jacoco.gradle"
 apply from: "$rootDir/gradle/publish.gradle"
