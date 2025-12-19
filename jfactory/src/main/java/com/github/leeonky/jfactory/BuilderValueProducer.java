@@ -20,7 +20,7 @@ public class BuilderValueProducer<T> extends Producer<T> {
     public Producer<T> changeTo(Producer<T> newProducer) {
         if (newProducer instanceof BuilderValueProducer) {
             DefaultBuilder<T> marge = builder.marge(((BuilderValueProducer<T>) newProducer).builder);
-            return new BuilderValueProducer<>(marge, true);
+            return new BuilderValueProducer<>(marge, ((BuilderValueProducer<Object>) newProducer).queryFirst || queryFirst);
         }
 //        TODO need test
         return super.changeTo(newProducer);
