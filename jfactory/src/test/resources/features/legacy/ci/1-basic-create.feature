@@ -6,415 +6,241 @@ Feature: basic use
     new JFactory();
     """
 
-  Rule: create bean
+  Rule: default value
 
-#    Scenario: simple create - create bean with input property
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String stringValue;
-#        public int intValue;
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("stringValue", "input-value").create();
-#      """
-#      Then the result should:
-#      """
-#      stringValue= input-value
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).properties(new HashMap<String, Object>() {{
-#        put("stringValue", "input-value");
-#        put("intValue", 100);
-#      }}).create();
-#      """
-#      Then the result should:
-#      """
-#      = {
-#        stringValue= input-value
-#        intValue= 100
-#      }
-#      """
-
-#    Scenario: customize constructor - create bean use customer constructor
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        private int i;
-#        public Bean(int i) {
-#          this.i = i;
-#        }
-#
-#        public int getI() {
-#          return i;
-#        }
-#      }
-#      """
-#      And register:
-#      """
-#      jFactory.factory(Bean.class).constructor(arg -> new Bean(100));
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).create();
-#      """
-#      Then the result should:
-#      """
-#      i= 100
-#      """
-
-    Scenario: use base customized constructor when create via spec
+    Scenario: default value types - support generate default value for these types under the current version of JFactory
       Given the following bean class:
       """
       public class Bean {
-        public int i;
-        public Bean(int i) {
-          this.i = i;
-        }
-      }
-      """
-      And register:
-      """
-      jFactory.factory(Bean.class).constructor(arg -> new Bean(100));
-      """
-      And the following spec class:
-      """
-      public class BeanSpec extends Spec<Bean> {
-        public void main() {
-          property("i").ignore();
+        public String stringValue;
+        public int intValue;
+        public Integer boxedIntValue;
+        public short shortValue;
+        public Short boxedShortValue;
+        public byte byteValue;
+        public Byte boxedbyteValue;
+        public long longValue;
+        public Long boxedLongvalue;
+        public float floatValue;
+        public Float boxedFloatValue;
+        public double doubleValue;
+        public Double boxedDoubleValue;
+        public boolean boolValue;
+        public Boolean boxedBoolValue;
+        public BigInteger bigInt;
+        public BigDecimal bigDec;
+        public UUID uuid;
+        public Date date;
+        public java.time.Instant instant;
+        public java.time.LocalDate localDate;
+        public java.time.LocalTime localTime;
+        public java.time.LocalDateTime localDateTime;
+        public java.time.OffsetDateTime offsetDateTime;
+        public java.time.ZonedDateTime zonedDateTime;
+        public EnumType enumValue;
+
+        public enum EnumType {
+          A, B
         }
       }
       """
       When build:
       """
-      jFactory.spec(BeanSpec.class).create();
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """
-      i= 100
+      = {
+        stringValue= stringValue#1
+        intValue= 1
+        boxedIntValue= 1
+        shortValue= 1s
+        boxedShortValue= 1s
+        byteValue= 1y
+        boxedbyteValue= 1y
+        longValue= 1L
+        boxedLongvalue= 1L
+        floatValue= 1.0f
+        boxedFloatValue= 1.0f
+        doubleValue= 1.0d
+        boxedDoubleValue= 1.0d
+        boolValue= true
+        boxedBoolValue= true
+        bigInt= 1bi
+        bigDec= 1bd
+        uuid: '00000000-0000-0000-0000-000000000001'
+        date.toInstant: '1996-01-24T00:00:00Z'
+        instant: '1996-01-23T00:00:01Z'
+        localDate: '1996-01-24'
+        localTime: '00:00:01'
+        localDateTime: '1996-01-23T00:00:01'
+        offsetDateTime.toInstant: '1996-01-23T00:00:01Z'
+        zonedDateTime.toInstant: '1996-01-23T00:00:01Z'
+        enumValue: A
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      = {
+        stringValue= stringValue#2
+        intValue= 2
+        boxedIntValue= 2
+        shortValue= 2s
+        boxedShortValue= 2s
+        byteValue= 2y
+        boxedbyteValue= 2y
+        longValue= 2L
+        boxedLongvalue= 2L
+        floatValue= 2.0f
+        boxedFloatValue= 2.0f
+        doubleValue= 2.0d
+        boxedDoubleValue= 2.0d
+        boolValue= false
+        boxedBoolValue= false
+        bigInt= 2bi
+        bigDec= 2bd
+        uuid: '00000000-0000-0000-0000-000000000002'
+        date.toInstant: '1996-01-25T00:00:00Z'
+        instant: '1996-01-23T00:00:02Z'
+        localDate: '1996-01-25'
+        localTime: '00:00:02'
+        localDateTime: '1996-01-23T00:00:02'
+        offsetDateTime.toInstant: '1996-01-23T00:00:02Z'
+        zonedDateTime.toInstant: '1996-01-23T00:00:02Z'
+        enumValue: B
+      }
       """
 
-    Scenario: customize constructor from spec
+    Scenario: customized - define default value strategy by type
       Given the following bean class:
       """
       public class Bean {
-        private int i;
+        public String str;
       }
       """
-      And the following spec class:
+      When register:
       """
-      public class BeanSpec extends Spec<Object> {
-      }
+      jFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
+        @Override
+          public <T> String create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
+            return "hello";
+          }
+        });
       """
-      And register:
+      And build:
       """
-      jFactory.specFactory(BeanSpec.class).constructor(arg -> new Bean());
-      """
-      When build:
-      """
-      jFactory.spec(BeanSpec.class).create();
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """
-      class.simpleName= Bean
+      str= hello
       """
 
-    Scenario: define constructor in spec class
+    Scenario: skip - support skip default value generation
       Given the following bean class:
       """
       public class Bean {
-        public int i;
-        public Bean(int i) {
-          this.i = i;
-        }
+        public String str;
       }
       """
-      And the following spec class:
+      When register:
       """
-      public class BeanSpec extends Spec<Object> {
-        public void main() {
-          property("i").ignore();
-        }
-
-        protected Object construct() {
-          return new Bean(100);
-        }
-      }
+      jFactory.ignoreDefaultValue(propertyWriter -> "str".equals(propertyWriter.getName()));
       """
-      When build:
+      And build:
       """
-      jFactory.spec(BeanSpec.class).create();
+      jFactory.type(Bean.class).create();
       """
       Then the result should:
       """
-      : {
-        class.simpleName= Bean
-        i= 100
-      }
+      str= null
       """
-
-    Scenario Outline: construct specific list type in construct
-      Given the following spec class:
-      """
-      public class ListSpec extends Spec<<listType>> {
-        protected <listType> construct() {
-          return <listCode>;
-        }
-      }
-      """
-      When build:
-      """
-      jFactory.spec(ListSpec.class).property("[0]", 1).property("[1]", 2).create();
-      """
-      Then the result should:
-      """
-      : {
-        class.simpleName= <listType>
-        ::this: [1 2]
-      }
-      """
-      Examples:
-        | listCode                                                              | listType  |
-        | new ArrayList(Collections.nCopies(instance().collectionSize(), null)) | ArrayList |
-
-#  Rule: default value
-#
-#    Scenario: default value types - support generate default value for these types under the current version of JFactory
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String stringValue;
-#        public int intValue;
-#        public Integer boxedIntValue;
-#        public short shortValue;
-#        public Short boxedShortValue;
-#        public byte byteValue;
-#        public Byte boxedbyteValue;
-#        public long longValue;
-#        public Long boxedLongvalue;
-#        public float floatValue;
-#        public Float boxedFloatValue;
-#        public double doubleValue;
-#        public Double boxedDoubleValue;
-#        public boolean boolValue;
-#        public Boolean boxedBoolValue;
-#        public BigInteger bigInt;
-#        public BigDecimal bigDec;
-#        public UUID uuid;
-#        public Date date;
-#        public java.time.Instant instant;
-#        public java.time.LocalDate localDate;
-#        public java.time.LocalTime localTime;
-#        public java.time.LocalDateTime localDateTime;
-#        public java.time.OffsetDateTime offsetDateTime;
-#        public java.time.ZonedDateTime zonedDateTime;
-#        public EnumType enumValue;
-#
-#        public enum EnumType {
-#          A, B
-#        }
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).create();
-#      """
-#      Then the result should:
-#      """
-#      = {
-#        stringValue= stringValue#1
-#        intValue= 1
-#        boxedIntValue= 1
-#        shortValue= 1s
-#        boxedShortValue= 1s
-#        byteValue= 1y
-#        boxedbyteValue= 1y
-#        longValue= 1L
-#        boxedLongvalue= 1L
-#        floatValue= 1.0f
-#        boxedFloatValue= 1.0f
-#        doubleValue= 1.0d
-#        boxedDoubleValue= 1.0d
-#        boolValue= true
-#        boxedBoolValue= true
-#        bigInt= 1bi
-#        bigDec= 1bd
-#        uuid: '00000000-0000-0000-0000-000000000001'
-#        date.toInstant: '1996-01-24T00:00:00Z'
-#        instant: '1996-01-23T00:00:01Z'
-#        localDate: '1996-01-24'
-#        localTime: '00:00:01'
-#        localDateTime: '1996-01-23T00:00:01'
-#        offsetDateTime.toInstant: '1996-01-23T00:00:01Z'
-#        zonedDateTime.toInstant: '1996-01-23T00:00:01Z'
-#        enumValue: A
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).create();
-#      """
-#      Then the result should:
-#      """
-#      = {
-#        stringValue= stringValue#2
-#        intValue= 2
-#        boxedIntValue= 2
-#        shortValue= 2s
-#        boxedShortValue= 2s
-#        byteValue= 2y
-#        boxedbyteValue= 2y
-#        longValue= 2L
-#        boxedLongvalue= 2L
-#        floatValue= 2.0f
-#        boxedFloatValue= 2.0f
-#        doubleValue= 2.0d
-#        boxedDoubleValue= 2.0d
-#        boolValue= false
-#        boxedBoolValue= false
-#        bigInt= 2bi
-#        bigDec= 2bd
-#        uuid: '00000000-0000-0000-0000-000000000002'
-#        date.toInstant: '1996-01-25T00:00:00Z'
-#        instant: '1996-01-23T00:00:02Z'
-#        localDate: '1996-01-25'
-#        localTime: '00:00:02'
-#        localDateTime: '1996-01-23T00:00:02'
-#        offsetDateTime.toInstant: '1996-01-23T00:00:02Z'
-#        zonedDateTime.toInstant: '1996-01-23T00:00:02Z'
-#        enumValue: B
-#      }
-#      """
-#
-#    Scenario: customized - define default value strategy by type
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String str;
-#      }
-#      """
-#      When register:
-#      """
-#      jFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
-#        @Override
-#          public <T> String create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
-#            return "hello";
-#          }
-#        });
-#      """
-#      And build:
-#      """
-#      jFactory.type(Bean.class).create();
-#      """
-#      Then the result should:
-#      """
-#      str= hello
-#      """
-#
-#    Scenario: skip - support skip default value generation
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String str;
-#      }
-#      """
-#      When register:
-#      """
-#      jFactory.ignoreDefaultValue(propertyWriter -> "str".equals(propertyWriter.getName()));
-#      """
-#      And build:
-#      """
-#      jFactory.type(Bean.class).create();
-#      """
-#      Then the result should:
-#      """
-#      str= null
-#      """
 
   Rule: data repo
 
-#    Scenario: save/query/query all - save bean after create bean
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String str;
-#      }
-#      """
-#      And build:
-#      """
-#      jFactory.type(Bean.class).property("str", "hello").create();
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("str", "hello").query();
-#      """
-#      Then the result should:
-#      """
-#      str= hello
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("str", "hello").queryAll();
-#      """
-#      Then the result should:
-#      """
-#      str[]= [hello]
-#      """
-#
-#    Scenario: query empty - query nothing when property miss
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String str;
-#      }
-#      """
-#      And build:
-#      """
-#      jFactory.type(Bean.class).property("str", "hello").create();
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("str", "not match").query();
-#      """
-#      Then the result should:
-#      """
-#      = null
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("str", "not match").queryAll();
-#      """
-#      Then the result should:
-#      """
-#      = []
-#      """
-#
-#    Scenario: clear repo - query nothing when repo is cleared before query
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String str;
-#      }
-#      """
-#      And build:
-#      """
-#      jFactory.type(Bean.class).property("str", "hello").create();
-#      """
-#      And operate:
-#      """
-#      jFactory.getDataRepository().clear();
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("str", "hello").query();
-#      """
-#      Then the result should:
-#      """
-#      = null
-#      """
+    Scenario: save/query/query all - save bean after create bean
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").query();
+      """
+      Then the result should:
+      """
+      str= hello
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").queryAll();
+      """
+      Then the result should:
+      """
+      str[]= [hello]
+      """
+
+    Scenario: query empty - query nothing when property miss
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "not match").query();
+      """
+      Then the result should:
+      """
+      = null
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "not match").queryAll();
+      """
+      Then the result should:
+      """
+      = []
+      """
+
+    Scenario: clear repo - query nothing when repo is cleared before query
+      Given the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      And build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      And operate:
+      """
+      jFactory.getDataRepository().clear();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").query();
+      """
+      Then the result should:
+      """
+      = null
+      """
 
     Scenario: property chain - save and query with property chain
       Given the following bean class:
@@ -521,44 +347,44 @@ Feature: basic use
       ::size= 2
       """
 
-#    Scenario: customized repo - use customized repo in build
-#      Given declaration list =
-#      """
-#      new ArrayList<>();
-#      """
-#      And declaration jFactory =
-#      """
-#      new JFactory(new DataRepository() {
-#          @Override
-#          public void save(Object object) {
-#              list.add(object);
-#          }
-#          @Override
-#          public <T> Collection<T> queryAll(Class<T> type) {
-#              return null;
-#          }
-#          @Override
-#          public void clear() {
-#          }
-#      });
-#      """
-#      And the following bean class:
-#      """
-#      public class Bean {
-#        public String str;
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("str", "hello").create();
-#      """
-#      Then the list in repo should:
-#      """
-#      : [{
-#        str= hello
-#        class.simpleName= Bean
-#      }]
-#      """
+    Scenario: customized repo - use customized repo in build
+      Given declaration list =
+      """
+      new ArrayList<>();
+      """
+      And declaration jFactory =
+      """
+      new JFactory(new DataRepository() {
+          @Override
+          public void save(Object object) {
+              list.add(object);
+          }
+          @Override
+          public <T> Collection<T> queryAll(Class<T> type) {
+              return null;
+          }
+          @Override
+          public void clear() {
+          }
+      });
+      """
+      And the following bean class:
+      """
+      public class Bean {
+        public String str;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("str", "hello").create();
+      """
+      Then the list in repo should:
+      """
+      : [{
+        str= hello
+        class.simpleName= Bean
+      }]
+      """
 
     Scenario: order of repo saving - save object and sub objects in right order
       Given declaration list =
@@ -615,72 +441,72 @@ Feature: basic use
       }]
       """
 
-#    Scenario: raise error when there are than one matched elements during query with condition
-#      And the following bean class:
-#      """
-#      public class Bean {
-#        public String stringValue;
-#      }
-#      """
-#      And register:
-#      """
-#      jFactory.type(Bean.class).property("stringValue", "hello").create();
-#      jFactory.type(Bean.class).property("stringValue", "hello").create();
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).query();
-#      """
-#      Then the result should:
-#      """
-#      stringValue= hello
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).property("stringValue", "hello").query();
-#      """
-#      Then should raise error:
-#      """
-#      message= 'There are multiple elements in the query result.'
-#      """
+    Scenario: raise error when there are than one matched elements during query with condition
+      And the following bean class:
+      """
+      public class Bean {
+        public String stringValue;
+      }
+      """
+      And register:
+      """
+      jFactory.type(Bean.class).property("stringValue", "hello").create();
+      jFactory.type(Bean.class).property("stringValue", "hello").create();
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).query();
+      """
+      Then the result should:
+      """
+      stringValue= hello
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).property("stringValue", "hello").query();
+      """
+      Then should raise error:
+      """
+      message= 'There are multiple elements in the query result.'
+      """
 
-#  Rule: spec
-#
-#    Scenario: in lambda - define spec and naming spec(trait) in lambda
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String value1, value2;
-#      }
-#      """
-#      And register:
-#      """
-#      jFactory.factory(Bean.class)
-#        .spec("hello", instance -> instance.spec().property("value1").value("hello"))
-#        .spec(instance -> instance.spec().property("value2").value("world"));
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).create();
-#      """
-#      Then the result should:
-#      """
-#      = {
-#        value1= /^value1.*/
-#        value2= "world"
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.type(Bean.class).traits("hello").create();
-#      """
-#      Then the result should:
-#      """
-#      = {
-#        value1= hello
-#        value2= world
-#      }
-#      """
+  Rule: spec
+
+    Scenario: in lambda - define spec and naming spec(trait) in lambda
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value1, value2;
+      }
+      """
+      And register:
+      """
+      jFactory.factory(Bean.class)
+        .spec("hello", instance -> instance.spec().property("value1").value("hello"))
+        .spec(instance -> instance.spec().property("value2").value("world"));
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).create();
+      """
+      Then the result should:
+      """
+      = {
+        value1= /^value1.*/
+        value2= "world"
+      }
+      """
+      When build:
+      """
+      jFactory.type(Bean.class).traits("hello").create();
+      """
+      Then the result should:
+      """
+      = {
+        value1= hello
+        value2= world
+      }
+      """
 
   Rule: params
 
@@ -1024,40 +850,40 @@ Feature: basic use
       = [{value= hello}]
       """
 
-#  Rule: sequence
-#
-#    Scenario: reset sequence
-#      Given the following bean class:
-#      """
-#      public class Bean {
-#        public String value;
-#      }
-#      """
-#      When build:
-#      """
-#      jFactory.create(Bean.class);
-#      """
-#      Then the result should:
-#      """
-#      value= 'value#1'
-#      """
-#      When build:
-#      """
-#      jFactory.clear().create(Bean.class);
-#      """
-#      Then the result should:
-#      """
-#      value= 'value#1'
-#      """
-#      When register:
-#      """
-#      jFactory.clear().setSequenceStart(100);
-#      """
-#      When build:
-#      """
-#      jFactory.create(Bean.class);
-#      """
-#      Then the result should:
-#      """
-#      value= 'value#100'
-#      """
+  Rule: sequence
+
+    Scenario: reset sequence
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      When build:
+      """
+      jFactory.create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= 'value#1'
+      """
+      When build:
+      """
+      jFactory.clear().create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= 'value#1'
+      """
+      When register:
+      """
+      jFactory.clear().setSequenceStart(100);
+      """
+      When build:
+      """
+      jFactory.create(Bean.class);
+      """
+      Then the result should:
+      """
+      value= 'value#100'
+      """
