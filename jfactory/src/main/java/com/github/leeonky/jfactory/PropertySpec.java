@@ -105,7 +105,7 @@ public class PropertySpec<T> {
         if (isAssociation())
             return spec;
         return appendProducer(context ->
-                context.producer.newDefaultValueProducer(cast(context.producer.getType().getPropertyWriter(context.property))).orElseGet(() ->
+                context.producer.buildPropertyDefaultValueProducer(cast(context.producer.getType().getPropertyWriter(context.property))).orElseGet(() ->
                         createCreateProducer(context.jFactory.type(context.producer.getPropertyWriterType(context.property).getType()), context.association)));
     }
 
@@ -113,7 +113,7 @@ public class PropertySpec<T> {
         if (isAssociation())
             return spec;
         return appendProducer(context ->
-                context.producer.newDefaultValueProducer(cast(context.producer.getType().getPropertyWriter(context.property))).orElseGet(() ->
+                context.producer.buildPropertyDefaultValueProducer(cast(context.producer.getType().getPropertyWriter(context.property))).orElseGet(() ->
                         createQueryOrCreateProducer(builder.apply(context.jFactory.type(
                                 context.producer.getPropertyWriterType(context.property).getType())), context.association)));
     }

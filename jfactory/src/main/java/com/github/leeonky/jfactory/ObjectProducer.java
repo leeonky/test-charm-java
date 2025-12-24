@@ -15,8 +15,6 @@ import static java.util.stream.IntStream.range;
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
     private final JFactory jFactory;
-    //    TODO refactor
-    final DefaultBuilder<T> builder;
     private final boolean forQuery;
     private final ObjectInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
@@ -44,11 +42,10 @@ class ObjectProducer<T> extends Producer<T> {
         super(factory.getType());
         this.factory = factory;
         this.jFactory = jFactory;
-        this.builder = builder;
         this.forQuery = forQuery;
         instance = factory.createInstance(builder.getArguments(), association, reverseAssociation, this);
         persistable = jFactory.getDataRepository();
-        createDefaultValueProducers();
+        setupDefaultValueProducers();
         builder.collectSpec(this, instance);
         builder.processInputProperty(this, forQuery);
         resolveBuilderValueProducer(forQuery);
@@ -74,7 +71,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     public Producer<?> newElementPopulationProducer(PropertyWriter<T> propertyWriter) {
         return getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
-                () -> newDefaultValueProducer(propertyWriter))
+                () -> buildPropertyDefaultValueProducer(propertyWriter))
                 .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
     }
 
@@ -124,7 +121,7 @@ class ObjectProducer<T> extends Producer<T> {
     public Producer<?> childForUpdate(String property) {
         PropertyWriter<T> propertyWriter = getType().getPropertyWriter(property);
         return getFirstPresent(() -> getChild(propertyWriter.getName()),
-                () -> newDefaultValueProducer(propertyWriter)).orElseGet(() -> {
+                () -> buildPropertyDefaultValueProducer(propertyWriter)).orElseGet(() -> {
             if (ignorePropertiesInSpec.contains(propertyWriter.getName()))
                 return new ReadOnlyProducer<>(this, propertyWriter.getName());
             return new DefaultTypeValueProducer<>(propertyWriter.getType());
@@ -152,19 +149,10 @@ class ObjectProducer<T> extends Producer<T> {
             createElementDefaultValueProducersWhenBuildListAsRoot();
             return factory.create(instance);
         }, obj -> {
-            produceSubs(obj);
+            children.forEach((key, value) -> getType().setPropertyValue(obj, key, value.getValue()));
             persistable.save(obj);
             cachedChildren.getAll().forEach(persistable::save);
         });
-    }
-
-    private void produceSubs(T obj) {
-        children.entrySet().stream().filter(this::isDefaultValueProducer).forEach(e -> produceSub(obj, e));
-        children.entrySet().stream().filter(e -> !(isDefaultValueProducer(e))).forEach(e -> produceSub(obj, e));
-    }
-
-    private void produceSub(T obj, Map.Entry<String, Producer<?>> e) {
-        getType().setPropertyValue(obj, e.getKey(), e.getValue().getValue());
     }
 
     private boolean isDefaultValueProducer(Map.Entry<String, Producer<?>> e) {
@@ -191,27 +179,32 @@ class ObjectProducer<T> extends Producer<T> {
         children.forEach((property, producer) -> producer.collectConsistent(root, base.concat(property)));
     }
 
-    private void createDefaultValueProducers() {
+    private void setupDefaultValueProducers() {
         getType().getPropertyWriters().values().stream().filter(jFactory::shouldCreateDefaultValue)
-                .forEach(propertyWriter -> factory.getFactorySet().newDefaultValueFactoryProducer(propertyWriter, instance.sub(propertyWriter))
+                .forEach(propertyWriter -> defaultValueProducer(propertyWriter)
                         .ifPresent(producer -> setChild(propertyWriter.getName(), producer)));
     }
 
+    private Optional<Producer<?>> defaultValueProducer(PropertyWriter<T> propertyWriter) {
+        return factory.getFactorySet().queryDefaultValueFactory(propertyWriter.getType()).map(valueFactory ->
+                new DefaultValueFactoryProducer<>(propertyWriter.getBeanType(), valueFactory, instance.sub(propertyWriter)));
+    }
+
     @Override
-    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<T> property) {
+    public Optional<Producer<?>> buildPropertyDefaultValueProducer(PropertyWriter<T> property) {
         if (ignorePropertiesInSpec.contains(property.getName()))
             return empty();
-        if (property.getType().isCollection()) {
+        if (property.getType().isCollection())
             return of(createCollectionProducer(property));
-        } else
-            return factory.getFactorySet().newDefaultValueFactoryProducer(property, instance.sub(property));
+        else
+            return defaultValueProducer(property);
     }
 
     public Optional<Producer<?>> newDefaultValueProducerForRead(PropertyWriter<T> property) {
         if (ignorePropertiesInSpec.contains(property.getName()))
             return empty();
         else
-            return factory.getFactorySet().newDefaultValueFactoryProducer(property, instance.sub(property));
+            return defaultValueProducer(property);
     }
 
     private Producer<?> createCollectionProducer(PropertyWriter<T> property) {

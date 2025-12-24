@@ -84,7 +84,7 @@ class CollectionProducer<T, C> extends Producer<C> {
 
     public Producer<?> newElementPopulationProducer(PropertyWriter<C> propertyWriter) {
         Producer<?> producer = getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
-                () -> newDefaultValueProducer(propertyWriter))
+                () -> buildPropertyDefaultValueProducer(propertyWriter))
                 .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
         return autoResolveBuilderValueProducer ? producer.resolveBuilderValueProducer(false) : producer;
     }
@@ -94,7 +94,7 @@ class CollectionProducer<T, C> extends Producer<C> {
         return getChild(property).orElseGet(() -> {
             PropertyWriter<C> propertyWriter = getType().getPropertyWriter(property);
             return setChild(property, getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
-                    () -> newDefaultValueProducer(propertyWriter))
+                    () -> buildPropertyDefaultValueProducer(propertyWriter))
                     .orElseGet(() -> new BuilderValueProducer<>(jFactory.type(propertyWriter.getType()), false)));
         });
     }
@@ -111,8 +111,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    public Optional<Producer<?>> newDefaultValueProducer(PropertyWriter<C> property) {
-        return factorySet.newDefaultValueFactoryProducer(parentType, property, collection.sub(property));
+    public Optional<Producer<?>> buildPropertyDefaultValueProducer(PropertyWriter<C> property) {
+        return factorySet.queryDefaultValueFactory(property.getType()).map(valueFactory ->
+                new DefaultValueFactoryProducer<>(parentType, valueFactory, collection.sub(property)));
     }
 
     @Override
