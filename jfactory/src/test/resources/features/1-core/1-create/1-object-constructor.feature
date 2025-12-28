@@ -74,7 +74,7 @@ Feature: Object Constructor
       i= 100
       """
 
-  Scenario: Define in Spec Lambda - Define Custom Constructor in Spec Lambda
+  Scenario: Define with Spec Factory - Define Custom Constructor with Spec Factory
     Given the following bean definition:
       """
       public class Bean {
@@ -116,6 +116,36 @@ Feature: Object Constructor
           return new Bean(100);
         }
       }
+      """
+    When evaluating the following code:
+      """
+      jFactory.spec(BeanSpec.class).create();
+      """
+    Then the result should be:
+      """
+      i= 100
+      """
+
+  Scenario: Constructor Priority - Custom Constructor Registered in Spec Factory Has Higher Priority Than That in Spec Class
+    Given the following bean definition:
+      """
+      public class Bean {
+        private int i;
+        public Bean(int i) { this.i = i; }
+        public int getI() { return i; }
+      }
+      """
+    And the following spec definition:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        protected Bean construct() {
+          return new Bean(200);
+        }
+      }
+      """
+    And register as follows:
+      """
+      jFactory.specFactory(BeanSpec.class).constructor(arg -> new Bean(100));
       """
     When evaluating the following code:
       """

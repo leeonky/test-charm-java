@@ -6,65 +6,6 @@ Feature: use spec
     new JFactory();
     """
 
-  Rule: spec class
-
-    Scenario: define class - define spec and trait in class
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value1, value2;
-      }
-      """
-      Given the following spec class:
-      """
-      @Global
-      public class BeanSpec extends Spec<Bean> {
-
-        @Override
-        public void main() {
-          property("value2").value("world");
-        }
-
-        @Trait
-        public void hello() {
-          property("value1").value("hello");
-        }
-      }
-      """
-      When build:
-      """
-      jFactory.spec(BeanSpec.class).traits("hello").create();
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
-      """
-      When build:
-      """
-      jFactory.createAs(BeanSpec.class, spec -> spec.hello());
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
-      """
-      When build:
-      """
-      jFactory.createAs("hello", "BeanSpec");
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
-      """
-
   Rule: global spec class
 
     Scenario: define global spec class as base spec and origin factory as base
