@@ -6,53 +6,6 @@ Feature: basic use
     new JFactory();
     """
 
-  Rule: default value
-
-    Scenario: customized - define default value strategy by type
-      Given the following bean class:
-      """
-      public class Bean {
-        public String str;
-      }
-      """
-      When register:
-      """
-      jFactory.registerDefaultValueFactory(String.class, new DefaultValueFactory<String>() {
-        @Override
-          public <T> String create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
-            return "hello";
-          }
-        });
-      """
-      And build:
-      """
-      jFactory.type(Bean.class).create();
-      """
-      Then the result should:
-      """
-      str= hello
-      """
-
-    Scenario: skip - support skip default value generation
-      Given the following bean class:
-      """
-      public class Bean {
-        public String str;
-      }
-      """
-      When register:
-      """
-      jFactory.ignoreDefaultValue(propertyWriter -> "str".equals(propertyWriter.getName()));
-      """
-      And build:
-      """
-      jFactory.type(Bean.class).create();
-      """
-      Then the result should:
-      """
-      str= null
-      """
-
   Rule: data repo
 
     Scenario: save/query/query all - save bean after create bean
@@ -361,44 +314,6 @@ Feature: basic use
       Then should raise error:
       """
       message= 'There are multiple elements in the query result.'
-      """
-
-  Rule: spec
-
-    Scenario: in lambda - define spec and naming spec(trait) in lambda
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value1, value2;
-      }
-      """
-      And register:
-      """
-      jFactory.factory(Bean.class)
-        .spec("hello", instance -> instance.spec().property("value1").value("hello"))
-        .spec(instance -> instance.spec().property("value2").value("world"));
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).create();
-      """
-      Then the result should:
-      """
-      = {
-        value1= /^value1.*/
-        value2= "world"
-      }
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).traits("hello").create();
-      """
-      Then the result should:
-      """
-      = {
-        value1= hello
-        value2= world
-      }
       """
 
   Rule: params

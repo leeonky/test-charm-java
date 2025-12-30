@@ -28,6 +28,6 @@ public interface Instance<T> {
     }
 
     default <T> Supplier<T> rotate(T... values) {
-        return () -> values[getSequence() % values.length];
+        return () -> values[(getSequence() - 1) % values.length];
     }
 }

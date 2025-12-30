@@ -79,7 +79,7 @@ Feature: Custom Default Value
         str= hello_1
         """
 
-    Scenario: Use Lambda in Default Value - Define Default Value for a Property in Class Spec by Lambda Expression
+    Scenario: Lazy Mode Default Value - Define Default Value for a Property in Class Spec in Lazy Mode by Lambda Expression
       Given the following bean definition:
         """
         public class Bean {
@@ -91,7 +91,7 @@ Feature: Custom Default Value
         public class BeanSpec extends Spec<Bean> {
           @Override
           public void main() {
-            property("str").defaultValue(() -> "hello_lambda");
+            property("str").defaultValue(() -> "hello_lazy");
           }
         }
         """
@@ -101,7 +101,32 @@ Feature: Custom Default Value
         """
       Then the result should be:
         """
-        str= hello_lambda
+        str= hello_lazy
+        """
+
+    Scenario: Null Default Value — Treat Null as a Literal Null Default, not as a Null Supplier<Object>
+      Given the following bean definition:
+        """
+        public class Bean {
+          public String str;
+        }
+        """
+      And the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          @Override
+          public void main() {
+            property("str").defaultValue(null);
+          }
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.createAs(BeanSpec.class);
+        """
+      Then the result should be:
+        """
+        str= null
         """
 
     Scenario: Sub Property Default Value - Not Allowed to Define Sub Property Default Value
@@ -133,6 +158,55 @@ Feature: Custom Default Value
       Then the result should be:
         """
         ::throw.message: 'Property chain `bean.str` is not supported in the current operation'
+        """
+
+    Scenario: Rotate values - Define Default Value by Rotating Given Values
+      Given the following bean definition:
+        """
+        public class Bean {
+          public String str;
+        }
+        """
+      And the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          @Override
+          public void main() {
+            property("str").defaultValue(instance().rotate("A", "B", "C"));
+          }
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.createAs(BeanSpec.class);
+        """
+      Then the result should be:
+        """
+        str= A
+        """
+      When evaluating the following code:
+        """
+        jFactory.createAs(BeanSpec.class);
+        """
+      Then the result should be:
+        """
+        str= B
+        """
+      When evaluating the following code:
+        """
+        jFactory.createAs(BeanSpec.class);
+        """
+      Then the result should be:
+        """
+        str= C
+        """
+      When evaluating the following code:
+        """
+        jFactory.createAs(BeanSpec.class);
+        """
+      Then the result should be:
+        """
+        str= A
         """
 
   Rule: Ignore Default Value Generation
