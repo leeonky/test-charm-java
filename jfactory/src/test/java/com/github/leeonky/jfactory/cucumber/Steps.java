@@ -15,6 +15,7 @@ public class Steps {
     public void theFollowingSpecDefinition(String sourceCode) {
         JavaExecutor.executor().addClass(
                 "import com.github.leeonky.jfactory.Spec;\n" +
+                        "import com.github.leeonky.jfactory.Global;\n" +
                         "import com.github.leeonky.jfactory.Trait;\n" + sourceCode);
     }
 }

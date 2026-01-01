@@ -55,6 +55,7 @@ public class JFactory {
         return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specClass), this, SPEC);
     }
 
+    @Deprecated
     public <T, S extends Spec<T>> Builder<T> spec(Class<S> specClass, Consumer<S> trait) {
         return new DefaultBuilder<>(factorySet.createSpecFactory(specClass, trait), this, SPEC);
     }

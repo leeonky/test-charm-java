@@ -84,8 +84,8 @@ class FactorySet {
         typeSequence.setStart(start);
     }
 
-    public <T, S extends Spec<T>> SpecFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
-        return new SpecFactory<>(Classes.newInstance(specClass), this, trait);
+    public <T, S extends Spec<T>> SpecInstanceFactory<T, S> createSpecFactory(Class<S> specClass, Consumer<S> trait) {
+        return new SpecInstanceFactory<>(this, Classes.newInstance(specClass), trait);
     }
 
     public <T> void registerDefaultValueFactory(Class<T> type, DefaultValueFactory<T> factory) {

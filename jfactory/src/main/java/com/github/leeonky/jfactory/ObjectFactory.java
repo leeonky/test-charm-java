@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 class ObjectFactory<T> implements Factory<T> {
     protected final FactorySet factorySet;
     private final BeanClass<T> type;
-    private final Map<String, Consumer<Instance<T>>> traits = new LinkedHashMap<>();
-    private final Map<String, Pattern> traitPatterns = new LinkedHashMap<>();
+    private final Map<String, Consumer<Instance<T>>> traitCollectors = new LinkedHashMap<>();
+    private final Map<String, Pattern> traitPatternCollectors = new LinkedHashMap<>();
     private final Map<String, Transformer> transformers = new LinkedHashMap<>();
     private final Transformer passThrough = input -> input;
     private Function<Instance<T>, T> constructor = this::defaultConstruct;
-    private Consumer<Instance<T>> spec = (instance) -> {
+    private Consumer<Instance<T>> specCollector = (instance) -> {
     };
 
     public ObjectFactory(BeanClass<T> type, FactorySet factorySet) {
@@ -57,15 +57,15 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> spec(Consumer<Instance<T>> spec) {
-        this.spec = Objects.requireNonNull(spec);
+    public Factory<T> spec(Consumer<Instance<T>> specCollector) {
+        this.specCollector = Objects.requireNonNull(specCollector);
         return this;
     }
 
     @Override
-    public Factory<T> spec(String name, Consumer<Instance<T>> trait) {
-        traits.put(name, Objects.requireNonNull(trait));
-        traitPatterns.put(name, Pattern.compile(name));
+    public Factory<T> spec(String name, Consumer<Instance<T>> traitCollector) {
+        traitCollectors.put(name, Objects.requireNonNull(traitCollector));
+        traitPatternCollectors.put(name, Pattern.compile(name));
         return this;
     }
 
@@ -105,20 +105,20 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     public void collectSpec(Collection<String> traits, ObjectInstance<T> instance) {
-        spec.accept(instance);
+        specCollector.accept(instance);
         collectSubSpec(instance);
         for (String name : traits)
             queryTrait(name).execute(instance);
     }
 
     private TraitExecutor<T> queryTrait(String name) {
-        Consumer<Instance<T>> action = traits.get(name);
+        Consumer<Instance<T>> action = traitCollectors.get(name);
         if (action != null)
             return new TraitExecutor<>(action);
-        List<Matcher> matchers = traitPatterns.values().stream().map(p -> p.matcher(name)).filter(Matcher::matches)
+        List<Matcher> matchers = traitPatternCollectors.values().stream().map(p -> p.matcher(name)).filter(Matcher::matches)
                 .collect(Collectors.toList());
         if (matchers.size() == 1)
-            return new TraitExecutor<>(matchers.get(0), traits.get(matchers.get(0).pattern().pattern()));
+            return new TraitExecutor<>(matchers.get(0), traitCollectors.get(matchers.get(0).pattern().pattern()));
         if (matchers.size() > 1)
             throw new IllegalArgumentException(String.format("Ambiguous trait pattern: %s, candidates are:\n%s", name,
                     matchers.stream().map(p -> "  " + p.pattern().pattern()).collect(Collectors.joining("\n"))));
