@@ -1,8 +1,5 @@
 package com.github.leeonky.util;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 
 import static java.util.Collections.addAll;
@@ -44,8 +41,7 @@ public class ExecutorMain {
     public Object evaluate() {
         if (executor == null) {
             javaExecutor.addClass(asCode());
-            BeanClass<Executor> executorType = (BeanClass<Executor>) BeanClass.create(javaExecutor.classFor(CLASS_NAME,
-                    URLClassLoader.newInstance(Sneaky.get(() -> new URL[]{new File("").toURI().toURL()}))));
+            BeanClass<Executor> executorType = (BeanClass<Executor>) BeanClass.create(javaExecutor.classOf(CLASS_NAME));
             executor = executorType.newInstance();
             declarationValues.forEach((key, value) ->
                     executorType.getPropertyWriter(key).setValue(executor, value));

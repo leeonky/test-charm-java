@@ -1,5 +1,7 @@
 package com.github.leeonky.util;
 
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -11,7 +13,7 @@ public class JavaExecutor {
             = ThreadLocal.withInitial(() -> new JavaExecutor(new JavaCompiler("src.test.generate.t", index.getAndIncrement())));
 
     private final Set<String> unCompiled = new LinkedHashSet<>();
-    private final Set<Definition> allCompiled = new LinkedHashSet<>();
+    private final Set<ClassDefinition> allCompiled = new LinkedHashSet<>();
 
     public static JavaExecutor executor() {
         return localThreadJavaExecutor.get();
@@ -35,18 +37,20 @@ public class JavaExecutor {
         return context.executorMain;
     }
 
-    public Class<?> classFor(String className, ClassLoader classLoader) {
+    public Class<?> classOf(String className) {
+        ClassLoader classLoader = URLClassLoader.newInstance(Sneaky.get(() ->
+                new URL[]{javaCompiler.getLocation().getAbsoluteFile().toURI().toURL()}));
         return Sneaky.get(() -> findDefinition(allCompiled(), className)
-                .map(d -> d.loadClass(classLoader))
+                .map(d -> Sneaky.get(() -> classLoader.loadClass(d.className())))
                 .orElseThrow(() -> new ClassNotFoundException(className)));
     }
 
-    private Optional<Definition> findDefinition(Set<Definition> definitions, String className) {
-        return definitions.stream().filter(a -> a.getSimpleClassName().equals(className))
+    private Optional<ClassDefinition> findDefinition(Set<ClassDefinition> definitions, String className) {
+        return definitions.stream().filter(a -> a.className().equals(className))
                 .findFirst();
     }
 
-    private Set<Definition> allCompiled() {
+    private Set<ClassDefinition> allCompiled() {
         if (!unCompiled.isEmpty()) {
             allCompiled.addAll(javaCompiler.compile(unCompiled));
             unCompiled.clear();

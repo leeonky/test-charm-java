@@ -3,16 +3,11 @@ package com.github.leeonky.util;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-
 import static com.github.leeonky.dal.Assertions.expect;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 class JavaExecutorTest {
     private final JavaExecutor executor = JavaExecutor.executor().resetAll();
-    private final ClassLoader classLoader = URLClassLoader.newInstance(Sneaky.get(() -> new URL[]{new File("").toURI().toURL()}));
 
     @Nested
     class BaseApi {
@@ -21,7 +16,7 @@ class JavaExecutorTest {
         void compile_and_get_class() {
             executor.addClass("public class Bean {}");
 
-            expect(executor.classFor("Bean", classLoader))
+            expect(executor.classOf("Bean"))
                     .should("simpleName= Bean");
         }
 

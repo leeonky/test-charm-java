@@ -1,9 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.leeonky.util.JavaCompiler;
-import com.github.leeonky.util.JavaCompilerPoolLegacy;
-import com.github.leeonky.util.Sneaky;
 import com.github.leeonky.dal.Assertions;
 import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
@@ -14,6 +11,9 @@ import com.github.leeonky.dal.runtime.inspector.ValueDumper;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
+import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerPoolLegacy;
+import com.github.leeonky.util.Sneaky;
 import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
@@ -24,9 +24,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.util.JavaCompiler.guessClassName;
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.cucumber.TestTask.threadsCount;
+import static com.github.leeonky.util.ClassDefinition.guessClassName;
 import static java.util.Arrays.asList;
 import static java.util.stream.Stream.of;
 import static org.assertj.core.api.Assertions.assertThat;

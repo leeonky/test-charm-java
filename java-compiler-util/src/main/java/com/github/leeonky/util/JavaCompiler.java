@@ -8,8 +8,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,32 +24,13 @@ public class JavaCompiler {
     public JavaCompiler(String packageName, int id) {
         this.packageName = packageName + id;
         this.id = id;
+        getLocation().mkdirs();
     }
 
     @SneakyThrows
+    @Deprecated
     private URLClassLoader getUrlClassLoader() {
         return URLClassLoader.newInstance(new URL[]{new File("").toURI().toURL()});
-    }
-
-    public static String guessClassName(String code) {
-        String s = Stream.of(code.split("\n")).filter(l -> l.contains("class") || l.contains("interface"))
-                .findFirst().orElse(null);
-        Matcher matcher = Pattern.compile(".* class\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
-        if (matcher.matches())
-            return matcher.group(1).trim();
-        matcher = Pattern.compile(".* class\\s(.*)\\simplements.*", Pattern.DOTALL).matcher(s);
-        if (matcher.matches())
-            return matcher.group(1).trim();
-        matcher = Pattern.compile(".* class\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
-        if (matcher.matches())
-            return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
-        if (matcher.matches())
-            return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
-        if (matcher.matches())
-            return matcher.group(1).trim();
-        throw new IllegalStateException("Can not guess class name of code:\n" + code);
     }
 
     @SneakyThrows
@@ -61,7 +40,7 @@ public class JavaCompiler {
             return emptyList();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         List<JavaSourceFromStringLegacy> files = classCodes.stream().map(code ->
-                        new JavaSourceFromStringLegacy(guessClassName(code).replaceAll("<.*>", ""), declarePackage() + code))
+                        new JavaSourceFromStringLegacy(ClassDefinition.guessClassName(code).replaceAll("<.*>", ""), declarePackage() + code))
                 .collect(Collectors.toList());
         javax.tools.JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
         StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
@@ -75,22 +54,22 @@ public class JavaCompiler {
     }
 
     @SneakyThrows
-    public List<Definition> compile(Collection<String> classCodes) {
+    public List<ClassDefinition> compile(Collection<String> classCodes) {
         return Sneaky.get(() -> {
             if (classCodes.isEmpty())
                 return emptyList();
             DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-            List<Definition> definitions = classCodes.stream().map(code -> new Definition(packageName, guessClassName(code).replaceAll("<.*>", ""), code))
+            List<ClassDefinition> definitions = classCodes.stream().map(ClassDefinition::new)
                     .collect(Collectors.toList());
             javax.tools.JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
             StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
-            standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(new File("./")));
+            standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(getLocation()));
 
             List<File> classPath = new ArrayList<>();
             String currentCp = System.getProperty("java.class.path");
             for (String path : currentCp.split(File.pathSeparator))
                 classPath.add(new File(path));
-            classPath.add(new File("./"));
+            classPath.add(getLocation());
             standardFileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
             if (!systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, definitions).call()) {
                 System.out.println(diagnostics.getDiagnostics().stream().filter(d -> d.getSource() != null).collect(groupingBy(Diagnostic::getSource))
@@ -99,6 +78,10 @@ public class JavaCompiler {
             }
             return definitions;
         });
+    }
+
+    public File getLocation() {
+        return new File("./" + packageName.replace('.', '/'));
     }
 
     @Deprecated
@@ -130,17 +113,15 @@ public class JavaCompiler {
     @SneakyThrows
     @Deprecated
     public Class<?> loadClass(String name) {
-        return Class.forName(fullName(name), true, loader);
+        return Class.forName(packagePrefix() + name, true, loader);
     }
 
-    public String fullName(String name) {
-        return packagePrefix() + name;
-    }
-
+    @Deprecated
     public String packagePrefix() {
         return packageName.isEmpty() ? "" : packageName + ".";
     }
 
+    @Deprecated
     public int getId() {
         return id;
     }

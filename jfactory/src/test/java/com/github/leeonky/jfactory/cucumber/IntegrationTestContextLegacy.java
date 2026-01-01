@@ -1,10 +1,11 @@
 package com.github.leeonky.jfactory.cucumber;
 
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.JavaCompiler;
-import com.github.leeonky.util.JavaCompilerPoolLegacy;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.Spec;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.ClassDefinition;
+import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerPoolLegacy;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -78,7 +79,7 @@ public class IntegrationTestContextLegacy {
     }
 
     private void addClass(String snipCode) {
-        classCodes.put(JavaCompiler.guessClassName(snipCode), snipCode);
+        classCodes.put(ClassDefinition.guessClassName(snipCode), snipCode);
     }
 
     private void compileAll() {
