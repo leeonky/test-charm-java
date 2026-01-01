@@ -67,6 +67,16 @@ Feature: Spec
         stringValue= hello
         """
 
+    Scenario: Missing Trait - Use a Non-Existing Trait and Raise an Error
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("not_exist").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Trait `not_exist` not exist"
+        """
+
   Rule: Use Spec Class
 
     Background:
@@ -129,6 +139,16 @@ Feature: Spec
       Then the result should be:
         """
         stringValue= hello
+        """
+
+    Scenario: Missing Spec Class - Use a Non-Existing Spec Class and Raise an Error
+      When evaluating the following code:
+        """
+        jFactory.spec("NotExistSpec").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Spec `NotExistSpec` not exist"
         """
 
     Scenario: Trait in Spec Class - Define Traits in a Spec Class and Create an Object by Trait
@@ -195,6 +215,20 @@ Feature: Spec
         }
         """
 
+    Scenario: Disallow generic Spec<T> registration — Type erasure prevents inferring target type; use Spec<Bean> or override Spec::getType
+      Given the following spec definition:
+        """
+        public class ABean<T> extends Spec<T> {}
+        """
+      When register as follows:
+        """
+        jFactory.register(ABean.class);
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Cannot guess type via generic type argument, please override Spec::getType"
+        """
+
   Rule: Global Spec Class
 
     Background:
@@ -252,6 +286,31 @@ Feature: Spec
         stringValue= /^stringValue.*/
         """
 
+#    Scenario: Duplicated Global Spec Class - Do not allow Duplicated Global Spec Class Registration
+#      Given the following spec definition:
+#        """
+#        @Global
+#        public class GlobalBeanSpec1 extends Spec<Bean> {}
+#        """
+#      And the following spec definition:
+#        """
+#        @Global
+#        public class GlobalBeanSpec2 extends Spec<Bean> {}
+#        """
+#      When register as follows:
+#        """
+#        jFactory.register(GlobalBeanSpec1.class);
+#        jFactory.register(GlobalBeanSpec2.class);
+#        """
+#      And evaluating the following code:
+#        """
+#        jFactory.createAs(GlobalBeanSpec2.class);
+#        """
+#      Then the result should be:
+#        """
+#        ::throw.message= "Global Spec `GlobalBeanSpec` for type `Bean` already registered"
+#        """
+
   Rule: Spec Overlay
 
     Background:
@@ -262,7 +321,7 @@ Feature: Spec
         }
         """
 
-    Scenario: Spec Class and Type Spec - Type Spec as the base Spec of Spec Class
+    Scenario: Spec Class / Type Spec - Type Spec as the base Spec of Spec Class
       Given the following spec definition:
         """
         public class BeanSpec extends Spec<Bean> {
@@ -289,7 +348,7 @@ Feature: Spec
         }
         """
 
-    Scenario: Spec Class and Global Spec Class - Global Spec Class as the base Spec of Spec Class
+    Scenario: Spec Class / Global Spec Class - Global Spec Class as the base Spec of Spec Class
       Given the following spec definition:
         """
         @Global
@@ -323,7 +382,7 @@ Feature: Spec
         }
         """
 
-    Scenario: Type Spec and Global Spec Class - Type Spec as the base Spec of Global Spec Class
+    Scenario: Global Spec Class / Type Spec - Type Spec as the base Spec of Global Spec Class
       Given the following spec definition:
         """
         @Global

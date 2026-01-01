@@ -6,68 +6,6 @@ Feature: use spec
     new JFactory();
     """
 
-  Rule: global spec class
-
-    Scenario: define global spec class as base spec and origin factory as base
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value;
-      }
-      """
-      And the following spec class:
-      """
-      @Global
-      public class BeanSpec extends Spec<Bean> {
-        @Override
-        public void main() {
-          property("value").value("hello");
-        }
-      }
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).create();
-      """
-      Then the result should:
-      """
-      value= hello
-      """
-
-    Scenario: support remove global spec class
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value1, value2;
-      }
-      """
-      And the following spec class:
-      """
-      @Global
-      public class BeanSpec extends Spec<Bean> {
-        @Override
-        public void main() {
-          property("value1").value("hello");
-        }
-      }
-      """
-      And register:
-      """
-      jFactory.register(BeanSpec.class);
-      jFactory.removeGlobalSpec(Bean.class);
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).create();
-      """
-      Then the result should:
-      """
-      = {
-        value1= 'value1#1'
-        value2= 'value2#1'
-      }
-      """
-
   Rule: circular dependency
 
     Background:
@@ -1012,44 +950,6 @@ Feature: use spec
       """
 
   Rule: invalid spec/trait
-
-    Scenario: raise error when spec not exist
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value;
-      }
-      """
-      Given the following spec class:
-      """
-      @Global
-      public class BeanSpec extends Spec<Bean> {
-      }
-      """
-      When build:
-      """
-      jFactory.createAs("NotExist");
-      """
-      Then should raise error:
-      """
-      message= 'Spec `NotExist` not exist'
-      """
-
-    Scenario: raise error when trait not exist
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value;
-      }
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).traits("not-exist").create();
-      """
-      Then should raise error:
-      """
-      message= 'Trait `not-exist` not exist'
-      """
 
     Scenario: do not allow generic base spec class
       Given the following spec class:
