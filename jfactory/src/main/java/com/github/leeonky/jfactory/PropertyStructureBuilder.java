@@ -1,6 +1,7 @@
 package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Zipped;
 import com.github.leeonky.util.function.TriConsumer;
 
 import java.util.List;
@@ -52,9 +53,8 @@ public class PropertyStructureBuilder<T> {
         }
 
         public Spec<T> populate(BiConsumer<PropertySpec<T>, Object[]> definition) {
-            spec.appendStructureDefinition(new PropertyStructureDefinition<>(dependents, property,
-                    values -> condition.test(values),
-                    (ps, values) -> definition.accept(ps, values)));
+            spec.specRules.appendStructureDefinition(new PropertyStructureDefinition<>(dependents, property,
+                    values -> condition.test(values), definition));
             return spec;
         }
     }
@@ -73,7 +73,7 @@ public class PropertyStructureBuilder<T> {
         }
 
         public Spec<T> populate(BiConsumer<PropertySpec<T>, D> definition) {
-            spec.appendStructureDefinition(new PropertyStructureDefinition<>(singletonList(dependent), property,
+            spec.specRules.appendStructureDefinition(new PropertyStructureDefinition<>(singletonList(dependent), property,
                     values -> condition.test((D) values[0]),
                     (ps, values) -> definition.accept(ps, (D) values[0])));
             return spec;
@@ -95,7 +95,7 @@ public class PropertyStructureBuilder<T> {
         }
 
         public Spec<T> populate(TriConsumer<PropertySpec<T>, D1, D2> definition) {
-            spec.appendStructureDefinition(new PropertyStructureDefinition<>(asList(dependent1, dependent2), property,
+            spec.specRules.appendStructureDefinition(new PropertyStructureDefinition<>(asList(dependent1, dependent2), property,
                     values -> condition.test((D1) values[0], (D2) values[1]),
                     (ps, values) -> definition.accept(ps, (D1) values[0], (D2) values[1])));
             return spec;
@@ -118,7 +118,7 @@ class PropertyStructureDefinition<T> {
 
     void apply(Spec<T> spec, ObjectProducer<?> rootProducer) {
         Object[] dependents = this.dependents.stream().map(rootProducer::descendantForRead).map(Producer::getValue).toArray();
-        Map<String, Object> propertyAndValue = zip(this.dependents, asList(dependents)).stream().collect(toMap(e -> e.left().toString(), e -> e.right()));
+        Map<String, Object> propertyAndValue = zip(this.dependents, asList(dependents)).stream().collect(toMap(e -> e.left().toString(), Zipped.ZippedEntry::right));
 
         rootProducer.lock(new PropertyStructureDependent(propertyAndValue));
 

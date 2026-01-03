@@ -286,30 +286,30 @@ Feature: Spec
         stringValue= /^stringValue.*/
         """
 
-#    Scenario: Duplicated Global Spec Class - Do not allow Duplicated Global Spec Class Registration
-#      Given the following spec definition:
-#        """
-#        @Global
-#        public class GlobalBeanSpec1 extends Spec<Bean> {}
-#        """
-#      And the following spec definition:
-#        """
-#        @Global
-#        public class GlobalBeanSpec2 extends Spec<Bean> {}
-#        """
-#      When register as follows:
-#        """
-#        jFactory.register(GlobalBeanSpec1.class);
-#        jFactory.register(GlobalBeanSpec2.class);
-#        """
-#      And evaluating the following code:
-#        """
-#        jFactory.createAs(GlobalBeanSpec2.class);
-#        """
-#      Then the result should be:
-#        """
-#        ::throw.message= "Global Spec `GlobalBeanSpec` for type `Bean` already registered"
-#        """
+    Scenario: Duplicated Global Spec Class - Do not allow Duplicated Global Spec Class Registration
+      Given the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec1 extends Spec<Bean> {}
+        """
+      And the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec2 extends Spec<Bean> {}
+        """
+      When register as follows:
+        """
+        jFactory.register(GlobalBeanSpec1.class);
+        jFactory.register(GlobalBeanSpec2.class);
+        """
+      And evaluating the following code:
+        """
+        jFactory.createAs(GlobalBeanSpec2.class);
+        """
+      Then the result should be:
+        """
+        ::throw.message= "More than one @Global Spec class `GlobalBeanSpec1` and `GlobalBeanSpec2`"
+        """
 
   Rule: Spec Overlay
 
@@ -449,7 +449,7 @@ Feature: Spec
         }
         """
 
-#    Scenario: Base Spec Trait - Define Traits in Base Spec and Use it in Creation
+#    Scenario: Base Spec Trait - Use Traits which werr Defined in Base Spec
 #      Given the following spec definition:
 #        """
 #        @Global
@@ -482,7 +482,6 @@ Feature: Spec
 #          value2= global
 #        }
 #        """
-
 
 #TODO Spec class and Type spec (merge, trait override)
 #TODO regex trait(lambda, spec class)

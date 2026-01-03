@@ -69,9 +69,10 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         if (instance.spec().getClass().equals(specClass))
             consumer.accept(instance.spec());
         else {
-            Spec<T> spec = createSpecWithContext(instance.spec().association, instance.spec().reverseAssociation, instance.spec().objectProducer).setInstance(instance);
+            Spec<T> spec = createSpec();
+            spec.setRules(instance.spec().specRules);
             consumer.accept(spec);
-            instance.spec().append(spec);
+            instance.spec().specRules.append(spec);
         }
     }
 

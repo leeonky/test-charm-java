@@ -447,7 +447,7 @@ Feature: basic use
       public class AuthorWithArg extends Spec<Author> {
         @Override
         public void main() {
-          property("name").value((Object)param("input-name"));
+          property("name").value((Object)instance().param("input-name"));
         }
       }
       """

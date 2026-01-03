@@ -112,6 +112,8 @@ Feature: Object Constructor
     And the following spec definition:
       """
       public class BeanSpec extends Spec<Bean> {
+
+        @Override
         protected Bean construct() {
           return new Bean(100);
         }

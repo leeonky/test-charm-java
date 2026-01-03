@@ -2,32 +2,18 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
-import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 
 public class Spec<T> {
-    private final List<BiConsumer<JFactory, ObjectProducer<T>>> specDefinitions = new ArrayList<>();
-    private final List<PropertyStructureDefinition<T>> propertyStructureDefinitions = new ArrayList<>();
-    private final Set<PropertySpec<T>.IsSpec<?, ? extends Spec<?>>> invalidIsSpecs = new LinkedHashSet<>();
-    private final Set<PropertySpec<T>.IsSpec2<?>> invalidIsSpec2s = new LinkedHashSet<>();
-
-    private Instance<T> instance;
-    private BeanClass<T> type = null;
-    //    TODO to private
-    Optional<Association> association = Optional.empty();
-    Optional<ReverseAssociation> reverseAssociation = Optional.empty();
-    ObjectProducer<?> objectProducer;
+    SpecRules<T> specRules;
 
     private ObjectFactory<T> objectFactory;
 
     T constructBy(ObjectFactory<T> factory) {
-        objectFactory = factory;
         try {
-            if (objectFactory == null)
-                throw new IllegalStateException("Illegal construct context");
+            objectFactory = factory;
             return construct();
         } finally {
             objectFactory = null;
@@ -35,7 +21,7 @@ public class Spec<T> {
     }
 
     protected T construct() {
-        return objectFactory.getBase().create(instance);
+        return objectFactory.getBase().create(specRules.instance());
     }
 
     public void main() {
@@ -45,39 +31,14 @@ public class Spec<T> {
         return new PropertySpec<>(this, propertyChain(property));
     }
 
-    Spec<T> appendSpec(BiConsumer<JFactory, ObjectProducer<T>> operation) {
-        specDefinitions.add(operation);
+    Spec<T> appendRule(BiConsumer<JFactory, ObjectProducer<T>> rule) {
+        specRules.append(rule);
         return this;
-    }
-
-    void applySpecs(JFactory jFactory, ObjectProducer<T> producer) {
-        specDefinitions.forEach(o -> o.accept(jFactory, producer));
-        type = producer.getType();
-        if (!invalidIsSpecs.isEmpty())
-            throw new InvalidSpecException("Invalid property spec:\n\t"
-                    + invalidIsSpecs.stream().map(PropertySpec.IsSpec::getPosition).collect(Collectors.joining("\n\t"))
-                    + "\nShould finish method chain with `and` or `which`:\n"
-                    + "\tproperty().from().which()\n"
-                    + "\tproperty().from().and()\n"
-                    + "Or use property().is() to create object with only spec directly.");
-        if (!invalidIsSpec2s.isEmpty())
-            throw new InvalidSpecException("Invalid property spec:\n\t"
-                    + invalidIsSpec2s.stream().map(PropertySpec.IsSpec2::getPosition).collect(Collectors.joining("\n\t"))
-                    + "\nShould finish method chain with `and`:\n"
-                    + "\tproperty().from().and()\n"
-                    + "Or use property().is() to create object with only spec directly.");
-    }
-
-    void applyPropertyStructureDefinitions(JFactory jFactory, ObjectProducer<T> producer) {
-        specDefinitions.clear();
-        for (PropertyStructureDefinition<T> propertyStructureDefinition : propertyStructureDefinitions)
-            propertyStructureDefinition.apply(this, producer);
-        applySpecs(jFactory, producer);
     }
 
     @SuppressWarnings("unchecked")
     public BeanClass<T> getType() {
-        return getClass().equals(Spec.class) ? type :
+        return getClass().equals(Spec.class) ? specRules.type :
                 (BeanClass<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
                         .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"));
     }
@@ -86,29 +47,13 @@ public class Spec<T> {
         return getClass().getSimpleName();
     }
 
-    Spec<T> setInstance(Instance<T> instance) {
-        this.instance = instance;
+    Spec<T> setRules(SpecRules<T> rules) {
+        specRules = rules;
         return this;
     }
 
-    public <P> P param(String key) {
-        return instance.param(key);
-    }
-
-    public <P> P param(String key, P defaultValue) {
-        return instance.param(key, defaultValue);
-    }
-
-    public Arguments params(String property) {
-        return instance.params(property);
-    }
-
-    public Arguments params() {
-        return instance.params();
-    }
-
     public Instance<T> instance() {
-        return instance;
+        return specRules.instance();
     }
 
     public Spec<T> ignore(String... properties) {
@@ -119,29 +64,20 @@ public class Spec<T> {
 
     @Deprecated
     <V, S extends Spec<V>> PropertySpec<T>.IsSpec<V, S> newIsSpec(Class<S> specClass, PropertySpec<T> propertySpec) {
-        PropertySpec<T>.IsSpec<V, S> isSpec = propertySpec.new IsSpec<V, S>(specClass);
-        invalidIsSpecs.add(isSpec);
-        return isSpec;
+        return specRules.newIsSpec(specClass, propertySpec);
     }
 
     @Deprecated
     void consume(PropertySpec<T>.IsSpec<?, ? extends Spec<?>> isSpec) {
-        invalidIsSpecs.remove(isSpec);
+        specRules.consume(isSpec);
     }
 
     <V> PropertySpec<T>.IsSpec2<V> newIsSpec(String[] traitsAndSpec, PropertySpec<T> propertySpec) {
-        PropertySpec<T>.IsSpec2<V> isSpec = propertySpec.new IsSpec2<V>(traitsAndSpec);
-        invalidIsSpec2s.add(isSpec);
-        return isSpec;
+        return specRules.newIsSpec(traitsAndSpec, propertySpec);
     }
 
     void consume(PropertySpec<T>.IsSpec2<?> isSpec) {
-        invalidIsSpec2s.remove(isSpec);
-    }
-
-    void append(Spec<T> spec) {
-        specDefinitions.addAll(spec.specDefinitions);
-        invalidIsSpecs.addAll(spec.invalidIsSpecs);
+        specRules.consume(isSpec);
     }
 
     public Spec<T> link(String propertyChain1, String propertyChain2, String... others) {
@@ -155,13 +91,13 @@ public class Spec<T> {
 
     public <V> Consistency<V, Coordinate> consistent(Class<V> type) {
         DefaultConsistency<V, Coordinate> consistency = new DefaultConsistency<>(type, Coordinate.class);
-        appendSpec((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        appendRule((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
         return consistency;
     }
 
     public <V, C extends Coordinate> Consistency<V, C> consistent(Class<V> type, Class<C> cType) {
         DefaultConsistency<V, C> consistency = new DefaultConsistency<>(type, cType);
-        appendSpec((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
+        appendRule((jFactory, objectProducer) -> objectProducer.appendLink(consistency));
         return consistency;
     }
 
@@ -175,21 +111,19 @@ public class Spec<T> {
 
     public <C extends Coordinate> ListStructure<T, C> structure(Class<C> coordinateType) {
         DefaultListStructure<T, C> listStructure = new DefaultListStructure<>(coordinateType);
-        appendSpec((jFactory, objectProducer) -> objectProducer.appendListStructure(listStructure));
+        appendRule((jFactory, objectProducer) -> objectProducer.appendListStructure(listStructure));
         return listStructure;
     }
 
-    void appendStructureDefinition(PropertyStructureDefinition<T> propertyStructureDefinition) {
-        propertyStructureDefinitions.add(propertyStructureDefinition);
-    }
+    //    TODO needed?
 
     boolean isAssociation(String property) {
-        return association.map(a -> a.matches(property)).orElse(false);
+        return specRules.association.map(a -> a.matches(property)).orElse(false);
     }
 
     boolean isReverseAssociation(PropertyChain property) {
-        return objectProducer.reverseAssociation(property)
-                .map(s -> reverseAssociation.map(a -> a.matches(s,
+        return specRules.objectProducer.reverseAssociation(property)
+                .map(s -> specRules.reverseAssociation.map(a -> a.matches(s,
                         getType().getPropertyWriter(property.toString()).getType().getElementOrPropertyType())).orElse(false))
                 .orElse(false);
     }
