@@ -11,19 +11,23 @@ class SpecRules<T> {
     private final List<PropertyStructureDefinition<T>> propertyStructureRules = new ArrayList<>();
     private final Set<PropertySpec<T>.IsSpec<?, ? extends Spec<?>>> invalidIsSpecs = new LinkedHashSet<>();
     private final Set<PropertySpec<T>.IsSpec2<?>> invalidIsSpec2s = new LinkedHashSet<>();
-    Instance<T> instance;
-    BeanClass<T> type = null;
+    private final Instance<T> instance;
+    private BeanClass<T> runtimeType = null;
     //    TODO to private
-    Optional<Association> association;
-    Optional<ReverseAssociation> reverseAssociation;
-    ObjectProducer<?> objectProducer;
+    private final Optional<Association> association;
+    private final Optional<ReverseAssociation> reverseAssociation;
+    private final ObjectProducer<T> objectProducer;
 
-    public SpecRules(ObjectInstance<T> objectInstance, ObjectProducer<?> objectProducer,
+    public SpecRules(ObjectInstance<T> objectInstance, ObjectProducer<T> objectProducer,
                      Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
         instance = objectInstance;
         this.objectProducer = objectProducer;
         this.association = association;
         this.reverseAssociation = reverseAssociation;
+    }
+
+    public BeanClass<T> runtimeType() {
+        return runtimeType;
     }
 
     public Instance<T> instance() {
@@ -36,7 +40,7 @@ class SpecRules<T> {
 
     public void applySpecs(JFactory jFactory, ObjectProducer<T> producer) {
         rules.forEach(o -> o.accept(jFactory, producer));
-        type = producer.getType();
+        runtimeType = producer.getType();
         if (!invalidIsSpecs.isEmpty())
             throw new InvalidSpecException("Invalid property spec:\n\t"
                     + invalidIsSpecs.stream().map(PropertySpec.IsSpec::getPosition).collect(Collectors.joining("\n\t"))
@@ -64,29 +68,50 @@ class SpecRules<T> {
     public void append(Spec<T> spec) {
         rules.addAll(spec.specRules.rules);
         invalidIsSpecs.addAll(spec.specRules.invalidIsSpecs);
+        invalidIsSpec2s.addAll(spec.specRules.invalidIsSpec2s);
     }
 
     public void appendStructureDefinition(PropertyStructureDefinition<T> propertyStructureDefinition) {
         propertyStructureRules.add(propertyStructureDefinition);
     }
 
+    @Deprecated
     public <V, S extends Spec<V>> PropertySpec<T>.IsSpec<V, S> newIsSpec(Class<S> specClass, PropertySpec<T> propertySpec) {
         PropertySpec<T>.IsSpec<V, S> isSpec = propertySpec.new IsSpec<V, S>(specClass);
         invalidIsSpecs.add(isSpec);
         return isSpec;
     }
 
+    @Deprecated
     public void consume(PropertySpec<T>.IsSpec<?, ? extends Spec<?>> isSpec) {
         invalidIsSpecs.remove(isSpec);
     }
 
+    @Deprecated
     public <V> PropertySpec<T>.IsSpec2<V> newIsSpec(String[] traitsAndSpec, PropertySpec<T> propertySpec) {
         PropertySpec<T>.IsSpec2<V> isSpec = propertySpec.new IsSpec2<V>(traitsAndSpec);
         invalidIsSpec2s.add(isSpec);
         return isSpec;
     }
 
+    @Deprecated
     public void consume(PropertySpec<T>.IsSpec2<?> isSpec) {
         invalidIsSpec2s.remove(isSpec);
+    }
+
+    //    TODO needed?
+    boolean isAssociation(String property) {
+        return association.map(a -> a.matches(property)).orElse(false);
+    }
+
+    boolean isReverseAssociation(PropertyChain property) {
+        return objectProducer.reverseAssociation(property)
+                .map(s -> reverseAssociation.map(a -> a.matches(s,
+                        runtimeType.getPropertyWriter(property.toString()).getType().getElementOrPropertyType())).orElse(false))
+                .orElse(false);
+    }
+
+    public void appendReverseAssociation(PropertyChain property, String association) {
+        objectProducer.appendReverseAssociation(property, association);
     }
 }

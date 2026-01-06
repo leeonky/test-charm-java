@@ -122,10 +122,9 @@ class ObjectFactory<T> implements Factory<T> {
 
     public ObjectInstance<T> createInstance(Arguments argument, Optional<Association> association,
                                             Optional<ReverseAssociation> reverseAssociation,
-                                            ObjectProducer<?> objectProducer) {
+                                            ObjectProducer<T> objectProducer) {
         Spec<T> spec = createSpec();
-        ObjectInstance<T> objectInstance = new ObjectInstance<>(spec, argument,
-                factorySet.sequence(getType().getType()));
+        ObjectInstance<T> objectInstance = new ObjectInstance<>(spec, argument, factorySet.sequence(getType().getType()));
         SpecRules<T> rules = new SpecRules<>(objectInstance, objectProducer, association, reverseAssociation);
         spec.setRules(rules);
         return objectInstance;

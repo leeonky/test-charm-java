@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 public interface Instance<T> {
     int getSequence();
 
+    @Deprecated
     Spec<T> spec();
 
     Supplier<T> reference();

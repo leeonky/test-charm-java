@@ -5,6 +5,7 @@ import com.github.leeonky.util.PropertyWriter;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -16,10 +17,12 @@ import static java.util.Optional.of;
 
 public class PropertySpec<T> {
     private final Spec<T> spec;
+    private final SpecRules<T> specRules;
     private final PropertyChain property;
 
-    PropertySpec(Spec<T> spec, PropertyChain property) {
+    PropertySpec(Spec<T> spec, PropertyChain property, SpecRules<T> specRules) {
         this.spec = spec;
+        this.specRules = specRules;
         this.property = property;
     }
 
@@ -42,8 +45,8 @@ public class PropertySpec<T> {
     }
 
     private boolean isAssociation() {
-        return spec.isAssociation(property.toString())
-                || spec.isReverseAssociation(property.isTopLevelPropertyCollection() ? property.removeTail() : property);
+        return specRules.isAssociation(property.toString())
+                || specRules.isReverseAssociation(property.isTopLevelPropertyCollection() ? property.removeTail() : property);
     }
 
     public Spec<T> is(String... traitsAndSpec) {
@@ -53,15 +56,15 @@ public class PropertySpec<T> {
     }
 
     public <V> IsSpec2<V> from(String... traitsAndSpec) {
-        return spec.newIsSpec(traitsAndSpec, this);
+        return specRules.newIsSpec(traitsAndSpec, this);
     }
 
     public Spec<T> optional(String... traitsAndSpec) {
         if (property.isSingle()) {
-            return spec.appendRule((jFactory, objectProducer) -> objectProducer.changeChild(property.toString(),
+            return appendRule((jFactory, objectProducer) -> objectProducer.changeChild(property.toString(),
                     new OptionalSpecDefaultValueProducer<>(traitsAndSpec, jFactory, jFactory.spec(traitsAndSpec))));
         } else if (property.isDefaultPropertyCollection()) {
-            return spec.appendRule((jFactory, objectProducer) -> {
+            return appendRule((jFactory, objectProducer) -> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
@@ -86,7 +89,7 @@ public class PropertySpec<T> {
      * reference spec and trait via string
      */
     public <V, S extends Spec<V>> IsSpec<V, S> from(Class<S> specClass) {
-        return spec.newIsSpec(specClass, this);
+        return specRules.newIsSpec(specClass, this);
     }
 
     public Spec<T> defaultValue(Object value) {
@@ -141,11 +144,11 @@ public class PropertySpec<T> {
 
     private Spec<T> appendProducer(Function<ProducerFactoryContext, Producer<?>> producerFactory) {
         if (property.isSingle() || property.isTopLevelPropertyCollection())
-            return spec.appendRule((jFactory, objectProducer) -> objectProducer.changeDescendant(property,
+            return appendRule((jFactory, objectProducer) -> objectProducer.changeDescendant(property,
                     ((nextToLast, property) -> producerFactory.apply(new ProducerFactoryContext(jFactory, nextToLast, property,
                             objectProducer.association(this.property.head().toString()), objectProducer)))));
         if (property.isDefaultPropertyCollection()) {
-            return spec.appendRule((jFactory, objectProducer) -> {
+            return appendRule((jFactory, objectProducer) -> {
                 PropertyWriter<T> propertyWriter = objectProducer.getType().getPropertyWriter((String) property.head());
                 if (!propertyWriter.getType().isCollection() && propertyWriter.getType().is(Object.class)) {
                     Producer<?> element = producerFactory.apply(new ProducerFactoryContext(jFactory, objectProducer, "0", objectProducer.association(property.head().toString()), objectProducer));
@@ -159,10 +162,8 @@ public class PropertySpec<T> {
             });
         }
         if (property.isTopLevelDefaultPropertyCollection()) {
-            return spec.appendRule((jFactory, objectProducer) -> {
-                objectProducer.changeElementPopulationFactory(propertyWriter ->
-                        producerFactory.apply(new ProducerFactoryContext(jFactory, objectProducer, propertyWriter.getName(), Optional.empty(), objectProducer)));
-            });
+            return appendRule((jFactory, objectProducer) -> objectProducer.changeElementPopulationFactory(propertyWriter ->
+                    producerFactory.apply(new ProducerFactoryContext(jFactory, objectProducer, propertyWriter.getName(), Optional.empty(), objectProducer))));
         }
         throw new IllegalArgumentException(format("Property chain `%s` is not supported in the current operation", property));
     }
@@ -180,16 +181,21 @@ public class PropertySpec<T> {
     }
 
     public Spec<T> reverseAssociation(String association) {
-        spec.specRules.objectProducer.appendReverseAssociation(property, association);
+        specRules.appendReverseAssociation(property, association);
         return spec;
     }
 
     public Spec<T> ignore() {
-        return spec.appendRule((jFactory, objectProducer) -> objectProducer.ignoreProperty(property.toString()));
+        return appendRule((jFactory, objectProducer) -> objectProducer.ignoreProperty(property.toString()));
     }
 
     public PropertySpec<T> element(int index) {
         return spec.property(property.toString() + "[" + index + "]");
+    }
+
+    Spec<T> appendRule(BiConsumer<JFactory, ObjectProducer<T>> rule) {
+        specRules.append(rule);
+        return spec;
     }
 
     @FunctionalInterface
@@ -202,19 +208,19 @@ public class PropertySpec<T> {
         private final String position;
 
         public IsSpec(Class<S> spec) {
-            position = Thread.currentThread().getStackTrace()[5].toString();
+            position = Thread.currentThread().getStackTrace()[4].toString();
             specClass = spec;
         }
 
         public Spec<T> which(Consumer<S> trait) {
-            spec.consume(this);
+            specRules.consume(this);
             if (isAssociation())
                 return spec;
             return appendProducer(context -> createCreateProducer(context.jFactory.spec(specClass, trait), context.association));
         }
 
         public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
-            spec.consume(this);
+            specRules.consume(this);
             if (isAssociation())
                 return spec;
             return appendProducer(context -> createQueryOrCreateProducer(builder.apply(context.jFactory.spec(specClass)), context.association));
@@ -230,12 +236,12 @@ public class PropertySpec<T> {
         private final String position;
 
         public IsSpec2(String[] spec) {
-            position = Thread.currentThread().getStackTrace()[5].toString();
+            position = Thread.currentThread().getStackTrace()[4].toString();
             this.spec = spec;
         }
 
         public Spec<T> and(Function<Builder<V>, Builder<V>> builder) {
-            PropertySpec.this.spec.consume(this);
+            specRules.consume(this);
             if (isAssociation())
                 return PropertySpec.this.spec;
             return appendProducer(context -> createQueryOrCreateProducer(builder.apply(context.jFactory.spec(spec)), context.association));
