@@ -77,10 +77,10 @@ class ObjectInstance<T> implements Instance<T> {
         return traitParams;
     }
 
-    void runTraitWithParams(Object[] params, Consumer<Instance<T>> action) {
+    void runTraitWithParams(Object[] params, Consumer<Spec<T>> action) {
         traitParams = params;
         try {
-            action.accept(this);
+            action.accept(spec);
         } finally {
             traitParams = NO_TRAIT_PARAMS;
         }

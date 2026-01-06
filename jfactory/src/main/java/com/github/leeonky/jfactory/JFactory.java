@@ -64,7 +64,7 @@ public class JFactory {
         Factory<T> specFactory = specFactory(specClass);
         Class<T[]> arrayType = (Class<T[]>) Array.newInstance(specFactory.getType().getType(), 0).getClass();
         ObjectFactory<T[]> listFactory = new ObjectFactory<>(BeanClass.create(arrayType), factorySet);
-        listFactory.spec(ins -> ins.spec().property("[]").is(specClass));
+        listFactory.spec(spec -> spec.property("[]").is(specClass));
         return new DefaultBuilder<>(listFactory, this, TYPE);
     }
 
@@ -72,7 +72,7 @@ public class JFactory {
         Factory<T> specFactory = specFactory(specClass);
         ObjectFactory<L> listFactory = new ObjectFactory<>(reify(collectionType,
                 specFactory.getType().getType()), factorySet);
-        listFactory.spec(ins -> ins.spec().property("[]").is(specClass));
+        listFactory.spec(spec -> spec.property("[]").is(specClass));
         return new DefaultBuilder<>(listFactory, this, TYPE);
     }
 
@@ -83,7 +83,7 @@ public class JFactory {
             Factory<Object> specFactory = specFactory(specName);
             ObjectFactory<?> listFactory = new ObjectFactory<>(reify(List.class, specFactory.getType().getType()), factorySet);
             traitsAndSpec[traitsAndSpec.length - 1] = specName;
-            listFactory.spec(ins -> ins.spec().property("[]").is(traitsAndSpec));
+            listFactory.spec(spec -> spec.property("[]").is(traitsAndSpec));
             return new DefaultBuilder(listFactory, this, TYPE);
         }
         return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specName), this, SPEC)

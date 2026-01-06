@@ -12,7 +12,7 @@ class SpecValue {
     void define_spec_default_value() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").value("hello_" + ins.getSequence()));
+        jFactory.factory(Bean.class).spec(spec -> spec.property("str").value("hello_" + spec.instance().getSequence()));
 
         expect(jFactory.create(Bean.class)).should("str= hello_1");
     }
@@ -21,7 +21,7 @@ class SpecValue {
     void define_spec_value_with_lambda() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").value(() -> "from_lambda"));
+        jFactory.factory(Bean.class).spec(spec -> spec.property("str").value(() -> "from_lambda"));
 
         expect(jFactory.create(Bean.class)).should("str= from_lambda");
     }
@@ -30,7 +30,7 @@ class SpecValue {
     void do_not_allow_define_sub_property_spec_value() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(BeanHolder.class).spec(ins -> ins.spec().property("bean.str").value("hello"));
+        jFactory.factory(BeanHolder.class).spec(spec -> spec.property("bean.str").value("hello"));
 
         expectRun(() -> jFactory.create(BeanHolder.class)).should("::throw.message: 'Property chain `bean.str` is not supported in the current operation'");
     }

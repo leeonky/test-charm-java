@@ -20,7 +20,7 @@ Feature: Reverse Association
     Scenario: no query before create
       Given register:
       """
-        jFactory.factory(Person.class).spec(instance -> instance.spec()
+        jFactory.factory(Person.class).spec(spec -> spec
           .property("passport").reverseAssociation("person"));
       """
       When build:
@@ -58,7 +58,7 @@ Feature: Reverse Association
       """
       And register:
       """
-        jFactory.factory(Person.class).spec(instance -> instance.spec()
+        jFactory.factory(Person.class).spec(spec -> spec
           .property("passport").reverseAssociation("person"));
       """
       When build:
@@ -76,7 +76,7 @@ Feature: Reverse Association
     Scenario: query before create should not happen
       Given register:
       """
-      jFactory.factory(Person.class).spec(instance -> instance.spec()
+      jFactory.factory(Person.class).spec(spec -> spec
         .property("passport").reverseAssociation("person"));
       """
       When operate:
@@ -109,7 +109,7 @@ Feature: Reverse Association
       """
       And register:
       """
-      jFactory.factory(Order.class).spec(instance -> instance.spec()
+      jFactory.factory(Order.class).spec(spec -> spec
         .property("orderLines").reverseAssociation("order"));
       """
       When build:
@@ -158,7 +158,7 @@ Feature: Reverse Association
       """
       And register:
       """
-      jFactory.factory(Order.class).spec(instance -> instance.spec()
+      jFactory.factory(Order.class).spec(spec -> spec
         .property("orderLines").reverseAssociation("order"));
       """
       When build:
@@ -187,7 +187,7 @@ Feature: Reverse Association
       """
       Given register:
       """
-      jFactory.factory(Order.class).spec(instance -> instance.spec()
+      jFactory.factory(Order.class).spec(spec -> spec
         .property("orderLines").reverseAssociation("order"));
       """
       When operate:

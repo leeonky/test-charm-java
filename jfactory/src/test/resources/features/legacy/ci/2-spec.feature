@@ -211,7 +211,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Order.class).spec(ins-> ins.spec()
+      jFactory.factory(Order.class).spec(spec-> spec
           .property("line").reverseAssociation("order")
           .property("line").is("OrderLineSpec")
       );
@@ -242,7 +242,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Order.class).spec(ins-> ins.spec()
+      jFactory.factory(Order.class).spec(spec-> spec
           .property("line").reverseAssociation("order")
           .property("line").is("OrderLineSpec")
       );
@@ -548,7 +548,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value1").value("lambda spec"));
       """
       When build:
@@ -582,7 +582,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value1").value("lambda spec"));
       """
       When build:
@@ -625,7 +625,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value1").value("lambda spec"));
       """
       When build:
@@ -692,7 +692,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value").value("lambda spec"));
       """
       When build:
@@ -723,7 +723,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value").value("lambda spec"));
       """
       When build:
@@ -763,7 +763,7 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value").value("lambda spec"));
       """
       When build:
@@ -787,8 +787,8 @@ Feature: use spec
       Given register:
       """
       jFactory.factory(Bean.class)
-        .spec(instance-> instance.spec().property("value").value("type spec"))
-        .spec("hello", instance-> instance.spec().property("value").value("hello"));
+        .spec(spec -> spec.property("value").value("type spec"))
+        .spec("hello", spec-> spec.property("value").value("hello"));
       """
       When build:
       """
@@ -809,7 +809,7 @@ Feature: use spec
       Given register:
       """
       jFactory.factory(Bean.class)
-        .spec(instance-> instance.spec().property("value").value("type spec"));
+        .spec(spec -> spec.property("value").value("type spec"));
       """
       And the following spec class:
       """
@@ -1004,8 +1004,8 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec("input-(.+)", ins -> {
-          ins.spec().property("value").value(ins.traitParam(0));
+      jFactory.factory(Bean.class).spec("input-(.+)", spec -> {
+          spec.property("value").value(spec.instance().traitParam(0));
       });
       """
       When build:
@@ -1026,8 +1026,8 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec("input-(.+)-(.+)", ins -> {
-          ins.spec().property("value").value(ins.traitParam(0)+ "_" +  ins.traitParam(1));
+      jFactory.factory(Bean.class).spec("input-(.+)-(.+)", spec -> {
+          spec.property("value").value(spec.instance().traitParam(0)+ "_" +  spec.instance().traitParam(1));
       });
       """
       When build:
@@ -1048,14 +1048,14 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec("input1-(.+)-(.+)", ins -> {
-          ins.spec().property("value1").value(ins.traitParam(0)+ "_1_" +  ins.traitParam(1));
+      jFactory.factory(Bean.class).spec("input1-(.+)-(.+)", spec -> {
+          spec.property("value1").value(spec.instance().traitParam(0)+ "_1_" +  spec.instance().traitParam(1));
       });
-      jFactory.factory(Bean.class).spec("input3-(.+)-(.+)", ins -> {
-          ins.spec().property("value3").value(ins.traitParam(0)+ "_3_" +  ins.traitParam(1));
+      jFactory.factory(Bean.class).spec("input3-(.+)-(.+)", spec -> {
+          spec.property("value3").value(spec.instance().traitParam(0)+ "_3_" +  spec.instance().traitParam(1));
       });
-      jFactory.factory(Bean.class).spec("input-value2", ins -> {
-          ins.spec().property("value2").value("v2");
+      jFactory.factory(Bean.class).spec("input-value2", spec -> {
+          spec.property("value2").value("v2");
       });
       """
       When build:
@@ -1131,10 +1131,10 @@ Feature: use spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec("input-(.+)", ins -> {
+      jFactory.factory(Bean.class).spec("input-(.+)", spec -> {
         throw new RuntimeException("failed");
-      }).spec("input-hello", ins -> {
-          ins.spec().property("value").value("hello");
+      }).spec("input-hello", spec -> {
+          spec.property("value").value("hello");
       });
       """
       When build:
@@ -2233,7 +2233,7 @@ Feature: use spec
         """
       And operate:
         """
-        jFactory.factory(ListObject.class).spec(ins-> ins.spec().property("list").is("BeanListSpec") );
+        jFactory.factory(ListObject.class).spec(spec -> spec.property("list").is("BeanListSpec") );
         """
       When build:
         """
@@ -2283,7 +2283,7 @@ Feature: use spec
         """
       And operate:
         """
-        jFactory.factory(ListObject.class).spec(ins-> ins.spec().property("list").is("BeanListSpec") );
+        jFactory.factory(ListObject.class).spec(spec -> spec.property("list").is("BeanListSpec") );
         """
       When build:
         """
@@ -2436,8 +2436,8 @@ Feature: use spec
       """
       And register:
       """
-        jFactory.factory(Bean.class).spec(ins ->
-          ins.spec().property("sub").optional("Default", "SubBeanSpec"));
+        jFactory.factory(Bean.class).spec(spec ->
+          spec.property("sub").optional("Default", "SubBeanSpec"));
       """
       When build:
         """

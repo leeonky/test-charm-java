@@ -68,9 +68,9 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value").value("hello")
-        .property("bean").value(instance.reference()));
+        .property("bean").value(spec.instance().reference()));
       """
       When build:
       """
@@ -602,7 +602,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value").value("bean"));
       """
       And the following spec class:
@@ -638,9 +638,9 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value2").value("bean"));
-      jFactory.factory(Bean.class).spec("hello", instance -> instance.spec()
+      jFactory.factory(Bean.class).spec("hello", spec -> spec
         .property("value1").value("hello"));
       """
       And the following spec class:
@@ -726,7 +726,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("value").byFactory());
       """
       When build:
@@ -749,7 +749,7 @@ Feature: define spec
       """
       When register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("values").value(Arrays.asList("hello")));
       """
       Then "jFactory.type(Bean.class).create()" should
@@ -758,7 +758,7 @@ Feature: define spec
       """
       When register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("values").value(null));
       """
       Then "jFactory.type(Bean.class).create()" should
@@ -767,7 +767,7 @@ Feature: define spec
       """
       When register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("values").value(Collections.emptyList()));
       """
       Then "jFactory.type(Bean.class).create()" should
@@ -784,7 +784,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("values[0]").value("hello"));
       """
       When build:
@@ -805,7 +805,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("values[1]").value("hello"));
       """
       When build:
@@ -844,7 +844,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanList.class).spec(spec -> spec
         .property("beans[1]").is(ABean.class));
       """
       When build:
@@ -880,7 +880,7 @@ Feature: define spec
       """
       When register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
         .property("beans[0]").value(new Bean().setValue("world"))
         .property("beans[-2]").value(new Bean().setValue("hello")));
       """
@@ -910,7 +910,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Person.class).spec(instance -> instance.spec()
+      jFactory.factory(Person.class).spec(spec -> spec
         .property("passport").reverseAssociation("person")
         .property("passport").byFactory());
       """
@@ -939,7 +939,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Person.class).spec(instance -> instance.spec()
+      jFactory.factory(Person.class).spec(spec -> spec
         .property("passport").reverseAssociation("person"));
       """
       When operate:
@@ -988,7 +988,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Person.class).spec(instance -> instance.spec()
+      jFactory.factory(Person.class).spec(spec -> spec
         .property("passport").reverseAssociation("person"));
       """
       When build:
@@ -1018,7 +1018,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Person.class).spec(instance -> instance.spec()
+      jFactory.factory(Person.class).spec(spec -> spec
         .property("passport").reverseAssociation("person")
         .property("passport").byFactory());
       """
@@ -1047,7 +1047,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Order.class).spec(instance -> instance.spec()
+      jFactory.factory(Order.class).spec(spec -> spec
         .property("orderLines").reverseAssociation("order"));
       """
       When build:
@@ -1078,7 +1078,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Order.class).spec(instance -> instance.spec()
+      jFactory.factory(Order.class).spec(spec -> spec
         .property("orderLines").reverseAssociation("order"));
       """
       When operate:
@@ -1107,7 +1107,7 @@ Feature: define spec
       """
       And register:
       """
-      jFactory.factory(Order.class).spec(instance -> instance.spec()
+      jFactory.factory(Order.class).spec(spec -> spec
         .property("orderLines").reverseAssociation("order"));
       """
       When build:

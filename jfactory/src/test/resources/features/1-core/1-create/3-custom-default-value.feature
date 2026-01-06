@@ -383,7 +383,7 @@ Feature: Custom Default Value
         """
       And register as follows:
         """
-        jFactory.factory(Bean.class).spec(ins -> ins.spec()
+        jFactory.factory(Bean.class).spec(spec -> spec
           .property("str1").ignore()
           .property("str2").defaultValue("any")
         );

@@ -24,15 +24,15 @@ class ListConsistencyTest {
 
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(BeanList.class).spec(ins -> {
-            ins.spec().structure(Coordinate.D2.class)
+        jFactory.factory(BeanList.class).spec(spec -> {
+            spec.structure(Coordinate.D2.class)
                     .list("beansList1", "beans").normalize(d2 -> Coordinate.d2(d2.index1(), d2.index0()),
                             d2 -> Coordinate.d2(d2.index1(), d2.index0()))
                     .list("beansList2", "beans");
         });
 
-        jFactory.factory(BeanList.class).spec(ins ->
-                ins.spec().consistent(String.class)
+        jFactory.factory(BeanList.class).spec(spec ->
+                spec.consistent(String.class)
                         .list("beans1").normalize(reverse())
                         .consistent(beans1 -> beans1
                                 .direct("status1"))
@@ -54,8 +54,8 @@ class ListConsistencyTest {
     void reverse_index_2() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(BeanList.class).spec(ins ->
-                ins.spec().consistent(String.class, Coordinate.D1.class)
+        jFactory.factory(BeanList.class).spec(spec ->
+                spec.consistent(String.class, Coordinate.D1.class)
                         .list("beans1").normalize(d1 -> d1(d1.index().reverse()), d1 -> d1(d1.index().reverse()))
                         .consistent(beans1 -> beans1
                                 .direct("status1"))
@@ -77,8 +77,8 @@ class ListConsistencyTest {
     void change_index() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(BeanList.class).spec(ins ->
-                ins.spec().consistent(String.class)
+        jFactory.factory(BeanList.class).spec(spec ->
+                spec.consistent(String.class)
                         .list("beans1").normalize(shift(1))
                         .consistent(beans1 -> beans1
                                 .direct("status1"))
@@ -102,8 +102,8 @@ class ListConsistencyTest {
     void change_index_2() {
         JFactory jFactory = new JFactory();
 
-        jFactory.factory(BeanList.class).spec(ins ->
-                ins.spec().consistent(String.class, Coordinate.D1.class)
+        jFactory.factory(BeanList.class).spec(spec ->
+                spec.consistent(String.class, Coordinate.D1.class)
                         .list("beans1").normalize(d1 -> d1(d1.index().shift(1)), d1 -> d1(d1.index().shift(-1)))
                         .consistent(beans1 -> beans1
                                 .direct("status1"))

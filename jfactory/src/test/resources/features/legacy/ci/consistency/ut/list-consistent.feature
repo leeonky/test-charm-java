@@ -100,8 +100,7 @@ Feature: list consistency
     Scenario: single property effect all element property
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(String.class)
                     .list("beans").consistent(beans -> beans
                       .direct("status1"))
@@ -123,8 +122,7 @@ Feature: list consistency
     Scenario: single property effect element property which has default factory value
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(String.class)
                     .list("beans").consistent(beans-> beans
                       .direct("status1"))
@@ -148,8 +146,7 @@ Feature: list consistency
     Scenario: element impact element property
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(String.class)
                     .list("beans").consistent(beans -> beans
                       .direct("status1"))
@@ -170,8 +167,7 @@ Feature: list consistency
     Scenario: different property in list consistent
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(String.class)
                     .list("beans").consistent(beans -> beans
                       .direct("status1")
@@ -205,8 +201,8 @@ Feature: list consistency
         """
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            ins.spec().consistent(String.class)
+        jFactory.factory(BeanList.class).spec(spec -> {
+            spec.consistent(String.class)
                     .list("beans1").consistent(beans -> beans
                       .direct("status1"))
                     .list("beans2").consistent(beans -> beans
@@ -242,8 +238,7 @@ Feature: list consistency
     Scenario: define reader and writer in list property
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(Object.class)
                     .list("beans").consistent(beans -> beans.property("status1")
                       .read(s->s)
@@ -266,8 +261,7 @@ Feature: list consistency
     Scenario: multi properties
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(Object[].class)
                     .list("beans").consistent(beans-> beans
                       .properties("status1", "status2")
@@ -298,8 +292,7 @@ Feature: list consistency
     Scenario: three properties
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(Object[].class)
                     .list("beans").consistent(beans-> beans
                       .properties("status1", "status2", "status3")
@@ -332,8 +325,7 @@ Feature: list consistency
     Scenario: more properties
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            Spec<BeanList> spec = ins.spec();
+        jFactory.factory(BeanList.class).spec(spec -> {
             spec.consistent(Object[].class)
                     .list("beans").consistent(beans-> beans
                       .properties("status1", "status2")
@@ -382,8 +374,8 @@ Feature: list consistency
     Scenario: nested list and list consistency
       And operate:
         """
-        jFactory.factory(BeanListList.class).spec(ins -> {
-            ins.spec().consistent(String.class)
+        jFactory.factory(BeanListList.class).spec(spec -> {
+            spec.consistent(String.class)
                     .direct("status")
                     .list("beans").consistent(beans -> beans
                       .direct("status1"))

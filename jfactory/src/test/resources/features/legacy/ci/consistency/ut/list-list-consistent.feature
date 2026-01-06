@@ -26,8 +26,8 @@ Feature: list - list consistency
     Scenario: list beans1[0] -> beans2[0], beans2[1] -> beans1[1]
       And operate:
             """
-            jFactory.factory(BeanList.class).spec(ins -> {
-                ins.spec().consistent(String.class)
+            jFactory.factory(BeanList.class).spec(spec -> {
+                spec.consistent(String.class)
                     .list("beans1").consistent(beans1 -> beans1
                       .direct("status1"))
                     .list("beans2").consistent(beans2 -> beans2
@@ -88,8 +88,8 @@ Feature: list - list consistency
         """
       And operate:
         """
-        jFactory.factory(BeanListList.class).spec(ins -> {
-            ins.spec().consistent(String.class, Coordinate.D2.class)
+        jFactory.factory(BeanListList.class).spec(spec -> {
+            spec.consistent(String.class, Coordinate.D2.class)
                     .list("beansList1", "beans1").consistent(beansList1Beans1 -> beansList1Beans1
                       .direct("status1"))
                     .list("beansList2", "beans1").consistent(beansList1Beans1 -> beansList1Beans1
@@ -168,8 +168,8 @@ Feature: list - list consistency
     Scenario: reverse mapping
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            ins.spec().consistent(String.class)
+        jFactory.factory(BeanList.class).spec(spec -> {
+            spec.consistent(String.class)
                 .list("beans1").normalize(Normalizer.reverse()).consistent(beans1 -> beans1
                   .direct("status1"))
                 .list("beans2").consistent(beans2 -> beans2
@@ -195,8 +195,8 @@ Feature: list - list consistency
     Scenario: reverse mapping through separated api
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            ins.spec().consistent(String.class, Coordinate.D1.class)
+        jFactory.factory(BeanList.class).spec(spec -> {
+            spec.consistent(String.class, Coordinate.D1.class)
                 .list("beans1").normalize(d1 -> Coordinate.d1(d1.index().reverse()),
                                           d1 -> Coordinate.d1(d1.index().reverse())).consistent(beans1 -> beans1
                   .direct("status1"))
@@ -230,8 +230,8 @@ Feature: list - list consistency
         """
       And operate:
         """
-        jFactory.factory(BeanListList.class).spec(ins -> {
-            ins.spec().consistent(String.class)
+        jFactory.factory(BeanListList.class).spec(spec -> {
+            spec.consistent(String.class)
                     .list("beansList1", "beans1").normalize(Normalizer.reverse()).consistent(beansList1Beans1 -> beansList1Beans1
                       .direct("status1"))
                     .list("beansList2", "beans1").consistent(beansList1Beans1 -> beansList1Beans1
@@ -269,17 +269,17 @@ Feature: list - list consistency
     Scenario: different size list consistent
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            ins.spec().property("beans1[]").byFactory();
-            ins.spec().property("beans2[]").byFactory();
+        jFactory.factory(BeanList.class).spec(spec -> {
+            spec.property("beans1[]").byFactory();
+            spec.property("beans2[]").byFactory();
 
-            ins.spec().consistent(String.class)
-                    .list("beans1").normalize(Normalizer.sample(2, 0)).consistent(beans1 -> beans1
-                      .direct("status1"))
-                    .list("beans2").consistent(beans2 -> beans2
-                      .direct("status1"));
+            spec.consistent(String.class)
+                .list("beans1").normalize(Normalizer.sample(2, 0)).consistent(beans1 -> beans1
+                  .direct("status1"))
+                .list("beans2").consistent(beans2 -> beans2
+                  .direct("status1"));
 
-            ins.spec().consistent(String.class)
+            spec.consistent(String.class)
                     .list("beans1").normalize(Normalizer.sample(2, 1)).consistent(beans1 -> beans1
                       .direct("status1"))
                     .list("beans2").consistent(beans2 -> beans2
@@ -333,17 +333,17 @@ Feature: list - list consistency
         """
       And operate:
         """
-        jFactory.factory(BeanList.class).spec(ins -> {
-            ins.spec().property("beans1[]").byFactory();
+        jFactory.factory(BeanList.class).spec(spec -> {
+            spec.property("beans1[]").byFactory();
         });
         """
       And operate:
         """
-        jFactory.factory(BeanListList.class).spec(ins -> {
-            ins.spec().property("beansList1[]").byFactory();
-            ins.spec().property("beansList2[]").byFactory();
+        jFactory.factory(BeanListList.class).spec(spec -> {
+            spec.property("beansList1[]").byFactory();
+            spec.property("beansList2[]").byFactory();
 
-            ins.spec().consistent(String.class)
+            spec.consistent(String.class)
                     .list("beansList1", "beans1").normalize(Normalizer.transpose()).consistent(beansList1Beans1 -> beansList1Beans1
                       .direct("status1"))
                     .list("beansList2", "beans1").consistent(beansList1Beans1 -> beansList1Beans1

@@ -22,9 +22,9 @@ Feature: object population depends on another property
   Scenario: object population depends on another property
     And register:
       """
-      jFactory.factory(Beans.class).spec(ins -> {
-        ins.spec().property("value").value("hello");
-        ins.spec().structure("bean").dependsOn("flag1").when(f-> f.equals("yes")).populate((s, f) -> {
+      jFactory.factory(Beans.class).spec(spec -> {
+        spec.property("value").value("hello");
+        spec.structure("bean").dependsOn("flag1").when(f-> f.equals("yes")).populate((s, f) -> {
           s.byFactory();
         });
       });
@@ -57,8 +57,8 @@ Feature: object population depends on another property
   Scenario: object population depends on multi properties
     And register:
       """
-      jFactory.factory(Beans.class).spec(ins -> {
-        ins.spec().structure("value").<String, String>dependsOn("flag1", "flag2").when((f1,f2)-> f1.equals("yes") && f2.equals("Y")).populate((s, f1, f2) -> {
+      jFactory.factory(Beans.class).spec(spec -> {
+        spec.structure("value").<String, String>dependsOn("flag1", "flag2").when((f1,f2)-> f1.equals("yes") && f2.equals("Y")).populate((s, f1, f2) -> {
           s.value(f1+f2);
         });
       });
@@ -91,8 +91,8 @@ Feature: object population depends on another property
   Scenario: object population depends on property array
     And register:
       """
-      jFactory.factory(Beans.class).spec(ins -> {
-        ins.spec().structure("value").dependsOn("flag1", "flag2", "flag3").when(fs-> fs[0].equals("yes") && fs[1].equals("Y")).populate((s, fs) -> {
+      jFactory.factory(Beans.class).spec(spec -> {
+        spec.structure("value").dependsOn("flag1", "flag2", "flag3").when(fs-> fs[0].equals("yes") && fs[1].equals("Y")).populate((s, fs) -> {
           s.value(""+fs[0]+fs[1]+fs[2]);
         });
       });
@@ -166,9 +166,9 @@ Feature: object population depends on another property
       """
     And register:
       """
-      jFactory.factory(Beans.class).spec(ins -> {
-        ins.spec().property("value").value("hello");
-        ins.spec().structure("bean").dependsOn("flag1").when(f-> f.equals("yes")).populate((s, f) -> {
+      jFactory.factory(Beans.class).spec(spec -> {
+        spec.property("value").value("hello");
+        spec.structure("bean").dependsOn("flag1").when(f-> f.equals("yes")).populate((s, f) -> {
           s.byFactory();
         });
       });
@@ -249,8 +249,8 @@ Feature: object population depends on another property
       """
     And register:
       """
-      jFactory.factory(Beans.class).spec(ins -> {
-        ins.spec().structure("beans").<Integer>dependsOn("size").populate((s, f) -> {
+      jFactory.factory(Beans.class).spec(spec -> {
+        spec.structure("beans").<Integer>dependsOn("size").populate((s, f) -> {
           for(int i=0; i<f; i++)
             s.element(i).byFactory();
         });

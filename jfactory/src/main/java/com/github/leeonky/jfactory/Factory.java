@@ -8,9 +8,9 @@ import java.util.function.Function;
 public interface Factory<T> {
     Factory<T> constructor(Function<Instance<T>, T> constructor);
 
-    Factory<T> spec(Consumer<Instance<T>> instance);
+    Factory<T> spec(Consumer<Spec<T>> instance);
 
-    Factory<T> spec(String name, Consumer<Instance<T>> instance);
+    Factory<T> spec(String name, Consumer<Spec<T>> instance);
 
     BeanClass<T> getType();
 

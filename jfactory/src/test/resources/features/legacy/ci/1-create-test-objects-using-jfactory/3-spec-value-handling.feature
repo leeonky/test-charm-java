@@ -15,7 +15,7 @@ Feature: Spec Value Handling
       """
     When register as follows:
       """
-      jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").value("hello"));
+      jFactory.factory(Bean.class).spec(spec -> spec.property("str").value("hello"));
       """
     And evaluating the following code:
       """
@@ -35,7 +35,7 @@ Feature: Spec Value Handling
       """
     When register as follows:
       """
-      jFactory.factory(Bean.class).spec(ins -> ins.spec().property("str").value(() -> "from_lambda"));
+      jFactory.factory(Bean.class).spec(spec -> spec.property("str").value(() -> "from_lambda"));
       """
     And evaluating the following code:
       """
@@ -55,7 +55,7 @@ Feature: Spec Value Handling
       """
     And register as follows:
       """
-      jFactory.factory(Bean.class).spec(ins -> ins.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("str").value("spec-value")
       );
       """

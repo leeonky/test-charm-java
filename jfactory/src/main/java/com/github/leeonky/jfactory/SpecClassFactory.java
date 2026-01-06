@@ -39,8 +39,8 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     private void registerTraits() {
         Stream.of(specClass.getMethods())
                 .filter(this::isTraitMethod)
-                .forEach(method -> spec(getTraitName(method), instance -> execute(() ->
-                        method.invoke(instance.spec(), convertParams(method, instance.traitParams())))));
+                .forEach(method -> spec(getTraitName(method), spec -> execute(() ->
+                        method.invoke(spec, convertParams(method, spec.instance().traitParams())))));
     }
 
     private Object[] convertParams(Method method, Object[] traitParams) {

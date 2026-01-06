@@ -21,7 +21,7 @@ public class PropertyShouldOverridePropertyInSpec {
 
     @Test
     void property_should_override_property_in_spec() {
-        jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
+        jFactory.factory(ProductPriceBook.class).spec(spec -> spec.property("priceBook")
                 .byFactory(builder -> builder.property("code", "amazon")));
 
         ProductPriceBook productPriceBook = jFactory.type(ProductPriceBook.class).property("priceBook.code", "ebay").create();
@@ -34,7 +34,7 @@ public class PropertyShouldOverridePropertyInSpec {
         jFactory.type(PriceBook.class).property("name", "book").create();
         PriceBook priceBook = jFactory.type(PriceBook.class).property("code", "amazon").property("name", "book").create();
 
-        jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
+        jFactory.factory(ProductPriceBook.class).spec(spec -> spec.property("priceBook")
                 .byFactory(builder -> builder.property("code", "amazon")));
 
         ProductPriceBook book1 = jFactory.type(ProductPriceBook.class).property("priceBook.name", "book").create();
@@ -44,7 +44,7 @@ public class PropertyShouldOverridePropertyInSpec {
 
     @Test
     void should_merge_property_in_spec_and_input_when_property_inside_spec_is_a_query_and_create_with_merged_property() {
-        jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
+        jFactory.factory(ProductPriceBook.class).spec(spec -> spec.property("priceBook")
                 .byFactory(builder -> builder.property("code", "amazon")));
 
         ProductPriceBook book1 = jFactory.type(ProductPriceBook.class).property("priceBook.name", "book1").create();
@@ -56,7 +56,7 @@ public class PropertyShouldOverridePropertyInSpec {
 
     @Test
     void should_use_spec_in_property_override_origin_builder_spec() {
-        jFactory.factory(ProductPriceBook.class).spec(instance -> instance.spec().property("priceBook")
+        jFactory.factory(ProductPriceBook.class).spec(spec -> spec.property("priceBook")
                 .from(PriceBookSpecInSpec.class).and(builder -> builder));
 
         ProductPriceBook productPriceBook = jFactory.type(ProductPriceBook.class).property("priceBook(PriceBookSpecInProperty).rate", 10).create();

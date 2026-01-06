@@ -20,7 +20,7 @@ Feature: Spec
     Scenario: Base Spec for a Type - Define Default Base Rules for a Type and Create an Object with the Base Spec
       When register as follows:
         """
-        jFactory.factory(Bean.class).spec(ins -> ins.spec()
+        jFactory.factory(Bean.class).spec(spec -> spec
           .property("stringValue").value("hello")
           .property("intValue").value(100)
         );
@@ -41,7 +41,7 @@ Feature: Spec
       When register as follows:
         """
         jFactory.factory(Bean.class)
-          .spec("hello", ins -> ins.spec().property("stringValue").value("hello"));
+          .spec("hello", spec -> spec.property("stringValue").value("hello"));
         """
       And evaluating the following code:
         """
@@ -56,7 +56,7 @@ Feature: Spec
       When register as follows:
         """
         jFactory.factory(Bean.class)
-          .spec("string_(.*)", ins -> ins.spec().property("stringValue").value(ins.traitParams()[0]));
+          .spec("string_(.*)", spec -> spec.property("stringValue").value(spec.instance().traitParams()[0]));
         """
       And evaluating the following code:
         """
@@ -332,7 +332,7 @@ Feature: Spec
         """
       And register as follows:
         """
-        jFactory.factory(Bean.class).spec(ins -> ins.spec()
+        jFactory.factory(Bean.class).spec(spec -> spec
           .property("value2").value("base_type")
         );
         """
@@ -395,7 +395,7 @@ Feature: Spec
       And register as follows:
         """
         jFactory.register(GlobalBeanSpec.class);
-        jFactory.factory(Bean.class).spec(ins -> ins.spec()
+        jFactory.factory(Bean.class).spec(spec -> spec
           .property("value2").value("base_type")
         );
         """
@@ -432,7 +432,7 @@ Feature: Spec
       And register as follows:
         """
         jFactory.register(GlobalBeanSpec.class);
-        jFactory.factory(Bean.class).spec(ins -> ins.spec()
+        jFactory.factory(Bean.class).spec(spec -> spec
           .property("value3").value("base_type")
         );
         """

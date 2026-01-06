@@ -17,7 +17,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .link("str1", "str2"));
       """
       When build:
@@ -38,7 +38,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .link("str1", "str2")
           .link("str3", "str4")
           .link("str2", "str3"));
@@ -66,7 +66,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("bean1").byFactory()
           .link("bean1", "bean2"));
       """
@@ -96,7 +96,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("bean1").byFactory()
           .link("bean1", "bean2"));
       """
@@ -129,7 +129,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("beans[]").byFactory()
           .link("beans[0].value", "beans[1].value", "beans[2].value"));
       """
@@ -158,7 +158,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("beans[]").byFactory()
           .link("beans[0]", "beans[1]", "bean"));
       """
@@ -191,7 +191,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("beans[]").byFactory()
           .link("beans[0]", "beans[1]", "bean"));
       """
@@ -224,7 +224,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("beans[]").byFactory()
           .link("beans[0].value", "beans[1].value", "value"));
       """
@@ -246,7 +246,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .link("values[0]", "values[-1]"));
       """
       When build:
@@ -276,13 +276,13 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .property("str1").value("hello")
           .link("str1", "str2"));
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
           .property("bean").byFactory()
           .link("value", "bean.str2"));
       """
@@ -310,12 +310,12 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .link("str1", "str2"));
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("beans[0]").byFactory());
       """
       When build:
@@ -348,12 +348,12 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .property("value").value("hello"));
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
           .property("bean1").byFactory()
           .link("bean1.value", "value")
           .link("bean1", "bean2"));
@@ -390,7 +390,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .link("bean.value", "value"));
       """
       When build:
@@ -428,7 +428,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .property("value").dependsOn("value2", o -> o)
         .link("bean.value", "value"));
       """
@@ -451,7 +451,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("str2").dependsOn("str", o->o)
         .property("str3").value("default")
         .link("str1", "str2", "str3", "str4"));
@@ -475,7 +475,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
         .property("str1").value("hello")
         .link("str1", "str2"));
       """
@@ -505,7 +505,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
         .property("bean1").byFactory()
         .property("bean2").byFactory()
         .link("bean1", "bean2")
@@ -546,7 +546,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .link("bean.value", "value"));
       """
       When build:
@@ -576,7 +576,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .link("bean.value", "value"));
       """
       When build:
@@ -612,7 +612,7 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .property("bean").value(new Bean().setValue("hello"))
         .link("bean.value", "value"));
       """
@@ -646,11 +646,10 @@ Feature: define link
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance ->
-        instance.spec()
-        .property("bean").byFactory()
-        .link("bean.value", "value")
-        .link("bean", "another"));
+      jFactory.factory(BeanWrapper.class).spec(spec ->
+        spec.property("bean").byFactory()
+          .link("bean.value", "value")
+          .link("bean", "another"));
       """
       When build:
       """

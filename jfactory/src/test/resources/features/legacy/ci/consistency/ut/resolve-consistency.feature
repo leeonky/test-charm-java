@@ -145,10 +145,10 @@ Feature: resolve consistency
     Scenario: dependency order in consistency definition should not impact the result
       And register:
         """
-        jFactory.factory(Bean.class).spec(ins -> {
-          ins.spec().property("str1").dependsOn("str2");
-          ins.spec().property("str3").dependsOn("str4");
-          ins.spec().property("str2").dependsOn("str3");
+        jFactory.factory(Bean.class).spec(spec -> {
+          spec.property("str1").dependsOn("str2");
+          spec.property("str3").dependsOn("str4");
+          spec.property("str2").dependsOn("str3");
         });
         """
       When build:

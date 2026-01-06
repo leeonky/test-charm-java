@@ -26,8 +26,8 @@ Feature: populate list depends on another list
     Scenario: list population depends on another list null default value element
       And register:
         """
-        jFactory.factory(Beans.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(Beans.class).spec(spec -> {
+          spec.structure()
             .list("beans1")
             .list("beans2");
         });
@@ -47,8 +47,8 @@ Feature: populate list depends on another list
     Scenario: list population depends on each other
       And register:
         """
-        jFactory.factory(Beans.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(Beans.class).spec(spec -> {
+          spec.structure()
             .list("beans1")
             .list("beans2");
         });
@@ -68,8 +68,8 @@ Feature: populate list depends on another list
     Scenario: should not change element when already has value
       And register:
         """
-        jFactory.factory(Beans.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(Beans.class).spec(spec -> {
+          spec.structure()
             .list("beans1")
             .list("beans2");
         });
@@ -90,11 +90,11 @@ Feature: populate list depends on another list
     Scenario: custom normalizer
       And register:
         """
-        jFactory.factory(Beans.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(Beans.class).spec(spec -> {
+          spec.structure()
             .list("beans1").normalize(Normalizer.sample(2, 0))
             .list("beans2");
-          ins.spec().structure()
+          spec.structure()
             .list("beans1").normalize(Normalizer.sample(2, 1))
             .list("beans2");
         });
@@ -143,8 +143,8 @@ Feature: populate list depends on another list
         """
       And register:
         """
-        jFactory.factory(Beans.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(Beans.class).spec(spec -> {
+          spec.structure()
             .list("beans1")
             .list("beans2").spec("Default", "BeanSpec");
         });
@@ -172,11 +172,11 @@ Feature: populate list depends on another list
       """
       And register:
         """
-        jFactory.factory(Beans.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(Beans.class).spec(spec -> {
+          spec.structure()
             .list("beans1")
             .list("beans2");
-          ins.spec().property("beans2").reverseAssociation("beans");
+          spec.property("beans2").reverseAssociation("beans");
         });
         """
       When build:
@@ -238,8 +238,8 @@ Feature: populate list depends on another list
     Scenario: two dimensional list population
       And register:
         """
-        jFactory.factory(BeanLists.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(BeanLists.class).spec(spec -> {
+          spec.structure()
             .list("beansList1", "beans")
             .list("beansList2", "beans");
         });
@@ -268,8 +268,8 @@ Feature: populate list depends on another list
     Scenario: list population with different dimension
       And register:
         """
-        jFactory.factory(BeanLists.class).spec(ins -> {
-          ins.spec().structure()
+        jFactory.factory(BeanLists.class).spec(spec -> {
+          spec.structure()
             .list("beansList1", "beans")
             .list("beansList2");
         });
@@ -298,8 +298,8 @@ Feature: populate list depends on another list
     Scenario: custom normalizer
       And register:
         """
-        jFactory.factory(BeanLists.class).spec(ins -> {
-          ins.spec().structure(Coordinate.D2.class)
+        jFactory.factory(BeanLists.class).spec(spec -> {
+          spec.structure(Coordinate.D2.class)
             .list("beansList1", "beans").normalize(d2->Coordinate.d2(d2.index1(), d2.index0()),
               d2->Coordinate.d2(d2.index1(), d2.index0()))
             .list("beansList2", "beans");

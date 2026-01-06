@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 class ObjectFactory<T> implements Factory<T> {
     protected final FactorySet factorySet;
     private final BeanClass<T> type;
-    private final Map<String, Consumer<Instance<T>>> traitCollectors = new LinkedHashMap<>();
+    private final Map<String, Consumer<Spec<T>>> traitCollectors = new LinkedHashMap<>();
     private final Map<String, Pattern> traitPatternCollectors = new LinkedHashMap<>();
     private final Map<String, Transformer> transformers = new LinkedHashMap<>();
     private final Transformer passThrough = input -> input;
     private Function<Instance<T>, T> constructor = this::defaultConstruct;
-    private Consumer<Instance<T>> specCollector = (instance) -> {
+    private Consumer<Spec<T>> specCollector = (instance) -> {
     };
 
     public ObjectFactory(BeanClass<T> type, FactorySet factorySet) {
@@ -49,13 +49,13 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> spec(Consumer<Instance<T>> specCollector) {
+    public Factory<T> spec(Consumer<Spec<T>> specCollector) {
         this.specCollector = Objects.requireNonNull(specCollector);
         return this;
     }
 
     @Override
-    public Factory<T> spec(String name, Consumer<Instance<T>> traitCollector) {
+    public Factory<T> spec(String name, Consumer<Spec<T>> traitCollector) {
         traitCollectors.put(name, Objects.requireNonNull(traitCollector));
         traitPatternCollectors.put(name, Pattern.compile(name));
         return this;
@@ -78,16 +78,16 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     private static class TraitExecutor<T> {
-        private final Consumer<Instance<T>> action;
+        private final Consumer<Spec<T>> action;
         private final List<Object> args = new ArrayList<>();
 
-        public TraitExecutor(Matcher matcher, Consumer<Instance<T>> action) {
+        public TraitExecutor(Matcher matcher, Consumer<Spec<T>> action) {
             for (int i = 0; i < matcher.groupCount(); i++)
                 args.add(matcher.group(i + 1));
             this.action = action;
         }
 
-        public TraitExecutor(Consumer<Instance<T>> action) {
+        public TraitExecutor(Consumer<Spec<T>> action) {
             this.action = action;
         }
 
@@ -97,14 +97,14 @@ class ObjectFactory<T> implements Factory<T> {
     }
 
     public void collectSpec(Collection<String> traits, ObjectInstance<T> instance) {
-        specCollector.accept(instance);
+        specCollector.accept(instance.spec);
         collectSubSpec(instance);
         for (String name : traits)
             queryTrait(name).execute(instance);
     }
 
     private TraitExecutor<T> queryTrait(String name) {
-        Consumer<Instance<T>> action = traitCollectors.get(name);
+        Consumer<Spec<T>> action = traitCollectors.get(name);
         if (action != null)
             return new TraitExecutor<>(action);
         List<Matcher> matchers = traitPatternCollectors.values().stream().map(p -> p.matcher(name)).filter(Matcher::matches)

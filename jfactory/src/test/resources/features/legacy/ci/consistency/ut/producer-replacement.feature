@@ -78,8 +78,8 @@ Feature: consistency producer replacement
     """
     And register:
     """
-      jFactory.factory(Beans.class).spec(ins-> {
-        ins.spec().link("bean1.str", "bean2.str");
+      jFactory.factory(Beans.class).spec(spec-> {
+        spec.link("bean1.str", "bean2.str");
       });
     """
     When build:
@@ -106,8 +106,8 @@ Feature: consistency producer replacement
     """
     And register:
     """
-      jFactory.factory(Beans.class).spec(ins-> {
-        ins.spec().consistent(Object.class)
+      jFactory.factory(Beans.class).spec(spec-> {
+        spec.consistent(Object.class)
           .property("bean1")
             .write(o->o)
           .property("bean2")

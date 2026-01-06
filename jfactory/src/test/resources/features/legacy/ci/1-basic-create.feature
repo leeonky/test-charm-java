@@ -327,9 +327,9 @@ Feature: basic use
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
-        .property("str1").value((Object) instance.param("p1"))
-        .property("str2").value((Object) instance.param("p2")));
+      jFactory.factory(Bean.class).spec(spec -> spec
+        .property("str1").value((Object) spec.instance().param("p1"))
+        .property("str2").value((Object) spec.instance().param("p2")));
       """
       When build:
       """
@@ -374,9 +374,9 @@ Feature: basic use
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
-        .property("str1").value((Object) instance.param("p1", "default1"))
-        .property("str2").value((Object) instance.param("p2", "default2")));
+      jFactory.factory(Bean.class).spec(spec -> spec
+        .property("str1").value((Object) spec.instance().param("p1", "default1"))
+        .property("str2").value((Object) spec.instance().param("p2", "default2")));
       """
       When build:
       """
@@ -411,11 +411,11 @@ Feature: basic use
       """
       And register:
       """
-      jFactory.factory(Address.class).spec(instance -> instance.spec()
-        .property("country").value((Object) instance.param("p")));
-      jFactory.factory(Author.class).spec(instance -> instance.spec()
+      jFactory.factory(Address.class).spec(spec -> spec
+        .property("country").value((Object) spec.instance().param("p")));
+      jFactory.factory(Author.class).spec(spec -> spec
         .property("address").byFactory());
-      jFactory.factory(Book.class).spec(instance -> instance.spec()
+      jFactory.factory(Book.class).spec(spec -> spec
         .property("author").byFactory());
       """
       When build:
@@ -489,9 +489,9 @@ Feature: basic use
       """
       And register:
       """
-      jFactory.factory(Book.class).spec(instance -> instance.spec()
+      jFactory.factory(Book.class).spec(spec -> spec
         .property("author").value(new Author().setAddress(new Address()
-          .setCountry(instance.params("author").params("address").param("p")))));
+          .setCountry(spec.instance().params("author").params("address").param("p")))));
       """
       When build:
       """
@@ -517,13 +517,13 @@ Feature: basic use
       """
       And register:
       """
-      jFactory.factory(Author.class).spec(instance -> instance.spec()
-        .property("country").value((Object) instance.param("p")));
+      jFactory.factory(Author.class).spec(spec -> spec
+        .property("country").value((Object) spec.instance().param("p")));
       """
       And register:
       """
-      jFactory.factory(Book.class).spec(instance -> instance.spec()
-        .property("author").byFactory(builder ->builder.args(instance.params())));
+      jFactory.factory(Book.class).spec(spec -> spec
+        .property("author").byFactory(builder ->builder.args(spec.instance().params())));
       """
       When build:
       """

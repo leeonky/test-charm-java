@@ -18,7 +18,7 @@ class ProducerTest {
 
     @BeforeEach
     void setupCollectionProducer() {
-        JFactory.factory(Bean.class).spec(instance -> instance.spec()
+        JFactory.factory(Bean.class).spec(spec -> spec
                 .property("array1[0]").byFactory()
                 .property("array2[0]").byFactory()
                 .property("dependency1").dependsOn("defaultString1", o -> o)

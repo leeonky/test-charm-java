@@ -342,7 +342,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .property("bean").byFactory()
         .property("bean.value").dependsOn("value", o -> o));
       """
@@ -356,7 +356,7 @@ Feature: define dependency
       """
       Given register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .property("value").dependsOn("bean.value", o -> o));
       """
       When build:
@@ -384,7 +384,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .property("bean").byFactory()
         .property("bean.value").dependsOn("value", o -> o));
       """
@@ -419,7 +419,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .property("bean").byFactory()
         .property("bean.value").dependsOn("value", o -> o));
       """
@@ -457,7 +457,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(BeanWrapper.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanWrapper.class).spec(spec -> spec
         .property("bean").dependsOn("another", o -> o)
         .property("bean.value").dependsOn("value", o -> o));
       """
@@ -500,7 +500,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanArray.class).spec(spec -> spec
           .property("beans[]").byFactory()
           .property("beans[0].stringValue").dependsOn("beans[1].stringValue", obj -> obj));
       """
@@ -565,12 +565,12 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Strings.class).spec(instance -> instance.spec()
+      jFactory.factory(Strings.class).spec(spec -> spec
           .property("str1").dependsOn("str2", obj -> obj));
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .property("value").dependsOn("strings.str1", obj -> obj));
       """
       When build:
@@ -597,12 +597,12 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Bean.class).spec(instance -> instance.spec()
+      jFactory.factory(Bean.class).spec(spec -> spec
           .property("str1").dependsOn("str2", obj -> obj));
       """
       And register:
       """
-      jFactory.factory(BeanArray.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanArray.class).spec(spec -> spec
           .property("beans[0]").byFactory());
       """
       When build:
@@ -632,7 +632,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("bean.value").dependsOn("value", obj -> obj));
       """
       When build:
@@ -662,7 +662,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("beans[0].value").dependsOn("beans[1].value", obj -> obj));
       """
       When build:
@@ -695,7 +695,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("bean.value").dependsOn("value", obj -> obj));
       """
       When build:
@@ -735,7 +735,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("bean1").dependsOn("bean2", obj -> obj));
       """
       When build:
@@ -770,7 +770,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("bean1").byFactory()
           .property("bean1.value").dependsOn("bean2.value", obj -> obj));
       """
@@ -812,7 +812,7 @@ Feature: define dependency
       """
       jFactory.factory(Beans.class)
           .constructor(instance -> new Beans().setBean2(new Bean().setValue("hello")))
-          .spec(instance -> instance.spec()
+          .spec(spec -> spec
           .property("bean2").ignore()
           .property("bean1").byFactory()
           .property("bean1.value").dependsOn("bean2.value", obj -> obj));
@@ -855,7 +855,7 @@ Feature: define dependency
             beans.beans2 = new Bean[]{new Bean().setValue("hello")};
             return beans;
           })
-          .spec(instance -> instance.spec()
+          .spec(spec -> spec
           .property("beans2").ignore()
           .property("beans1[0]").byFactory()
           .property("beans1[0].value").dependsOn("beans2[0].value", obj -> obj));
@@ -892,7 +892,7 @@ Feature: define dependency
       """
       And register:
       """
-      jFactory.factory(Beans.class).spec(instance -> instance.spec()
+      jFactory.factory(Beans.class).spec(spec -> spec
           .property("bean1").byFactory()
           .property("bean1.value").dependsOn("bean2.value", obj -> obj));
       """

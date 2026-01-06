@@ -1411,7 +1411,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(IntList.class).spec(instance -> instance.spec()
+      jFactory.factory(IntList.class).spec(spec -> spec
         .property("ints[]").value(100));
       """
       When build:
@@ -1438,8 +1438,8 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(IntList.class).spec(instance -> instance.spec()
-        .property("ints[]").value(instance::getSequence));
+      jFactory.factory(IntList.class).spec(spec -> spec
+        .property("ints[]").value(spec.instance()::getSequence));
       """
       When build:
       """
@@ -1473,7 +1473,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanList.class).spec(spec -> spec
         .property("beans[]").is(ABean.class));
       """
       When build:
@@ -1511,7 +1511,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanList.class).spec(spec -> spec
         .property("beans[]").is("ABean"));
       """
       When build:
@@ -1549,8 +1549,8 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
-        .property("beans[]").from(ABean.class).which(spec->{}));
+      jFactory.factory(BeanList.class).spec(spec -> spec
+        .property("beans[]").from(ABean.class).which(s->{}));
       """
       When build:
       """
@@ -1573,7 +1573,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(IntList.class).spec(instance -> instance.spec()
+      jFactory.factory(IntList.class).spec(spec -> spec
         .property("ints[]").defaultValue(100));
       """
       When build:
@@ -1600,8 +1600,8 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(IntList.class).spec(instance -> instance.spec()
-        .property("ints[]").defaultValue(instance::getSequence));
+      jFactory.factory(IntList.class).spec(spec -> spec
+        .property("ints[]").defaultValue(spec.instance()::getSequence));
       """
       When build:
       """
@@ -1627,7 +1627,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanList.class).spec(spec -> spec
         .property("beans[]").byFactory());
       """
       When build:
@@ -1656,7 +1656,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanList.class).spec(spec -> spec
         .property("beans[]").byFactory(builder-> builder.property("value", "hello")));
       """
       When build:
@@ -1703,7 +1703,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanList.class).spec(spec -> spec
         .property("beans[]").is(ABean.class));
       """
       When build:
@@ -1767,7 +1767,7 @@ Feature: input property
       """
       And register:
       """
-      jFactory.factory(BeanList.class).spec(instance -> instance.spec()
+      jFactory.factory(BeanList.class).spec(spec -> spec
         .property("beans[]").optional("ABean"));
       """
       When build:
