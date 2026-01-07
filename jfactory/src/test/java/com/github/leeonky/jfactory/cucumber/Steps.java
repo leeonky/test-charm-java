@@ -16,6 +16,7 @@ public class Steps {
         JavaExecutor.executor().addClass(
                 "import com.github.leeonky.jfactory.Spec;\n" +
                         "import com.github.leeonky.jfactory.Global;\n" +
+                        "import com.github.leeonky.jfactory.Instance;\n" +
                         "import com.github.leeonky.jfactory.Trait;\n" + sourceCode);
     }
 }

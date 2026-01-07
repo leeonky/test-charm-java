@@ -43,13 +43,15 @@ class ObjectProducer<T> extends Producer<T> {
         this.factory = factory;
         this.jFactory = jFactory;
         this.forQuery = forQuery;
-        instance = factory.createInstance(builder.getArguments(), association, reverseAssociation, this);
+        instance = factory.createInstance(builder.getArguments());
+        SpecRules<T> rules = new SpecRules<>(instance, this, association, reverseAssociation);
+        Spec<T> spec = factory.createSpec(rules);
         persistable = jFactory.getDataRepository();
         setupDefaultValueProducers();
-        builder.collectSpec(this, instance);
+        builder.collectSpec(this, spec);
         builder.processInputProperty(this, forQuery);
         resolveBuilderValueProducer(forQuery);
-        instance.spec.specRules.applyPropertyStructureDefinitions(jFactory, this, instance.spec);
+        rules.applyPropertyStructureDefinitions(jFactory, this, spec);
         processListStructures();
         setupReverseAssociations();
 
@@ -223,7 +225,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     @Override
     protected <R> void setupAssociation(String association, ObjectInstance<R> instance, ListPersistable cachedChildren) {
-        setChild(association, new UnFixedValueProducer<>(instance.reference(), instance.spec().getType()));
+        setChild(association, new UnFixedValueProducer<>(instance.reference(), instance.type()));
         persistable = cachedChildren;
     }
 
@@ -289,17 +291,19 @@ class ReverseAssociation {
     private final String property;
     //    TODO refactor
     final Instance<?> instance;
+    private final Spec<?> spec;
 
-    ReverseAssociation(String property, Instance<?> instance) {
+    ReverseAssociation(String property, Instance<?> instance, Spec<?> spec) {
         this.property = property;
         this.instance = instance;
+        this.spec = spec;
     }
 
     public boolean matches(String property, BeanClass<?> type) {
-        return this.property.equals(property) && instance.spec().getType().equals(type);
+        return this.property.equals(property) && spec.getType().equals(type);
     }
 
     UnFixedValueProducer buildUnFixedValueProducer() {
-        return new UnFixedValueProducer(instance.reference(), instance.spec().getType());
+        return new UnFixedValueProducer(instance.reference(), spec.getType());
     }
 }

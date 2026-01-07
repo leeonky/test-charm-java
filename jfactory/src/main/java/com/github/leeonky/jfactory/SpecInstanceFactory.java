@@ -14,14 +14,14 @@ class SpecInstanceFactory<T, S extends Spec<T>> extends SpecClassFactory<T> {
     }
 
     @Override
-    protected Spec<T> createSpec() {
+    protected Spec<T> newSpecInstance() {
         return spec;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void collectSubSpec(ObjectInstance<T> instance) {
-        super.collectSubSpec(instance);
-        collectClassSpec(instance, spec -> trait.accept((S) spec));
+    protected void collectSubSpec(Spec<T> spec_) {
+        super.collectSubSpec(spec_);
+        collectClassSpec(spec -> trait.accept((S) spec), spec_);
     }
 }

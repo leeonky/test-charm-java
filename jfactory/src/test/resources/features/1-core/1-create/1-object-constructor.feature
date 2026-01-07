@@ -114,7 +114,7 @@ Feature: Object Constructor
       public class BeanSpec extends Spec<Bean> {
 
         @Override
-        protected Bean construct() {
+        public Bean construct(Instance<Bean> instance) {
           return new Bean(100);
         }
       }

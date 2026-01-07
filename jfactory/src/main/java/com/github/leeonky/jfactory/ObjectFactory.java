@@ -33,13 +33,17 @@ class ObjectFactory<T> implements Factory<T> {
                 : getType().newInstance();
     }
 
-    protected Spec<T> createSpec() {
+    protected Spec<T> newSpecInstance() {
         return new Spec<T>() {
             @Override
             public BeanClass<T> getType() {
                 return type;
             }
         };
+    }
+
+    public final Spec<T> createSpec(SpecRules<T> specRules) {
+        return newSpecInstance().setRules(specRules);
     }
 
     @Override
@@ -91,16 +95,16 @@ class ObjectFactory<T> implements Factory<T> {
             this.action = action;
         }
 
-        public void execute(Instance<T> instance) {
-            ((ObjectInstance<T>) instance).runTraitWithParams(args.toArray(), action);
+        public void execute(Spec<T> spec) {
+            spec.runTraitWithParams(args.toArray(), action);
         }
     }
 
-    public void collectSpec(Collection<String> traits, ObjectInstance<T> instance) {
-        specCollector.accept(instance.spec);
-        collectSubSpec(instance);
+    public void collectSpec(Collection<String> traits, Spec<T> spec) {
+        specCollector.accept(spec);
+        collectSubSpec(spec);
         for (String name : traits)
-            queryTrait(name).execute(instance);
+            queryTrait(name).execute(spec);
     }
 
     private TraitExecutor<T> queryTrait(String name) {
@@ -117,17 +121,12 @@ class ObjectFactory<T> implements Factory<T> {
         throw new IllegalArgumentException("Trait `" + name + "` not exist");
     }
 
-    protected void collectSubSpec(ObjectInstance<T> instance) {
+    protected void collectSubSpec(Spec<T> spec_) {
     }
 
-    public ObjectInstance<T> createInstance(Arguments argument, Optional<Association> association,
-                                            Optional<ReverseAssociation> reverseAssociation,
-                                            ObjectProducer<T> objectProducer) {
-        Spec<T> spec = createSpec();
-        ObjectInstance<T> objectInstance = new ObjectInstance<>(spec, argument, factorySet.sequence(getType().getType()));
-        SpecRules<T> rules = new SpecRules<>(objectInstance, objectProducer, association, reverseAssociation);
-        spec.setRules(rules);
-        return objectInstance;
+    public ObjectInstance<T> createInstance(Arguments argument) {
+        return new ObjectInstance<>(argument, factorySet.sequence(getType().getType()),
+                getType());
     }
 
     public FactorySet getFactorySet() {

@@ -1005,7 +1005,7 @@ Feature: use spec
       And register:
       """
       jFactory.factory(Bean.class).spec("input-(.+)", spec -> {
-          spec.property("value").value(spec.instance().traitParam(0));
+          spec.property("value").value(spec.traitParam(0));
       });
       """
       When build:
@@ -1027,7 +1027,7 @@ Feature: use spec
       And register:
       """
       jFactory.factory(Bean.class).spec("input-(.+)-(.+)", spec -> {
-          spec.property("value").value(spec.instance().traitParam(0)+ "_" +  spec.instance().traitParam(1));
+          spec.property("value").value(spec.traitParam(0)+ "_" +  spec.traitParam(1));
       });
       """
       When build:
@@ -1049,10 +1049,10 @@ Feature: use spec
       And register:
       """
       jFactory.factory(Bean.class).spec("input1-(.+)-(.+)", spec -> {
-          spec.property("value1").value(spec.instance().traitParam(0)+ "_1_" +  spec.instance().traitParam(1));
+          spec.property("value1").value(spec.traitParam(0)+ "_1_" +  spec.traitParam(1));
       });
       jFactory.factory(Bean.class).spec("input3-(.+)-(.+)", spec -> {
-          spec.property("value3").value(spec.instance().traitParam(0)+ "_3_" +  spec.instance().traitParam(1));
+          spec.property("value3").value(spec.traitParam(0)+ "_3_" +  spec.traitParam(1));
       });
       jFactory.factory(Bean.class).spec("input-value2", spec -> {
           spec.property("value2").value("v2");

@@ -2,24 +2,28 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.util.BeanClass;
 
+import java.util.function.Consumer;
+
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 
 public class Spec<T> {
+    //    TODO private
     SpecRules<T> specRules;
-
     private ObjectFactory<T> objectFactory;
+    private static final Object[] NO_TRAIT_PARAMS = new Object[0];
+    private Object[] traitParams = NO_TRAIT_PARAMS;
 
-    T constructBy(ObjectFactory<T> factory) {
+    T constructBy(ObjectFactory<T> factory, Instance<T> instance) {
         try {
             objectFactory = factory;
-            return construct();
+            return construct(instance);
         } finally {
             objectFactory = null;
         }
     }
 
-    protected T construct() {
-        return objectFactory.getBase().create(specRules.instance());
+    protected T construct(Instance<T> instance) {
+        return objectFactory.getBase().create(instance);
     }
 
     public void main() {
@@ -90,4 +94,20 @@ public class Spec<T> {
         return listStructure;
     }
 
+    public Object[] traitParams() {
+        return traitParams;
+    }
+
+    public Object traitParam(int index) {
+        return traitParams()[index];
+    }
+
+    void runTraitWithParams(Object[] params, Consumer<Spec<T>> action) {
+        traitParams = params;
+        try {
+            action.accept(this);
+        } finally {
+            traitParams = NO_TRAIT_PARAMS;
+        }
+    }
 }

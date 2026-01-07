@@ -1,12 +1,13 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.function.Supplier;
 
 public interface Instance<T> {
     int getSequence();
 
-    @Deprecated
-    Spec<T> spec();
+    BeanClass<T> type();
 
     Supplier<T> reference();
 
@@ -20,12 +21,6 @@ public interface Instance<T> {
 
     default int collectionSize() {
         return 0;
-    }
-
-    Object[] traitParams();
-
-    default Object traitParam(int index) {
-        return traitParams()[index];
     }
 
     default <T> Supplier<T> rotate(T... values) {

@@ -56,7 +56,7 @@ Feature: Spec
       When register as follows:
         """
         jFactory.factory(Bean.class)
-          .spec("string_(.*)", spec -> spec.property("stringValue").value(spec.instance().traitParams()[0]));
+          .spec("string_(.*)", spec -> spec.property("stringValue").value(spec.traitParams()[0]));
         """
       And evaluating the following code:
         """

@@ -170,13 +170,13 @@ public class PropertySpec<T> {
 
     private <V> Producer<V> createQueryOrCreateProducer(Builder<V> builder, Optional<Association> association) {
         DefaultBuilder<V> builderWithArgs = ((DefaultBuilder<V>) builder.args(spec.instance().params(property.toString())))
-                .setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance())));
+                .setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance(), spec)));
         return new BuilderValueProducer<>(builderWithArgs, true);
     }
 
     private <V> Producer<V> createCreateProducer(Builder<V> builder, Optional<Association> association) {
         DefaultBuilder<V> args = (DefaultBuilder<V>) builder.args(spec.instance().params(property.toString()));
-        args = args.setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance())));
+        args = args.setAssociation(association).setReverseAssociation(of(new ReverseAssociation(property.toString(), spec.instance(), spec)));
         return new BuilderValueProducer<>(args, false);
     }
 

@@ -21,7 +21,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         this.specClass = specClass;
         base = guessBaseFactory(factorySet, globalSpec);
         registerTraits();
-        constructor(instance -> instance.spec().constructBy(this));
+        constructor(instance -> newSpecInstance().constructBy(this, instance));
     }
 
     private Supplier<ObjectFactory<T>> guessBaseFactory(FactorySet factorySet, boolean globalSpec) {
@@ -32,7 +32,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    protected Spec<T> createSpec() {
+    protected Spec<T> newSpecInstance() {
         return newInstance(specClass);
     }
 
@@ -40,7 +40,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         Stream.of(specClass.getMethods())
                 .filter(this::isTraitMethod)
                 .forEach(method -> spec(getTraitName(method), spec -> execute(() ->
-                        method.invoke(spec, convertParams(method, spec.instance().traitParams())))));
+                        method.invoke(spec, convertParams(method, spec.traitParams())))));
     }
 
     private Object[] convertParams(Method method, Object[] traitParams) {
@@ -60,19 +60,19 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    protected void collectSubSpec(ObjectInstance<T> instance) {
-        getBase().collectSpec(Collections.emptyList(), instance);
-        collectClassSpec(instance, Spec::main);
+    protected void collectSubSpec(Spec<T> spec_) {
+        getBase().collectSpec(Collections.emptyList(), spec_);
+        collectClassSpec(Spec::main, spec_);
     }
 
-    protected void collectClassSpec(Instance<T> instance, Consumer<Spec<T>> consumer) {
-        if (instance.spec().getClass().equals(specClass))
-            consumer.accept(instance.spec());
+    protected void collectClassSpec(Consumer<Spec<T>> consumer, Spec<T> spec1) {
+        if (spec1.getClass().equals(specClass))
+            consumer.accept(spec1);
         else {
-            Spec<T> spec = createSpec();
-            spec.setRules(instance.spec().specRules);
+            Spec<T> spec = newSpecInstance();
+            spec.setRules(spec1.specRules);
             consumer.accept(spec);
-            instance.spec().specRules.append(spec);
+            spec1.specRules.append(spec);
         }
     }
 

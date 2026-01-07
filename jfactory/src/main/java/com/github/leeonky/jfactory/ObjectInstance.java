@@ -1,23 +1,27 @@
 package com.github.leeonky.jfactory;
 
+import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 class ObjectInstance<T> implements Instance<T> {
-    private static final Object[] NO_TRAIT_PARAMS = new Object[0];
-    protected final Spec<T> spec;
-    protected final Arguments arguments;
-    protected final TypeSequence.Sequence sequence;
+    private final Arguments arguments;
+    private final TypeSequence.Sequence sequence;
+    private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
     private int collectionSize = 0;
-    private Object[] traitParams = NO_TRAIT_PARAMS;
 
-    public ObjectInstance(Spec<T> spec, Arguments arguments, TypeSequence.Sequence sequence) {
-        this.spec = spec;
+    public ObjectInstance(Arguments arguments, TypeSequence.Sequence sequence, BeanClass<T> type) {
         this.arguments = arguments;
         this.sequence = sequence;
+        this.type = type;
+    }
+
+    @Override
+    public BeanClass<T> type() {
+        return type;
     }
 
     @Override
@@ -27,11 +31,6 @@ class ObjectInstance<T> implements Instance<T> {
 
     ObjectProperty<T> sub(PropertyWriter<?> property) {
         return new ObjectProperty<>(property, this);
-    }
-
-    @Override
-    public Spec<T> spec() {
-        return spec;
     }
 
     @Override
@@ -70,19 +69,5 @@ class ObjectInstance<T> implements Instance<T> {
     @Override
     public int collectionSize() {
         return collectionSize;
-    }
-
-    @Override
-    public Object[] traitParams() {
-        return traitParams;
-    }
-
-    void runTraitWithParams(Object[] params, Consumer<Spec<T>> action) {
-        traitParams = params;
-        try {
-            action.accept(spec);
-        } finally {
-            traitParams = NO_TRAIT_PARAMS;
-        }
     }
 }

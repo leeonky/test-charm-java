@@ -13,7 +13,6 @@ class SpecRules<T> {
     private final Set<PropertySpec<T>.IsSpec2<?>> invalidIsSpec2s = new LinkedHashSet<>();
     private final Instance<T> instance;
     private BeanClass<T> runtimeType = null;
-    //    TODO to private
     private final Optional<Association> association;
     private final Optional<ReverseAssociation> reverseAssociation;
     private final ObjectProducer<T> objectProducer;
