@@ -60,9 +60,9 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    protected void collectSubSpec(Spec<T> spec_) {
-        getBase().collectSpec(Collections.emptyList(), spec_);
-        collectClassSpec(Spec::main, spec_);
+    protected void collectSubSpec(Spec<T> spec) {
+        getBase().collectSpec(Collections.emptyList(), spec);
+        collectClassSpec(Spec::main, spec);
     }
 
     protected void collectClassSpec(Consumer<Spec<T>> consumer, Spec<T> spec1) {
@@ -72,7 +72,6 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
             Spec<T> spec = newSpecInstance();
             spec.setRules(spec1.specRules);
             consumer.accept(spec);
-            spec1.specRules.append(spec);
         }
     }
 

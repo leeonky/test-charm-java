@@ -157,10 +157,6 @@ class ObjectProducer<T> extends Producer<T> {
         });
     }
 
-    private boolean isDefaultValueProducer(Map.Entry<String, Producer<?>> e) {
-        return e.getValue() instanceof DefaultValueFactoryProducer;
-    }
-
     public ObjectProducer<T> processConsistent() {
         collectConsistent(this, propertyChain(""));
         consistencySet.resolve(this);

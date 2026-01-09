@@ -62,14 +62,6 @@ class SpecRules<T> {
         applySpecs(jFactory, producer);
     }
 
-    @Deprecated
-    //TODO not needed when singleton SpecRules instance ?
-    public void append(Spec<T> spec) {
-        rules.addAll(spec.specRules.rules);
-        invalidIsSpecs.addAll(spec.specRules.invalidIsSpecs);
-        invalidIsSpec2s.addAll(spec.specRules.invalidIsSpec2s);
-    }
-
     public void appendStructureDefinition(PropertyStructureDefinition<T> propertyStructureDefinition) {
         propertyStructureRules.add(propertyStructureDefinition);
     }
