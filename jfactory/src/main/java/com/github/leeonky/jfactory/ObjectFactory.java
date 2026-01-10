@@ -33,17 +33,13 @@ class ObjectFactory<T> implements Factory<T> {
                 : getType().newInstance();
     }
 
-    protected Spec<T> newSpecInstance() {
+    public Spec<T> newSpecInstance() {
         return new Spec<T>() {
             @Override
             public BeanClass<T> getType() {
                 return type;
             }
         };
-    }
-
-    public final Spec<T> createSpec(SpecRules<T> specRules) {
-        return newSpecInstance().setRules(specRules);
     }
 
     @Override
@@ -100,7 +96,8 @@ class ObjectFactory<T> implements Factory<T> {
         }
     }
 
-    public void collectSpec(Collection<String> traits, Spec<T> spec) {
+    public void collectSpec(Collection<String> traits, SpecRules<T> rules) {
+        Spec<T> spec = rules.specOf(this);
         specCollector.accept(spec);
         collectSubSpec(spec);
         for (String name : traits)
@@ -121,7 +118,7 @@ class ObjectFactory<T> implements Factory<T> {
         throw new IllegalArgumentException("Trait `" + name + "` not exist");
     }
 
-    protected void collectSubSpec(Spec<T> spec_) {
+    protected void collectSubSpec(Spec<T> spec) {
     }
 
     public ObjectInstance<T> createInstance(Arguments argument) {

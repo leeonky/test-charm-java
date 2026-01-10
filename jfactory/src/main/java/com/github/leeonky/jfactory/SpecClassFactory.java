@@ -5,7 +5,6 @@ import com.github.leeonky.util.Converter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -32,7 +31,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     @Override
-    protected Spec<T> newSpecInstance() {
+    public Spec<T> newSpecInstance() {
         return newInstance(specClass);
     }
 
@@ -61,18 +60,8 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
 
     @Override
     protected void collectSubSpec(Spec<T> spec) {
-        getBase().collectSpec(Collections.emptyList(), spec);
-        collectClassSpec(Spec::main, spec);
-    }
-
-    protected void collectClassSpec(Consumer<Spec<T>> consumer, Spec<T> spec1) {
-        if (spec1.getClass().equals(specClass))
-            consumer.accept(spec1);
-        else {
-            Spec<T> spec = newSpecInstance();
-            spec.setRules(spec1.specRules);
-            consumer.accept(spec);
-        }
+        getBase().collectSpec(Collections.emptyList(), spec.specRules());
+        spec.main();
     }
 
     @Override
@@ -80,7 +69,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
         return base.get();
     }
 
-    public Class<? extends Spec<T>> getSpecClass() {
+    public Class<? extends Spec<T>> specClass() {
         return specClass;
     }
 

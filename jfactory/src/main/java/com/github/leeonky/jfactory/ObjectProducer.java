@@ -45,13 +45,12 @@ class ObjectProducer<T> extends Producer<T> {
         this.forQuery = forQuery;
         instance = factory.createInstance(builder.getArguments());
         SpecRules<T> rules = new SpecRules<>(instance, this, association, reverseAssociation);
-        Spec<T> spec = factory.createSpec(rules);
         persistable = jFactory.getDataRepository();
         setupDefaultValueProducers();
-        builder.collectSpec(this, spec);
+        builder.collectSpec(this, rules);
         builder.processInputProperty(this, forQuery);
         resolveBuilderValueProducer(forQuery);
-        rules.applyPropertyStructureDefinitions(jFactory, this, spec);
+        rules.applyPropertyStructureDefinitions(jFactory, this, rules.specOf(factory));
         processListStructures();
         setupReverseAssociations();
 

@@ -53,7 +53,7 @@ public class PropertyStructureBuilder<T> {
         }
 
         public Spec<T> populate(BiConsumer<PropertySpec<T>, Object[]> definition) {
-            spec.specRules.appendStructureDefinition(new PropertyStructureDefinition<>(dependents, property,
+            spec.specRules().appendStructureDefinition(new PropertyStructureDefinition<>(dependents, property,
                     values -> condition.test(values), definition));
             return spec;
         }
@@ -73,7 +73,7 @@ public class PropertyStructureBuilder<T> {
         }
 
         public Spec<T> populate(BiConsumer<PropertySpec<T>, D> definition) {
-            spec.specRules.appendStructureDefinition(new PropertyStructureDefinition<>(singletonList(dependent), property,
+            spec.specRules().appendStructureDefinition(new PropertyStructureDefinition<>(singletonList(dependent), property,
                     values -> condition.test((D) values[0]),
                     (ps, values) -> definition.accept(ps, (D) values[0])));
             return spec;
@@ -95,7 +95,7 @@ public class PropertyStructureBuilder<T> {
         }
 
         public Spec<T> populate(TriConsumer<PropertySpec<T>, D1, D2> definition) {
-            spec.specRules.appendStructureDefinition(new PropertyStructureDefinition<>(asList(dependent1, dependent2), property,
+            spec.specRules().appendStructureDefinition(new PropertyStructureDefinition<>(asList(dependent1, dependent2), property,
                     values -> condition.test((D1) values[0], (D2) values[1]),
                     (ps, values) -> definition.accept(ps, (D1) values[0], (D2) values[1])));
             return spec;

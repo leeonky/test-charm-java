@@ -7,8 +7,7 @@ import java.util.function.Consumer;
 import static com.github.leeonky.jfactory.PropertyChain.propertyChain;
 
 public class Spec<T> {
-    //    TODO private
-    SpecRules<T> specRules;
+    private SpecRules<T> specRules;
     private ObjectFactory<T> objectFactory;
     private static final Object[] NO_TRAIT_PARAMS = new Object[0];
     private Object[] traitParams = NO_TRAIT_PARAMS;
@@ -38,6 +37,10 @@ public class Spec<T> {
         return getClass().equals(Spec.class) ? specRules.runtimeType() :
                 (BeanClass<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
                         .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"));
+    }
+
+    SpecRules<T> specRules() {
+        return specRules;
     }
 
     protected String getName() {

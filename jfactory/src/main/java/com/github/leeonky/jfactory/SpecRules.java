@@ -16,6 +16,7 @@ class SpecRules<T> {
     private final Optional<Association> association;
     private final Optional<ReverseAssociation> reverseAssociation;
     private final ObjectProducer<T> objectProducer;
+    private final Map<ObjectFactory<?>, Spec<?>> specInstances = new HashMap<>();
 
     public SpecRules(ObjectInstance<T> objectInstance, ObjectProducer<T> objectProducer,
                      Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
@@ -104,5 +105,10 @@ class SpecRules<T> {
 
     public void appendReverseAssociation(PropertyChain property, String association) {
         objectProducer.appendReverseAssociation(property, association);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Spec<T> specOf(ObjectFactory<T> factory) {
+        return (Spec<T>) specInstances.computeIfAbsent(factory, k -> factory.newSpecInstance().setRules(this));
     }
 }

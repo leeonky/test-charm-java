@@ -36,10 +36,10 @@ class FactorySet {
     }
 
     private <T> void registerGlobalSpec(SpecClassFactory<?> specClassFactory) {
-        Class<? extends Spec<?>> specClass = specClassFactory.getSpecClass();
+        Class<? extends Spec<?>> specClass = specClassFactory.specClass();
         if (specClassFactory.getBase() instanceof SpecClassFactory)
             throw new IllegalArgumentException(String.format("More than one @Global Spec class `%s` and `%s`",
-                    ((SpecClassFactory<?>) specClassFactory.getBase()).getSpecClass().getName(), specClass.getName()));
+                    ((SpecClassFactory<?>) specClassFactory.getBase()).specClass().getName(), specClass.getName()));
         if (!specClass.getSuperclass().equals(Spec.class))
             throw new IllegalArgumentException(String.format("Global Spec %s should not have super Spec %s.",
                     specClass.getName(), specClass.getSuperclass().getName()));

@@ -14,7 +14,7 @@ public class AliasSetStore {
 
     public <T> String resolve(ObjectFactory<T> objectFactory, String propertyChain, boolean collectionProperties) {
         if (objectFactory instanceof SpecClassFactory) {
-            String evaluated = specAliasSet(((SpecClassFactory<T>) objectFactory).getSpecClass())
+            String evaluated = specAliasSet(((SpecClassFactory<T>) objectFactory).specClass())
                     .resolve(propertyChain(propertyChain), collectionProperties).toString();
             if (!evaluated.equals(propertyChain))
                 return evaluated;
