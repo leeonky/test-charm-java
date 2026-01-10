@@ -449,7 +449,47 @@ Feature: Spec
         }
         """
 
-#    Scenario: Base Spec Trait - Use Traits which werr Defined in Base Spec
+  Rule: Constructor Overlay
+
+    Background:
+      Given the following bean definition:
+        """
+        public class Bean {
+          private int i;
+          public Bean(int i) { this.i = i; }
+          public int getI() { return i; }
+        }
+        """
+
+#    Scenario: Spec Class / Global Spec Class - Use the Constructor defined in Global Spec Class
+#      Given the following spec definition:
+#        """
+#        @Global
+#        public class GlobalBeanSpec extends Spec<Bean> {
+#          @Override
+#          protected Bean construct() {
+#            return new Bean(200);
+#          }
+#        }
+#        """
+#      Given the following spec definition:
+#        """
+#        public class BeanSpec extends Spec<Bean> {}
+#        """
+#      And register as follows:
+#        """
+#        jFactory.register(GlobalBeanSpec.class);
+#        """
+#      When evaluating the following code:
+#        """
+#        jFactory.spec(BeanSpec.class).create();
+#        """
+#      Then the result should be:
+#        """
+#        i= 200
+#        """
+
+#    Scenario: Base Spec Trait - Use Traits which was Defined in Base Spec
 #      Given the following spec definition:
 #        """
 #        @Global

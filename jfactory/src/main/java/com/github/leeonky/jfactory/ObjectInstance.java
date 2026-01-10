@@ -3,6 +3,7 @@ package com.github.leeonky.jfactory;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -12,11 +13,19 @@ class ObjectInstance<T> implements Instance<T> {
     private final BeanClass<T> type;
     private final ValueCache<T> valueCache = new ValueCache<>();
     private int collectionSize = 0;
+    private final SpecRules<T> specRules;
 
-    public ObjectInstance(Arguments arguments, TypeSequence.Sequence sequence, BeanClass<T> type) {
+    public ObjectInstance(Arguments arguments, TypeSequence.Sequence sequence, BeanClass<T> type,
+                          ObjectProducer<T> objectProducer, Optional<Association> association,
+                          Optional<ReverseAssociation> reverseAssociation) {
         this.arguments = arguments;
         this.sequence = sequence;
         this.type = type;
+        specRules = new SpecRules<>(this, objectProducer, association, reverseAssociation);
+    }
+
+    public SpecRules<T> specRules() {
+        return specRules;
     }
 
     @Override
@@ -69,5 +78,9 @@ class ObjectInstance<T> implements Instance<T> {
     @Override
     public int collectionSize() {
         return collectionSize;
+    }
+
+    public T defaultConstruct(SpecClassFactory<T> factory) {
+        return specRules().specOf(factory).constructBy(factory);
     }
 }

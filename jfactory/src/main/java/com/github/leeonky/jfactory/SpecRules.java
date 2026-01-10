@@ -56,10 +56,10 @@ class SpecRules<T> {
                     + "Or use property().is() to create object with only spec directly.");
     }
 
-    public void applyPropertyStructureDefinitions(JFactory jFactory, ObjectProducer<T> producer, Spec<T> spec) {
+    public void applyPropertyStructureDefinitions(JFactory jFactory, ObjectProducer<T> producer, ObjectFactory<T> factory) {
         rules.clear();
         for (PropertyStructureDefinition<T> propertyStructureDefinition : propertyStructureRules)
-            propertyStructureDefinition.apply(spec, producer);
+            propertyStructureDefinition.apply(specOf(factory), producer);
         applySpecs(jFactory, producer);
     }
 

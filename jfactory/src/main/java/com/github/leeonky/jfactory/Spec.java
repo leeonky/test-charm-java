@@ -12,17 +12,17 @@ public class Spec<T> {
     private static final Object[] NO_TRAIT_PARAMS = new Object[0];
     private Object[] traitParams = NO_TRAIT_PARAMS;
 
-    T constructBy(ObjectFactory<T> factory, Instance<T> instance) {
+    T constructBy(ObjectFactory<T> factory) {
         try {
             objectFactory = factory;
-            return construct(instance);
+            return construct();
         } finally {
             objectFactory = null;
         }
     }
 
-    protected T construct(Instance<T> instance) {
-        return objectFactory.getBase().create(instance);
+    protected T construct() {
+        return objectFactory.getBase().create(instance());
     }
 
     public void main() {
