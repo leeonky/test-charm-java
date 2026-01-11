@@ -1,4 +1,4 @@
-Feature: Spec Class Based Custom Constructor
+Feature: Spec Factory Based Custom Constructor
 
   Background:
     Given the following declarations:
@@ -13,17 +13,18 @@ Feature: Spec Class Based Custom Constructor
         public Object getValue() { return value; }
       }
       """
+    And the following spec definition:
+      """
+      public class BeanSpec extends Spec<Bean> {}
+      """
 
   Rule: Define Custom Constructor
 
     Scenario: Contextual Arguments - Build from Type and Creation Sequence
-      Given the following spec definition:
+      Given register as follows:
         """
-        public class BeanSpec extends Spec<Bean> {
-          protected Bean construct() {
-            return new Bean(instance().type().getSimpleName() + instance().getSequence());
-          }
-        }
+        jFactory.specFactory(BeanSpec.class).constructor(instance ->
+          new Bean(instance.type().getSimpleName() + instance.getSequence()));
         """
       When evaluating the following code:
         """
@@ -43,13 +44,10 @@ Feature: Spec Class Based Custom Constructor
         """
 
     Scenario: Parameterized Arguments - Build from Provided Parameters
-      Given the following spec definition:
+      Given register as follows:
         """
-        public class BeanSpec extends Spec<Bean> {
-          protected Bean construct() {
-            return new Bean(instance().param("key"));
-          }
-        }
+        jFactory.specFactory(BeanSpec.class).constructor(instance ->
+          new Bean(instance.param("key")));
         """
       When evaluating the following code:
         """
@@ -61,13 +59,10 @@ Feature: Spec Class Based Custom Constructor
         """
 
     Scenario: Rotating Values - Cycle Through a Predefined List of Values
-      Given the following spec definition:
+      Given register as follows:
         """
-        public class BeanSpec extends Spec<Bean> {
-          protected Bean construct() {
-            return new Bean(instance().rotate("A", "B").get());
-          }
-        }
+        jFactory.specFactory(BeanSpec.class).constructor(instance ->
+          new Bean(instance.rotate("A", "B").get()));
         """
       When evaluating the following code:
         """
@@ -95,13 +90,10 @@ Feature: Spec Class Based Custom Constructor
         """
 
     Scenario: Reference Guard - Prevent Self-Reference in Custom Constructor
-      Given the following spec definition:
+      Given register as follows:
         """
-        public class BeanSpec extends Spec<Bean> {
-          protected Bean construct() {
-            return new Bean(instance().reference().get());
-          }
-        }
+        jFactory.specFactory(BeanSpec.class).constructor(instance ->
+          new Bean(instance.reference().get()));
         """
       When evaluating the following code:
         """
@@ -115,17 +107,9 @@ Feature: Spec Class Based Custom Constructor
   Rule: Use Custom Constructor
 
     Background:
-      Given the following spec definition:
+      Given register as follows:
         """
-        public class BeanSpec extends Spec<Bean> {
-          protected Bean construct() {
-            return new Bean(100);
-          }
-        }
-        """
-      And register as follows:
-        """
-        jFactory.register(BeanSpec.class);
+        jFactory.specFactory(BeanSpec.class).constructor(instance -> new Bean(100));
         """
 
     Scenario: By Type - Does Not Invoke the Constructor
@@ -248,15 +232,12 @@ Feature: Spec Class Based Custom Constructor
       Given the following spec definition:
         """
         @Global
-        public class GlobalBeanSpec extends Spec<Bean> {
-          protected Bean construct() {
-            return new Bean(100);
-          }
-        }
+        public class GlobalBeanSpec extends Spec<Bean> {}
         """
       And register as follows:
         """
         jFactory.register(GlobalBeanSpec.class);
+        jFactory.specFactory(GlobalBeanSpec.class).constructor(instance -> new Bean(100));
         """
 
     Scenario: By Type with Global Spec - Invoke the Constructor with the Type and the Global Spec Present
