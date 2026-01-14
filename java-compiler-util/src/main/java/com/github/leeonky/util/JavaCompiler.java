@@ -7,6 +7,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,7 +26,22 @@ public class JavaCompiler {
     public JavaCompiler(String packageName, int id) {
         this.packageName = packageName + id;
         this.id = id;
-        getLocation().mkdirs();
+        File location = getLocation();
+        location.mkdirs();
+        clean(location.toPath());
+    }
+
+    private void clean(Path dir) {
+        try (Stream<Path> s = Sneaky.get(() -> Files.walk(dir))) {
+            s.sorted(Comparator.comparingInt(Path::getNameCount).reversed())
+                    .filter(p -> !p.equals(dir))
+                    .forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                        } catch (Exception ignored) {
+                        }
+                    });
+        }
     }
 
     @SneakyThrows

@@ -2,9 +2,13 @@ package com.github.leeonky.util;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class JavaExecutorTest {
     private final JavaExecutor executor = JavaExecutor.executor().resetAll();
@@ -153,6 +157,41 @@ class JavaExecutorTest {
 
                 expect(executor.main().evaluate()).isEqualTo(2);
             }
+        }
+    }
+
+    @Nested
+    class Compile {
+
+        @Test
+        void should_not_recompile_same_code() {
+            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+
+            JavaExecutor executor = new JavaExecutor(spyCompiler);
+
+            executor.addClass("public class Foo {}");
+            executor.classOf("Foo");
+
+            executor.addClass("public class Foo {}");
+            executor.classOf("Foo");
+
+            verify(spyCompiler, times(1)).compile(anyCollection());
+        }
+
+        @Test
+        void should_delete_exist_same_name_class_file_after_add_different_content_class() {
+            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+
+            JavaExecutor executor = new JavaExecutor(spyCompiler);
+
+            executor.addClass("public class Foo {}");
+            executor.addClass("public class Bar {}");
+            executor.classOf("Foo");
+
+            executor.addClass("public class Foo {int any;}");
+            expect(realCompiler.getLocation()).should("name[]= ['Bar.class']");
         }
     }
 }

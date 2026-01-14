@@ -2,10 +2,13 @@ package com.github.leeonky.util;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.github.leeonky.util.ClassDefinition.guessClassName;
 
 public class JavaExecutor {
     private static final AtomicInteger index = new AtomicInteger();
@@ -28,9 +31,12 @@ public class JavaExecutor {
     private Context context = new Context();
 
     public void addClass(String sourceCode) {
-//        if (!findDefinition(allCompiled, guessClassName(sourceCode))
-//                .map(d -> d.getMainCode().equals(sourceCode)).orElse(false))
-        unCompiled.add(sourceCode);
+        String className = guessClassName(sourceCode);
+        if (!findDefinition(allCompiled, className)
+                .map(d -> d.getCharContent(true).equals(sourceCode)).orElse(false)) {
+            Sneaky.run(() -> Files.deleteIfExists(javaCompiler.getLocation().toPath().resolve(className.replace('.', '/') + ".class")));
+            unCompiled.add(sourceCode);
+        }
     }
 
     public ExecutorMain main() {
