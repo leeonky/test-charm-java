@@ -196,6 +196,12 @@ Feature: Custom Constructor Toolkit
 
   Rule: Spec-Factory Constructor
 
+    Background:
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {}
+        """
+
     Scenario: Instance Context - Access Type Information and Creation Sequence
       Given register as follows:
         """
