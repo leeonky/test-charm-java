@@ -161,7 +161,20 @@ class JavaExecutorTest {
     }
 
     @Nested
-    class Compile {
+    class CompileCache {
+
+        @Test
+        void new_class() {
+            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+
+            JavaExecutor executor = new JavaExecutor(spyCompiler);
+
+            executor.addClass("public class Foo {}");
+            expect(executor.classOf("Foo")).should("simpleName= Foo");
+            verify(spyCompiler, times(1)).compile(anyCollection());
+        }
+
 
         @Test
         void should_not_recompile_same_code() {
@@ -192,6 +205,9 @@ class JavaExecutorTest {
 
             executor.addClass("public class Foo {int any;}");
             expect(realCompiler.getLocation()).should("name[]= ['Bar.class']");
+            executor.classOf("Foo");
+
+            verify(spyCompiler, times(2)).compile(anyCollection());
         }
     }
 }
