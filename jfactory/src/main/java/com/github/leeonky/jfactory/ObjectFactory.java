@@ -115,7 +115,10 @@ class ObjectFactory<T> implements Factory<T> {
         if (matchers.size() > 1)
             throw new IllegalArgumentException(String.format("Ambiguous trait pattern: %s, candidates are:\n%s", name,
                     matchers.stream().map(p -> "  " + p.pattern().pattern()).collect(Collectors.joining("\n"))));
-        throw new IllegalArgumentException("Trait `" + name + "` not exist");
+        ObjectFactory<T> base = getBase();
+        if (base == this)
+            throw new IllegalArgumentException("Trait `" + name + "` not exist");
+        return base.queryTrait(name);
     }
 
     protected void collectSubSpec(Spec<T> spec) {
