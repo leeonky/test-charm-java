@@ -705,13 +705,17 @@ Feature: use spec
       """
 
     Scenario: global spec class override base lambda spec
-      Given the following bean class:
+      Given the following declarations:
+      """
+      JFactory jFactory = new JFactory();
+      """
+      Given the following bean definition:
       """
       public class Bean {
         public String value;
       }
       """
-      And the following spec class:
+      And the following spec definition:
       """
       @Global
       public class BeanSpec extends Spec<Bean> {
@@ -721,16 +725,17 @@ Feature: use spec
         }
       }
       """
-      And register:
+      And register as follows:
       """
       jFactory.factory(Bean.class).spec(spec -> spec
         .property("value").value("lambda spec"));
+      jFactory.register(BeanSpec.class);
       """
-      When build:
+      When evaluating the following code:
       """
       jFactory.type(Bean.class).create();
       """
-      Then the result should:
+      Then the result should be:
       """
       value= 'class spec'
       """

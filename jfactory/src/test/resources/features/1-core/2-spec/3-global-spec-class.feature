@@ -84,29 +84,39 @@ Feature: Mark Global Spec Class as the Type Base Spec
       ::throw.message= "More than one @Global Spec class `GlobalBeanSpec1` and `GlobalBeanSpec2`"
       """
 
-#  Scenario: Type Factory with Global Spec Class - Type Factory is Applied after Global Spec Class
-#    Given the following spec definition:
-#      """
-#      @Global
-#      public class GlobalBeanSpec extends Spec<Bean> {
-#        public void main() {
-#          property("stringValue").value("globalHello");
-#        }
-#      }
-#      """
-#    And register as follows:
-#      """
-#      jFactory.register(GlobalBeanSpec.class);
-#      jFactory.factory(Bean.class).spec(spec -> spec
-#        .property("stringValue").value("from_type_factory"));
-#      """
-#    When evaluating the following code:
-#      """
-#      jFactory.create(Bean.class);
-#      """
-#    Then the result should be:
-#      """
-#      stringValue= from_type_factory
-#      """
-
-
+  Scenario: Type Factory Shadowed - Type Factory Returns the Global Spec Class Factory after the Global Spec Class was Registered
+    Given the following spec definition:
+      """
+      @Global
+      public class GlobalBeanSpec extends Spec<Bean> {
+        public void main() {
+          property("stringValue").value("globalHello");
+        }
+      }
+      """
+    And register as follows:
+      """
+      jFactory.register(GlobalBeanSpec.class);
+      jFactory.factory(Bean.class).spec(spec -> spec
+        .property("stringValue").value("from_type_factory"));
+      """
+    When evaluating the following code:
+      """
+      jFactory.create(Bean.class);
+      """
+    Then the result should be:
+      """
+      stringValue= from_type_factory
+      """
+    And register as follows:
+      """
+      jFactory.removeGlobalSpec(Bean.class);
+      """
+    When evaluating the following code:
+      """
+      jFactory.create(Bean.class);
+      """
+    Then the result should be:
+      """
+      stringValue= /^stringValue.*/
+      """

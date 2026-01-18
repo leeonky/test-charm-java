@@ -49,20 +49,14 @@ public class JavaExecutor {
     }
 
     public Class<?> classOf(String className) {
-        ClassLoader classLoader = URLClassLoader.newInstance(Sneaky.get(() ->
-                new URL[]{javaCompiler.getLocation().getAbsoluteFile().toURI().toURL()}));
-
-        Optional<ClassDefinition> compiled = findDefinition(allCompiled, className);
-        if (!compiled.isPresent()) {
-            if (!unCompiled.isEmpty()) {
-                allCompiled.addAll(javaCompiler.compile(unCompiled));
-                unCompiled.clear();
-                compiled = findDefinition(allCompiled, className);
-            }
+        if (!unCompiled.isEmpty()) {
+            allCompiled.addAll(javaCompiler.compile(unCompiled));
+            unCompiled.clear();
         }
-
-        Optional<? extends Class<?>> clazz = compiled.map(d -> Sneaky.get(() -> classLoader.loadClass(d.className())));
-        return Sneaky.get(() -> clazz.orElseThrow(() -> new ClassNotFoundException(className)));
+        return Sneaky.get(() -> findDefinition(allCompiled, className).map(d ->
+                Sneaky.get(() -> URLClassLoader.newInstance(Sneaky.get(() ->
+                                new URL[]{javaCompiler.getLocation().getAbsoluteFile().toURI().toURL()}))
+                        .loadClass(d.className()))).orElseThrow(() -> new ClassNotFoundException(className)));
     }
 
     private Optional<ClassDefinition> findDefinition(Set<ClassDefinition> definitions, String className) {

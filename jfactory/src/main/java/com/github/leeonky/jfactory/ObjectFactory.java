@@ -98,8 +98,8 @@ class ObjectFactory<T> implements Factory<T> {
 
     public void collectSpec(Collection<String> traits, SpecRules<T> rules) {
         Spec<T> spec = rules.specOf(this);
-        specCollector.accept(spec);
         collectSubSpec(spec);
+        specCollector.accept(spec);
         for (String name : traits)
             queryTrait(name).execute(spec);
     }
