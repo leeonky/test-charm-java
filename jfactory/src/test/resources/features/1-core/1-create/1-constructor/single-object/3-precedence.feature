@@ -15,7 +15,7 @@ Feature: Constructor Resolution Precedence
       }
       """
 
-  Scenario: Global Spec - Global Spec Class Constructor > Type Factory Constructor
+  Scenario: Global Spec Class Constructor > Type Factory Constructor - Global Spec Class Constructor Takes Precedence over Type Factory Constructor
     Given register as follows:
       """
       jFactory.factory(Bean.class).constructor(instance -> new Bean("type"));
@@ -47,7 +47,7 @@ Feature: Constructor Resolution Precedence
       value= global-spec
       """
 
-  Scenario: Global Spec Factory - Global Spec Factory Constructor > Global Spec Class Constructor
+  Scenario: Global Spec Factory - Global Spec Factory Constructor Takes Precedence over Global Spec Class Constructor
     Given register as follows:
       """
       jFactory.factory(Bean.class).constructor(instance -> new Bean("type"));
@@ -79,7 +79,7 @@ Feature: Constructor Resolution Precedence
       value= global-spec-factory
       """
 
-  Scenario: Spec-Class Constructor - Spec Class Constructor > Global Spec Factory Constructor
+  Scenario: Spec-Class Constructor - Spec Class Constructor Takes Precedence over Global Spec Factory Constructor
     Given the following spec definition:
       """
       @Global
@@ -116,7 +116,7 @@ Feature: Constructor Resolution Precedence
       value= spec
       """
 
-  Scenario: Spec-Factory Constructor - Spec Factory Constructor > Spec Class Constructor
+  Scenario: Spec-Factory Constructor - Spec Factory Constructor Takes Precedence over Spec Class Constructor
     Given register as follows:
       """
       jFactory.factory(Bean.class).constructor(instance -> new Bean("type"));
