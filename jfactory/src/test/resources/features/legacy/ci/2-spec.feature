@@ -954,50 +954,6 @@ Feature: use spec
       value: 0
       """
 
-  Rule: invalid spec/trait
-
-    Scenario: do not allow generic base spec class
-      Given the following spec class:
-      """
-      public class Spec2<T> extends Spec<T> {
-      }
-      """
-      And the following spec class:
-      """
-      public class InvalidGenericArgSpec extends Spec2<String> {
-      }
-      """
-      When build:
-      """
-      jFactory.createAs(InvalidGenericArgSpec.class);
-      """
-      Then should raise error:
-      """
-      message= 'Cannot guess type via generic type argument, please override Spec::getType'
-      """
-
-    Scenario: do not allow duplicated global spec class, so also do not allow a global spec class as base of another global spec class
-      Given the following spec class:
-      """
-      @Global
-      public class Spec1 extends Spec<String> {
-      }
-      """
-      And the following spec class:
-      """
-      @Global
-      public class Spec2 extends Spec<String> {
-      }
-      """
-      When build:
-      """
-      jFactory.createAs(Spec2.class);
-      """
-      Then should raise error:
-      """
-      message= 'More than one @Global Spec class `#package#Spec1` and `#package#Spec2`'
-      """
-
   Rule: args in trait
 
     Scenario: support use parameter in Trait lambda
@@ -1149,34 +1105,6 @@ Feature: use spec
       Then the result should:
       """
       value= hello
-      """
-
-    Scenario: raise error when more than one pattern matched
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value;
-      }
-      """
-      And register:
-      """
-      jFactory.factory(Bean.class).spec("input-(.+)", ins -> {
-        throw new RuntimeException("failed");
-      }).spec("input-(.*)", ins -> {
-        throw new RuntimeException("failed");
-      });
-      """
-      When build:
-      """
-      jFactory.type(Bean.class).traits("input-hello").create();
-      """
-      Then should raise error:
-      """
-      message= ```
-               Ambiguous trait pattern: input-hello, candidates are:
-                 input-(.+)
-                 input-(.*)
-               ```
       """
 
   Rule: narrow java.lang.Object

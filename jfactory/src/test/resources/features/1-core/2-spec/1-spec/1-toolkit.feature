@@ -103,7 +103,11 @@ Feature: Spec Definition Toolkit
     Scenario: Disallow generic Spec<T> registration — Type erasure prevents inferring target type; use Spec<Bean> or override Spec::getType
       Given the following spec definition:
         """
-        public class BeanSpec<T> extends Spec<T> {}
+        public class BaseSpec<T> extends Spec<T> {}
+        """
+      And the following spec definition:
+        """
+        public class BeanSpec extends BaseSpec<Bean> {}
         """
       When register as follows:
         """

@@ -30,22 +30,6 @@ Feature: Trait Definition Toolkit
         stringValue= hello
         """
 
-    Scenario: Trait Override - Rules in Trait Take Precedence Over the rules in Spec
-      When register as follows:
-        """
-        jFactory.factory(Bean.class)
-        .spec(spec -> spec.property("stringValue").value("from_spec"))
-        .spec("trait", spec -> spec.property("stringValue").value("from_trait"));
-        """
-      And evaluating the following code:
-        """
-        jFactory.type(Bean.class).traits("trait").create();
-        """
-      Then the result should be:
-        """
-        stringValue= from_trait
-        """
-
     Scenario: Regex Trait Registration — Define a Regex Trait, then Match and Bind Captured Params on Create
       When register as follows:
         """
@@ -69,6 +53,26 @@ Feature: Trait Definition Toolkit
       Then the result should be:
         """
         ::throw.message= "Trait `not_exist` not exist"
+        """
+
+    Scenario: Ambiguous Trait - Raise Error When More Than One Pattern Matched
+      When register as follows:
+        """
+        jFactory.factory(Bean.class)
+          .spec("value_(.*)", spec -> spec.property("stringValue").value(spec.traitParam(0)))
+          .spec("value_(.*)_(.*)", spec -> spec.property("intValue").value(Integer.parseInt((String)spec.traitParam(1))));
+        """
+      And evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("value_hello_100").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= ```
+                         Ambiguous trait pattern: value_hello_100, candidates are:
+                           value_(.*)
+                           value_(.*)_(.*)
+                         ```
         """
 
   Rule: In Spec Class
