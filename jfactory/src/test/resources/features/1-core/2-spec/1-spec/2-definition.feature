@@ -196,3 +196,32 @@ Feature: Spec Definition in Different Object Creation Forms
           value2= /value2.*/
         }
         """
+
+    Scenario: Base-Spec Resolution - Base Decided at Create Time, Not at Register Time
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean>{
+        }
+        """
+      And the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec extends Spec<Bean>{
+          public void main() {
+            property("value1").value("global base");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(BeanSpec.class);
+        jFactory.register(GlobalBeanSpec.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).create();
+        """
+      Then the result should be:
+        """
+        value1= 'global base'
+        """

@@ -175,7 +175,6 @@ class JavaExecutorTest {
             verify(spyCompiler, times(1)).compile(anyCollection());
         }
 
-
         @Test
         void should_not_recompile_same_code() {
             JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
@@ -208,6 +207,19 @@ class JavaExecutorTest {
             executor.classOf("Foo");
 
             verify(spyCompiler, times(2)).compile(anyCollection());
+        }
+
+        @Test
+        void replace_uncompiled_class() throws InstantiationException, IllegalAccessException {
+            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+
+            JavaExecutor executor = new JavaExecutor(spyCompiler);
+
+            executor.addClass("public class Foo {}");
+            executor.addClass("public class Foo { public int i= 100;}");
+            expect(executor.classOf("Foo").newInstance()).should("i= 100");
+            verify(spyCompiler, times(1)).compile(anyCollection());
         }
     }
 }

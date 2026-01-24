@@ -3,9 +3,7 @@ package com.github.leeonky.util;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.leeonky.util.ClassDefinition.guessClassName;
@@ -15,7 +13,7 @@ public class JavaExecutor {
     private static final ThreadLocal<JavaExecutor> localThreadJavaExecutor
             = ThreadLocal.withInitial(() -> new JavaExecutor(new JavaCompiler("src.test.generate.t", index.getAndIncrement())));
 
-    private final Set<String> unCompiled = new LinkedHashSet<>();
+    private final Map<String, String> unCompiled = new HashMap<>();
     private final Set<ClassDefinition> allCompiled = new LinkedHashSet<>();
 
     public static JavaExecutor executor() {
@@ -35,12 +33,12 @@ public class JavaExecutor {
         Optional<ClassDefinition> compiled = findDefinition(allCompiled, className);
         if (compiled.isPresent()) {
             if (!compiled.get().getCharContent(true).equals(sourceCode)) {
-                unCompiled.add(sourceCode);
+                unCompiled.put(className, sourceCode);
                 allCompiled.remove(compiled.get());
                 Sneaky.run(() -> Files.deleteIfExists(javaCompiler.getLocation().toPath().resolve(className.replace('.', '/') + ".class")));
             }
         } else {
-            unCompiled.add(sourceCode);
+            unCompiled.put(className, sourceCode);
         }
     }
 
@@ -50,7 +48,7 @@ public class JavaExecutor {
 
     public Class<?> classOf(String className) {
         if (!unCompiled.isEmpty()) {
-            allCompiled.addAll(javaCompiler.compile(unCompiled));
+            allCompiled.addAll(javaCompiler.compile(unCompiled.values()));
             unCompiled.clear();
         }
         return Sneaky.get(() -> findDefinition(allCompiled, className).map(d ->

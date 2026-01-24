@@ -13,9 +13,9 @@ Feature: Trait Definition Toolkit
       }
       """
 
-  Rule: Through Lambda for Data Type
+  Rule: Definition
 
-    Scenario: Trait - Define Naming Spec as a Trait
+    Scenario: Type-Factory Trait - Define Naming Spec as a Trait in Type Factory
       When register as follows:
         """
         jFactory.factory(Bean.class)
@@ -30,54 +30,7 @@ Feature: Trait Definition Toolkit
         stringValue= hello
         """
 
-    Scenario: Regex Trait Registration — Define a Regex Trait, then Match and Bind Captured Params on Create
-      When register as follows:
-        """
-        jFactory.factory(Bean.class)
-          .spec("string_(.*)", spec -> spec.property("stringValue").value(spec.traitParam(0)));
-        """
-      And evaluating the following code:
-        """
-        jFactory.type(Bean.class).traits("string_hello").create();
-        """
-      Then the result should be:
-        """
-        stringValue= hello
-        """
-
-    Scenario: Missing Trait - Use a Non-Existing Trait and Raise an Error
-      When evaluating the following code:
-        """
-        jFactory.type(Bean.class).traits("not_exist").create();
-        """
-      Then the result should be:
-        """
-        ::throw.message= "Trait `not_exist` not exist"
-        """
-
-    Scenario: Ambiguous Trait - Raise Error When More Than One Pattern Matched
-      When register as follows:
-        """
-        jFactory.factory(Bean.class)
-          .spec("value_(.*)", spec -> spec.property("stringValue").value(spec.traitParam(0)))
-          .spec("value_(.*)_(.*)", spec -> spec.property("intValue").value(Integer.parseInt((String)spec.traitParam(1))));
-        """
-      And evaluating the following code:
-        """
-        jFactory.type(Bean.class).traits("value_hello_100").create();
-        """
-      Then the result should be:
-        """
-        ::throw.message= ```
-                         Ambiguous trait pattern: value_hello_100, candidates are:
-                           value_(.*)
-                           value_(.*)_(.*)
-                         ```
-        """
-
-  Rule: In Spec Class
-
-    Scenario: Trait in Spec Class - Define Traits in a Spec Class and Create an Object by Trait
+    Scenario: Trait in Spec Class - Define Trait in a Spec Class and Create an Object by Trait
       Given the following spec definition:
         """
         public class BeanSpec extends Spec<Bean> {
@@ -97,6 +50,25 @@ Feature: Trait Definition Toolkit
         stringValue= hello
         """
 
+    Scenario: Trait in Spec Factory - Extend More Traits for an Exist Spec Class in Spec Factory Lambda
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {}
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(BeanSpec.class).spec("factoryTrait", spec -> spec
+          .property("intValue").value(200));
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("factoryTrait").create();
+        """
+      Then the result should be:
+        """
+        intValue= 200
+        """
+
     Scenario: Trait Name via Annotation — Use @Trait("name") instead of method name
       Given the following spec definition:
         """
@@ -111,6 +83,33 @@ Feature: Trait Definition Toolkit
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).traits("helloTrait").create();
+        """
+      Then the result should be:
+        """
+        stringValue= hello
+        """
+
+    Scenario: Missing Trait - Use a Non-Existing Trait and Raise an Error
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("not_exist").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Trait `not_exist` not exist"
+        """
+
+  Rule: Regex Trait
+
+    Scenario: Regex Trait Registration — Define a Regex Trait, then Match and Bind Captured Params on Create
+      When register as follows:
+        """
+        jFactory.factory(Bean.class)
+          .spec("string_(.*)", spec -> spec.property("stringValue").value(spec.traitParam(0)));
+        """
+      And evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("string_hello").create();
         """
       Then the result should be:
         """
@@ -141,21 +140,23 @@ Feature: Trait Definition Toolkit
         }
         """
 
-    Scenario: Trait in Spec Factory - Extend More Traits for an Exist Spec Class in Spec Factory Lambda
-      Given the following spec definition:
+    Scenario: Ambiguous Trait - Raise Error When More Than One Pattern Matched
+      When register as follows:
         """
-        public class BeanSpec extends Spec<Bean> {}
+        jFactory.factory(Bean.class)
+          .spec("value_(.*)", spec -> spec.property("stringValue").value(spec.traitParam(0)))
+          .spec("value_(.*)_(.*)", spec -> spec.property("intValue").value(Integer.parseInt((String)spec.traitParam(1))));
         """
-      And register as follows:
+      And evaluating the following code:
         """
-        jFactory.specFactory(BeanSpec.class).spec("factoryTrait", spec -> spec
-          .property("intValue").value(200));
-        """
-      When evaluating the following code:
-        """
-        jFactory.spec(BeanSpec.class).traits("factoryTrait").create();
+        jFactory.type(Bean.class).traits("value_hello_100").create();
         """
       Then the result should be:
         """
-        intValue= 200
+        ::throw.message= ```
+                         Ambiguous trait pattern: value_hello_100, candidates are:
+                           value_(.*)
+                           value_(.*)_(.*)
+                         ```
         """
+
