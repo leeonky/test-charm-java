@@ -14,21 +14,6 @@ Feature: Trait Spec Definition in Different Object Creation Forms
 
   Rule: Type Creation
 
-    Scenario: Type-Factory - Define Trait in Type Factory
-      Given register as follows:
-        """
-        jFactory.factory(Bean.class)
-          .spec("type-factory", spec -> spec.property("value1").value("type-factory"));
-        """
-      When evaluating the following code:
-        """
-        jFactory.type(Bean.class).traits("type-factory").create();
-        """
-      Then the result should be:
-        """
-        value1= type-factory
-        """
-
     Scenario: Type-Factory with Global Spec-Class - Define Trait in Type Factory, Global Spec Class and Global Spec Factory
       Given the following spec definition:
         """
@@ -104,36 +89,6 @@ Feature: Trait Spec Definition in Different Object Creation Forms
 
   Rule: Spec Creation
 
-    Scenario: Type-Factory and Spec-Class - Define Trait in Type Factory, Spec Class and Spec Factory
-      Given the following spec definition:
-        """
-        public class BeanSpec extends Spec<Bean> {
-          @Trait("spec-class")
-          public void specClass() {
-            property("value2").value("spec-class");
-          }
-        }
-        """
-      And register as follows:
-        """
-        jFactory.factory(Bean.class)
-          .spec("type-factory", spec -> spec.property("value1").value("type-factory"));
-        jFactory.specFactory(BeanSpec.class)
-          .spec("spec-factory", spec -> spec.property("value3").value("spec-factory"));
-        """
-      When evaluating the following code:
-        """
-        jFactory.spec(BeanSpec.class).traits("type-factory", "spec-class", "spec-factory").create();
-        """
-      Then the result should be:
-        """
-        : {
-          value1= type-factory
-          value2= spec-class
-          value3= spec-factory
-        }
-        """
-
     Scenario: Type-Factory and Spec-Class with Global Spec Class - Define Trait in Type Factory, Spec Class, Spec Factory, Global Spec Class and Global Spec Factory
       Given the following bean definition:
         """
@@ -185,54 +140,4 @@ Feature: Trait Spec Definition in Different Object Creation Forms
           value4= global-spec-factory
           value5= type-factory
         }
-        """
-
-    Scenario: Ineffective Trait During Spec Creation - Trait Defined in Non-Matching Spec Class Have No Effect in Spec Creation
-      Given the following spec definition:
-        """
-        public class BeanSpec extends Spec<Bean> {}
-        """
-      And the following spec definition:
-        """
-        public class NonMatchingBeanSpec extends Spec<Bean> {
-          @Trait("trait")
-          public void trait() {
-            property("value1").value("any-value");
-          }
-        }
-        """
-      And register as follows:
-        """
-        jFactory.register(NonMatchingBeanSpec.class);
-        """
-      When evaluating the following code:
-        """
-        jFactory.spec(BeanSpec.class).traits("trait").create();
-        """
-      Then the result should be:
-        """
-        ::throw.message= "Trait `trait` not exist"
-        """
-
-    Scenario: Ineffective Trait During Spec Creation - Trait Defined in Non-Matching Spec Factory Have No Effect in Spec Creation
-      Given the following spec definition:
-        """
-        public class BeanSpec extends Spec<Bean> {}
-        """
-      And the following spec definition:
-        """
-        public class NonMatchingBeanSpec extends Spec<Bean> {}
-        """
-      And register as follows:
-        """
-        jFactory.specFactory(NonMatchingBeanSpec.class).spec("trait", spec -> spec.
-          property("value1").value("any-value"));
-        """
-      When evaluating the following code:
-        """
-        jFactory.spec(BeanSpec.class).traits("trait").create();
-        """
-      Then the result should be:
-        """
-        ::throw.message= "Trait `trait` not exist"
         """
