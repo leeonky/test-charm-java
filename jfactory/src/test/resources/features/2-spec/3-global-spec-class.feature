@@ -424,3 +424,151 @@ Feature: Global Spec Class
         """
         value= spec-class
         """
+
+    Scenario: Global Spec-Class Trait > Spec-Factory Spec - Middle Priority Trait Takes Precedence over Highest Priority Spec
+      Given the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec extends Spec<Bean> {
+          @Trait
+          public void trait() {
+              property("value").value("global-spec-class-trait");
+          }
+        }
+        """
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {}
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(BeanSpec.class).spec(spec -> spec
+          .property("value").value("spec-factory"));
+        jFactory.register(GlobalBeanSpec.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("trait").create();
+        """
+      Then the result should be:
+        """
+        value= global-spec-class-trait
+        """
+
+    Scenario: Global Spec-Factory Trait > Spec-Factory Spec - Highest Priority Trait Takes Precedence over Highest Priority Spec
+      Given the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec extends Spec<Bean> {}
+        """
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {}
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(BeanSpec.class)
+          .spec(spec -> spec
+            .property("value").value("spec-factory"));
+        jFactory.specFactory(GlobalBeanSpec.class)
+          .spec("trait", spec -> spec
+            .property("value").value("global-spec-factory-trait"));
+        """
+      When evaluating the following code:
+            """
+            jFactory.spec(BeanSpec.class).traits("trait").create();
+            """
+      Then the result should be:
+            """
+            value= global-spec-factory-trait
+            """
+
+  Rule: Trait Precedence
+
+    Background:
+      Given the following bean definition:
+        """
+        public class Bean {
+          public String value;
+        }
+        """
+
+    Scenario: Global Spec-Class > Type-Factory - Global Spec Class Takes Precedence over Type Factory
+      Given the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec extends Spec<Bean> {
+          @Trait
+          public void trait() {
+              property("value").value("global-spec-class");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.factory(Bean.class).spec("trait", spec -> spec
+          .property("value").value("type-factory"));
+        jFactory.register(GlobalBeanSpec.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("trait").create();
+        """
+      Then the result should be:
+        """
+        value= global-spec-class
+        """
+
+    Scenario: Global Spec-Factory > Spec-Class - Global Spec Factory Takes Precedence over Global Spec Class
+      Given the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec extends Spec<Bean> {
+          @Trait
+          public void trait() {
+              property("value").value("global-spec-class");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(GlobalBeanSpec.class).spec("trait", spec -> spec
+          .property("value").value("global-spec-factory"));
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("trait").create();
+        """
+      Then the result should be:
+        """
+        value= global-spec-factory
+        """
+
+    Scenario: Spec-Class > Global Spec-Factory - Spec Class Takes Precedence over Global Spec Factory
+      Given the following spec definition:
+        """
+        @Global
+        public class GlobalBeanSpec extends Spec<Bean> {}
+        """
+      And the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          @Trait
+          public void trait() {
+            property("value").value("spec-class");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(GlobalBeanSpec.class).spec("trait", spec -> spec
+          .property("value").value("global-spec-factory"));
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("trait").create();
+        """
+      Then the result should be:
+        """
+        value= spec-class
+        """

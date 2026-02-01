@@ -61,18 +61,31 @@ Feature: Type Default Spec - Define Default Rules for a Type
         """
 
     Scenario: Regex Trait Registration — Define a Regex Trait, then Match and Bind Captured Params on Create
-      When register as follows:
+      Given the following bean definition:
         """
-        jFactory.factory(Bean.class)
-          .spec("string_(.*)", spec -> spec.property("stringValue").value(spec.traitParam(0)));
+        public class Bean {
+          public String value1, value2;
+        }
         """
-      And evaluating the following code:
+      And register as follows:
         """
-        jFactory.type(Bean.class).traits("string_hello").create();
+        jFactory.factory(Bean.class).spec("input1-(.+)-(.+)", spec -> {
+            spec.property("value1").value(spec.traitParam(0)+ "_1_" +  spec.traitParam(1));
+        });
+        jFactory.factory(Bean.class).spec("input2-(.+)-(.+)", spec -> {
+            spec.property("value2").value(spec.traitParam(0)+ "_2_" +  spec.traitParam(1));
+        });
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("input1-hello-world", "input2-goodbye-world").create();
         """
       Then the result should be:
         """
-        stringValue= hello
+        : {
+          value1= hello_1_world
+          value2= goodbye_2_world
+        }
         """
 
     Scenario: Ambiguous Trait - Raise Error When More Than One Pattern Matched

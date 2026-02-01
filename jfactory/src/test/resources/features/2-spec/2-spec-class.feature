@@ -185,7 +185,7 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
         stringValue= hello
         """
 
-    Scenario: Regex Trait in Spec Class - Match the Trait Name and Bind Captured Groups to Trait Method Parameters
+    Scenario: Regex Trait in Spec Class - Match the Trait Name and Auto-Convert Captured Groups to Trait Method Parameter Types
       Given the following spec definition:
         """
         public class BeanSpec extends Spec<Bean> {
@@ -208,6 +208,8 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
           intValue= 100
         }
         """
+
+#    Scenario: Trait Argument Mismatch - Raise Error when Captured Groups Size is Different from Trait Method Parameter Size
 
   Rule: Composition
 
