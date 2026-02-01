@@ -133,7 +133,7 @@ Feature: Global Spec Class
       @Global
       public class GlobalBeanSpec extends Spec<Bean>{
         public void main() {
-          property("value1").value("global base");
+          property("stringValue").value("global base");
         }
       }
       """
@@ -148,7 +148,7 @@ Feature: Global Spec Class
       """
     Then the result should be:
       """
-      value1= 'global base'
+      stringValue= 'global base'
       """
 
   Rule: Composition
@@ -157,11 +157,11 @@ Feature: Global Spec Class
       Given the following bean definition:
       """
       public class Bean {
-        public String value1, value2, value3, value4, value5;
+        public String value1, value2, value3, value4, value5, value6;
       }
       """
 
-    Scenario: Merge Specs from Global-Spec Class and Type-Factory in Type Creation
+    Scenario: Merge Specs from Global-Spec Class and Type-Factory with Trait in Type Creation
       Given the following spec definition:
         """
         @Global
@@ -169,18 +169,29 @@ Feature: Global Spec Class
           public void main() {
             property("value2").value("global-spec-class");
           }
+
+          @Trait
+          public void globalSpecClassTrait() {
+            property("value5").value("global-spec-class-trait");
+          }
         }
         """
       And register as follows:
         """
-        jFactory.factory(Bean.class).spec(spec -> spec
-          .property("value1").value("type-factory"));
-        jFactory.specFactory(GlobalBeanSpec.class).spec(spec -> spec
-          .property("value3").value("global-spec-factory"));
+        jFactory.factory(Bean.class)
+          .spec(spec -> spec
+            .property("value1").value("type-factory"))
+          .spec("typeFactoryTrait", spec -> spec
+            .property("value4").value("type-factory-trait"));
+        jFactory.specFactory(GlobalBeanSpec.class)
+          .spec(spec -> spec
+            .property("value3").value("global-spec-factory"))
+          .spec("globalSpecFactoryTrait", spec -> spec
+            .property("value6").value("global-spec-factory-trait"));
         """
       When evaluating the following code:
         """
-        jFactory.type(Bean.class).create();
+        jFactory.type(Bean.class).traits("typeFactoryTrait", "globalSpecClassTrait", "globalSpecFactoryTrait").create();
         """
       Then the result should be:
         """
@@ -188,6 +199,9 @@ Feature: Global Spec Class
           value1= type-factory
           value2= global-spec-class
           value3= global-spec-factory
+          value4= type-factory-trait
+          value5= global-spec-class-trait
+          value6= global-spec-factory-trait
         }
         """
 
@@ -195,19 +209,27 @@ Feature: Global Spec Class
       Given the following bean definition:
         """
         public class Bean {
-          public String value1, value2, value3, value4, value5;
+          public String value1, value2, value3, value4, value5, value6, value7, value8, value9, value10;
         }
         """
       And register as follows:
         """
-        jFactory.factory(Bean.class).spec(spec -> spec
-          .property("value5").value("type-factory"));
+        jFactory.factory(Bean.class)
+          .spec(spec -> spec
+            .property("value5").value("type-factory"))
+          .spec("typeFactoryTrait", spec -> spec
+            .property("value10").value("type-factory-trait"));
         """
       And the following spec definition:
         """
         public class BeanSpec extends Spec<Bean> {
           public void main() {
               property("value1").value("spec-class");
+          }
+
+          @Trait
+          public void specClassTrait() {
+            property("value6").value("spec-class-trait");
           }
         }
         """
@@ -218,18 +240,29 @@ Feature: Global Spec Class
           public void main() {
               property("value3").value("global-spec-class");
           }
+
+          @Trait
+          public void globalSpecClassTrait() {
+            property("value8").value("global-spec-class-trait");
+          }
         }
         """
       And register as follows:
         """
-        jFactory.specFactory(BeanSpec.class).spec(spec -> spec
-          .property("value2").value("spec-factory"));
-        jFactory.specFactory(GlobalBeanSpec.class).spec(spec -> spec
-          .property("value4").value("global-spec-factory"));
+        jFactory.specFactory(BeanSpec.class)
+          .spec(spec -> spec
+            .property("value2").value("spec-factory"))
+          .spec("specFactoryTrait", spec -> spec
+            .property("value7").value("spec-factory-trait"));
+        jFactory.specFactory(GlobalBeanSpec.class)
+          .spec(spec -> spec
+            .property("value4").value("global-spec-factory"))
+          .spec("globalSpecFactoryTrait", spec -> spec
+            .property("value9").value("global-spec-factory-trait"));
         """
       When evaluating the following code:
         """
-        jFactory.createAs(BeanSpec.class);
+        jFactory.spec(BeanSpec.class).traits("typeFactoryTrait", "specClassTrait", "specFactoryTrait", "globalSpecClassTrait", "globalSpecFactoryTrait").create();
         """
       Then the result should be:
         """
@@ -239,10 +272,15 @@ Feature: Global Spec Class
           value3= global-spec-class
           value4= global-spec-factory
           value5= type-factory
+          value6= spec-class-trait
+          value7= spec-factory-trait
+          value8= global-spec-class-trait
+          value9= global-spec-factory-trait
+          value10= type-factory-trait
         }
         """
 
-    Scenario: Ineffective Spec During Type Creation - Spec Defined in Non-Global Spec Classes Have No Effect in Type Creation
+    Scenario: Ineffective Spec - Spec Defined in Non-Global Spec Classes Have No Effect in Type Creation
       Given the following spec definition:
         """
         public class AnyBeanSpec extends Spec<Bean> {
@@ -266,6 +304,38 @@ Feature: Global Spec Class
           value1= /value1.*/
           value2= /value2.*/
         }
+        """
+
+    Scenario: Ineffective Trait - Trait Defined in Non-Global Spec Class Have No Effect in Type Creation
+      Given the following spec definition:
+        """
+        public class NonGlobalBeanSpec extends Spec<Bean> {
+          @Trait("trait")
+          public void trait1() {
+            property("value1").value("any-value");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(NonGlobalBeanSpec.class)
+          .spec("trait2", spec -> spec.property("value1").value("any-value"));
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("trait1").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Trait `trait1` not exist"
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).traits("trait2").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Trait `trait2` not exist"
         """
 
   Rule: Property Spec Precedence

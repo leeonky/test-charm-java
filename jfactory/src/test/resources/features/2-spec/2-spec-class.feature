@@ -260,7 +260,7 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
         }
         """
 
-    Scenario: Ineffective Spec - Spec Defined in Non-Matching Spec Classes Have No Effect in Spec Creation
+    Scenario: Ineffective Spec - Spec Defined in Non-Matching Spec Class Have No Effect in Spec Creation
       Given the following spec definition:
         """
         public class BeanSpec extends Spec<Bean> {}
@@ -299,23 +299,31 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
         """
         public class NonMatchingBeanSpec extends Spec<Bean> {
           @Trait
-          public void trait() {
+          public void trait1() {
             property("value1").value("any-value");
           }
         }
         """
       And register as follows:
         """
-        jFactory.specFactory(NonMatchingBeanSpec.class).spec("trait", spec -> spec.
+        jFactory.specFactory(NonMatchingBeanSpec.class).spec("trait2", spec -> spec.
           property("value1").value("any-value"));
         """
       When evaluating the following code:
         """
-        jFactory.spec(BeanSpec.class).traits("trait").create();
+        jFactory.spec(BeanSpec.class).traits("trait1").create();
         """
       Then the result should be:
         """
-        ::throw.message= "Trait `trait` not exist"
+        ::throw.message= "Trait `trait1` not exist"
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("trait2").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Trait `trait2` not exist"
         """
 
   Rule: Property Spec Precedence
@@ -374,7 +382,81 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
         value= spec-factory
         """
 
+    Scenario: Type-Factory Trait > Spec-Factory Spec - Lowest Priority Trait Takes Precedence over Highest Priority Spec
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {}
+        """
+      And register as follows:
+        """
+        jFactory.factory(Bean.class).spec("trait", spec -> spec
+          .property("value").value("type-factory-trait"));
+        jFactory.specFactory(BeanSpec.class).spec(spec -> spec
+          .property("value").value("spec-factory"));
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("trait").create();
+        """
+      Then the result should be:
+        """
+        value= type-factory-trait
+        """
+
+    Scenario: Spec-Class Trait > Spec-Factory Spec - Middle Priority Trait Takes Precedence over Highest Priority Spec
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          @Trait
+          public void trait() {
+            property("value").value("spec-class-trait");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(BeanSpec.class).spec(spec -> spec
+          .property("value").value("spec-factory"));
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("trait").create();
+        """
+      Then the result should be:
+        """
+        value= spec-class-trait
+        """
+
+    Scenario: Spec-Factory Trait > Spec-Factory Spec - Highest Priority Trait Takes Precedence over Highest Priority Spec
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {}
+        """
+      And register as follows:
+        """
+        jFactory.specFactory(BeanSpec.class).spec(spec -> spec
+          .property("value").value("spec-factory"));
+        jFactory.specFactory(BeanSpec.class).spec("trait", spec -> spec
+          .property("value").value("spec-factory-trait"));
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("trait").create();
+        """
+      Then the result should be:
+        """
+        value= spec-factory-trait
+        """
+
   Rule: Trait Precedence
+
+    Background:
+      Given the following bean definition:
+        """
+        public class Bean {
+          public String value;
+        }
+        """
 
     Scenario: Spec-Class > Type-Factory - The Same-Named Trait in Spec Class Takes Precedence over Type Factory
       Given the following spec definition:
@@ -459,4 +541,3 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
           value2= /^value2.*/
         }
         """
-
