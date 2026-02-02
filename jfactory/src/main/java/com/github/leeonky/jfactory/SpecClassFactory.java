@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.util.Classes.newInstance;
 import static com.github.leeonky.util.Sneaky.execute;
+import static java.lang.String.format;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
     private final Class<? extends Spec<T>> specClass;
@@ -42,6 +43,10 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     }
 
     private Object[] convertParams(Method method, Object[] traitParams) {
+        if (traitParams.length != method.getParameterCount())
+            throw new IllegalArgumentException(
+                    format("Trait `%s` argument count mismatch: captured %d groups but method expects %d",
+                            getTraitName(method), traitParams.length, method.getParameterCount()));
         return new ArrayList<Object>() {{
             for (int i = 0; i < method.getParameterTypes().length; i++)
                 add(Converter.getInstance().convert(method.getParameterTypes()[i], traitParams[i]));

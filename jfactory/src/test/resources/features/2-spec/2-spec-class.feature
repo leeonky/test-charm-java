@@ -209,7 +209,23 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
         }
         """
 
-#    Scenario: Trait Argument Mismatch - Raise Error when Captured Groups Size is Different from Trait Method Parameter Size
+    Scenario: Trait Argument Mismatch - Raise Error when Captured Groups Size is Different from Trait Method Parameter Size
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          @Trait("value_(.*)_(.*)")
+          public void stringTrait(String s) {
+          }
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).traits("value_a1_a2").create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= "Trait `value_(.*)_(.*)` argument count mismatch: captured 2 groups but method expects 1"
+        """
 
   Rule: Composition
 

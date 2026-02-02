@@ -557,33 +557,6 @@ Feature: use spec
       value: 0
       """
 
-  Rule: args in trait
-
-    Scenario: ignore trait args when count different
-      Given the following bean class:
-      """
-      public class Bean {
-        public String value;
-      }
-      """
-      Given the following spec class:
-      """
-      public class BeanSpec extends Spec<Bean> {
-        @Trait("input-(.+)-(.+)")
-        public void input(int i) {
-          property("value").value(i);
-        }
-      }
-      """
-      When build:
-      """
-      jFactory.spec(BeanSpec.class).traits("input-1-2").create();
-      """
-      Then the result should:
-      """
-      value= '1'
-      """
-
   Rule: narrow java.lang.Object
 
     Scenario: create narrow single from input spec
