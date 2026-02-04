@@ -527,35 +527,6 @@ Feature: use spec
 #        value: hello
 #      }
 #      """
-  Rule: trait override
-
-    Scenario: avoid duplicated execute base spec
-      Given the following bean class:
-      """
-      public class Bean {
-        public int value;
-      }
-      """
-      Given the following spec class:
-      """
-      @Global
-      public class BeanSpec extends Spec<Bean> {
-        private static int i = 0;
-
-        @Override
-        public void main() {
-          property("value").value(i++);
-        }
-      }
-      """
-      When build:
-      """
-      jFactory.spec(BeanSpec.class).create();
-      """
-      Then the result should:
-      """
-      value: 0
-      """
 
   Rule: narrow java.lang.Object
 

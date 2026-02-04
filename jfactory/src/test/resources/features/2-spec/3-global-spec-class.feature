@@ -151,6 +151,34 @@ Feature: Global Spec Class
       stringValue= 'global base'
       """
 
+  Scenario: Avoid Duplicate Base-Spec Execution - Creating via Global Spec Does Not Collect/Execute Specs Twice
+    Given the following bean class:
+      """
+      public class Bean {
+        public int value;
+      }
+      """
+    Given the following spec class:
+      """
+      @Global
+      public class BeanSpec extends Spec<Bean> {
+        private static int i = 0;
+
+        @Override
+        public void main() {
+          property("value").value(i++);
+        }
+      }
+      """
+    When build:
+      """
+      jFactory.spec(BeanSpec.class).create();
+      """
+    Then the result should:
+      """
+      value: 0
+      """
+
   Rule: Composition
 
     Background:
