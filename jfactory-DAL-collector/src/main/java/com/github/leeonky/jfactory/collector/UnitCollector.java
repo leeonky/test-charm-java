@@ -4,11 +4,11 @@ import com.github.leeonky.dal.runtime.ProxyObject;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class UnitCollector implements ProxyObject {
     private final LinkedHashMap<String, UnitCollector> fields = new LinkedHashMap<>();
     private Object value;
+    private String[] traitsSpec;
 
     @Override
     public Object getValue(Object property) {
@@ -23,7 +23,18 @@ public class UnitCollector implements ProxyObject {
         return value;
     }
 
-    protected Map<String, ?> propertiesMap() {
-        return fields.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().value()));
+    protected Map<String, Object> propertiesMap() {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        fields.forEach((key, value) -> result.put(key, value.value()));
+        return result;
+    }
+
+    public UnitCollector setTraitsSpec(String[] traitsSpec) {
+        this.traitsSpec = traitsSpec;
+        return this;
+    }
+
+    public String[] traitsSpec() {
+        return traitsSpec;
     }
 }
