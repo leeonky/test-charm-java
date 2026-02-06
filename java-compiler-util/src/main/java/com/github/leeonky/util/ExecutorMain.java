@@ -12,6 +12,7 @@ public class ExecutorMain {
     private final List<String> registers = new ArrayList<>();
     private final Set<String> dependencies = new LinkedHashSet<>();
     private final Map<String, Object> declarationValues = new HashMap<>();
+    private final Map<String, Object> args = new HashMap<>();
     private Executor executor = null;
 
     public ExecutorMain(JavaExecutor javaExecutor) {
@@ -23,7 +24,7 @@ public class ExecutorMain {
         for (String dependency : dependencies)
             builder.append("import ").append(dependency).append(";\n");
         builder.append("public class ").append(CLASS_NAME)
-                .append(" implements com.github.leeonky.util.ExecutorMain.Executor {\n");
+                .append(" extends ").append(ExecutorMain.class.getName()).append(".Executor {\n");
         for (String declaration : declarations)
             builder.append("public ").append(declaration).append(";\n");
         builder.append("public void register").append("() {\n");
@@ -49,6 +50,7 @@ public class ExecutorMain {
                     declarationValues.put(s, propertyReader.getValue(executor))));
             executor.register();
         }
+        executor.args.putAll(args);
         return executor.execute();
     }
 
@@ -80,9 +82,15 @@ public class ExecutorMain {
         return this;
     }
 
-    public interface Executor {
-        void register();
+    public void addArg(String name, Object value) {
+        args.put(name, value);
+    }
 
-        Object execute();
+    public abstract static class Executor {
+        public Map<String, Object> args = new HashMap<>();
+
+        public abstract void register();
+
+        public abstract Object execute();
     }
 }

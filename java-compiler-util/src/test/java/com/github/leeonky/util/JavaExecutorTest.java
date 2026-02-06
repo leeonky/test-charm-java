@@ -71,6 +71,15 @@ class JavaExecutorTest {
 
             expect(executor.main().evaluate()).isEqualTo(102);
         }
+
+        @Test
+        void add_args_to_executor() {
+            executor.main().addArg("var", 100);
+
+            executor.main().returnExpression("args.get(\"var\")");
+
+            expect(executor.main().evaluate()).isEqualTo(100);
+        }
     }
 
     @Nested
