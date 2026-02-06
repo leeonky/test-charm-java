@@ -172,6 +172,10 @@ Feature: Type Default Spec - Define Default Rules for a Type
           public String value;
         }
         """
+      Given the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {}
+        """
       And register as follows:
         """
         jFactory.factory(Bean.class)

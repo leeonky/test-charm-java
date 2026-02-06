@@ -100,7 +100,7 @@ Feature: Spec Value
       bean= ::root
       """
 
-  Scenario: Value Override - Prioritize Spec Value Over Default Value
+  Scenario: Override Default Value - Spec Value Overrides Default Value
     And register as follows:
       """
       jFactory.factory(Bean.class).spec(spec -> spec

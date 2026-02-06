@@ -315,7 +315,6 @@ Feature: transformer
       value: HELLO
       """
 
-
   Rule: single creation, define in spec factory
 
     Scenario: define use transformer by spec, sub spec

@@ -1,11 +1,78 @@
-Feature: Simple Bean Creation
+Feature: Input Value
 
   Background:
-    Given the following bean definition:
+    Given the following declarations:
+      """
+      JFactory jFactory = new JFactory();
+      """
+    And the following bean definition:
       """
       public class Bean {
         public String stringValue;
         public int intValue;
+      }
+      """
+
+  Scenario: Specify Single Value - Create an Object with One or More Specified Property Values
+    When evaluating the following code:
+      """
+      jFactory.type(Bean.class).property("intValue", 100).create()
+      """
+    Then the result should be:
+      """
+      : {
+        stringValue= stringValue#1
+        intValue= 100
+      }
+      """
+    When evaluating the following code:
+      """
+      jFactory.type(Bean.class)
+        .property("stringValue", "hello")
+        .property("intValue", 43)
+        .create();
+      """
+    Then the result should be:
+      """
+      : {
+        stringValue= hello
+        intValue= 43
+      }
+      """
+
+  @import(java.util.*)
+  Scenario: Specify Multiple Values - Create an Object with Specified Property Values
+    When evaluating the following code:
+      """
+      jFactory.type(Bean.class)
+        .properties(new HashMap<String, Object>(){{
+          put("stringValue", "hello");
+          put("intValue", 43);
+        }}).create();
+      """
+    Then the result should be:
+      """
+      : {
+        stringValue= hello
+        intValue= 43
+      }
+      """
+
+  Scenario: Customer Input - Input Value with a Custom Function
+    When evaluating the following code:
+      """
+      jFactory.type(Bean.class).properties(new PropertyValue() {
+            @Override
+            public <T> Builder<T> applyToBuilder(String property, Builder<T> builder) {
+                return builder.property("stringValue", "hello").property("intValue", 43);
+            }
+        }).create();
+      """
+    Then the result should be:
+      """
+      : {
+        stringValue= hello
+        intValue= 43
       }
       """
 
@@ -102,5 +169,57 @@ Feature: Simple Bean Creation
         zonedDateTimeValueFromString: '1978-05-03T12:30:45Z'
         yearMonthValue: '1978-05'
         dateValueFromString.toInstant: '1978-05-03T00:00:00Z'
+      }
+      """
+
+  Scenario: Override Spec Value - Input Value Overrides Spec Value
+    Given the following spec definition:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("stringValue").value("from_spec");
+          property("intValue").value(99);
+        }
+      }
+      """
+    When evaluating the following code:
+      """
+      jFactory.spec(BeanSpec.class)
+        .property("stringValue", "from_input")
+        .property("intValue", 43)
+        .create();
+      """
+    Then the result should be:
+      """
+      : {
+        stringValue= from_input
+        intValue= 43
+      }
+      """
+
+  Scenario: Override Default Value - Input Value Overrides Default Value
+    Given the following spec definition:
+      """
+      public class BeanSpec extends Spec<Bean> {
+        @Override
+        public void main() {
+          property("stringValue").defaultValue("from_default");
+          property("intValue").defaultValue(88);
+        }
+      }
+      """
+    When evaluating the following code:
+      """
+      jFactory.spec(BeanSpec.class)
+        .property("stringValue", "from_input")
+        .property("intValue", 43)
+        .create();
+      """
+    Then the result should be:
+      """
+      : {
+        stringValue= from_input
+        intValue= 43
       }
       """
