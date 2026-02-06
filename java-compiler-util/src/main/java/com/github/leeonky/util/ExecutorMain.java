@@ -44,13 +44,13 @@ public class ExecutorMain {
             javaExecutor.addClass(asCode());
             BeanClass<Executor> executorType = (BeanClass<Executor>) BeanClass.create(javaExecutor.classOf(CLASS_NAME));
             executor = executorType.newInstance();
+            executor.args.putAll(args);
             declarationValues.forEach((key, value) ->
                     executorType.getPropertyWriter(key).setValue(executor, value));
             executorType.getPropertyReaders().forEach(((s, propertyReader) ->
                     declarationValues.put(s, propertyReader.getValue(executor))));
             executor.register();
         }
-        executor.args.putAll(args);
         return executor.execute();
     }
 

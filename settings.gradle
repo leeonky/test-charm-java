@@ -17,6 +17,7 @@ include(
         'jfactory-repo-jpa',
         'jfactory-cucumber',
         'jfactory-property-value',
+        'jfactory-DAL-collector',
         'RESTful-cucumber',
         'page-flow-selenium',
         'page-flow-playwright',

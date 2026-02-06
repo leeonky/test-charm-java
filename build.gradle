@@ -18,7 +18,8 @@ ext.cucumberProjects = [
         [name: 'jfactory-property-value', glues: ['com.github.leeonky']],
         [name: 'RESTful-cucumber', glues: ['com.github.leeonky.cucumber.restful']],
         [name: 'page-flow', glues: ['com.github.leeonky.pf.cucumber']],
-        [name: 'feature-summary', glues: ['com.github.leeonky']]
+        [name: 'feature-summary', glues: ['com.github.leeonky']],
+        [name: 'jfactory-DAL-collector', glues: ['com.github.leeonky']]
 ]
 
 apply from: "$rootDir/gradle/jacoco.gradle"
