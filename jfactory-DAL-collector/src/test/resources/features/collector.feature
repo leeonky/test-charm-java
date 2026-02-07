@@ -284,6 +284,23 @@ Feature: Collector
         }
         """
 
+    Scenario: create a ArrayList for Type Object
+      Given the following declarations:
+        """
+        Collector listCollector = new Collector(jFactory, Object.class);
+        """
+      When "listCollector" collect and build with the following properties:
+        """
+        = [hello world]
+        """
+      Then the result should be:
+        """
+        : {
+          ::this= [hello world]
+          ::object.class.simpleName= ArrayList
+        }
+        """
+
   Rule: Simple Object for Default Spec
 
     Scenario: Simple Object - Collect and Build Object with Default Spec of Simple Object
@@ -409,3 +426,6 @@ Feature: Collector
 
 #TODO default type Object.class, dal object => map
 #TODO dal list > all => list
+#TODO intently creation
+
+#TODO error: mixed list and map

@@ -18,8 +18,11 @@ public class Collector extends UnitCollector {
     }
 
     public Object build() {
-        if (defaultType.equals(Object.class) && traitsSpec() == null)
-            return propertiesMap();
+        if (traitsSpec() == null) {
+            if (defaultType.equals(Object.class)) {
+                return value();
+            }
+        }
         return builder().properties(propertiesMap()).create();
     }
 

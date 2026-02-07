@@ -2,8 +2,7 @@ package com.github.leeonky.extensions.dal;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RemarkData;
-import com.github.leeonky.dal.runtime.RuntimeDataHandler;
+import com.github.leeonky.dal.runtime.InfiniteDALCollection;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.jfactory.collector.UnitCollector;
@@ -19,12 +18,16 @@ public class Extension implements com.github.leeonky.dal.runtime.Extension {
         dal.getRuntimeContextBuilder().checkerSetForMatching()
                 .register((expected, actual) -> verificationOptAsAssignmentOpt(actual));
 
-        dal.getRuntimeContextBuilder().registerDataRemark(UnitCollector.class, new RuntimeDataHandler<RemarkData<UnitCollector>>() {
-            @Override
-            public Data<?> handleData(RemarkData<UnitCollector> remarkData) {
-                return remarkData.data().map(unitCollector -> unitCollector.setTraitsSpec(remarkData.remark().split(", |,| ")));
-            }
-        });
+        dal.getRuntimeContextBuilder().registerDataRemark(UnitCollector.class, remarkData ->
+                remarkData.data().value().setTraitsSpec(remarkData.remark().split(", |,| ")));
+
+        dal.getRuntimeContextBuilder().registerDALCollectionFactory(UnitCollector.class, instance ->
+                new InfiniteDALCollection<UnitCollector>(() -> null) {
+                    @Override
+                    protected UnitCollector getByPosition(int position) {
+                        return instance.getByIndex(position);
+                    }
+                });
     }
 
     private Optional<Checker> verificationOptAsAssignmentOpt(Data<?> actual) {
