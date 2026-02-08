@@ -13,7 +13,7 @@ Feature: Collector
         """
       Given the following declarations:
         """
-        Collector collector = new Collector(jFactory, Bean.class);
+        Collector collector = jFactory.collector(Bean.class);
         """
 
     Scenario: Simple Object - Collect and Build Object with Default Type of Simple Object
@@ -270,7 +270,7 @@ Feature: Collector
     Scenario: create a LinkedHashMap for Type Object
       Given the following declarations:
         """
-        Collector mapCollector = new Collector(jFactory, Object.class);
+        Collector mapCollector = jFactory.collector(Object.class);
         """
       When "mapCollector" collect and build with the following properties:
         """
@@ -287,7 +287,7 @@ Feature: Collector
     Scenario: create a ArrayList for Type Object
       Given the following declarations:
         """
-        Collector listCollector = new Collector(jFactory, Object.class);
+        Collector listCollector = jFactory.collector(Object.class);
         """
       When "listCollector" collect and build with the following properties:
         """
@@ -320,9 +320,9 @@ Feature: Collector
         """
       And the following declarations:
         """
-        Collector collector = new Collector(new JFactory() {{
+        Collector collector = new JFactory() {{
           register(BeanSpec.class);
-        }}, "BeanSpec");
+        }}.collector("BeanSpec");
         """
       When "collector" collect and build with the following properties:
         """
@@ -358,9 +358,9 @@ Feature: Collector
         """
       And the following declarations:
         """
-        Collector collector = new Collector(new JFactory() {{
+        Collector collector = new JFactory() {{
           register(BeanSpec.class);
-        }}, "trait", "BeanSpec");
+        }}.collector("trait", "BeanSpec");
         """
       When "collector" collect and build with the following properties:
         """
@@ -400,10 +400,10 @@ Feature: Collector
         """
       And the following declarations:
         """
-        Collector collector = new Collector(new JFactory() {{
+        Collector collector = new JFactory() {{
           register(BeanSpec.class);
           register(AnotherBeanSpec.class);
-        }}, "BeanSpec");
+        }}.collector("BeanSpec");
         """
       When "collector" collect and build with the following properties:
         """

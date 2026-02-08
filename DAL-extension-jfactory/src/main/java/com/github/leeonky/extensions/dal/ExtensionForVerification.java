@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.extensions.jfactory;
+package com.github.leeonky.extensions.dal;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.*;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 
-public class JFactoryExtension implements Extension {
+public class ExtensionForVerification implements Extension {
     @Override
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();

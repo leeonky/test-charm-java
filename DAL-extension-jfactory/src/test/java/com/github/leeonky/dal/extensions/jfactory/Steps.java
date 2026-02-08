@@ -5,9 +5,11 @@ import com.github.leeonky.dal.extensions.Beans;
 import com.github.leeonky.dal.extensions.Orders;
 import com.github.leeonky.jfactory.JFactory;
 import com.github.leeonky.jfactory.cucumber.JData;
+import com.github.leeonky.util.JavaExecutor;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 import static com.github.leeonky.dal.Assertions.expect;
 
@@ -37,5 +39,30 @@ public class Steps {
     @Then("dumped jfactoy should be:")
     public void dumped_jfactoy_should_be(String docString) {
         expect(DAL.getInstance().getRuntimeContextBuilder().build(jFactory).getThis().dump()).should(docString);
+    }
+
+
+    @Before
+    public void importDependencies() {
+        JavaExecutor.executor().main().importDependency("com.github.leeonky.jfactory.*");
+        JavaExecutor.executor().main().importDependency("com.github.leeonky.dal.*");
+    }
+
+    @Given("the following spec definition:")
+    public void theFollowingSpecDefinition(String sourceCode) {
+        JavaExecutor.executor().addClass(
+                "import com.github.leeonky.jfactory.Spec;\n" +
+                        "import com.github.leeonky.jfactory.Global;\n" +
+                        "import com.github.leeonky.jfactory.Instance;\n" +
+                        "import com.github.leeonky.jfactory.Trait;\n" + sourceCode);
+    }
+
+    @When("{string} collect and build with the following properties:")
+    public void collectAndBuildWithTheFollowingProperties(String collectorVarName,
+                                                          String expressionForBuild) {
+        String expressionForBuildVarName = "exp";
+        JavaExecutor.executor().main().addArg(expressionForBuildVarName, expressionForBuild);
+        JavaExecutor.executor().main().addRegisters(String.format("Assertions.expect(%s).should((String)args.get(\"%s\"))", collectorVarName, expressionForBuildVarName));
+        JavaExecutor.executor().main().returnExpression(collectorVarName + ".build()");
     }
 }

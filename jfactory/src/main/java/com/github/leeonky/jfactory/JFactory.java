@@ -181,4 +181,12 @@ public class JFactory {
         factorySet.setSequenceStart(start);
         return this;
     }
+
+    public Collector collector(Class<?> type) {
+        return new Collector(this, type);
+    }
+
+    public Collector collector(String... traitsSpec) {
+        return new Collector(this, traitsSpec);
+    }
 }
