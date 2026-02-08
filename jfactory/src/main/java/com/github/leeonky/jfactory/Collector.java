@@ -1,17 +1,18 @@
 package com.github.leeonky.jfactory;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class Collector {
     private final JFactory jFactory;
     private final Class<?> defaultType;
     private final LinkedHashMap<String, Collector> fields = new LinkedHashMap<>();
-    private final List<Collector> list = new ArrayList<>();
+    private final LinkedHashMap<Integer, Collector> list = new LinkedHashMap<>();
     private Object value;
+    private Type type = Type.OBJECT;
     private String[] traitsSpec;
 
     protected Collector(JFactory jFactory, Class<?> defaultType) {
@@ -27,18 +28,21 @@ public class Collector {
     public Object build() {
         if (traitsSpec() == null) {
             if (defaultType.equals(Object.class)) {
-                if (!fields.isEmpty())
-                    return asMap();
-                if (!list.isEmpty())
-                    return asList();
-                return value;
+                switch (type) {
+                    case VALUE:
+                        return value;
+                    case LIST: {
+                        Object[] list = new Object[this.list.isEmpty() ? 0 : (Collections.max(this.list.keySet()) + 1)];
+                        this.list.forEach((key, value) -> list[key] = value.build());
+                        return list;
+                    }
+                }
+                LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+                fields.forEach((key, value) -> map.put(key, value.build()));
+                return map;
             }
         }
-        return builder().properties(asMap()).create();
-    }
-
-    private List<Object> asList() {
-        return list.stream().map(Collector::build).collect(Collectors.toList());
+        return builder().properties(((FlatAble) objectValue()).flat()).create();
     }
 
     private Builder<?> builder() {
@@ -48,12 +52,7 @@ public class Collector {
 
     public void setValue(Object value) {
         this.value = value;
-    }
-
-    private Map<String, Object> asMap() {
-        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-        fields.forEach((key, value) -> result.put(key, value.build()));
-        return result;
+        forceType(Type.VALUE);
     }
 
     public Collector setTraitsSpec(String[] traitsSpec) {
@@ -66,15 +65,62 @@ public class Collector {
     }
 
     public Collector collect(int index) {
-        int count = index + 1 - list.size();
-        while (count-- > 0)
-            list.add(null);
-        if (list.get(index) == null)
-            list.set(index, jFactory.collector());
-        return list.get(index);
+        forceType(Type.LIST);
+        return list.computeIfAbsent(index, k -> jFactory.collector());
     }
 
     public Collector collect(Object property) {
         return fields.computeIfAbsent((String) property, k -> jFactory.collector());
+    }
+
+    private Object objectValue() {
+        switch (type) {
+            case VALUE:
+                return value;
+            case LIST:
+                return new ObjectValue(list, k -> "[" + k + "]");
+            default:
+                return new ObjectValue(fields, Function.identity());
+        }
+    }
+
+    public void forceType(Type type) {
+        this.type = type;
+    }
+
+    class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
+        public <K> ObjectValue(Map<K, Collector> data, Function<K, String> keyMapper) {
+            data.forEach((key, value) -> put(keyMapper.apply(key), value.objectValue()));
+        }
+    }
+
+    public enum Type {
+        LIST, OBJECT, VALUE;
+    }
+}
+
+interface FlatAble {
+
+    default Map<String, Object> flat() {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        forEach((key, value) -> {
+            if (value instanceof FlatAble) {
+                ((FlatAble) value).flatSub(result, key);
+            } else
+                result.put(key, value);
+        });
+        return result;
+    }
+
+    default String buildPropertyName(String property) {
+        return property;
+    }
+
+    void forEach(BiConsumer<? super String, ? super Object> action);
+
+    default void flatSub(LinkedHashMap<String, Object> result, String key) {
+        for (Map.Entry<String, Object> entry : flat().entrySet())
+            result.put(buildPropertyName(key) +
+                    (entry.getKey().startsWith("[") ? entry.getKey() : "." + entry.getKey()), entry.getValue());
     }
 }

@@ -10,6 +10,8 @@ import com.github.leeonky.jfactory.Collector;
 
 import java.util.Optional;
 
+import static com.github.leeonky.jfactory.Collector.Type.LIST;
+
 public class ExtensionForBuild implements com.github.leeonky.dal.runtime.Extension {
 
     @Override
@@ -29,7 +31,10 @@ public class ExtensionForBuild implements com.github.leeonky.dal.runtime.Extensi
                     }
                 })
                 .registerDALCollectionFactory(Collector.class, instance ->
-                        new InfiniteDALCollection<Collector>(() -> null) {
+                        new InfiniteDALCollection<Collector>(() -> {
+                            instance.forceType(LIST);
+                            return null;
+                        }) {
                             @Override
                             protected Collector getByPosition(int position) {
                                 return instance.collect(position);
