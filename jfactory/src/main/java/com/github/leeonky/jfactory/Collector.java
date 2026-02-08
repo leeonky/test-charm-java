@@ -28,13 +28,17 @@ public class Collector {
         if (traitsSpec() == null) {
             if (defaultType.equals(Object.class)) {
                 if (!fields.isEmpty())
-                    return propertiesMap();
+                    return asMap();
                 if (!list.isEmpty())
-                    return list.stream().map(Collector::build).collect(Collectors.toList());
+                    return asList();
                 return value;
             }
         }
-        return builder().properties(propertiesMap()).create();
+        return builder().properties(asMap()).create();
+    }
+
+    private List<Object> asList() {
+        return list.stream().map(Collector::build).collect(Collectors.toList());
     }
 
     private Builder<?> builder() {
@@ -46,7 +50,7 @@ public class Collector {
         this.value = value;
     }
 
-    private Map<String, Object> propertiesMap() {
+    private Map<String, Object> asMap() {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         fields.forEach((key, value) -> result.put(key, value.build()));
         return result;
@@ -61,20 +65,16 @@ public class Collector {
         return traitsSpec;
     }
 
-    public Collector newElement() {
-        return jFactory.collector(Object.class);
-    }
-
-    public Collector elementAt(int index) {
+    public Collector collect(int index) {
         int count = index + 1 - list.size();
         while (count-- > 0)
             list.add(null);
         if (list.get(index) == null)
-            list.set(index, newElement());
+            list.set(index, jFactory.collector());
         return list.get(index);
     }
 
-    public Collector fieldOf(Object property) {
-        return fields.computeIfAbsent((String) property, k -> this.newElement());
+    public Collector collect(Object property) {
+        return fields.computeIfAbsent((String) property, k -> jFactory.collector());
     }
 }

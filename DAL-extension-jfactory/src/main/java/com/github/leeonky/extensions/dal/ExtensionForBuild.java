@@ -25,14 +25,14 @@ public class ExtensionForBuild implements com.github.leeonky.dal.runtime.Extensi
                 .registerPropertyAccessor(Collector.class, new PropertyAccessor<Collector>() {
                     @Override
                     public Object getValue(Collector collector, Object property) {
-                        return collector.fieldOf(property);
+                        return collector.collect(property);
                     }
                 })
                 .registerDALCollectionFactory(Collector.class, instance ->
                         new InfiniteDALCollection<Collector>(() -> null) {
                             @Override
                             protected Collector getByPosition(int position) {
-                                return instance.elementAt(position);
+                                return instance.collect(position);
                             }
                         });
     }

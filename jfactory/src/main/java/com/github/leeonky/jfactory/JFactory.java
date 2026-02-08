@@ -186,6 +186,10 @@ public class JFactory {
         return new Collector(this, type);
     }
 
+    public Collector collector() {
+        return collector(Object.class);
+    }
+
     public Collector collector(String... traitsSpec) {
         return new Collector(this, traitsSpec);
     }

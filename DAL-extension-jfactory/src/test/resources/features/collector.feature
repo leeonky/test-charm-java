@@ -270,7 +270,7 @@ Feature: Collector
     Scenario: create a LinkedHashMap for Type Object
       Given the following declarations:
         """
-        Collector mapCollector = jFactory.collector(Object.class);
+        Collector mapCollector = jFactory.collector();
         """
       When "mapCollector" collect and build with the following properties:
         """
@@ -287,7 +287,7 @@ Feature: Collector
     Scenario: create a ArrayList for Type Object
       Given the following declarations:
         """
-        Collector listCollector = jFactory.collector(Object.class);
+        Collector listCollector = jFactory.collector();
         """
       When "listCollector" collect and build with the following properties:
         """
