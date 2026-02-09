@@ -1,9 +1,8 @@
 package com.github.leeonky.extensions.dal;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.InfiniteDALCollection;
-import com.github.leeonky.dal.runtime.PropertyAccessor;
+import com.github.leeonky.dal.ast.opt.DALOperator;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.jfactory.Collector;
@@ -16,6 +15,21 @@ public class ExtensionForBuild implements com.github.leeonky.dal.runtime.Extensi
 
     @Override
     public void extend(DAL dal) {
+        dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation<Collector, ExpectationFactory>() {
+            @Override
+            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
+                return v1.instanceOf(Collector.class) && v2.instanceOf(ExpectationFactory.class);
+            }
+
+            @Override
+            public Data<?> operateData(Data<Collector> v1, DALOperator operator, Data<ExpectationFactory> v2,
+                                       RuntimeContextBuilder.DALRuntimeContext context) {
+                ExpectationFactory.Expectation expectation = v2.value().create(operator, v1);
+                v1.value().raw();
+                return expectation.equalTo();
+            }
+        });
+
         dal.getRuntimeContextBuilder().checkerSetForEqualing()
                 .register((expected, actual) -> verificationOptAsAssignmentOpt(actual));
         dal.getRuntimeContextBuilder().checkerSetForMatching()

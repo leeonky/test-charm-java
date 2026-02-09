@@ -62,7 +62,7 @@ public class Steps {
                                                           String expressionForBuild) {
         String expressionForBuildVarName = "exp";
         JavaExecutor.executor().main().addArg(expressionForBuildVarName, expressionForBuild);
-        JavaExecutor.executor().main().addRegisters(String.format("Assertions.expect(%s).should((String)args.get(\"%s\"))", collectorVarName, expressionForBuildVarName));
+        JavaExecutor.executor().main().addRegisters(String.format("Accessors.get((String)args.get(\"%s\")).from(%s)", expressionForBuildVarName, collectorVarName));
         JavaExecutor.executor().main().returnExpression(collectorVarName + ".build()");
     }
 }

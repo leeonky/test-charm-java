@@ -13,6 +13,8 @@ public class Collector {
     private final LinkedHashMap<Integer, Collector> list = new LinkedHashMap<>();
     private Object value;
     private Type type = Type.OBJECT;
+    private boolean isSpecifySpec = false;
+    private boolean raw = false;
     private String[] traitsSpec;
 
     protected Collector(JFactory jFactory, Class<?> defaultType) {
@@ -22,12 +24,12 @@ public class Collector {
 
     protected Collector(JFactory jFactory, String... traitsSpec) {
         this(jFactory, Object.class);
-        setTraitsSpec(traitsSpec);
+        this.traitsSpec = traitsSpec;
     }
 
     public Object build() {
-        if (traitsSpec() == null) {
-            if (defaultType.equals(Object.class)) {
+        if (traitsSpec() == null || raw) {
+            if (defaultType.equals(Object.class) || raw) {
                 switch (type) {
                     case VALUE:
                         return value;
@@ -37,9 +39,9 @@ public class Collector {
                         return list;
                     }
                 }
-                LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-                fields.forEach((key, value) -> map.put(key, value.build()));
-                return map;
+                return new LinkedHashMap<String, Object>() {{
+                    fields.forEach((key, value1) -> put(key, value1.build()));
+                }};
             }
         }
         return builder().properties(((FlatAble) objectValue()).flat()).create();
@@ -56,6 +58,7 @@ public class Collector {
     }
 
     public Collector setTraitsSpec(String[] traitsSpec) {
+        isSpecifySpec = true;
         this.traitsSpec = traitsSpec;
         return this;
     }
@@ -88,6 +91,12 @@ public class Collector {
         this.type = type;
     }
 
+    public void raw() {
+        if (isSpecifySpec)
+            throw new IllegalStateException("Cannot create raw Map/List when traits were specified");
+        this.raw = true;
+    }
+
     class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
         public <K> ObjectValue(Map<K, Collector> data, Function<K, String> keyMapper) {
             data.forEach((key, value) -> put(keyMapper.apply(key), value.objectValue()));
@@ -102,14 +111,14 @@ public class Collector {
 interface FlatAble {
 
     default Map<String, Object> flat() {
-        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
-        forEach((key, value) -> {
-            if (value instanceof FlatAble) {
-                ((FlatAble) value).flatSub(result, key);
-            } else
-                result.put(key, value);
-        });
-        return result;
+        return new LinkedHashMap<String, Object>() {{
+            FlatAble.this.forEach((key, value) -> {
+                if (value instanceof FlatAble) {
+                    ((FlatAble) value).flatSub(this, key);
+                } else
+                    put(key, value);
+            });
+        }};
     }
 
     default String buildPropertyName(String property) {
