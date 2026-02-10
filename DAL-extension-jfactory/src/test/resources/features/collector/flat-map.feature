@@ -15,7 +15,7 @@ Feature: Flat Map
     Scenario: create a Map
       When "collector" collect and build with the following properties:
         """
-        key= value
+        : {key= value}
         """
       Then the result should be:
         """
