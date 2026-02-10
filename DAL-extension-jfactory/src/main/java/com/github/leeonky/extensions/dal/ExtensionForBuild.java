@@ -24,9 +24,8 @@ public class ExtensionForBuild implements com.github.leeonky.dal.runtime.Extensi
             @Override
             public Data<?> operateData(Data<Collector> v1, DALOperator operator, Data<ExpectationFactory> v2,
                                        RuntimeContextBuilder.DALRuntimeContext context) {
-                ExpectationFactory.Expectation expectation = v2.value().create(operator, v1);
                 v1.value().raw();
-                return expectation.equalTo();
+                return v2.value().create(operator, v1).equalTo();
             }
         });
 

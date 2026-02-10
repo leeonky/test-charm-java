@@ -27,6 +27,7 @@ public class Collector {
         this.traitsSpec = traitsSpec;
     }
 
+    @SuppressWarnings("unchecked")
     public Object build() {
         if (traitsSpec() == null || raw) {
             if (defaultType.equals(Object.class) || raw) {
@@ -40,11 +41,13 @@ public class Collector {
                     }
                 }
                 return new LinkedHashMap<String, Object>() {{
-                    fields.forEach((key, value1) -> put(key, value1.build()));
+                    fields.forEach((key, value) -> put(key, value.build()));
                 }};
             }
         }
-        return builder().properties(((FlatAble) objectValue()).flat()).create();
+        Object o = objectValue();
+        return builder().properties(o instanceof FlatAble ?
+                ((FlatAble) o).flat() : (Map<String, ?>) o).create();
     }
 
     private Builder<?> builder() {
@@ -94,17 +97,26 @@ public class Collector {
     public void raw() {
         if (isSpecifySpec)
             throw new IllegalStateException("Cannot create raw Map/List when traits were specified");
-        this.raw = true;
+        raw = true;
     }
 
     class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
         public <K> ObjectValue(Map<K, Collector> data, Function<K, String> keyMapper) {
             data.forEach((key, value) -> put(keyMapper.apply(key), value.objectValue()));
         }
+
+        @Override
+        public String buildPropertyName(String property) {
+            if (traitsSpec != null)
+                property += "(" + String.join(" ", traitsSpec) + ")";
+//            if (intently)
+//                property += "!";
+            return property;
+        }
     }
 
     public enum Type {
-        LIST, OBJECT, VALUE;
+        LIST, OBJECT, VALUE
     }
 }
 
@@ -113,9 +125,9 @@ interface FlatAble {
     default Map<String, Object> flat() {
         return new LinkedHashMap<String, Object>() {{
             FlatAble.this.forEach((key, value) -> {
-                if (value instanceof FlatAble) {
+                if (value instanceof FlatAble)
                     ((FlatAble) value).flatSub(this, key);
-                } else
+                else
                     put(key, value);
             });
         }};
@@ -128,8 +140,11 @@ interface FlatAble {
     void forEach(BiConsumer<? super String, ? super Object> action);
 
     default void flatSub(LinkedHashMap<String, Object> result, String key) {
-        for (Map.Entry<String, Object> entry : flat().entrySet())
-            result.put(buildPropertyName(key) +
-                    (entry.getKey().startsWith("[") ? entry.getKey() : "." + entry.getKey()), entry.getValue());
+        Map<String, Object> flat = flat();
+        if (flat.isEmpty())
+            result.put(buildPropertyName(key), flat);
+        else
+            flat.forEach((subKey, subValue) -> result.put(buildPropertyName(key) +
+                    (subKey.startsWith("[") ? subKey : "." + subKey), subValue));
     }
 }
