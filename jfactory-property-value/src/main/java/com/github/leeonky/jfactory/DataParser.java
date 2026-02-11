@@ -2,6 +2,7 @@ package com.github.leeonky.jfactory;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.jfactory.helper.FlatAble;
 import com.github.leeonky.jfactory.helper.*;
 
 import java.util.Map;
