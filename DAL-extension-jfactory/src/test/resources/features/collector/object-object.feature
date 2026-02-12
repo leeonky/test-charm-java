@@ -160,74 +160,150 @@ Feature: Nested Object(a.b)
       }
       """
 
+  Scenario: Specify Child With Intently Creation and Properties
+    When "collector" collect with the following properties:
+      """
+      : {
+        name= Smartphone
+        category!: {
+          name= Electronics
+          order= 42
+        }
+      }
+      """
+    Then the result should be:
+      """
+      : {
+        ::properties= {
+          name= Smartphone
+          'category!.name'= Electronics
+          'category!.order'= 42
+        }
+        ::build: {
+          name= Smartphone
+          category= {
+            name= Electronics
+            order= 42
+          }
+        }
+      }
+      """
 
+  Scenario: Specify Child With Intently Creation and Default
+    When "collector" collect with the following properties:
+      """
+      : {
+        name= Smartphone
+        category!: {...}
+      }
+      """
+    Then the result should be:
+      """
+      : {
+        ::properties= {
+          name= Smartphone
+          'category!'= {}
+        }
+        ::build= {
+          name= Smartphone
+          category= {
+            name= /^name.*/
+            order= 1
+          }
+        }
+      }
+      """
+
+  Scenario: Specify Child With Spec Intently Creation and Properties
+    Given the following spec definition:
+      """
+      public class CategorySpec extends Spec<Category> {
+        public void main() {
+            property("name").value("Electronics");
+        }
+      }
+      """
+    And register as follows:
+      """
+      jFactory.register(CategorySpec.class);
+      """
+    When "collector" collect with the following properties:
+      """
+      : {
+        name= Smartphone
+        category(CategorySpec)!: {
+          order= 2
+        }
+      }
+      """
+    Then the result should be:
+      """
+      : {
+        ::properties= {
+          name= Smartphone
+          'category(CategorySpec)!.order'= 2
+        }
+        ::build= {
+          name= Smartphone
+          category= {
+            name= Electronics
+            order= 2
+          }
+        }
+      }
+      """
+
+  Scenario: Specify Child With Spec Intently Creation and Default
+    Given the following spec definition:
+      """
+      public class CategorySpec extends Spec<Category> {
+        public void main() {
+            property("name").value("Electronics");
+            property("order").value(42);
+        }
+      }
+      """
+    And register as follows:
+      """
+      jFactory.register(CategorySpec.class);
+      """
+    When "collector" collect with the following properties:
+      """
+      : {
+        name= Smartphone
+        category(CategorySpec)!: {...}
+      }
+      """
+    Then the result should be:
+      """
+      : {
+        ::properties= {
+          name= Smartphone
+          'category(CategorySpec)!'= {}
+        }
+        ::build= {
+          name= Smartphone
+          category= {
+            name= Electronics
+            order= 42
+          }
+        }
+      }
+      """
 
 #  Scenario: Invalid = {} for Child
+#  Parent Only
+#  Parent Default
 
-  Rule: With Parent Type
+#  Properties
+#  Default
 
-    Background:
-      Given the following declarations:
-        """
-        Collector collector = jFactory.collector(Product.class);
-        """
+#  Spec Properties
+#  Spec Default
 
-    Scenario: Specify Parent Spec
-      Given the following spec definition:
-        """
-        public class ProductSpec extends Spec<Product> {
-          public void main() {
-              property("name").value("Laptop");
-          }
-        }
-        """
-      And register as follows:
-        """
-        jFactory.register(ProductSpec.class);
-        """
-      When "collector" collect and build with the following properties:
-        """
-        ::this(ProductSpec).category: {
-          name= Electronics
-        }
-        """
-      Then the result should be:
-        """
-        = {
-          category: {
-              name= Electronics
-          }
-          name= Laptop
-        }
-        """
+#  Intently Properties
+#  Intently Default
 
-#    Scenario: Specify Child Spec
-#      Given the following spec definition:
-#        """
-#        public class CategorySpec extends Spec<Category> {
-#          public void main() {
-#              property("name").value("Electronics");
-#          }
-#        }
-#        """
-#      And register as follows:
-#        """
-#        jFactory.register(CategorySpec.class);
-#        """
-#      When "collector" collect and build with the following properties:
-#        """
-#        : {
-#          category(CategorySpec): {...}
-#          name= Laptop
-#        }
-#        """
-#      Then the result should be:
-#        """
-#        = {
-#          category= {
-#              name= Electronics
-#          }
-#          name= Laptop
-#        }
-#        """
-#
+#  Spec Intently Properties
+#  Spec Intently Default
+

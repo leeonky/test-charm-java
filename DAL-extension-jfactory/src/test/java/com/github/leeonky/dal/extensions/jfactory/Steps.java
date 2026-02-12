@@ -65,4 +65,13 @@ public class Steps {
         JavaExecutor.executor().main().addRegisters(String.format("Accessors.get((String)args.get(\"%s\")).from(%s)", expressionForBuildVarName, collectorVarName));
         JavaExecutor.executor().main().returnExpression(collectorVarName + ".build()");
     }
+
+    @When("{string} collect with the following properties:")
+    public void collectWithTheFollowingProperties(String collectorVarName,
+                                                  String expressionForBuild) {
+        String expressionForBuildVarName = "exp";
+        JavaExecutor.executor().main().addArg(expressionForBuildVarName, expressionForBuild);
+        JavaExecutor.executor().main().addRegisters(String.format("Accessors.get((String)args.get(\"%s\")).from(%s)", expressionForBuildVarName, collectorVarName));
+        JavaExecutor.executor().main().returnExpression(collectorVarName);
+    }
 }

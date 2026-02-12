@@ -52,7 +52,12 @@ public class ExtensionForBuild implements com.github.leeonky.dal.runtime.Extensi
                             protected Collector getByPosition(int position) {
                                 return instance.collect(position);
                             }
-                        });
+                        })
+                .registerExclamation(Collector.class, runtimeData -> {
+                    runtimeData.data().value().intently();
+                    return runtimeData.data().value();
+                })
+        ;
     }
 
     private Optional<Checker> verificationOptAsAssignmentOpt(Data<?> actual) {

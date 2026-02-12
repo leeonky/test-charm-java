@@ -16,6 +16,7 @@ public class Collector {
     private boolean isSpecifySpec = false;
     private boolean raw = false;
     private String[] traitsSpec;
+    private boolean intently = false;
 
     protected Collector(JFactory jFactory, Class<?> defaultType) {
         this.jFactory = jFactory;
@@ -27,7 +28,6 @@ public class Collector {
         this.traitsSpec = traitsSpec;
     }
 
-    @SuppressWarnings("unchecked")
     public Object build() {
         if (traitsSpec() == null || raw) {
             if (defaultType.equals(Object.class) || raw) {
@@ -45,9 +45,13 @@ public class Collector {
                 }};
             }
         }
+        return builder().properties(properties()).create();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, ?> properties() {
         Object o = objectValue();
-        return builder().properties(o instanceof FlatAble ?
-                ((FlatAble) o).flat() : (Map<String, ?>) o).create();
+        return o instanceof FlatAble ? ((FlatAble) o).flat() : (Map<String, ?>) o;
     }
 
     private Builder<?> builder() {
@@ -100,6 +104,10 @@ public class Collector {
         raw = true;
     }
 
+    public void intently() {
+        intently = true;
+    }
+
     class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
         public <K> ObjectValue(Map<K, Collector> data, Function<K, String> keyMapper) {
             data.forEach((key, value) -> put(keyMapper.apply(key), value.objectValue()));
@@ -109,8 +117,8 @@ public class Collector {
         public String buildPropertyName(String property) {
             if (traitsSpec != null)
                 property += "(" + String.join(" ", traitsSpec) + ")";
-//            if (intently)
-//                property += "!";
+            if (intently)
+                property += "!";
             return property;
         }
     }
