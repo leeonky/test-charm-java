@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import static com.github.leeonky.util.function.Extension.mapValue;
+
 public class Collector {
     private final JFactory jFactory;
     private final Class<?> defaultType;
@@ -40,9 +42,7 @@ public class Collector {
                         return list;
                     }
                 }
-                return new LinkedHashMap<String, Object>() {{
-                    fields.forEach((key, value) -> put(key, value.build()));
-                }};
+                return mapValue(fields, Collector::build, LinkedHashMap::new);
             }
         }
         return builder().properties(properties()).create();
@@ -90,6 +90,8 @@ public class Collector {
             case LIST:
                 return new ObjectValue(list, k -> "[" + k + "]");
             default:
+                if (raw)
+                    return build();
                 return new ObjectValue(fields, Function.identity());
         }
     }
@@ -131,14 +133,14 @@ public class Collector {
 interface FlatAble {
 
     default Map<String, Object> flat() {
-        return new LinkedHashMap<String, Object>() {{
-            FlatAble.this.forEach((key, value) -> {
-                if (value instanceof FlatAble)
-                    ((FlatAble) value).flatSub(this, key);
-                else
-                    put(key, value);
-            });
-        }};
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+        forEach((key, value) -> {
+            if (value instanceof FlatAble)
+                ((FlatAble) value).flatSub(map, key);
+            else
+                map.put(key, value);
+        });
+        return map;
     }
 
     default String buildPropertyName(String property) {

@@ -1,6 +1,6 @@
 Feature: Flat List
 
-  Rule: Type Object
+  Rule: Default Collector
 
     Background:
       Given the following declarations:

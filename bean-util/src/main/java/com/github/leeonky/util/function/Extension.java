@@ -1,9 +1,6 @@
 package com.github.leeonky.util.function;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -53,5 +50,15 @@ public class Extension {
 
     public static <E, R> Stream<R> mapPresent(Collection<? extends E> collection, Function<E, Optional<R>> mapper) {
         return collection.stream().map(mapper).filter(Optional::isPresent).map(Optional::get);
+    }
+
+    public static <K, V, N> Map<K, N> mapValue(Map<K, V> map, Function<? super V, ? extends N> mapper) {
+        return mapValue(map, mapper, HashMap::new);
+    }
+
+    public static <K, V, N> Map<K, N> mapValue(Map<K, V> map, Function<? super V, ? extends N> mapper, Supplier<Map<K, N>> mapFactory) {
+        Map<K, N> result = mapFactory.get();
+        map.forEach((k, v) -> result.put(k, mapper.apply(v)));
+        return result;
     }
 }

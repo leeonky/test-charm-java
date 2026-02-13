@@ -1,4 +1,4 @@
-Feature: Nested Object(a.b)
+Feature: Nested Bean(a.b)
 
   Background:
     Given the following declarations:
@@ -89,6 +89,22 @@ Feature: Nested Object(a.b)
     When "collector" collect and build with the following properties:
       """
       category: {...}
+      """
+    Then the result should be:
+      """
+      = {
+        category= {
+          name= /^name.*/
+          order= 1
+        }
+        name= /^name.*/
+      }
+      """
+
+  Scenario: Specify Child All Default = {}
+    When "collector" collect and build with the following properties:
+      """
+      category= {}
       """
     Then the result should be:
       """
@@ -291,7 +307,23 @@ Feature: Nested Object(a.b)
       }
       """
 
-#  Scenario: Invalid = {} for Child
+  Scenario: Invalid = {key: value} in Child Creation
+    When "collector" collect and build with the following properties:
+      """
+      : {
+        name= Smartphone
+        category= {
+          name= Electronics
+        }
+      }
+      """
+    Then the result should be:
+      """
+      ::throw.message= ```
+                       Cannot convert from java.util.LinkedHashMap to class Category
+                       ```
+      """
+
 #  Parent Only
 #  Parent Default
 
@@ -306,4 +338,3 @@ Feature: Nested Object(a.b)
 
 #  Spec Intently Properties
 #  Spec Intently Default
-

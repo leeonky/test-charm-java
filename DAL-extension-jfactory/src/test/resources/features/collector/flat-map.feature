@@ -1,6 +1,6 @@
 Feature: Flat Map
 
-  Rule: Type Object
+  Rule: Default Collector
 
     Background:
       Given the following declarations:
@@ -21,7 +21,7 @@ Feature: Flat Map
         """
         = {
           key= value
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
@@ -34,7 +34,7 @@ Feature: Flat Map
         """
         = {
           key= value
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
@@ -47,7 +47,7 @@ Feature: Flat Map
         """
         : {
           ::this= {}
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
@@ -60,7 +60,7 @@ Feature: Flat Map
         """
         : {
           ::this= {}
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
@@ -89,7 +89,7 @@ Feature: Flat Map
         """
         : {
           hello= world
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
@@ -102,7 +102,7 @@ Feature: Flat Map
         """
         : {
           ::this= {}
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
@@ -135,7 +135,7 @@ Feature: Flat Map
         """
         : {
           hello= world
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
@@ -148,7 +148,7 @@ Feature: Flat Map
         """
         : {
           ::this= {}
-          ::object.class.superclass.simpleName= LinkedHashMap
+          ::object.class.simpleName= LinkedHashMap
         }
         """
 
