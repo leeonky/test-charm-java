@@ -42,7 +42,7 @@ public class ObjectScopeNode extends DALNode {
             @Override
             public Data<?> matches() {
                 if (verificationExpressions.isEmpty() && !isObjectWildcard)
-                    throw new SyntaxException("Should use `{...}` to verify any non null object or `=` before {}", getPositionBegin());
+                    throw new SyntaxException("Should use `: {...}` to verify any non null object or `= {}` verify any empty object", getPositionBegin());
                 if (isObjectWildcard && opt1(actual::isNull))
                     throw new AssertionFailure("Expected value to be not null, but it was null", getOperandPosition());
                 return actual.execute(() -> {
@@ -55,7 +55,9 @@ public class ObjectScopeNode extends DALNode {
 
             @Override
             public Data<?> equalTo() {
-                if ((isObjectWildcard || verificationExpressions.isEmpty()) && opt1(actual::isNull))
+                if (verificationExpressions.isEmpty() && isObjectWildcard)
+                    throw new SyntaxException("Should use `: {...}` to verify any non null object or `= {}` verify any empty object", getPositionBegin());
+                if (verificationExpressions.isEmpty() && opt1(actual::isNull))
                     throw new AssertionFailure("Expected value to be not null, but it was null", getOperandPosition());
                 Data<?> execute = actual.execute(() -> {
                     Data<?> result = context.data(null);

@@ -117,7 +117,7 @@ Feature: verify object
       | "any string" |
       | 100          |
 
-  Scenario: do not allow :{}
+  Scenario: do not allow : {}
     Given the following input data:
     """
       {}
@@ -128,11 +128,30 @@ Feature: verify object
     """
     Then failed with the message:
     """
-    Should use `{...}` to verify any non null object or `=` before {}
+    Should use `: {...}` to verify any non null object or `= {}` verify any empty object
     """
     And got the following notation:
     """
       : {}
+        ^
+    """
+
+  Scenario: do not allow = {...}
+    Given the following input data:
+    """
+      {}
+    """
+    When evaluate by:
+    """
+      = {...}
+    """
+    Then failed with the message:
+    """
+    Should use `: {...}` to verify any non null object or `= {}` verify any empty object
+    """
+    And got the following notation:
+    """
+      = {...}
         ^
     """
 

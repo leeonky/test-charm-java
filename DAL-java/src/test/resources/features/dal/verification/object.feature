@@ -26,23 +26,6 @@ Feature: object
     """
     null: {...}
     """
-    When evaluate by:
-    """
-    null= {...}
-    """
-    Then failed with the message:
-    """
-    Expected value to be not null, but it was null
-    """
-    And got the following notation:
-    """
-    null= {...}
-          ^
-    """
-    And the inspect should:
-    """
-    null= {...}
-    """
 
   Scenario: unexpected fields
     When the following json:
