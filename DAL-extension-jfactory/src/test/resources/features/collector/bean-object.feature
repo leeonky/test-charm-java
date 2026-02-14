@@ -60,6 +60,7 @@ Feature: Nested Object
         = {
           sub= {
             key= value
+            ::object.class.name= java.util.LinkedHashMap
           }
           name= TestBean
         }
@@ -78,13 +79,14 @@ Feature: Nested Object
         = {
           sub= {
             key= value
-            number= 123
+            number= 123,
+            ::object.class.name= java.util.LinkedHashMap
           }
           name= /^name.*/
         }
         """
 
-    Scenario: Specify Child All Default
+    Scenario: Default of Object with : {...} should create an Object
       When "collector" collect and build with the following properties:
         """
         sub: {...}
@@ -92,12 +94,14 @@ Feature: Nested Object
       Then the result should be:
         """
         = {
-          sub= {}
+          sub= {
+            ::object.class.name= java.lang.Object
+          }
           name= /^name.*/
         }
         """
 
-    Scenario: Specify Child All Default = {}
+    Scenario: Specify Child an Empty Map by = {}
       When "collector" collect and build with the following properties:
         """
         sub= {}
@@ -105,7 +109,9 @@ Feature: Nested Object
       Then the result should be:
         """
         = {
-          sub= {}
+          sub= {
+            ::object.class.name= java.util.HashMap
+          }
           name= /^name.*/
         }
         """
@@ -128,7 +134,8 @@ Feature: Nested Object
             name= hello
             sub= {
               key= value
-              number= 123
+              number= 123,
+              ::object.class.name= java.util.LinkedHashMap
             }
           }
           ::build: {
@@ -145,7 +152,7 @@ Feature: Nested Object
       When "collector" collect with the following properties:
         """
         : {
-          sub! = {...}
+          sub! = {}
           name= hello
         }
         """
@@ -154,11 +161,13 @@ Feature: Nested Object
         : {
           ::properties= {
               name= hello
-              sub= {}
+              'sub(EMPTY_MAP)'= {}
           }
           ::build= {
               name= hello
-              sub= {}
+              sub= {
+                ::object.class.name= java.util.HashMap
+              }
           }
         }
         """

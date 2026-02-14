@@ -137,6 +137,8 @@ interface FlatAble {
         forEach((key, value) -> {
             if (value instanceof FlatAble)
                 ((FlatAble) value).flatSub(map, key);
+            else if (value instanceof Map && ((Map<?, ?>) value).isEmpty())
+                map.put(key + "(EMPTY_MAP)", value);
             else
                 map.put(key, value);
         });

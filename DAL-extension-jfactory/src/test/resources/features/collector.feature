@@ -11,3 +11,6 @@ Feature: Collector
 
 #TODO error: mixed list and map
 #TODO List: whole list, part of list(has negative index)
+
+#TODO bean-object (list)
+#TODO list-bean

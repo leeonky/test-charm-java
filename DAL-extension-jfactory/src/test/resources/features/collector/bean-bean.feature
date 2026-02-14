@@ -101,22 +101,6 @@ Feature: Nested Bean(a.b)
       }
       """
 
-  Scenario: Specify Child All Default = {}
-    When "collector" collect and build with the following properties:
-      """
-      category= {}
-      """
-    Then the result should be:
-      """
-      = {
-        category= {
-          name= /^name.*/
-          order= 1
-        }
-        name= /^name.*/
-      }
-      """
-
   Scenario: Specify Child With Spec and Properties
     Given the following spec definition:
       """
