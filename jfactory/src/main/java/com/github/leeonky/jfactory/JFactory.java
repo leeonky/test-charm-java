@@ -20,11 +20,12 @@ public class JFactory {
     private final Set<Predicate<PropertyWriter<?>>> ignoreDefaultValues = new LinkedHashSet<>();
 
     public JFactory() {
-        dataRepository = new MemoryDataRepository();
+        this(new MemoryDataRepository());
     }
 
     public JFactory(DataRepository dataRepository) {
         this.dataRepository = dataRepository;
+        register(EmptyMapSpec.class);
     }
 
     public DataRepository getDataRepository() {

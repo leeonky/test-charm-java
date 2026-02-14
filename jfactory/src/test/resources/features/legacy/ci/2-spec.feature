@@ -1805,3 +1805,18 @@ Feature: use spec
           value= bye
         }
         """
+
+  Rule: create Map
+
+    Scenario: support create a map from build-in spec MAP
+      When build:
+        """
+        jFactory.spec("EMPTY_MAP").create();
+        """
+      Then the result should:
+        """
+        : {
+          ::this= {}
+          ::object.class.name= java.util.HashMap
+        }
+        """

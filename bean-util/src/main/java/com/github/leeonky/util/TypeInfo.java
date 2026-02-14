@@ -3,6 +3,7 @@ package com.github.leeonky.util;
 import java.util.Map;
 
 interface TypeInfo<T> {
+
     static <T> TypeInfo<T> create(BeanClass<T> type, PropertyProxyFactory<T> proxyFactory) {
         if (type.isCollection())
             return new CollectionTypeInfo<>(type, proxyFactory);
