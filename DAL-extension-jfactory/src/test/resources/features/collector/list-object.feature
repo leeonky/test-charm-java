@@ -54,7 +54,7 @@ Feature: List Bean([0].b)
     Scenario: Specify Child All Default
       When "collector" collect and build with the following properties:
         """
-        : [= {...}]
+        : [= {}]
         """
       Then the result should be:
         """
