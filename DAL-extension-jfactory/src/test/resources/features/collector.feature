@@ -14,3 +14,8 @@ Feature: Collector
 
 #TODO bean-object (list)
 #TODO list-bean
+
+
+#TODO build all
+#TODO raw list / map
+#TODO mixed

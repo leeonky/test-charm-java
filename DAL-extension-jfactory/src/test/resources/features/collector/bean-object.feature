@@ -17,7 +17,7 @@ Feature: Nested Object
       Collector collector = jFactory.collector(Bean.class);
       """
 
-  Rule: As a Map
+  Rule: Sub is a Map
 
     Scenario: Specify Parent Property Only
       When "collector" collect and build with the following properties:
@@ -172,7 +172,110 @@ Feature: Nested Object
         }
         """
 
-  Rule: Use Spec
+  Rule: Sub is a List Map
+
+    Scenario: Specify Grand Child Properties
+      When "collector" collect and build with the following properties:
+        """
+        sub= [{
+          value1= v1
+          value2= v2
+        }]
+        """
+      Then the result should be:
+        """
+        = {
+          sub= [{
+            value1= v1
+            value2= v2
+            ::object.class.name= java.util.LinkedHashMap
+          }]
+
+          sub::object.class.name= java.util.ArrayList
+          name= /^name.*/
+        }
+        """
+
+    Scenario: Specify Grand Child All Default
+      When "collector" collect and build with the following properties:
+        """
+        sub= [{}]
+        """
+      Then the result should be:
+        """
+        = {
+          sub= [{
+            ::object.class.name= java.util.LinkedHashMap
+          }]
+          sub::object.class.name= java.util.ArrayList
+          name= /^name.*/
+        }
+        """
+
+    Scenario: Specify Empty List
+      When "collector" collect and build with the following properties:
+        """
+        sub= []
+        """
+      Then the result should be:
+        """
+        = {
+          sub= []
+          sub::object.class.name= java.util.ArrayList
+          name= /^name.*/
+        }
+        """
+
+#  Rule: Sub is a List Bean by List Spec
+#
+#    Background:
+#      Given the following bean definition:
+#        """
+#        public class Sub {
+#          public String value1, value2;
+#        }
+#        """
+#      Given the following spec definition:
+#        """
+#        public class SubListSpec extends Spec<java.util.List<Sub>> {}
+#        """
+#
+#    Scenario: Specify Grand Child Properties
+#      When "collector" collect and build with the following properties:
+#        """
+#        sub(SubListSpec): [{
+#          value1= v1
+#          value2= v2
+#        }]
+#        """
+#      Then the result should be:
+#        """
+#        = {
+#          sub= [{
+#            value1= v1
+#            value2= v2
+#          }]
+#          name= /^name.*/
+#        }
+#        """
+#
+#    Scenario: Specify Grand Child All Default
+#      When "collector" collect and build with the following properties:
+#        """
+#        sub(SubListSpec): [{...}]
+#        """
+#      Then the result should be:
+#        """
+#        = {
+#          sub= [{
+#            value1= /^value1.*/
+#            value2= /^value2.*/
+#          }]
+#          name= /^name.*/
+#        }
+#        """
+
+  Rule: Sub is Bean by Spec
 
     Background:
       Given the following bean definition:

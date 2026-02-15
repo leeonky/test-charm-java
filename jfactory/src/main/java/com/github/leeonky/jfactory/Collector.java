@@ -84,14 +84,14 @@ public class Collector {
     }
 
     private Object objectValue() {
+        if (raw)
+            return build();
         switch (type) {
             case VALUE:
                 return value;
             case LIST:
                 return new ObjectValue(list, k -> "[" + k + "]");
             default:
-                if (raw)
-                    return build();
                 return new ObjectValue(fields, Function.identity());
         }
     }

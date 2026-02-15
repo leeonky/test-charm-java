@@ -10,7 +10,7 @@ Feature: List Bean([0].b)
       Collector collector = jFactory.collector(java.util.LinkedList.class);
       """
 
-  Rule: As a Map
+  Rule: Sub is a Map
 
     Scenario: Specify Child Properties
       When "collector" collect and build with the following properties:
@@ -94,7 +94,63 @@ Feature: List Bean([0].b)
         }
         """
 
-  Rule: Use Spec
+  Rule: Sub is a List Map
+
+    Scenario: Specify Grand Child Properties
+      When "collector" collect with the following properties:
+        """
+        [0]= [{
+          value1= v1
+          value2= v2
+        }]
+        """
+      Then the result should be:
+        """
+        : {
+          ::properties: {
+            '[0]'= [{
+              value1= v1
+              value2= v2
+            }]
+          }
+
+          ::build: {
+            ::this= [[{
+              value1= v1
+              value2= v2
+              ::object.class.name= java.util.LinkedHashMap
+            }]]
+
+            [0]::object.class.name= java.util.ArrayList
+            class.name= java.util.LinkedList
+          }
+        }
+        """
+
+    Scenario: Specify Grand Child All Default
+      When "collector" collect with the following properties:
+        """
+        [0]= [{}]
+        """
+      Then the result should be:
+          """
+          : {
+            ::properties: {
+              '[0]'= [{}]
+            }
+
+            ::build: {
+              ::this= [[{
+                ::object.class.name= java.util.LinkedHashMap
+              }]]
+
+              [0]::object.class.name= java.util.ArrayList
+              class.name= java.util.LinkedList
+            }
+          }
+          """
+
+  Rule: Sub is Bean by Spec
 
     Background:
       Given the following bean definition:
