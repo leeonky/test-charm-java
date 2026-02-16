@@ -59,7 +59,7 @@ public class PropertySpec<T> {
         return specRules.newIsSpec(traitsAndSpec, this);
     }
 
-    public Spec<T> optional(String... traitsAndSpec) {
+    public Spec<T> apply(String... traitsAndSpec) {
         if (property.isSingle()) {
             return appendRule((jFactory, objectProducer) -> objectProducer.changeChild(property.toString(),
                     new OptionalSpecDefaultValueProducer<>(traitsAndSpec, jFactory, jFactory.spec(traitsAndSpec))));

@@ -149,3 +149,5 @@ Feature: Super => Sub
           class.simpleName= Sub
         }
         """
+
+#  Rule: In Parent Spec by apply

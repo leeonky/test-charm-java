@@ -1742,9 +1742,9 @@ Feature: input property
       message: '#package#Bean.value is not list'
       """
 
-  Rule: optional spec for list element
+  Rule: apply spec for list element
 
-    Scenario Outline: define optional spec of list
+    Scenario Outline: define apply spec of list
       Given the following bean class:
       """
       public class Bean {
@@ -1768,7 +1768,7 @@ Feature: input property
       And register:
       """
       jFactory.factory(BeanList.class).spec(spec -> spec
-        .property("beans[]").optional("ABean"));
+        .property("beans[]").apply("ABean"));
       """
       When build:
       """

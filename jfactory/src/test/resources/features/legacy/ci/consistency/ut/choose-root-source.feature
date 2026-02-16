@@ -366,7 +366,7 @@ Feature: choose consistency root source provider
         }
         """
 
-    Scenario: should consider optional spec default value producer sub property as PlaceHolderProducer
+    Scenario: should consider apply spec default value producer sub property as PlaceHolderProducer
       Given the following bean class:
         """
         public class SubBean {
@@ -389,7 +389,7 @@ Feature: choose consistency root source provider
         public class ABean extends Spec<Bean> {
           public void main() {
               property("subBean").byFactory();
-              property("bean").optional("SubBeanSpec");
+              property("bean").apply("SubBeanSpec");
               link("subBean", "bean.subBean");
           }
         }

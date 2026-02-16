@@ -395,7 +395,7 @@ Feature: Summary
         }
         """
 
-    Scenario: Create New Child from Spec - Based on Input Child Property and Optional Property Spec
+    Scenario: Create New Child from Spec - Based on Input Child Property and Apply Property Spec
       Given the following spec definition:
         """
         public class AnAuthor extends Spec<Author> {
@@ -408,7 +408,7 @@ Feature: Summary
         """
         public class ABook extends Spec<Book> {
           public void main() {
-            property("author").optional("AnAuthor");
+            property("author").apply("AnAuthor");
           }
         }
         """

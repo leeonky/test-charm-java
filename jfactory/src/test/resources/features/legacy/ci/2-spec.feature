@@ -1791,7 +1791,7 @@ Feature: use spec
       And register:
       """
         jFactory.factory(Bean.class).spec(spec ->
-          spec.property("sub").optional("Default", "SubBeanSpec"));
+          spec.property("sub").apply("Default", "SubBeanSpec"));
       """
       When build:
         """
