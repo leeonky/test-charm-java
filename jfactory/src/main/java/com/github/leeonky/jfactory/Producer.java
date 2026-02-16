@@ -89,6 +89,10 @@ abstract class Producer<T> {
         return this;
     }
 
+    protected Producer<T> changeFrom(CollectionProducer<?, T> producer) {
+        return this;
+    }
+
     protected Producer<T> changeFrom(OptionalSpecDefaultValueProducer<T> producer) {
         return this;
     }

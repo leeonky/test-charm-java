@@ -73,6 +73,7 @@ public class JavaExecutor {
         reset();
         unCompiled.clear();
         allCompiled.clear();
+        dependencies.clear();
         return this;
     }
 

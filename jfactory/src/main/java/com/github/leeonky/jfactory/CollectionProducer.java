@@ -142,4 +142,9 @@ class CollectionProducer<T, C> extends Producer<C> {
         children.replaceAll(producer -> producer.resolveBuilderValueProducer(forQuery));
         return this;
     }
+
+    @Override
+    public Producer<C> changeTo(Producer<C> newProducer) {
+        return newProducer.changeFrom(this);
+    }
 }

@@ -1806,6 +1806,43 @@ Feature: use spec
         }
         """
 
+    Scenario: not apply for collection
+      Given the following declarations:
+        """
+        JFactory jFactory = new JFactory();
+        """
+      Given the following class definition:
+        """
+        public class Bean {
+          public List sub;
+        }
+        """
+      And the following spec definition:
+        """
+        public class SubBeanSpec extends Spec<SubBean> {}
+        """
+      Given the following class definition:
+        """
+        public class SubBean {
+          public String value1, value2;
+          public String value;
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(SubBeanSpec.class);
+        jFactory.factory(Bean.class).spec(spec ->
+          spec.property("sub").apply("SubBeanSpec"));
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("sub[0]", null).create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= 'Cannot use `apply` on collection property'
+        """
+
   Rule: create Map
 
     Scenario: support create a map from build-in spec MAP

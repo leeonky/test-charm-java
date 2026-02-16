@@ -25,4 +25,9 @@ class OptionalSpecDefaultValueProducer<V> extends DefaultTypeValueProducer<V> {
     public DefaultBuilder<V> builder() {
         return builder;
     }
+
+    @Override
+    protected Producer<V> changeFrom(CollectionProducer<?, V> producer) {
+        throw new IllegalStateException("Cannot use `apply` on collection property");
+    }
 }
