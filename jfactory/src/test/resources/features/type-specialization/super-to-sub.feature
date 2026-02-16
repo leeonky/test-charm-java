@@ -386,6 +386,20 @@ Feature: Super => Sub
         jFactory.register(SubSpec.class);
         """
 
+    Scenario: Create Default with Specified Default Sub
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("object(SubSpec)", new HashMap()).create();
+        """
+      Then the result should be:
+        """
+        object: {
+          value1= /^value1.*/
+          value2= New
+          class.simpleName= Sub
+        }
+        """
+
     Scenario: Create Default with Sub Properties
       When evaluating the following code:
         """

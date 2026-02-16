@@ -67,13 +67,13 @@ public class JavaExecutor {
     public void reset() {
         executorMain = new ExecutorMain(this);
         unCompiled.clear();
+        dependencies.clear();
     }
 
     public JavaExecutor resetAll() {
         reset();
         unCompiled.clear();
         allCompiled.clear();
-        dependencies.clear();
         return this;
     }
 
