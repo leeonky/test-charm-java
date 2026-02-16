@@ -344,6 +344,55 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
         ::throw.message= "Trait `trait2` not exist"
         """
 
+    Scenario: Specify and Replace From Input - Specify a New Spec for a Sub Object
+      Given the following bean definition:
+        """
+        public class Container {
+          public Bean bean;
+        }
+        """
+      And the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          public void main() {
+              property("value1").value("spec-class");
+          }
+        }
+        """
+      And the following spec definition:
+        """
+        public class NewBeanSpec extends Spec<Bean> {
+          public void main() {
+              property("value2").value("input-property");
+          }
+        }
+        """
+      And the following spec definition:
+        """
+        public class ContainerSpec extends Spec<Container> {
+          public void main() {
+              property("bean").is(BeanSpec.class);
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(NewBeanSpec.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(ContainerSpec.class).property("bean(NewBeanSpec)", new HashMap()).create();
+        """
+      Then the result should be:
+        """
+        : {
+          bean: {
+            value1= /^value1.*/
+            value2= input-property
+          }
+        }
+        """
+
   Rule: Property Spec Precedence
 
     Background:
@@ -558,4 +607,52 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
           value1= trait
           value2= /^value2.*/
         }
+        """
+
+    Scenario: Specify and Replace From Input - Specify a New Spec for a Sub Object
+      Given the following bean definition:
+        """
+        public class Container {
+          public Bean bean;
+        }
+        """
+      And the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+
+          @Trait
+          public void v1() {
+            property("value").value("spec-class");
+          }
+        }
+        """
+      And the following spec definition:
+        """
+        public class NewBeanSpec extends Spec<Bean> {
+
+          @Trait
+          public void v1() {
+            property("value").value("input-property");
+          }
+        }
+        """
+      And the following spec definition:
+        """
+        public class ContainerSpec extends Spec<Container> {
+          public void main() {
+              property("bean").is(BeanSpec.class);
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(NewBeanSpec.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(ContainerSpec.class).property("bean(v1 NewBeanSpec)", new HashMap()).create();
+        """
+      Then the result should be:
+        """
+        bean.value= input-property
         """
