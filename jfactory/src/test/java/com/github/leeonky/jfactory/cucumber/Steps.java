@@ -8,6 +8,8 @@ public class Steps {
 
     @Before
     public void importDependencies() {
+        JavaExecutor.executor().importDependency("java.util.List");
+        JavaExecutor.executor().importDependency("java.util.HashMap");
         JavaExecutor.executor().main().importDependency("com.github.leeonky.jfactory.*");
     }
 

@@ -374,7 +374,6 @@ Feature: input property
       message: 'The format of property `a![0]` is invalid.'
       """
 
-
   Rule: collection property
 
     Scenario: support input collection element property

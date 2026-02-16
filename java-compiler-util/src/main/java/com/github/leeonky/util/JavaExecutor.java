@@ -5,6 +5,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.ClassDefinition.guessClassName;
 
@@ -15,6 +16,7 @@ public class JavaExecutor {
 
     private final Map<String, String> unCompiled = new HashMap<>();
     private final Set<ClassDefinition> allCompiled = new LinkedHashSet<>();
+    private final List<String> dependencies = new ArrayList<>();
 
     public static JavaExecutor executor() {
         return localThreadJavaExecutor.get();
@@ -48,7 +50,7 @@ public class JavaExecutor {
 
     public Class<?> classOf(String className) {
         if (!unCompiled.isEmpty()) {
-            allCompiled.addAll(javaCompiler.compile(unCompiled.values()));
+            allCompiled.addAll(javaCompiler.compile(unCompiled.values().stream().map(s -> String.join("\n", dependencies) + "\n" + s).collect(Collectors.toList())));
             unCompiled.clear();
         }
         return Sneaky.get(() -> findDefinition(allCompiled, className).map(d ->
@@ -72,5 +74,13 @@ public class JavaExecutor {
         unCompiled.clear();
         allCompiled.clear();
         return this;
+    }
+
+    public void importDependency(String packages) {
+        dependencies.add("import " + packages + ";");
+    }
+
+    public List<String> dependencies() {
+        return dependencies;
     }
 }

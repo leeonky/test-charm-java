@@ -21,6 +21,8 @@ public class ExecutorMain {
 
     private String asCode() {
         StringBuilder builder = new StringBuilder();
+        for (String dependency : javaExecutor.dependencies())
+            builder.append(dependency).append(";\n");
         for (String dependency : dependencies)
             builder.append("import ").append(dependency).append(";\n");
         builder.append("public class ").append(CLASS_NAME)
