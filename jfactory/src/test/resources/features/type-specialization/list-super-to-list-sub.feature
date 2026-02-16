@@ -29,7 +29,7 @@ Feature: List Super => List Sub
         }
         """
 
-    Scenario Outline: Create Empty List
+    Scenario Outline: Create Default Empty List without Input Properties
       Given the following spec definition:
         """
         public class ListSubSpec extends Spec<<specType>> {}
@@ -59,7 +59,7 @@ Feature: List Super => List Sub
         | Object[]    | Sub[]     | Sub[]          |
         | Super[]     | Sub[]     | Sub[]          |
 
-    Scenario Outline: Create Default without Input Properties
+    Scenario Outline: Create with Specified Default Sub
       Given the following spec definition:
         """
         public class ListSubSpec extends Spec<<specType>> {}
@@ -86,9 +86,118 @@ Feature: List Super => List Sub
         }
         """
       Examples:
-        | type | specType | actualListType |
-#        | List | List<Sub> | ArrayList      |
-#        | List<?>     | List<Sub> | ArrayList      |
-#        | List<Super> | List<Sub> | ArrayList      |
-#        | Object[]    | Sub[]     | Sub[]          |
-#        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType |
+        | List        | List<Sub> | ArrayList      |
+        | List<?>     | List<Sub> | ArrayList      |
+        | List<Super> | List<Sub> | ArrayList      |
+        | Object[]    | Sub[]     | Sub[]          |
+        | Super[]     | Sub[]     | Sub[]          |
+
+    Scenario Outline: Create with Sub Property
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      And the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0].value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= v1
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | specType  | actualListType |
+        | List        | List<Sub> | ArrayList      |
+        | List<?>     | List<Sub> | ArrayList      |
+        | List<Super> | List<Sub> | ArrayList      |
+        | Object[]    | Sub[]     | Sub[]          |
+        | Super[]     | Sub[]     | Sub[]          |
+
+    Scenario Outline: Create with Sub Property Query
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      And the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0].value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= v1
+            value2= v2
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | specType  | actualListType |
+        | List        | List<Sub> | ArrayList      |
+        | List<?>     | List<Sub> | ArrayList      |
+        | List<Super> | List<Sub> | ArrayList      |
+        | Object[]    | Sub[]     | Sub[]          |
+        | Super[]     | Sub[]     | Sub[]          |
+
+    Scenario Outline: Query with Sub Property
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      And the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      Given register as follows:
+        """
+        Sub sub = jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
+        jFactory.type(Bean.class).property("list[0]", sub).create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0].value1", "v1").query();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= v1
+            value2= v2
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | specType  | actualListType |
+        | List        | List<Sub> | ArrayList      |
+        | List<?>     | List<Sub> | ArrayList      |
+        | List<Super> | List<Sub> | ArrayList      |
+        | Object[]    | Sub[]     | Object[]       |
+        | Super[]     | Sub[]     | Super[]        |

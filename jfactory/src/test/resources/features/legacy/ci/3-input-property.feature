@@ -784,6 +784,28 @@ Feature: input property
       }]
       """
 
+    Scenario: pass empty map means create an element with no properties
+      Given the following bean class:
+      """
+      public class Bean {
+        public String value;
+      }
+      """
+      And the following bean class:
+      """
+      public class Beans {
+        public Bean[] beans;
+      }
+      """
+      When build:
+      """
+      jFactory.type(Beans.class).property("beans[0]", new HashMap()).create();
+      """
+      Then the result should:
+      """
+      beans: [{class.simpleName= Bean}]
+      """
+
   Rule: negative index in collection
 
     Background:

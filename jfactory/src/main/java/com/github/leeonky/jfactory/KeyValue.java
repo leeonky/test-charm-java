@@ -120,6 +120,8 @@ class KeyValue {
         } else
             subProducer = collectionProducer.getChild(index).orElse(PlaceHolderProducer.PLACE_HOLDER);
         if (collectionProducer instanceof BuilderValueProducer) {
+            if (clause == null)
+                return new SubObjectExpression<>(new KeyValueCollection().append(index, value), elementTraitSpec, property, objectFactory, subProducer, forQuery);
             return new SubObjectExpression<>(new KeyValueCollection().append(index + "." + clause, value), elementTraitSpec, property, objectFactory, subProducer, forQuery);
         }
         return new CollectionExpression<>(property, intIndex,

@@ -5,7 +5,6 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.ClassDefinition.guessClassName;
 
@@ -31,6 +30,7 @@ public class JavaExecutor {
     private ExecutorMain executorMain = new ExecutorMain(this);
 
     public void addClass(String sourceCode) {
+        sourceCode = String.join("\n", dependencies) + "\n" + sourceCode;
         String className = guessClassName(sourceCode);
         Optional<ClassDefinition> compiled = findDefinition(allCompiled, className);
         if (compiled.isPresent()) {
@@ -50,7 +50,7 @@ public class JavaExecutor {
 
     public Class<?> classOf(String className) {
         if (!unCompiled.isEmpty()) {
-            allCompiled.addAll(javaCompiler.compile(unCompiled.values().stream().map(s -> String.join("\n", dependencies) + "\n" + s).collect(Collectors.toList())));
+            allCompiled.addAll(javaCompiler.compile(unCompiled.values()));
             unCompiled.clear();
         }
         return Sneaky.get(() -> findDefinition(allCompiled, className).map(d ->
