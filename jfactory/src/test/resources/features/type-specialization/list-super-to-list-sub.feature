@@ -379,7 +379,12 @@ Feature: List Super => List Sub
     Background:
       Given the following spec definition:
         """
-        public class SubSpec extends Spec<Sub> {}
+        public class SubSpec extends Spec<Sub> {
+          @Trait
+          public void v2() {
+            property("value2").value("v2");
+          }
+        }
         """
       And register as follows:
         """
@@ -531,6 +536,347 @@ Feature: List Super => List Sub
             value1= v1
             value2= v2
             class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Use Trait in SubSpec
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list[0](v2 SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        list: [{
+          value1= v1
+          value2= v2
+          class.simpleName= Sub
+        }]
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Create with Sub Properties (Merge Spec)
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list[0](SubSpec).value1", "v1").property("list[0].value2", "v2").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            value2= v2
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+  Rule: Input Property Spec override Original Spec in Parent
+
+    Background:
+      Given the following class definition:
+        """
+        public class AnotherSub extends Super {}
+        """
+      Given the following spec definition:
+        """
+        public class OriginalSupSpec extends Spec<AnotherSub> {}
+        """
+      And the following spec definition:
+        """
+        public class SubSpec extends Spec<Sub> {
+          public void main() {
+            property("value2").value("New");
+          }
+
+          @Trait
+          public void v2() {
+            property("value2").value("v2");
+          }
+        }
+        """
+      And register as follows:
+         """
+         jFactory.register(SubSpec.class);
+         """
+      And the following spec definition:
+         """
+         public class BeanSpec extends Spec<Bean> {
+           public void main() {
+             property("list[]").is(OriginalSupSpec.class);
+           }
+         }
+         """
+
+    Scenario Outline: Create Default with Specified Default Sub
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](SubSpec)", new HashMap()).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value2= New
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Create Default with Sub Properties
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            value2= New
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Create with Sub Property
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            value2= New
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Create with Sub Property Query
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            value2= v2
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Query with Sub Property
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      Given register as follows:
+        """
+        Sub sub = jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
+        jFactory.type(Bean.class).property("list[0]", sub).create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](SubSpec).value1", "v1").query();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            value2= v2
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Use Trait in SubSpec
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](v2 SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        list: [{
+          value1= v1
+          value2= v2
+          class.simpleName= Sub
+        }]
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Create with Sub Properties (Merge Spec)
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](SubSpec).value1", "v1").property("list[0].value2", "v2").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            value2= v2
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Create one Keep the others
+      Given the following bean definition:
+        """
+        public class Bean {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0](SubSpec).value1", "v1").property("list[1]", new HashMap()).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            value2= New
+            class.simpleName= Sub
+          }{
+            class.simpleName= AnotherSub
           }]
           list.class.simpleName= '<actualListType>'
         }
