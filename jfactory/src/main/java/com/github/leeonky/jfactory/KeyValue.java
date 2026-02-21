@@ -6,6 +6,7 @@ import com.github.leeonky.util.Property;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,7 +75,7 @@ class KeyValue {
         Property<T> property = beanClass.getProperty(propertyName);
         Producer<?> subProducer;
 
-        if (traitsSpec.isCollectionSpec()
+        if (traitsSpec.isCollectionElementSpec()
 //        TODO raise error when spec and property type conflicted
 //                && producer instanceof ObjectProducer
 //                && (property.getWriterType().is(Object.class) || property.getWriterType().isCollection())
@@ -86,19 +87,25 @@ class KeyValue {
             subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
             if (subProducer instanceof CollectionProducer)
                 ((CollectionProducer<?, ?>) subProducer).changeElementPopulationFactory(i ->
-                                new BuilderValueProducer<>(
-                                        traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()), true)
-//                                .createProducer()
+                        new BuilderValueProducer<>(
+                                traitsSpec.toBuilder(((ObjectProducer) producer).jFactory(), specFactory.getType()), true)
                 );
             if (subProducer == null)
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else {
-            subProducer = producer.getChild(propertyName).orElse(PlaceHolderProducer.PLACE_HOLDER);
-            if (subProducer instanceof ObjectProducer
-                    || subProducer instanceof CollectionProducer
-                    || subProducer instanceof BuilderValueProducer
-            )
-                property = property.decorateType(subProducer.getType());
+            Optional<BeanClass<?>> optionalSpecType = traitsSpec.guessPropertyType(objectFactory.getFactorySet());
+            if (optionalSpecType.isPresent() && optionalSpecType.get().isCollection() &&
+                    property.getWriterType().is(Object.class)) {
+                property = property.decorateType(optionalSpecType.get());
+                subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
+            } else {
+                subProducer = producer.getChild(propertyName).orElse(PlaceHolderProducer.PLACE_HOLDER);
+                if (subProducer instanceof ObjectProducer
+                        || subProducer instanceof CollectionProducer
+                        || subProducer instanceof BuilderValueProducer
+                )
+                    property = property.decorateType(subProducer.getType());
+            }
         }
         Property<T> finalSubProperty = property;
         Producer<T> finalSubProducer = (Producer<T>) subProducer;
@@ -136,7 +143,7 @@ class KeyValue {
     private <T> Expression<T> createSubExpression(Property<T> property, Property<?> parentProperty,
                                                   ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery, TraitsSpec traitsSpec) {
         Expression<T> result;
-        Property<T> decoratedProperty = traitsSpec.guessPropertyType(objectFactory).map(property::decorateType).orElse(property);
+        Property<T> decoratedProperty = traitsSpec.guessPropertyType(objectFactory.getFactorySet()).map(property::decorateType).orElse(property);
         if (clause == null) {
             String transformerName = parentProperty != null && decoratedProperty.getBeanType().isCollection()
                     ? propertyName + "[]" : propertyName;

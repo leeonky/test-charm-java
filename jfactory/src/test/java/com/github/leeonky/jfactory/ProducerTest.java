@@ -125,7 +125,7 @@ class ProducerTest {
 
         @Test
         void to_default_value_should() {
-            assertChange("not override from collection", "array2", "defaultString1", "array2");
+            assertChange("override from collection", "array2", "defaultString1", "defaultString1");
             assertChange("override from default value", "defaultString2", "defaultString1", "defaultString1");
             assertChange("not override from dependency value", "dependency2", "defaultString1", "dependency2");
             assertChange("not override from input", "inputString2", "defaultString1", "inputString2");

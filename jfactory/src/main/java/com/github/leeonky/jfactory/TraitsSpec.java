@@ -52,21 +52,17 @@ class TraitsSpec {
         mergeSpec(another, property);
     }
 
-    public Optional<BeanClass> guessPropertyType(ObjectFactory<?> objectFactory) {
+    public Optional<BeanClass<?>> guessPropertyType(FactorySet factorySet) {
         if (spec != null)
-            return Optional.of(objectFactory.getFactorySet().querySpecClassFactory(spec).getType());
+            return Optional.of(factorySet.querySpecClassFactory(spec).getType());
         return Optional.empty();
     }
 
-    public boolean isCollectionSpec() {
+    public boolean isCollectionElementSpec() {
         return collectionSpec;
     }
 
     public String spec() {
         return spec;
-    }
-
-    public boolean isEmpty() {
-        return spec == null;
     }
 }
