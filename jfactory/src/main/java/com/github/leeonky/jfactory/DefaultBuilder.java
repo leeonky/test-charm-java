@@ -125,7 +125,7 @@ class DefaultBuilder<T> implements Builder<T> {
             if (isCollection(value)) {
                 List<Object> objects = CollectionHelper.toStream(value).collect(Collectors.toList());
                 if (objects.isEmpty() || !property.contains("$"))
-                    newBuilder.properties.append(trimIndexAlias(property), objects);
+                    newBuilder.properties.append(trimIndexAlias(property), value);
                 else for (int i = 0; i < objects.size(); i++)
                     newBuilder.properties.append(property.replaceFirst("\\$", String.valueOf(i)), objects.get(i));
             } else

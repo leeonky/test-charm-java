@@ -94,8 +94,7 @@ class KeyValue {
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else {
             Optional<BeanClass<?>> optionalSpecType = traitsSpec.guessPropertyType(objectFactory.getFactorySet());
-            if (optionalSpecType.isPresent() && optionalSpecType.get().isCollection() &&
-                    property.getWriterType().is(Object.class)) {
+            if (optionalSpecType.isPresent() && optionalSpecType.get().isCollection()) {
                 property = property.decorateType(optionalSpecType.get());
                 subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
             } else {
