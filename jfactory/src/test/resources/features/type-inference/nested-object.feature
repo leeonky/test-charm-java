@@ -16,12 +16,6 @@ Feature: Nested object specialization via Spec
         public String value1, value2;
       }
       """
-    And the following bean definition:
-      """
-      public class Bean {
-        public Super object;
-      }
-      """
     And the following spec definition:
       """
       public class SubSpec extends Spec<Sub> {
@@ -48,7 +42,13 @@ Feature: Nested object specialization via Spec
         }
         """
 
-    Scenario: Create Root Object without any Sub-Object Properties
+    Scenario Outline: Create Root Object without any Sub-Object Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).create();
@@ -61,8 +61,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create Default Sub-Object without Specifying its Properties
+    Scenario Outline: Create Default Sub-Object without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object", new HashMap()).create();
@@ -75,8 +87,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create Sub-Object with Given Properties
+    Scenario Outline: Create Sub-Object with Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object.value1", "v1").create();
@@ -89,9 +113,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Reuse Previously Created Sub-Object by Matching its Properties
-      Given register as follows:
+    Scenario Outline: Reuse Previously Created Sub-Object by Matching its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         """
@@ -107,9 +143,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Query Root Object by Sub-Object Properties
-      Given register as follows:
+    Scenario Outline: Query Root Object by Sub-Object Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         Sub sub = jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         jFactory.type(Bean.class).property("object", sub).create();
@@ -126,9 +174,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Use Trait in SubSpec
-      Given the following spec definition:
+    Scenario Outline: Use Trait in SubSpec
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And the following spec definition:
         """
         public class BeanSpec extends Spec<Bean> {
           public void main() {
@@ -148,6 +208,12 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
   Rule: By apply(...) in the parent spec
 
@@ -171,7 +237,13 @@ Feature: Nested object specialization via Spec
         object: null
         """
 
-    Scenario: Create Default Sub-Object without Specifying its Properties
+    Scenario Outline: Create Default Sub-Object without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object", new HashMap()).create();
@@ -184,8 +256,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create Sub-Object with Given Properties
+    Scenario Outline: Create Sub-Object with Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object.value1", "v1").create();
@@ -198,9 +282,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Reuse Previously Created Sub-Object by Matching its Properties
-      Given register as follows:
+    Scenario Outline: Reuse Previously Created Sub-Object by Matching its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         """
@@ -216,9 +312,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Query Root Object by Sub-Object Properties
-      Given register as follows:
+    Scenario Outline: Query Root Object by Sub-Object Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         Sub sub = jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         jFactory.type(Bean.class).property("object", sub).create();
@@ -235,19 +343,31 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Use Trait in SubSpec
-      Given the following spec definition:
+    Scenario Outline: Use Trait in SubSpec
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And the following spec definition:
         """
         public class BeanSpec extends Spec<Bean> {
           public void main() {
-            property("object").is("v2", "SubSpec");
+            property("object").apply("v2", "SubSpec");
           }
         }
         """
       When evaluating the following code:
         """
-        jFactory.spec(BeanSpec.class).create();
+        jFactory.spec(BeanSpec.class).property("object", new HashMap()).create();
         """
       Then the result should be:
         """
@@ -257,10 +377,22 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
   Rule: By input child property Spec
 
-    Scenario: Create Default Sub-Object without Specifying its Properties
+    Scenario Outline: Create Default Sub-Object without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("object(SubSpec)", new HashMap()).create();
@@ -273,8 +405,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create Sub-Object with Given Properties
+    Scenario Outline: Create Sub-Object with Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("object(SubSpec).value1", "v1").create();
@@ -287,9 +431,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Reuse Previously Created Sub-Object by Matching its Properties
-      Given register as follows:
+    Scenario Outline: Reuse Previously Created Sub-Object by Matching its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         """
@@ -305,9 +461,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Query Root Object by Sub-Object Properties
-      Given register as follows:
+    Scenario Outline: Query Root Object by Sub-Object Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         Sub sub = jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         jFactory.type(Bean.class).property("object", sub).create();
@@ -324,8 +492,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Use Trait in SubSpec
+    Scenario Outline: Use Trait in SubSpec
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("object(v2 SubSpec).value1", "v1").create();
@@ -338,8 +518,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create with Sub Properties (Merge Spec)
+    Scenario Outline: Create with Sub Properties (Merge Spec)
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("object(SubSpec).value1", "hello").property("object.value2", "world").create();
@@ -352,13 +544,19 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
   Rule: By input child property spec override in parent spec is(...)
 
     Background:
       Given the following spec definition:
         """
-        public class OriginalSupSpec extends Spec<Super> {}
+        public class OriginalSupSpec extends Spec<Sub> {}
         """
       And the following spec definition:
         """
@@ -386,7 +584,13 @@ Feature: Nested object specialization via Spec
         jFactory.register(SubSpec.class);
         """
 
-    Scenario: Create Default Sub-Object without Specifying its Properties
+    Scenario Outline: Create Default Sub-Object without Specifying its Properties -x
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(SubSpec)", new HashMap()).create();
@@ -399,8 +603,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create Sub-Object with Given Properties
+    Scenario Outline: Create Sub-Object with Given Properties x
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(SubSpec).value1", "v1").create();
@@ -413,9 +629,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Reuse Previously Created Sub-Object by Matching its Properties
-      Given register as follows:
+    Scenario Outline: Reuse Previously Created Sub-Object by Matching its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         """
@@ -431,9 +659,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Query Root Object by Sub-Object Properties
-      Given register as follows:
+    Scenario Outline: Query Root Object by Sub-Object Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         Sub sub = jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         jFactory.type(Bean.class).property("object", sub).create();
@@ -450,8 +690,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Use Trait in SubSpec
+    Scenario Outline: Use Trait in SubSpec
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(v2 SubSpec).value1", "v1").create();
@@ -464,8 +716,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create with Sub Properties (Merge Spec)
+    Scenario Outline: Create with Sub Properties (Merge Spec)
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(SubSpec).value1", "hello").property("object.value2", "world").create();
@@ -478,6 +742,12 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
   Rule: By input child property spec override in parent spec apply(...)
 
@@ -513,7 +783,13 @@ Feature: Nested object specialization via Spec
         jFactory.register(SubSpec.class);
         """
 
-    Scenario: Create Default Sub-Object without Specifying its Properties
+    Scenario Outline: Create Default Sub-Object without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(SubSpec)", new HashMap()).create();
@@ -526,8 +802,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create Sub-Object with Given Properties
+    Scenario Outline: Create Sub-Object with Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(SubSpec).value1", "v1").create();
@@ -540,9 +828,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Reuse Previously Created Sub-Object by Matching its Properties
-      Given register as follows:
+    Scenario Outline: Reuse Previously Created Sub-Object by Matching its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         """
@@ -558,9 +858,21 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Query Root Object by Sub-Object Properties
-      Given register as follows:
+    Scenario Outline: Query Root Object by Sub-Object Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      And register as follows:
         """
         Sub sub = jFactory.type(Sub.class).property("value1", "v1").property("value2", "v2").create();
         jFactory.type(Bean.class).property("object", sub).create();
@@ -577,8 +889,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Use Trait in SubSpec
+    Scenario Outline: Use Trait in SubSpec
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(v2 SubSpec).value1", "v1").create();
@@ -591,8 +915,20 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
 
-    Scenario: Create with Sub Properties (Merge Spec)
+    Scenario Outline: Create with Sub Properties (Merge Spec)
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object(SubSpec).value1", "hello").property("object.value2", "world").create();
@@ -605,3 +941,9 @@ Feature: Nested object specialization via Spec
           class.simpleName= Sub
         }
         """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |

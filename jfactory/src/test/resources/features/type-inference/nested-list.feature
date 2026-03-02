@@ -36,7 +36,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -52,15 +52,17 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | ArrayList      |
-        | Object      | Super[]   | Super[]        |
-        | Object      | Sub[]     | Sub[]          |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Sub[]          |
-        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Super[]   | Super[]        |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Create Default List Element Without Specifying its Properties
       Given the following spec definition:
@@ -69,7 +71,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -89,14 +91,14 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | ArrayList      |
-        | Object      | Sub[]     | Sub[]          |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Sub[]          |
-        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Create List Element With Given Properties
       Given the following spec definition:
@@ -105,7 +107,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -125,14 +127,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | ArrayList      |
-        | Object      | Sub[]     | Sub[]          |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Sub[]          |
-        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Reuse Previously Created Object by Matching its Properties
       Given the following spec definition:
@@ -141,7 +145,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -164,14 +168,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | ArrayList      |
-        | Object      | Sub[]     | Sub[]          |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Sub[]          |
-        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Query Root Object by List Element Properties
       Given the following spec definition:
@@ -180,7 +186,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -204,16 +210,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | Object[]       |
-        | Object      | Sub[]     | Object[]       |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Object[]       |
-        | Super[]     | Sub[]     | Super[]        |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | Object[]       |         |
+        | Object      | Sub[]     | Object[]       |         |
+        | T           | List<Sub> | Object[]       | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Object[]       |         |
+        | Super[]     | Sub[]     | Super[]        |         |
 
-  Rule: By is(...) with element spec in the parent spec
+  Rule: By is(...) with collection element spec in the parent spec
 
     Background:
       Given the following spec definition:
@@ -232,7 +240,7 @@ Feature: Nested list element specialization via Spec
     Scenario Outline: Create Root Object Without Specifying any List Element Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -248,18 +256,20 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | ArrayList      |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Create Default List Element Without Specifying its Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -279,18 +289,20 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | ArrayList      |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Create List Element With Given Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -309,13 +321,15 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | ArrayList      |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Reuse Previously Created Element by Matching its Properties
       Given register as follows:
@@ -324,7 +338,7 @@ Feature: Nested list element specialization via Spec
         """
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -343,18 +357,20 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | ArrayList      |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Query Root Object by List Element Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -378,13 +394,15 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | Object[]       |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | Object      | Object[]       |         |
+        | T           | Object[]       | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
   Rule: By input child collection Spec
 
@@ -405,7 +423,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -425,14 +443,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | ArrayList      |
-        | Object      | Sub[]     | Sub[]          |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Sub[]          |
-        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Create List Element With Given Properties
       Given the following spec definition:
@@ -441,7 +461,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -461,14 +481,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | ArrayList      |
-        | Object      | Sub[]     | Sub[]          |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Sub[]          |
-        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Reuse Previously Created Object by Matching its Properties
       Given the following spec definition:
@@ -477,7 +499,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -500,14 +522,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | ArrayList      |
-        | Object      | Sub[]     | Sub[]          |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Sub[]          |
-        | Super[]     | Sub[]     | Sub[]          |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Query Root Object by List Element Properties
       Given the following spec definition:
@@ -516,7 +540,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -540,16 +564,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | specType  | actualListType |
-        | Object      | List<Sub> | Object[]       |
-        | Object      | Sub[]     | Object[]       |
-        | List        | List<Sub> | ArrayList      |
-        | List<?>     | List<Sub> | ArrayList      |
-        | List<Super> | List<Sub> | ArrayList      |
-        | Object[]    | Sub[]     | Object[]       |
-        | Super[]     | Sub[]     | Super[]        |
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | Object[]       |         |
+        | Object      | Sub[]     | Object[]       |         |
+        | T           | List<Sub> | Object[]       | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Object[]       |         |
+        | Super[]     | Sub[]     | Super[]        |         |
 
-  Rule: By input child collection spec (element spec[])
+  Rule: By input child collection element spec
 
     Background:
       Given the following spec definition:
@@ -569,7 +595,7 @@ Feature: Nested list element specialization via Spec
     Scenario Outline: Create Default List Element Without Specifying its Properties
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -589,18 +615,20 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | ArrayList      |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Sub[]          |
-        | Super[]     | Sub[]          |
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Sub[]          |         |
+        | Super[]     | Sub[]          |         |
 
     Scenario Outline: Create List Element With Given Properties
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -620,18 +648,20 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | ArrayList      |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Sub[]          |
-        | Super[]     | Sub[]          |
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Sub[]          |         |
+        | Super[]     | Sub[]          |         |
 
     Scenario Outline: Reuse Previously Created List Element by Matching its Properties
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -654,18 +684,20 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | ArrayList      |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Sub[]          |
-        | Super[]     | Sub[]          |
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Sub[]          |         |
+        | Super[]     | Sub[]          |         |
 
     Scenario Outline: Query Root Object by List Element Properties
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -689,13 +721,15 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | Object      | Object[]       |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | Object      | Object[]       |         |
+        | T           | Object[]       | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
   Rule: By input child element Spec
 
@@ -717,7 +751,7 @@ Feature: Nested list element specialization via Spec
     Scenario Outline: Create Default List Element Without Specifying its Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -737,17 +771,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Create List Element With Given Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -766,17 +801,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Reuse Previously Created List Element by Matching its Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -800,17 +836,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Query Root Object by List Element Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -835,17 +872,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Use Trait in Element Property Spec
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -872,7 +910,7 @@ Feature: Nested list element specialization via Spec
     Scenario Outline: Create with Sub Properties (Merge Spec)
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -892,19 +930,20 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
   Rule: By input child element Spec for Object Type Collection
 
     Background:
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public Object list;
         }
         """
@@ -1118,7 +1157,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1138,14 +1177,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | originalSpecType | specType  | actualListType |
-        | Object      | List<Super>      | List<Sub> | ArrayList      |
-        | Object      | Super[]          | Sub[]     | Sub[]          |
-        | List        | List<Super>      | List<Sub> | ArrayList      |
-        | List<?>     | List<Super>      | List<Sub> | ArrayList      |
-        | List<Super> | List<Super>      | List<Sub> | ArrayList      |
-        | Object[]    | Super[]          | Sub[]     | Sub[]          |
-        | Super[]     | Super[]          | Sub[]     | Sub[]          |
+        | type        | originalSpecType | specType  | actualListType | generic |
+        | Object      | List<Super>      | List<Sub> | ArrayList      |         |
+        | Object      | Super[]          | Sub[]     | Sub[]          |         |
+        | T           | Super[]          | Sub[]     | Sub[]          | <T>     |
+        | List<T>     | List<Super>      | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Super>      | List<Sub> | ArrayList      |         |
+        | Object[]    | Super[]          | Sub[]     | Sub[]          |         |
+        | Super[]     | Super[]          | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Create List Element With Given Properties
       Given the following spec definition:
@@ -1158,7 +1199,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1178,14 +1219,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | originalSpecType | specType  | actualListType |
-        | Object      | List<Super>      | List<Sub> | ArrayList      |
-        | Object      | Super[]          | Sub[]     | Sub[]          |
-        | List        | List<Super>      | List<Sub> | ArrayList      |
-        | List<?>     | List<Super>      | List<Sub> | ArrayList      |
-        | List<Super> | List<Super>      | List<Sub> | ArrayList      |
-        | Object[]    | Super[]          | Sub[]     | Sub[]          |
-        | Super[]     | Super[]          | Sub[]     | Sub[]          |
+        | type        | originalSpecType | specType  | actualListType | generic |
+        | Object      | List<Super>      | List<Sub> | ArrayList      |         |
+        | Object      | Super[]          | Sub[]     | Sub[]          |         |
+        | T           | Super[]          | Sub[]     | Sub[]          | <T>     |
+        | List<T>     | List<Super>      | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Super>      | List<Sub> | ArrayList      |         |
+        | Object[]    | Super[]          | Sub[]     | Sub[]          |         |
+        | Super[]     | Super[]          | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Reuse Previously Created Object by Matching its Properties
       Given the following spec definition:
@@ -1198,7 +1241,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1221,14 +1264,16 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | originalSpecType | specType  | actualListType |
-        | Object      | List<Super>      | List<Sub> | ArrayList      |
-        | Object      | Super[]          | Sub[]     | Sub[]          |
-        | List        | List<Super>      | List<Sub> | ArrayList      |
-        | List<?>     | List<Super>      | List<Sub> | ArrayList      |
-        | List<Super> | List<Super>      | List<Sub> | ArrayList      |
-        | Object[]    | Super[]          | Sub[]     | Sub[]          |
-        | Super[]     | Super[]          | Sub[]     | Sub[]          |
+        | type        | originalSpecType | specType  | actualListType | generic |
+        | Object      | List<Super>      | List<Sub> | ArrayList      |         |
+        | Object      | Super[]          | Sub[]     | Sub[]          |         |
+        | T           | Super[]          | Sub[]     | Sub[]          | <T>     |
+        | List<T>     | List<Super>      | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Super>      | List<Sub> | ArrayList      |         |
+        | Object[]    | Super[]          | Sub[]     | Sub[]          |         |
+        | Super[]     | Super[]          | Sub[]     | Sub[]          |         |
 
     Scenario Outline: Query Root Object by List Element Properties
       Given the following spec definition:
@@ -1241,7 +1286,7 @@ Feature: Nested list element specialization via Spec
         """
       And the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1265,16 +1310,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | originalSpecType | specType  | actualListType |
-        | Object      | List<Super>      | List<Sub> | Object[]       |
-        | Object      | Super[]          | Sub[]     | Object[]       |
-        | List        | List<Super>      | List<Sub> | ArrayList      |
-        | List<?>     | List<Super>      | List<Sub> | ArrayList      |
-        | List<Super> | List<Super>      | List<Sub> | ArrayList      |
-        | Object[]    | Super[]          | Sub[]     | Object[]       |
-        | Super[]     | Super[]          | Sub[]     | Super[]        |
+        | type        | originalSpecType | specType  | actualListType | generic |
+        | Object      | List<Super>      | List<Sub> | Object[]       |         |
+        | Object      | Super[]          | Sub[]     | Object[]       |         |
+        | T           | Super[]          | Sub[]     | Object[]       | <T>     |
+        | List<T>     | List<Super>      | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Super>      | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Super>      | List<Sub> | ArrayList      |         |
+        | Object[]    | Super[]          | Sub[]     | Object[]       |         |
+        | Super[]     | Super[]          | Sub[]     | Super[]        |         |
 
-#  Rule: By input child collection Spec Override Parent is(...) with ELement Spec
+#  Rule: By input child collection Spec Override Parent is(...) with Element Spec
 #
 #    Background:
 #      Given the following spec definition:
@@ -1296,7 +1343,7 @@ Feature: Nested list element specialization via Spec
 #        """
 #      And the following bean definition:
 #        """
-#        public class Bean {
+#        public class Bean<generic> {
 #          public <type> list;
 #        }
 #        """
@@ -1332,7 +1379,7 @@ Feature: Nested list element specialization via Spec
 #        """
 #      And the following bean definition:
 #        """
-#        public class Bean {
+#        public class Bean<generic> {
 #          public <type> list;
 #        }
 #        """
@@ -1368,7 +1415,7 @@ Feature: Nested list element specialization via Spec
 #        """
 #      And the following bean definition:
 #        """
-#        public class Bean {
+#        public class Bean<generic> {
 #          public <type> list;
 #        }
 #        """
@@ -1407,7 +1454,7 @@ Feature: Nested list element specialization via Spec
 #        """
 #      And the following bean definition:
 #        """
-#        public class Bean {
+#        public class Bean<generic> {
 #          public <type> list;
 #        }
 #        """
@@ -1479,10 +1526,10 @@ Feature: Nested list element specialization via Spec
          }
          """
 
-    Scenario Outline: Create Default List Element Without Specifying its Properties
+    Scenario Outline: Create Default List Element Without Specifying its Properties x
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1501,17 +1548,19 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+#Bug        | Object      | ArrayList      |         |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Create List Element With Given Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1531,17 +1580,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Reuse Previously Created List Element by Matching its Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1565,17 +1615,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Query Root Object by List Element Properties
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1600,17 +1651,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Use Trait in Element Property Spec
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1627,17 +1679,18 @@ Feature: Nested list element specialization via Spec
         }]
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Create with Sub Properties (Merge Spec)
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1657,17 +1710,18 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
     Scenario Outline: Create one Keep the others
       Given the following bean definition:
         """
-        public class Bean {
+        public class Bean<generic> {
           public <type> list;
         }
         """
@@ -1689,12 +1743,13 @@ Feature: Nested list element specialization via Spec
         }
         """
       Examples:
-        | type        | actualListType |
-        | List        | ArrayList      |
-        | List<?>     | ArrayList      |
-        | List<Super> | ArrayList      |
-        | Object[]    | Object[]       |
-        | Super[]     | Super[]        |
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
 
   Rule: By input child element Spec override Original Spec in Parent for type object Collection
 
@@ -1788,10 +1843,14 @@ Feature: Nested list element specialization via Spec
         """
 
 
-#      TODO Missing spec override test input collection override parent element[]
+#      Done TODO Missing spec override test input collection override parent collection
+#      Bug TODO Missing spec override test input collection override parent element[]
+
 #      TODO Missing spec override test input element[] override parent collection
 #      TODO Missing spec override test input element[] override parent element[]
+
 #      TODO Missing spec override test input element spec override parent collection
-#      TODO Missing spec override test input element spec override parent element[]
+#      Done TODO Missing spec override test input element spec override parent element[]
+#      Bug TODO Missing spec override test input element spec override parent element[] for object type
 #      TODO Missing spec override test input element spec override input collection
 #      TODO Missing spec override test input element spec override input element[]
