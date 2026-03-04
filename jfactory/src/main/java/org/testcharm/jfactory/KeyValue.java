@@ -10,10 +10,10 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.testcharm.util.CollectionHelper.reify;
-import static org.testcharm.util.Sneaky.cast;
 import static java.lang.Integer.parseInt;
 import static java.util.Optional.ofNullable;
+import static org.testcharm.util.CollectionHelper.reify;
+import static org.testcharm.util.Sneaky.cast;
 
 //TODO use a parser to parse this
 class KeyValue {
@@ -127,7 +127,7 @@ class KeyValue {
             subProducer = collectionProducer.getChild(index).orElse(PlaceHolderProducer.PLACE_HOLDER);
         if (collectionProducer instanceof BuilderValueProducer) {
             if (clause == null)
-                return new SubObjectExpression<>(new KeyValueCollection().append(index, value), traitsSpec, property, objectFactory, subProducer, forQuery);
+                return new SubObjectExpression<>(new KeyValueCollection().append(index + (intently ? "!" : ""), value), traitsSpec, property, objectFactory, subProducer, forQuery);
             return new SubObjectExpression<>(new KeyValueCollection().append(index + "." + clause, value), traitsSpec, property, objectFactory, subProducer, forQuery);
         }
         return new CollectionExpression<>(property, intIndex,

@@ -100,6 +100,42 @@ Feature: Nested list element specialization via Spec
         | Object[]    | Sub[]     | Sub[]          |         |
         | Super[]     | Sub[]     | Sub[]          |         |
 
+    Scenario Outline: Intently Create Default List Element Without Specifying its Properties
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      And the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0]!", null).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= /^value1.*/
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
+
     Scenario Outline: Create List Element With Given Properties
       Given the following spec definition:
         """
@@ -114,6 +150,44 @@ Feature: Nested list element specialization via Spec
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("list[0].value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= v1
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
+
+    Scenario Outline: IntentlyCreate List Element With Given Properties
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      And the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0]!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -299,6 +373,39 @@ Feature: Nested list element specialization via Spec
         | Object[]    | Object[]       |         |
         | Super[]     | Super[]        |         |
 
+    Scenario Outline: Intently Create Default List Element Without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0]!", null).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= /^value1.*/
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
+
     Scenario Outline: Create List Element With Given Properties
       Given the following bean definition:
         """
@@ -309,6 +416,38 @@ Feature: Nested list element specialization via Spec
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("list[0].value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
+
+    Scenario Outline: Intently Create List Element With Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("list[0]!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -454,6 +593,44 @@ Feature: Nested list element specialization via Spec
         | Object[]    | Sub[]     | Sub[]          |         |
         | Super[]     | Sub[]     | Sub[]          |         |
 
+    Scenario Outline: Intently Create Default List Element Without Specifying its Properties
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      And the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list(ListSubSpec)[0]!", null).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= /^value1.*/
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
+
     Scenario Outline: Create List Element With Given Properties
       Given the following spec definition:
         """
@@ -468,6 +645,44 @@ Feature: Nested list element specialization via Spec
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("list(ListSubSpec)[0].value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= v1
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | specType  | actualListType | generic |
+        | Object      | List<Sub> | ArrayList      |         |
+        | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
+        | List        | List<Sub> | ArrayList      |         |
+        | List<?>     | List<Sub> | ArrayList      |         |
+        | List<Super> | List<Sub> | ArrayList      |         |
+        | Object[]    | Sub[]     | Sub[]          |         |
+        | Super[]     | Sub[]     | Sub[]          |         |
+
+    Scenario Outline: IntentlyCreate List Element With Given Properties
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      And the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list(ListSubSpec)[0]!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -625,6 +840,39 @@ Feature: Nested list element specialization via Spec
         | Object[]    | Sub[]          |         |
         | Super[]     | Sub[]          |         |
 
+    Scenario Outline: Intently Create Default List Element Without Specifying its Properties
+      And the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list(SubSpec[])[0]!", null).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= /^value1.*/
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Sub[]          |         |
+        | Super[]     | Sub[]          |         |
+
     Scenario Outline: Create List Element With Given Properties
       And the following bean definition:
         """
@@ -635,6 +883,39 @@ Feature: Nested list element specialization via Spec
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("list(SubSpec[])[0].value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= v1
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType | generic |
+        | Object      | ArrayList      |         |
+        | T           | ArrayList      | <T>     |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Sub[]          |         |
+        | Super[]     | Sub[]          |         |
+
+    Scenario Outline: Intently Create List Element With Given Properties
+      And the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list(SubSpec[])[0]!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -779,6 +1060,37 @@ Feature: Nested list element specialization via Spec
         | Object[]    | Object[]       |         |
         | Super[]     | Super[]        |         |
 
+    Scenario Outline: Intently Create Default List Element Without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list[0](SubSpec)!", null).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= /^value1.*/
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
+
     Scenario Outline: Create List Element With Given Properties
       Given the following bean definition:
         """
@@ -789,6 +1101,36 @@ Feature: Nested list element specialization via Spec
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("list[0](SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | type        | actualListType | generic |
+        | List<T>     | ArrayList      | <T>     |
+        | List        | ArrayList      |         |
+        | List<?>     | ArrayList      |         |
+        | List<Super> | ArrayList      |         |
+        | Object[]    | Object[]       |         |
+        | Super[]     | Super[]        |         |
+
+    Scenario Outline: Intently Create List Element With Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> list;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list[0](SubSpec)!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -990,6 +1332,34 @@ Feature: Nested list element specialization via Spec
         | Object[]    | Object[]       |
         | Super[]     | Super[]        |
 
+    Scenario Outline: Intently Create Default List Element Without Specifying its Properties
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list(ListSubSpec)[0](SubSpec)!", null).create();
+        """
+      Then the result should be:
+        """
+        : {
+          list= [{
+            value1= /^value1.*/
+            value2= /^value2.*/
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | specType    | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
     Scenario Outline: Create List Element With Given Properties
       Given the following spec definition:
         """
@@ -998,6 +1368,33 @@ Feature: Nested list element specialization via Spec
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("list(ListSubSpec)[0](SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        : {
+          list: [{
+            value1= v1
+            class.simpleName= Sub
+          }]
+          list.class.simpleName= '<actualListType>'
+        }
+        """
+      Examples:
+        | specType    | actualListType |
+        | List        | ArrayList      |
+        | List<?>     | ArrayList      |
+        | List<Super> | ArrayList      |
+        | Object[]    | Object[]       |
+        | Super[]     | Super[]        |
+
+    Scenario Outline: Intently Create List Element With Given Properties
+      Given the following spec definition:
+        """
+        public class ListSubSpec extends Spec<<specType>> {}
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("list(ListSubSpec)[0](SubSpec)!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -1526,7 +1923,7 @@ Feature: Nested list element specialization via Spec
          }
          """
 
-    Scenario Outline: Create Default List Element Without Specifying its Properties x
+    Scenario Outline: Create Default List Element Without Specifying its Properties
       Given the following bean definition:
         """
         public class Bean<generic> {

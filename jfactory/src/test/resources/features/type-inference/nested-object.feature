@@ -94,6 +94,32 @@ Feature: Nested object specialization via Spec
         | Object |         |
         | T      | <T>     |
 
+    Scenario Outline: Intently Create Default Sub-Object without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("object!", null).create();
+        """
+      Then the result should be:
+        """
+        object: {
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
+
     Scenario Outline: Create Sub-Object with Given Properties
       Given the following bean definition:
         """
@@ -104,6 +130,32 @@ Feature: Nested object specialization via Spec
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object.value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        object: {
+          value1= v1
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
+
+    Scenario Outline: Intently Create Sub-Object with Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("object!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -263,6 +315,32 @@ Feature: Nested object specialization via Spec
         | Object |         |
         | T      | <T>     |
 
+    Scenario Outline: Intently Create Default Sub-Object without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("object!", null).create();
+        """
+      Then the result should be:
+        """
+        object: {
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
+
     Scenario Outline: Create Sub-Object with Given Properties
       Given the following bean definition:
         """
@@ -273,6 +351,32 @@ Feature: Nested object specialization via Spec
       When evaluating the following code:
         """
         jFactory.spec(BeanSpec.class).property("object.value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        object: {
+          value1= v1
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
+
+    Scenario Outline: Intently Create Sub-Object with Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.spec(BeanSpec.class).property("object!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -412,6 +516,32 @@ Feature: Nested object specialization via Spec
         | Object |         |
         | T      | <T>     |
 
+    Scenario Outline: Intently Create Default Sub-Object without Specifying its Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("object(SubSpec)!", null).create();
+        """
+      Then the result should be:
+        """
+        object: {
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
+
     Scenario Outline: Create Sub-Object with Given Properties
       Given the following bean definition:
         """
@@ -422,6 +552,32 @@ Feature: Nested object specialization via Spec
       When evaluating the following code:
         """
         jFactory.type(Bean.class).property("object(SubSpec).value1", "v1").create();
+        """
+      Then the result should be:
+        """
+        object: {
+          value1= v1
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+      Examples:
+        | type   | generic |
+        | Sub    |         |
+        | Super  |         |
+        | Object |         |
+        | T      | <T>     |
+
+    Scenario Outline: Intently Create Sub-Object with Given Properties
+      Given the following bean definition:
+        """
+        public class Bean<generic> {
+          public <type> object;
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("object(SubSpec)!.value1", "v1").create();
         """
       Then the result should be:
         """
@@ -610,7 +766,7 @@ Feature: Nested object specialization via Spec
         | Object |         |
         | T      | <T>     |
 
-    Scenario Outline: Create Sub-Object with Given Properties x
+    Scenario Outline: Create Sub-Object with Given Properties
       Given the following bean definition:
         """
         public class Bean<generic> {
