@@ -175,5 +175,18 @@ class KeyValue {
     public Object getValue() {
         return value;
     }
+
+    @Deprecated
+    public boolean refactor() {
+        return clause == null && !(value instanceof Map) && index == null && traitsSpec.spec() == null && !intently;
+    }
+
+    public String propertyName() {
+        return propertyName;
+    }
+
+    public String key() {
+        return key;
+    }
 }
 

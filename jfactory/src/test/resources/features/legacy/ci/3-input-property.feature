@@ -1,5 +1,109 @@
 Feature: input property
 
+  Rule: Single Object
+
+    Scenario: create by input property
+      Given the following bean class:
+        """
+        public class Bean {
+          public String value1, value2;
+        }
+        """
+      When build:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "v1")
+          .create();
+        """
+      Then the result should:
+        """
+        value1= v1
+        """
+
+    Scenario: input the same property twice
+      Given the following bean class:
+        """
+        public class Bean {
+          public String value1, value2;
+        }
+        """
+      When build:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "v1")
+          .property("value1", "v2")
+          .create();
+        """
+      Then the result should:
+        """
+        value1= v2
+        """
+
+    Scenario: intently create sub value property (by jfactory) will ignore input value
+      Given the following bean class:
+        """
+        public class Bean {
+          public String value1, value2;
+        }
+        """
+      When build:
+        """
+        jFactory.type(Bean.class)
+          .property("value1!", "v1")
+          .create();
+        """
+      Then the result should:
+        """
+        value1= ""
+        """
+
+    Scenario: non intently and intently property with the same key
+      Given the following bean class:
+        """
+        public class Bean {
+          public String value1, value2;
+        }
+        """
+      When build:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "v1")
+          .property("value1!", "v2")
+          .create();
+        """
+      Then the result should:
+        """
+        value1= ""
+        """
+
+    Scenario: intently create object
+      Given the following bean class:
+        """
+        public class Bean {
+          public SubBean sub;
+        }
+        """
+      Given the following bean class:
+        """
+        public class SubBean {
+          public String value1, value2;
+        }
+        """
+      When build:
+        """
+        jFactory.type(Bean.class)
+          .property("sub!", "any")
+          .create();
+        """
+      Then the result should:
+        """
+        sub: {
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= SubBean
+        }
+        """
+
   Rule: input properties for sub object
 
     Scenario: support multi properties in nested property creation and query

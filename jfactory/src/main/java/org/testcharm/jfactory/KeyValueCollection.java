@@ -2,30 +2,30 @@ package org.testcharm.jfactory;
 
 import org.testcharm.util.BeanClass;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class KeyValueCollection {
-    private final Map<String, KeyValue> keyValues = new LinkedHashMap<>();
+    private final List<KeyValue> keyValues = new ArrayList<>();
 
     public void insertAll(KeyValueCollection another) {
-        LinkedHashMap<String, KeyValue> merged = new LinkedHashMap<String, KeyValue>() {{
-            putAll(another.keyValues);
-            putAll(keyValues);
+        List<KeyValue> merged = new ArrayList<KeyValue>() {{
+            addAll(another.keyValues);
+            addAll(keyValues);
         }};
         keyValues.clear();
-        keyValues.putAll(merged);
+        keyValues.addAll(merged);
     }
 
     public void appendAll(KeyValueCollection another) {
-        keyValues.putAll(another.keyValues);
+        keyValues.addAll(another.keyValues);
     }
 
     Builder<?> apply(Builder<?> builder) {
-        for (KeyValue keyValue : keyValues.values())
+        for (KeyValue keyValue : keyValues)
             builder = keyValue.apply(builder);
         return builder;
     }
@@ -33,14 +33,19 @@ public class KeyValueCollection {
     //    TODO remove arg type
     <T> Collection<Expression<T>> expressions(BeanClass<T> type, ObjectFactory<T> objectFactory,
                                               Producer<T> producer, boolean forQuery) {
-        return keyValues.values().stream().map(keyValue -> keyValue.createExpression(type, objectFactory, producer, forQuery))
+        return keyValues.stream().map(keyValue -> keyValue.createExpression(type, objectFactory, producer, forQuery))
                 .collect(Collectors.groupingBy(Expression::getProperty)).values().stream()
                 .map(Expression::merge)
                 .collect(Collectors.toList());
     }
 
+    @Deprecated
+    public boolean refactor() {
+        return keyValues.stream().allMatch(keyValue -> keyValue.refactor());
+    }
+
     public KeyValueCollection append(String key, Object value) {
-        keyValues.put(key, new KeyValue(key, value));
+        keyValues.add(new KeyValue(key, value));
         return this;
     }
 
@@ -58,6 +63,11 @@ public class KeyValueCollection {
 
     public <T> Matcher<T> matcher(BeanClass<T> type, ObjectFactory<T> objectFactory, Producer<T> producer) {
         return new Matcher<>(type, objectFactory, producer);
+    }
+
+    public List<SubBuilder> groupByProperty() {
+        return keyValues.stream().collect(Collectors.groupingBy(KeyValue::propertyName))
+                .values().stream().map(SubBuilder::create).collect(Collectors.toList());
     }
 
     public class Matcher<T> {
