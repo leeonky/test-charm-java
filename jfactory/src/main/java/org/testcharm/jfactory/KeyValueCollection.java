@@ -2,10 +2,7 @@ package org.testcharm.jfactory;
 
 import org.testcharm.util.BeanClass;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class KeyValueCollection {
@@ -65,9 +62,11 @@ public class KeyValueCollection {
         return new Matcher<>(type, objectFactory, producer);
     }
 
-    public List<SubBuilder> groupByProperty() {
-        return keyValues.stream().collect(Collectors.groupingBy(KeyValue::propertyName))
-                .values().stream().map(SubBuilder::create).collect(Collectors.toList());
+    List<SubBuilder> groupByProperty() {
+        return keyValues.stream().map(keyValue -> SubBuilder.create(keyValue.key(), keyValue.getValue()))
+                .collect(Collectors.groupingBy(SubBuilder::property)).values().stream()
+                .map(subBuilders -> subBuilders.stream().reduce(SubBuilder::mergeTo))
+                .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
     public class Matcher<T> {

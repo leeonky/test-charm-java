@@ -178,7 +178,12 @@ class KeyValue {
 
     @Deprecated
     public boolean refactor() {
-        return clause == null && !(value instanceof Map) && index == null && traitsSpec.spec() == null && !intently;
+        try {
+            return SubBuilder.create(key, value) != null;
+        } catch (Exception e) {
+            return false;
+        }
+//        return clause == null && !(value instanceof Map) && index == null && traitsSpec.spec() == null && !intently;
     }
 
     public String propertyName() {
