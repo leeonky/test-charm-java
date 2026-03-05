@@ -191,7 +191,7 @@ class DefaultBuilder<T> implements Builder<T> {
     public void processInputProperty(ObjectProducer<T> producer, boolean forQuery) {
         if (properties.refactor()) {
             properties.groupByProperty().forEach(subBuilder -> {
-                producer.changeChild(subBuilder.property(), subBuilder.buildProducer(producer, objectFactory));
+                producer.changeChild(subBuilder.property(), subBuilder.buildProducer(producer, objectFactory, jFactory));
             });
         } else
             properties.expressions(objectFactory.getType(), objectFactory, producer, forQuery).forEach(exp -> producer.changeChild(exp.getProperty(),

@@ -17,11 +17,15 @@ abstract class SubBuilder {
         return property;
     }
 
-    public abstract Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory);
+    public abstract Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory);
 
     protected abstract SubBuilder mergeTo(SubBuilder subBuilder);
 
     protected SubBuilder mergeFrom(SubValueBuilder subValueBuilder) {
+        return this;
+    }
+
+    protected SubBuilder mergeFrom(SubObjectBuilder subValueBuilder) {
         return this;
     }
 
@@ -31,9 +35,12 @@ abstract class SubBuilder {
         if (matcher.lookingAt()) {
             String property = matcher.group(0);
             String remaining = key.substring(matcher.end());
-            if (remaining.isEmpty() && !isEmptyMap(value)) {
-                return new SubValueBuilder(property, value);
-            }
+            if (remaining.isEmpty())
+                if (!isEmptyMap(value)) {
+                    return new SubValueBuilder(property, value);
+                } else {
+                    return new SubObjectBuilder(property);
+                }
         }
         throw new IllegalArgumentException("Illegal property format: " + key);
     }
