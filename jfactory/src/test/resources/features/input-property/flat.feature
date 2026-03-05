@@ -45,5 +45,17 @@ Feature: flat property
         value1= v2
         """
 
-#  Rule: Collection
-#    Background:
+  Rule: Collection
+
+    Scenario: Create by Element and Value
+      When evaluating the following code:
+        """
+        jFactory.type(List.class)
+          .property("[0]", "v1")
+          .property("[1]", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        = [v1 v2]
+        """
