@@ -43,6 +43,11 @@ class BuilderParser extends Parser {
     private static final Pattern PROPERTY_PATTERN = Pattern.compile("[^.(!\\[]+");
     private static final Pattern FORCE_PATTERN = Pattern.compile("!");
 
+    private static final String PATTERN_SPEC_TRAIT_WORD = "[^, )]";
+    private static final String PATTERN_TRAIT = "((" + PATTERN_SPEC_TRAIT_WORD + "+[, ])(" + PATTERN_SPEC_TRAIT_WORD + "+[, ])*)?";
+    private static final String PATTERN_SPEC = "(" + PATTERN_SPEC_TRAIT_WORD + "+)";
+    private static final Pattern PATTERN_TRAIT_SPEC = Pattern.compile("(\\(" + PATTERN_TRAIT + PATTERN_SPEC + "\\))?");
+
     public BuilderParser(String content) {
         super(content);
     }
@@ -50,19 +55,20 @@ class BuilderParser extends Parser {
     public SubBuilder parse(Object value) {
         return pop(PROPERTY_PATTERN).map(property -> {
             if (isEmpty())
-                return isEmptyMap(value) ? new SubObjectBuilder(property, false) : new SubValueBuilder(property, value);
+                return isEmptyMap(value) ? new SubObjectBuilder(property) : new SubValueBuilder(property, value);
             else {
-                return pop(FORCE_PATTERN).map(force -> {
+                return pop(PATTERN_TRAIT_SPEC).map(TraitsSpec::new).map(traitsSpec -> {
+                    if (isEmpty())
+                        return new SubObjectBuilder(property, traitsSpec);
+                    else
+                        throw new IllegalArgumentException("Illegal property format: " + content());
+                }).orElseGet(() -> pop(FORCE_PATTERN).map(force -> {
                     if (isEmpty())
                         return new SubObjectBuilder(property, true);
-                    else {
+                    else
                         throw new IllegalArgumentException("Illegal property format: " + content());
-                    }
-                }).orElseThrow(() ->
-                        new IllegalArgumentException("Illegal property format: " + content())
-                );
+                }).orElseThrow(() -> new IllegalArgumentException("Illegal property format: " + content())));
             }
-
         }).orElseThrow(() -> new IllegalArgumentException("Illegal property format: " + content()));
     }
 

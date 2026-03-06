@@ -87,7 +87,7 @@ Feature: Nested
         : [{class.simpleName: Sub}]
         """
 
-  Rule: Without Force Creation
+  Rule: Without Only Force Creation
 
     Background:
       Given the following class definition:
@@ -167,3 +167,121 @@ Feature: Nested
         ::size= 2
         """
 
+  Rule: Default Creation Without Only Spec
+
+    Background:
+      Given the following class definition:
+        """
+        public class Bean {
+          public Object sub;
+        }
+        """
+      Given the following class definition:
+        """
+        public class Sub {
+          public String value1, value2;
+        }
+        """
+      Given the following spec definition:
+        """
+        public class SubSpec extends Spec<Sub> {
+          @Trait
+          public void v1() {
+            property("value1").value("v1");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(SubSpec.class);
+        """
+
+    Scenario: Input Empty Map will Create Object with all Properties by Default
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)", new HashMap())
+          .create();
+        """
+      Then the result should be:
+        """
+        sub.class.simpleName= Sub
+        """
+
+    Scenario: With Trait Input Empty Map will Create Object with all Properties by Default
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(v1 SubSpec)", new HashMap())
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          value1= v1
+          class.simpleName= Sub
+        }
+        """
+
+    Scenario: Input Empty Map will Query any Exist Sub Objects First
+      Given register as follows:
+        """
+        jFactory.create(Sub.class);
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)", new HashMap())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Sub.class).queryAll()
+        """
+      Then the result should be:
+        """
+        : [{class.simpleName: Sub}]
+        """
+
+    Scenario: Input Empty Map will Create Object with all Properties by Default For List
+      When evaluating the following code:
+        """
+        jFactory.type(Object[].class)
+          .property("[0](SubSpec)", new HashMap())
+          .create();
+        """
+      Then the result should be:
+        """
+        : [{ class.simpleName= Sub }]
+        """
+
+    Scenario: With Trait Input Empty Map will Create Object with all Properties by Default For List
+      When evaluating the following code:
+        """
+        jFactory.type(Object[].class)
+          .property("[0](v1 SubSpec)", new HashMap())
+          .create();
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= v1
+          class.simpleName= Sub
+        }]
+        """
+
+    Scenario: Input Empty Map will Query any Exist Sub Objects First for List
+      Given register as follows:
+        """
+        jFactory.create(Sub.class);
+        jFactory.type(Object[].class)
+          .property("[0](SubSpec)", new HashMap())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Sub.class).queryAll()
+        """
+      Then the result should be:
+        """
+        : [{class.simpleName: Sub}]
+        """
+
+#TODO Scenario: Input Empty Map will Query any Exist Sub Objects First for List        force positive should verify created object

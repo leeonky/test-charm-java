@@ -2,10 +2,7 @@ package org.testcharm.jfactory;
 
 import org.testcharm.util.BeanClass;
 
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -17,6 +14,12 @@ class TraitsSpec {
     public TraitsSpec(String[] traits, String spec) {
         setSpec(spec);
         this.traits = new LinkedHashSet<>(asList(traits));
+    }
+
+    public TraitsSpec(String traitsAndSpec) {
+        String[] items = traitsAndSpec.replace('(', ' ').replace(')', ' ').trim().split(", |,| ");
+        setSpec(items[items.length - 1]);
+        traits = new LinkedHashSet<>(asList(items).subList(0, items.length - 1));
     }
 
     private void mergeTraits(TraitsSpec another) {
@@ -64,5 +67,11 @@ class TraitsSpec {
 
     public String spec() {
         return spec;
+    }
+
+    public String[] traitsSpec() {
+        List<String> strings = new ArrayList<>(traits);
+        strings.add(spec);
+        return strings.toArray(new String[0]);
     }
 }
