@@ -1,5 +1,7 @@
 package org.testcharm.util;
 
+import org.testcharm.dal.Accessors;
+
 import java.util.*;
 
 import static java.util.Collections.addAll;
@@ -86,6 +88,12 @@ public class ExecutorMain {
 
     public void addArg(String name, Object value) {
         args.put(name, value);
+    }
+
+    public Object field(String name) {
+        if (executor == null)
+            evaluate();
+        return Accessors.get(name).from(executor);
     }
 
     public abstract static class Executor {

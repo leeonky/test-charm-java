@@ -7,6 +7,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.Assertions.expectRun;
 
 public class Steps {
@@ -51,7 +52,6 @@ public class Steps {
 
     @Then("the field {string} should be:")
     public void value_of_should_be(String field, String expression) {
-        JavaExecutor.executor().main().returnExpression(field);
-        expectRun(JavaExecutor.executor().main()::evaluate).should(expression);
+        expect(JavaExecutor.executor().main().field(field)).should(expression);
     }
 }

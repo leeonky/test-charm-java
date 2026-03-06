@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.testcharm.dal.Assertions.expect;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.testcharm.dal.Assertions.expect;
 
 class JavaExecutorTest {
     private final JavaExecutor executor = JavaExecutor.executor().resetAll();
@@ -167,68 +167,111 @@ class JavaExecutorTest {
                 expect(executor.main().evaluate()).isEqualTo(2);
             }
         }
-    }
 
-    @Nested
-    class CompileCache {
+        @Nested
+        class GetFieldValue {
 
-        @Test
-        void new_class() {
-            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
-            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+            @Test
+            void get_field_without_previous_return_expression() {
+                executor.main().addDeclarations("int i=100");
 
-            JavaExecutor executor = new JavaExecutor(spyCompiler);
+                expect(executor.main().field("i")).isEqualTo(100);
+            }
 
-            executor.addClass("public class Foo {}");
-            expect(executor.classOf("Foo")).should("simpleName= Foo");
-            verify(spyCompiler, times(1)).compile(anyCollection());
+            @Test
+            void get_field_after_evaluation_return_expression_avoid_duplicated_called_of_evaluate() {
+                executor.main().addDeclarations("int i=100");
+                executor.main().returnExpression("i++");
+
+                expect(executor.main().field("i")).isEqualTo(101);
+            }
+
+            @Test
+            void should_not_evaluate_when_return_not_changed() {
+                executor.main().addDeclarations("int i=100");
+                executor.main().returnExpression("i++");
+
+                expect(executor.main().field("i")).isEqualTo(101);
+
+                executor.main().returnExpression("i++");
+
+                expect(executor.main().field("i")).isEqualTo(101);
+            }
+
+            @Test
+            void should_evaluate_again_when_return_changed() {
+                executor.main().addDeclarations("int i=100");
+                executor.main().returnExpression("i++");
+
+                expect(executor.main().field("i")).isEqualTo(101);
+
+                executor.main().returnExpression("i+=2");
+
+                expect(executor.main().field("i")).isEqualTo(102);
+            }
         }
 
-        @Test
-        void should_not_recompile_same_code() {
-            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
-            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+        @Nested
+        class CompileCache {
 
-            JavaExecutor executor = new JavaExecutor(spyCompiler);
+            @Test
+            void new_class() {
+                JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+                JavaCompiler spyCompiler = Mockito.spy(realCompiler);
 
-            executor.addClass("public class Foo {}");
-            executor.classOf("Foo");
+                JavaExecutor executor = new JavaExecutor(spyCompiler);
 
-            executor.addClass("public class Foo {}");
-            executor.classOf("Foo");
+                executor.addClass("public class Foo {}");
+                expect(executor.classOf("Foo")).should("simpleName= Foo");
+                verify(spyCompiler, times(1)).compile(anyCollection());
+            }
 
-            verify(spyCompiler, times(1)).compile(anyCollection());
-        }
+            @Test
+            void should_not_recompile_same_code() {
+                JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+                JavaCompiler spyCompiler = Mockito.spy(realCompiler);
 
-        @Test
-        void should_delete_exist_same_name_class_file_after_add_different_content_class() {
-            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
-            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+                JavaExecutor executor = new JavaExecutor(spyCompiler);
 
-            JavaExecutor executor = new JavaExecutor(spyCompiler);
+                executor.addClass("public class Foo {}");
+                executor.classOf("Foo");
 
-            executor.addClass("public class Foo {}");
-            executor.addClass("public class Bar {}");
-            executor.classOf("Foo");
+                executor.addClass("public class Foo {}");
+                executor.classOf("Foo");
 
-            executor.addClass("public class Foo {int any;}");
-            expect(realCompiler.getLocation()).should("name[]= ['Bar.class']");
-            executor.classOf("Foo");
+                verify(spyCompiler, times(1)).compile(anyCollection());
+            }
 
-            verify(spyCompiler, times(2)).compile(anyCollection());
-        }
+            @Test
+            void should_delete_exist_same_name_class_file_after_add_different_content_class() {
+                JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+                JavaCompiler spyCompiler = Mockito.spy(realCompiler);
 
-        @Test
-        void replace_uncompiled_class() throws InstantiationException, IllegalAccessException {
-            JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
-            JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+                JavaExecutor executor = new JavaExecutor(spyCompiler);
 
-            JavaExecutor executor = new JavaExecutor(spyCompiler);
+                executor.addClass("public class Foo {}");
+                executor.addClass("public class Bar {}");
+                executor.classOf("Foo");
 
-            executor.addClass("public class Foo {}");
-            executor.addClass("public class Foo { public int i= 100;}");
-            expect(executor.classOf("Foo").newInstance()).should("i= 100");
-            verify(spyCompiler, times(1)).compile(anyCollection());
+                executor.addClass("public class Foo {int any;}");
+                expect(realCompiler.getLocation()).should("name[]= ['Bar.class']");
+                executor.classOf("Foo");
+
+                verify(spyCompiler, times(2)).compile(anyCollection());
+            }
+
+            @Test
+            void replace_uncompiled_class() throws InstantiationException, IllegalAccessException {
+                JavaCompiler realCompiler = new JavaCompiler("src.test.generate.t", 0);
+                JavaCompiler spyCompiler = Mockito.spy(realCompiler);
+
+                JavaExecutor executor = new JavaExecutor(spyCompiler);
+
+                executor.addClass("public class Foo {}");
+                executor.addClass("public class Foo { public int i= 100;}");
+                expect(executor.classOf("Foo").newInstance()).should("i= 100");
+                verify(spyCompiler, times(1)).compile(anyCollection());
+            }
         }
     }
 }

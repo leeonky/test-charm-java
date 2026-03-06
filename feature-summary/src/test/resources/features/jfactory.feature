@@ -636,6 +636,9 @@ Feature: Summary
       Given the following declarations:
         """
         List<Object> createdDBs = new ArrayList<>();
+        """
+      Given the following declarations:
+        """
         List<Object> createdRedis = new ArrayList<>();
         """
       And the following declarations:
