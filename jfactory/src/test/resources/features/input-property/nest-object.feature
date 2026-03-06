@@ -227,17 +227,21 @@ Feature: Nested
       Given register as follows:
         """
         jFactory.create(Sub.class);
+        jFactory.register(SubSpec.class);
+        """
+      When evaluating the following code:
+        """
         jFactory.type(Bean.class)
           .property("sub(SubSpec)", new HashMap())
           .create();
         """
-      When evaluating the following code:
-        """
-        jFactory.type(Sub.class).queryAll()
-        """
       Then the result should be:
         """
-        : [{class.simpleName: Sub}]
+        sub.class.simpleName: Sub
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec: [{class.simpleName: Sub}]
         """
 
     Scenario: Input Empty Map will Create Object with all Properties by Default For List
@@ -271,17 +275,18 @@ Feature: Nested
       Given register as follows:
         """
         jFactory.create(Sub.class);
-        jFactory.type(Object[].class)
-          .property("[0](SubSpec)", new HashMap())
-          .create();
         """
       When evaluating the following code:
         """
-        jFactory.type(Sub.class).queryAll()
+        jFactory.type(Object[].class)
+          .property("[0](SubSpec)", new HashMap())
+          .create();
         """
       Then the result should be:
         """
         : [{class.simpleName: Sub}]
         """
-
-#TODO Scenario: Input Empty Map will Query any Exist Sub Objects First for List        force positive should verify created object
+      And the field "jFactory" should be:
+        """
+        SubSpec: [{class.simpleName: Sub}]
+        """

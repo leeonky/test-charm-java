@@ -3,6 +3,7 @@ dependencies {
 
     testImplementation project(':DAL-java')
     testImplementation project(':DAL-extension-basic')
+    testImplementation project(':DAL-extension-jfactory')
     testImplementation project(':java-compiler-util')
 }
 
