@@ -22,6 +22,12 @@ class SubObjectBuilder extends SubBuilder {
         force = false;
     }
 
+    public SubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force) {
+        super(property);
+        this.force = force;
+        this.traitsSpec = traitsSpec;
+    }
+
     @Override
     public Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory) {
         return new BuilderValueProducer<>(toBuilder(parent, jFactory), !force);

@@ -15,7 +15,7 @@ Feature: Save Bean to Repository
       """
     Then the field "jFactory" should be:
       """
-      dataRepository.allData::entries: ^| {simpleName: Bean} | [{str= hello}] |
+      ::object.dataRepository.allData::entries: ^| {simpleName: Bean} | [{str= hello}] |
       """
 
   @import(java.util.*)

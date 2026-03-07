@@ -54,7 +54,7 @@ Feature: Nested
         : [{class.simpleName: Sub}]
         """
 
-    Scenario: Input Empty Map will Create Object with all Properties by Default For List
+    Scenario: Input Empty Map will Create Object with all Properties by Default For Top List
       When evaluating the following code:
         """
         jFactory.type(Sub[].class)
@@ -70,7 +70,7 @@ Feature: Nested
         }]
         """
 
-    Scenario: Input Empty Map will Query any Exist Sub Objects First For List
+    Scenario: Input Empty Map will Query any Exist Sub Objects First For Top List
       Given register as follows:
         """
         jFactory.create(Sub.class);
@@ -135,7 +135,7 @@ Feature: Nested
         ::size= 2
         """
 
-    Scenario: Specify ! to Force Create Object for List
+    Scenario: Specify ! to Force Create Object for Top List
       When evaluating the following code:
         """
         jFactory.type(Sub[].class)
@@ -150,7 +150,7 @@ Feature: Nested
         }]
         """
 
-    Scenario: Will Not Query when Specify ! for List
+    Scenario: Will Not Query when Specify ! for Top List
       Given register as follows:
         """
         jFactory.create(Sub.class);
@@ -167,7 +167,7 @@ Feature: Nested
         ::size= 2
         """
 
-  Rule: Default Creation Without Only Spec
+  Rule: Default Creation With Only Spec
 
     Background:
       Given the following class definition:
@@ -244,7 +244,7 @@ Feature: Nested
         SubSpec: [{class.simpleName: Sub}]
         """
 
-    Scenario: Input Empty Map will Create Object with all Properties by Default For List
+    Scenario: Input Empty Map will Create Object with all Properties by Default For Top List
       When evaluating the following code:
         """
         jFactory.type(Object[].class)
@@ -256,7 +256,7 @@ Feature: Nested
         : [{ class.simpleName= Sub }]
         """
 
-    Scenario: With Trait Input Empty Map will Create Object with all Properties by Default For List
+    Scenario: With Trait Input Empty Map will Create Object with all Properties by Default For Top List
       When evaluating the following code:
         """
         jFactory.type(Object[].class)
@@ -271,7 +271,7 @@ Feature: Nested
         }]
         """
 
-    Scenario: Input Empty Map will Query any Exist Sub Objects First for List
+    Scenario: Input Empty Map will Query any Exist Sub Objects First for Top List
       Given register as follows:
         """
         jFactory.create(Sub.class);
@@ -290,3 +290,143 @@ Feature: Nested
         """
         SubSpec: [{class.simpleName: Sub}]
         """
+
+  Rule: Default Creation With Spec and Force
+
+    Background:
+      Given the following class definition:
+        """
+        public class Bean {
+          public Object sub;
+        }
+        """
+      Given the following class definition:
+        """
+        public class Sub {
+          public String value1, value2;
+        }
+        """
+      Given the following spec definition:
+        """
+        public class SubSpec extends Spec<Sub> {
+          @Trait
+          public void v1() {
+            property("value1").value("v1");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(SubSpec.class);
+        """
+
+    Scenario: Force Create Object by Spec and Force
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)!", null)
+          .create();
+        """
+      Then the result should be:
+        """
+        sub= {
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+
+    Scenario: Will Not Query when Specify !
+      Given register as follows:
+        """
+        jFactory.create(Sub.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)!", null)
+          .create();
+        """
+      Then the result should be:
+        """
+        sub= {
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+    Scenario: Specify ! to Force Create Object for Top List
+      When evaluating the following code:
+        """
+        jFactory.type(Object[].class)
+          .property("[0](SubSpec)!", null)
+          .create();
+        """
+      Then the result should be:
+        """
+        = [{
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }]
+        """
+
+    Scenario: Will Not Query when Specify ! for Top List
+      Given register as follows:
+        """
+        jFactory.create(Sub.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Object[].class)
+          .property("[0](SubSpec)!", null)
+          .create();
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= /^value1.*/
+          value2= /^value2.*/
+          class.simpleName= Sub
+        }]
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+  Rule: With Sub Properties
+
+    Background:
+      Given the following class definition:
+        """
+        public class Bean {
+          public Sub sub;
+          public String value1, value2;
+        }
+        """
+      Given the following class definition:
+        """
+        public class Sub {
+          public String subValue1, subValue2;
+        }
+        """
+
+#    Scenario: Create with Single Sub Property
+#      When evaluating the following code:
+#        """
+#        jFactory.type(Bean.class)
+#          .property("sub.subValue1", "v1")
+#          .create();
+#        """
+#      Then the result should be:
+#        """
+#        sub: {
+#          subValue1= v1
+#        }
+#        """
