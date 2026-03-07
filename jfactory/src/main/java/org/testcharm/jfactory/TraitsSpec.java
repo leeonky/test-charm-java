@@ -8,18 +8,21 @@ import static java.util.Arrays.asList;
 
 class TraitsSpec {
     private String spec;
-    private final Set<String> traits;
+    private final Set<String> traits = new LinkedHashSet<>();
     private boolean collectionSpec = false;
 
     public TraitsSpec(String[] traits, String spec) {
         setSpec(spec);
-        this.traits = new LinkedHashSet<>(asList(traits));
+        this.traits.addAll(asList(traits));
     }
 
     public TraitsSpec(String traitsAndSpec) {
         String[] items = traitsAndSpec.replace('(', ' ').replace(')', ' ').trim().split(", |,| ");
         setSpec(items[items.length - 1]);
-        traits = new LinkedHashSet<>(asList(items).subList(0, items.length - 1));
+        traits.addAll(asList(items).subList(0, items.length - 1));
+    }
+
+    public TraitsSpec() {
     }
 
     private void mergeTraits(TraitsSpec another) {
@@ -28,7 +31,7 @@ class TraitsSpec {
 
     private void mergeSpec(TraitsSpec another, String property) {
         if (isDifferentSpec(another))
-            throw new IllegalArgumentException(String.format("Cannot merge different spec `%s` and `%s` for %s",
+            throw new IllegalArgumentException(String.format("Cannot merge different spec `%s` and `%s` for property %s",
                     spec, another.spec, property));
         if (spec == null)
             setSpec(another.spec);
@@ -45,13 +48,24 @@ class TraitsSpec {
         return spec != null && another.spec != null && !Objects.equals(spec, another.spec);
     }
 
-    public Builder<?> toBuilder(JFactory jFactory, BeanClass<?> propertyType) {
-        return (spec != null ? jFactory.spec(spec) : jFactory.type(propertyType.getType()))
+    @SuppressWarnings("unchecked")
+    public Builder<Object> toBuilder(JFactory jFactory, BeanClass<?> propertyType) {
+        return (Builder<Object>) (spec != null ? jFactory.spec(spec) : jFactory.type(propertyType.getType()))
                 .traits(traits.toArray(new String[0]));
     }
 
+    @Deprecated
     public void merge(TraitsSpec another, String property) {
         mergeTraits(another);
+        mergeSpec(another, property);
+    }
+
+    public void mergeFrom(TraitsSpec another, String property) {
+        Set<String> newTraits = new LinkedHashSet<>();
+        newTraits.addAll(another.traits);
+        newTraits.addAll(traits);
+        traits.clear();
+        traits.addAll(newTraits);
         mergeSpec(another, property);
     }
 

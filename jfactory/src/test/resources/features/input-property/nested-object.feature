@@ -493,3 +493,203 @@ Feature: Nested
           sub.subValue2= v2
         }]
         """
+
+  Rule: With Sub Properties with Spec
+
+    Background:
+      Given the following class definition:
+        """
+        public class Bean {
+          public Object sub;
+          public String value1, value2;
+        }
+        """
+      Given the following class definition:
+        """
+        public class Sub {
+          public String subValue1, subValue2, subValue3, subValue4;
+        }
+        """
+      Given the following spec definition:
+        """
+        public class SubSpec extends Spec<Sub> {
+          @Trait
+          public void v1() {
+            property("subValue1").value("v1");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(SubSpec.class);
+        """
+
+    Scenario: Create with Single Sub Property
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec).subValue1", "v1")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+        }
+        """
+
+    Scenario: Create with Multiple Sub Properties
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec).subValue1", "v1")
+          .property("sub(SubSpec).subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Create with Sub Trait
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(v1 SubSpec).subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Query with Single Sub Property
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class).property("subValue1", "v1").create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("sub(SubSpec).subValue1", "v1").queryAll()
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= bean1
+          sub.subValue1= v1
+        }]
+        """
+
+    Scenario: Query with Single Sub Property
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class)
+            .property("subValue1", "v1")
+            .property("subValue2", "v2")
+            .create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec).subValue1", "v1")
+          .property("sub(SubSpec).subValue2", "v2")
+          .queryAll()
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= bean1
+          sub.subValue1= v1
+          sub.subValue2= v2
+        }]
+        """
+
+
+    Scenario: Merge Spec - Spec and Null
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec).subValue1", "v1")
+          .property("sub.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Merge Spec - Null and Spec
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub.subValue1", "v1")
+          .property("sub(SubSpec).subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Merge Spec - Different Spec Should Raise Error
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec1).subValue1", "v1")
+          .property("sub(SubSpec2).subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        ::throw.message= 'Cannot merge different spec `SubSpec2` and `SubSpec1` for property sub'
+        """
+
+    Scenario: Merge Spec - Merge Trait
+      Given the following spec definition:
+        """
+        public class SubSpec extends Spec<Sub> {
+          @Trait
+          public void v1() {
+            property("subValue1").value("v1");
+          }
+
+          @Trait
+          public void v2() {
+            property("subValue2").value("v2");
+          }
+        }
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(v1 SubSpec).subValue3", "v3")
+          .property("sub(v2 SubSpec).subValue4", "v4")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+          subValue3= v3
+          subValue4= v4
+        }
+        """

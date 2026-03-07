@@ -18,13 +18,13 @@ abstract class SubBuilder {
 
     public abstract Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory);
 
-    protected abstract SubBuilder mergeTo(SubBuilder subBuilder);
+    protected abstract SubBuilder mergeTo(SubBuilder to);
 
-    protected SubBuilder mergeFrom(SubValueBuilder subValueBuilder) {
+    protected SubBuilder mergeFrom(SubValueBuilder from) {
         return this;
     }
 
-    protected SubBuilder mergeFrom(SubObjectBuilder subValueBuilder) {
+    protected SubBuilder mergeFrom(SubObjectBuilder from) {
         return this;
     }
 
@@ -58,7 +58,12 @@ class BuilderParser extends Parser {
                         if (isEmpty())
                             return new SubObjectBuilder(property, traitsSpec, true);
                         throw new IllegalArgumentException("Illegal property format: " + content());
-                    }).orElseThrow(() -> new IllegalArgumentException("Illegal property format: " + content()));
+                    }).orElseGet(() -> {
+                        String clause = content();
+                        if (clause.startsWith("."))
+                            return new SubObjectBuilder(property, traitsSpec, clause.substring(1), value);
+                        throw new IllegalArgumentException("Illegal property format: " + content());
+                    });
                 }).orElseGet(() -> pop(FORCE_PATTERN).map(force -> {
                     if (isEmpty())
                         return new SubObjectBuilder(property, true);

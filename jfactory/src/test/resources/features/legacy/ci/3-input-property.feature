@@ -316,7 +316,7 @@ Feature: input property
       """
       Then should raise error:
       """
-      message= 'Cannot merge different spec `Book` and `Computer` for #package#Store.product'
+      message= 'Cannot merge different spec `Book` and `Computer` for property product'
       """
 
     Scenario: pass empty map means create an object with no properties

@@ -10,13 +10,13 @@ class SubObjectBuilder extends SubBuilder {
     public SubObjectBuilder(String property) {
         super(property);
         force = false;
-        traitsSpec = null;
+        traitsSpec = new TraitsSpec();
     }
 
     public SubObjectBuilder(String property, boolean force) {
         super(property);
         this.force = force;
-        traitsSpec = null;
+        traitsSpec = new TraitsSpec();
     }
 
     public SubObjectBuilder(String property, TraitsSpec traitsSpec) {
@@ -34,8 +34,15 @@ class SubObjectBuilder extends SubBuilder {
     public SubObjectBuilder(String property, String clause, Object value) {
         super(property);
         force = false;
-        traitsSpec = null;
+        traitsSpec = new TraitsSpec();
         subProperties.put(clause, value);
+    }
+
+    public SubObjectBuilder(String property, TraitsSpec traitsSpec, String substring, Object value) {
+        super(property);
+        force = false;
+        this.traitsSpec = traitsSpec;
+        subProperties.put(substring, value);
     }
 
     @Override
@@ -44,21 +51,19 @@ class SubObjectBuilder extends SubBuilder {
     }
 
     private Builder<Object> toBuilder(Producer<?> parent, JFactory jFactory) {
-        Builder<Object> builder = traitsSpec != null ? jFactory.spec(traitsSpec.traitsSpec())
-                : jFactory.type(parent.getType().getProperty(property).getWriterType());
-        return builder.properties(subProperties);
+        return traitsSpec.toBuilder(jFactory, parent.getType().getProperty(property).getWriterType()).properties(subProperties);
     }
 
     @Override
-    protected SubBuilder mergeTo(SubBuilder subBuilder) {
-        return subBuilder.mergeFrom(this);
+    protected SubBuilder mergeTo(SubBuilder to) {
+        return to.mergeFrom(this);
     }
 
     @Override
-    protected SubBuilder mergeFrom(SubObjectBuilder subValueBuilder) {
+    protected SubBuilder mergeFrom(SubObjectBuilder from) {
+        traitsSpec.mergeFrom(from.traitsSpec, property);
 //        TODO merge force
-//        TODO merge spec
-        subProperties.putAll(subValueBuilder.subProperties);
+        subProperties.putAll(from.subProperties);
         return this;
     }
 

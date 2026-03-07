@@ -9,8 +9,8 @@ class SubValueBuilder extends SubBuilder {
     }
 
     @Override
-    protected SubBuilder mergeTo(SubBuilder subBuilder) {
-        return subBuilder.mergeFrom(this);
+    protected SubBuilder mergeTo(SubBuilder to) {
+        return to.mergeFrom(this);
     }
 
     @Override
