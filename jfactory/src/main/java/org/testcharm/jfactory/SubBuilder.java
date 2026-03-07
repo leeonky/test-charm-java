@@ -48,34 +48,31 @@ class BuilderParser extends Parser {
         return pop(PROPERTY_PATTERN).map(property -> {
             if (isEmpty()) {
                 if (isEmptyMap(value))
-                    return new SubObjectBuilder(property);
+                    return new SubObjectBuilder(property, new TraitsSpec(), false);
                 return new SubValueBuilder(property, value);
             } else {
                 return pop1(PATTERN_TRAIT_SPEC).map(TraitsSpec::new).map(traitsSpec -> {
                     if (isEmpty())
-                        return new SubObjectBuilder(property, traitsSpec);
-                    return pop(FORCE_PATTERN).map(force -> {
-                        if (isEmpty())
-                            return new SubObjectBuilder(property, traitsSpec, true);
-                        throw new IllegalArgumentException("Illegal property format: " + content());
-                    }).orElseGet(() -> {
-                        String clause = content();
-                        if (clause.startsWith("."))
-                            return new SubObjectBuilder(property, traitsSpec, clause.substring(1), value);
-                        throw new IllegalArgumentException("Illegal property format: " + content());
-                    });
-                }).orElseGet(() -> pop(FORCE_PATTERN).map(force -> {
-                    if (isEmpty())
-                        return new SubObjectBuilder(property, true);
-                    throw new IllegalArgumentException("Illegal property format: " + content());
-                }).orElseGet(() -> {
-                    String clause = content();
-                    if (clause.startsWith("."))
-                        return new SubObjectBuilder(property, clause.substring(1), value);
-                    throw new IllegalArgumentException("Illegal property format: " + content());
-                }));
+                        return new SubObjectBuilder(property, traitsSpec, false);
+                    return checkForceAndCreateSubBuilder(value, property, traitsSpec);
+                }).orElseGet(() -> checkForceAndCreateSubBuilder(value, property, new TraitsSpec()));
             }
         }).orElseThrow(() -> new IllegalArgumentException("Illegal property format: " + content()));
+    }
+
+    private SubObjectBuilder checkForceAndCreateSubBuilder(Object value, String property, TraitsSpec traitsSpec) {
+        return pop(FORCE_PATTERN).map(force -> {
+            if (isEmpty())
+                return new SubObjectBuilder(property, traitsSpec, true);
+            return createSubObjectBuilder(property, traitsSpec, true, value);
+        }).orElseGet(() -> createSubObjectBuilder(property, traitsSpec, false, value));
+    }
+
+    private SubObjectBuilder createSubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force, Object value) {
+        String clause = content();
+        if (clause.startsWith("."))
+            return new SubObjectBuilder(property, traitsSpec, force, clause.substring(1), value);
+        throw new IllegalArgumentException("Illegal property format: " + content());
     }
 
     private static boolean isEmptyMap(Object value) {

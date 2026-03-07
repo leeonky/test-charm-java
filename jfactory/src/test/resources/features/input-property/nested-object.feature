@@ -467,7 +467,7 @@ Feature: Nested
         }]
         """
 
-    Scenario: Query with Single Sub Property
+    Scenario: Query with Single Sub Properties
       Given register as follows:
         """
         jFactory.type(Bean.class)
@@ -494,7 +494,7 @@ Feature: Nested
         }]
         """
 
-  Rule: With Sub Properties with Spec
+  Rule: With Sub Properties and Spec
 
     Background:
       Given the following class definition:
@@ -616,7 +616,6 @@ Feature: Nested
         }]
         """
 
-
     Scenario: Merge Spec - Spec and Null
       When evaluating the following code:
         """
@@ -693,3 +692,355 @@ Feature: Nested
           subValue4= v4
         }
         """
+
+  Rule: With Sub Properties and Force
+
+    Background:
+      Given the following class definition:
+        """
+        public class Bean {
+          public Sub sub;
+          public String value1, value2;
+        }
+        """
+      Given the following class definition:
+        """
+        public class Sub {
+          public String subValue1, subValue2;
+        }
+        """
+      Given the following spec definition:
+        """
+        public class SubSpec extends Spec<Sub> {}
+        """
+      And register as follows:
+        """
+        jFactory.register(SubSpec.class);
+        """
+
+    Scenario: Create with Single Sub Property
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub!.subValue1", "v1")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+        }
+        """
+
+    Scenario: Create with Multiple Sub Properties
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub!.subValue1", "v1")
+          .property("sub!.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Will Not Query when Specify !
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("subValue1", "v1").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub!.subValue1", "v1")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+        }
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+    Scenario: Query with Force Creation and Single Sub Property Always Return Empty
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class).property("subValue1", "v1").create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("sub!.subValue1", "v1").queryAll()
+        """
+      Then the result should be:
+        """
+        : []
+        """
+
+    Scenario: Query with Force Creation and Single Sub Properties Always Return Empty
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class)
+            .property("subValue1", "v1")
+            .property("subValue2", "v2")
+            .create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub!.subValue1", "v1")
+          .property("sub!.subValue2", "v2")
+          .queryAll()
+        """
+      Then the result should be:
+        """
+        : []
+        """
+
+    Scenario: Merge Force Creation - Force and Not Force
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("subValue1", "v1").property("subValue2", "v2").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub!.subValue1", "v1")
+          .property("sub.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+    Scenario: Merge Force Creation - Not Force and Force
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("subValue1", "v1").property("subValue2", "v2").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub.subValue1", "v1")
+          .property("sub!.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+  Rule: With Sub Properties and Spec and Force
+
+    Background:
+      Given the following class definition:
+        """
+        public class Bean {
+          public Object sub;
+          public String value1, value2;
+        }
+        """
+      Given the following class definition:
+        """
+        public class Sub {
+          public String subValue1, subValue2, subValue3, subValue4;
+        }
+        """
+      Given the following spec definition:
+        """
+        public class SubSpec extends Spec<Sub> {
+          @Trait
+          public void v1() {
+            property("subValue1").value("v1");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(SubSpec.class);
+        """
+
+    Scenario: Create with Single Sub Property
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)!.subValue1", "v1")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+        }
+        """
+
+    Scenario: Create with Multiple Sub Properties
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)!.subValue1", "v1")
+          .property("sub(SubSpec)!.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Create with Sub Trait
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(v1 SubSpec)!.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Will Not Query when Specify !
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("subValue1", "v1").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)!.subValue1", "v1")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+        }
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+    Scenario: Query with Force Creation and Single Sub Property Always Return Empty
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class).property("subValue1", "v1").create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("sub(SubSpec)!.subValue1", "v1").queryAll()
+        """
+      Then the result should be:
+        """
+        : []
+        """
+
+    Scenario: Query with Force Creation and Single Sub Properties Always Return Empty
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class)
+            .property("subValue1", "v1")
+            .property("subValue2", "v2")
+            .create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec)!.subValue1", "v1")
+          .property("sub(SubSpec)!.subValue2", "v2")
+          .queryAll()
+        """
+      Then the result should be:
+        """
+        : []
+        """
+
+    Scenario: Merge Spec and Force
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("subValue1", "v1").property("subValue2", "v2").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub(SubSpec).subValue1", "v1")
+          .property("sub!.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+    Scenario: Merge Force and Spec
+      Given register as follows:
+        """
+        jFactory.type(Sub.class).property("subValue1", "v1").property("subValue2", "v2").create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub!.subValue1", "v1")
+          .property("sub(SubSpec)!.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+      And the field "jFactory" should be:
+        """
+        SubSpec::size= 2
+        """
+
+#      TODO for sub List

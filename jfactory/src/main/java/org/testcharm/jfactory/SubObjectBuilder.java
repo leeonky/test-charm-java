@@ -3,27 +3,9 @@ package org.testcharm.jfactory;
 import java.util.LinkedHashMap;
 
 class SubObjectBuilder extends SubBuilder {
-    private final boolean force;
+    private boolean force;
     private final TraitsSpec traitsSpec;
     private final LinkedHashMap<String, Object> subProperties = new LinkedHashMap<>();
-
-    public SubObjectBuilder(String property) {
-        super(property);
-        force = false;
-        traitsSpec = new TraitsSpec();
-    }
-
-    public SubObjectBuilder(String property, boolean force) {
-        super(property);
-        this.force = force;
-        traitsSpec = new TraitsSpec();
-    }
-
-    public SubObjectBuilder(String property, TraitsSpec traitsSpec) {
-        super(property);
-        this.traitsSpec = traitsSpec;
-        force = false;
-    }
 
     public SubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force) {
         super(property);
@@ -31,16 +13,9 @@ class SubObjectBuilder extends SubBuilder {
         this.traitsSpec = traitsSpec;
     }
 
-    public SubObjectBuilder(String property, String clause, Object value) {
+    public SubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force, String substring, Object value) {
         super(property);
-        force = false;
-        traitsSpec = new TraitsSpec();
-        subProperties.put(clause, value);
-    }
-
-    public SubObjectBuilder(String property, TraitsSpec traitsSpec, String substring, Object value) {
-        super(property);
-        force = false;
+        this.force = force;
         this.traitsSpec = traitsSpec;
         subProperties.put(substring, value);
     }
@@ -62,7 +37,7 @@ class SubObjectBuilder extends SubBuilder {
     @Override
     protected SubBuilder mergeFrom(SubObjectBuilder from) {
         traitsSpec.mergeFrom(from.traitsSpec, property);
-//        TODO merge force
+        force = force || from.force;
         subProperties.putAll(from.subProperties);
         return this;
     }

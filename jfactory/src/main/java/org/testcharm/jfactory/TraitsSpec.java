@@ -6,6 +6,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
+//TODO final fields
 class TraitsSpec {
     private String spec;
     private final Set<String> traits = new LinkedHashSet<>();
