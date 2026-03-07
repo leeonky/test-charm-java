@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Deprecated
 class CollectionExpression<P, E> extends Expression<P> {
     private final Map<Integer, Expression<E>> children = new LinkedHashMap<>();
 

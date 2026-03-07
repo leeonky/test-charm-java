@@ -4,6 +4,7 @@ import org.testcharm.util.Property;
 
 import java.util.List;
 
+@Deprecated
 abstract class Expression<P> {
     protected final Property<P> property;
     protected boolean intently = false;

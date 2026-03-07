@@ -6,8 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 abstract class SubBuilder {
-    private static final Pattern PROPERTY_PATTERN = Pattern.compile("[^.(!\\[]+");
-
     protected final String property;
 
     protected SubBuilder(String property) {
@@ -32,10 +30,6 @@ abstract class SubBuilder {
 
     static SubBuilder create(String key, Object value) {
         return new BuilderParser(key).parse(value);
-    }
-
-    private static boolean isEmptyMap(Object value) {
-        return value instanceof Map && ((Map<?, ?>) value).isEmpty();
     }
 }
 
@@ -70,8 +64,9 @@ class BuilderParser extends Parser {
                         return new SubObjectBuilder(property, true);
                     throw new IllegalArgumentException("Illegal property format: " + content());
                 }).orElseGet(() -> {
-
-
+                    String clause = content();
+                    if (clause.startsWith("."))
+                        return new SubObjectBuilder(property, clause.substring(1), value);
                     throw new IllegalArgumentException("Illegal property format: " + content());
                 }));
             }

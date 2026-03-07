@@ -2,6 +2,7 @@ package org.testcharm.jfactory;
 
 import org.testcharm.util.Property;
 
+@Deprecated
 class SubObjectExpression<P> extends Expression<P> {
     private final KeyValueCollection properties;
     private final TraitsSpec traitsSpec;

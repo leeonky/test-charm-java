@@ -417,16 +417,79 @@ Feature: Nested
         }
         """
 
-#    Scenario: Create with Single Sub Property
-#      When evaluating the following code:
-#        """
-#        jFactory.type(Bean.class)
-#          .property("sub.subValue1", "v1")
-#          .create();
-#        """
-#      Then the result should be:
-#        """
-#        sub: {
-#          subValue1= v1
-#        }
-#        """
+    Scenario: Create with Single Sub Property
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub.subValue1", "v1")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+        }
+        """
+
+    Scenario: Create with Multiple Sub Properties
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub.subValue1", "v1")
+          .property("sub.subValue2", "v2")
+          .create();
+        """
+      Then the result should be:
+        """
+        sub: {
+          subValue1= v1
+          subValue2= v2
+        }
+        """
+
+    Scenario: Query with Single Sub Property
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class).property("subValue1", "v1").create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("sub.subValue1", "v1").queryAll()
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= bean1
+          sub.subValue1= v1
+        }]
+        """
+
+    Scenario: Query with Single Sub Property
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("sub", jFactory.type(Sub.class)
+            .property("subValue1", "v1")
+            .property("subValue2", "v2")
+            .create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("sub.subValue1", "v1")
+          .property("sub.subValue2", "v2")
+          .queryAll()
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= bean1
+          sub.subValue1= v1
+          sub.subValue2= v2
+        }]
+        """

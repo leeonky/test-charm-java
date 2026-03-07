@@ -190,12 +190,16 @@ class DefaultBuilder<T> implements Builder<T> {
 
     public void processInputProperty(ObjectProducer<T> producer, boolean forQuery) {
         if (properties.refactor()) {
-            properties.groupByProperty().forEach(subBuilder -> {
-                producer.changeChild(subBuilder.property(), subBuilder.buildProducer(producer, objectFactory, jFactory));
-            });
+            properties.groupByProperty().stream().map(subBuilder -> processReverseAssociation(producer, subBuilder)).forEach(subBuilder ->
+                    producer.changeChild(subBuilder.property(), subBuilder.buildProducer(producer, objectFactory, jFactory)));
         } else
             properties.expressions(objectFactory.getType(), objectFactory, producer, forQuery).forEach(exp -> producer.changeChild(exp.getProperty(),
                     intentlyCreateWhenReverseAssociation(producer, exp).buildProducer(jFactory, producer)));
+    }
+
+    private SubBuilder processReverseAssociation(ObjectProducer<T> producer, SubBuilder subBuilder) {
+        return subBuilder instanceof SubValueBuilder ? subBuilder :
+                producer.isReverseAssociation(subBuilder.property()) ? ((SubObjectBuilder) subBuilder).forceCreate() : subBuilder;
     }
 
     private Expression<T> intentlyCreateWhenReverseAssociation(ObjectProducer<T> producer, Expression<T> exp) {
