@@ -16,6 +16,8 @@ import static org.testcharm.util.CollectionHelper.reify;
 import static org.testcharm.util.Sneaky.cast;
 
 //TODO use a parser to parse this
+//TODO  use subBuilder
+@Deprecated
 class KeyValue {
     private static final String PATTERN_PROPERTY = "([^.(!\\[]+)";
     private static final String PATTERN_COLLECTION_INDEX = "(\\[(-?\\d+)])?";
@@ -84,7 +86,7 @@ class KeyValue {
             property = property.decorateType(reify(
                     property.getWriterType().isCollection() ? property.getWriterType().getType() :
                             List.class, specFactory.getType().getGenericType()));
-            subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
+            subProducer = ((ObjectProducer) producer).getChildOrDefaultCollection(property.getWriter());
             if (subProducer instanceof CollectionProducer)
                 ((CollectionProducer<?, ?>) subProducer).changeElementPopulationFactory(i ->
                         new BuilderValueProducer<>(
@@ -96,7 +98,7 @@ class KeyValue {
             Optional<BeanClass<?>> optionalSpecType = traitsSpec.guessPropertyType(objectFactory.getFactorySet());
             if (optionalSpecType.isPresent() && optionalSpecType.get().isCollection()) {
                 property = property.decorateType(optionalSpecType.get());
-                subProducer = ((ObjectProducer) producer).forceChildOrDefaultCollection(property.getWriter());
+                subProducer = ((ObjectProducer) producer).getChildOrDefaultCollection(property.getWriter());
             } else {
                 subProducer = producer.getChild(propertyName).orElse(PlaceHolderProducer.PLACE_HOLDER);
                 if (subProducer instanceof ObjectProducer
@@ -174,20 +176,6 @@ class KeyValue {
 
     public Object getValue() {
         return value;
-    }
-
-    @Deprecated
-    public boolean refactor() {
-        try {
-            return SubBuilder.create(key, value) != null;
-        } catch (Exception e) {
-            return false;
-        }
-//        return clause == null && !(value instanceof Map) && index == null && traitsSpec.spec() == null && !intently;
-    }
-
-    public String propertyName() {
-        return propertyName;
     }
 
     public String key() {

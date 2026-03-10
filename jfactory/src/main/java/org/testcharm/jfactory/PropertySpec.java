@@ -10,10 +10,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.testcharm.util.CollectionHelper.reify;
-import static org.testcharm.util.Sneaky.cast;
 import static java.lang.String.format;
 import static java.util.Optional.of;
+import static org.testcharm.util.CollectionHelper.reify;
+import static org.testcharm.util.Sneaky.cast;
 
 public class PropertySpec<T> {
     private final Spec<T> spec;
@@ -73,7 +73,7 @@ public class PropertySpec<T> {
                     Factory<Object> factory = jFactory.specFactory(traitsAndSpec[traitsAndSpec.length - 1]);
                     propertyWriter = propertyWriter.decorateType(reify(propertyWriter.getType().getType(), factory.getType().getGenericType()));
                 }
-                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
+                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.getChildOrDefaultCollection(propertyWriter),
                         CollectionProducer.class).orElseThrow(() ->
                         new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
                 OptionalSpecDefaultValueProducer<?> optionalSpecDefaultValueProducer =
@@ -154,7 +154,7 @@ public class PropertySpec<T> {
                     Producer<?> element = producerFactory.apply(new ProducerFactoryContext(jFactory, objectProducer, "0", objectProducer.association(property.head().toString()), objectProducer));
                     propertyWriter = propertyWriter.decorateType(reify(List.class, element.getType().getGenericType()));
                 }
-                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.forceChildOrDefaultCollection(propertyWriter),
+                CollectionProducer<?, ?> collectionProducer = BeanClass.cast(objectProducer.getChildOrDefaultCollection(propertyWriter),
                         CollectionProducer.class).orElseThrow(() ->
                         new IllegalArgumentException(format("%s.%s is not list", spec.getType().getName(), property.head())));
                 collectionProducer.changeElementPopulationFactory(index ->

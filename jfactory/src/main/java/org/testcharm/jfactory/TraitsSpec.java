@@ -51,7 +51,7 @@ class TraitsSpec {
 
     @SuppressWarnings("unchecked")
     public Builder<Object> toBuilder(JFactory jFactory, BeanClass<?> propertyType) {
-        return (Builder<Object>) (spec != null ? jFactory.spec(spec) : jFactory.type(propertyType.getType()))
+        return (Builder<Object>) (spec != null ? jFactory.spec(spec) : jFactory.type(propertyType))
                 .traits(traits.toArray(new String[0]));
     }
 
@@ -88,5 +88,11 @@ class TraitsSpec {
         List<String> strings = new ArrayList<>(traits);
         strings.add(spec);
         return strings.toArray(new String[0]);
+    }
+
+    public BeanClass<?> resolveElementType(FactorySet factorySet) {
+        if (spec != null)
+            return factorySet.querySpecClassFactory(spec).getType().getElementType();
+        return null;
     }
 }

@@ -7,10 +7,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.testcharm.jfactory.PropertyChain.propertyChain;
-import static org.testcharm.util.function.Extension.getFirstPresent;
 import static java.util.Optional.*;
 import static java.util.stream.IntStream.range;
+import static org.testcharm.jfactory.PropertyChain.propertyChain;
+import static org.testcharm.util.function.Extension.getFirstPresent;
 
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
@@ -139,7 +139,8 @@ class ObjectProducer<T> extends Producer<T> {
         });
     }
 
-    public Producer<?> forceChildOrDefaultCollection(PropertyWriter<T> propertyWriter) {
+    @Override
+    public Producer<?> getChildOrDefaultCollection(PropertyWriter<T> propertyWriter) {
         return getChild(propertyWriter.getName()).orElseGet(() -> createCollectionProducer(propertyWriter));
     }
 

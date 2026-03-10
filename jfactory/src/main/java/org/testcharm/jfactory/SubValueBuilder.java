@@ -1,10 +1,12 @@
 package org.testcharm.jfactory;
 
+import org.testcharm.util.BeanClass;
+
 class SubValueBuilder extends SubBuilder {
     protected final Object value;
 
-    public SubValueBuilder(String property, Object value) {
-        super(property);
+    public SubValueBuilder(String property, Object value, SubCollectionBuilder parentCollectionBuilder) {
+        super(property, parentCollectionBuilder);
         this.value = value;
     }
 
@@ -14,7 +16,9 @@ class SubValueBuilder extends SubBuilder {
     }
 
     @Override
-    public Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory) {
-        return new FixedValueProducer<>(parent.getType().getProperty(property).getWriterType(), factory.transform(property, value));
+    public Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory,
+                                     BeanClass<?> collectionSpecElementType) {
+        return new FixedValueProducer<>(parent.getType().getProperty(property()).getWriterType(),
+                factory.transform(resolveNameForTransformer(), value));
     }
 }

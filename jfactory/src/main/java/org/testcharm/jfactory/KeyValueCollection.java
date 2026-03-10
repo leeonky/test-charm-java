@@ -36,11 +36,6 @@ public class KeyValueCollection {
                 .collect(Collectors.toList());
     }
 
-    @Deprecated
-    public boolean refactor() {
-        return keyValues.stream().allMatch(keyValue -> keyValue.refactor());
-    }
-
     public KeyValueCollection append(String key, Object value) {
         keyValues.add(new KeyValue(key, value));
         return this;
@@ -63,8 +58,8 @@ public class KeyValueCollection {
     }
 
     List<SubBuilder> groupByProperty() {
-        return keyValues.stream().map(keyValue -> SubBuilder.create(keyValue.key(), keyValue.getValue()))
-                .collect(Collectors.groupingBy(SubBuilder::property)).values().stream()
+        return keyValues.stream().map(keyValue -> SubBuilder.create(keyValue.key(), keyValue.getValue(), null))
+                .collect(Collectors.groupingBy(SubBuilder::property, LinkedHashMap::new, Collectors.toList())).values().stream()
                 .map(subBuilders -> subBuilders.stream().reduce(SubBuilder::mergeTo))
                 .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }

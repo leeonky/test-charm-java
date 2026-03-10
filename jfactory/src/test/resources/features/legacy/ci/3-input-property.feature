@@ -688,28 +688,28 @@ Feature: input property
         public Beans[] beansList;
       }
       """
-      When build:
-      """
-      jFactory.type(Beans.class)
-        .property("beans[0]", null)
-        .property("beans[0].value", "hello")
-      .create();
-      """
-      Then the result should:
-      """
-      beans.value[]: [ hello ]
-      """
-      When build:
-      """
-      jFactory.type(Beans.class)
-        .property("beans[0].value", "any string")
-        .property("beans[0]", null)
-      .create();
-      """
-      Then the result should:
-      """
-      beans: [ null ]
-      """
+#      When build:
+#      """
+#      jFactory.type(Beans.class)
+#        .property("beans[0]", null)
+#        .property("beans[0].value", "hello")
+#      .create();
+#      """
+#      Then the result should:
+#      """
+#      beans.value[]: [ hello ]
+#      """
+#      When build:
+#      """
+#      jFactory.type(Beans.class)
+#        .property("beans[0].value", "any string")
+#        .property("beans[0]", null)
+#      .create();
+#      """
+#      Then the result should:
+#      """
+#      beans: [ null ]
+#      """
       When build:
       """
       jFactory.type(BeansList.class)

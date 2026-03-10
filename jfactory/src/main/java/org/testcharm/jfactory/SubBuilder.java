@@ -1,22 +1,31 @@
 package org.testcharm.jfactory;
 
+import org.testcharm.util.BeanClass;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 abstract class SubBuilder {
-    protected final String property;
+    private final String property;
+    private final SubCollectionBuilder parentCollectionBuilder;
 
-    protected SubBuilder(String property) {
+    protected SubBuilder(String property, SubCollectionBuilder parentCollectionBuilder) {
         this.property = property;
+        this.parentCollectionBuilder = parentCollectionBuilder;
     }
 
     public String property() {
         return property;
     }
 
-    public abstract Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory);
+    public SubCollectionBuilder parentCollectionBuilder() {
+        return parentCollectionBuilder;
+    }
+
+    public abstract Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory,
+                                              BeanClass<?> collectionSpecElementType);
 
     protected abstract SubBuilder mergeTo(SubBuilder to);
 
@@ -28,8 +37,16 @@ abstract class SubBuilder {
         return this;
     }
 
-    static SubBuilder create(String key, Object value) {
-        return new BuilderParser(key).parse(value);
+    protected SubBuilder mergeFrom(SubCollectionBuilder from) {
+        return this;
+    }
+
+    static SubBuilder create(String key, Object value, SubCollectionBuilder parentCollectionBuilder) {
+        return new BuilderParser(key).parse(value, parentCollectionBuilder);
+    }
+
+    protected String resolveNameForTransformer() {
+        return parentCollectionBuilder() != null ? parentCollectionBuilder().property() + "[]" : property();
     }
 }
 
@@ -39,39 +56,46 @@ class BuilderParser extends Parser {
     private static final String PATTERN_SPEC_TRAIT_WORD = "[^,\\s()]+";
     private static final Pattern PATTERN_TRAIT_SPEC = Pattern.compile("\\((" + PATTERN_SPEC_TRAIT_WORD + "(?:[\\s,]+"
             + PATTERN_SPEC_TRAIT_WORD + ")*)\\)");
+    private static final Pattern INDEX_PATTERN = Pattern.compile("\\[(-?\\d+)\\]");
 
     public BuilderParser(String content) {
         super(content);
     }
 
-    public SubBuilder parse(Object value) {
-        return pop(PROPERTY_PATTERN).map(property -> {
-            if (isEmpty()) {
-                if (isEmptyMap(value))
-                    return new SubObjectBuilder(property, new TraitsSpec(), false);
-                return new SubValueBuilder(property, value);
-            } else {
-                return pop1(PATTERN_TRAIT_SPEC).map(TraitsSpec::new).map(traitsSpec -> {
-                    if (isEmpty())
-                        return new SubObjectBuilder(property, traitsSpec, false);
-                    return checkForceAndCreateSubBuilder(value, property, traitsSpec);
-                }).orElseGet(() -> checkForceAndCreateSubBuilder(value, property, new TraitsSpec()));
-            }
-        }).orElseThrow(() -> new IllegalArgumentException("Illegal property format: " + content()));
+    public SubBuilder parse(Object value, SubCollectionBuilder parentCollectionBuilder) {
+        return pop(PROPERTY_PATTERN).map(property -> createSubBuilder(property, value, parentCollectionBuilder))
+                .orElseGet(() -> pop1(INDEX_PATTERN).map(property -> createSubBuilder(property, value, parentCollectionBuilder))
+                        .orElseThrow(() -> new IllegalArgumentException("Illegal property format: " + content())));
     }
 
-    private SubObjectBuilder checkForceAndCreateSubBuilder(Object value, String property, TraitsSpec traitsSpec) {
+    private SubBuilder createSubBuilder(String property, Object value, SubCollectionBuilder parentCollectionBuilder) {
+        if (isEmpty()) {
+            if (isEmptyMap(value))
+                return new SubObjectBuilder(property, new TraitsSpec(), false, parentCollectionBuilder);
+            return new SubValueBuilder(property, value, parentCollectionBuilder);
+        } else {
+            return pop1(PATTERN_TRAIT_SPEC).map(TraitsSpec::new).map(traitsSpec -> {
+                if (isEmpty())
+                    return new SubObjectBuilder(property, traitsSpec, false, parentCollectionBuilder);
+                return checkForceAndCreateSubBuilder(value, property, traitsSpec, parentCollectionBuilder);
+            }).orElseGet(() -> checkForceAndCreateSubBuilder(value, property, new TraitsSpec(), parentCollectionBuilder));
+        }
+    }
+
+    private SubBuilder checkForceAndCreateSubBuilder(Object value, String property, TraitsSpec traitsSpec, SubCollectionBuilder parentCollectionBuilder) {
         return pop(FORCE_PATTERN).map(force -> {
             if (isEmpty())
-                return new SubObjectBuilder(property, traitsSpec, true);
-            return createSubObjectBuilder(property, traitsSpec, true, value);
-        }).orElseGet(() -> createSubObjectBuilder(property, traitsSpec, false, value));
+                return new SubObjectBuilder(property, traitsSpec, true, parentCollectionBuilder);
+            return createSubObjectBuilder(property, traitsSpec, true, value, parentCollectionBuilder);
+        }).orElseGet(() -> createSubObjectBuilder(property, traitsSpec, false, value, parentCollectionBuilder));
     }
 
-    private SubObjectBuilder createSubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force, Object value) {
+    private SubBuilder createSubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force, Object value, SubCollectionBuilder parentCollectionBuilder) {
         String clause = content();
         if (clause.startsWith("."))
-            return new SubObjectBuilder(property, traitsSpec, force, clause.substring(1), value);
+            return new SubObjectBuilder(property, traitsSpec, force, clause.substring(1), value, parentCollectionBuilder);
+        if (clause.startsWith("["))
+            return new SubCollectionBuilder(property, traitsSpec, force, clause, value, parentCollectionBuilder);
         throw new IllegalArgumentException("Illegal property format: " + content());
     }
 

@@ -94,6 +94,8 @@ Feature: Nested list element specialization via Spec
         | type        | specType  | actualListType | generic |
         | Object      | List<Sub> | ArrayList      |         |
         | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
         | List        | List<Sub> | ArrayList      |         |
         | List<?>     | List<Sub> | ArrayList      |         |
         | List<Super> | List<Sub> | ArrayList      |         |
@@ -130,6 +132,8 @@ Feature: Nested list element specialization via Spec
         | type        | specType  | actualListType | generic |
         | Object      | List<Sub> | ArrayList      |         |
         | Object      | Sub[]     | Sub[]          |         |
+        | T           | List<Sub> | ArrayList      | <T>     |
+        | List<T>     | List<Sub> | ArrayList      | <T>     |
         | List        | List<Sub> | ArrayList      |         |
         | List<?>     | List<Sub> | ArrayList      |         |
         | List<Super> | List<Sub> | ArrayList      |         |

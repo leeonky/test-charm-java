@@ -467,7 +467,7 @@ Feature: Nested
         }]
         """
 
-    Scenario: Query with Single Sub Properties
+    Scenario: Query with Multiple Sub Properties
       Given register as follows:
         """
         jFactory.type(Bean.class)
@@ -589,7 +589,7 @@ Feature: Nested
         }]
         """
 
-    Scenario: Query with Single Sub Property
+    Scenario: Query with Multiple Sub Property
       Given register as follows:
         """
         jFactory.type(Bean.class)
@@ -1044,3 +1044,100 @@ Feature: Nested
         """
 
 #      TODO for sub List
+
+  Rule: With Sub Properties for Sub List
+
+    Background:
+      Given the following class definition:
+        """
+        public class Bean {
+          public List<Sub> subs;
+          public String value1, value2;
+        }
+        """
+      Given the following class definition:
+        """
+        public class Sub {
+          public String subValue1, subValue2;
+        }
+        """
+
+    Scenario: Create with Single Sub Property
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("subs[0].subValue1", "v1")
+          .create();
+        """
+      Then the result should be:
+        """
+        subs: [{
+          subValue1= v1
+        }]
+        """
+
+    Scenario: Create with Multiple Sub Properties
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("subs[0].subValue1", "v1")
+          .property("subs[0].subValue2", "v2")
+          .property("subs[1].subValue1", "v3")
+          .property("subs[1].subValue2", "v4")
+          .create();
+        """
+      Then the result should be:
+        """
+        subs: | subValue1 | subValue2 |
+              | v1        | v2        |
+              | v3        | v4        |
+        """
+
+    Scenario: Query with Single Sub Property
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("subs[0]", jFactory.type(Sub.class).property("subValue1", "v1").create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class).property("subs[0].subValue1", "v1").queryAll()
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= bean1
+          subs: [{subValue1= v1}]
+        }]
+        """
+
+    Scenario: Query with Multiple Sub Properties
+      Given register as follows:
+        """
+        jFactory.type(Bean.class)
+          .property("value1", "bean1")
+          .property("subs[0]", jFactory.type(Sub.class)
+            .property("subValue1", "v1")
+            .property("subValue2", "v2")
+            .create())
+          .create();
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Bean.class)
+          .property("subs[0].subValue1", "v1")
+          .property("subs[0].subValue2", "v2")
+          .queryAll()
+        """
+      Then the result should be:
+        """
+        : [{
+          value1= bean1
+          subs:[{
+            subValue1= v1
+            subValue2= v2
+          }]
+        }]
+        """

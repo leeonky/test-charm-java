@@ -119,4 +119,8 @@ abstract class Producer<T> {
     protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
         return this;
     }
+
+    public Producer<?> getChildOrDefaultCollection(PropertyWriter<T> writer) {
+        throw new UnsupportedOperationException();
+    }
 }

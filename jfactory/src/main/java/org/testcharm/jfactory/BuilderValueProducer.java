@@ -1,5 +1,7 @@
 package org.testcharm.jfactory;
 
+import java.util.Map;
+
 public class BuilderValueProducer<T> extends Producer<T> {
     private final DefaultBuilder<T> builder;
     private final boolean queryFirst;
@@ -8,6 +10,11 @@ public class BuilderValueProducer<T> extends Producer<T> {
         super(builder.getType());
         this.builder = (DefaultBuilder<T>) builder;
         this.queryFirst = queryFirst;
+    }
+
+
+    public BuilderValueProducer<T> apply(Map<String, Object> properties) {
+        return new BuilderValueProducer<>(builder.properties(properties), queryFirst);
     }
 
     @Override

@@ -40,7 +40,6 @@ class CollectionExpression<P, E> extends Expression<P> {
         return producer;
     }
 
-    // TODO missing test [-1] [3] should process positive index first?  but [0] [-2] also incorrect
     private Map<Integer, List<Expression<E>>> groupByAdjustedPositiveAndNegativeIndexExpression(
             CollectionProducer<?, E> collectionProducer) {
         Map<Integer, List<Expression<E>>> result = new LinkedHashMap<>();
