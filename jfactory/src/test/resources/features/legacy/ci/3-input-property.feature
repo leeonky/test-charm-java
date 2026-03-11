@@ -462,20 +462,34 @@ Feature: input property
       author.contact.name= /name.*/
       """
 
-    Scenario: raise error when property format is invalid
+    Scenario: raise error when property is invalid
+      Given the following bean class:
+      """
+      public class Contact {}
+      """
+      When build:
+      """
+      jFactory.type(Contact.class).property("!a[0]", "Jerry").create();
+      """
+      Then should raise error:
+      """
+      message: 'The format of property `!a[0]` is invalid.'
+      """
+
+    Scenario: raise error when sub property format is invalid
       Given the following bean class:
       """
       public class Contact {
-        public String name;
+        public String a;
       }
       """
       When build:
       """
-      jFactory.type(Contact.class).property("a![0]", "Jerry").create();
+      jFactory.type(Contact.class).property("a.!empty", "Jerry").create();
       """
       Then should raise error:
       """
-      message: 'The format of property `a![0]` is invalid.'
+      message: 'The format of property `!empty` is invalid.'
       """
 
   Rule: collection property

@@ -2,7 +2,7 @@ package org.testcharm.jfactory;
 
 import java.util.Map;
 
-public class BuilderValueProducer<T> extends Producer<T> {
+class BuilderValueProducer<T> extends Producer<T> {
     private final DefaultBuilder<T> builder;
     private final boolean queryFirst;
 
@@ -11,7 +11,6 @@ public class BuilderValueProducer<T> extends Producer<T> {
         this.builder = (DefaultBuilder<T>) builder;
         this.queryFirst = queryFirst;
     }
-
 
     public BuilderValueProducer<T> apply(Map<String, Object> properties) {
         return new BuilderValueProducer<>(builder.properties(properties), queryFirst);
@@ -43,8 +42,8 @@ public class BuilderValueProducer<T> extends Producer<T> {
     //    TODO need test missing all test of this method() query in spec and should be created after merge input property
 //    TODO forQuery for builder.queryAll()
     @Override
-    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
-        if (!forQuery && queryFirst) {
+    protected Producer<?> resolveBuilderValueProducer() {
+        if (queryFirst) {
             T result = builder.query();
             if (result != null)
                 return new FixedValueProducer<>(getType(), result);

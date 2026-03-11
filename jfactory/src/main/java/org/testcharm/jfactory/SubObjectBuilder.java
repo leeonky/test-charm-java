@@ -5,18 +5,14 @@ import org.testcharm.util.BeanClass;
 import java.util.stream.Collectors;
 
 class SubObjectBuilder extends SubNestedBuilder {
-    public SubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force, boolean queryFirst) {
-        super(property, queryFirst, force, traitsSpec);
-    }
-
-    public SubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force, String substring, Object value, boolean queryFirst) {
-        this(property, traitsSpec, force, queryFirst);
-        subProperties.put(substring, value);
+    public SubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force) {
+        super(property, traitsSpec, force);
     }
 
     @Override
     public Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory) {
-        Builder<Object> builder = traitsSpec.toBuilder(jFactory, parent.getType().getProperty(property()).getWriterType()).properties(subProperties);
+        Builder<Object> builder = traitsSpec.toBuilder(jFactory, parent.getType().getProperty(property()).getWriterType())
+                .properties(subProperties);
         return new BuilderValueProducer<>(builder, !force);
     }
 
@@ -27,7 +23,7 @@ class SubObjectBuilder extends SubNestedBuilder {
 
     @Override
     protected SubBuilder mergeFrom(SubObjectBuilder from) {
-        SubObjectBuilder subObjectBuilder = new SubObjectBuilder(property(), traitsSpec.mergeFrom(from.traitsSpec, property()), force || from.force, queryFirst);
+        SubObjectBuilder subObjectBuilder = new SubObjectBuilder(property(), traitsSpec.mergeFrom(from.traitsSpec, property()), force || from.force);
         subObjectBuilder.subProperties.putAll(from.subProperties);
         subObjectBuilder.subProperties.putAll(subProperties);
         return subObjectBuilder;
@@ -35,7 +31,7 @@ class SubObjectBuilder extends SubNestedBuilder {
 
     @Override
     public SubBuilder forceCreate() {
-        SubObjectBuilder newBuilder = new SubObjectBuilder(property(), traitsSpec, true, queryFirst);
+        SubObjectBuilder newBuilder = new SubObjectBuilder(property(), traitsSpec, true);
         newBuilder.subProperties.putAll(subProperties);
         return newBuilder;
     }
@@ -45,7 +41,7 @@ class SubObjectBuilder extends SubNestedBuilder {
         if (force)
             return false;
         Object propertyValue = BeanClass.createFrom(object).getPropertyValue(object, property());
-        KeyValueCollection.Matcher2 objectMatcher2 = new KeyValueCollection.Matcher2<>(subBuilders(objectFactory).collect(Collectors.toList()));
-        return objectMatcher2.matches(propertyValue, objectFactory);
+        Matcher objectMatcher = new Matcher<>(subBuilders(objectFactory).collect(Collectors.toList()));
+        return objectMatcher.matches(propertyValue, objectFactory);
     }
 }

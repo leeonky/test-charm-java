@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static org.testcharm.util.function.Extension.getFirstPresent;
 import static java.lang.Integer.max;
 import static java.lang.Integer.parseInt;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+import static org.testcharm.util.function.Extension.getFirstPresent;
 
 class CollectionProducer<T, C> extends Producer<C> {
     private final List<Producer<?>> children = new ArrayList<>();
@@ -58,7 +58,7 @@ class CollectionProducer<T, C> extends Producer<C> {
     @Override
     protected Producer<?> setChild(String property, Producer<?> producer) {
         if (autoResolveBuilderValueProducer)
-            producer = producer.resolveBuilderValueProducer(false);
+            producer = producer.resolveBuilderValueProducer();
         int index = parseInt(property);
         fillCollectionWithDefaultValue(index);
         children.set(transformNegativeIndex(index), producer);
@@ -86,7 +86,7 @@ class CollectionProducer<T, C> extends Producer<C> {
         Producer<?> producer = getFirstPresent(() -> ofNullable(elementPopulationFactory.apply(propertyWriter)),
                 () -> buildPropertyDefaultValueProducer(propertyWriter))
                 .orElseGet(() -> new DefaultTypeValueProducer<>(propertyWriter.getType()));
-        return autoResolveBuilderValueProducer ? producer.resolveBuilderValueProducer(false) : producer;
+        return autoResolveBuilderValueProducer ? producer.resolveBuilderValueProducer() : producer;
     }
 
     @Override
@@ -137,9 +137,9 @@ class CollectionProducer<T, C> extends Producer<C> {
     }
 
     @Override
-    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
+    protected Producer<?> resolveBuilderValueProducer() {
         autoResolveBuilderValueProducer = true;
-        children.replaceAll(producer -> producer.resolveBuilderValueProducer(forQuery));
+        children.replaceAll(Producer::resolveBuilderValueProducer);
         return this;
     }
 

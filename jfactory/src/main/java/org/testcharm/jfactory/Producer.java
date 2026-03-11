@@ -116,7 +116,7 @@ abstract class Producer<T> {
     }
 
     //    TODO use T
-    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
+    protected Producer<?> resolveBuilderValueProducer() {
         return this;
     }
 

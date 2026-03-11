@@ -47,8 +47,8 @@ class TraitsSpec {
     }
 
     @SuppressWarnings("unchecked")
-    public Builder<Object> toBuilder(JFactory jFactory, BeanClass<?> propertyType) {
-        return (Builder<Object>) (spec != null ? jFactory.spec(spec) : jFactory.type(propertyType))
+    public DefaultBuilder<Object> toBuilder(JFactory jFactory, BeanClass<?> propertyType) {
+        return (DefaultBuilder<Object>) (spec != null ? jFactory.spec(spec) : jFactory.type(propertyType))
                 .traits(traits.toArray(new String[0]));
     }
 

@@ -15,7 +15,6 @@ import static org.testcharm.util.function.Extension.getFirstPresent;
 class ObjectProducer<T> extends Producer<T> {
     private final ObjectFactory<T> factory;
     private final JFactory jFactory;
-    private final boolean forQuery;
     private final ObjectInstance<T> instance;
     private final Map<String, Producer<?>> children = new HashMap<>();
     private final Map<PropertyChain, String> reverseAssociations = new LinkedHashMap<>();
@@ -28,27 +27,17 @@ class ObjectProducer<T> extends Producer<T> {
     private final List<DefaultListStructure<T, ?>> listStructures = new ArrayList<>();
     private boolean autoResolveBuilderValueProducer = false;
 
-    public JFactory jFactory() {
-        return jFactory;
-    }
-
     public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder,
-                          Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
-        this(jFactory, factory, builder, false, association, reverseAssociation);
-    }
-
-    public ObjectProducer(JFactory jFactory, ObjectFactory<T> factory, DefaultBuilder<T> builder, boolean forQuery,
                           Optional<Association> association, Optional<ReverseAssociation> reverseAssociation) {
         super(factory.getType());
         this.factory = factory;
         this.jFactory = jFactory;
-        this.forQuery = forQuery;
         instance = factory.createInstance(builder.getArguments(), this, association, reverseAssociation);
         persistable = jFactory.getDataRepository();
         setupDefaultValueProducers();
         builder.collectSpec(this, instance.specRules());
-        builder.processInputProperty(this, forQuery);
-        resolveBuilderValueProducer(forQuery);
+        builder.processInputProperty(this);
+        resolveBuilderValueProducer();
         instance.specRules().applyPropertyStructureDefinitions(jFactory, this, factory);
         processListStructures();
         setupReverseAssociations();
@@ -77,7 +66,7 @@ class ObjectProducer<T> extends Producer<T> {
 
     //        TODO refactor duplicated call
     @Override
-    protected Producer<?> resolveBuilderValueProducer(boolean forQuery) {
+    protected Producer<?> resolveBuilderValueProducer() {
         autoResolveBuilderValueProducer = true;
         for (Map.Entry<String, Producer<?>> kv : children.entrySet())
             setChild(kv.getKey(), kv.getValue());
@@ -107,7 +96,7 @@ class ObjectProducer<T> extends Producer<T> {
     @Override
     protected Producer<?> setChild(String property, Producer<?> producer) {
         if (autoResolveBuilderValueProducer)
-            producer = producer.resolveBuilderValueProducer(forQuery);
+            producer = producer.resolveBuilderValueProducer();
         children.put(property, producer);
         return producer;
     }

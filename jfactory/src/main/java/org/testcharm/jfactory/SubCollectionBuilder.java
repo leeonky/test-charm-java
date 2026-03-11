@@ -11,13 +11,8 @@ import static org.testcharm.util.CollectionHelper.reify;
 class SubCollectionBuilder extends SubNestedBuilder {
     private final SubCollectionBuilder parent;
 
-    public SubCollectionBuilder(String property, TraitsSpec traitsSpec, boolean force, String clause, Object value, SubCollectionBuilder parent, boolean queryFirst) {
-        this(property, traitsSpec, force, parent, queryFirst);
-        subProperties.put(clause, value);
-    }
-
-    public SubCollectionBuilder(String property, TraitsSpec traitsSpec, boolean force, SubCollectionBuilder parent, boolean queryFirst) {
-        super(property, queryFirst, force, traitsSpec);
+    public SubCollectionBuilder(String property, TraitsSpec traitsSpec, boolean force, SubCollectionBuilder parent) {
+        super(property, traitsSpec, force);
         this.parent = parent;
     }
 
@@ -65,7 +60,7 @@ class SubCollectionBuilder extends SubNestedBuilder {
     protected SubBuilder mergeFrom(SubCollectionBuilder from) {
 //        TODO merge force ?
         SubCollectionBuilder subCollectionBuilder = new SubCollectionBuilder(property(),
-                traitsSpec.mergeFrom(from.traitsSpec, property()), force || from.force, parentCollectionBuilder(), queryFirst);
+                traitsSpec.mergeFrom(from.traitsSpec, property()), force || from.force, parent);
         subCollectionBuilder.subProperties.putAll(from.subProperties);
         subCollectionBuilder.subProperties.putAll(subProperties);
         return subCollectionBuilder;
@@ -73,7 +68,7 @@ class SubCollectionBuilder extends SubNestedBuilder {
 
     @Override
     public SubBuilder forceCreate() {
-        SubCollectionBuilder newBuilder = new SubCollectionBuilder(property(), traitsSpec, true, parentCollectionBuilder(), queryFirst);
+        SubCollectionBuilder newBuilder = new SubCollectionBuilder(property(), traitsSpec, true, parent);
         newBuilder.subProperties.putAll(subProperties);
         return newBuilder;
     }
@@ -83,7 +78,7 @@ class SubCollectionBuilder extends SubNestedBuilder {
         if (force)
             return false;
         Object propertyValue = BeanClass.createFrom(object).getPropertyValue(object, property());
-        KeyValueCollection.Matcher2 objectMatcher2 = new KeyValueCollection.Matcher2<>(subBuilders(objectFactory).collect(Collectors.toList()));
-        return objectMatcher2.matches(propertyValue, objectFactory);
+        Matcher objectMatcher = new Matcher<>(subBuilders(objectFactory).collect(Collectors.toList()));
+        return objectMatcher.matches(propertyValue, objectFactory);
     }
 }
