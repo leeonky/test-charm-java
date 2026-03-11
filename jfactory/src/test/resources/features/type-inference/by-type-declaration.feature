@@ -1,0 +1,1 @@
+Feature: Resolve Type by Declaration

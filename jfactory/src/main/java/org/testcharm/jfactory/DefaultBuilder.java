@@ -156,9 +156,16 @@ class DefaultBuilder<T> implements Builder<T> {
     @Override
     public Collection<T> queryAll() {
         ObjectProducer<T> producer = new ObjectProducer<>(jFactory, objectFactory, this, true, Optional.empty(), Optional.empty());
-        KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType(), objectFactory, producer);
-        return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
-                .filter(matcher::matches).collect(Collectors.toList());
+
+        try {
+            KeyValueCollection.Matcher2<T> objectMatcher2 = new KeyValueCollection.Matcher2<>(properties.groupByProperty(true, objectFactory));
+            return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
+                    .filter(object -> objectMatcher2.matches(object, objectFactory)).collect(Collectors.toList());
+        } catch (UnsupportedOperationException e) {
+            KeyValueCollection.Matcher<T> matcher = properties.matcher(objectFactory.getType(), objectFactory, producer);
+            return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
+                    .filter(matcher::matches).collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -189,27 +196,14 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public void processInputProperty(ObjectProducer<T> producer, boolean forQuery) {
-        properties.groupByProperty().stream().map(subBuilder -> processReverseAssociation(producer, subBuilder)).forEach(subBuilder ->
+        properties.groupByProperty(false, objectFactory).stream().map(subBuilder -> processReverseAssociation(producer, subBuilder)).forEach(subBuilder ->
 //                        TODO top list transformer
-                producer.changeChild(subBuilder.property(), subBuilder.buildProducer(producer, objectFactory, jFactory, null)));
+                producer.changeChild(subBuilder.property(), subBuilder.buildProducer(producer, objectFactory, jFactory)));
     }
 
     private SubBuilder processReverseAssociation(ObjectProducer<T> producer, SubBuilder subBuilder) {
-        if (subBuilder instanceof SubValueBuilder) {
-            return subBuilder;
-        } else {
-            if (producer.isReverseAssociation(subBuilder.property())) {
-                if (subBuilder instanceof SubObjectBuilder)
-                    return ((SubObjectBuilder) subBuilder).forceCreate();
-                return ((SubCollectionBuilder) subBuilder).forceCreateElement();
-            }
-            return subBuilder;
-        }
-    }
-
-    private Expression<T> intentlyCreateWhenReverseAssociation(ObjectProducer<T> producer, Expression<T> exp) {
-        return exp instanceof SingleValueExpression ? exp :
-                producer.isReverseAssociation(exp.getProperty()) ? exp.setIntently(true) : exp;
+        return subBuilder instanceof SubValueBuilder ? subBuilder
+                : producer.isReverseAssociation(subBuilder.property()) ? subBuilder.forceCreate() : subBuilder;
     }
 
     public DefaultBuilder<T> marge(DefaultBuilder<T> another) {

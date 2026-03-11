@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class ObjectFactory<T> implements Factory<T> {
-    protected final FactorySet factorySet;
+    private final FactorySet factorySet;
     private final BeanClass<T> type;
     private final Map<String, Consumer<Spec<T>>> traitCollectors = new LinkedHashMap<>();
     private final Map<String, Pattern> traitPatternCollectors = new LinkedHashMap<>();
@@ -130,7 +130,7 @@ class ObjectFactory<T> implements Factory<T> {
                 association, reverseAssociation);
     }
 
-    public FactorySet getFactorySet() {
+    public FactorySet factorySet() {
         return factorySet;
     }
 

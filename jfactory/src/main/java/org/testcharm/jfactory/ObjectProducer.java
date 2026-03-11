@@ -183,7 +183,7 @@ class ObjectProducer<T> extends Producer<T> {
     }
 
     private Optional<Producer<?>> defaultValueProducer(PropertyWriter<T> propertyWriter) {
-        return factory.getFactorySet().queryDefaultValueFactory(propertyWriter.getType()).map(valueFactory ->
+        return factory.factorySet().queryDefaultValueFactory(propertyWriter.getType()).map(valueFactory ->
                 new DefaultValueFactoryProducer<>(propertyWriter.getBeanType(), valueFactory, instance.sub(propertyWriter)));
     }
 
@@ -204,9 +204,9 @@ class ObjectProducer<T> extends Producer<T> {
             return defaultValueProducer(property);
     }
 
-    private Producer<?> createCollectionProducer(PropertyWriter<T> property) {
-        return setChild(property.getName(), new CollectionProducer<>(getType(), property.getType(), instance.sub(property),
-                factory.getFactorySet(), jFactory));
+    public CollectionProducer<T, ?> createCollectionProducer(PropertyWriter<T> property) {
+        return (CollectionProducer<T, ?>) setChild(property.getName(), new CollectionProducer<>(getType(), property.getType(), instance.sub(property),
+                factory.factorySet(), jFactory));
     }
 
     @Override

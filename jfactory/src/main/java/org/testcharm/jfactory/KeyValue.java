@@ -82,7 +82,7 @@ class KeyValue {
 //                && producer instanceof ObjectProducer
 //                && (property.getWriterType().is(Object.class) || property.getWriterType().isCollection())
         ) {
-            SpecClassFactory<T> specFactory = objectFactory.getFactorySet().querySpecClassFactory(traitsSpec.spec());
+            SpecClassFactory<T> specFactory = objectFactory.factorySet().querySpecClassFactory(traitsSpec.spec());
             property = property.decorateType(reify(
                     property.getWriterType().isCollection() ? property.getWriterType().getType() :
                             List.class, specFactory.getType().getGenericType()));
@@ -95,7 +95,7 @@ class KeyValue {
             if (subProducer == null)
                 subProducer = PlaceHolderProducer.PLACE_HOLDER;
         } else {
-            Optional<BeanClass<?>> optionalSpecType = traitsSpec.guessPropertyType(objectFactory.getFactorySet());
+            Optional<BeanClass<?>> optionalSpecType = traitsSpec.guessPropertyType(objectFactory.factorySet());
             if (optionalSpecType.isPresent() && optionalSpecType.get().isCollection()) {
                 property = property.decorateType(optionalSpecType.get());
                 subProducer = ((ObjectProducer) producer).getChildOrDefaultCollection(property.getWriter());
@@ -144,7 +144,7 @@ class KeyValue {
     private <T> Expression<T> createSubExpression(Property<T> property, Property<?> parentProperty,
                                                   ObjectFactory<?> objectFactory, Producer<?> subProducer, boolean forQuery, TraitsSpec traitsSpec) {
         Expression<T> result;
-        Property<T> decoratedProperty = traitsSpec.guessPropertyType(objectFactory.getFactorySet()).map(property::decorateType).orElse(property);
+        Property<T> decoratedProperty = traitsSpec.guessPropertyType(objectFactory.factorySet()).map(property::decorateType).orElse(property);
         if (clause == null) {
             String transformerName = parentProperty != null && decoratedProperty.getBeanType().isCollection()
                     ? propertyName + "[]" : propertyName;

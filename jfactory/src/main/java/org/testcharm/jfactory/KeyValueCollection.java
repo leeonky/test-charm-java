@@ -57,8 +57,8 @@ public class KeyValueCollection {
         return new Matcher<>(type, objectFactory, producer);
     }
 
-    List<SubBuilder> groupByProperty() {
-        return keyValues.stream().map(keyValue -> SubBuilder.create(keyValue.key(), keyValue.getValue(), null))
+    List<SubBuilder> groupByProperty(boolean queryFirst, ObjectFactory<?> objectFactory) {
+        return keyValues.stream().map(keyValue -> SubBuilder.create(keyValue.key(), keyValue.getValue(), null, queryFirst, objectFactory))
                 .collect(Collectors.groupingBy(SubBuilder::property, LinkedHashMap::new, Collectors.toList())).values().stream()
                 .map(subBuilders -> subBuilders.stream().reduce(SubBuilder::mergeTo))
                 .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
@@ -73,6 +73,18 @@ public class KeyValueCollection {
 
         public boolean matches(T object) {
             return expressions.stream().allMatch(e -> e.isMatch(object));
+        }
+    }
+
+    public static class Matcher2<T> {
+        private final Collection<SubBuilder> expressions;
+
+        Matcher2(List<SubBuilder> expressions) {
+            this.expressions = new ArrayList<>(expressions);
+        }
+
+        public boolean matches(T object, ObjectFactory<T> objectFactory) {
+            return expressions.stream().allMatch(e -> e.matches(object, objectFactory));
         }
     }
 

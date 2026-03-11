@@ -5,7 +5,7 @@ import org.testcharm.util.Property;
 @Deprecated
 class SubObjectExpression<P> extends Expression<P> {
     private final KeyValueCollection properties;
-    private final TraitsSpec traitsSpec;
+    private TraitsSpec traitsSpec;
     private final ObjectFactory objectFactory;
     private final Producer<?> subProducer;
     private final boolean forQuery;
@@ -39,7 +39,7 @@ class SubObjectExpression<P> extends Expression<P> {
     @Override
     protected Expression<P> mergeFrom(SubObjectExpression<P> origin) {
         properties.insertAll(origin.properties);
-        traitsSpec.merge(origin.traitsSpec, property.toString());
+        traitsSpec = traitsSpec.mergeFrom(origin.traitsSpec, property.toString());
         setIntently(intently || origin.intently);
         return this;
     }

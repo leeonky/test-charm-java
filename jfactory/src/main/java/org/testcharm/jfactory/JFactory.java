@@ -16,7 +16,7 @@ import static org.testcharm.util.CollectionHelper.reify;
 
 public class JFactory {
     final AliasSetStore aliasSetStore = new AliasSetStore();
-    private final FactorySet factorySet = new FactorySet();
+    private final FactorySet factorySet = new FactorySet(this);
     private final DataRepository dataRepository;
     private final Set<Predicate<PropertyWriter<?>>> ignoreDefaultValues = new LinkedHashSet<>();
 

@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static org.testcharm.util.Classes.newInstance;
 import static org.testcharm.util.Sneaky.execute;
-import static java.lang.String.format;
 
 class SpecClassFactory<T> extends ObjectFactory<T> {
     private final Class<? extends Spec<T>> specClass;
@@ -81,7 +81,7 @@ class SpecClassFactory<T> extends ObjectFactory<T> {
     @SuppressWarnings("unchecked")
     protected Supplier<Transformer> fallback(String name, Supplier<Transformer> fallback) {
         return () -> specClass.getSuperclass().equals(Spec.class) ? getBase().queryTransformer(name, fallback)
-                : factorySet.querySpecClassFactory((Class<? extends Spec<T>>) specClass.getSuperclass())
+                : factorySet().querySpecClassFactory((Class<? extends Spec<T>>) specClass.getSuperclass())
                 .queryTransformer(name, fallback);
     }
 }

@@ -7,11 +7,20 @@ import java.util.*;
 import java.util.function.Consumer;
 
 class FactorySet {
+    private final JFactory jFactory;
     private final TypeSequence typeSequence = new TypeSequence();
     private final DefaultValueFactories defaultValueFactories = new DefaultValueFactories();
     private final Map<BeanClass<?>, ObjectFactory<?>> objectFactories = new HashMap<>();
     private final Map<Class<?>, SpecClassFactory<?>> specClassFactoriesWithType = new HashMap<>();
     private final Map<String, SpecClassFactory<?>> specClassFactoriesWithName = new LinkedHashMap<>();
+
+    FactorySet(JFactory jFactory) {
+        this.jFactory = jFactory;
+    }
+
+    public JFactory jFactory() {
+        return jFactory;
+    }
 
     @SuppressWarnings("unchecked")
     public <T> ObjectFactory<T> queryObjectFactory(BeanClass<T> type) {
