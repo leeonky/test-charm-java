@@ -3,6 +3,7 @@ project = "1.0.0-alpha.2"
 jackson = "2.9.0"
 junit = "5.3.1"
 cucumber = "6.10.4"
+cucumber7 = "7.34.2"
 jpa = "2.2"
 cucumberJunit = "5.1.1"
 slf4j = "2.0.17"
@@ -54,6 +55,7 @@ test-pug4j = { module = "de.neuland-bfi:pug4j", version = "2.3.1" }
 test-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 #TODO remove
 test-jsonassert = { module = "org.skyscreamer:jsonassert", version = "1.5.0" }
+test-cucumber7 = { module = "io.cucumber:cucumber-java", version.ref = "cucumber7" }
 
 [plugins]
 nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }

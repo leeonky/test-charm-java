@@ -1,7 +1,6 @@
 package org.testcharm.dal.extensions.inspector.cucumber;
 
 import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Playwright;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -9,6 +8,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterAll;
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.extensions.basic.binary.util.HexFormatter;
 import org.testcharm.dal.extensions.inspector.Inspector;
@@ -31,16 +31,20 @@ public class InspectorSteps {
 //    private final BrowserSelenium browser = new BrowserSelenium(() ->
 //            Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
 
-    private static final Playwright playwright = Playwright.create();
-    private final BrowserPlaywright browser = new BrowserPlaywright(() -> playwright.chromium().connect("ws://www.s.com:3000/", new BrowserType.ConnectOptions().setHeaders(
+    private static final BrowserContextPlaywright browserContextPlaywright = new BrowserContextPlaywright(playwright -> playwright.chromium().connect("ws://www.s.com:3000/", new BrowserType.ConnectOptions().setHeaders(
             new HashMap<String, String>() {{
                 put("x-playwright-launch-options", "{ \"headless\": false }");
             }})));
 
+    @AfterAll
+    public static void before_or_after_all() {
+        browserContextPlaywright.destroyAll();
+    }
+
 
     @After
     public void close() {
-        browser.destroy();
+        browserContextPlaywright.destroy();
     }
 
     @Before
@@ -58,7 +62,7 @@ public class InspectorSteps {
 
     @And("launch inspector web page")
     public void launchInspectorWebPage() {
-        mainPage = new MainPage(browser.open("http://host.docker.internal:10082").find(css("body")).single());
+        mainPage = new MainPage(browserContextPlaywright.open("http://host.docker.internal:10082").find(css("body")).single());
     }
 
     @And("shutdown web server")

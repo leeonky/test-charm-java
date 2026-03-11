@@ -1,22 +1,23 @@
 package org.testcharm.pf.cucumber;
 
-import org.testcharm.pf.By;
-import org.testcharm.pf.PlaywrightElement;
+import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import org.testcharm.pf.By;
+import org.testcharm.pf.PlaywrightElement;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public class Playwright {
-    static final com.microsoft.playwright.Playwright playwright = com.microsoft.playwright.Playwright.create();
-
-    public static class BrowserPlaywright {
-        private final Supplier<BrowserContext> browserContextSupplier;
+    public static class BrowserContextPlaywright {
+        private com.microsoft.playwright.Playwright playwright;
+        private Browser browser;
         private BrowserContext browserContext;
+        private final Function<com.microsoft.playwright.Playwright, Browser> browserSupplier;
 
-        public BrowserPlaywright(Supplier<BrowserContext> browserContextSupplier) {
-            this.browserContextSupplier = browserContextSupplier;
+        public BrowserContextPlaywright(Function<com.microsoft.playwright.Playwright, Browser> browserSupplier) {
+            this.browserSupplier = browserSupplier;
         }
 
         public void destroy() {
@@ -26,8 +27,26 @@ public class Playwright {
             }
         }
 
+        public void destroyAll() {
+            destroy();
+            if (browser != null) {
+                browser.close();
+                browser = null;
+            }
+            if (playwright != null) {
+                playwright.close();
+                playwright = null;
+            }
+        }
+
         public PlaywrightE open(String url) {
-            BrowserContext browserContext = browserContextSupplier.get();
+            if (playwright == null)
+                playwright = com.microsoft.playwright.Playwright.create();
+            if (browser == null)
+                browser = browserSupplier.apply(playwright);
+            if (browserContext == null)
+                browserContext = browser.newContext();
+
             Page page = browserContext.newPage();
             page.navigate(url);
             PlaywrightE e = new PlaywrightE(page.locator("html"));

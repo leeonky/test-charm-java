@@ -5,6 +5,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.microsoft.playwright.BrowserType;
 import de.neuland.pug4j.Pug4J;
 import io.cucumber.java.After;
+import io.cucumber.java.AfterAll;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
@@ -33,10 +34,11 @@ public class Steps {
     private final Selenium.BrowserSelenium browserSelenium = new Selenium.BrowserSelenium(() ->
             Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));
 
-    private final Playwright.BrowserPlaywright browserPlaywright = new Playwright.BrowserPlaywright(() -> Playwright.playwright.chromium().connect("ws://www.s.com:3000/", new BrowserType.ConnectOptions().setHeaders(
-            new HashMap<String, String>() {{
-                put("x-playwright-launch-options", "{ \"headless\": false }");
-            }})).newContext());
+    private static final Playwright.BrowserContextPlaywright BROWSER_CONTEXT_PLAYWRIGHT = new Playwright.BrowserContextPlaywright(playwright ->
+            playwright.chromium().connect("ws://www.s.com:3000/", new BrowserType.ConnectOptions().setHeaders(
+                    new HashMap<String, String>() {{
+                        put("x-playwright-launch-options", "{ \"headless\": false }");
+                    }})));
     private Selenium.SeleniumE seleniumE;
     private Playwright.PlaywrightE playwrightE;
     private Map<String, Object> lastFormData;
@@ -65,12 +67,16 @@ public class Steps {
             javalin = null;
         }
         browserSelenium.destroy();
-        browserPlaywright.destroy();
+        BROWSER_CONTEXT_PLAYWRIGHT.destroy();
         lastError = null;
         seleniumE = null;
         playwrightE = null;
     }
 
+    @AfterAll
+    public static void before_or_after_all() {
+        BROWSER_CONTEXT_PLAYWRIGHT.destroyAll();
+    }
 
     @Then("page in driver selenium should:")
     public void pageInDriverSeleniumShould(String expression) {
@@ -90,7 +96,7 @@ public class Steps {
 
     private Playwright.PlaywrightE rootPlaywrightElement() {
         if (playwrightE == null)
-            playwrightE = browserPlaywright.open("http://host.docker.internal:10081");
+            playwrightE = BROWSER_CONTEXT_PLAYWRIGHT.open("http://host.docker.internal:10081");
         return playwrightE;
     }
 

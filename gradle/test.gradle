@@ -70,10 +70,3 @@ project(":DAL-extension-inspector") {
         mustRunAfter(":page-flow:test")
     }
 }
-
-project(":page-flow") {
-    tasks.named("test") {
-        mustRunAfter(":page-flow-playwright:test")
-        mustRunAfter(":page-flow-selenium:test")
-    }
-}
