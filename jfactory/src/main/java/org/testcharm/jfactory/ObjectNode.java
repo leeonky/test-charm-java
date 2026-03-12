@@ -4,8 +4,8 @@ import org.testcharm.util.BeanClass;
 
 import java.util.stream.Collectors;
 
-class SubObjectBuilder extends SubNestedBuilder {
-    public SubObjectBuilder(String property, TraitsSpec traitsSpec, boolean force) {
+class ObjectNode extends CompositeBuilder {
+    public ObjectNode(String property, TraitsSpec traitsSpec, boolean force) {
         super(property, traitsSpec, force);
     }
 
@@ -17,21 +17,21 @@ class SubObjectBuilder extends SubNestedBuilder {
     }
 
     @Override
-    protected SubBuilder mergeTo(SubBuilder to) {
+    protected PropertyNode mergeTo(PropertyNode to) {
         return to.mergeFrom(this);
     }
 
     @Override
-    protected SubBuilder mergeFrom(SubObjectBuilder from) {
-        SubObjectBuilder subObjectBuilder = new SubObjectBuilder(property(), traitsSpec.mergeFrom(from.traitsSpec, property()), force || from.force);
-        subObjectBuilder.subProperties.putAll(from.subProperties);
-        subObjectBuilder.subProperties.putAll(subProperties);
-        return subObjectBuilder;
+    protected PropertyNode mergeFrom(ObjectNode from) {
+        ObjectNode objectNode = new ObjectNode(property(), traitsSpec.mergeFrom(from.traitsSpec, property()), force || from.force);
+        objectNode.subProperties.putAll(from.subProperties);
+        objectNode.subProperties.putAll(subProperties);
+        return objectNode;
     }
 
     @Override
-    public SubBuilder forceCreate() {
-        SubObjectBuilder newBuilder = new SubObjectBuilder(property(), traitsSpec, true);
+    public PropertyNode forceCreate() {
+        ObjectNode newBuilder = new ObjectNode(property(), traitsSpec, true);
         newBuilder.subProperties.putAll(subProperties);
         return newBuilder;
     }
@@ -41,7 +41,7 @@ class SubObjectBuilder extends SubNestedBuilder {
         if (force)
             return false;
         Object propertyValue = BeanClass.createFrom(object).getPropertyValue(object, property());
-        Matcher objectMatcher = new Matcher<>(subBuilders(objectFactory).collect(Collectors.toList()));
+        Matcher objectMatcher = new Matcher<>(createSubNodes(objectFactory).collect(Collectors.toList()));
         return objectMatcher.matches(propertyValue, objectFactory);
     }
 }

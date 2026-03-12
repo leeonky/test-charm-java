@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 
 import static org.testcharm.util.CollectionHelper.reify;
 
-class SubCollectionBuilder extends SubNestedBuilder {
-    private final SubCollectionBuilder parent;
+class CollectionNode extends CompositeBuilder {
+    private final CollectionNode parent;
 
-    public SubCollectionBuilder(String property, TraitsSpec traitsSpec, boolean force, SubCollectionBuilder parent) {
+    public CollectionNode(String property, TraitsSpec traitsSpec, boolean force, CollectionNode parent) {
         super(property, traitsSpec, force);
         this.parent = parent;
     }
@@ -22,12 +22,12 @@ class SubCollectionBuilder extends SubNestedBuilder {
     public Producer<?> buildProducer(Producer<?> parent, ObjectFactory<?> factory, JFactory jFactory) {
         if (traitsSpec.spec() != null) {
             return traitsSpec.isCollectionElementSpec() ?
-                    processElementBuilder(jFactory, factory, generateCollectionProducerByInputSpec(parent, factory, jFactory))
+                    processElementNode(jFactory, factory, generateCollectionProducerByInputSpec(parent, factory, jFactory))
                     : new BuilderValueProducer<>(traitsSpec.toBuilder(jFactory, null), false).apply(subProperties);
         } else {
             Producer<?> producer = parent.getChildOrDefaultCollection((PropertyWriter) parent.getType().getPropertyWriter(property()));
             return producer instanceof CollectionProducer
-                    ? processElementBuilder(jFactory, factory, (CollectionProducer<?, ?>) producer)
+                    ? processElementNode(jFactory, factory, (CollectionProducer<?, ?>) producer)
                     : ((BuilderValueProducer<?>) producer).apply(subProperties);
         }
     }
@@ -45,30 +45,30 @@ class SubCollectionBuilder extends SubNestedBuilder {
         return collectionProducer;
     }
 
-    private CollectionProducer<?, ?> processElementBuilder(JFactory jFactory, ObjectFactory<?> factory, CollectionProducer<?, ?> collectionProducer) {
-        subBuilders(factory).map(subBuilder -> force ? subBuilder.forceCreate() : subBuilder).forEach((subBuilder) ->
-                collectionProducer.changeChild(subBuilder.property(), subBuilder.buildProducer(collectionProducer, factory, jFactory)));
+    private CollectionProducer<?, ?> processElementNode(JFactory jFactory, ObjectFactory<?> factory, CollectionProducer<?, ?> collectionProducer) {
+        createSubNodes(factory).map(node -> force ? node.forceCreate() : node).forEach((node) ->
+                collectionProducer.changeChild(node.property(), node.buildProducer(collectionProducer, factory, jFactory)));
         return collectionProducer;
     }
 
     @Override
-    protected SubBuilder mergeTo(SubBuilder to) {
+    protected PropertyNode mergeTo(PropertyNode to) {
         return to.mergeFrom(this);
     }
 
     @Override
-    protected SubBuilder mergeFrom(SubCollectionBuilder from) {
+    protected PropertyNode mergeFrom(CollectionNode from) {
 //        TODO merge force ?
-        SubCollectionBuilder subCollectionBuilder = new SubCollectionBuilder(property(),
+        CollectionNode collectionNode = new CollectionNode(property(),
                 traitsSpec.mergeFrom(from.traitsSpec, property()), force || from.force, parent);
-        subCollectionBuilder.subProperties.putAll(from.subProperties);
-        subCollectionBuilder.subProperties.putAll(subProperties);
-        return subCollectionBuilder;
+        collectionNode.subProperties.putAll(from.subProperties);
+        collectionNode.subProperties.putAll(subProperties);
+        return collectionNode;
     }
 
     @Override
-    public SubBuilder forceCreate() {
-        SubCollectionBuilder newBuilder = new SubCollectionBuilder(property(), traitsSpec, true, parent);
+    public PropertyNode forceCreate() {
+        CollectionNode newBuilder = new CollectionNode(property(), traitsSpec, true, parent);
         newBuilder.subProperties.putAll(subProperties);
         return newBuilder;
     }
@@ -78,7 +78,7 @@ class SubCollectionBuilder extends SubNestedBuilder {
         if (force)
             return false;
         Object propertyValue = BeanClass.createFrom(object).getPropertyValue(object, property());
-        Matcher objectMatcher = new Matcher<>(subBuilders(objectFactory).collect(Collectors.toList()));
+        Matcher objectMatcher = new Matcher<>(createSubNodes(objectFactory).collect(Collectors.toList()));
         return objectMatcher.matches(propertyValue, objectFactory);
     }
 }

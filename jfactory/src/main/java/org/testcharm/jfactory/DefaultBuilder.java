@@ -19,7 +19,7 @@ class DefaultBuilder<T> implements Builder<T> {
     private final JFactory jFactory;
     private final Set<String> traits = new LinkedHashSet<>();
 
-    private final List<SubBuilder> properties;
+    private final List<PropertyNode> properties;
     private final DefaultArguments arguments = new DefaultArguments();
     private int collectionSize = 0;
     private final BuildFrom buildFrom;
@@ -123,11 +123,11 @@ class DefaultBuilder<T> implements Builder<T> {
             if (isCollection(value)) {
                 List<Object> objects = CollectionHelper.convertToStream(value).collect(Collectors.toList());
                 if (objects.isEmpty() || !property.contains("$"))
-                    newBuilder.properties.add(SubBuilder.create(trimIndexAlias(property), value, null, objectFactory));
+                    newBuilder.properties.add(PropertyNode.create(trimIndexAlias(property), value, null, objectFactory));
                 else for (int i = 0; i < objects.size(); i++)
-                    newBuilder.properties.add(SubBuilder.create(property.replaceFirst("\\$", String.valueOf(i)), objects.get(i), null, objectFactory));
+                    newBuilder.properties.add(PropertyNode.create(property.replaceFirst("\\$", String.valueOf(i)), objects.get(i), null, objectFactory));
             } else
-                newBuilder.properties.add(SubBuilder.create(property, value, null, objectFactory));
+                newBuilder.properties.add(PropertyNode.create(property, value, null, objectFactory));
         });
         return newBuilder;
     }
@@ -153,7 +153,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public Collection<T> queryAll() {
-        Matcher<T> objectMatcher = new Matcher<>(SubBuilder.groupByProperty(properties));
+        Matcher<T> objectMatcher = new Matcher<>(PropertyNode.groupByProperty(properties));
         return jFactory.getDataRepository().queryAll(objectFactory.getType().getType()).stream()
                 .filter(object -> objectMatcher.matches(object, objectFactory)).collect(Collectors.toList());
     }
@@ -173,14 +173,14 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public void processInputProperty(ObjectProducer<T> producer) {
-        SubBuilder.groupByProperty(properties).stream().map(subBuilder -> processReverseAssociation(producer, subBuilder)).forEach(subBuilder ->
+        PropertyNode.groupByProperty(properties).stream().map(node -> processReverseAssociation(producer, node)).forEach(node ->
 //                        TODO top list transformer
-                producer.changeChild(subBuilder.property(), subBuilder.buildProducer(producer, objectFactory, jFactory)));
+                producer.changeChild(node.property(), node.buildProducer(producer, objectFactory, jFactory)));
     }
 
-    private SubBuilder processReverseAssociation(ObjectProducer<T> producer, SubBuilder subBuilder) {
-        return subBuilder instanceof SubValueBuilder ? subBuilder
-                : producer.isReverseAssociation(subBuilder.property()) ? subBuilder.forceCreate() : subBuilder;
+    private PropertyNode processReverseAssociation(ObjectProducer<T> producer, PropertyNode propertyNode) {
+        return propertyNode instanceof ValueNode ? propertyNode
+                : producer.isReverseAssociation(propertyNode.property()) ? propertyNode.forceCreate() : propertyNode;
     }
 
     public DefaultBuilder<T> marge(DefaultBuilder<T> another) {

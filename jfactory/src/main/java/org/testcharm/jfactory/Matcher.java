@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 public class Matcher<T> {
-    private final Collection<SubBuilder> expressions;
+    private final Collection<PropertyNode> expressions;
 
-    Matcher(List<SubBuilder> expressions) {
+    Matcher(List<PropertyNode> expressions) {
         this.expressions = new ArrayList<>(expressions);
     }
 

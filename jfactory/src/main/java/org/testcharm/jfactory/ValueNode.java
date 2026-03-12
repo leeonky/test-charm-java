@@ -5,16 +5,16 @@ import org.testcharm.util.PropertyReader;
 
 import java.util.Objects;
 
-class SubValueBuilder extends SubBuilder {
+class ValueNode extends PropertyNode {
     protected final Object value;
 
-    public SubValueBuilder(String property, Object value) {
+    public ValueNode(String property, Object value) {
         super(property);
         this.value = value;
     }
 
     @Override
-    protected SubBuilder mergeTo(SubBuilder to) {
+    protected PropertyNode mergeTo(PropertyNode to) {
         return to.mergeFrom(this);
     }
 
