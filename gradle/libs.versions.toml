@@ -1,5 +1,5 @@
 [versions]
-project = "1.0.0-alpha.2"
+project = "1.0.0-alpha.3"
 jackson = "2.9.0"
 junit = "5.3.1"
 cucumber = "6.10.4"
@@ -22,8 +22,6 @@ prod-reflections = { module = "org.reflections:reflections", version = "0.9.11" 
 prod-cucumber = { module = "io.cucumber:cucumber-java", version.ref = "cucumber" }
 prod-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 prod-jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
-prod-javalin = { module = "io.javalin:javalin", version.ref = "javalin" }
-prod-tika-core = { module = "org.apache.tika:tika-core", version = "1.28.5" }
 prod-selenium = { module = "org.seleniumhq.selenium:selenium-java", version = "3.141.59" }
 prod-playwight = { module = "com.microsoft.playwright:playwright", version = "1.50.0" }
 prod-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
