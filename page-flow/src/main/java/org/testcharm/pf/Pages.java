@@ -8,9 +8,9 @@ public class Pages<P> {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends P> T switchTo(Target<T> target) {
+    public <T extends P> T switchTo(Target<P> target) {
         current = getCurrent();
-        if (current != null && target.matches((T) current))
+        if (current != null && target.matches(current))
             return (T) current;
         target.navigateTo();
         return (T) (current = target.create());

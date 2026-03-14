@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
     private final T element;
     private final By locator;
-    private DALCollection<T> list;
 
     public Elements(By locator, T element) {
         this.locator = locator;
@@ -22,9 +21,7 @@ public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
 
     @Override
     public DALCollection<T> list() {
-        if (list == null)
-            list = findAll();
-        return list;
+        return findAll();
     }
 
     private CollectionDALCollection<T> findAll() {
@@ -43,13 +40,12 @@ public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
 
     @Override
     public List<T> soloList() {
-        if (list == null)
-            list = new Retryer(element.timeout(), 100).get(() -> {
-                DALCollection<T> elements = findAll();
-                if (elements.size() != 1)
-                    throw unexpectedElementSize();
-                return elements;
-            });
+        DALCollection<T> list = new Retryer(element.timeout(), 100).get(() -> {
+            DALCollection<T> elements = findAll();
+            if (elements.size() != 1)
+                throw unexpectedElementSize();
+            return elements;
+        });
         if (list.size() != 1)
             throw unexpectedElementSize();
         return list.collect();
