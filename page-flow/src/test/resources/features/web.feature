@@ -338,6 +338,26 @@ Feature: web ui
         | selenium   |
         | playwright |
 
+    Scenario Outline: screenshot
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            .target hello
+        """
+      When perform via driver <driver>:
+        """
+        css[.target].screenshot: {
+          class.simpleName: 'byte[]'
+          string::should.contains: 'PNG'
+        }
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
   Rule: input output
 
     Scenario Outline: web element textarea input select is input

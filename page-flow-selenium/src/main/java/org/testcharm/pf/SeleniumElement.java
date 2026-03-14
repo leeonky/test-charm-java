@@ -1,5 +1,6 @@
 package org.testcharm.pf;
 
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.support.ui.Select;
 import org.testcharm.dal.runtime.AdaptiveList;
 import org.testcharm.util.CollectionHelper;
@@ -128,5 +129,10 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
         }
 
         return generateFullXPath(parent) + "/" + elementTag + "[" + index + "]";
+    }
+
+    @Override
+    public byte[] screenshot() {
+        return element.getScreenshotAs(OutputType.BYTES);
     }
 }

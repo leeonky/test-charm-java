@@ -83,6 +83,8 @@ public interface Element<T extends Element<T, E>, E> {
         return null;
     }
 
+    byte[] screenshot();
+
     @SuppressWarnings("unchecked")
     default Elements<T> find(By locator) {
         return new Elements<>(locator, (T) this);

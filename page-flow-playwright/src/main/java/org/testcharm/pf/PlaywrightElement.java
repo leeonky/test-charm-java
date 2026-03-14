@@ -101,4 +101,9 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
     public String getLocation() {
         return (String) locator.evaluate("element => { const getXPath = (node) => { if (node.tagName === 'HTML') return '/html[1]'; let ix=0; const siblings = node.parentNode.childNodes; for (var i=0; i<siblings.length; i++) { const sibling = siblings[i]; if (sibling === node) return getXPath(node.parentNode) + '/' + node.tagName.toLowerCase() + '[' + (ix+1) + ']'; if (sibling.nodeType === 1 && sibling.tagName === node.tagName) ix++; } }; return getXPath(element); }");
     }
+
+    @Override
+    public byte[] screenshot() {
+        return locator.screenshot();
+    }
 }
