@@ -1,14 +1,23 @@
 Feature: integer node
 
-  Scenario: null when does not match
+  Scenario Outline: null when does not match
     Given the following dal expression:
     """
-    not starts with digital
+    <code>
     """
     Then parse the following "integer" node:
     """
     : null
     """
+    Examples:
+      | code                    |
+      | not starts with digital |
+      | 1.1                     |
+      | 1s                      |
+      | 1y                      |
+      | 1l                      |
+      | 1bd                     |
+      | 999999999999999         |
 
   Scenario Outline: supported format for integer parsing
     Given the following dal expression:
@@ -28,11 +37,10 @@ Feature: integer node
     : <evaluate>
     """
     Examples:
-      | code           | inspect        | evaluate       |
-      | 100            | 100            | 100            |
-      | 99999999999999 | 99999999999999 | 99999999999999 |
-      | 0x100          | 256            | 256            |
-      | -10            | -10            | -10            |
+      | code  | inspect | evaluate |
+      | 100   | 100     | 100      |
+      | 0x100 | 256     | 256      |
+      | -10   | -10     | -10      |
 
   Scenario Outline: delimiter between numbers
     When evaluate follow expression as "integer" node:
@@ -64,13 +72,3 @@ Feature: integer node
       | \n        |
       | `TAB      |
       | `SPACE    |
-
-  Scenario: raise error when number is not a integer
-    Given the following dal expression:
-    """
-    1.1
-    """
-    Then failed to parse "integer" with the following message:
-    """
-    expect an integer
-    """

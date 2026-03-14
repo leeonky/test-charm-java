@@ -47,7 +47,7 @@ public class Compiler {
             OBJECT_VERIFICATION_PROPERTY, CONST_REMARK,
             ROOT_INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.Root.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(NodeFactory::literalNumber),
-            INTEGER = Tokens.INTEGER.nodeParser(NodeFactory::literalInteger),
+            INTEGER = Tokens.PURE_INTEGER.nodeParser(NodeFactory::literalInteger),
             SINGLE_QUOTED_STRING = Notations.SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
                     .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(NodeFactory::literalString)),
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))

@@ -24,10 +24,15 @@ public class Tokens {
         return numberParser.parse(token.getContent()) != null;
     }
 
+    private static boolean isPureInteger(Token token) {
+        Number parse = numberParser.parse(token.getContent());
+        return parse instanceof Integer;
+    }
+
     public static final TokenScanner<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             NUMBER = tokenSpec(DIGITAL_OR_MINUS::contains, emptySet(), Tokens::notNumber).predicate(Tokens::isNumber).scanner(),
-            INTEGER = tokenSpec(DIGITAL_OR_MINUS::contains, emptySet(), Tokens::notNumber)
-                    .predicate(Tokens::isNumber).scanner(),
+            PURE_INTEGER = tokenSpec(DIGITAL_OR_MINUS::contains, emptySet(), Tokens::notPureNumber)
+                    .predicate(Tokens::isPureInteger).scanner(),
             SYMBOL = tokenSpec(not(PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, PROPERTY_DELIMITER)
                     .predicate(not(Tokens::isNumber)).scanner(),
             USER_LITERAL_SYMBOL = tokenSpec(not(PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, PROPERTY_DELIMITER)
@@ -62,6 +67,12 @@ public class Tokens {
         if (size == 0)
             return false;
         return notSymbolAfterPower(code, position) || notNumberPoint(code, position);
+    }
+
+    private static boolean notPureNumber(String code, int position, int size) {
+        if (size == 0)
+            return false;
+        return notSymbolAfterPower(code, position);
     }
 
     private static boolean notNumberPoint(String code, int position) {
