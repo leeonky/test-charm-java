@@ -208,7 +208,7 @@ Feature: web ui
         """
       Then page in driver <driver> should:
         """
-        css[.target].text= hello
+        patience[1s].css[.target].text= hello
         """
       And logs should:
         """

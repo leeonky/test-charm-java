@@ -44,7 +44,7 @@ public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
     @Override
     public List<T> soloList() {
         if (list == null)
-            list = new Retryer(element.defaultTimeout(), 100).get(() -> {
+            list = new Retryer(element.timeout(), 100).get(() -> {
                 DALCollection<T> elements = findAll();
                 if (elements.size() != 1)
                     throw unexpectedElementSize();

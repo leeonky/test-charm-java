@@ -22,6 +22,10 @@ public interface Element<T extends Element<T, E>, E> {
         return 8888;
     }
 
+    int timeout();
+
+    T patience(String time);
+
     @SuppressWarnings("unchecked")
     default List<By> locators() {
         return new ArrayList<By>() {{
