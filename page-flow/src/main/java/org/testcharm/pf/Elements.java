@@ -46,16 +46,16 @@ public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
         if (list == null)
             list = new Retryer(element.defaultTimeout(), 100).get(() -> {
                 DALCollection<T> elements = findAll();
-                if (elements.isEmpty())
-                    throw unexpectedElementSize("no");
+                if (elements.size() != 1)
+                    throw unexpectedElementSize();
                 return elements;
             });
         if (list.size() != 1)
-            throw unexpectedElementSize(list.size());
+            throw unexpectedElementSize();
         return list.collect();
     }
 
-    private InvalidAdaptiveListException unexpectedElementSize(Object size) {
+    private InvalidAdaptiveListException unexpectedElementSize() {
         return new InvalidAdaptiveListException(locateInfo("Operations can only be performed on a single located element at: ", " => " + locator));
     }
 
