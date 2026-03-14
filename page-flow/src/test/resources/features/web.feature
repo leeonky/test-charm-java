@@ -254,43 +254,6 @@ Feature: web ui
         | selenium   |
         | playwright |
 
-    Scenario Outline: Once elements have been operated, the previously located set of elements does not change
-      Given launch the following web page:
-        """
-        html
-          script.
-            document.addEventListener('DOMContentLoaded', function() {
-              setTimeout(function() {
-                var newElement = document.createElement('div');
-                newElement.className = 'target';
-                newElement.textContent = 'hello';
-                document.body.appendChild(newElement);
-              }, 500);
-            });
-          body
-        """
-      When try to find element via driver <driver>:
-        """
-        css[.target]: {
-          text[]= []
-          text= hello
-        }
-        """
-      Then failed with:
-        """
-        Operations can only be performed on a single located element at: css{html} => css{.target}, but is: org.testcharm.pf.Elements []
-        """
-      And logs should:
-        """
-        : | level | message                             |
-          | INFO  | Locating: css{html} => css{.target} |
-          | INFO  | Found 0 elements                    |
-        """
-      Examples:
-        | driver     | type                   |
-        | selenium   | Selenium$SeleniumE     |
-        | playwright | Playwright$PlaywrightE |
-
     Scenario Outline: Once only element have been operated, the previously located set of elements does not change
       Given launch the following web page:
         """

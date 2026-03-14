@@ -47,12 +47,17 @@ public class MetaProperties implements Extension {
                 asList(k, metaData.data().property(k).value())).collect(Collectors.toList());
     }
 
+    private static Object values(MetaData<?> metaData) {
+        return new StaticAdaptiveList<>(new IterableDALCollection<>(() -> metaData.data().fieldNames().stream().map(k ->
+                metaData.data().property(k).value()).iterator()));
+    }
+
+
     private static Object flat(MetaData<?> metaData) {
         Object[] array = metaData.data().list().wraps().stream()
                 .flatMap(dataIndexedElement -> dataIndexedElement.value().list().values())
                 .toArray();
-        return array
-                ;
+        return array;
     }
 
     @Override
@@ -64,6 +69,7 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty("object", MetaProperties::object_)
                 .registerMetaProperty("keys", MetaProperties::keys)
                 .registerMetaProperty("entries", MetaProperties::entries)
+                .registerMetaProperty("values", MetaProperties::values)
                 .registerMetaProperty("should", MetaShould::new)
                 .registerMetaProperty("this", (RuntimeDataHandler<MetaData<?>>) RuntimeData::data)
                 .registerMetaProperty(MetaShould.class, "not", (metaData) -> metaData.data().value().negative())

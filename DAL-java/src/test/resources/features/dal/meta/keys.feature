@@ -11,3 +11,27 @@ Feature: keys
     """
     ::keys= [key1 key2]
     """
+
+  Scenario: support to get all entries as a list
+    Given the following java class:
+    """
+    public class Bean {
+      public String key1="hello", key2="world";
+    }
+    """
+    Then the following verification for the instance of java class "Bean" should pass:
+    """
+    ::entries= [[key1, hello] [key2, world]]
+    """
+
+  Scenario: support to get all values as a list
+    Given the following java class:
+    """
+    public class Bean {
+      public String key1="hello", key2="world";
+    }
+    """
+    Then the following verification for the instance of java class "Bean" should pass:
+    """
+    ::values= [hello world]
+    """
