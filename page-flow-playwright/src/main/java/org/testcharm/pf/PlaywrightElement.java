@@ -35,7 +35,7 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
             case XPATH:
                 return "xpath=" + by.value();
             case CAPTION:
-                return format("xpath=.//*[normalize-space(@value)='%s' or normalize-space(text())='%s']", by.value(), by.value());
+                return String.format("text='%s'", by.value());
             case PLACEHOLDER:
                 return format("xpath=.//*[@placeholder='%s']", by.value());
             default:

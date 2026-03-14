@@ -19,7 +19,7 @@ public interface Element<T extends Element<T, E>, E> {
     List<E> findElements(By by);
 
     default int defaultTimeout() {
-        return 2000;
+        return 8888;
     }
 
     @SuppressWarnings("unchecked")
