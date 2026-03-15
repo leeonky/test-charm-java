@@ -1,17 +1,17 @@
 package org.testcharm.pf.cucumber;
 
-import org.testcharm.pf.SeleniumElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.testcharm.pf.SeleniumElement;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 public class Selenium {
     public static class SeleniumE extends SeleniumElement<SeleniumE> {
-        public SeleniumE(WebElement element) {
-            super(element);
+        public SeleniumE(WebDriver webDriver, WebElement element) {
+            super(webDriver, element);
         }
     }
 
@@ -35,7 +35,7 @@ public class Selenium {
                 webDriver = driverFactory.get();
             webDriver.get(url);
             By by = By.tagName("html");
-            SeleniumE e = new SeleniumE(webDriver.findElement(by));
+            SeleniumE e = new SeleniumE(webDriver, webDriver.findElement(by));
             e.setLocator(org.testcharm.pf.By.css("html"));
             return e;
         }

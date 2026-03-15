@@ -1,8 +1,11 @@
 package org.testcharm.pf;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.Select;
 import org.testcharm.dal.runtime.AdaptiveList;
+import org.testcharm.util.BeanClass;
 import org.testcharm.util.CollectionHelper;
 
 import java.util.List;
@@ -16,9 +19,17 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
         extends AbstractElement<T, org.openqa.selenium.WebElement>
         implements WebElement<T, org.openqa.selenium.WebElement> {
     protected final org.openqa.selenium.WebElement element;
+    private final WebDriver webDriver;
 
-    public SeleniumElement(org.openqa.selenium.WebElement element) {
+    public SeleniumElement(WebDriver webDriver, org.openqa.selenium.WebElement element) {
         this.element = element;
+        this.webDriver = webDriver;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T newChildren(org.openqa.selenium.WebElement element) {
+        return (T) BeanClass.create(getClass()).newInstance(webDriver, element);
     }
 
     @Override
@@ -134,5 +145,10 @@ public abstract class SeleniumElement<T extends SeleniumElement<T>>
     @Override
     public byte[] screenshot() {
         return element.getScreenshotAs(OutputType.BYTES);
+    }
+
+    @Override
+    public String getDom() {
+        return (String) ((JavascriptExecutor) webDriver).executeScript("return arguments[0].outerHTML;", element);
     }
 }

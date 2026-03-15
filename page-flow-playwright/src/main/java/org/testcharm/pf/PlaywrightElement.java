@@ -106,4 +106,9 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T>>
     public byte[] screenshot() {
         return locator.screenshot();
     }
+
+    @Override
+    public String getDom() {
+        return (String) locator.evaluate("e => e.outerHTML");
+    }
 }

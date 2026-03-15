@@ -133,18 +133,20 @@ Feature: web ui
         """
       When try to find element via driver <driver>:
         """
-        css[.target].text
+        patience[1s].css[.target].text
         """
       Then failed with:
         """
         Operations can only be performed on a single located element at: css{html} => css{.target}, but is: org.testcharm.pf.Elements [
             org.testcharm.pf.cucumber.<type> {
+                dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
                 location: java.lang.String </html[1]/body[1]/div[1]>,
                 locator: css{.target},
                 tag: java.lang.String <div>
             },
             org.testcharm.pf.cucumber.<type> {
+                dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
                 location: java.lang.String </html[1]/body[1]/div[2]>,
                 locator: css{.target},
@@ -167,18 +169,20 @@ Feature: web ui
         """
       When try to find element via driver <driver>:
         """
-        css[.target]: unexpected
+        patience[1s].css[.target]: unexpected
         """
       Then failed with:
         """
         Operations can only be performed on a single located element at: css{html} => css{.target}, but is: org.testcharm.pf.Elements [
             org.testcharm.pf.cucumber.<type> {
+                dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
                 location: java.lang.String </html[1]/body[1]/div[1]>,
                 locator: css{.target},
                 tag: java.lang.String <div>
             },
             org.testcharm.pf.cucumber.<type> {
+                dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
                 location: java.lang.String </html[1]/body[1]/div[2]>,
                 locator: css{.target},
@@ -233,7 +237,7 @@ Feature: web ui
         """
       When try to find element via driver <driver>:
         """
-        css[.target].text
+        patience[1s].css[.target].text
         """
       Then failed with:
         """
@@ -353,6 +357,27 @@ Feature: web ui
           string::should.contains: 'PNG'
         }
         """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: html
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            .target
+              label hello
+        """
+      When perform via driver <driver>:
+        """
+        css[.target]: {
+          dom= '<div class="target"><label>hello</label></div>'
+        }
+        """
+
       Examples:
         | driver     |
         | selenium   |

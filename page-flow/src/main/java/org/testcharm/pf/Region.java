@@ -17,6 +17,7 @@ public interface Region<T extends Element<T, ?>> {
         return locate(expression, null);
     }
 
+    @SuppressWarnings("unchecked")
     default Elements<T> locate(String expression, Object constants) {
         Object elements = Accessors.get(expression).by(PageFlow.dal()).constants(constants).from(element());
         if (elements instanceof Elements)
