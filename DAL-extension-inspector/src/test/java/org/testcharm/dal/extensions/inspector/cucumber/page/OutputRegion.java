@@ -7,4 +7,9 @@ public class OutputRegion extends Tab {
     public OutputRegion(Element header, Element element) {
         super(header, element);
     }
+
+    @Override
+    public String toString() {
+        return element().text();
+    }
 }

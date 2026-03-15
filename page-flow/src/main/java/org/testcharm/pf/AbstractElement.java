@@ -42,6 +42,6 @@ public abstract class AbstractElement<T extends Element<T, E>, E> implements Ele
 
     @Override
     public String toString() {
-        return text();
+        return getDom();
     }
 }

@@ -33,6 +33,4 @@ public interface WebElement<T extends WebElement<T, E>, E> extends Element<T, E>
             return attribute("value");
         return Element.super.value();
     }
-
-    String getDom();
 }

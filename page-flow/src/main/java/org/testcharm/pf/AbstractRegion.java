@@ -14,6 +14,6 @@ public class AbstractRegion<T extends Element<T, ?>> implements Region<T> {
 
     @Override
     public String toString() {
-        return element().text();
+        return getClass() + "\n" + element().getDom();
     }
 }

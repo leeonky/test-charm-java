@@ -105,4 +105,6 @@ public interface Element<T extends Element<T, E>, E> {
     default Elements<T> placeholder(String placeholder) {
         return find(By.placeholder(placeholder));
     }
+
+    String getDom();
 }
