@@ -21,16 +21,12 @@ public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
 
     @Override
     public DALCollection<T> list() {
-        return findAll();
-    }
-
-    private CollectionDALCollection<T> findAll() {
         Element.logger.info(locateInfo("Locating: ", " => " + locator));
         List<?> elements = element.findElements(locator);
         CollectionDALCollection<T> result = new CollectionDALCollection<>(elements.stream()
-                .map(element -> {
-                    T child = this.element.newChildren(Sneaky.cast(element));
-                    child.parent(this.element);
+                .map(element1 -> {
+                    T child = element.newChildren(Sneaky.cast(element1));
+                    child.parent(element);
                     child.setLocator(locator);
                     return child;
                 }).collect(Collectors.toList()));
@@ -40,15 +36,12 @@ public class Elements<T extends Element<T, ?>> implements AdaptiveList<T> {
 
     @Override
     public List<T> soloList() {
-        DALCollection<T> list = new Retryer(element.timeout(), 100).get(() -> {
-            DALCollection<T> elements = findAll();
+        return new Retryer(element.timeout(), 100).get(() -> {
+            DALCollection<T> elements = list();
             if (elements.size() != 1)
                 throw unexpectedElementSize();
             return elements;
-        });
-        if (list.size() != 1)
-            throw unexpectedElementSize();
-        return list.collect();
+        }).collect();
     }
 
     private InvalidAdaptiveListException unexpectedElementSize() {

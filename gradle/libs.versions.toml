@@ -1,5 +1,5 @@
 [versions]
-project = "1.0.0-alpha.3"
+project = "1.0.0-alpha.4"
 jackson = "2.9.0"
 junit = "5.3.1"
 cucumber = "6.10.4"
