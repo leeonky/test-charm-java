@@ -8,6 +8,7 @@ dependencies {
     testImplementation project(':java-compiler-util')
     testImplementation project(':page-flow-playwright')
     testImplementation project(':page-flow-selenium')
+    testImplementation project(':DAL-extension-inspector')
     testImplementation libs.test.javalin
     testImplementation libs.test.slf4j.test
     testImplementation libs.test.pug4j

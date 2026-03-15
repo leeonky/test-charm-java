@@ -276,3 +276,7 @@ button.dismiss::after {
     white-space: pre;
     overflow-x: auto;
 }
+
+.watch-img {
+    border: 2px solid #5c677d;
+}
