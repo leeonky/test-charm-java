@@ -83,3 +83,71 @@ Feature: attachments
             ```
     }
     """
+
+  Scenario: same property name in watch
+    Given the 'Ins1' following input:
+      """
+      [{
+        "string": "hello"
+      },{
+        "string": "world"
+      },{
+        "string": "!"
+      }]
+      """
+    And use DAL 'Ins1' to evaluating the following:
+      """
+      ::inspect
+      """
+    When you:
+      """
+      WorkBench::await[Ins1]: { DAL.typeIn: '.string[]::watch[]' }
+      WorkBench[Ins1].execute
+      """
+    Then you should see:
+      """
+      WorkBench[Ins1].Output::eventually: {
+        Root: ```
+              [
+                  {
+                      string: java.lang.String <hello>
+                  },
+                  {
+                      string: java.lang.String <world>
+                  },
+                  {
+                      string: java.lang.String <!>
+                  }
+              ]
+              ```
+
+        Result: ```
+              [
+                  java.lang.String <hello>,
+                  java.lang.String <world>,
+                  java.lang.String <!>
+              ]
+                ```
+
+        Error: ''
+
+        Inspect: '{}.string[]::watch[]'
+
+        Watches::eventually= {
+            '{}.string[]': ```
+                         java.lang.String
+                         <hello>
+                         ```
+
+            '{}.string[] (1)': ```
+                         java.lang.String
+                         <world>
+                         ```
+
+            '{}.string[] (2)': ```
+                         java.lang.String
+                         <!>
+                         ```
+        }
+      }
+      """

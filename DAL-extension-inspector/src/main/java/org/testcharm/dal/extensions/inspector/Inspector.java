@@ -7,34 +7,13 @@ import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.interpreter.InterpreterException;
 import org.testcharm.util.Sneaky;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URLConnection;
-import java.net.URLDecoder;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -248,6 +227,7 @@ public class Inspector {
         }
 
         public void watch(String property, Data value) {
+            property = uniqName(property);
             byte[] bytes = getBytes(value);
             if (bytes != null) {
                 watches.add(new BinaryWatch(property, bytes));
@@ -255,6 +235,16 @@ public class Inspector {
                 watches.add(new DefaultWatch(property, value));
         }
 
+        private String uniqName(String property) {
+            String newProperty = property;
+            for (int i = 1; containName(newProperty); i++)
+                newProperty = String.format("%s (%d)", property, i);
+            return newProperty;
+        }
+
+        private boolean containName(String name) {
+            return watches.stream().anyMatch(p -> p.property().equals(name));
+        }
 
         public class DefaultWatch implements Watch {
             private final String property;
@@ -263,6 +253,11 @@ public class Inspector {
             public DefaultWatch(String property, Data value) {
                 this.property = property;
                 this.value = value.dump();
+            }
+
+            @Override
+            public String property() {
+                return property;
             }
 
             @Override
@@ -289,6 +284,11 @@ public class Inspector {
 
             public byte[] binary() {
                 return binary;
+            }
+
+            @Override
+            public String property() {
+                return property;
             }
 
             @Override
@@ -421,6 +421,8 @@ public class Inspector {
 
     interface Watch {
         Map<String, Object> collect();
+
+        String property();
     }
 
     private static class Attachment {
@@ -643,8 +645,8 @@ public class Inspector {
         private ClientConnection(String sessionId, Socket socket) throws IOException {
             this.sessionId = sessionId;
             this.socket = socket;
-            this.in = socket.getInputStream();
-            this.out = socket.getOutputStream();
+            in = socket.getInputStream();
+            out = socket.getOutputStream();
         }
 
         private synchronized void sendText(String message) throws IOException {
