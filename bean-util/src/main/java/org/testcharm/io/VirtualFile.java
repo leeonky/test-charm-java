@@ -1,6 +1,6 @@
 package org.testcharm.io;
 
-public interface MemoryFile {
+public interface VirtualFile {
     String getName();
 
     byte[] binary();

@@ -625,7 +625,7 @@ Feature: web ui
     Scenario Outline: upload one file
       Given the following class definition:
         """
-        public class TextFile implements org.testcharm.io.MemoryFile {
+        public class TextFile implements org.testcharm.io.VirtualFile {
           private String name;
 
           public String getName() {

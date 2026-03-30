@@ -9,7 +9,7 @@ import org.testcharm.dal.DAL;
 import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONArray;
 import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONException;
 import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONObject;
-import org.testcharm.io.MemoryFile;
+import org.testcharm.io.VirtualFile;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.jfactory.cucumber.Table;
 import org.testcharm.util.BeanClass;
@@ -63,6 +63,22 @@ public class RestfulStep {
                 byte[] body = serializer.apply(parseBodyAndHeaders(bodyContent, traitSpec)).getBytes(UTF_8);
                 request.applyHeader(connection);
                 buildRequestBody(connection, "application/json", body);
+            }
+        });
+
+        put("multipart/form-data", new ObjectBodyWriter() {
+            @Override
+            public void write(String[] traitSpec, String bodyContent, HttpURLConnection connection) {
+                Sneaky.run(() -> {
+                    Object o = parseBodyAndHeaders(bodyContent, traitSpec);
+                    request.applyHeader(connection);
+                    connection.setDoOutput(true);
+                    String boundary = UUID.randomUUID().toString();
+                    connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+                    HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
+                    DAL.dal().wrap(o).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+                    httpStream.close(boundary);
+                });
             }
         });
     }};
@@ -346,8 +362,8 @@ public class RestfulStep {
         httpStream.bound(boundary, () -> {
             if (key.startsWith("@"))
                 httpStream.appendFile(key, request.files.get(String.valueOf(value)));
-            else if (value instanceof MemoryFile)
-                httpStream.appendFile(key, ((MemoryFile) value).getName(), ((MemoryFile) value).binary());
+            else if (value instanceof VirtualFile)
+                httpStream.appendFile(key, ((VirtualFile) value).getName(), ((VirtualFile) value).binary());
             else
                 httpStream.appendField(key, value);
         });

@@ -47,7 +47,7 @@ public class TempDirectory {
         return dir;
     }
 
-    public Path write(MemoryFile file) {
+    public Path write(VirtualFile file) {
         return write(file.getName(), file.binary());
     }
 

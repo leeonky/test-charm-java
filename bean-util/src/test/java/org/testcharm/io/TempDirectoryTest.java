@@ -22,7 +22,7 @@ class TempDirectoryTest {
 
     @Test
     void create_binary_file() {
-        Path file = tempDirectory.write(new MemoryFile() {
+        Path file = tempDirectory.write(new VirtualFile() {
             @Override
             public String getName() {
                 return "hello";
@@ -39,7 +39,7 @@ class TempDirectoryTest {
 
     @Test
     void clean_file() {
-        tempDirectory.write(new MemoryFile() {
+        tempDirectory.write(new VirtualFile() {
             @Override
             public String getName() {
                 return "hello";

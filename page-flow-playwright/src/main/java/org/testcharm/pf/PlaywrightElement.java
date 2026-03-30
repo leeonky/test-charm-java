@@ -3,7 +3,7 @@ package org.testcharm.pf;
 import com.microsoft.playwright.Download;
 import com.microsoft.playwright.Locator;
 import org.testcharm.dal.runtime.AdaptiveList;
-import org.testcharm.io.MemoryFile;
+import org.testcharm.io.VirtualFile;
 import org.testcharm.util.CollectionHelper;
 
 import java.util.Collection;
@@ -83,8 +83,8 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T, P>, P ext
                 click();
         } else if (selectAble()) {
             raw().selectOption(CollectionHelper.asStream(value).map(String::valueOf).toArray(String[]::new));
-        } else if (value instanceof MemoryFile) {
-            raw().setInputFiles(pageFlow().workingDir().write((MemoryFile) value));
+        } else if (value instanceof VirtualFile) {
+            raw().setInputFiles(pageFlow().workingDir().write((VirtualFile) value));
         } else
             raw().fill(String.valueOf(value));
         return (T) this;
