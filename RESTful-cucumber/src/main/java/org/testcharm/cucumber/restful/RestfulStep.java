@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.dal.Assertions.expect;
@@ -56,32 +57,55 @@ public class RestfulStep {
     };
     private JFactory jFactory;
     private String defautRequestContentType = "dal:application/json";
-    private Map<String, ObjectBodyWriter> objectBodyWriters = new LinkedHashMap<String, ObjectBodyWriter>() {{
-        put("application/json", new ObjectBodyWriter() {
-            @Override
-            public void write(String[] traitSpec, String bodyContent, HttpURLConnection connection) {
-                byte[] body = serializer.apply(parseBodyAndHeaders(bodyContent, traitSpec)).getBytes(UTF_8);
-                request.applyHeader(connection);
-                buildRequestBody(connection, "application/json", body);
-            }
-        });
+    private List<ConnectionWriter> objectBodyWriters = asList(
+            new ConnectionWriter() {
+                @Override
+                public boolean matches(String contentType) {
+                    return contentType.equals("application/json");
+                }
 
-        put("multipart/form-data", new ObjectBodyWriter() {
-            @Override
-            public void write(String[] traitSpec, String bodyContent, HttpURLConnection connection) {
-                Sneaky.run(() -> {
-                    Object o = parseBodyAndHeaders(bodyContent, traitSpec);
+                @Override
+                public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
+                    byte[] body = serializer.apply(parseBodyAndHeaders(bodyContent, traitSpec)).getBytes(UTF_8);
                     request.applyHeader(connection);
-                    connection.setDoOutput(true);
-                    String boundary = UUID.randomUUID().toString();
-                    connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-                    HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
-                    DAL.dal().wrap(o).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
-                    httpStream.close(boundary);
-                });
+                    buildRequestBody(connection, contentType, body);
+                }
+            },
+            new ConnectionWriter() {
+                @Override
+                public boolean matches(String contentType) {
+                    return contentType.equals("multipart/form-data");
+                }
+
+                @Override
+                public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
+                    Sneaky.run(() -> {
+                        Object o = parseBodyAndHeaders(bodyContent, traitSpec);
+                        request.applyHeader(connection);
+                        connection.setDoOutput(true);
+                        String boundary = UUID.randomUUID().toString();
+                        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+                        HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
+                        DAL.dal().wrap(o).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+                        httpStream.close(boundary);
+                    });
+                }
             }
-        });
-    }};
+    );
+
+    private List<ConnectionWriter> textBodyWriters = asList(new ConnectionWriter() {
+        @Override
+        public boolean matches(String contentType) {
+            return contentType.startsWith("multipart/form-data");
+        }
+
+        @Override
+        public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
+            connection.setDoOutput(true);
+            byte[] bytes = String.join("\r\n", bodyContent.split(System.lineSeparator())).getBytes();
+            buildRequestBody(connection, contentType, bytes);
+        }
+    });
 
     private static Stream<String> getParamString(Map.Entry<String, Object> entry) {
         if (entry.getValue() instanceof List) {
@@ -163,23 +187,38 @@ public class RestfulStep {
             String parsedContentType = processContentType(contentType, traitSpec);
             String bodyContent = evaluator.eval(content);
             if (traitSpec != null) {
-                if (objectBodyWriters.containsKey(parsedContentType)) {
-                    requestAndResponse(method, path, connection -> objectBodyWriters.get(parsedContentType).write(traitSpec, bodyContent, connection));
-                } else if (Objects.equals(parsedContentType, "application/octet-stream"))
+                for (ConnectionWriter connectionWriter : objectBodyWriters) {
+                    if (connectionWriter.matches(parsedContentType)) {
+                        requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, traitSpec, bodyContent, connection));
+                        return;
+                    }
+                }
+                if (Objects.equals(parsedContentType, "application/octet-stream"))
                     requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, Sneaky.get(() -> getBytesOf(content))));
                 else
                     requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, bodyContent.getBytes(UTF_8)));
             } else {
                 if (parsedContentType.startsWith("dal:")) {
-                    if (objectBodyWriters.containsKey(parsedContentType.substring(4))) {
-                        requestAndResponse(method, path, connection -> objectBodyWriters.get(parsedContentType.substring(4)).write(traitSpec, bodyContent, connection));
-                    } else {
-                        throw new IllegalStateException();
+                    for (ConnectionWriter connectionWriter : objectBodyWriters) {
+                        if (connectionWriter.matches(parsedContentType.substring(4))) {
+                            requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType.substring(4), traitSpec, bodyContent, connection));
+                            return;
+                        }
                     }
-                } else if (Objects.equals(parsedContentType, "application/octet-stream"))
-                    requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, Sneaky.get(() -> getBytesOf(content))));
-                else
-                    requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, bodyContent.getBytes(UTF_8)));
+                    throw new IllegalStateException();
+                } else {
+                    for (ConnectionWriter connectionWriter : textBodyWriters) {
+                        if (connectionWriter.matches(parsedContentType)) {
+                            requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, traitSpec, bodyContent, connection));
+                            return;
+                        }
+                    }
+
+                    if (Objects.equals(parsedContentType, "application/octet-stream"))
+                        requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, Sneaky.get(() -> getBytesOf(content))));
+                    else
+                        requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, bodyContent.getBytes(UTF_8)));
+                }
             }
         });
     }

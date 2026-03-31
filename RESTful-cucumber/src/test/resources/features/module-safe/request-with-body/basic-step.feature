@@ -523,9 +523,7 @@ Feature: Basic Request With Body Steps
         : [{
           method: <method>
           path: '/index'
-          headers: {
-            ['Content-Type']: ['application/json']
-          }
+          headers[Content-Type]: ['application/json']
           body.json= {}
         }]
         """
@@ -566,6 +564,99 @@ Feature: Basic Request With Body Steps
           method: <method>
           path: '/index'
           headers[Content-Type]: ['application/json']
+          body.rawBytes.base64.string= raw-string
+          queryStringParameters: {
+           中文参数= [中文值]
+           second= [value2]
+          }
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+  Rule: multipart/form-data
+
+    Scenario Outline: <method> doc type overrides header content type x
+      Given header by RESTful api:
+        """
+        {
+          "Content-Type": "text/plain"
+        }
+        """
+      When <method> "/index":
+        """ multipart/form-data
+        hello
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: ['multipart/form-data']
+          body.rawBytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: body of form-data
+      When <method> "/index":
+        """ multipart/form-data; boundary=boundary1
+        --boundary1
+        Content-Disposition: form-data; name="intValue"
+        Content-Type: text/plain; charset=utf-8
+
+        1
+        --boundary1
+        Content-Disposition: form-data; name="strValue1"
+        Content-Type: text/plain; charset=utf-8
+
+        hello
+        --boundary1
+        Content-Disposition: form-data; name="strValue2"
+        Content-Type: text/plain; charset=utf-8
+
+        strValue2#1
+        --boundary1
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: ['multipart/form-data; boundary=boundary1']
+        }]
+        """
+      And got request form data:
+        """
+        : | +fieldName | outputStream.data.string |
+          | intValue   | '1'                      |
+          | strValue1  | hello                    |
+          | strValue2  | /^strValue2.*/           |
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: <method> with body and params
+      When <method> "/index?中文参数=中文值&second=value2":
+        """ multipart/form-data
+        raw-string
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: ['multipart/form-data']
           body.rawBytes.base64.string= raw-string
           queryStringParameters: {
            中文参数= [中文值]
