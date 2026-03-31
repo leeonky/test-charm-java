@@ -463,3 +463,25 @@ Feature: Request With Spec and Body Steps
         | POST   |
         | PUT    |
         | PATCH  |
+
+  Rule: application/octet-stream
+
+    Scenario Outline: post virtual file
+      When <method> "File" "/index":
+        """ application/octet-stream
+        content: 100
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= '100'
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |

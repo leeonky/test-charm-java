@@ -505,6 +505,92 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
+  Rule: dal:application/octet-stream
+
+    Scenario Outline: post string
+      When <method> "/index":
+        """ dal:application/octet-stream
+        'a-string'
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= a-string
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: post bytes
+      When <method> "/index":
+        """ dal:application/octet-stream
+        'a-string'.bytes
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= a-string
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: post legacy file step
+      Given a file "图片1" with name "图片.png":
+        """
+        hello 头像
+        """
+      When <method> "/index":
+        """ dal:application/octet-stream
+        ::files[图片1]
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= 'hello 头像'
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: post virtual file
+      When <method> "/index":
+        """ dal:application/octet-stream
+        ::this(File).content: 100
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= '100'
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
   Rule: application/json
 
     Scenario Outline: <method> doc type overrides header content type
@@ -579,7 +665,7 @@ Feature: Basic Request With Body Steps
 
   Rule: multipart/form-data
 
-    Scenario Outline: <method> doc type overrides header content type x
+    Scenario Outline: <method> doc type overrides header content type
       Given header by RESTful api:
         """
         {
@@ -669,3 +755,48 @@ Feature: Basic Request With Body Steps
         | POST   |
         | PUT    |
         | PATCH  |
+
+  Rule: application/octet-stream
+
+    Scenario Outline: post string utf-8 bytes
+      When <method> "/index":
+        """ application/octet-stream
+        a-string
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= a-string
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+  Rule: default content type
+
+    Scenario Outline: post string to server directly
+      When <method> "/index":
+        """ any-content
+        raw-string
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [any-content]
+          body.rawBytes.base64.string= raw-string
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
