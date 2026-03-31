@@ -22,30 +22,30 @@ Feature: Basic Request With Body Steps
       public class RequestSpec extends Spec<Request> {}
       """
     Given the following class definition:
-        """
-        public class TextFile implements org.testcharm.io.VirtualFile {
-          private String name;
+      """
+      public class TextFile implements org.testcharm.io.VirtualFile {
+        private String name;
 
-          public String getName() {
-            return name;
-          }
-
-          public void setName(String name) {
-            this.name = name;
-          }
-
-          public String content;
-
-          @Override
-          public byte[] binary() {
-              return content.getBytes();
-          }
+        public String getName() {
+          return name;
         }
-        """
+
+        public void setName(String name) {
+          this.name = name;
+        }
+
+        public String content;
+
+        @Override
+        public byte[] binary() {
+            return content.getBytes();
+        }
+      }
+      """
     Given the following class definition:
-        """
-        public class File extends Spec<TextFile> {}
-        """
+      """
+      public class File extends Spec<TextFile> {}
+      """
     And register as follows:
       """
       jfactory.register(RequestSpec.class);
@@ -63,7 +63,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers: {
             ['Content-Type']: ['application/json']
@@ -93,7 +93,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers: {
             ['Content-Type']: ['text/plain']
@@ -123,7 +123,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: ['application/json']
           body.json= {}
@@ -135,7 +135,7 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
-    Scenario Outline: only body
+    Scenario Outline: with body
       When <method> "/index":
         """ dal:application/json
         text: hello
@@ -143,7 +143,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: ['application/json']
           body.json= {
@@ -165,7 +165,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: ['application/json']
           body.json= {
@@ -197,7 +197,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers: {
             'Content-Type': ['application/json']
@@ -235,7 +235,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers: {
             'Content-Type': ['application/json']
@@ -264,7 +264,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: ['application/json']
           body.json= {
@@ -296,7 +296,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: [/^multipart\/form-data; boundary=.*/]
         }]
@@ -311,10 +311,10 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
-    Scenario Outline: only body
+    Scenario Outline: body with virtual file
       When <method> "/index":
         """ dal:multipart/form-data
-        : {
+        {
           text: 'Hello world'
           file(File): {
             name= u.txt
@@ -325,7 +325,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: [/^multipart\/form-data; boundary=.*/]
         }]
@@ -342,6 +342,38 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
+    Scenario Outline: with legacy file step
+      Given a file "图片1" with name "图片.png":
+        """
+        hello 头像
+        """
+      When <method> "/index":
+        """ dal:multipart/form-data
+        {
+          姓名: 张三
+          '@附件': 图片1
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [/^multipart\/form-data; boundary=.*/]
+        }]
+        """
+      And got request form data:
+        """
+        : | +fieldName | outputStream.data.string | name     |
+          | 姓名       | 张三                     | *        |
+          | 附件       | hello 头像               | 图片.png |
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
     Scenario Outline: <method> with body and params
       When <method> "/index?中文参数=中文值&second=value2":
         """ dal:multipart/form-data
@@ -350,7 +382,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: [/^multipart\/form-data; boundary=.*/]
           queryStringParameters: {
@@ -384,7 +416,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers: {
             'Content-Type': [/^multipart\/form-data; boundary=.*/]
@@ -424,7 +456,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers: {
             'Content-Type': [/^multipart\/form-data; boundary=.*/]
@@ -455,7 +487,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers[Content-Type]: [/^multipart\/form-data; boundary=.*/]
         }]
@@ -489,7 +521,7 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
           headers: {
             ['Content-Type']: ['application/json']
@@ -503,7 +535,7 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
-    Scenario Outline: only body
+    Scenario Outline: body
       When <method> "/index":
         """ application/json
         raw-string
@@ -511,11 +543,9 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
-          headers: {
-            ['Content-Type']: ['application/json']
-          }
+          headers[Content-Type]: ['application/json']
           body.rawBytes.base64.string= raw-string
         }]
         """
@@ -533,11 +563,9 @@ Feature: Basic Request With Body Steps
       Then got request:
         """
         : [{
-          method: '<method>'
+          method: <method>
           path: '/index'
-          headers: {
-            ['Content-Type']: ['application/json']
-          }
+          headers[Content-Type]: ['application/json']
           body.rawBytes.base64.string= raw-string
           queryStringParameters: {
            中文参数= [中文值]
@@ -550,6 +578,3 @@ Feature: Basic Request With Body Steps
         | POST   |
         | PUT    |
         | PATCH  |
-
-
-#      FORM file (VirtualFile; @File)
