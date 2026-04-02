@@ -216,7 +216,7 @@ Feature: Request without Body
 
     Scenario Outline: specify spec in step
       When <method> "RequestSpec" "/index":
-        """ dal:application/json
+        """ application/json
         {
           intValue: 1
           strValue1: hello

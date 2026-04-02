@@ -257,7 +257,7 @@ Feature: Request With Spec and Body Steps
         }
         """
       When <method> "RequestSpec" "/index":
-        """ dal:application/json
+        """ application/json
         {
           strValue1: hello
           ::headers: {

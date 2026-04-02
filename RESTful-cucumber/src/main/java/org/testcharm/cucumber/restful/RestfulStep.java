@@ -7,11 +7,8 @@ import io.cucumber.java.en.When;
 import org.testcharm.dal.Accessors;
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONArray;
-import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONException;
-import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONObject;
 import org.testcharm.io.VirtualFile;
 import org.testcharm.jfactory.JFactory;
-import org.testcharm.jfactory.cucumber.Table;
 import org.testcharm.util.BeanClass;
 import org.testcharm.util.Collector;
 import org.testcharm.util.PropertyReader;
@@ -37,9 +34,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.Evaluator.evaluate;
-import static org.testcharm.dal.Evaluator.evaluateObject;
 import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
-import static org.testcharm.util.Sneaky.sneakyRun;
 
 public class RestfulStep {
     public static final String CHARSET = "utf-8";
@@ -63,8 +58,8 @@ public class RestfulStep {
 
                 @Override
                 public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
-                    byte[] body = serializer.apply(parseBodyAndHeaders(bodyContent, traitSpec)).getBytes(UTF_8);
-                    buildRequestBody(connection, contentType, body);
+                    Object object = parseBodyAndHeaders(bodyContent, traitSpec);
+                    buildRequestBody(connection, contentType, serializer.apply(object).getBytes(UTF_8));
                 }
             },
             new ConnectionWriter() {
@@ -73,15 +68,29 @@ public class RestfulStep {
                     return contentType.equals("multipart/form-data");
                 }
 
+                @SuppressWarnings("unchecked")
                 @Override
                 public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
                     Sneaky.run(() -> {
-                        Object o = parseBodyAndHeaders(bodyContent, traitSpec);
+                        Object object = parseBodyAndHeaders(bodyContent, traitSpec);
                         connection.setDoOutput(true);
                         String boundary = UUID.randomUUID().toString();
                         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
                         HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
-                        DAL.dal().wrap(o).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+                        if (object instanceof Map) {
+                            DAL.dal().wrap(object).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+                        } else {
+                            BeanClass<Object> type = BeanClass.createFrom(object);
+                            DAL.dal().wrap(object).toMap().forEach((key, value) -> {
+                                        Optional<PropertyReader<Object>> linkName = ((BeanClass<Object>) type.getPropertyReader(key).getType()).getPropertyReaders().values()
+                                                .stream().filter(p -> p.annotation(FormFileLinkName.class).isPresent()).findFirst();
+                                        if (linkName.isPresent())
+                                            appendEntry(httpStream, "@" + key, linkName.get().getValue(value), boundary);
+                                        else
+                                            appendEntry(httpStream, key, value, boundary);
+                                    }
+                            );
+                        }
                         httpStream.close(boundary);
                     });
                 }
@@ -167,7 +176,7 @@ public class RestfulStep {
 
     @When("POST {string}:")
     public void post(String path, DocString content) {
-        requestBodyAndResponse("POST", path, null, content.getContentType(), content.getContent());
+        post(path, content.getContentType(), content.getContent());
     }
 
     @When("POST {string} {string}:")
@@ -178,7 +187,7 @@ public class RestfulStep {
 
     @When("PUT {string}:")
     public void put(String path, DocString content) {
-        requestBodyAndResponse("PUT", path, null, content.getContentType(), content.getContent());
+        put(path, content.getContentType(), content.getContent());
     }
 
     @When("PUT {string} {string}:")
@@ -189,7 +198,7 @@ public class RestfulStep {
 
     @When("PATCH {string}:")
     public void patch(String path, DocString content) {
-        requestBodyAndResponse("PATCH", path, null, content.getContentType(), content.getContent());
+        patch(path, content.getContentType(), content.getContent());
     }
 
     @When("PATCH {string} {string}:")
@@ -201,33 +210,32 @@ public class RestfulStep {
     private void requestBodyAndResponse(String method, String path, String[] traitSpec, String contentType, String content) {
         String parsedContentType = processContentType(contentType, traitSpec);
         String bodyContent = evaluator.eval(content);
-        if (traitSpec != null) {
-            for (ConnectionWriter connectionWriter : objectBodyWriters) {
-                if (connectionWriter.matches(parsedContentType)) {
-                    requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, traitSpec, bodyContent, connection));
-                    return;
-                }
-            }
-            requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, bodyContent.getBytes(UTF_8)));
-        } else {
-            if (parsedContentType.startsWith("dal:")) {
-                for (ConnectionWriter connectionWriter : objectBodyWriters) {
-                    if (connectionWriter.matches(parsedContentType.substring(4))) {
-                        requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType.substring(4), traitSpec, bodyContent, connection));
-                        return;
-                    }
-                }
-                throw new IllegalStateException();
-            } else {
-                for (ConnectionWriter connectionWriter : textBodyWriters) {
-                    if (connectionWriter.matches(parsedContentType)) {
-                        requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, traitSpec, bodyContent, connection));
-                        return;
-                    }
-                }
-                requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, bodyContent.getBytes(UTF_8)));
+        if (traitSpec != null)
+            requestObjectBodyAndResponse(method, path, traitSpec, parsedContentType, bodyContent);
+        else if (parsedContentType.startsWith("dal:"))
+            requestObjectBodyAndResponse(method, path, null, parsedContentType.substring(4), bodyContent);
+        else
+            requestTextBodyAndResponse(method, path, parsedContentType, bodyContent);
+    }
+
+    private void requestTextBodyAndResponse(String method, String path, String parsedContentType, String bodyContent) {
+        for (ConnectionWriter connectionWriter : textBodyWriters) {
+            if (connectionWriter.matches(parsedContentType)) {
+                requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, null, bodyContent, connection));
+                return;
             }
         }
+        requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, bodyContent.getBytes(UTF_8)));
+    }
+
+    private void requestObjectBodyAndResponse(String method, String path, String[] traitSpec, String parsedContentType, String bodyContent) {
+        for (ConnectionWriter connectionWriter : objectBodyWriters) {
+            if (connectionWriter.matches(parsedContentType)) {
+                requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, traitSpec, bodyContent, connection));
+                return;
+            }
+        }
+        throw new IllegalArgumentException(String.format("Unknown object writer for content type: %s", parsedContentType));
     }
 
     private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) {
@@ -241,119 +249,50 @@ public class RestfulStep {
         });
     }
 
-    private String processContentType(String contentType1, String[] traitSpec) {
-        String contentType = contentType1;
+    private String processContentType(String contentType, String[] traitSpec) {
         if (contentType == null || contentType.isEmpty())
             contentType = request.contentType();
-
-        if (contentType == null || contentType.isEmpty())
+        if (contentType == null || contentType.isEmpty()) {
             contentType = defautRequestContentType;
-        if (traitSpec != null)
-            contentType = contentType.replaceFirst("dal:", "");
+            if (traitSpec != null)
+                contentType = contentType.replaceFirst("dal:", "");
+        }
         return contentType;
     }
 
-    public void post(String path, byte[] bytes, String contentType) {
-        requestAndResponse("POST", path, connection -> buildRequestBody(connection, contentType, bytes));
-    }
-
-    public void post(String path, String body, String contentType) {
-        post(path, body.getBytes(UTF_8), contentType);
-    }
-
-    public void post(String path, String body) {
-        post(path, body, null);
-    }
-
-    public void post(String path, Object body, String contentType) {
-        post(path, serializer.apply(body), contentType);
+    public void post(String path, String contentType, String content) {
+        requestBodyAndResponse("POST", path, null, contentType, content);
     }
 
     public void post(String path, Object body) {
-        post(path, body, null);
+        requestAndResponse("POST", path, connection -> buildRequestBody(connection, null, serializer.apply(body).getBytes(UTF_8)));
     }
 
     @When("POST form {string}:")
     public void postForm(String path, String form) {
-        try {
-            postForm(path, new JSONObject(evaluator.eval(form)).toMap());
-        } catch (JSONException ig) {
-            Collector collector = jFactory.collector();
-            evaluateObject(form).on(collector);
-            postForm(path, DAL.dal().wrap(collector.build()).toMap());
-        }
-    }
-
-    public void postForm(String path, Map<String, ?> params) {
-        requestAndResponse("POST", path, sneakyRun(connection -> {
-            connection.setDoOutput(true);
-            String boundary = UUID.randomUUID().toString();
-            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-            HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
-            params.forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
-            httpStream.close(boundary);
-        }));
+        requestBodyAndResponse("POST", path, null, "dal:multipart/form-data", form);
     }
 
     @When("POST form {string} {string}:")
     @Then("POST form {string} to {string}:")
-    @SuppressWarnings("unchecked")
     public void postForm(String spec, String path, String form) {
-        Map<String, Object>[] maps = Table.create(evaluator.eval(form)).flatSub();
-        String[] delimiters = spec.split("[ ,]");
-        Object formObject = jFactory.spec(delimiters).properties(maps[0]).create();
-        BeanClass<Object> type = BeanClass.createFrom(formObject);
-        postForm(path, new LinkedHashMap<String, Object>() {{
-            type.getPropertyReaders().forEach((key, property) -> {
-                Optional<PropertyReader<Object>> linkName = ((BeanClass<Object>) property.getType()).getPropertyReaders().values()
-                        .stream().filter(p -> p.annotation(FormFileLinkName.class).isPresent()).findFirst();
-                Object value = property.getValue(formObject);
-                if (linkName.isPresent())
-                    put("@" + key, linkName.get().getValue(value));
-                else
-                    put(key, value);
-            });
-        }});
+        requestBodyAndResponse("POST", path, spec.split("[ ,]"), "multipart/form-data", form);
     }
 
-    public void put(String path, byte[] bytes, String contentType) {
-        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, contentType, bytes));
-    }
-
-    public void put(String path, String body, String contentType) {
-        put(path, body.getBytes(UTF_8), contentType);
-    }
-
-    public void put(String path, String body) {
-        put(path, body, null);
-    }
-
-    public void put(String path, Object body, String contentType) {
-        put(path, serializer.apply(body), contentType);
+    public void put(String path, String contentType, String content) {
+        requestBodyAndResponse("PUT", path, null, contentType, content);
     }
 
     public void put(String path, Object body) {
-        put(path, body, null);
+        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, null, serializer.apply(body).getBytes(UTF_8)));
     }
 
-    public void patch(String path, byte[] body, String contentType) {
-        requestAndResponse("PATCH", path, connection -> buildRequestBody(connection, contentType, body));
-    }
-
-    public void patch(String path, String body, String contentType) {
-        patch(path, body.getBytes(UTF_8), contentType);
-    }
-
-    public void patch(String path, String body) {
-        patch(path, body, null);
-    }
-
-    public void patch(String path, Object body, String contentType) {
-        patch(path, serializer.apply(body), contentType);
+    public void patch(String path, String contentType, String content) {
+        requestBodyAndResponse("PATCH", path, null, contentType, content);
     }
 
     public void patch(String path, Object object) {
-        patch(path, object, null);
+        requestAndResponse("PATCH", path, connection -> buildRequestBody(connection, null, serializer.apply(object).getBytes(UTF_8)));
     }
 
     @After
@@ -419,6 +358,7 @@ public class RestfulStep {
         Sneaky.run(() -> {
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", contentType == null ? String.valueOf(request.headers.getOrDefault("Content-Type", "application/json")) : contentType);
+//            connection.setRequestProperty("Content-Type", contentType);
             connection.getOutputStream().write(bytes);
             connection.getOutputStream().close();
         });
@@ -457,7 +397,6 @@ public class RestfulStep {
                 header(String.valueOf(key), ((Collection<?>) value).stream().map(String::valueOf).collect(toList()));
             else
                 header(String.valueOf(key), String.valueOf(value));
-
         });
         if (connection != null)
             request.applyHeader(connection);
