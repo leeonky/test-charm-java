@@ -14,6 +14,7 @@ import org.testcharm.util.Collector;
 import org.testcharm.util.PropertyReader;
 import org.testcharm.util.Sneaky;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -34,7 +35,6 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.dal.Assertions.expect;
-import static org.testcharm.dal.Evaluator.evaluate;
 import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
 import static org.testcharm.util.Sneaky.sneakyRun;
 
@@ -50,7 +50,17 @@ public class RestfulStep {
         return json.substring(1, json.length() - 1);
     };
     private JFactory jFactory;
-    private String defautRequestContentType = "dal:application/json";
+
+    public void setDefaultContentType(String defaultContentType) {
+        this.defaultContentType = defaultContentType;
+    }
+
+    public void setDefaultTextBodyWriter(TextBodyWriter defaultTextBodyWriter) {
+        this.defaultTextBodyWriter = defaultTextBodyWriter;
+    }
+
+    private String defaultContentType = "dal:application/json";
+
     private final List<BodyRequestBuilder<ObjectBodyWriter>> objectBodyRequestBuilders = asList(
             new BodyRequestBuilder<ObjectBodyWriter>() {
                 @Override
@@ -60,8 +70,8 @@ public class RestfulStep {
 
                 @Override
                 public ObjectBodyWriter writer(String contentType) {
-                    return (outputStream, collector, result) ->
-                            outputStream.write(serializer.apply(collector.build()).getBytes(UTF_8));
+                    return (outputStream, object) ->
+                            outputStream.write(serializer.apply(object).getBytes(UTF_8));
                 }
             }, new BodyRequestBuilder<ObjectBodyWriter>() {
                 @Override
@@ -73,9 +83,9 @@ public class RestfulStep {
                 public ObjectBodyWriter writer(String contentType) {
                     String boundary = UUID.randomUUID().toString();
                     return new ObjectBodyWriter() {
+                        @SuppressWarnings("unchecked")
                         @Override
-                        public void write(OutputStream outputStream, Collector collector, Object result) {
-                            Object object = collector.build();
+                        public void write(OutputStream outputStream, Object object) {
                             HttpStream httpStream = new HttpStream(outputStream, UTF_8);
                             if (object instanceof Map) {
                                 DAL.dal().wrap(object).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
@@ -108,16 +118,23 @@ public class RestfulStep {
 
                 @Override
                 public ObjectBodyWriter writer(String contentType) {
-                    return (outputStream, collector, result) -> {
-                        Object object = result instanceof Collector ? collector.build() : result;
-                        if (object instanceof String) {
-                            outputStream.write(((String) object).getBytes());
-                        } else if (object instanceof byte[]) {
-                            outputStream.write((byte[]) object);
-                        } else if (object instanceof UploadFile) {
-                            outputStream.write(((UploadFile) object).getContent());
-                        } else if (object instanceof VirtualFile) {
-                            outputStream.write(((VirtualFile) object).binary());
+                    return new ObjectBodyWriter() {
+                        @Override
+                        public Object body(Collector collector, Object result) {
+                            return result instanceof Collector ? collector.build() : result;
+                        }
+
+                        @Override
+                        public void write(OutputStream outputStream, Object object) throws IOException {
+                            if (object instanceof String) {
+                                outputStream.write(((String) object).getBytes());
+                            } else if (object instanceof byte[]) {
+                                outputStream.write((byte[]) object);
+                            } else if (object instanceof UploadFile) {
+                                outputStream.write(((UploadFile) object).getContent());
+                            } else if (object instanceof VirtualFile) {
+                                outputStream.write(((VirtualFile) object).binary());
+                            }
                         }
                     };
                 }
@@ -136,88 +153,7 @@ public class RestfulStep {
                 }
             }
     );
-    private final List<ConnectionWriter> objectBodyWriters = asList(
-            new ConnectionWriter() {
-                @Override
-                public boolean matches(String contentType) {
-                    return contentType.equals("application/json");
-                }
 
-                @Override
-                public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
-                    Object object = parseBodyAndHeaders(bodyContent, traitSpec);
-                    buildRequestBody(connection, contentType, serializer.apply(object).getBytes(UTF_8));
-                }
-            },
-            new ConnectionWriter() {
-                @Override
-                public boolean matches(String contentType) {
-                    return contentType.equals("multipart/form-data");
-                }
-
-                @SuppressWarnings("unchecked")
-                @Override
-                public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
-                    Sneaky.run(() -> {
-                        Object object = parseBodyAndHeaders(bodyContent, traitSpec);
-                        connection.setDoOutput(true);
-                        String boundary = UUID.randomUUID().toString();
-                        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-                        HttpStream httpStream = new HttpStream(connection.getOutputStream(), UTF_8);
-                        if (object instanceof Map) {
-                            DAL.dal().wrap(object).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
-                        } else {
-                            BeanClass<Object> type = BeanClass.createFrom(object);
-                            DAL.dal().wrap(object).toMap().forEach((key, value) -> {
-                                        Optional<PropertyReader<Object>> linkName = ((BeanClass<Object>) type.getPropertyReader(key).getType()).getPropertyReaders().values()
-                                                .stream().filter(p -> p.annotation(FormFileLinkName.class).isPresent()).findFirst();
-                                        if (linkName.isPresent())
-                                            appendEntry(httpStream, "@" + key, linkName.get().getValue(value), boundary);
-                                        else
-                                            appendEntry(httpStream, key, value, boundary);
-                                    }
-                            );
-                        }
-                        httpStream.close(boundary);
-                    });
-                }
-            },
-            new ConnectionWriter() {
-                @Override
-                public boolean matches(String contentType) {
-                    return contentType.equals("application/octet-stream");
-                }
-
-                @Override
-                public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
-                    Object o = parseOctetStreamBodyAndHeaders(bodyContent, traitSpec);
-                    connection.setDoOutput(true);
-                    if (o instanceof String) {
-                        buildRequestBody(connection, contentType, ((String) o).getBytes());
-                    } else if (o instanceof byte[]) {
-                        buildRequestBody(connection, contentType, (byte[]) o);
-                    } else if (o instanceof UploadFile) {
-                        buildRequestBody(connection, contentType, ((UploadFile) o).getContent());
-                    } else if (o instanceof VirtualFile) {
-                        buildRequestBody(connection, contentType, ((VirtualFile) o).binary());
-                    }
-                }
-            }
-    );
-
-    private final List<ConnectionWriter> textBodyWriters = asList(new ConnectionWriter() {
-        @Override
-        public boolean matches(String contentType) {
-            return contentType.startsWith("multipart/form-data");
-        }
-
-        @Override
-        public void write(String contentType, String[] traitSpec, String bodyContent, HttpURLConnection connection) {
-            connection.setDoOutput(true);
-            byte[] bytes = String.join("\r\n", bodyContent.split(System.lineSeparator())).getBytes();
-            buildRequestBody(connection, contentType, bytes);
-        }
-    });
     private TextBodyWriter defaultTextBodyWriter = (outputStream, content) -> outputStream.write(content.getBytes());
 
     private static Stream<String> getParamString(Map.Entry<String, Object> entry) {
@@ -264,36 +200,19 @@ public class RestfulStep {
 
     @When("POST {string}:")
     public void post(String path, DocString content) {
-        requestBodyAndResponse(path, "POST", content.getContentType(), content.getContent());
+        requestBodyAndResponse("POST", path, content.getContentType(), content.getContent());
     }
 
-    private void requestBodyAndResponse(String path, String method, String contentType, String content) {
+    private void requestBodyAndResponse(String method, String path, String contentType, String content) {
         if (contentType == null)
             contentType = request.contentType();
         if (contentType == null)
-            contentType = defautRequestContentType;
+            contentType = defaultContentType;
         if (contentType.startsWith("dal:")) {
-            String resolvedContentType = contentType.substring(4);
             RequestCollector collector = new RequestCollector(jFactory, request.getContext());
             Object result = org.testcharm.dal.Evaluator.evaluateObject(evaluator.eval(content)).on(collector);
-            DAL.dal().wrap(collector.headerCollector().build()).toMap().forEach((key, value) -> {
-                if (value instanceof Collection)
-                    header(String.valueOf(key), ((Collection<?>) value).stream().map(String::valueOf).collect(toList()));
-                else
-                    header(String.valueOf(key), String.valueOf(value));
-
-            });
-
-            requestAndResponse(method, path, sneakyRun(connection -> {
-                ObjectBodyWriter objectBodyWriter = objectBodyRequestBuilders.stream().filter(builder -> builder.matches(resolvedContentType))
-                        .map(builder -> builder.writer(resolvedContentType))
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown object writer for content type: %s", resolvedContentType)));
-                connection.setDoOutput(true);
-                connection.setRequestProperty("Content-Type", objectBodyWriter.contentType(resolvedContentType));
-                objectBodyWriter.write(connection.getOutputStream(), collector, result);
-                connection.getOutputStream().close();
-            }));
+            applyCollectedHeaders(collector);
+            writeObjectBody(method, path, contentType.substring(4), objectBodyWriter -> objectBodyWriter.body(collector, result));
         } else {
             String resolvedContentType = contentType;
             requestAndResponse(method, path, sneakyRun(connection1 -> {
@@ -309,32 +228,43 @@ public class RestfulStep {
     }
 
     private void requestBodyAndResponse(String method, String path, String contentType, String content, String[] traitSpec) {
-        if (contentType == null)
-            contentType = request.contentType();
-        if (contentType == null) {
-            contentType = defautRequestContentType;
-            contentType = contentType.replaceFirst("^dal:", "");
-        }
-        String resolvedContentType = contentType;
         RequestCollector collector = new RequestCollector(jFactory, request.getContext());
         collector.traitsSpec(traitSpec);
         Object result = org.testcharm.dal.Evaluator.evaluateObject(evaluator.eval(content)).on(collector);
+        applyCollectedHeaders(collector);
+        writeObjectBody(method, path, resolveObjectContentType(contentType), objectBodyWriter -> objectBodyWriter.body(collector, result));
+    }
+
+    private void requestBodyAndResponse(String method, String path, String contentType, Object body) {
+        writeObjectBody(method, path, resolveObjectContentType(contentType), objectBodyWriter -> body);
+    }
+
+    private String resolveObjectContentType(String contentType) {
+        if (contentType == null)
+            contentType = request.contentType();
+        if (contentType == null)
+            contentType = defaultContentType.replaceFirst("^dal:", "");
+        return contentType;
+    }
+
+    private void applyCollectedHeaders(RequestCollector collector) {
         DAL.dal().wrap(collector.headerCollector().build()).toMap().forEach((key, value) -> {
             if (value instanceof Collection)
                 header(String.valueOf(key), ((Collection<?>) value).stream().map(String::valueOf).collect(toList()));
             else
                 header(String.valueOf(key), String.valueOf(value));
-
         });
+    }
 
+    private void writeObjectBody(String method, String path, String resolvedContentType,
+                                 Function<ObjectBodyWriter, Object> bodyResolver) {
         requestAndResponse(method, path, sneakyRun(connection -> {
             ObjectBodyWriter objectBodyWriter = objectBodyRequestBuilders.stream().filter(builder -> builder.matches(resolvedContentType))
-                    .map(builder -> builder.writer(resolvedContentType))
-                    .findFirst()
+                    .map(builder -> builder.writer(resolvedContentType)).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException(String.format("Unknown object writer for content type: %s", resolvedContentType)));
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", objectBodyWriter.contentType(resolvedContentType));
-            objectBodyWriter.write(connection.getOutputStream(), collector, result);
+            objectBodyWriter.write(connection.getOutputStream(), bodyResolver.apply(objectBodyWriter));
             connection.getOutputStream().close();
         }));
     }
@@ -347,7 +277,7 @@ public class RestfulStep {
 
     @When("PUT {string}:")
     public void put(String path, DocString content) {
-        requestBodyAndResponse(path, "PUT", content.getContentType(), content.getContent());
+        requestBodyAndResponse("PUT", path, content.getContentType(), content.getContent());
     }
 
     @When("PUT {string} {string}:")
@@ -358,44 +288,13 @@ public class RestfulStep {
 
     @When("PATCH {string}:")
     public void patch(String path, DocString content) {
-        requestBodyAndResponse(path, "PATCH", content.getContentType(), content.getContent());
+        requestBodyAndResponse("PATCH", path, content.getContentType(), content.getContent());
     }
 
     @When("PATCH {string} {string}:")
     @Then("PATCH {string} to {string}:")
     public void patchWithSpec(String spec, String path, DocString body) {
         requestBodyAndResponse("PATCH", path, body.getContentType(), body.getContent(), spec.split("[ ,]"));
-    }
-
-    private void requestBodyAndResponse(String method, String path, String[] traitSpec, String contentType, String content) {
-        String parsedContentType = processContentType(contentType, traitSpec);
-        String bodyContent = evaluator.eval(content);
-        if (traitSpec != null)
-            requestObjectBodyAndResponse(method, path, traitSpec, parsedContentType, bodyContent);
-        else if (parsedContentType.startsWith("dal:"))
-            requestObjectBodyAndResponse(method, path, null, parsedContentType.substring(4), bodyContent);
-        else
-            requestTextBodyAndResponseBk(method, path, parsedContentType, bodyContent);
-    }
-
-    private void requestTextBodyAndResponseBk(String method, String path, String parsedContentType, String bodyContent) {
-        for (ConnectionWriter connectionWriter : textBodyWriters) {
-            if (connectionWriter.matches(parsedContentType)) {
-                requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, null, bodyContent, connection));
-                return;
-            }
-        }
-        requestAndResponse(method, path, connection1 -> buildRequestBody(connection1, parsedContentType, bodyContent.getBytes(UTF_8)));
-    }
-
-    private void requestObjectBodyAndResponse(String method, String path, String[] traitSpec, String parsedContentType, String bodyContent) {
-        for (ConnectionWriter connectionWriter : objectBodyWriters) {
-            if (connectionWriter.matches(parsedContentType)) {
-                requestAndResponse(method, path, connection -> connectionWriter.write(parsedContentType, traitSpec, bodyContent, connection));
-                return;
-            }
-        }
-        throw new IllegalArgumentException(String.format("Unknown object writer for content type: %s", parsedContentType));
     }
 
     private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) {
@@ -409,50 +308,63 @@ public class RestfulStep {
         });
     }
 
-    private String processContentType(String contentType, String[] traitSpec) {
-        if (contentType == null || contentType.isEmpty())
-            contentType = request.contentType();
-        if (contentType == null || contentType.isEmpty()) {
-            contentType = defautRequestContentType;
-            if (traitSpec != null)
-                contentType = contentType.replaceFirst("dal:", "");
-        }
-        return contentType;
+    public void post(String path, String contentType, String content) {
+        requestBodyAndResponse("POST", path, contentType, content);
     }
 
-    public void post(String path, String contentType, String content) {
-        requestBodyAndResponse("POST", path, null, contentType, content);
+    public void post(String path, String content) {
+        post(path, null, content);
+    }
+
+    public void post(String path, String contentType, Object body) {
+        requestBodyAndResponse("POST", path, contentType, body);
     }
 
     public void post(String path, Object body) {
-        requestAndResponse("POST", path, connection -> buildRequestBody(connection, null, serializer.apply(body).getBytes(UTF_8)));
+        post(path, null, body);
     }
 
     @When("POST form {string}:")
     public void postForm(String path, String form) {
-        requestBodyAndResponse("POST", path, null, "dal:multipart/form-data", form);
+        requestBodyAndResponse("POST", path, "dal:multipart/form-data", form);
     }
 
     @When("POST form {string} {string}:")
     @Then("POST form {string} to {string}:")
     public void postForm(String spec, String path, String form) {
-        requestBodyAndResponse("POST", path, spec.split("[ ,]"), "multipart/form-data", form);
+        requestBodyAndResponse("POST", path, "multipart/form-data", form, spec.split("[ ,]"));
     }
 
     public void put(String path, String contentType, String content) {
-        requestBodyAndResponse("PUT", path, null, contentType, content);
+        requestBodyAndResponse("PUT", path, contentType, content);
+    }
+
+    public void put(String path, String content) {
+        put(path, null, content);
+    }
+
+    public void put(String path, String contentType, Object body) {
+        requestBodyAndResponse("PUT", path, contentType, body);
     }
 
     public void put(String path, Object body) {
-        requestAndResponse("PUT", path, connection -> buildRequestBody(connection, null, serializer.apply(body).getBytes(UTF_8)));
+        put(path, null, body);
     }
 
     public void patch(String path, String contentType, String content) {
-        requestBodyAndResponse("PATCH", path, null, contentType, content);
+        requestBodyAndResponse("PATCH", path, contentType, content);
+    }
+
+    public void patch(String path, String content) {
+        patch(path, null, content);
+    }
+
+    public void patch(String path, String contentType, Object object) {
+        requestBodyAndResponse("PATCH", path, contentType, object);
     }
 
     public void patch(String path, Object object) {
-        requestAndResponse("PATCH", path, connection -> buildRequestBody(connection, null, serializer.apply(object).getBytes(UTF_8)));
+        patch(path, null, object);
     }
 
     @After
@@ -514,57 +426,13 @@ public class RestfulStep {
         });
     }
 
-    private void buildRequestBody(HttpURLConnection connection, String contentType, byte[] bytes) {
-        Sneaky.run(() -> {
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", contentType == null ? String.valueOf(request.headers.getOrDefault("Content-Type", "application/json")) : contentType);
-//            connection.setRequestProperty("Content-Type", contentType);
-            connection.getOutputStream().write(bytes);
-            connection.getOutputStream().close();
-        });
-    }
-
     private String pathWithParams(String path, String params) {
-        Object body = parseBodyAndHeaders(params, null);
+        RequestCollector collector = new RequestCollector(jFactory, request.getContext());
+        org.testcharm.dal.Evaluator.evaluateObject(params).on(collector);
+        applyCollectedHeaders(collector);
+        Object body = collector.build();
         return path + "?" + DAL.dal().wrap(body).toMap().entrySet().stream()
                 .flatMap(RestfulStep::getParamString).collect(joining("&"));
-    }
-
-    @Deprecated
-    private Object parseBodyAndHeaders(String content, String[] traitSpec) {
-        RequestCollector collector = new RequestCollector(jFactory, request.getContext());
-        if (traitSpec != null)
-            collector.traitsSpec(traitSpec);
-        org.testcharm.dal.Evaluator.evaluateObject(content).on(collector);
-        DAL.dal().wrap(collector.headerCollector().build()).toMap().forEach((key, value) -> {
-            if (value instanceof Collection)
-                header(String.valueOf(key), ((Collection<?>) value).stream().map(String::valueOf).collect(toList()));
-            else
-                header(String.valueOf(key), String.valueOf(value));
-
-        });
-        if (connection != null)
-            request.applyHeader(connection);
-        return collector.build();
-    }
-
-    @Deprecated
-    private Object parseOctetStreamBodyAndHeaders(String content, String[] traitSpec) {
-        RequestCollector collector = new RequestCollector(jFactory, request.getContext());
-        if (traitSpec != null)
-            collector.traitsSpec(traitSpec);
-        Object on = evaluate(content).on(collector);
-        DAL.dal().wrap(collector.headerCollector().build()).toMap().forEach((key, value) -> {
-            if (value instanceof Collection)
-                header(String.valueOf(key), ((Collection<?>) value).stream().map(String::valueOf).collect(toList()));
-            else
-                header(String.valueOf(key), String.valueOf(value));
-        });
-        if (connection != null)
-            request.applyHeader(connection);
-        if (on instanceof Collector) // use root collector
-            return collector.build();
-        return on;
     }
 
     private void setRequestMethod(String method) {

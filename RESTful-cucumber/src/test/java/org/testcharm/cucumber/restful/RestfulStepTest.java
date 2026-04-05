@@ -141,7 +141,7 @@ public class RestfulStepTest {
         void get_response_property() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.post("/test", "any-string");
+            restfulStep.post("/test", "text/plain", "any-string");
 
             assertThat((Object) restfulStep.response("code")).isEqualTo(404);
         }

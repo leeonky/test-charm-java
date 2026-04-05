@@ -10,5 +10,9 @@ public interface ObjectBodyWriter {
         return contentType;
     }
 
-    void write(OutputStream outputStream, Collector collector, Object result) throws IOException;
+    default Object body(Collector collector, Object result) {
+        return collector.build();
+    }
+
+    void write(OutputStream outputStream, Object body) throws IOException;
 }

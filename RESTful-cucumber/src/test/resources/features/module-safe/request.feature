@@ -68,7 +68,7 @@ Feature: Request without Body
 
     Scenario Outline: <method> with single value param
       When <method> "/index":
-        """ application/json
+        """
         {
           "中文参数": "中文值",
           "second": "value1"
@@ -216,7 +216,7 @@ Feature: Request without Body
 
     Scenario Outline: specify spec in step
       When <method> "RequestSpec" "/index":
-        """ application/json
+        """
         {
           intValue: 1
           strValue1: hello
