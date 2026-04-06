@@ -1,5 +1,6 @@
 package org.testcharm.pf;
 
+//TODO need test
 public class AbstractPanel<T extends Element<T, ?, ?>> implements Panel<T> {
     private final T element;
 
