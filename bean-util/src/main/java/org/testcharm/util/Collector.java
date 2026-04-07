@@ -57,6 +57,10 @@ public class Collector {
         return elements.computeIfAbsent(index, k -> createSubCollector());
     }
 
+    public Collector collect() {
+        return collect(elements.size());
+    }
+
     public Collector collect(Object property) {
         return fields.computeIfAbsent((String) property, k -> createSubCollector());
     }

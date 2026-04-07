@@ -398,6 +398,30 @@ Feature: List
         }
         """
 
+    Scenario: bug: list mapping
+      Given the following declarations:
+        """
+        Collector elementSpecCollector = jFactory.collector("red", "ProductSpec[]");
+        """
+      When "elementSpecCollector" collect with the following properties:
+        """
+        name[]: [p1 p2]
+        """
+      Then the result should be:
+        """
+        : {
+          ::properties= {
+            '[0].name'= p1
+            '[1].name'= p2
+          }
+          ::build: {
+            ::this= | name | color | price | class.simpleName |
+                    | p1   | red   | 1     | Product          |
+                    | p2   | red   | 2     | Product          |
+          }
+        }
+        """
+
   Rule: Element is a Raw List Map
 
     Scenario: Specify Grand Child Properties

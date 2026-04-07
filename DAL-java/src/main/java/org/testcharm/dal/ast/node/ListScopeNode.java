@@ -74,7 +74,7 @@ public class ListScopeNode extends DALNode {
                     zipped.forEachElement((clause, index) -> add(buildIndexExpression(clause, index, context)));
                     if (zipped.hasLeft())
                         throw differentSizeException(usefulInputClauses, actual, zipped.index());
-                    if (zipped.hasRight() && !list.infinite())
+                    if (!list.infinite() && zipped.hasRight())
                         throw differentSizeException(usefulInputClauses, actual, list.size());
                 }
             }

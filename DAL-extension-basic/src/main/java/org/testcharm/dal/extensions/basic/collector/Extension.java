@@ -6,11 +6,10 @@ import org.testcharm.dal.runtime.InfiniteDALCollection;
 import org.testcharm.dal.runtime.PropertyAccessor;
 import org.testcharm.dal.runtime.checker.Checker;
 import org.testcharm.dal.runtime.checker.CheckingContext;
+import org.testcharm.dal.runtime.inspector.DumperFactory;
 import org.testcharm.util.Collector;
 
 import java.util.Optional;
-
-import static org.testcharm.util.Collector.Type.LIST;
 
 public class Extension implements org.testcharm.dal.runtime.Extension {
 
@@ -28,16 +27,11 @@ public class Extension implements org.testcharm.dal.runtime.Extension {
                         return collector.collect(property);
                     }
                 })
-                .registerDALCollectionFactory(Collector.class, instance ->
-                        new InfiniteDALCollection<Collector>(() -> {
-                            instance.type(LIST);
-                            return null;
-                        }) {
-                            @Override
-                            protected Collector getByPosition(int position) {
-                                return instance.collect(position);
-                            }
-                        });
+                .registerDALCollectionFactory(Collector.class, instance -> {
+                    instance.type(Collector.Type.LIST);
+                    return new InfiniteDALCollection<>(instance::collect);
+                })
+                .registerDumper(Collector.class, DumperFactory.skip());
     }
 
     private Optional<Checker> verificationOptAsAssignmentOpt(Data<?> actual) {
