@@ -970,6 +970,7 @@ Feature: list
       public class InfiniteCollection implements Iterable<Integer> {
         private int index=0;
         public Iterator<Integer> iterator() {
+          index=0;
           return new Iterator<Integer>() {
             public boolean hasNext() {
               return true;

@@ -138,6 +138,25 @@ Feature: async
       }
       """
 
+    Scenario: Iterable list eventually pass
+      Given the following java class:
+      """
+      public class Data implements Iterable {
+        private Instant time = Instant.now();
+
+        @Override
+        public Iterator iterator() {
+          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1 )
+            return Arrays.asList(100).iterator();
+           return Arrays.asList().iterator();
+        }
+      }
+      """
+      Then the following should pass:
+      """
+      ::eventually: [ 100 ]
+      """
+
   Rule: await
 
     Scenario: await return result ignore exception it default 5 seconds

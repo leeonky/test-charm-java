@@ -16,6 +16,8 @@ public class IterableDALCollection<E> extends DALCollectionBase<E> {
 
     @Override
     public Iterator<IndexedElement<E>> iterator() {
+        cached.clear();
+        iterator = null;
         return new Iterator<IndexedElement<E>>() {
             private int index = firstIndex();
             private int position = 0;

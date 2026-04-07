@@ -6,6 +6,8 @@ import org.testcharm.dal.runtime.Data;
 
 import java.util.function.BiFunction;
 
+import static org.testcharm.dal.Assertions.expect;
+
 //TODO need test
 public interface Panel<E extends Element<E, ?, ?>> {
     E element();
@@ -58,5 +60,13 @@ public interface Panel<E extends Element<E, ?, ?>> {
 
     default <O> O operateAll(String expressions, Object constants) {
         return Evaluator.evaluateAll(expressions).by(element().pageFlow().dal()).constants(constants).on(this);
+    }
+
+    default void should(String expression) {
+        should(expression, null);
+    }
+
+    default void should(String expression, Object constants) {
+        expect(this).constants(constants).should(expression);
     }
 }
