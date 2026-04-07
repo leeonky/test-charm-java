@@ -18,7 +18,7 @@ public class ExtensionForVerification implements Extension {
                 new PropertyAccessor<JFactory>() {
                     @Override
                     public Object getValue(JFactory jFactory, Object property) {
-                        return AdaptiveList.staticList(jFactory.spec((String) property).queryAll());
+                        return new StaticAdaptiveList<>(() -> new CollectionDALCollection<>(jFactory.spec((String) property).queryAll()));
                     }
 
                     @Override
