@@ -6,7 +6,7 @@ public interface WebElement<T extends WebElement<T, E, P>, E, P extends PageFlow
 
     @Override
     default boolean isInput() {
-        String tag = getTag().toLowerCase();
+        String tag = tag().toLowerCase();
         return tag.equals("textarea") || tag.equals("input") || tag.equals("select");
     }
 
@@ -24,7 +24,7 @@ public interface WebElement<T extends WebElement<T, E, P>, E, P extends PageFlow
     }
 
     default boolean selectAble() {
-        return "select".equals(getTag());
+        return "select".equals(tag());
     }
 
     @Override

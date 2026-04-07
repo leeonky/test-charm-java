@@ -35,7 +35,7 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
         }};
     }
 
-    String getTag();
+    String tag();
 
     String text();
 
@@ -79,9 +79,9 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
         throw new IllegalStateException("Not support operation");
     }
 
-    default String getLocation() {
-        return null;
-    }
+//    default String getLocation() {
+//        return null;
+//    }
 
     byte[] screenshot();
 

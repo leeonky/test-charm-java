@@ -141,16 +141,12 @@ Feature: web ui
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
-                location: java.lang.String </html[1]/body[1]/div[1]>,
-                locator: css{.target},
-                tag: java.lang.String <div>
+                locator: css{.target}
             },
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
-                location: java.lang.String </html[1]/body[1]/div[2]>,
-                locator: css{.target},
-                tag: java.lang.String <div>
+                locator: css{.target}
             }
         ]
         """
@@ -177,16 +173,12 @@ Feature: web ui
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
-                location: java.lang.String </html[1]/body[1]/div[1]>,
-                locator: css{.target},
-                tag: java.lang.String <div>
+                locator: css{.target}
             },
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
                 input: java.lang.Boolean <false>,
-                location: java.lang.String </html[1]/body[1]/div[2]>,
-                locator: css{.target},
-                tag: java.lang.String <div>
+                locator: css{.target}
             }
         ]
         """

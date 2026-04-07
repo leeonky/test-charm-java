@@ -29,7 +29,7 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, P>, P extends
     }
 
     @Override
-    public String getTag() {
+    public String tag() {
         return raw().getTagName();
     }
 
@@ -107,10 +107,10 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, P>, P extends
         return WebElement.super.value();
     }
 
-    @Override
-    public String getLocation() {
-        return generateFullXPath(raw());
-    }
+//    @Override
+//    public String getLocation() {
+//        return generateFullXPath(raw());
+//    }
 
     private String generateFullXPath(org.openqa.selenium.WebElement element) {
         if (element.getTagName().equals("html")) {
