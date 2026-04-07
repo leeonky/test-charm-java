@@ -43,7 +43,7 @@ public class Elements<T extends Element<T, ?, ?>> implements AdaptiveList<T> {
         try {
             return new Retryer(element.timeout(), 100).get(AdaptiveList.super::single);
         } catch (InvalidAdaptiveListException ig) {
-            throw new InvalidAdaptiveListException(locateInfo("Operations can only be performed on a single located element at: ", " => " + locator));
+            throw new InvalidAdaptiveListException(locateInfo("Operations can only be performed on a single located element at: ", " => " + locator), ig.list());
         }
     }
 }

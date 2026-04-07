@@ -15,7 +15,7 @@ public interface AdaptiveList<T> {
             if (!iterator.hasNext())
                 return next.value();
         }
-        throw new InvalidAdaptiveListException("Expected list can only have one element");
+        throw new InvalidAdaptiveListException("Expected list can only have one element", list);
     }
 
     static <T> AdaptiveList<T> staticList(Collection<T> list) {

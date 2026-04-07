@@ -110,7 +110,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: org.testcharm.dal.runtime.StaticAdaptiveList [
+        Expected list can only have one element, but is: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]
@@ -128,7 +128,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: org.testcharm.dal.runtime.StaticAdaptiveList [
+        Expected list can only have one element, but is: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]
@@ -273,7 +273,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: org.testcharm.dal.runtime.StaticAdaptiveList [
+        Expected list can only have one element, but is: [
             #package#Data {
                 i: java.lang.Integer <1>,
                 j: java.lang.Integer <2>
@@ -342,7 +342,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: org.testcharm.dal.runtime.StaticAdaptiveList [
+        Expected list can only have one element, but is: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]
@@ -358,7 +358,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: org.testcharm.dal.runtime.StaticAdaptiveList [
+        Expected list can only have one element, but is: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]
