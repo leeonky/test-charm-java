@@ -53,7 +53,7 @@ public class Types implements Extension {
                 .registerPropertyAccessor(AdaptiveList.class, new PropertyAccessor<AdaptiveList<?>>() {
 
                     @Override
-                    public Data<?> getData(Data<AdaptiveList<?>> data, Object property, DALRuntimeContext context) {
+                    public Data<?> getData(Data<AdaptiveList<?>> data, Object property) {
                         return adaptiveListOf(data, d -> d.map(AdaptiveList::single).property(property), ExpressionException::illegalOp2);
                     }
 

@@ -367,7 +367,7 @@ public class RuntimeContextBuilder {
         }
 
         public <T> Data<?> accessProperty(Data<T> data, Object propertyChain) {
-            return getObjectPropertyAccessor(data.value()).getData(data, propertyChain, this);
+            return getObjectPropertyAccessor(data.value()).getData(data, propertyChain);
         }
 
         public DALCollection<Object> createCollection(Object instance) {

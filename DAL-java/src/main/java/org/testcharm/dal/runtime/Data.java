@@ -109,6 +109,10 @@ public class Data<T> {
     }
 
     public <N> Data<N> map(Function<T, N> mapper) {
+        return map(mapper, schemaType);
+    }
+
+    public <N> Data<N> map(Function<T, N> mapper, SchemaType schemaType) {
         return new Data<>(mapper.apply(value()), context, schemaType);
     }
 

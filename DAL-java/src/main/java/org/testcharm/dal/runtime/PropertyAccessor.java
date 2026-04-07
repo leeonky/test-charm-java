@@ -1,6 +1,5 @@
 package org.testcharm.dal.runtime;
 
-import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.util.BeanClass;
 import org.testcharm.util.Sneaky;
 
@@ -11,7 +10,7 @@ import static org.testcharm.dal.runtime.DALException.buildUserRuntimeException;
 
 public interface PropertyAccessor<T> {
 
-    default Data<?> getData(Data<T> data, Object property, DALRuntimeContext context) {
+    default Data<?> getData(Data<T> data, Object property) {
         Object result = null;
         try {
             result = getValue(data, property);
@@ -25,7 +24,8 @@ public interface PropertyAccessor<T> {
             Sneaky.sneakyThrow(buildUserRuntimeException(e));
         }
         SchemaType schemaType = data.propertySchema(property, data.instanceOf(AutoMappingList.class) && property instanceof String);
-        return context.data(result, schemaType);
+        Object finalResult = result;
+        return data.map(ig -> finalResult, schemaType);
     }
 
     default Object getValue(Data<T> data, Object property) {

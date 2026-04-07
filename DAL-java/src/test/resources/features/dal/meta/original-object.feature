@@ -15,18 +15,6 @@ Feature: original-object
         ::object.class.simpleName= LinkedHashMap
       """
 
-    Scenario: fallback to dal data property when no java property
-      Given the following json:
-      """
-      {
-        "field": "map-key-value"
-      }
-      """
-      Then the following verification should pass:
-      """
-      ::object.field= map-key-value
-      """
-
     Scenario: null value object is still null
       Given the following json:
       """
@@ -35,4 +23,16 @@ Feature: original-object
       Then the following verification should pass:
       """
       ::object= null
+      """
+
+    Scenario: fallback to method call when no java property
+      Given the following json:
+      """
+      {
+        "field": "map-key-value"
+      }
+      """
+      Then the following verification should pass:
+      """
+      ::object.get.field= map-key-value
       """

@@ -8,7 +8,6 @@ import org.testcharm.dal.runtime.checker.Checker;
 import org.testcharm.dal.runtime.checker.CheckingContext;
 import org.testcharm.interpreter.SyntaxException;
 import org.testcharm.util.BeanClass;
-import org.testcharm.util.NoSuchAccessorException;
 import org.testcharm.util.Sneaky;
 
 import java.util.Set;
@@ -75,7 +74,18 @@ public class MetaProperties implements Extension {
                 .registerMetaProperty(MetaShould.class, "not", (metaData) -> metaData.data().value().negative())
                 .registerMetaProperty("root", (RuntimeDataHandler<MetaData<?>>) metaData ->
                         metaData.runtimeContext().inputRoot())
-        ;
+                .registerPropertyAccessor(OriginalJavaObject.class, new PropertyAccessor<OriginalJavaObject<?>>() {
+                    @Override
+                    public Data<?> getData(Data<OriginalJavaObject<?>> data, Object property) {
+                        Data<Object> originalObject = data.map(d -> d.data.value());
+                        return new JavaClassPropertyAccessor<>(BeanClass.createFrom(originalObject.value())).getData(originalObject, property);
+                    }
+
+                    @Override
+                    public Set<?> getPropertyNames(OriginalJavaObject<?> instance) {
+                        return BeanClass.createFrom(instance.data.value()).getPropertyReaders().keySet();
+                    }
+                });
 
         dal.getRuntimeContextBuilder().checkerSetForMatching()
                 .register((expected, actual) -> actual.cast(MetaShould.PredicateMethod.class).map(predicateMethod -> new Checker() {
@@ -122,26 +132,11 @@ public class MetaProperties implements Extension {
         });
     }
 
-    static class OriginalJavaObject implements ProxyObject {
-        private final Data<?> data;
+    static class OriginalJavaObject<T> {
+        private final Data<T> data;
 
-        public OriginalJavaObject(Data<?> data) {
+        public OriginalJavaObject(Data<T> data) {
             this.data = data;
-        }
-
-        @Override
-        public Object getValue(Object property) {
-            try {
-                Object instance = data.value();
-                return BeanClass.createFrom(instance).getPropertyValue(instance, property.toString());
-            } catch (NoSuchAccessorException ignore) {
-                return data.property(property).value();
-            }
-        }
-
-        @Override
-        public Set<?> getPropertyNames() {
-            return BeanClass.createFrom(data.value()).getPropertyReaders().keySet();
         }
     }
 }
