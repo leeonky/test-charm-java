@@ -24,6 +24,7 @@ class SpecRules<T> {
         this.objectProducer = objectProducer;
         this.association = association;
         this.reverseAssociation = reverseAssociation;
+        runtimeType = objectProducer.getType();
     }
 
     public BeanClass<T> runtimeType() {
@@ -38,9 +39,8 @@ class SpecRules<T> {
         rules.add(rule);
     }
 
-    public void applySpecs(JFactory jFactory, ObjectProducer<T> producer) {
-        rules.forEach(o -> o.accept(jFactory, producer));
-        runtimeType = producer.getType();
+    public void applySpecs(JFactory jFactory) {
+        rules.forEach(o -> o.accept(jFactory, objectProducer));
         if (!invalidIsSpecs.isEmpty())
             throw new InvalidSpecException("Invalid property spec:\n\t"
                     + invalidIsSpecs.stream().map(PropertySpec.IsSpec::getPosition).collect(Collectors.joining("\n\t"))
@@ -60,7 +60,7 @@ class SpecRules<T> {
         rules.clear();
         for (PropertyStructureDefinition<T> propertyStructureDefinition : propertyStructureRules)
             propertyStructureDefinition.apply(specOf(factory), producer);
-        applySpecs(jFactory, producer);
+        applySpecs(jFactory);
     }
 
     public void appendStructureDefinition(PropertyStructureDefinition<T> propertyStructureDefinition) {
