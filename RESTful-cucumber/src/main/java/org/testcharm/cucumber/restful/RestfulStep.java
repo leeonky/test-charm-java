@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.dal.Assertions.expect;
@@ -61,7 +62,7 @@ public class RestfulStep {
 
     private String defaultContentType = "dal:application/json";
 
-    private final List<BodyRequestBuilder<ObjectBodyWriter>> objectBodyRequestBuilders = asList(
+    private final LinkedList<BodyRequestBuilder<ObjectBodyWriter>> objectBodyRequestBuilders = new LinkedList<>(asList(
             new BodyRequestBuilder<ObjectBodyWriter>() {
                 @Override
                 public boolean matches(String contentType) {
@@ -139,8 +140,13 @@ public class RestfulStep {
                     };
                 }
             }
-    );
-    private final List<BodyRequestBuilder<TextBodyWriter>> textBodyRequestBuilders = asList(
+    ));
+
+    public void addObjectBodyRequestBuilder(BodyRequestBuilder<ObjectBodyWriter> builder) {
+        objectBodyRequestBuilders.addFirst(builder);
+    }
+
+    private final LinkedList<BodyRequestBuilder<TextBodyWriter>> textBodyRequestBuilders = new LinkedList<>(singletonList(
             new BodyRequestBuilder<TextBodyWriter>() {
                 @Override
                 public boolean matches(String contentType) {
@@ -152,7 +158,11 @@ public class RestfulStep {
                     return (outputStream, content) -> outputStream.write(String.join("\r\n", content.split(System.lineSeparator())).getBytes());
                 }
             }
-    );
+    ));
+
+    public void addTextBodyRequestBuilder(BodyRequestBuilder<TextBodyWriter> builder) {
+        textBodyRequestBuilders.addFirst(builder);
+    }
 
     private TextBodyWriter defaultTextBodyWriter = (outputStream, content) -> outputStream.write(content.getBytes());
 

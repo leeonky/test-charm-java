@@ -152,13 +152,8 @@ public class JSONObject {
      * Construct an empty JSONObject.
      */
     public JSONObject() {
-        // HashMap is used on purpose to ensure that elements are unordered by
-        // the specification.
-        // JSON tends to be a portable transfer format to allows the container
-        // implementations to rearrange their items for a faster element
-        // retrieval based on associative access.
-        // Therefore, an implementation mustn't rely on the order of the item.
-        map = new HashMap<>();
+        // Use LinkedHashMap instead of HashMap to preserve order of insertion which can be important for some applications
+        map = new LinkedHashMap<>();
     }
 
     /**
@@ -279,9 +274,9 @@ public class JSONObject {
             throw new JSONException("JSONObject has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
         }
         if (m == null) {
-            map = new HashMap<>();
+            map = new LinkedHashMap<>();
         } else {
-            map = new HashMap<>(m.size());
+            map = new LinkedHashMap<>(m.size());
             for (final Entry<?, ?> e : m.entrySet()) {
                 if (e.getKey() == null) {
                     throw new NullPointerException("Null key.");
@@ -449,7 +444,7 @@ public class JSONObject {
      * @param initialCapacity initial capacity of the internal map.
      */
     protected JSONObject(int initialCapacity) {
-        map = new HashMap<>(initialCapacity);
+        map = new LinkedHashMap<>(initialCapacity);
     }
 
     /**
@@ -2629,7 +2624,7 @@ public class JSONObject {
      * @return a java.util.Map containing the entries of this object
      */
     public Map<String, Object> toMap() {
-        Map<String, Object> results = new HashMap<>();
+        Map<String, Object> results = new LinkedHashMap<>();
         for (Entry<String, Object> entry : entrySet()) {
             Object value;
             if (entry.getValue() == null || NULL.equals(entry.getValue())) {
