@@ -60,7 +60,7 @@ public class RestfulStep {
         this.defaultTextBodyWriter = defaultTextBodyWriter;
     }
 
-    private String defaultContentType = "dal:application/json";
+    private String defaultContentType = "application/json";
 
     private final LinkedList<BodyRequestBuilder<ObjectBodyWriter>> objectBodyRequestBuilders = new LinkedList<>(asList(
             new BodyRequestBuilder<ObjectBodyWriter>() {

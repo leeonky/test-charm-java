@@ -55,7 +55,7 @@ Feature: Basic Request With Body Steps
 
   Rule: no doc type
 
-    Scenario Outline: guess content type from defautRequestContentType(dal:application/json)
+    Scenario Outline: guess content type from defautRequestContentType(application/json)
       When <method> "/index":
         """
         text: hello
@@ -65,12 +65,8 @@ Feature: Basic Request With Body Steps
         : [{
           method: <method>
           path: '/index'
-          headers: {
-            ['Content-Type']: ['application/json']
-          }
-          body.json= {
-            text= hello
-          }
+          headers[Content-Type]: [application/json]
+          body.rawBytes.base64.string= 'text: hello'
         }]
         """
       Examples:

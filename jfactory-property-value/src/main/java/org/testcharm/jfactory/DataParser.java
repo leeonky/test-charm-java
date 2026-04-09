@@ -2,13 +2,12 @@ package org.testcharm.jfactory;
 
 import org.testcharm.dal.DAL;
 import org.testcharm.interpreter.InterpreterException;
-import org.testcharm.jfactory.helper.FlatAble;
 import org.testcharm.jfactory.helper.*;
 
 import java.util.Map;
 
 public class DataParser {
-    private static final DAL DAL = new DALHelper().dal();
+    private static final ThreadLocal<DAL> instance = new ThreadLocal<>();
 
     public static PropertyValue data(String expression) {
         return new PropertyValue() {
@@ -35,7 +34,7 @@ public class DataParser {
         String prefix = guessPrefix(expression);
         ObjectReference objectReference = new ObjectReference();
         try {
-            DAL.evaluateAll(objectReference, prefix + expression);
+            dal().evaluateAll(objectReference, prefix + expression);
         } catch (InterpreterException e) {
             throw new IllegalArgumentException("\n" + e.show(prefix + expression, prefix.length()) + "\n\n" + e.getMessage());
         }
@@ -55,11 +54,16 @@ public class DataParser {
         String prefix = guessPrefix(expression);
         Specs specs = new Specs();
         try {
-            DAL.evaluateAll(specs, prefix + expression);
+            dal().evaluateAll(specs, prefix + expression);
         } catch (InterpreterException e) {
             throw new IllegalArgumentException("\n" + e.show(prefix + expression, prefix.length()) + "\n\n" + e.getMessage());
         }
         return specs;
     }
 
+    private static DAL dal() {
+        if (instance.get() == null)
+            instance.set(new DALHelper().dal());
+        return instance.get();
+    }
 }

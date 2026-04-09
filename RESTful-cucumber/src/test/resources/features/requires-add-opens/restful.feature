@@ -11,9 +11,16 @@ Feature: RESTful api steps
       """
       { "text": "Hello world" }
       """
-      Then "http://www.a.com" got a "<method>" request on "/index" with body
+      Then got request:
       """
-      {"text":"Hello world"}
+      : [{
+        method: '<method>'
+        path: '/index'
+        headers[Content-Type]: [application/json]
+        body.json= {
+          text= 'Hello world'
+        }
+      }]
       """
       Examples:
         | method |
@@ -24,9 +31,20 @@ Feature: RESTful api steps
       """
       { "text": "Hello world" }
       """
-      Then "http://www.a.com" got a "<method>" request on "/index" with params "中文参数=中文值&second=value2" and body
+      Then got request:
       """
-      {"text":"Hello world"}
+      : [{
+        method: '<method>'
+        path: '/index'
+        headers[Content-Type]: [application/json]
+        queryStringParameters: {
+         中文参数= [中文值]
+         second= [value2]
+        }
+        body.json= {
+          text= 'Hello world'
+        }
+      }]
       """
       Examples:
         | method |
