@@ -55,7 +55,8 @@ Feature: Basic Request With Body Steps
 
   Rule: no doc type
 
-    Scenario Outline: guess content type from defautRequestContentType(application/json)
+    Scenario Outline: resolve content type from defaultDocType(application/json)
+      Given default doc type "application/json"
       When <method> "/index":
         """
         text: hello
@@ -75,12 +76,10 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
-    Scenario Outline: guess content type from header
+    Scenario Outline: resolve content type from header
       Given header by RESTful api:
         """
-        {
-          "Content-Type": "text/plain"
-        }
+        { "Content-Type": "text/plain" }
         """
       When <method> "/index":
         """
@@ -103,15 +102,322 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
-  Rule: dal:application/json
+    Scenario Outline: resolve content type from defaultDocType(dal:application/json)
+      Given default doc type "dal:application/json"
+      When <method> "/index":
+        """
+        text: hello
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/json]
+          body.json= {text: hello}
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
 
-    Scenario Outline: <method> doc type overrides header content type
+    Scenario Outline: resolve content type header > defaultDocType
+      Given default doc type "dal:application/json"
       Given header by RESTful api:
         """
+        { "Content-Type": "text/plain" }
+        """
+      When <method> "/index":
+        """
         {
-          "Content-Type": "text/plain"
+          text: hello
         }
         """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [text/plain]
+          body.rawBytes.base64.string= ```
+                                       {
+                                         text: hello
+                                       }
+                                       ```
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: resolve content type defaultDocType > content ::headers (content ::headers content type always not work)
+      Given default doc type "dal:application/json"
+      When <method> "/index":
+        """
+        {
+          text: hello
+          ::headers[Content-Type]: text/plain
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/json]
+          body.json= {text= hello}
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: with header body and params
+      Given default doc type "application/json"
+      Given header by RESTful api:
+        """
+        { "key": "value" }
+        """
+      When <method> "/index?中文参数=中文值&second=value2":
+        """
+        raw-string
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers: {
+            Content-Type= [application/json]
+            key= [value]
+          }
+          body.rawBytes.base64.string= raw-string
+          queryStringParameters: {
+           中文参数= [中文值]
+           second= [value2]
+          }
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+  Rule: doc type dal
+
+    Scenario Outline: resolve content type from defaultDocType(application/octet-stream)
+      Given default doc type "application/octet-stream"
+      When <method> "/index":
+        """ dal
+        ::this(File).content: hello
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: resolve content type from defaultDocType(dal:application/octet-stream)
+      Given default doc type "dal:application/octet-stream"
+      When <method> "/index":
+        """ dal
+        ::this(File).content: hello
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: resolve content type from header
+      Given header by RESTful api:
+        """
+        { "Content-Type": "application/octet-stream" }
+        """
+      When <method> "/index":
+        """ dal
+        ::this(File).content: hello
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: resolve content type from content ::headers
+      When <method> "/index":
+        """ dal
+        : {
+          ::this(File).content: hello
+          ::headers[Content-Type]: application/octet-stream
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: resolve content type header > defaultDocType
+      Given default doc type "application/json"
+      Given header by RESTful api:
+        """
+        { "Content-Type": "application/octet-stream" }
+        """
+      When <method> "/index":
+        """ dal
+        ::this(File).content: hello
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: resolve content type content ::headers > defaultDocType
+      Given default doc type "application/json"
+      When <method> "/index":
+        """ dal
+        {
+          ::this(File).content: hello
+          ::headers[Content-Type]: application/octet-stream
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: resolve content type content ::headers > header
+      Given header by RESTful api:
+        """
+        { "Content-Type": "application/json" }
+        """
+      When <method> "/index":
+        """ dal
+        {
+          ::this(File).content: hello
+          ::headers[Content-Type]: application/octet-stream
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: [application/octet-stream]
+          body.base64Bytes.base64.string= hello
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: with header body and params
+      Given default doc type "application/json"
+      Given header by RESTful api:
+        """
+        { "key": "value" }
+        """
+      When <method> "/index?中文参数=中文值&second=value2":
+        """ dal
+        {
+          field: hello
+          ::headers: {
+            key2= value2
+          }
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers: {
+            'Content-Type': [application/json]
+            key= [value]
+            key2= [value2]
+          }
+          body.json= {field= hello}
+          queryStringParameters: {
+           中文参数= [中文值]
+           second= [value2]
+          }
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+  Rule: doc type dal:content-type
+
+    Scenario Outline: resolve content type from doc type
       When <method> "/index":
         """ dal:application/json
         {...}
@@ -130,6 +436,104 @@ Feature: Basic Request With Body Steps
         | POST   |
         | PUT    |
         | PATCH  |
+
+    Scenario Outline: doc type > header
+      Given header by RESTful api:
+        """
+        { "Content-Type": "text/plain" }
+        """
+      When <method> "/index":
+        """ dal:application/json
+        {
+          ::headers[Content-Type]: text/plain
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: ['application/json']
+          body.json= {}
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: doc type > content ::headers (content ::headers content type always not work)
+      When <method> "/index":
+        """ dal:application/json
+        {
+          ::headers[Content-Type]: text/plain
+        }
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: ['application/json']
+          body.json= {}
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+  Rule: doc type content-type
+
+    Scenario Outline: resolve content type from doc type
+      When <method> "/index":
+        """ application/json
+        {}
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: ['application/json']
+          body.json= {}
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+    Scenario Outline: <method> doc type overrides header content type
+      Given header by RESTful api:
+        """
+        {
+          "Content-Type": "text/plain"
+        }
+        """
+      When <method> "/index":
+        """ application/json
+        {}
+        """
+      Then got request:
+        """
+        : [{
+          method: <method>
+          path: '/index'
+          headers[Content-Type]: ['application/json']
+          body.json= {}
+        }]
+        """
+      Examples:
+        | method |
+        | POST   |
+        | PUT    |
+        | PATCH  |
+
+  Rule: dal:application/json
 
     Scenario Outline: with body
       When <method> "/index":
@@ -276,36 +680,27 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
-  Rule: dal:multipart/form-data
-
-    Scenario Outline: <method> doc type overrides header content type
-      Given header by RESTful api:
-        """
-        {
-          "Content-Type": "text/plain"
-        }
-        """
+    Scenario Outline: request single value
       When <method> "/index":
-        """ dal:multipart/form-data
-        {...}
+        """ dal:application/json
+        <value>
         """
       Then got request:
         """
         : [{
           method: <method>
           path: '/index'
-          headers[Content-Type]: [/^multipart\/form-data; boundary=.*/]
+          headers[Content-Type]: ['application/json']
+          body.json= <value>
         }]
         """
-      And got request form data:
-        """
-        : []
-        """
       Examples:
-        | method |
-        | POST   |
-        | PUT    |
-        | PATCH  |
+        | method | value   |
+        | POST   | true    |
+        | PUT    | 100     |
+        | PATCH  | 'hello' |
+
+  Rule: dal:multipart/form-data
 
     Scenario Outline: body with virtual file
       When <method> "/index":
@@ -589,32 +984,6 @@ Feature: Basic Request With Body Steps
 
   Rule: application/json
 
-    Scenario Outline: <method> doc type overrides header content type
-      Given header by RESTful api:
-        """
-        {
-          "Content-Type": "text/plain"
-        }
-        """
-      When <method> "/index":
-        """ application/json
-        {}
-        """
-      Then got request:
-        """
-        : [{
-          method: <method>
-          path: '/index'
-          headers[Content-Type]: ['application/json']
-          body.json= {}
-        }]
-        """
-      Examples:
-        | method |
-        | POST   |
-        | PUT    |
-        | PATCH  |
-
     Scenario Outline: body
       When <method> "/index":
         """ application/json
@@ -660,32 +1029,6 @@ Feature: Basic Request With Body Steps
         | PATCH  |
 
   Rule: multipart/form-data
-
-    Scenario Outline: <method> doc type overrides header content type
-      Given header by RESTful api:
-        """
-        {
-          "Content-Type": "text/plain"
-        }
-        """
-      When <method> "/index":
-        """ multipart/form-data
-        hello
-        """
-      Then got request:
-        """
-        : [{
-          method: <method>
-          path: '/index'
-          headers[Content-Type]: ['multipart/form-data']
-          body.rawBytes.base64.string= hello
-        }]
-        """
-      Examples:
-        | method |
-        | POST   |
-        | PUT    |
-        | PATCH  |
 
     Scenario Outline: body of form-data
       When <method> "/index":
@@ -796,3 +1139,4 @@ Feature: Basic Request With Body Steps
         | PUT    |
         | PATCH  |
 
+#POST single object in dal

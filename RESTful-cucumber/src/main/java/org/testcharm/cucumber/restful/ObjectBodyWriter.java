@@ -11,7 +11,7 @@ public interface ObjectBodyWriter {
     }
 
     default Object body(Collector collector, Object result) {
-        return collector.build();
+        return result instanceof Collector ? collector.build() : result;
     }
 
     void write(OutputStream outputStream, Object body) throws IOException;

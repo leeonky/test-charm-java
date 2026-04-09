@@ -10,11 +10,9 @@ import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONArray;
 import org.testcharm.io.VirtualFile;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.util.BeanClass;
-import org.testcharm.util.Collector;
 import org.testcharm.util.PropertyReader;
 import org.testcharm.util.Sneaky;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -52,15 +50,15 @@ public class RestfulStep {
     };
     private JFactory jFactory;
 
-    public void setDefaultContentType(String defaultContentType) {
-        this.defaultContentType = defaultContentType;
+    public void setDefaultDocType(String defaultDocType) {
+        this.defaultDocType = defaultDocType;
     }
 
     public void setDefaultTextBodyWriter(TextBodyWriter defaultTextBodyWriter) {
         this.defaultTextBodyWriter = defaultTextBodyWriter;
     }
 
-    private String defaultContentType = "application/json";
+    private String defaultDocType = "application/json";
 
     private final LinkedList<BodyRequestBuilder<ObjectBodyWriter>> objectBodyRequestBuilders = new LinkedList<>(asList(
             new BodyRequestBuilder<ObjectBodyWriter>() {
@@ -119,24 +117,15 @@ public class RestfulStep {
 
                 @Override
                 public ObjectBodyWriter writer(String contentType) {
-                    return new ObjectBodyWriter() {
-                        @Override
-                        public Object body(Collector collector, Object result) {
-                            return result instanceof Collector ? collector.build() : result;
-                        }
-
-                        @Override
-                        public void write(OutputStream outputStream, Object object) throws IOException {
-                            if (object instanceof String) {
-                                outputStream.write(((String) object).getBytes());
-                            } else if (object instanceof byte[]) {
-                                outputStream.write((byte[]) object);
-                            } else if (object instanceof UploadFile) {
-                                outputStream.write(((UploadFile) object).getContent());
-                            } else if (object instanceof VirtualFile) {
-                                outputStream.write(((VirtualFile) object).binary());
-                            }
-                        }
+                    return (outputStream, object) -> {
+                        if (object instanceof String)
+                            outputStream.write(((String) object).getBytes());
+                        else if (object instanceof byte[])
+                            outputStream.write((byte[]) object);
+                        else if (object instanceof UploadFile)
+                            outputStream.write(((UploadFile) object).getContent());
+                        else if (object instanceof VirtualFile)
+                            outputStream.write(((VirtualFile) object).binary());
                     };
                 }
             }
@@ -213,39 +202,50 @@ public class RestfulStep {
         requestBodyAndResponse("POST", path, content.getContentType(), content.getContent());
     }
 
-    private void requestBodyAndResponse(String method, String path, String contentType, String content) {
-        if (contentType == null)
-            contentType = request.contentType();
-        if (contentType == null)
-            contentType = defaultContentType;
-        if (contentType.startsWith("dal:")) {
+    private void requestBodyAndResponse(String method, String path, String docType, String content) {
+        if ("dal".equals(docType)) {
             RequestCollector collector = new RequestCollector(jFactory, request.getContext());
             Object result = org.testcharm.dal.Evaluator.evaluateObject(evaluator.eval(content)).on(collector);
             applyCollectedHeaders(collector);
-            writeObjectBody(method, path, contentType.substring(4), objectBodyWriter -> objectBodyWriter.body(collector, result));
+            if (request.contentType() != null)
+                docType = "dal:" + request.contentType();
+            else
+                docType = "dal:" + defaultDocType.replaceFirst("^dal:", "");
+            writeObjectBody(method, path, docType.substring(4), objectBodyWriter -> objectBodyWriter.body(collector, result));
         } else {
-            String resolvedContentType = contentType;
-            requestAndResponse(method, path, sneakyRun(connection1 -> {
-                TextBodyWriter textBodyWriter = textBodyRequestBuilders.stream().filter(builder -> builder.matches(resolvedContentType))
-                        .map(builder -> builder.writer(resolvedContentType))
-                        .findFirst().orElse(defaultTextBodyWriter);
-                connection1.setDoOutput(true);
-                connection1.setRequestProperty("Content-Type", textBodyWriter.contentType(resolvedContentType));
-                textBodyWriter.write(connection1.getOutputStream(), evaluator.eval(content));
-                connection1.getOutputStream().close();
-            }));
+            if (docType == null)
+                docType = request.contentType();
+            if (docType == null)
+                docType = defaultDocType;
+            if (docType.startsWith("dal:")) {
+                RequestCollector collector = new RequestCollector(jFactory, request.getContext());
+                Object result = org.testcharm.dal.Evaluator.evaluateObject(evaluator.eval(content)).on(collector);
+                applyCollectedHeaders(collector);
+                writeObjectBody(method, path, docType.substring(4), objectBodyWriter -> objectBodyWriter.body(collector, result));
+            } else {
+                String resolvedContentType = docType;
+                requestAndResponse(method, path, sneakyRun(connection -> {
+                    TextBodyWriter textBodyWriter = textBodyRequestBuilders.stream().filter(builder -> builder.matches(resolvedContentType))
+                            .map(builder -> builder.writer(resolvedContentType))
+                            .findFirst().orElse(defaultTextBodyWriter);
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty("Content-Type", textBodyWriter.contentType(resolvedContentType));
+                    textBodyWriter.write(connection.getOutputStream(), evaluator.eval(content));
+                    connection.getOutputStream().close();
+                }));
+            }
         }
     }
 
-    private void requestBodyAndResponse(String method, String path, String contentType, String content, String[] traitSpec) {
+    private void requestBodyAndResponse(String method, String path, String docType, String content, String[] traitSpec) {
         RequestCollector collector = new RequestCollector(jFactory, request.getContext());
         collector.traitsSpec(traitSpec);
         Object result = org.testcharm.dal.Evaluator.evaluateObject(evaluator.eval(content)).on(collector);
         applyCollectedHeaders(collector);
-        writeObjectBody(method, path, resolveObjectContentType(contentType), objectBodyWriter -> objectBodyWriter.body(collector, result));
+        writeObjectBody(method, path, resolveObjectContentType(docType), objectBodyWriter -> objectBodyWriter.body(collector, result));
     }
 
-    private void requestBodyAndResponse(String method, String path, String contentType, Object body) {
+    private void requestObjectBodyAndResponse(String method, String path, String contentType, Object body) {
         writeObjectBody(method, path, resolveObjectContentType(contentType), objectBodyWriter -> body);
     }
 
@@ -253,7 +253,7 @@ public class RestfulStep {
         if (contentType == null)
             contentType = request.contentType();
         if (contentType == null)
-            contentType = defaultContentType.replaceFirst("^dal:", "");
+            contentType = defaultDocType.replaceFirst("^dal:", "");
         return contentType;
     }
 
@@ -318,8 +318,8 @@ public class RestfulStep {
         });
     }
 
-    public void post(String path, String contentType, String content) {
-        requestBodyAndResponse("POST", path, contentType, content);
+    public void post(String path, String docType, String content) {
+        requestBodyAndResponse("POST", path, docType, content);
     }
 
     public void post(String path, String content) {
@@ -327,7 +327,7 @@ public class RestfulStep {
     }
 
     public void post(String path, String contentType, Object body) {
-        requestBodyAndResponse("POST", path, contentType, body);
+        requestObjectBodyAndResponse("POST", path, contentType, body);
     }
 
     public void post(String path, Object body) {
@@ -345,8 +345,8 @@ public class RestfulStep {
         requestBodyAndResponse("POST", path, "multipart/form-data", form, spec.split("[ ,]"));
     }
 
-    public void put(String path, String contentType, String content) {
-        requestBodyAndResponse("PUT", path, contentType, content);
+    public void put(String path, String docType, String content) {
+        requestBodyAndResponse("PUT", path, docType, content);
     }
 
     public void put(String path, String content) {
@@ -354,15 +354,15 @@ public class RestfulStep {
     }
 
     public void put(String path, String contentType, Object body) {
-        requestBodyAndResponse("PUT", path, contentType, body);
+        requestObjectBodyAndResponse("PUT", path, contentType, body);
     }
 
     public void put(String path, Object body) {
         put(path, null, body);
     }
 
-    public void patch(String path, String contentType, String content) {
-        requestBodyAndResponse("PATCH", path, contentType, content);
+    public void patch(String path, String docType, String content) {
+        requestBodyAndResponse("PATCH", path, docType, content);
     }
 
     public void patch(String path, String content) {
@@ -370,7 +370,7 @@ public class RestfulStep {
     }
 
     public void patch(String path, String contentType, Object object) {
-        requestBodyAndResponse("PATCH", path, contentType, object);
+        requestObjectBodyAndResponse("PATCH", path, contentType, object);
     }
 
     public void patch(String path, Object object) {

@@ -175,6 +175,7 @@ public class Steps {
     public void reset() {
         PathVariableReplacement.reset();
         JavaExecutor.executor().importDependency("org.testcharm.jfactory.*");
+        restfulStep.setDefaultDocType("application/json");
     }
 
     @Given("binary response {int} on GET {string} with file name {string}:")
@@ -250,5 +251,10 @@ public class Steps {
     public void useAsJFactory(String var) {
         JavaExecutor.executor().main().returnExpression(var);
         restfulStep.setJFactory((JFactory) JavaExecutor.executor().main().evaluate());
+    }
+
+    @Given("default doc type {string}")
+    public void defaultDocType(String docType) {
+        restfulStep.setDefaultDocType(docType);
     }
 }
