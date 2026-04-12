@@ -1,7 +1,6 @@
 package org.testcharm.dal.extensions.inspector.cucumber.page;
 
 import org.testcharm.dal.extensions.inspector.cucumber.page.e.Element;
-import org.testcharm.dal.runtime.AdaptiveList;
 import org.testcharm.dal.runtime.ProxyObject;
 import org.testcharm.pf.Elements;
 
@@ -22,14 +21,14 @@ public class WatchesPanel extends OutputPanel implements ProxyObject {
 
     @Override
     public WatchesItem getValue(Object property) {
-        return ((AdaptiveList<Element>) watches()).list().values().filter(panel -> property.equals(panel.find(css(".watches-item-name")).single().text()))
+        return watches().list().values().filter(panel -> property.equals(panel.find(css(".watches-item-name")).single().text()))
                 .map(WatchesItem::new)
                 .findFirst().orElse(null);
     }
 
     @Override
     public Set<Object> getPropertyNames() {
-        return ((AdaptiveList<Element>) watches()).list().values().map(panel -> (Object) panel.find(css(".watches-item-name")).single().text())
+        return watches().list().values().map(panel -> (Object) panel.find(css(".watches-item-name")).single().text())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

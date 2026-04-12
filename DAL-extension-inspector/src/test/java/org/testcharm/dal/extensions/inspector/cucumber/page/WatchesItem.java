@@ -10,7 +10,7 @@ public class WatchesItem extends AbstractPanel<Element> {
     }
 
     @Override
-    public String toString() {
+    public String text() {
         return perform("css[.watches-item-content].text");
     }
 
