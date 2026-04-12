@@ -198,9 +198,109 @@ public class RestfulStep {
     }
 
     @When("POST {string}:")
-    public void post(String path, DocString content) {
-        requestBodyAndResponse("POST", path, content.getContentType(), content.getContent());
+    public void post(String path, DocString contentOrExpression) {
+        post(path, contentOrExpression.getContentType(), contentOrExpression.getContent());
     }
+
+    @When("POST form {string}:")
+    public void postForm(String path, String expression) {
+        requestBodyAndResponse("POST", path, "dal:multipart/form-data", expression);
+    }
+
+    @When("POST form {string} {string}:")
+    @Then("POST form {string} to {string}:")
+    public void postForm(String spec, String path, String expression) {
+        postWithSpec(path, "multipart/form-data", spec.split("[ ,]"), expression);
+    }
+
+    @When("POST {string} {string}:")
+    @Then("POST {string} to {string}:")
+    public void postWithSpec(String spec, String path, DocString expression) {
+        postWithSpec(path, expression.getContentType(), spec.split("[ ,]"), expression.getContent());
+    }
+
+    public void postWithSpec(String path, String contentType, String[] traitSpec, String expression) {
+        requestBodyAndResponse("POST", path, contentType, expression, traitSpec);
+    }
+
+    public void post(String path, String docType, String contentOrExpression) {
+        requestBodyAndResponse("POST", path, docType, contentOrExpression);
+    }
+
+    public void postInDefault(String path, String contentOrExpression) {
+        post(path, null, contentOrExpression);
+    }
+
+    public void postObject(String path, String contentType, Object body) {
+        requestObjectBodyAndResponse("POST", path, contentType, body);
+    }
+
+    public void postObjectInDefault(String path, Object body) {
+        postObject(path, null, body);
+    }
+
+    @When("PUT {string}:")
+    public void put(String path, DocString contentOrExpression) {
+        put(path, contentOrExpression.getContentType(), contentOrExpression.getContent());
+    }
+
+    @When("PUT {string} {string}:")
+    @Then("PUT {string} to {string}:")
+    public void putWithSpec(String spec, String path, DocString expression) {
+        putWithSpec(path, expression.getContentType(), spec.split("[ ,]"), expression.getContent());
+    }
+
+    public void putWithSpec(String path, String contentType, String[] traitSpec, String expression) {
+        requestBodyAndResponse("PUT", path, contentType, expression, traitSpec);
+    }
+
+    public void put(String path, String docType, String contentOrExpression) {
+        requestBodyAndResponse("PUT", path, docType, contentOrExpression);
+    }
+
+    public void putInDefault(String path, String contentOrExpression) {
+        put(path, null, contentOrExpression);
+    }
+
+    public void putObject(String path, String contentType, Object body) {
+        requestObjectBodyAndResponse("PUT", path, contentType, body);
+    }
+
+    public void putObjectInDefault(String path, Object body) {
+        putObject(path, null, body);
+    }
+
+    @When("PATCH {string}:")
+    public void patch(String path, DocString contentOrExpression) {
+        patch(path, contentOrExpression.getContentType(), contentOrExpression.getContent());
+    }
+
+    @When("PATCH {string} {string}:")
+    @Then("PATCH {string} to {string}:")
+    public void patchWithSpec(String spec, String path, DocString expression) {
+        patchWithSpec(path, expression.getContentType(), spec.split("[ ,]"), expression.getContent());
+    }
+
+    public void patchWithSpec(String path, String contentType, String[] traitSpec, String expression) {
+        requestBodyAndResponse("PATCH", path, contentType, expression, traitSpec);
+    }
+
+    public void patch(String path, String docType, String contentOrExpression) {
+        requestBodyAndResponse("PATCH", path, docType, contentOrExpression);
+    }
+
+    public void patchInDefault(String path, String contentOrExpression) {
+        patch(path, null, contentOrExpression);
+    }
+
+    public void patchObject(String path, String contentType, Object object) {
+        requestObjectBodyAndResponse("PATCH", path, contentType, object);
+    }
+
+    public void patchObjectInDefault(String path, Object object) {
+        patchObject(path, null, object);
+    }
+
 
     private void requestBodyAndResponse(String method, String path, String docType, String content) {
         if ("dal".equals(docType)) {
@@ -279,34 +379,6 @@ public class RestfulStep {
         }));
     }
 
-    @When("POST {string} {string}:")
-    @Then("POST {string} to {string}:")
-    public void postWithSpec(String spec, String path, DocString body) {
-        requestBodyAndResponse("POST", path, body.getContentType(), body.getContent(), spec.split("[ ,]"));
-    }
-
-    @When("PUT {string}:")
-    public void put(String path, DocString content) {
-        requestBodyAndResponse("PUT", path, content.getContentType(), content.getContent());
-    }
-
-    @When("PUT {string} {string}:")
-    @Then("PUT {string} to {string}:")
-    public void putWithSpec(String spec, String path, DocString body) {
-        requestBodyAndResponse("PUT", path, body.getContentType(), body.getContent(), spec.split("[ ,]"));
-    }
-
-    @When("PATCH {string}:")
-    public void patch(String path, DocString content) {
-        requestBodyAndResponse("PATCH", path, content.getContentType(), content.getContent());
-    }
-
-    @When("PATCH {string} {string}:")
-    @Then("PATCH {string} to {string}:")
-    public void patchWithSpec(String spec, String path, DocString body) {
-        requestBodyAndResponse("PATCH", path, body.getContentType(), body.getContent(), spec.split("[ ,]"));
-    }
-
     private void requestAndResponse(String method, String path, Consumer<HttpURLConnection> body) {
         Sneaky.run(() -> {
             URL url = new URL(baseUrl + evaluator.eval(path));
@@ -316,65 +388,6 @@ public class RestfulStep {
             body.accept(connection);
             response = new Response(connection);
         });
-    }
-
-    public void post(String path, String docType, String content) {
-        requestBodyAndResponse("POST", path, docType, content);
-    }
-
-    public void post(String path, String content) {
-        post(path, null, content);
-    }
-
-    public void post(String path, String contentType, Object body) {
-        requestObjectBodyAndResponse("POST", path, contentType, body);
-    }
-
-    public void post(String path, Object body) {
-        post(path, null, body);
-    }
-
-    @When("POST form {string}:")
-    public void postForm(String path, String form) {
-        requestBodyAndResponse("POST", path, "dal:multipart/form-data", form);
-    }
-
-    @When("POST form {string} {string}:")
-    @Then("POST form {string} to {string}:")
-    public void postForm(String spec, String path, String form) {
-        requestBodyAndResponse("POST", path, "multipart/form-data", form, spec.split("[ ,]"));
-    }
-
-    public void put(String path, String docType, String content) {
-        requestBodyAndResponse("PUT", path, docType, content);
-    }
-
-    public void put(String path, String content) {
-        put(path, null, content);
-    }
-
-    public void put(String path, String contentType, Object body) {
-        requestObjectBodyAndResponse("PUT", path, contentType, body);
-    }
-
-    public void put(String path, Object body) {
-        put(path, null, body);
-    }
-
-    public void patch(String path, String docType, String content) {
-        requestBodyAndResponse("PATCH", path, docType, content);
-    }
-
-    public void patch(String path, String content) {
-        patch(path, null, content);
-    }
-
-    public void patch(String path, String contentType, Object object) {
-        requestObjectBodyAndResponse("PATCH", path, contentType, object);
-    }
-
-    public void patch(String path, Object object) {
-        patch(path, null, object);
     }
 
     @After

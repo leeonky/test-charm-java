@@ -26,7 +26,7 @@ public class RestfulStepPatchTest {
         void patch_single_value() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.patch("/test", (Object) "hello");
+            restfulStep.patchObjectInDefault("/test", "hello");
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= '\"hello\"'}]");
         }
@@ -36,7 +36,7 @@ public class RestfulStepPatchTest {
         void patch_single_null() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.patch("/test", (Object) null);
+            restfulStep.patchObjectInDefault("/test", null);
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= 'null'}]");
         }
@@ -46,7 +46,7 @@ public class RestfulStepPatchTest {
         void patch_single_number() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.patch("/test", 1);
+            restfulStep.patchObjectInDefault("/test", 1);
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= '1'}]");
         }
@@ -56,7 +56,7 @@ public class RestfulStepPatchTest {
         void patch_map() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.patch("/test", new HashMap<Object, Object>() {{
+            restfulStep.patchObjectInDefault("/test", new HashMap<Object, Object>() {{
                 put("key1", 1);
                 put("key2", "str");
             }});
@@ -69,7 +69,7 @@ public class RestfulStepPatchTest {
         void patch_list() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.patch("/test", asList(1, "hello", true));
+            restfulStep.patchObjectInDefault("/test", asList(1, "hello", true));
 
             steps.verifyRequest(": [{path= '/test' body.json= [1 hello true]}]");
         }

@@ -1138,5 +1138,3 @@ Feature: Basic Request With Body Steps
         | POST   |
         | PUT    |
         | PATCH  |
-
-#POST single object in dal

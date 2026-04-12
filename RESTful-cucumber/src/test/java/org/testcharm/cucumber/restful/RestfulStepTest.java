@@ -27,7 +27,7 @@ public class RestfulStepTest {
         void post_single_value() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.post("/test", (Object) "hello");
+            restfulStep.postObjectInDefault("/test", "hello");
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= '\"hello\"'}]");
         }
@@ -37,7 +37,7 @@ public class RestfulStepTest {
         void post_single_null() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.post("/test", (Object) null);
+            restfulStep.postObjectInDefault("/test", null);
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= 'null'}]");
         }
@@ -47,7 +47,7 @@ public class RestfulStepTest {
         void post_single_number() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.post("/test", 1);
+            restfulStep.postObjectInDefault("/test", 1);
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= '1'}]");
         }
@@ -57,7 +57,7 @@ public class RestfulStepTest {
         void post_map() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.post("/test", new HashMap<Object, Object>() {{
+            restfulStep.postObjectInDefault("/test", new HashMap<Object, Object>() {{
                 put("key1", 1);
                 put("key2", "str");
             }});
@@ -70,7 +70,7 @@ public class RestfulStepTest {
         void post_list() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.post("/test", asList(1, "hello", true));
+            restfulStep.postObjectInDefault("/test", asList(1, "hello", true));
 
             steps.verifyRequest(": [{path= '/test' body.json= [1 hello true]}]");
         }
@@ -84,7 +84,7 @@ public class RestfulStepTest {
         void put_single_value() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.put("/test", (Object) "hello");
+            restfulStep.putObjectInDefault("/test", "hello");
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= '\"hello\"'}]");
         }
@@ -94,7 +94,7 @@ public class RestfulStepTest {
         void put_single_null() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.put("/test", (Object) null);
+            restfulStep.putObjectInDefault("/test", null);
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= 'null'}]");
         }
@@ -104,7 +104,7 @@ public class RestfulStepTest {
         void put_single_number() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.put("/test", 1);
+            restfulStep.putObjectInDefault("/test", 1);
 
             steps.verifyRequest(": [{path= '/test' body.rawBytes.base64.string= '1'}]");
         }
@@ -114,7 +114,7 @@ public class RestfulStepTest {
         void put_map() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.put("/test", new HashMap<Object, Object>() {{
+            restfulStep.putObjectInDefault("/test", new HashMap<Object, Object>() {{
                 put("key1", 1);
                 put("key2", "str");
             }});
@@ -127,7 +127,7 @@ public class RestfulStepTest {
         void put_list() {
             restfulStep.setBaseUrl("http://www.a.com:8080");
 
-            restfulStep.put("/test", asList(1, "hello", true));
+            restfulStep.putObjectInDefault("/test", asList(1, "hello", true));
 
             steps.verifyRequest(": [{path= '/test' body.json= [1 hello true]}]");
         }
