@@ -58,6 +58,11 @@ public class ExecutorMain {
         return executor.execute();
     }
 
+    public void execute(String code) {
+        addRegisters(code);
+        evaluate();
+    }
+
     public void addDeclarations(String declaration) {
         declarations.add(declaration);
         executor = null;

@@ -251,7 +251,7 @@ Feature: Summary
   Rule: Data Repository
 
     Scenario: Save and Query - Create Object and Query It Back
-      When execute as follows:
+      When performing the following actions:
         """
         jFactory.type(Bean.class).property("stringValue", "hello").create();
         jFactory.type(Bean.class).property("stringValue", "world").create();
@@ -274,7 +274,7 @@ Feature: Summary
         """
 
     Scenario: Clear Repo - Clear Repo then Return Empty or Null
-      When execute as follows:
+      When performing the following actions:
         """
         jFactory.type(Bean.class).property("stringValue", "hello").create();
         jFactory.getDataRepository().clear();
@@ -297,7 +297,7 @@ Feature: Summary
         """
 
     Scenario: Multiple Result - Should Raise Error when Query with Criteria Return Multiple Objects
-      When execute as follows:
+      When performing the following actions:
         """
         jFactory.type(Bean.class)
           .property("stringValue", "hello")
@@ -570,7 +570,7 @@ Feature: Summary
           public void save(Object object) { createdList.add(object); }
         });
         """
-      When execute as follows:
+      When performing the following actions:
         """
         jFactoryWithRepo.type(Bean.class).property("stringValue", "hello").create();
         """
@@ -578,7 +578,7 @@ Feature: Summary
         """
         : [{ class.simpleName= Bean, stringValue= hello }]
         """
-      And execute as follows:
+      And performing the following actions:
         """
         jFactoryWithRepo.type(Bean.class).property("stringValue", "world").create();
         """
@@ -604,7 +604,7 @@ Feature: Summary
           }
         });
         """
-      When execute as follows:
+      When performing the following actions:
         """
         Bean bean = new Bean();
         bean.stringValue = "hello";
@@ -660,7 +660,7 @@ Feature: Summary
 
         JFactory jFactoryWithRepo = new JFactory(compositeRepo);
         """
-      When execute as follows:
+      When performing the following actions:
         """
         jFactoryWithRepo.type(DBEntity.class).property("value", "db").create();
         jFactoryWithRepo.type(RedisData.class).property("value", "redis").create();

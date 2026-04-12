@@ -9,7 +9,7 @@ Feature: Save Bean to Repository
       """
       public class Bean { public String str; }
       """
-    When execute as follows:
+    When performing the following actions:
       """
       jFactory.type(Bean.class).property("str", "hello").create();
       """
@@ -43,7 +43,7 @@ Feature: Save Bean to Repository
       """
       public class Bean { public String str; }
       """
-    When execute as follows:
+    When performing the following actions:
       """
       jFactory.type(Bean.class).property("str", "hello").create();
       """
@@ -51,7 +51,7 @@ Feature: Save Bean to Repository
       """
       = [{ class.simpleName= Bean, str= hello }]
       """
-    And execute as follows:
+    And performing the following actions:
       """
       jFactory.type(Bean.class).property("str", "world").create();
       """

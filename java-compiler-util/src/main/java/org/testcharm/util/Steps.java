@@ -24,8 +24,13 @@ public class Steps {
     }
 
     @When("evaluating the following code:")
-    public void executingTheFollowingCode(String expression) {
+    public void evaluatingTheFollowingCode(String expression) {
         JavaExecutor.executor().main().returnExpression(expression);
+    }
+
+    @When("executing the following code:")
+    public void executingTheFollowingCode(String registers) {
+        JavaExecutor.executor().main().execute(registers);
     }
 
     @Given("the following declarations:")
@@ -34,7 +39,7 @@ public class Steps {
     }
 
     @And("register as follows:")
-    @And("execute as follows:")
+    @And("performing the following actions:")
     public void registerAsFollows(String registers) {
         JavaExecutor.executor().main().addRegisters(registers);
     }

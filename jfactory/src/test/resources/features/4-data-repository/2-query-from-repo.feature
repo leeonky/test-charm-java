@@ -27,7 +27,7 @@ Feature: Data Repository
       """
 
   Scenario: Query from Repo - Query All Object from Repository
-    When execute as follows:
+    When performing the following actions:
       """
       Bean bean = new Bean();
       bean.str = "hello";
@@ -43,7 +43,7 @@ Feature: Data Repository
       """
 
   Scenario: Query With Criteria - Query All Object from Repository with Criteria
-    When execute as follows:
+    When performing the following actions:
       """
       Bean bean1 = new Bean();
       bean1.str = "hello";
@@ -63,7 +63,7 @@ Feature: Data Repository
       """
 
   Scenario: Query Single - Query Single Object from Repository with Criteria
-    When execute as follows:
+    When performing the following actions:
       """
       Bean bean1 = new Bean();
       bean1.str = "hello";
@@ -83,7 +83,7 @@ Feature: Data Repository
       """
 
   Scenario: Query Single None - Return Null When No Object Found
-    When execute as follows:
+    When performing the following actions:
       """
       Bean bean = new Bean();
       bean.str = "hello";
@@ -99,7 +99,7 @@ Feature: Data Repository
       """
 
   Scenario: Query Single Strict - Raise Error When Multiple Objects Returned
-    When execute as follows:
+    When performing the following actions:
       """
       Bean bean1 = new Bean();
       bean1.str = "hello";
@@ -119,7 +119,7 @@ Feature: Data Repository
       """
 
   Scenario: Data Conversion - Automatic Data Conversion for Query Criteria
-    When execute as follows:
+    When performing the following actions:
       """
       Bean bean1 = new Bean();
       bean1.str = "100";
@@ -139,7 +139,7 @@ Feature: Data Repository
       """
 
   Scenario: Clear Repo - Clear Repository Data
-    When execute as follows:
+    When performing the following actions:
       """
       Bean bean1 = new Bean();
       bean1.str = "hello";
@@ -149,7 +149,7 @@ Feature: Data Repository
       bean2.str = "world";
       created.add(bean2);
       """
-    And execute as follows:
+    And performing the following actions:
       """
       jFactory.getDataRepository().clear();
       """

@@ -80,6 +80,15 @@ class JavaExecutorTest {
 
             expect(executor.main().evaluate()).isEqualTo(100);
         }
+
+        @Test
+        void execute_with_out_return() {
+            executor.main().addDeclarations("int i=100");
+
+            executor.main().execute("i++;i++;");
+
+            expect(executor.main().field("i")).isEqualTo(102);
+        }
     }
 
     @Nested
