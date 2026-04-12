@@ -178,6 +178,56 @@ Feature: consistency in multi-level-object
         }
         """
 
+    Scenario: merge consistency in parent and sub bean list
+
+      Given the following bean class:
+        """
+        public class Sub {
+          public String value;
+          public List<Bean> beans = new ArrayList<>();
+        }
+        """
+      Given the following bean class:
+        """
+        public class Parent {
+          public String value;
+          public Sub sub = new Sub();
+        }
+        """
+      And operate:
+        """
+        jFactory.factory(Sub.class).spec(spec -> {
+            spec.consistent(String.class)
+                    .direct("value")
+                    .list("beans").consistent(beans -> beans
+                      .direct("str1"));
+
+        });
+
+        jFactory.factory(Parent.class).spec(spec -> {
+            spec.link("value", "sub.value");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(Parent.class)
+          .property("value", "hello")
+          .property("sub.beans[0]!", null)
+          .create();
+        """
+      Then the result should:
+        """
+        : {
+          value: hello
+          sub: {
+            value: hello
+            beans: [{
+                str1: hello
+            }]
+          }
+        }
+        """
+
 #  Rule: resolution order
 #
 #    Background:

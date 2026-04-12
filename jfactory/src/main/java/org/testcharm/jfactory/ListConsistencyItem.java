@@ -5,9 +5,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 class ListConsistencyItem<T> {
-    Set<String> property = new LinkedHashSet<>();
-    DefaultConsistency.Composer<T> composer;
-    DefaultConsistency.Decomposer<T> decomposer;
+    private final Set<String> property;
+    private DefaultConsistency.Composer<T> composer;
+    private DefaultConsistency.Decomposer<T> decomposer;
 
     public ListConsistencyItem(Collection<String> property) {
         this.property = new LinkedHashSet<>(property);

@@ -5,14 +5,14 @@ import org.testcharm.util.BeanClass;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static org.testcharm.jfactory.DefaultConsistency.LINK_COMPOSER;
-import static org.testcharm.jfactory.DefaultConsistency.LINK_DECOMPOSER;
-import static org.testcharm.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.testcharm.jfactory.DefaultConsistency.LINK_COMPOSER;
+import static org.testcharm.jfactory.DefaultConsistency.LINK_DECOMPOSER;
+import static org.testcharm.jfactory.PropertyChain.propertyChain;
 
 class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency<T, C> {
     private final List<PropertyChain> listProperty;
@@ -33,7 +33,7 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
 
     DefaultListConsistency(List<String> listProperty, DefaultConsistency<T, C> consistency) {
         dimension = listProperty.size();
-        this.listProperty = listProperty.stream().map(PropertyChain::propertyChain).collect(Collectors.toList());
+        this.listProperty = listProperty.stream().map(PropertyChain::propertyChain).collect(toList());
         this.consistency = consistency;
     }
 
@@ -100,6 +100,14 @@ class DefaultListConsistency<T, C extends Coordinate> implements ListConsistency
                 for (ListConsistencyItem<T> item : items)
                     item.populateConsistency(elementProperty, newConsistency);
         }
+    }
+
+    public DefaultListConsistency<T, C> absoluteProperty(PropertyChain base) {
+        List<PropertyChain> propertyChains = new ArrayList<>(listProperty);
+        propertyChains.set(0, base.concat(propertyChains.get(0)));
+        DefaultListConsistency<T, C> absolute = new DefaultListConsistency<>(propertyChains.stream().map(PropertyChain::toString).collect(toList()), consistency);
+        absolute.items.addAll(items);
+        return absolute;
     }
 }
 

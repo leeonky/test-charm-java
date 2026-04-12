@@ -6,7 +6,7 @@ Feature: consistency merge
     new JFactory();
     """
 
-  Rule: without merge
+  Rule: should merge
 
     Background:
 
@@ -333,7 +333,7 @@ Feature: consistency merge
         }
         """
 
-  Rule: without merge
+  Rule: should not merge
 
     Background:
       Given the following bean class:

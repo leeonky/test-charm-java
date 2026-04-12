@@ -8,12 +8,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.testcharm.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
-import static org.testcharm.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+import static org.testcharm.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
+import static org.testcharm.jfactory.PropertyChain.propertyChain;
 
 class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
     private final List<ConsistencyItem<T>> items = new ArrayList<>();
@@ -101,9 +101,11 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
         return builder.toString();
     }
 
-    DefaultConsistency<T, C> absoluteProperty(PropertyChain base) {
+    DefaultConsistency<T, C> absoluteProperty(PropertyChain root) {
         DefaultConsistency<T, C> absolute = new DefaultConsistency<>(type(), coordinateType(), locations);
-        items.forEach(item -> absolute.items.add(item.absoluteProperty(base)));
+        items.forEach(item -> absolute.items.add(item.absoluteProperty(root)));
+
+        list.forEach(listConsistency -> absolute.list.add(listConsistency.absoluteProperty(root)));
         return absolute;
     }
 

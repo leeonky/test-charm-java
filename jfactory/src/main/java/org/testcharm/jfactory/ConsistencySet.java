@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static org.testcharm.util.Sneaky.cast;
-import static org.testcharm.util.function.Extension.*;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+import static org.testcharm.util.Sneaky.cast;
+import static org.testcharm.util.function.Extension.*;
 
 class ConsistencySet {
     private final List<DefaultConsistency<?, ?>> consistencies = new ArrayList<>();
@@ -22,9 +22,9 @@ class ConsistencySet {
         consistencies.addAll(consistencySet.consistencies);
     }
 
-    ConsistencySet absoluteProperty(PropertyChain base) {
+    ConsistencySet absoluteProperty(PropertyChain root) {
         ConsistencySet consistencySet = new ConsistencySet();
-        consistencies.forEach(consistency -> consistencySet.add(consistency.absoluteProperty(base)));
+        consistencies.forEach(consistency -> consistencySet.add(consistency.absoluteProperty(root)));
         return consistencySet;
     }
 
