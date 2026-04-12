@@ -239,6 +239,14 @@ public class RestfulStep {
         postObject(path, null, body);
     }
 
+    public void postInJson(String path, String content) {
+        post(path, "application/json", content);
+    }
+
+    public void postObjectInJson(String path, Object body) {
+        postObject(path, "application/json", body);
+    }
+
     @When("PUT {string}:")
     public void put(String path, DocString contentOrExpression) {
         put(path, contentOrExpression.getContentType(), contentOrExpression.getContent());
@@ -268,6 +276,14 @@ public class RestfulStep {
 
     public void putObjectInDefault(String path, Object body) {
         putObject(path, null, body);
+    }
+
+    public void putInJson(String path, String content) {
+        put(path, "application/json", content);
+    }
+
+    public void putObjectInJson(String path, Object body) {
+        putObject(path, "application/json", body);
     }
 
     @When("PATCH {string}:")
@@ -301,6 +317,13 @@ public class RestfulStep {
         patchObject(path, null, object);
     }
 
+    public void patchInJson(String path, String content) {
+        patch(path, "application/json", content);
+    }
+
+    public void patchObjectInJson(String path, Object object) {
+        patchObject(path, "application/json", object);
+    }
 
     private void requestBodyAndResponse(String method, String path, String docType, String content) {
         if ("dal".equals(docType)) {
