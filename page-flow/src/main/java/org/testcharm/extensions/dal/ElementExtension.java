@@ -1,11 +1,10 @@
 package org.testcharm.extensions.dal;
 
 import org.testcharm.dal.DAL;
+import org.testcharm.dal.ast.opt.DALOperator;
 import org.testcharm.dal.runtime.*;
-import org.testcharm.pf.By;
-import org.testcharm.pf.Element;
-import org.testcharm.pf.Panel;
-import org.testcharm.pf.WebElement;
+import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import org.testcharm.pf.*;
 import org.testcharm.util.BeanClass;
 import org.testcharm.util.Sneaky;
 
@@ -27,6 +26,9 @@ public class ElementExtension implements Extension {
                                 return super.getValue(webElement, property);
                             }
                         })
+                .registerMetaProperty(Elements.class, "filter", metaData -> new ElementsFilterable(metaData.data().value()))
+                .registerOperator(Operators.MATCH, new VerificationInFilter())
+                .registerOperator(Operators.EQUAL, new VerificationInFilter())
                 .registerDumper(By.class, byData -> (data, dumpingBuffer) -> dumpingBuffer.append(data.value().toString()))
                 .registerMetaProperty(Element.class, "watch", (RuntimeDataHandler<MetaData<Element>>)
                         elementMetaData -> watch(elementMetaData, dal, Element::screenshot))
@@ -43,5 +45,41 @@ public class ElementExtension implements Extension {
             method.invoke(null, dal, metaData.inputNode().inspect(), data.map(mapper));
             return data;
         });
+    }
+
+    private class ElementsFilterable {
+        private final Elements<?> elements;
+
+        public ElementsFilterable(Elements<?> elements) {
+            this.elements = elements;
+        }
+
+        public Elements<?> filter(DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+            return filterList(operator, v2, context);
+        }
+
+        protected Elements<?> filterList(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
+            return elements.filter(element -> {
+                try {
+                    context.calculate(context.data(element), operator, v2);
+                    return true;
+                } catch (Throwable ig) {
+                    return false;
+                }
+            });
+        }
+    }
+
+    private static class VerificationInFilter implements Operation<ElementExtension.ElementsFilterable, Object> {
+
+        @Override
+        public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
+            return v1.instanceOf(ElementExtension.ElementsFilterable.class);
+        }
+
+        @Override
+        public Object operate(Data<ElementExtension.ElementsFilterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+            return v1.value().filter(operator, v2, context);
+        }
     }
 }

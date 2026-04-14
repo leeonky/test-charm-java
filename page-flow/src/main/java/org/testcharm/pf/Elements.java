@@ -8,6 +8,7 @@ import org.testcharm.dal.runtime.IterableDALCollection;
 import org.testcharm.util.Sneaky;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Elements<T extends Element<T, ?, ?>> implements AdaptiveList<T> {
@@ -45,5 +46,14 @@ public class Elements<T extends Element<T, ?, ?>> implements AdaptiveList<T> {
         } catch (InvalidAdaptiveListException ig) {
             throw new InvalidAdaptiveListException(locateInfo("Operations can only be performed on a single located element at: ", " => " + locator), ig.list());
         }
+    }
+
+    public Elements<T> filter(Predicate<T> predicate) {
+        return new Elements<T>(locator, element) {
+            @Override
+            public DALCollection<T> list() {
+                return Elements.this.list().filter(predicate);
+            }
+        };
     }
 }

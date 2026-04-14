@@ -287,6 +287,50 @@ Feature: web ui
         | selenium   |
         | playwright |
 
+    Scenario Outline: filter and find element after waiting time
+      Given launch the following web page:
+        """
+        html
+          script.
+            document.addEventListener('DOMContentLoaded', function() {
+              setTimeout(function() {
+                var newElement = document.createElement('div');
+                newElement.className = 'target';
+                newElement.textContent = 'hello';
+                document.body.appendChild(newElement);
+
+                newElement = document.createElement('div');
+                newElement.className = 'not-target';
+                newElement.textContent = 'world';
+                document.body.appendChild(newElement);
+              }, 500);
+            });
+          body
+        """
+      Then page in driver <driver> should:
+        """
+        patience[1s].css[div]::filter: {
+          attribute[class]: [target]
+        }: {
+          text= hello
+        }
+        """
+      And logs should:
+        """
+        : | level | message                         |
+          | ...                                     |
+          | INFO  | Locating: css{html} => css{div} |
+          | INFO  | Found 0 elements                |
+          | INFO  | Locating: css{html} => css{div} |
+          | INFO  | Found 2 elements                |
+          | ...                                     |
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+
   Rule: ui operation
 
     Scenario Outline: click element
