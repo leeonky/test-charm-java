@@ -8,7 +8,6 @@ import java.util.function.BiFunction;
 
 import static org.testcharm.dal.Assertions.expect;
 
-//TODO need test
 public interface Panel<E extends Element<E, ?, ?>> {
     E element();
 
