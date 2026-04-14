@@ -79,10 +79,6 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
         throw new IllegalStateException("Not support operation");
     }
 
-//    default String getLocation() {
-//        return null;
-//    }
-
     byte[] screenshot();
 
     @SuppressWarnings("unchecked")
@@ -111,4 +107,6 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
     P pageFlow();
 
     E raw();
+
+    boolean isEnabled();
 }

@@ -35,4 +35,6 @@ public interface WebElement<T extends WebElement<T, E, P>, E, P extends PageFlow
     }
 
     T download();
+
+    boolean isVisible();
 }

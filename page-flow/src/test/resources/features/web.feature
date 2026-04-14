@@ -140,13 +140,17 @@ Feature: web ui
         Operations can only be performed on a single located element at: css{html} => css{.target}, but is: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
+                enabled: java.lang.Boolean <true>,
                 input: java.lang.Boolean <false>,
-                locator: css{.target}
+                locator: css{.target},
+                visible: java.lang.Boolean <true>
             },
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
+                enabled: java.lang.Boolean <true>,
                 input: java.lang.Boolean <false>,
-                locator: css{.target}
+                locator: css{.target},
+                visible: java.lang.Boolean <true>
             }
         ]
         """
@@ -172,13 +176,17 @@ Feature: web ui
         Operations can only be performed on a single located element at: css{html} => css{.target}, but is: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
+                enabled: java.lang.Boolean <true>,
                 input: java.lang.Boolean <false>,
-                locator: css{.target}
+                locator: css{.target},
+                visible: java.lang.Boolean <true>
             },
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
+                enabled: java.lang.Boolean <true>,
                 input: java.lang.Boolean <false>,
-                locator: css{.target}
+                locator: css{.target},
+                visible: java.lang.Boolean <true>
             }
         ]
         """
@@ -330,7 +338,6 @@ Feature: web ui
         | selenium   |
         | playwright |
 
-
   Rule: ui operation
 
     Scenario Outline: click element
@@ -449,6 +456,75 @@ Feature: web ui
         | selenium   |
         | playwright |
 
+    Scenario Outline: element enable
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            .disabled
+              input(type= 'text' disabled)
+              textarea(disabled)
+              select(disabled)
+            .enabled
+              input(type= 'text')
+              textarea
+              select
+        """
+      Then page in driver <driver> should:
+        """
+        css: {
+          [.disabled].css: {
+            input.enabled= false
+            textarea.enabled= false
+            select.enabled= false
+          }
+          [.enabled].css: {
+              input.enabled= true
+              textarea.enabled= true
+              select.enabled= true
+          }
+        }
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: element visible
+      Given launch the following web page:
+        """
+        html
+        head
+        body
+          .hidden(style='display:none')
+            input(type= 'text')
+            textarea
+            select
+          .visible
+            input(type= 'text')
+            textarea
+            select
+        """
+      Then page in driver <driver> should:
+        """
+        css: {
+          [.hidden].css: {
+              input.visible= false
+              textarea.visible= false
+              select.visible= false
+          }
+          [.visible].css: {
+              input.visible= true
+              textarea.visible= true
+              select.visible= true
+          }
+        }
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
 
   Rule: input output
 

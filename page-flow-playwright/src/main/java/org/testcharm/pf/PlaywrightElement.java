@@ -100,11 +100,6 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T, P>, P ext
         return raw().inputValue();
     }
 
-//    @Override
-//    public String getLocation() {
-//        return (String) raw().evaluate("element => { const getXPath = (node) => { if (node.tagName === 'HTML') return '/html[1]'; let ix=0; const siblings = node.parentNode.childNodes; for (var i=0; i<siblings.length; i++) { const sibling = siblings[i]; if (sibling === node) return getXPath(node.parentNode) + '/' + node.tagName.toLowerCase() + '[' + (ix+1) + ']'; if (sibling.nodeType === 1 && sibling.tagName === node.tagName) ix++; } }; return getXPath(element); }");
-//    }
-
     @Override
     public byte[] screenshot() {
         return raw().screenshot();
@@ -120,5 +115,15 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T, P>, P ext
         Download download = pageFlow().page().waitForDownload(this::click);
         download.saveAs(pageFlow().workingDir().resolve(download.suggestedFilename()));
         return (T) this;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return raw().isVisible();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return raw().isEnabled();
     }
 }

@@ -107,34 +107,6 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, P>, P extends
         return WebElement.super.value();
     }
 
-//    @Override
-//    public String getLocation() {
-//        return generateFullXPath(raw());
-//    }
-
-    private String generateFullXPath(org.openqa.selenium.WebElement element) {
-        if (element.getTagName().equals("html")) {
-            return "/html[1]";
-        }
-        org.openqa.selenium.WebElement parent = element.findElement(org.openqa.selenium.By.xpath(".."));
-        String elementTag = element.getTagName();
-        int count = 0;
-        int index = 1;
-
-        for (org.openqa.selenium.WebElement sibling : parent.findElements(org.openqa.selenium.By.xpath("*"))) {
-            String siblingTag = sibling.getTagName();
-            if (siblingTag.equals(elementTag)) {
-                if (sibling.equals(element)) {
-                    index = count + 1;
-                    break;
-                }
-                count++;
-            }
-        }
-
-        return generateFullXPath(parent) + "/" + elementTag + "[" + index + "]";
-    }
-
     @Override
     public byte[] screenshot() {
         return raw().getScreenshotAs(OutputType.BYTES);
@@ -148,5 +120,15 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, P>, P extends
     @Override
     public T download() {
         return click();
+    }
+
+    @Override
+    public boolean isVisible() {
+        return raw().isDisplayed();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return raw().isEnabled();
     }
 }
