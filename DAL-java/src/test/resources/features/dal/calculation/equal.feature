@@ -58,7 +58,7 @@ Feature: equal
       And register DAL:
       """
       dal.getRuntimeContextBuilder()
-        .registerPropertyAccessor(Bean.class, new JavaClassPropertyAccessor<Bean>(BeanClass.create(Bean.class)) {
+        .registerPropertyAccessor(Bean.class, new JavaClassPropertyAccessor<Bean>() {
           public boolean isNull(Bean instance) {
               return true;
           }

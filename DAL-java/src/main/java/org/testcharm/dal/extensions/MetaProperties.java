@@ -78,7 +78,7 @@ public class MetaProperties implements Extension {
                     @Override
                     public Data<?> getData(Data<OriginalJavaObject<?>> data, Object property) {
                         Data<Object> originalObject = data.map(d -> d.data.value());
-                        return new JavaClassPropertyAccessor<>(BeanClass.createFrom(originalObject.value())).getData(originalObject, property);
+                        return JavaClassPropertyAccessor.INSTANCE.getData(originalObject, property);
                     }
 
                     @Override

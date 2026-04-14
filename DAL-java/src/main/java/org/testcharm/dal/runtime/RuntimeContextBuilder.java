@@ -357,7 +357,7 @@ public class RuntimeContextBuilder {
         @SuppressWarnings("unchecked")
         private <T> PropertyAccessor<T> getObjectPropertyAccessor(T instance) {
             return (PropertyAccessor<T>) propertyAccessors.tryGetData(instance)
-                    .orElseGet(() -> new JavaClassPropertyAccessor<>(BeanClass.createFrom(instance)));
+                    .orElse(JavaClassPropertyAccessor.INSTANCE);
         }
 
         @SuppressWarnings("unchecked")

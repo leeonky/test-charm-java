@@ -15,10 +15,6 @@ Feature: customized null
     And register the following PropertyAccessor for java class "Bean":
     """
     public class BeanPropertyAccessor extends JavaClassPropertyAccessor<Bean> {
-      private static BeanClass<Bean> type = BeanClass.create(Bean.class);
-      public BeanPropertyAccessor() {
-        super(type);
-      }
       public boolean isNull(Bean instance) {
           return true;
       }
@@ -45,10 +41,6 @@ Feature: customized null
       And register the following PropertyAccessor for java class "Bean":
       """
       public class BeanPropertyAccessor extends JavaClassPropertyAccessor<Bean> {
-        private static BeanClass<Bean> type = BeanClass.create(Bean.class);
-        public BeanPropertyAccessor() {
-          super(type);
-        }
         public boolean isNull(Bean instance) {
             throw new java.lang.RuntimeException("Error");
         }

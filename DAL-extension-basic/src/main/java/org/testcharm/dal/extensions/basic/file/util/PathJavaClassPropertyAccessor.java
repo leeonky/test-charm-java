@@ -1,17 +1,12 @@
 package org.testcharm.dal.extensions.basic.file.util;
 
 import org.testcharm.dal.runtime.JavaClassPropertyAccessor;
-import org.testcharm.util.BeanClass;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Set;
 
 public class PathJavaClassPropertyAccessor extends JavaClassPropertyAccessor<Path> {
-
-    public PathJavaClassPropertyAccessor() {
-        super(BeanClass.create(Path.class));
-    }
 
     @Override
     public Set<?> getPropertyNames(Path path) {
