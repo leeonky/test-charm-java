@@ -1,0 +1,12 @@
+Test Charm - Bean Util
+Copyright 2024 Test Charm Contributors
+
+This product includes software developed by the JSON.org project.
+
+org.json (JSON-java)
+  Copyright (c) 2002 JSON.org
+  Licensed under the JSON License
+  https://www.json.org/license.html
+
+  The org.json classes are relocated (shaded) under the package
+  org.testcharm.shaded.org.json to avoid classpath conflicts.

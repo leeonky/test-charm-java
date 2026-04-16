@@ -1,4 +1,18 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
 dependencies {
+    implementation libs.prod.json.org
     testImplementation project(':DAL-java')
     testImplementation project(':DAL-extension-basic')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'org.json', 'org.testcharm.shaded.org.json'
+}
+
+jar {
+    archiveClassifier.set('plain')
 }

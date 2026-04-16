@@ -30,7 +30,6 @@ subprojects {
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                from(components.java)
                 artifactId = project.name
                 pom {
                     name = project.name
@@ -58,6 +57,16 @@ subprojects {
                         url = 'https://github.com/test-charm/test-charm-java.git'
                     }
                 }
+            }
+        }
+    }
+
+    afterEvaluate {
+        publishing.publications.mavenJava {
+            if (project.plugins.hasPlugin('com.gradleup.shadow')) {
+                from(components.shadow)
+            } else {
+                from(components.java)
             }
         }
     }
