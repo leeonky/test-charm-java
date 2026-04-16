@@ -17,50 +17,59 @@ class MessageConverterTest {
     class Register {
         @Test
         void register_default_by_module() {
-            MessageConverterSet messageConverterSet = new MessageConverterSet();
+            MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry();
             MessageConverter messageConverter = mock(MessageConverter.class);
 
-            messageConverterSet.register(json(), messageConverter);
+            messageConverterRegistry.register(json(), messageConverter);
 
-            assertEquals(messageConverter, messageConverterSet.messageConverter(json()));
+            assertEquals(messageConverter, messageConverterRegistry.module(json()));
         }
 
         @Test
         void raise_error_when_no_default() {
-            MessageConverterSet messageConverterSet = new MessageConverterSet();
+            MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry();
 
-            expectRun(() -> messageConverterSet.messageConverter(json()))
+            expectRun(() -> messageConverterRegistry.module(json()))
                     .should("::throw.message= 'No default message converter for format: json'");
         }
 
         @Test
         void register_by_module() {
-            MessageConverterSet messageConverterSet = new MessageConverterSet();
+            MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry();
             MessageConverter messageConverter = mock(MessageConverter.class);
 
-            messageConverterSet.register("target", json(), messageConverter);
+            messageConverterRegistry.register("target", json(), messageConverter);
 
-            assertEquals(messageConverter, messageConverterSet.messageConverter("target", json()));
+            assertEquals(messageConverter, messageConverterRegistry.module("target", json()));
         }
 
         @Test
         void raise_error_when_no_module() {
-            MessageConverterSet messageConverterSet = new MessageConverterSet();
-            messageConverterSet.register("not-target", json(), mock(MessageConverter.class));
-            messageConverterSet.register("target", Format.format("not-json"), mock(MessageConverter.class));
+            MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry();
+            messageConverterRegistry.register(json(), mock(MessageConverter.class));
+            messageConverterRegistry.register("not-target", json(), mock(MessageConverter.class));
 
-            expectRun(() -> messageConverterSet.messageConverter("target", json()))
+            expectRun(() -> messageConverterRegistry.module("target", json()))
+                    .should("::throw.message= 'No message converter for module: target and format: json'");
+        }
+
+        @Test
+        void raise_error_when_no_format() {
+            MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry();
+            messageConverterRegistry.register("target", Format.format("not-json"), mock(MessageConverter.class));
+
+            expectRun(() -> messageConverterRegistry.module("target", json()))
                     .should("::throw.message= 'No message converter for module: target and format: json'");
         }
 
         @Test
         void fallback_to_default() {
-            MessageConverterSet messageConverterSet = new MessageConverterSet();
+            MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry();
             MessageConverter messageConverter = mock(MessageConverter.class);
 
-            messageConverterSet.register(json(), messageConverter);
+            messageConverterRegistry.register(json(), messageConverter);
 
-            assertEquals(messageConverter, messageConverterSet.messageConverter("not-exist", json()));
+            assertEquals(messageConverter, messageConverterRegistry.moduleOrDefault("not-exist", json()));
         }
     }
 
@@ -171,6 +180,14 @@ class MessageConverterTest {
                     assertEquals("[{\"str\":\"hello\",\"i\":5,\"f\":true}]", messageConverter.serialize(new Object[]{new Bean()}));
                 }
             }
+        }
+    }
+
+    @Nested
+    class Extension {
+
+        @Test
+        void has_default_json_message_converter() {
         }
     }
 }

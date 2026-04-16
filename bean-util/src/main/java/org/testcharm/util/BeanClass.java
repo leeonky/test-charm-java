@@ -61,6 +61,27 @@ public class BeanClass<T> {
         BeanClass.converter = converter;
     }
 
+    @SuppressWarnings("unchecked")
+    public static Object normalize(Object object) {
+        if (object == null)
+            return null;
+        if (object instanceof CharSequence || object instanceof Number || object instanceof Boolean)
+            return object;
+        BeanClass<Object> type = createFrom(object);
+        if (type.isCollection())
+            return new ArrayList<Object>() {{
+                CollectionHelper.asStream(object).forEach(e -> add(normalize(e)));
+            }};
+        if (object instanceof Map)
+            return new LinkedHashMap<String, Object>() {{
+                ((Map<String, ?>) object).forEach((key, value) -> put(key, normalize(value)));
+            }};
+        return new LinkedHashMap<String, Object>() {{
+            type.getPropertyReaders().forEach((key, objectPropertyReader) ->
+                    put(key, normalize(objectPropertyReader.getValue(object))));
+        }};
+    }
+
     public Class<T> getType() {
         return type;
     }
