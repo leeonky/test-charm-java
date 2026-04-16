@@ -3,13 +3,9 @@ package org.testcharm.dal.compiler;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.testcharm.dal.BaseTest;
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.ast.node.DALNode;
-import org.testcharm.dal.cucumber.JSONArrayDALCollectionFactory;
-import org.testcharm.dal.cucumber.JSONObjectAccessor;
 import org.testcharm.dal.runtime.IterableDALCollection;
 import org.testcharm.interpreter.InterpreterException;
 import org.testcharm.message.MessageConverterRegistry;
@@ -44,10 +40,6 @@ public class CucumberContextBak {
             new JavaCompilerPoolLegacy(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.wsbk");
 
     public CucumberContextBak() {
-        dal.getRuntimeContextBuilder()
-                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory())
-        ;
         javaCompiler = JAVA_COMPILER_POOL.take();
     }
 

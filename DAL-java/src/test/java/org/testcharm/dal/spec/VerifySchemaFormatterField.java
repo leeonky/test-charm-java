@@ -1,15 +1,11 @@
 package org.testcharm.dal.spec;
 
-import org.testcharm.dal.cucumber.JSONArrayDALCollectionFactory;
-import org.testcharm.dal.cucumber.JSONObjectAccessor;
-import org.testcharm.dal.format.Formatters;
-import org.testcharm.dal.type.Schema;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcharm.dal.format.Formatters;
+import org.testcharm.dal.type.Schema;
+import org.testcharm.message.MessageConverter;
+import org.testcharm.message.MessageConverterRegistry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +14,7 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 
 class VerifySchemaFormatterField extends Base {
-    @BeforeEach
-    void registerJsonType() {
-        dal.getRuntimeContextBuilder()
-                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory());
-    }
+    private MessageConverter jsonConverter = MessageConverterRegistry.jsonConverter();
 
     public enum E {
         A, B
@@ -77,97 +68,97 @@ class VerifySchemaFormatterField extends Base {
     class Integer {
 
         @Test
-        void support_verify_integer() throws JSONException {
+        void support_verify_integer() {
             dal.getRuntimeContextBuilder().registerSchema(IntegerValue.class);
-            assertPass(new JSONObject("{" +
+            assertPass(jsonConverter.deserialize("{" +
                     "\"integer1\": 1," +
                     " \"integer2\": 2" +
                     "}"), "is IntegerValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integer1\": 2," +
                     " \"integer2\": 1" +
                     "}"), "is IntegerValue");
         }
 
         @Test
-        void support_verify_integer_list() throws JSONException {
+        void support_verify_integer_list() {
             dal.getRuntimeContextBuilder().registerSchema(IntegerListValue.class);
-            assertPass(new JSONObject("{" +
+            assertPass(jsonConverter.deserialize("{" +
                     "\"integerList\": [1, 2]" +
                     "}"), "is IntegerListValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integerList\": [1]" +
                     "}"), "is IntegerListValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integerList\": [1, 3]" +
                     "}"), "is IntegerListValue");
         }
 
         @Test
-        void support_verify_integer_array() throws JSONException {
+        void support_verify_integer_array() {
             dal.getRuntimeContextBuilder().registerSchema(IntegerArrayValue.class);
-            assertPass(new JSONObject("{" +
+            assertPass(jsonConverter.deserialize("{" +
                     "\"integerArray\": [1, 2]" +
                     "}"), "is IntegerArrayValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integerArray\": [1]" +
                     "}"), "is IntegerArrayValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integerArray\": [1, 3]" +
                     "}"), "is IntegerArrayValue");
         }
 
         @Test
-        void support_verify_integer_map() throws JSONException {
+        void support_verify_integer_map() {
             dal.getRuntimeContextBuilder().registerSchema(IntegerMapValue.class);
-            assertPass(new JSONObject("{" +
+            assertPass(jsonConverter.deserialize("{" +
                     "\"integerMap\": {\"a\": 1, \"b\": 2}" +
                     "}"), "is IntegerMapValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integerMap\": {\"a\": 1}" +
                     "}"), "is IntegerMapValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integerMap\": {\"a\": 1, \"b\": 3}" +
                     "}"), "is IntegerMapValue");
         }
 
         @Test
-        void support_positive_integer() throws JSONException {
+        void support_positive_integer() {
             dal.getRuntimeContextBuilder().registerSchema(PositiveIntegerValue.class);
 
-            assertPass(new JSONObject("{" +
+            assertPass(jsonConverter.deserialize("{" +
                     "\"integer\": 1" +
                     "}"), "is PositiveIntegerValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integer\": 0" +
                     "}"), "is PositiveIntegerValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integer\": -1" +
                     "}"), "is PositiveIntegerValue");
         }
 
         @Test
-        void support_negative_integer() throws JSONException {
+        void support_negative_integer() {
             dal.getRuntimeContextBuilder().registerSchema(NegativeIntegerValue.class);
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integer\": 1" +
                     "}"), "is NegativeIntegerValue");
 
-            assertFailed(new JSONObject("{" +
+            assertFailed(jsonConverter.deserialize("{" +
                     "\"integer\": 0" +
                     "}"), "is NegativeIntegerValue");
 
-            assertPass(new JSONObject("{" +
+            assertPass(jsonConverter.deserialize("{" +
                     "\"integer\": -1" +
                     "}"), "is NegativeIntegerValue");
         }
@@ -177,10 +168,10 @@ class VerifySchemaFormatterField extends Base {
     class Instant {
 
         @Test
-        void support_verify_instant_now_value() throws JSONException {
+        void support_verify_instant_now_value() {
             dal.getRuntimeContextBuilder().registerSchema(InstantNowValue.class);
-            assertPass(new JSONObject("{\"instant\": \"" + java.time.Instant.now().toString() + "\"}"), "is InstantNowValue");
-            assertFailed(new JSONObject("{\"instant\": \"" + java.time.Instant.now().plusSeconds(100).toString() + "\"}"), "is InstantNowValue");
+            assertPass(jsonConverter.deserialize("{\"instant\": \"" + java.time.Instant.now().toString() + "\"}"), "is InstantNowValue");
+            assertFailed(jsonConverter.deserialize("{\"instant\": \"" + java.time.Instant.now().plusSeconds(100).toString() + "\"}"), "is InstantNowValue");
         }
     }
 
@@ -188,32 +179,32 @@ class VerifySchemaFormatterField extends Base {
     class Number {
 
         @Test
-        void support_equal_to() throws JSONException {
+        void support_equal_to() {
             dal.getRuntimeContextBuilder().registerSchema(NumberValue.class);
-            assertPass(new JSONObject("{\"number\": 1}"), "is NumberValue");
-            assertPass(new JSONObject("{\"number\": 1.0}"), "is NumberValue");
-            assertFailed(new JSONObject("{\"number\": 1.1}"), "is NumberValue");
-            assertFailed(new JSONObject("{\"number\": \"1\"}"), "is NumberValue");
+            assertPass(jsonConverter.deserialize("{\"number\": 1}"), "is NumberValue");
+            assertPass(jsonConverter.deserialize("{\"number\": 1.0}"), "is NumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": 1.1}"), "is NumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": \"1\"}"), "is NumberValue");
         }
 
         @Test
-        void support_positive_number() throws JSONException {
+        void support_positive_number() {
             dal.getRuntimeContextBuilder().registerSchema(PositiveNumberValue.class);
-            assertPass(new JSONObject("{\"number\": 1}"), "is PositiveNumberValue");
-            assertPass(new JSONObject("{\"number\": 1.0}"), "is PositiveNumberValue");
-            assertFailed(new JSONObject("{\"number\": 0.0}"), "is PositiveNumberValue");
-            assertFailed(new JSONObject("{\"number\": 0}"), "is PositiveNumberValue");
-            assertFailed(new JSONObject("{\"number\": -1}"), "is PositiveNumberValue");
+            assertPass(jsonConverter.deserialize("{\"number\": 1}"), "is PositiveNumberValue");
+            assertPass(jsonConverter.deserialize("{\"number\": 1.0}"), "is PositiveNumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": 0.0}"), "is PositiveNumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": 0}"), "is PositiveNumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": -1}"), "is PositiveNumberValue");
         }
 
         @Test
-        void support_negative_number() throws JSONException {
+        void support_negative_number() {
             dal.getRuntimeContextBuilder().registerSchema(NegativeNumberValue.class);
-            assertPass(new JSONObject("{\"number\": -1}"), "is NegativeNumberValue");
-            assertPass(new JSONObject("{\"number\": -1.0}"), "is NegativeNumberValue");
-            assertFailed(new JSONObject("{\"number\": 0.0}"), "is NegativeNumberValue");
-            assertFailed(new JSONObject("{\"number\": 0}"), "is NegativeNumberValue");
-            assertFailed(new JSONObject("{\"number\": 1}"), "is NegativeNumberValue");
+            assertPass(jsonConverter.deserialize("{\"number\": -1}"), "is NegativeNumberValue");
+            assertPass(jsonConverter.deserialize("{\"number\": -1.0}"), "is NegativeNumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": 0.0}"), "is NegativeNumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": 0}"), "is NegativeNumberValue");
+            assertFailed(jsonConverter.deserialize("{\"number\": 1}"), "is NegativeNumberValue");
         }
     }
 }

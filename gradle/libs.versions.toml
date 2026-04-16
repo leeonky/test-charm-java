@@ -52,8 +52,6 @@ test-cucumber-picocontainer = { module = "io.cucumber:cucumber-picocontainer", v
 test-javalin = { module = "io.javalin:javalin", version.ref = "javalin" }
 test-pug4j = { module = "de.neuland-bfi:pug4j", version = "2.3.1" }
 test-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
-#TODO remove
-test-jsonassert = { module = "org.skyscreamer:jsonassert", version = "1.5.0" }
 test-cucumber7 = { module = "io.cucumber:cucumber-java", version.ref = "cucumber7" }
 
 [plugins]

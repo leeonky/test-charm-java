@@ -15,6 +15,10 @@ public class MessageConverterRegistry {
         return instance.get();
     }
 
+    public static MessageConverter jsonConverter() {
+        return messageConverterRegistry().format(Format.json());
+    }
+
     public MessageConverterRegistry register(String module, Format format, MessageConverter messageConverter) {
         moduleMessageConverters.computeIfAbsent(module, ig -> new HashMap<>()).put(format, messageConverter);
         return this;

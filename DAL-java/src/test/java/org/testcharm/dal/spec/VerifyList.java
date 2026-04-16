@@ -1,9 +1,7 @@
 package org.testcharm.dal.spec;
 
-import org.testcharm.dal.cucumber.JSONArrayDALCollectionFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
+import org.testcharm.message.MessageConverterRegistry;
 
 import java.util.ArrayList;
 
@@ -40,10 +38,7 @@ class VerifyList extends Base {
     }
 
     @Test
-    void should_support_customer_array_type() throws JSONException {
-        dal.getRuntimeContextBuilder()
-                .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory());
-
-        assertPass(new JSONArray("[2]"), "= [*]");
+    void should_support_customer_array_type() {
+        assertPass(MessageConverterRegistry.jsonConverter().deserialize("[2]"), "= [*]");
     }
 }

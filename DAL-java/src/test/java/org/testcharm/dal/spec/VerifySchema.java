@@ -1,62 +1,41 @@
 package org.testcharm.dal.spec;
 
-import org.testcharm.dal.cucumber.JSONArrayDALCollectionFactory;
-import org.testcharm.dal.cucumber.JSONObjectAccessor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.testcharm.dal.format.Formatters;
 import org.testcharm.dal.runtime.DALException;
-import org.testcharm.dal.runtime.PropertyAccessor;
 import org.testcharm.dal.type.AllowNull;
 import org.testcharm.dal.type.Partial;
 import org.testcharm.dal.type.Schema;
 import org.testcharm.dal.type.SubType;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.testcharm.message.MessageConverter;
+import org.testcharm.message.MessageConverterRegistry;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.testcharm.dal.runtime.NameStrategy.SIMPLE_NAME_WITH_PARENT;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.testcharm.dal.runtime.NameStrategy.SIMPLE_NAME_WITH_PARENT;
 
 class VerifySchema extends Base {
 
     private static final Set<Object> PROPERTY_NAMES = new HashSet<>(asList("f1", "f2"));
+    private MessageConverter jsonConverter = MessageConverterRegistry.jsonConverter();
 
     @Test
-    void should_support_register_customer_object_type() throws JSONException {
-        dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
-            @Override
-            public Object getValue(JSONObject instance, Object name) {
-                return "mocked return value of " + name;
-            }
-
-            @Override
-            public Set<Object> getPropertyNames(JSONObject instance) {
-                return PROPERTY_NAMES;
-            }
-
-            @Override
-            public boolean isNull(JSONObject instance) {
-                return instance == null || instance.equals(JSONObject.NULL);
-            }
-        });
-
-        dal.getRuntimeContextBuilder().registerSchema("Bean", (data, context) -> data.fieldNames() == PROPERTY_NAMES);
-
-        assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean which .f1='mocked return value of f1'");
-        assertPass(null, "= null");
-        assertPass(JSONObject.NULL, "= null");
+    void should_support_register_customer_object_type() {
+        dal.getRuntimeContextBuilder().registerSchema("Bean", (data, context) -> true);
+        assertPass(jsonConverter.deserialize("{\"f1\": 1, \"f2\": 1}"), "is Bean");
+        dal.getRuntimeContextBuilder().registerSchema("NotBean", (data, context) -> false);
+        assertFailed(jsonConverter.deserialize("{\"f1\": 1, \"f2\": 1}"), "is NotBean");
     }
 
     public static class RightFieldAndType implements Schema {
@@ -168,8 +147,6 @@ class VerifySchema extends Base {
         @BeforeEach
         void registerJson() {
             dal.getRuntimeContextBuilder()
-                    .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                    .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory())
                     .registerSchema(RightFieldAndType.class)
                     .registerSchema(AllowNullField.class)
                     .registerSchema(NestedType.class)
@@ -187,113 +164,113 @@ class VerifySchema extends Base {
         }
 
         @Test
-        void should_allow_null_on_field() throws JSONException {
-            assertPass(new JSONObject("{}"), "is AllowNullField");
-            assertPass(new JSONObject("{\"id\": null}"), "is AllowNullField");
+        void should_allow_null_on_field() {
+            assertPass(jsonConverter.deserialize("{}"), "is AllowNullField");
+            assertPass(jsonConverter.deserialize("{\"id\": null}"), "is AllowNullField");
         }
 
         @Test
-        void should_verify_nested_schema() throws JSONException {
-            assertPass(new JSONObject("{\"type\":{\"id\": 1}}"), "is NestedType");
-            assertFailed(new JSONObject("{\"type\":{\"id\": 0}}"), "is NestedType");
+        void should_verify_nested_schema() {
+            assertPass(jsonConverter.deserialize("{\"type\":{\"id\": 1}}"), "is NestedType");
+            assertFailed(jsonConverter.deserialize("{\"type\":{\"id\": 0}}"), "is NestedType");
         }
 
         @Test
-        void should_support_verify_nested_list_schema() throws JSONException {
-            assertPass(new JSONObject("{\"list\": [{\"id\": 1}]}"), "is NestedList");
-            assertFailed(new JSONObject("{\"list\": [{\"id\": 0}]}"), "is NestedList");
+        void should_support_verify_nested_list_schema() {
+            assertPass(jsonConverter.deserialize("{\"list\": [{\"id\": 1}]}"), "is NestedList");
+            assertFailed(jsonConverter.deserialize("{\"list\": [{\"id\": 0}]}"), "is NestedList");
         }
 
         @Test
-        void should_support_verify_nested_array_schema() throws JSONException {
-            assertPass(new JSONObject("{\"array\": [{\"id\": 1}]}"), "is NestedArray");
-            assertFailed(new JSONObject("{\"array\": [{\"id\": 0}]}"), "is NestedArray");
+        void should_support_verify_nested_array_schema() {
+            assertPass(jsonConverter.deserialize("{\"array\": [{\"id\": 1}]}"), "is NestedArray");
+            assertFailed(jsonConverter.deserialize("{\"array\": [{\"id\": 0}]}"), "is NestedArray");
         }
 
         @Test
-        void should_support_verify_nested_nested_list_schema() throws JSONException {
-            assertPass(new JSONObject("{\"list\": [[{\"id\": 1}]]}"), "is NestedNestedList");
-            assertFailed(new JSONObject("{\"list\": [[{\"id\": 0}]]}"), "is NestedNestedList");
+        void should_support_verify_nested_nested_list_schema() {
+            assertPass(jsonConverter.deserialize("{\"list\": [[{\"id\": 1}]]}"), "is NestedNestedList");
+            assertFailed(jsonConverter.deserialize("{\"list\": [[{\"id\": 0}]]}"), "is NestedNestedList");
         }
 
         @Test
-        void should_support_verify_nested_map_schema() throws JSONException {
-            assertPass(new JSONObject("{\"map\": {\"str\": {\"id\": 1}}}"), "is NestedMap");
-            assertFailed(new JSONObject("{\"map\": {\"str\": {\"id\": 0}}}"), "is NestedMap");
+        void should_support_verify_nested_map_schema() {
+            assertPass(jsonConverter.deserialize("{\"map\": {\"str\": {\"id\": 1}}}"), "is NestedMap");
+            assertFailed(jsonConverter.deserialize("{\"map\": {\"str\": {\"id\": 0}}}"), "is NestedMap");
 
-            assertPass(new JSONObject("{\"map\": {\"str\": {\"str\": {\"id\": 1}}}}"), "is NestedNestedMap");
-            assertFailed(new JSONObject("{\"map\": {\"str\": {\"str\": {\"id\": 0}}}}"), "is NestedNestedMap");
+            assertPass(jsonConverter.deserialize("{\"map\": {\"str\": {\"str\": {\"id\": 1}}}}"), "is NestedNestedMap");
+            assertFailed(jsonConverter.deserialize("{\"map\": {\"str\": {\"str\": {\"id\": 0}}}}"), "is NestedNestedMap");
         }
 
         @Test
-        void should_match_specific_sub_schema() throws JSONException {
-            assertPass(new JSONObject("{\"v\": {\"id\": 1, \"type\": \"V1\"}}"), "is V");
-            assertPass(new JSONObject("{\"v\": {\"url\": \"http://www.google.com\", \"type\": \"V2\"}}"), "is V");
+        void should_match_specific_sub_schema() {
+            assertPass(jsonConverter.deserialize("{\"v\": {\"id\": 1, \"type\": \"V1\"}}"), "is V");
+            assertPass(jsonConverter.deserialize("{\"v\": {\"url\": \"http://www.google.com\", \"type\": \"V2\"}}"), "is V");
 
-            assertFailed(new JSONObject("{\"v\": {\"id\": 1, \"type\": V2}}"), "is V");
-            assertFailed(new JSONObject("{\"v\": {\"id\": 0, \"type\": V1}}"), "is V");
+            assertFailed(jsonConverter.deserialize("{\"v\": {\"id\": 1, \"type\": V2}}"), "is V");
+            assertFailed(jsonConverter.deserialize("{\"v\": {\"id\": 0, \"type\": V1}}"), "is V");
         }
 
         @Test
-        void should_match_specific_sub_schema_in_list() throws JSONException {
-            assertPass(new JSONObject("{\"vs\": [{\"id\": 1, \"type\": \"V1\"}]}"), "is VList");
-            assertPass(new JSONObject("{\"vs\": [{\"url\": \"http://www.google.com\", \"type\": \"V2\"}]}"), "is VList");
+        void should_match_specific_sub_schema_in_list() {
+            assertPass(jsonConverter.deserialize("{\"vs\": [{\"id\": 1, \"type\": \"V1\"}]}"), "is VList");
+            assertPass(jsonConverter.deserialize("{\"vs\": [{\"url\": \"http://www.google.com\", \"type\": \"V2\"}]}"), "is VList");
 
-            assertFailed(new JSONObject("{\"vs\": [{\"id\": 1, \"type\": V2}]}"), "is VList");
-            assertFailed(new JSONObject("{\"vs\": [{\"id\": 0, \"type\": V1}]}"), "is VList");
+            assertFailed(jsonConverter.deserialize("{\"vs\": [{\"id\": 1, \"type\": V2}]}"), "is VList");
+            assertFailed(jsonConverter.deserialize("{\"vs\": [{\"id\": 0, \"type\": V1}]}"), "is VList");
         }
 
         @Test
-        void should_match_specific_sub_schema_through_nested_property() throws JSONException {
-            assertPass(new JSONObject("{\"type\": {\"type\": \"V1\"}, \"id\": 1}"), "is NestedAbstract");
-            assertPass(new JSONObject("{\"type\": {\"type\": \"V2\"}, \"url\": \"http://www.google.com\"}"), "is NestedAbstract");
+        void should_match_specific_sub_schema_through_nested_property() {
+            assertPass(jsonConverter.deserialize("{\"type\": {\"type\": \"V1\"}, \"id\": 1}"), "is NestedAbstract");
+            assertPass(jsonConverter.deserialize("{\"type\": {\"type\": \"V2\"}, \"url\": \"http://www.google.com\"}"), "is NestedAbstract");
         }
 
         @Test
         void should_error_when_no_type_property() {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                    () -> dal.evaluate(new JSONObject("{\"v\": {\"id\": 1}}"), "is V"));
+                    () -> dal.evaluate(jsonConverter.deserialize("{\"v\": {\"id\": 1}}"), "is V"));
             assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[null]");
         }
 
         @Test
         void should_error_when_no_matched_subtype() {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                    () -> dal.evaluate(new JSONObject("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
+                    () -> dal.evaluate(jsonConverter.deserialize("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
             assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[V3]");
         }
 
         @Test
-        void should_support_with_parent_type_name() throws JSONException {
+        void should_support_with_parent_type_name() {
             dal.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
-            assertPass(new JSONObject("{\"id\": 1}"), "is VerifySchema.RightFieldAndType");
+            assertPass(jsonConverter.deserialize("{\"id\": 1}"), "is VerifySchema.RightFieldAndType");
         }
 
         @Test
-        void should_support_partially_field_assertion() throws JSONException {
+        void should_support_partially_field_assertion() {
             dal.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class);
 
-            assertPass(new JSONObject("{\"id\": 1, \"unexpected\": 2}"), "is VerifySchema.IgnoreUnexpectedField");
+            assertPass(jsonConverter.deserialize("{\"id\": 1, \"unexpected\": 2}"), "is VerifySchema.IgnoreUnexpectedField");
         }
 
         @Test
-        void should_support_assertion_schema_list_opt_and_result_true() throws JSONException {
+        void should_support_assertion_schema_list_opt_and_result_true() {
             dal.getRuntimeContextBuilder()
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
-            assertPass(new JSONObject("{\"id\": 1}"),
+            assertPass(jsonConverter.deserialize("{\"id\": 1}"),
                     "is VerifySchema.RightFieldAndType / VerifySchema.IgnoreUnexpectedField");
         }
 
         @Test
-        void should_support_assertion_schema_list_opt_and_result_false() throws JSONException {
+        void should_support_assertion_schema_list_opt_and_result_false() {
             dal.getRuntimeContextBuilder()
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
-            assertFailed(new JSONObject("{\"id\": 1, \"unexpected\": 2}"),
+            assertFailed(jsonConverter.deserialize("{\"id\": 1, \"unexpected\": 2}"),
                     "is VerifySchema.RightFieldAndType / VerifySchema.IgnoreUnexpectedField");
         }
     }
@@ -304,17 +281,15 @@ class VerifySchema extends Base {
         @BeforeEach
         void registerJson() {
             dal.getRuntimeContextBuilder()
-                    .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                    .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory())
                     .registerSchema(FieldValue.class)
                     .registerSchema(SchemaWithInstance.class)
             ;
         }
 
         @Test
-        void should_support_verify_field_in_schema_type_with_instance() throws JSONException {
-            assertPass(new JSONObject("{\"fieldValue\": {\"integer\": 1}}"), "is SchemaWithInstance");
-            DALException failure = assertFailed(new JSONObject("{\"fieldValue\": {\"integer\": 2}}"), "is SchemaWithInstance");
+        void should_support_verify_field_in_schema_type_with_instance() {
+            assertPass(jsonConverter.deserialize("{\"fieldValue\": {\"integer\": 1}}"), "is SchemaWithInstance");
+            DALException failure = assertFailed(jsonConverter.deserialize("{\"fieldValue\": {\"integer\": 2}}"), "is SchemaWithInstance");
             assertThat(failure).hasMessage("Expected to match schema `SchemaWithInstance` but was not\n" +
                     "    Expected field `.fieldValue.integer` to be formatter `Number equal to [1]`\n" +
                     "    Actual: java.lang.Integer\n" +

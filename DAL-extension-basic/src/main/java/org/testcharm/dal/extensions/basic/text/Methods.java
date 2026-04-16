@@ -1,12 +1,11 @@
 package org.testcharm.dal.extensions.basic.text;
 
-import org.testcharm.message.Format;
 import org.testcharm.message.MessageConverter;
 import org.testcharm.message.MessageConverterRegistry;
 import org.yaml.snakeyaml.Yaml;
 
 public class Methods {
-    private static final MessageConverter jsonConverter = MessageConverterRegistry.messageConverterRegistry().format(Format.json());
+    private static final MessageConverter jsonConverter = MessageConverterRegistry.jsonConverter();
 
     public static Object json(byte[] data) {
         return json(new String(data));

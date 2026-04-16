@@ -4,13 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Accessors;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.testcharm.dal.DAL;
-import org.testcharm.dal.cucumber.JSONArrayDALCollectionFactory;
-import org.testcharm.dal.cucumber.JSONObjectAccessor;
 import org.testcharm.dal.runtime.*;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.dal.type.FieldAlias;
@@ -73,9 +69,7 @@ class DataTest {
 
     @Nested
     class GetPropertyOrIndexValue {
-        RuntimeContextBuilder runtimeContextBuilder = new DAL().extend().getRuntimeContextBuilder()
-                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory());
+        RuntimeContextBuilder runtimeContextBuilder = new DAL().extend().getRuntimeContextBuilder();
 
         @Test
         void access_java_class_property() {
@@ -92,14 +86,16 @@ class DataTest {
         @SneakyThrows
         @Test
         void access_via_property_accessor() {
-            assertDataAccess(new JSONObject().put("intValue", 1), 1, "intValue");
+            assertDataAccess(new HashMap<Object, Object>() {{
+                put("intValue", 1);
+            }}, 1, "intValue");
         }
 
         @Test
         void get_list_size() {
             assertListSize(emptyList(), 0);
             assertListSize(new String[]{"a"}, 1);
-            assertListSize(new JSONArray().put(100).put(200), 2);
+            assertListSize(asList(100, 200), 2);
         }
 
         @Test
@@ -114,7 +110,7 @@ class DataTest {
 
         @Test
         void get_list_element_from_accessor() {
-            assertDataAccess(new JSONArray().put("a").put("b"), "b", 1);
+            assertDataAccess(asList("a", "b"), "b", 1);
         }
 
         @Test
@@ -127,7 +123,7 @@ class DataTest {
 
         @Test
         void support_get_value_via_property_chain() {
-            assertDataAccess(new JSONArray().put("a").put(new Bean().setIntValue(100)), 100, 1, "intValue");
+            assertDataAccess(asList("a", new Bean().setIntValue(100)), 100, 1, "intValue");
         }
 
         @Test
@@ -168,7 +164,7 @@ class DataTest {
 
     @Nested
     class CurringMethodArgs {
-        private final DALRuntimeContext context = new RuntimeContextBuilder().build(null);
+        private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
 
         @Test
         void return_null_when_property_is_not_string() {
