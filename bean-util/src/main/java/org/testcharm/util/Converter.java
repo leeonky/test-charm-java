@@ -17,13 +17,11 @@ import static org.testcharm.util.Classes.getClassName;
 
 public class Converter {
     private static final NumberType numberType = new NumberType();
-    private static ThreadLocal<Converter> instance = new ThreadLocal<>();
+    private static final ThreadLocal<Converter> instance = ThreadLocal.withInitial(ConverterFactory::create);
     private final TypeHandlerSet<Function<Object, Object>> typeConverterSet = new TypeHandlerSet<>();
     private final TypeHandlerSet<BiFunction<Class<? extends Enum<?>>, Object, Object>> enumConverterSet = new TypeHandlerSet<>();
 
     public static Converter getInstance() {
-        if (instance.get() == null)
-            instance.set(ConverterFactory.create());
         return instance.get();
     }
 

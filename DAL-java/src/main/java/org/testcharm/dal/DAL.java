@@ -25,8 +25,8 @@ import static org.testcharm.util.function.Extension.not;
 public class DAL {
     private final Compiler compiler = new Compiler();
     private final RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
-    private static final ThreadLocal<DAL> instance = new ThreadLocal<>();
-    private static final ThreadLocal<Map<String, DAL>> instances = new ThreadLocal<>();
+    private static final ThreadLocal<DAL> instance = ThreadLocal.withInitial(() -> dal("Default"));
+    private static final ThreadLocal<Map<String, DAL>> instances = ThreadLocal.withInitial(HashMap::new);
     private final String name;
 
     @Deprecated
@@ -48,8 +48,6 @@ public class DAL {
     }
 
     public static DAL dal() {
-        if (instance.get() == null)
-            instance.set(dal("Default"));
         return instance.get();
     }
 
@@ -62,12 +60,7 @@ public class DAL {
     }
 
     public static synchronized DAL dal(String name) {
-        Map<String, DAL> dalMaps = instances.get();
-        if (dalMaps == null) {
-            dalMaps = new HashMap<>();
-            instances.set(dalMaps);
-        }
-        return dalMaps.computeIfAbsent(name, DAL::create);
+        return instances.get().computeIfAbsent(name, DAL::create);
     }
 
     public static DAL create(String name, Class<?>... exceptExtensions) {
