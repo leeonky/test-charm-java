@@ -22,14 +22,14 @@ class MessageConverterTest {
 
             messageConverterRegistry.register(json(), messageConverter);
 
-            assertEquals(messageConverter, messageConverterRegistry.module(json()));
+            assertEquals(messageConverter, messageConverterRegistry.format(json()));
         }
 
         @Test
         void raise_error_when_no_default() {
             MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry();
 
-            expectRun(() -> messageConverterRegistry.module(json()))
+            expectRun(() -> messageConverterRegistry.format(json()))
                     .should("::throw.message= 'No default message converter for format: json'");
         }
 
@@ -188,6 +188,8 @@ class MessageConverterTest {
 
         @Test
         void has_default_json_message_converter() {
+            MessageConverterRegistry messageConverterRegistry = new MessageConverterRegistry().extend();
+            assertEquals("43", messageConverterRegistry.format(json()).serialize(43));
         }
     }
 }

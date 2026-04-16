@@ -18,7 +18,7 @@ Feature: verify list
     Unexpected list size
     Expected: <1>
     Actual: <2>
-    Actual list: org.json.JSONArray [
+    Actual list: [
         java.lang.Integer <1>,
         java.lang.Integer <2>
     ]
@@ -65,7 +65,7 @@ Feature: verify list
     Unexpected list size
     Expected: <1>
     Actual: <2>
-    Actual list: org.json.JSONArray [
+    Actual list: [
         java.lang.Integer <1>,
         java.lang.Integer <2>
     ]
@@ -156,7 +156,7 @@ Feature: verify list
     Unexpected list size
     Expected: <1>
     Actual: <2>
-    Actual list: org.json.JSONArray [
+    Actual list: [
         java.lang.Integer <2>,
         java.lang.Integer <3>
     ]

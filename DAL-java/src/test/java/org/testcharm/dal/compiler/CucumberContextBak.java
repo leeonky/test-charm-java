@@ -12,6 +12,7 @@ import org.testcharm.dal.cucumber.JSONArrayDALCollectionFactory;
 import org.testcharm.dal.cucumber.JSONObjectAccessor;
 import org.testcharm.dal.runtime.IterableDALCollection;
 import org.testcharm.interpreter.InterpreterException;
+import org.testcharm.message.MessageConverterRegistry;
 import org.testcharm.util.JavaCompiler;
 import org.testcharm.util.JavaCompilerPoolLegacy;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.cucumber.TestTask.threadsCount;
+import static org.testcharm.message.Format.json;
 
 @Deprecated
 public class CucumberContextBak {
@@ -98,7 +100,7 @@ public class CucumberContextBak {
 
     @SneakyThrows
     public void givenInputByJson(String json) {
-        inputObject = new JSONArray(String.format("[%s]", json)).get(0);
+        inputObject = MessageConverterRegistry.messageConverterRegistry().format(json()).deserialize(json);
     }
 
     public void registerSchema(String schemaCode) {

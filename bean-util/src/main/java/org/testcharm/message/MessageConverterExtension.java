@@ -1,5 +1,5 @@
 package org.testcharm.message;
 
-interface MessageConverterExtension {
+public interface MessageConverterExtension {
     void extend(MessageConverterRegistry registry);
 }

@@ -4,5 +4,6 @@ dependencies {
 
     testImplementation project(':java-compiler-util')
     testImplementation libs.test.jackson.databind
-    testImplementation libs.test.jsonassert
+//    testImplementation libs.test.jsonassert
+    testImplementation libs.prod.json.org
 }
