@@ -1,47 +1,28 @@
 package org.testcharm.jfactory.cucumber;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.testcharm.jfactory.DataParser;
+import org.testcharm.message.Format;
+import org.testcharm.message.MessageConverter;
+import org.testcharm.message.MessageConverterRegistry;
 import org.testcharm.util.BeanClass;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.testcharm.jfactory.DataParser.tryFlat;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.IntStream.range;
+import static org.testcharm.jfactory.DataParser.tryFlat;
 
 public class Table extends ArrayList<Map<String, ?>> {
-    private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper() {{
-        configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        configure(JsonParser.Feature.ALLOW_TRAILING_COMMA, true);
-    }};
 
-    private static Function<String, Object> jsonDeserializer;
-
-    static {
-        resetJsonDeserializer();
-    }
-
-    public static void setJsonDeserializer(Function<String, Object> jsonDeserializer) {
-        Table.jsonDeserializer = jsonDeserializer;
-    }
-
-    private static final ObjectMapper YAML_OBJECT_MAPPER = new ObjectMapper(new YAMLFactory()) {{
-        configure(JsonParser.Feature.ALLOW_YAML_COMMENTS, true);
-    }};
+    private static MessageConverter jsonConverter = MessageConverterRegistry.messageConverterRegistry()
+            .moduleOrDefault("jfactory-cucumber", Format.json());
 
     @SafeVarargs
     public static Table create(Map<String, ?>... maps) {
@@ -65,7 +46,7 @@ public class Table extends ArrayList<Map<String, ?>> {
     @SuppressWarnings("unchecked")
     public static Table create(String content) {
         try {
-            Object value = jsonDeserializer.apply(content);
+            Object value = jsonConverter.deserialize(content);
             return create(BeanClass.cast(value, List.class).orElseGet(() -> singletonList(value)));
         } catch (Exception e) {
             Object data = DataParser.parse(content);
@@ -85,16 +66,6 @@ public class Table extends ArrayList<Map<String, ?>> {
     @SuppressWarnings("unchecked")
     public Map<String, Object>[] flatSub() {
         return stream().map(this::flat).toArray(Map[]::new);
-    }
-
-    public static void resetJsonDeserializer() {
-        setJsonDeserializer(content -> {
-            try {
-                return JSON_OBJECT_MAPPER.readValue(content, Object.class);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     private <T> Map<String, T> merge(Map<String, T> m1, Map<String, T> m2) {

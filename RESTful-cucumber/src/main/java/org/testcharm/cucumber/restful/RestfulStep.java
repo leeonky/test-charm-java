@@ -6,9 +6,9 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.testcharm.dal.Accessors;
 import org.testcharm.dal.DAL;
-import org.testcharm.dal.extensions.basic.string.jsonsource.org.json.JSONArray;
 import org.testcharm.io.VirtualFile;
 import org.testcharm.jfactory.JFactory;
+import org.testcharm.message.MessageConverter;
 import org.testcharm.util.BeanClass;
 import org.testcharm.util.PropertyReader;
 import org.testcharm.util.Sneaky;
@@ -35,6 +35,8 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
+import static org.testcharm.message.Format.json;
+import static org.testcharm.message.MessageConverterRegistry.messageConverterRegistry;
 import static org.testcharm.util.Sneaky.sneakyRun;
 
 public class RestfulStep {
@@ -44,10 +46,7 @@ public class RestfulStep {
     private Request request = new Request();
     private Response response;
     private HttpURLConnection connection;
-    private Function<Object, String> serializer = body -> {
-        String json = new JSONArray(Collections.singleton(body)).toString();
-        return json.substring(1, json.length() - 1);
-    };
+    private final MessageConverter jsonConverter = messageConverterRegistry().moduleOrDefault("restful-step", json());
     private JFactory jFactory;
 
     public void setDefaultDocType(String defaultDocType) {
@@ -69,8 +68,7 @@ public class RestfulStep {
 
                 @Override
                 public ObjectBodyWriter writer(String contentType) {
-                    return (outputStream, object) ->
-                            outputStream.write(serializer.apply(object).getBytes(UTF_8));
+                    return (outputStream, object) -> outputStream.write(jsonConverter.serialize(object).getBytes(UTF_8));
                 }
             }, new BodyRequestBuilder<ObjectBodyWriter>() {
                 @Override
@@ -165,10 +163,6 @@ public class RestfulStep {
 
     public void setJFactory(JFactory jFactory) {
         this.jFactory = jFactory;
-    }
-
-    public void setSerializer(Function<Object, String> serializer) {
-        this.serializer = serializer;
     }
 
     public void setBaseUrl(String baseUrl) {

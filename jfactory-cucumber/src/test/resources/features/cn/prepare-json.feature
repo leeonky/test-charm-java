@@ -1,34 +1,6 @@
 # language: zh-CN
 功能: 用JSON准备数据
 
-  @custom-json-deserializer
-  场景: Json数据序列化支持自定义-单个对象
-    假如存在"SnakeCase商品"：
-    """
-    {
-      "product_name": "book"
-    }
-    """
-    那么所有"SnakeCase商品"应为：
-    """
-      .productName[]= [book]
-    """
-
-  @custom-json-deserializer
-  场景: Json数据序列化支持自定义-数组
-    假如存在"SnakeCase商品"：
-    """
-    [{
-      "product_name": "book"
-    }, {
-      "product_name": "laptop"
-    }]
-    """
-    那么所有"SnakeCase商品"应为：
-    """
-      .productName[]= [book, laptop]
-    """
-
   场景: 准备商品-JSON数组格式
     假如存在"商品"：
     """

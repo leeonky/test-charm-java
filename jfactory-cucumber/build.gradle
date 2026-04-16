@@ -4,8 +4,6 @@ dependencies {
     implementation project(':jfactory-property-value')
     implementation project(':DAL-extension-jfactory')
     implementation libs.prod.cucumber
-    implementation libs.prod.jackson.databind
-    implementation libs.prod.jackson.yaml
 
     testImplementation project(':jfactory-repo-jpa')
     testImplementation project(':DAL-extension-jdbc')

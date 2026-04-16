@@ -21,8 +21,6 @@ prod-jpa = { module = "javax.persistence:javax.persistence-api", version.ref = "
 prod-orika = { module = "ma.glasnost.orika:orika-core", version = "1.5.4" }
 prod-reflections = { module = "org.reflections:reflections", version = "0.9.11" }
 prod-cucumber = { module = "io.cucumber:cucumber-java", version.ref = "cucumber" }
-prod-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
-prod-jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 prod-selenium = { module = "org.seleniumhq.selenium:selenium-java", version = "3.141.59" }
 prod-playwight = { module = "com.microsoft.playwright:playwright", version = "1.50.0" }
 prod-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
