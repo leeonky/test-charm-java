@@ -1,10 +1,5 @@
 package org.testcharm.jfactory.cucumber;
 
-import org.testcharm.jfactory.Builder;
-import org.testcharm.jfactory.DataParser;
-import org.testcharm.jfactory.JFactory;
-import org.testcharm.util.BeanClass;
-import org.testcharm.util.Property;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.DocStringType;
@@ -15,17 +10,27 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.zh_cn.假如;
 import io.cucumber.java.zh_cn.并且;
 import io.cucumber.java.zh_cn.那么;
+import org.testcharm.dal.Evaluator;
+import org.testcharm.jfactory.Builder;
+import org.testcharm.jfactory.DataParser;
+import org.testcharm.jfactory.JFactory;
+import org.testcharm.jfactory.JFactoryCollector;
+import org.testcharm.util.BeanClass;
+import org.testcharm.util.Collector;
+import org.testcharm.util.Property;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.testcharm.dal.Assertions.expect;
-import static org.testcharm.jfactory.cucumber.Table.create;
-import static org.testcharm.jfactory.cucumber.Table.flattenTable;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+import static org.testcharm.dal.Assertions.expect;
+import static org.testcharm.dal.DAL.dal;
+import static org.testcharm.jfactory.cucumber.Table.flattenTable;
 
 public class JData {
     private final JFactory jFactory;
@@ -34,12 +39,47 @@ public class JData {
         this.jFactory = jFactory;
     }
 
+    static List<Map<String, String>> asMaps(DataTable dataTable) {
+        if (needTranspose(dataTable))
+            dataTable = DataTable.create(removeTransposeSymbol(dataTable));
+        return dataTable.asMaps();
+    }
+
+    @SuppressWarnings("unchecked")
     @假如("存在{string}:")
     @并且("存在{string}：")
     @Given("Exists data {string}:")
     @And("exists data {string}:")
-    public <T> List<T> prepare(String traitsSpec, Table table) {
-        return prepare(traitsSpec, table.flatSub());
+    public void prepare(String traitsSpec, DocData docData) {
+        switch (docData.type) {
+            case EXPRESSION:
+                prepare(traitsSpec, docData.expression());
+                break;
+            case MAP:
+                prepare(traitsSpec, docData.maps());
+                break;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    @DocStringType
+    public DocData transform(String expression) {
+        return new DocData(expression);
+    }
+
+    @DataTableType
+    public DocData transform(DataTable dataTable) {
+        return new DocData(asMaps(dataTable));
+    }
+
+    public <T> List<T> prepare(String traitsSpec, String expressions) {
+        return prepare(traitsSpec, expressions, ig -> {
+        });
+    }
+
+    private String[] asArray(String traitsSpec) {
+        return traitsSpec.split(", |,| ");
     }
 
     @SuppressWarnings("unchecked")
@@ -52,26 +92,13 @@ public class JData {
         return (List<T>) data.stream().map(map -> toBuild(traitsSpec).properties(map).create()).collect(toList());
     }
 
-    @DocStringType
-    public Table transform(String content) {
-        return create(content);
-    }
-
-    @DataTableType
-    public Table transform(DataTable dataTable) {
-        if (needTranspose(dataTable))
-            dataTable = DataTable.create(removeTransposeSymbol(dataTable));
-        List<List<String>> cells = dataTable.cells();
-        return create(cells.get(0), cells.subList(1, cells.size()));
-    }
-
-    private List<List<String>> removeTransposeSymbol(DataTable dataTable) {
+    private static List<List<String>> removeTransposeSymbol(DataTable dataTable) {
         List<List<String>> data = dataTable.transpose().cells().stream().map(ArrayList::new).collect(toList());
         data.get(0).set(0, data.get(0).get(0).substring(1));
         return data;
     }
 
-    private boolean needTranspose(DataTable dataTable) {
+    private static boolean needTranspose(DataTable dataTable) {
         return dataTable.cell(0, 0).startsWith("'");
     }
 
@@ -114,8 +141,21 @@ public class JData {
     @并且("存在{string}的{string}:")
     @Given("Exists {string} as data {string}:")
     @And("exists {string} as data {string}:")
-    public <T> List<T> prepareAttachments(String beanProperty, String traitsSpec, Table table) {
-        return prepareAttachments(beanProperty, traitsSpec, table.flatSub());
+    public void prepareAttachments(String beanProperty, String traitsSpec, DocData docData) {
+        switch (docData.type) {
+            case EXPRESSION:
+                prepareAttachments(beanProperty, traitsSpec, docData.expression());
+                break;
+            case MAP:
+                prepareAttachments(beanProperty, traitsSpec, docData.maps());
+                break;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    public <T> List<T> prepareAttachments(String beanProperty, String traitsSpec, String expression) {
+        return setupAssociation(beanProperty, prepare(traitsSpec, expression));
     }
 
     @SuppressWarnings("unchecked")
@@ -123,9 +163,12 @@ public class JData {
         return prepareAttachments(beanProperty, traitsSpec, asList(data));
     }
 
-    @SuppressWarnings("unchecked")
     public <T> List<T> prepareAttachments(String beanProperty, String traitsSpec, List<? extends Map<String, ?>> data) {
-        List<T> attachments = prepare(traitsSpec, data);
+        return setupAssociation(beanProperty, prepare(traitsSpec, data));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<T> setupAssociation(String beanProperty, List<T> attachments) {
         int index = beanProperty.lastIndexOf('.');
         Object bean = query(beanProperty.substring(0, index));
         Property<Object> property = (Property<Object>) BeanClass.create(bean.getClass()).getProperty(beanProperty.substring(index + 1));
@@ -151,9 +194,38 @@ public class JData {
     @并且("存在如下{string}, 并且其{string}为{string}:")
     @Given("Exists following data {string}, and its {string} is {string}:")
     @And("exists following data {string}, and its {string} is {string}:")
+    public void prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression, DocData docData) {
+        switch (docData.type) {
+            case EXPRESSION:
+                prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, docData.expression());
+                break;
+            case MAP:
+                prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, docData.maps());
+                break;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
     public <T> List<T> prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression,
-                                          Table table) {
-        return prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, table.flatSub());
+                                          String expression) {
+        return prepare(traitsSpec, expression, s -> s.collect(reverseAssociationProperty).setValue(query(queryExpression)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<T> prepare(String traitsSpec, String expression, Consumer<JFactoryCollector> consumer) {
+        JFactoryCollector collector = jFactory.collector(Object.class);
+        String trim = expression.trim();
+        if (trim.startsWith("{") || trim.startsWith("|") || trim.startsWith("["))
+            expression = ":\n" + expression;
+        Evaluator.evaluateAll(expression).by(dal("JFactory")).on(collector);
+        if (collector.type() == Collector.Type.LIST)
+            return collector.elements().values().stream().peek(consumer)
+                    .map(sub -> (T) sub.traitsSpec(asArray(traitsSpec)).build()).collect(toList());
+        else {
+            consumer.accept(collector);
+            return singletonList((T) collector.traitsSpec(asArray(traitsSpec)).build());
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -165,6 +237,12 @@ public class JData {
     public <T> List<T> prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression,
                                           List<? extends Map<String, ?>> data) {
         return prepare(traitsSpec, addAssociationProperty(reverseAssociationProperty, queryExpression, data));
+    }
+
+    private List<Map<String, ?>> addAssociationProperty(String reverseAssociationProperty, String queryExpression,
+                                                        List<? extends Map<String, ?>> data) {
+        return data.stream().map(LinkedHashMap::new).peek(m -> m.put(reverseAssociationProperty, query(queryExpression)))
+                .collect(toList());
     }
 
     @假如("存在{int}个{string}，并且其{string}为{string}")
@@ -194,14 +272,9 @@ public class JData {
         expect(jFactory).should(dalExpression);
     }
 
-    private List<Map<String, ?>> addAssociationProperty(String reverseAssociationProperty, String queryExpression,
-                                                        List<? extends Map<String, ?>> data) {
-        return data.stream().map(LinkedHashMap::new).peek(m -> m.put(reverseAssociationProperty, query(queryExpression)))
-                .collect(toList());
-    }
 
     private Builder<Object> toBuild(String traitsSpec) {
-        return jFactory.spec(traitsSpec.split(", |,| "));
+        return jFactory.spec(asArray(traitsSpec));
     }
 
     private class QueryExpression {
@@ -229,6 +302,34 @@ public class JData {
             if (collection.size() != 1)
                 throw new IllegalStateException(String.format("Got %d object of `%s`", collection.size(), expression));
             return collection.iterator().next();
+        }
+    }
+
+    static class DocData {
+        final Type type;
+        final Object data;
+
+        public DocData(String expression) {
+            type = Type.EXPRESSION;
+            data = expression;
+        }
+
+        public DocData(List<Map<String, String>> maps) {
+            type = Type.MAP;
+            data = maps;
+        }
+
+        public String expression() {
+            return (String) data;
+        }
+
+        @SuppressWarnings("unchecked")
+        public List<Map<String, String>> maps() {
+            return (List<Map<String, String>>) data;
+        }
+
+        enum Type {
+            EXPRESSION, MAP
         }
     }
 }

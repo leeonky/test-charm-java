@@ -110,7 +110,7 @@ public class JFactoryCollector extends Collector {
     }
 
     class ObjectValue extends LinkedHashMap<String, Object> implements FlatAble {
-        public <K> ObjectValue(Map<K, Collector> data, Function<K, String> keyMapper) {
+        public <K> ObjectValue(Map<K, ? extends Collector> data, Function<K, String> keyMapper) {
             data.forEach((key, value) -> put(keyMapper.apply(key), ((JFactoryCollector) value).objectValue()));
         }
 
@@ -122,5 +122,17 @@ public class JFactoryCollector extends Collector {
                 property += "!";
             return property;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<Integer, ? extends JFactoryCollector> elements() {
+        return (Map<Integer, ? extends JFactoryCollector>) super.elements();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Map<String, ? extends JFactoryCollector> fields() {
+        return (Map<String, ? extends JFactoryCollector>) super.fields();
     }
 }

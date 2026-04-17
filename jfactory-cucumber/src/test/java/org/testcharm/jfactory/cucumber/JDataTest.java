@@ -1,5 +1,7 @@
 package org.testcharm.jfactory.cucumber;
 
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.testcharm.jfactory.DataRepository;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.jfactory.cucumber.entity.Cart;
@@ -10,11 +12,7 @@ import org.testcharm.jfactory.cucumber.factory.Carts;
 import org.testcharm.jfactory.cucumber.factory.Orders;
 import org.testcharm.jfactory.cucumber.factory.ProductStocks;
 import org.testcharm.jfactory.cucumber.factory.Products;
-import io.cucumber.datatable.DataTable;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -171,49 +169,49 @@ class JDataTest {
         @Nested
         class SupportJson {
 
-            @Test
-            void array_to_table() throws IOException {
-                Table table = jData.transform("[{" +
-                        "\"name\": \"book\"" +
-                        "}]");
-
-                assertThat(table).extracting("name").containsExactly("book");
-            }
-
-            @Test
-            void object_to_table() throws IOException {
-                Table table = jData.transform("{" +
-                        "\"name\": \"book\"" +
-                        "}");
-
-                assertThat(table).extracting("name").containsExactly("book");
-            }
+//            @Test
+//            void array_to_table() throws IOException {
+//                Table table = jData.transform("[{" +
+//                        "\"name\": \"book\"" +
+//                        "}]");
+//
+//                assertThat(table).extracting("name").containsExactly("book");
+//            }
+//
+//            @Test
+//            void object_to_table() throws IOException {
+//                Table table = jData.transform("{" +
+//                        "\"name\": \"book\"" +
+//                        "}");
+//
+//                assertThat(table).extracting("name").containsExactly("book");
+//            }
         }
 
         @Nested
         class SupportDataTable {
 
-            @Test
-            void to_table() {
-                Table table = jData.transform(DataTable.create(asList(
-                        asList("key1", "key2"),
-                        asList("value1", "value2")
-                )));
-
-                assertThat(table).hasSize(1)
-                        .extracting("key1", "key2").containsExactly(tuple("value1", "value2"));
-            }
-
-            @Test
-            void to_transpose_table() {
-                Table table = jData.transform(DataTable.create(asList(
-                        asList("'key1", "value1"),
-                        asList("key2", "value2")
-                )));
-
-                assertThat(table).hasSize(1)
-                        .extracting("key1", "key2").containsExactly(tuple("value1", "value2"));
-            }
+//            @Test
+//            void to_table() {
+//                Table table = jData.transform(DataTable.create(asList(
+//                        asList("key1", "key2"),
+//                        asList("value1", "value2")
+//                )));
+//
+//                assertThat(table).hasSize(1)
+//                        .extracting("key1", "key2").containsExactly(tuple("value1", "value2"));
+//            }
+//
+//            @Test
+//            void to_transpose_table() {
+//                Table table = jData.transform(DataTable.create(asList(
+//                        asList("'key1", "value1"),
+//                        asList("key2", "value2")
+//                )));
+//
+//                assertThat(table).hasSize(1)
+//                        .extracting("key1", "key2").containsExactly(tuple("value1", "value2"));
+//            }
         }
     }
 

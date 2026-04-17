@@ -22,11 +22,11 @@ public class Collector {
         return type;
     }
 
-    public Map<Integer, Collector> elements() {
+    public Map<Integer, ? extends Collector> elements() {
         return elements;
     }
 
-    public Map<String, Collector> fields() {
+    public Map<String, ? extends Collector> fields() {
         return fields;
     }
 

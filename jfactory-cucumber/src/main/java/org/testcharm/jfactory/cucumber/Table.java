@@ -19,10 +19,11 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.IntStream.range;
 import static org.testcharm.jfactory.DataParser.tryFlat;
 
+@Deprecated
 public class Table extends ArrayList<Map<String, ?>> {
 
     private static MessageConverter jsonConverter = MessageConverterRegistry.messageConverterRegistry()
-            .moduleOrDefault("jfactory-cucumber", Format.json());
+            .moduleOrDefault("JFactory-Cucumber", Format.json());
 
     @SafeVarargs
     public static Table create(Map<String, ?>... maps) {
@@ -122,6 +123,7 @@ public class Table extends ArrayList<Map<String, ?>> {
         }
     }
 
+    @Deprecated
     public static class Flatten extends Table {
 
         @SuppressWarnings("unchecked")

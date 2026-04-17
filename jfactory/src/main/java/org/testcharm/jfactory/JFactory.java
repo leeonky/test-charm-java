@@ -1,7 +1,6 @@
 package org.testcharm.jfactory;
 
 import org.testcharm.util.BeanClass;
-import org.testcharm.util.Collector;
 import org.testcharm.util.PropertyWriter;
 import org.testcharm.util.TypeReference;
 
@@ -184,15 +183,15 @@ public class JFactory {
         return this;
     }
 
-    public Collector collector(Class<?> type) {
+    public JFactoryCollector collector(Class<?> type) {
         return new JFactoryCollector(this, type);
     }
 
-    public Collector collector() {
+    public JFactoryCollector collector() {
         return collector(Object.class);
     }
 
-    public Collector collector(String... traitsSpec) {
+    public JFactoryCollector collector(String... traitsSpec) {
         return new JFactoryCollector(this, traitsSpec);
     }
 }

@@ -46,7 +46,7 @@ public class RestfulStep {
     private Request request = new Request();
     private Response response;
     private HttpURLConnection connection;
-    private final MessageConverter jsonConverter = messageConverterRegistry().moduleOrDefault("restful-step", json());
+    private final MessageConverter jsonConverter = messageConverterRegistry().moduleOrDefault("RESTful-Step", json());
     private JFactory jFactory;
 
     public void setDefaultDocType(String defaultDocType) {
