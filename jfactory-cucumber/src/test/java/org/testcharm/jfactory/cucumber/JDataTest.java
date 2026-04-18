@@ -50,14 +50,13 @@ class JDataTest {
             jFactory.register(Products.商品.class);
 
             List<Object> list = jData.prepare("红色的 商品",
-                    Table.create(
-                            new HashMap<String, Object>() {{
-                                put("name", "book");
-                            }},
-                            new HashMap<String, Object>() {{
-                                put("name", "bicycle");
-                            }}
-                    ));
+                    new HashMap<String, Object>() {{
+                        put("name", "book");
+                    }},
+                    new HashMap<String, Object>() {{
+                        put("name", "bicycle");
+                    }}
+            );
 
             assertThat(list).isEqualTo(persisted)
                     .extracting("name", "color").containsExactly(tuple("book", "red"), tuple("bicycle", "red"));

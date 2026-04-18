@@ -103,7 +103,8 @@ public class JData {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> List<T> prepare(String traitsSpec, Map<String, ?>... data) {
+    @SafeVarargs
+    public final <T> List<T> prepare(String traitsSpec, Map<String, ?>... data) {
         return prepare(traitsSpec, asList(data));
     }
 
