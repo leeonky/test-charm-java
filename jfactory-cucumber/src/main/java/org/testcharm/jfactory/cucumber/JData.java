@@ -11,12 +11,13 @@ import io.cucumber.java.zh_cn.假如;
 import io.cucumber.java.zh_cn.并且;
 import io.cucumber.java.zh_cn.那么;
 import org.testcharm.dal.Evaluator;
+import org.testcharm.dal.runtime.ProxyObject;
 import org.testcharm.jfactory.Builder;
-import org.testcharm.jfactory.DataParser;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.jfactory.JFactoryCollector;
 import org.testcharm.util.BeanClass;
 import org.testcharm.util.Collector;
+import org.testcharm.util.Pair;
 import org.testcharm.util.Property;
 
 import java.util.*;
@@ -30,7 +31,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.DAL.dal;
-import static org.testcharm.jfactory.cucumber.Table.flattenTable;
+import static org.testcharm.util.function.Consumer.noop;
 
 public class JData {
     private final JFactory jFactory;
@@ -74,8 +75,27 @@ public class JData {
     }
 
     public <T> List<T> prepare(String traitsSpec, String expressions) {
-        return prepare(traitsSpec, expressions, ig -> {
-        });
+        return prepare(traitsSpec, expressions, noop());
+    }
+
+    private <T> List<T> prepare(String traitsSpec, String expression, Consumer<JFactoryCollector> consumer) {
+        JFactoryCollector collector = jFactory.collector(Object.class);
+        String trim = expression.trim();
+        if (trim.startsWith("{") || trim.startsWith("|") || trim.startsWith("["))
+            expression = ":\n" + expression;
+        Evaluator.evaluateAll(expression).by(dal("JFactory")).on(collector);
+        return prepare(traitsSpec, consumer, collector);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<T> prepare(String traitsSpec, Consumer<JFactoryCollector> consumer, JFactoryCollector collector) {
+        if (collector.type() == Collector.Type.LIST)
+            return collector.elements().values().stream().peek(consumer)
+                    .map(sub -> (T) sub.traitsSpec(asArray(traitsSpec)).build()).collect(toList());
+        else {
+            consumer.accept(collector);
+            return singletonList((T) collector.traitsSpec(asArray(traitsSpec)).build());
+        }
     }
 
     private String[] asArray(String traitsSpec) {
@@ -213,22 +233,6 @@ public class JData {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> List<T> prepare(String traitsSpec, String expression, Consumer<JFactoryCollector> consumer) {
-        JFactoryCollector collector = jFactory.collector(Object.class);
-        String trim = expression.trim();
-        if (trim.startsWith("{") || trim.startsWith("|") || trim.startsWith("["))
-            expression = ":\n" + expression;
-        Evaluator.evaluateAll(expression).by(dal("JFactory")).on(collector);
-        if (collector.type() == Collector.Type.LIST)
-            return collector.elements().values().stream().peek(consumer)
-                    .map(sub -> (T) sub.traitsSpec(asArray(traitsSpec)).build()).collect(toList());
-        else {
-            consumer.accept(collector);
-            return singletonList((T) collector.traitsSpec(asArray(traitsSpec)).build());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     public <T> List<T> prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression,
                                           Map<String, ?>... data) {
         return prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, asList(data));
@@ -259,7 +263,9 @@ public class JData {
     @Given("Exists data:")
     @And("exists data:")
     public void prepare(String data) {
-        DataParser.specs(data).forEach(spec -> prepare(spec.traitSpec(), flattenTable(spec.properties())));
+        Specs specs = new Specs();
+        Evaluator.evaluateAll(data).by(dal("JFactory")).on(specs);
+        specs.getCollectors().forEach(pair -> prepare(pair.getFirst(), noop(), pair.getSecond()));
     }
 
     @假如("数据:")
@@ -330,6 +336,21 @@ public class JData {
 
         enum Type {
             EXPRESSION, MAP
+        }
+    }
+
+    class Specs implements ProxyObject {
+        private final List<Pair<String, JFactoryCollector>> collectors = new ArrayList<>();
+
+        @Override
+        public Object getValue(Object property) {
+            JFactoryCollector collector = jFactory.collector(asArray((String) property));
+            collectors.add(Pair.pair((String) property, collector));
+            return collector;
+        }
+
+        public List<Pair<String, JFactoryCollector>> getCollectors() {
+            return collectors;
         }
     }
 }

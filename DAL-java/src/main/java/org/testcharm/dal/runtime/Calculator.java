@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static org.testcharm.dal.runtime.ExpressionException.*;
-import static org.testcharm.util.Classes.getClassName;
-import static org.testcharm.util.Pair.pair;
-import static org.testcharm.util.function.Extension.getFirstPresent;
 import static java.lang.String.format;
 import static java.util.Comparator.*;
+import static org.testcharm.dal.runtime.ExpressionException.*;
+import static org.testcharm.util.Classes.getClassName;
+import static org.testcharm.util.Pair.same;
+import static org.testcharm.util.function.Extension.getFirstPresent;
 
 public class Calculator {
     private static final NumberType numberType = new NumberType();
 
-    private static int compare(Pair<Data<?>> pair, DALRuntimeContext context) {
+    private static int compare(Pair.Same<Data<?>> pair, DALRuntimeContext context) {
         return getFirstPresent(
                 () -> pair.both(d -> d.cast(Number.class), (num1, num2) -> context.getNumberType().compare(num1, num2)),
                 () -> pair.both(d -> d.cast(String.class), String::compareTo)).orElseThrow(() ->
@@ -99,19 +99,19 @@ public class Calculator {
     }
 
     public static Object less(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
-        return compare(pair(left, right), context) < 0;
+        return compare(same(left, right), context) < 0;
     }
 
     public static Object greaterOrEqual(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
-        return compare(pair(left, right), context) >= 0;
+        return compare(same(left, right), context) >= 0;
     }
 
     public static Object lessOrEqual(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
-        return compare(pair(left, right), context) <= 0;
+        return compare(same(left, right), context) <= 0;
     }
 
     public static Object greater(Data<?> left, DALOperator opt, Data<?> right, DALRuntimeContext context) {
-        return compare(pair(left, right), context) > 0;
+        return compare(same(left, right), context) > 0;
     }
 
     public static boolean notEqual(Data<?> left, Data<?> right) {

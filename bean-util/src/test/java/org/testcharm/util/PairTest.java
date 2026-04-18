@@ -11,7 +11,7 @@ class PairTest {
 
     @Test
     void create_pair() {
-        Pair<String> p = Pair.pair("hello", "world");
+        Pair.Same<String> p = Pair.same("hello", "world");
 
         assertThat(p.getFirst()).isEqualTo("hello");
         assertThat(p.getSecond()).isEqualTo("world");
@@ -22,7 +22,7 @@ class PairTest {
 
         @Test
         void both_has_value() {
-            Pair<String> p = Pair.pair("hello", "world");
+            Pair.Same<String> p = Pair.same("hello", "world");
 
             Optional<String> r = p.both(Optional::of, (s1, s2) -> s1 + s2);
 
@@ -31,7 +31,7 @@ class PairTest {
 
         @Test
         void first_has_value() {
-            Pair<String> p = Pair.pair("hello", null);
+            Pair.Same<String> p = Pair.same("hello", null);
 
             Optional<String> r = p.both(Optional::ofNullable, (s1, s2) -> s1 + s2);
 
@@ -40,7 +40,7 @@ class PairTest {
 
         @Test
         void second_has_value() {
-            Pair<String> p = Pair.pair(null, "world");
+            Pair.Same<String> p = Pair.same(null, "world");
 
             Optional<String> r = p.both(Optional::ofNullable, (s1, s2) -> s1 + s2);
 
@@ -49,7 +49,7 @@ class PairTest {
 
         @Test
         void both_has_no_value() {
-            Pair<String> p = Pair.pair(null, null);
+            Pair.Same<String> p = Pair.same(null, null);
 
             Optional<String> r = p.both(Optional::ofNullable, (s1, s2) -> s1 + s2);
 
