@@ -10,6 +10,7 @@ public class Evaluator {
     private DAL dal;
     private static Supplier<DAL> dalFactory = DAL::dal;
     private Object constants;
+    private int codeOffset = 0;
 
     public static void setDALFactory(Supplier<DAL> dalFactory) {
         Evaluator.dalFactory = dalFactory;
@@ -41,6 +42,11 @@ public class Evaluator {
         return this;
     }
 
+    public Evaluator codeOffset(int codeOffset) {
+        this.codeOffset = codeOffset;
+        return this;
+    }
+
     private DAL getDAL() {
         if (dal == null)
             dal = dalFactory.get();
@@ -60,7 +66,7 @@ public class Evaluator {
             else
                 return getDAL().evaluate(() -> input, expression, null, constants);
         } catch (InterpreterException e) {
-            String detailMessage = "\n" + e.show(expression, 0) + "\n\n" + e.getMessage();
+            String detailMessage = "\n" + e.show(expression, codeOffset) + "\n\n" + e.getMessage();
             throw new RuntimeException(detailMessage, e) {
 
                 @Override

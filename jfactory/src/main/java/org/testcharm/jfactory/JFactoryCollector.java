@@ -3,6 +3,7 @@ package org.testcharm.jfactory;
 import org.testcharm.util.Collector;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -72,7 +73,12 @@ public class JFactoryCollector extends Collector {
             case VALUE:
                 return value();
             case LIST:
-                return new ObjectValue(elements(), k -> "[" + k + "]");
+                return new ObjectValue(elements(), k -> "[" + k + "]") {
+                    @Override
+                    public boolean isList() {
+                        return true;
+                    }
+                };
             default:
                 return new ObjectValue(fields(), Function.identity());
         }
@@ -101,11 +107,20 @@ public class JFactoryCollector extends Collector {
 
         default void flatSub(LinkedHashMap<String, Object> result, String key) {
             Map<String, Object> flat = flat();
-            if (flat.isEmpty())
-                result.put(buildPropertyName(key), flat);
-            else
+            if (flat.isEmpty()) {
+                if (isList()) {
+//                    TODO missing test break rules: = [] : []
+                    result.put(buildPropertyName(key), Collections.emptyList());
+                } else {
+                    result.put(buildPropertyName(key), flat);
+                }
+            } else
                 flat.forEach((subKey, subValue) -> result.put(buildPropertyName(key) +
                         (subKey.startsWith("[") ? subKey : "." + subKey), subValue));
+        }
+
+        default boolean isList() {
+            return false;
         }
     }
 

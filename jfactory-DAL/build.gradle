@@ -1,8 +1,5 @@
 dependencies {
     implementation project(':jfactory')
     implementation project(':DAL-java')
-    implementation project(':jfactory-DAL')
-//    TODO to be romove
-    implementation project(':DAL-extension-jfactory')
     testImplementation project(':DAL-extension-basic')
 }

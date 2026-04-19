@@ -18,6 +18,10 @@ public class InfiniteDALCollection<E> extends IterableDALCollection<E> {
         });
     }
 
+    public InfiniteDALCollection(Iterable<E> iterable) {
+        super(iterable);
+    }
+
     @Override
     public boolean infinite() {
         return true;

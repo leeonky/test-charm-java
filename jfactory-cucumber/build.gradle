@@ -1,6 +1,7 @@
 dependencies {
     api project(':jfactory')
     api project(':DAL-java')
+    api project(':jfactory-DAL')
     implementation project(':jfactory-property-value')
     implementation project(':DAL-extension-jfactory')
     implementation libs.prod.cucumber

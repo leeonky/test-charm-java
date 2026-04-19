@@ -1,9 +1,6 @@
 package org.testcharm.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.testcharm.util.function.Extension.mapValue;
@@ -71,5 +68,21 @@ public class Collector {
 
     public enum Type {
         LIST, OBJECT, VALUE
+    }
+
+    public Iterator<Collector> elementsIterator() {
+        return new Iterator<Collector>() {
+            int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Collector next() {
+                return collect(index++);
+            }
+        };
     }
 }

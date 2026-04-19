@@ -27,9 +27,18 @@ public class Extension implements org.testcharm.dal.runtime.Extension {
                         return collector.collect(property);
                     }
                 })
+
                 .registerDALCollectionFactory(Collector.class, instance -> {
                     instance.type(Collector.Type.LIST);
-                    return new InfiniteDALCollection<>(instance::collect);
+//                List mapping need foreach auto collect
+//                List mapping *** (skip element) should not auto collect
+//                getByIndex should not auto collect
+                    return new InfiniteDALCollection<Collector>(Collector::new) {
+                        @Override
+                        protected Collector getByPosition(int position) {
+                            return instance.collect(position);
+                        }
+                    };
                 })
                 .registerDumper(Collector.class, DumperFactory.skip());
     }

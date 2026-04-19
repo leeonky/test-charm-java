@@ -79,23 +79,24 @@ Feature: trait-spec
     }]
     """
 
-  Scenario: legacy style trait spec in list
-    When create "商品":
-    """
-    stocks: [{
-      _: '(无货 库存)'
-      remark: empty
-    }, {
-      _: '(满货 库存)'
-      remark: full
-    }]
-    """
-    Then all "商品" should:
-    """
-    [0].stocks: | remark | count |
-                | empty  | 0     |
-                | full   | 100   |
-    """
+#Deprecated not supporteded
+#  Scenario: legacy style trait spec in list
+#    When create "商品":
+#    """
+#    stocks: [{
+#      _: '(无货 库存)'
+#      remark: empty
+#    }, {
+#      _: '(满货 库存)'
+#      remark: full
+#    }]
+#    """
+#    Then all "商品" should:
+#    """
+#    [0].stocks: | remark | count |
+#                | empty  | 0     |
+#                | full   | 100   |
+#    """
 
   Scenario: support force creation
     When create "商品":
@@ -132,23 +133,24 @@ Feature: trait-spec
       | PC   |
     """
 
-  Scenario: support force creation with legacy style
-    When create "商品":
-    """
-    name: PC
-    """
-    When create "库存":
-    """
-    [product!]: {
-      name= PC
-    }
-    """
-    Then all "商品" should:
-    """
-    : | name |
-      | PC   |
-      | PC   |
-    """
+#Deprecated legacy style, not support
+#  Scenario: support force creation with legacy style
+#    When create "商品":
+#    """
+#    name: PC
+#    """
+#    When create "库存":
+#    """
+#    [product!]: {
+#      name= PC
+#    }
+#    """
+#    Then all "商品" should:
+#    """
+#    : | name |
+#      | PC   |
+#      | PC   |
+#    """
 
   Scenario: bug use trait spec in sub object
     When create

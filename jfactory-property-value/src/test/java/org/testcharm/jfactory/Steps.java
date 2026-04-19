@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.testcharm.dal.Assertions.expect;
-import static org.testcharm.jfactory.DataParser.data;
 
 public class Steps {
     Context context = new Context();
@@ -56,10 +55,14 @@ public class Steps {
             Classes.assignableTypesOf(Spec.class, "org.testcharm.jfactory.specs").forEach(this::register);
         }};
 
+        private final JFactoryDAL jFactoryDAL = new JFactoryDAL(jFactory);
+
         private Exception e;
 
         public void createOne(String traitSpec, String dal) {
-            jFactory.spec(traitSpec.split(" ")).properties(data(dal)).create();
+            jFactoryDAL.create(traitSpec, dal);
+
+//            jFactory.spec(traitSpec.split(" ")).properties(data(dal)).create();
         }
 
         public void createSome(String traitSpec, String dal) {

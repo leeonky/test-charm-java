@@ -14,6 +14,7 @@ ext.cucumberProjects = [
         [name: 'DAL-extension-jfactory', glues: ['org.testcharm']],
         [name: 'DAL-extension-inspector', glues: ['org.testcharm']],
         [name: 'jfactory', glues: ['org.testcharm']],
+        [name: 'jfactory-DAL', glues: ['org.testcharm']],
         [name: 'jfactory-cucumber', glues: ['org.testcharm.jfactory.cucumber']],
         [name: 'jfactory-property-value', glues: ['org.testcharm']],
         [name: 'RESTful-cucumber', glues: ['org.testcharm.cucumber.restful', 'org.testcharm.util']],

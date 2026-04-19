@@ -116,22 +116,22 @@ Feature: single
               | A    | 100   |
     }]
     """
-
-  Scenario: support merge properties of list element
-    When create "商品":
-    """
-    stocks: | size | count |
-            | A    | 100   |
-            | B    | 200   |
-
-    stocks= []
-    """
-    Then all "商品" should:
-    """
-    : [{
-      stocks: []
-    }]
-    """
+#Feature changed = will not override previous value
+#  Scenario: support merge properties of list element
+#    When create "商品":
+#    """
+#    stocks: | size | count |
+#            | A    | 100   |
+#            | B    | 200   |
+#
+#    stocks= []
+#    """
+#    Then all "商品" should:
+#    """
+#    : [{
+#      stocks: []
+#    }]
+#    """
 
   Scenario: support override whole list
     When create "商品":
@@ -210,8 +210,29 @@ Feature: single
       }
     }]
     """
+#Feature changed = will not override whole map, but merge map
+#  Scenario: = should override whole map
+#    When create "商品":
+#    """
+#    name: book
+#    object= {
+#      key: k
+#    }
+#    object= {
+#      value: v
+#    }
+#    """
+#    Then all "商品" should:
+#    """
+#    : [{
+#      name: book
+#      object= {
+#        value: v
+#      }
+#    }]
+#    """
 
-  Scenario: = should override whole map
+  Scenario: = should merge map
     When create "商品":
     """
     name: book
@@ -227,6 +248,7 @@ Feature: single
     : [{
       name: book
       object= {
+        key: k
         value: v
       }
     }]
@@ -338,18 +360,30 @@ Feature: single
     }]
     """
 
-  Scenario: when use : [] pass raw empty list to property
+  Scenario: when use : [] for type Object
     When create "商品":
     """
     name: book
     object: []
-    stocks: []
     """
     Then all "商品" should:
     """
     : [{
       name: book
       object: []
+    }]
+    """
+
+  Scenario: when use : [] for type List
+    When create "商品":
+    """
+    name: book
+    stocks: []
+    """
+    Then all "商品" should:
+    """
+    : [{
+      name: book
       stocks: []
     }]
     """
