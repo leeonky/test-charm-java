@@ -1,7 +1,8 @@
 dependencies {
     api project(':DAL-java')
-    implementation project(':DAL-extension-basic')
     api project(':jfactory')
+    implementation project(':jfactory-DAL')
+    implementation project(':DAL-extension-basic')
     implementation project(':DAL-extension-jfactory')
     implementation libs.prod.slf4j.api
 

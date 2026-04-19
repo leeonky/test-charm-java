@@ -2,4 +2,5 @@ dependencies {
     implementation project(':jfactory')
     implementation project(':DAL-java')
     testImplementation project(':DAL-extension-basic')
+    testImplementation project(':java-compiler-util')
 }

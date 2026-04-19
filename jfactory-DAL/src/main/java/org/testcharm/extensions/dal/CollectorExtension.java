@@ -1,4 +1,4 @@
-package org.testcharm.dal.extensions.basic.collector;
+package org.testcharm.extensions.dal;
 
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.runtime.Data;
@@ -11,7 +11,7 @@ import org.testcharm.util.Collector;
 
 import java.util.Optional;
 
-public class Extension implements org.testcharm.dal.runtime.Extension {
+public class CollectorExtension implements org.testcharm.dal.runtime.Extension {
 
     @Override
     public void extend(DAL dal) {

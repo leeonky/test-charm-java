@@ -28,6 +28,7 @@ public class TablePropertyValue implements PropertyValue {
                 notAllowParallelReduce());
     }
 
+    @Deprecated
     public static PropertyValue table(String table) {
         return new TablePropertyValue(table);
     }

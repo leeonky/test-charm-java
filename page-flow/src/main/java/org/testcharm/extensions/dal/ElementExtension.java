@@ -3,6 +3,7 @@ package org.testcharm.extensions.dal;
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.ast.opt.DALOperator;
 import org.testcharm.dal.runtime.*;
+import org.testcharm.dal.runtime.Extension;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.pf.*;
 import org.testcharm.util.Sneaky;

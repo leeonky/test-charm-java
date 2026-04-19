@@ -1,4 +1,4 @@
-package org.testcharm.dal.extensions.jfactory;
+package org.testcharm.jfactory;
 
 
 import org.junit.jupiter.api.Test;

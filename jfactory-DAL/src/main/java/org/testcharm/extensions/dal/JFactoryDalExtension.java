@@ -4,9 +4,9 @@ import org.testcharm.dal.DAL;
 import org.testcharm.dal.ast.opt.DALOperator;
 import org.testcharm.dal.runtime.*;
 import org.testcharm.jfactory.JFactoryCollector;
+import org.testcharm.jfactory.JFactoryDAL;
 
-public class ExtensionForBuild implements Extension {
-
+public class JFactoryDalExtension implements org.testcharm.dal.runtime.Extension {
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder().registerOperator(Operators.EQUAL, new Operation<JFactoryCollector, ExpectationFactory>() {
@@ -30,6 +30,9 @@ public class ExtensionForBuild implements Extension {
                     runtimeData.data().value().intently();
                     return runtimeData.data().value();
                 })
+                .registerDataRemark(JFactoryDAL.JFactoryCollectorWithoutTraits.class,
+                        (RuntimeDataHandler<RemarkData<JFactoryDAL.JFactoryCollectorWithoutTraits>>)
+                                remarkData -> remarkData.data().map(collector -> collector.addTrait(remarkData.remark())))
         ;
     }
 }
