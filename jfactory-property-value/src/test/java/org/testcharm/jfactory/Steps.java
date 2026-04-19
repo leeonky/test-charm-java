@@ -3,12 +3,7 @@ package org.testcharm.jfactory;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.testcharm.jfactory.helper.ObjectValue;
-import org.testcharm.jfactory.helper.Specs;
 import org.testcharm.util.Classes;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.testcharm.dal.Assertions.expect;
 
@@ -22,7 +17,7 @@ public class Steps {
 
     @When("create {string}:")
     public void create(String traitSpec, String dal) {
-        context.createOne(traitSpec, dal);
+        context.create(traitSpec, dal);
     }
 
     @Then("all {string} should:")
@@ -42,7 +37,7 @@ public class Steps {
 
     @When("create some {string}:")
     public void createSome(String traitSpec, String dal) {
-        context.createSome(traitSpec, dal);
+        context.create(traitSpec, dal);
     }
 
     @When("create")
@@ -59,26 +54,8 @@ public class Steps {
 
         private Exception e;
 
-        public void createOne(String traitSpec, String dal) {
+        public void create(String traitSpec, String dal) {
             jFactoryDAL.create(traitSpec, dal);
-
-//            jFactory.spec(traitSpec.split(" ")).properties(data(dal)).create();
-        }
-
-        public void createSome(String traitSpec, String dal) {
-            Object object = DataParser.parse(dal);
-            createSome(traitSpec, object);
-        }
-
-        private void createSome(String traitSpec, Object object) {
-            if (object instanceof List)
-                ((List<ObjectValue>) object).forEach(objectValue ->
-                        jFactory.spec(traitSpec.split(" ")).properties(objectValue.flat()).create());
-            else if (object instanceof ObjectValue)
-                jFactory.spec(traitSpec.split(" ")).properties(((ObjectValue) object).flat()).create();
-            else
-                jFactory.spec(traitSpec.split(" ")).properties((Map) object).create();
-
         }
 
         public void shouldBe(String spec, String content) {
@@ -87,7 +64,7 @@ public class Steps {
 
         public void tryToCreate(String traitSpec, String dal) {
             try {
-                createOne(traitSpec, dal);
+                create(traitSpec, dal);
             } catch (Exception e) {
                 this.e = e;
             }
@@ -98,8 +75,7 @@ public class Steps {
         }
 
         public void create(String dal) {
-            Specs specData = DataParser.specs(dal);
-            specData.forEach(spec -> createSome(spec.traitSpec(), spec.properties()));
+            jFactoryDAL.createAll(dal);
         }
     }
 }

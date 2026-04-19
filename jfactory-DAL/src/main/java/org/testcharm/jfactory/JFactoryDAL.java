@@ -46,7 +46,7 @@ public class JFactoryDAL {
     public void createAll(String expressions) {
         Specs specs = new Specs();
         Evaluator.evaluateAll(expressions).by(dal).on(specs);
-        specs.getCollectors().forEach(pair -> create(pair.getFirst(), noop(), pair.getSecond()));
+        specs.getCollectors().forEach(pair -> create(pair.getSecond().getTraits() + " " + pair.getFirst(), noop(), pair.getSecond()));
     }
 
     @SuppressWarnings("unchecked")
@@ -60,22 +60,39 @@ public class JFactoryDAL {
         }
     }
 
-    private String[] asArray(String traitsSpec) {
-        return traitsSpec.split(", |,| ");
+    private static String[] asArray(String traitsSpec) {
+        return traitsSpec.trim().split(", |,| ");
     }
 
     class Specs implements ProxyObject {
-        private final List<Pair<String, JFactoryCollector>> collectors = new ArrayList<>();
+        private final List<Pair<String, JFactoryCollectorWithoutTraits>> collectors = new ArrayList<>();
 
         @Override
         public Object getValue(Object property) {
-            JFactoryCollector collector = jFactory.collector(asArray((String) property));
+            JFactoryCollectorWithoutTraits collector = new JFactoryCollectorWithoutTraits(jFactory);
             collectors.add(Pair.pair((String) property, collector));
             return collector;
         }
 
-        public List<Pair<String, JFactoryCollector>> getCollectors() {
+        public List<Pair<String, JFactoryCollectorWithoutTraits>> getCollectors() {
             return collectors;
+        }
+    }
+
+    public static class JFactoryCollectorWithoutTraits extends JFactoryCollector {
+        private String traits = "";
+
+        JFactoryCollectorWithoutTraits(JFactory jFactory) {
+            super(jFactory, Object.class);
+        }
+
+        public JFactoryCollectorWithoutTraits addTrait(String traits) {
+            this.traits = traits;
+            return this;
+        }
+
+        public String getTraits() {
+            return traits;
         }
     }
 }
