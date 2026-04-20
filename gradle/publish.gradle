@@ -65,6 +65,8 @@ subprojects {
         publishing.publications.mavenJava {
             if (project.plugins.hasPlugin('com.gradleup.shadow')) {
                 from(components.shadow)
+                artifact tasks.named('sourcesJar')
+                artifact tasks.named('javadocJar')
             } else {
                 from(components.java)
             }
