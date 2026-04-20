@@ -1,4 +1,4 @@
-package org.testcharm.jfactory;
+package org.testcharm.jfactory.legacy1;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;

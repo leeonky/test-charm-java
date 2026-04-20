@@ -34,7 +34,7 @@
       and [0].name='book'
     """
 
-#  Deprecated when use _ to indicate the spec
+#  Feature removed when use _ to indicate the spec
 #  场景: 准备多层购物车数据
 #    假如存在"购物车"：
 #    """

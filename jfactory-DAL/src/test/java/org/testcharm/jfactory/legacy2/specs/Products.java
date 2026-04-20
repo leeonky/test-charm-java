@@ -1,8 +1,8 @@
-package org.testcharm.jfactory.specs;
+package org.testcharm.jfactory.legacy2.specs;
 
 import org.testcharm.jfactory.Spec;
 import org.testcharm.jfactory.Trait;
-import org.testcharm.jfactory.entity.Product;
+import org.testcharm.jfactory.legacy2.entity.Product;
 
 public class Products {
     public static class 商品 extends Spec<Product> {

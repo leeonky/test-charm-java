@@ -1,8 +1,11 @@
-package org.testcharm.jfactory;
+package org.testcharm.jfactory.legacy2;
 
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.testcharm.jfactory.JFactory;
+import org.testcharm.jfactory.JFactoryDAL;
+import org.testcharm.jfactory.Spec;
 import org.testcharm.util.Classes;
 
 import static org.testcharm.dal.Assertions.expect;
@@ -47,7 +50,7 @@ public class Steps {
 
     public static class Context {
         private final JFactory jFactory = new JFactory() {{
-            Classes.assignableTypesOf(Spec.class, "org.testcharm.jfactory.specs").forEach(this::register);
+            Classes.assignableTypesOf(Spec.class, "org.testcharm.jfactory.legacy2.specs").forEach(this::register);
         }};
 
         private final JFactoryDAL jFactoryDAL = new JFactoryDAL(jFactory);

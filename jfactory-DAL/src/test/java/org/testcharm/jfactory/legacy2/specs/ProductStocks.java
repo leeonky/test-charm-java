@@ -1,8 +1,8 @@
-package org.testcharm.jfactory.specs;
+package org.testcharm.jfactory.legacy2.specs;
 
 import org.testcharm.jfactory.Spec;
 import org.testcharm.jfactory.Trait;
-import org.testcharm.jfactory.entity.ProductStock;
+import org.testcharm.jfactory.legacy2.entity.ProductStock;
 
 public class ProductStocks {
     public static class 库存 extends Spec<ProductStock> {

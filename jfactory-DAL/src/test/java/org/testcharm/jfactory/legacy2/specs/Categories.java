@@ -1,7 +1,7 @@
-package org.testcharm.jfactory.specs;
+package org.testcharm.jfactory.legacy2.specs;
 
 import org.testcharm.jfactory.Spec;
-import org.testcharm.jfactory.entity.Category;
+import org.testcharm.jfactory.legacy2.entity.Category;
 
 public class Categories {
     public static class 品类 extends Spec<Category> {

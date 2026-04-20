@@ -1,4 +1,4 @@
-package org.testcharm.jfactory.entity;
+package org.testcharm.jfactory.legacy2.entity;
 
 import lombok.Getter;
 import lombok.Setter;
