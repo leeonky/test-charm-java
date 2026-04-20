@@ -6,8 +6,8 @@ import org.testcharm.dal.runtime.*;
 import org.testcharm.dal.runtime.checker.Checker;
 import org.testcharm.dal.runtime.checker.CheckingContext;
 import org.testcharm.dal.runtime.inspector.DumperFactory;
+import org.testcharm.jfactory.BuilderInDAL;
 import org.testcharm.jfactory.JFactoryCollector;
-import org.testcharm.jfactory.JFactoryDAL;
 import org.testcharm.util.Collector;
 
 import java.util.Optional;
@@ -63,8 +63,8 @@ public class CollectorInDAL implements org.testcharm.dal.runtime.Extension {
                     runtimeData.data().value().intently();
                     return runtimeData.data().value();
                 })
-                .registerDataRemark(JFactoryDAL.JFactoryCollectorWithoutTraits.class,
-                        (RuntimeDataHandler<RemarkData<JFactoryDAL.JFactoryCollectorWithoutTraits>>)
+                .registerDataRemark(BuilderInDAL.JFactoryCollectorWithoutTraits.class,
+                        (RuntimeDataHandler<RemarkData<BuilderInDAL.JFactoryCollectorWithoutTraits>>)
                                 remarkData -> remarkData.data().map(collector -> collector.addTrait(remarkData.remark())))
         ;
     }

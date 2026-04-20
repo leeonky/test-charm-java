@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.nexus.publish)
 }
 
-ext.disabledPublishProjects = ['feature-summary']
+ext.disabledPublishProjects = ['feature-summary', 'jfactory-DAL']
 
 ext.cucumberProjects = [
         [name: 'interpreter-core', glues: ['org.testcharm.interpreter']],

@@ -15,10 +15,6 @@ Feature: JFactory-DAL API
       """
       JFactory jFactory = new JFactory();
       """
-    Given the following declarations:
-      """
-      JFactoryDAL jd = JFactoryDAL.instance(jFactory);
-      """
     And register as follows:
       """
       jFactory.register(BeanSpec.class);
@@ -27,7 +23,7 @@ Feature: JFactory-DAL API
   Scenario: create(Class<T> clazz, String expression)
     When evaluating the following code:
       """
-      jd.create(Bean.class, "str1: hello\nstr2: world");
+      jFactory.useDAL().create(Bean.class, "str1: hello\nstr2: world");
       """
     Then the result should be:
       """
@@ -41,7 +37,7 @@ Feature: JFactory-DAL API
   Scenario: collection create(String traitsSpec, String expression)
     When evaluating the following code:
       """
-      jd.create("BeanSpec", "[{str1: hello, str2: world}, {str1: hello2, str2: world2}]");
+      jFactory.useDAL().create("BeanSpec", "[{str1: hello, str2: world}, {str1: hello2, str2: world2}]");
       """
     Then the result should be:
       """
@@ -53,7 +49,7 @@ Feature: JFactory-DAL API
   Scenario: single create(String traitsSpec, String expression)
     When evaluating the following code:
       """
-      jd.create("BeanSpec", "str1: hello\nstr2: world");
+      jFactory.useDAL().create("BeanSpec", "str1: hello\nstr2: world");
       """
     Then the result should be:
       """

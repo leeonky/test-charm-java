@@ -11,8 +11,8 @@ import io.cucumber.java.zh_cn.假如;
 import io.cucumber.java.zh_cn.并且;
 import io.cucumber.java.zh_cn.那么;
 import org.testcharm.jfactory.Builder;
+import org.testcharm.jfactory.BuilderInDAL;
 import org.testcharm.jfactory.JFactory;
-import org.testcharm.jfactory.JFactoryDAL;
 import org.testcharm.util.BeanClass;
 import org.testcharm.util.CollectionHelper;
 import org.testcharm.util.Property;
@@ -28,32 +28,23 @@ import static org.testcharm.dal.Assertions.expect;
 
 public class JData {
     private final JFactory jFactory;
-    private final JFactoryDAL jFactoryDAL;
+    private final BuilderInDAL builderInDAL;
 
     public JData(JFactory jFactory) {
         this.jFactory = jFactory;
-        jFactoryDAL = JFactoryDAL.instance(jFactory);
+        builderInDAL = jFactory.useDAL();
     }
 
-    static List<Map<String, String>> asMaps(DataTable dataTable) {
-        if (needTranspose(dataTable))
-            dataTable = DataTable.create(removeTransposeSymbol(dataTable));
-        return dataTable.asMaps();
-    }
-
-    @SuppressWarnings("unchecked")
     @假如("存在{string}:")
     @并且("存在{string}：")
     @Given("Exists data {string}:")
     @And("exists data {string}:")
-    public void prepare(String traitsSpec, DocData docData) {
+    public <T> List<T> prepare(String traitsSpec, DocData docData) {
         switch (docData.type) {
             case EXPRESSION:
-                prepare(traitsSpec, docData.expression());
-                break;
+                return prepare(traitsSpec, docData.expression());
             case MAP:
-                prepare(traitsSpec, docData.maps());
-                break;
+                return prepare(traitsSpec, docData.maps());
             default:
                 throw new IllegalStateException();
         }
@@ -66,11 +57,14 @@ public class JData {
 
     @DataTableType
     public DocData transform(DataTable dataTable) {
-        return new DocData(asMaps(dataTable));
+        if (needTranspose(dataTable))
+            dataTable = DataTable.create(removeTransposeSymbol(dataTable));
+        return new DocData(dataTable.asMaps());
     }
 
-    public <T> T prepare(String traitsSpec, String expressions) {
-        return jFactoryDAL.create(traitsSpec, expressions);
+    @SuppressWarnings("unchecked")
+    public <T> List<T> prepare(String traitsSpec, String expressions) {
+        return (List<T>) CollectionHelper.asStream(builderInDAL.create(traitsSpec, expressions)).collect(toList());
     }
 
     private String[] asArray(String traitsSpec) {
@@ -150,10 +144,8 @@ public class JData {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <T> List<T> prepareAttachments(String beanProperty, String traitsSpec, String expression) {
-        List<T> attachments = (List<T>) CollectionHelper.asStream(prepare(traitsSpec, expression)).collect(toList());
-        return setupAssociation(beanProperty, attachments);
+        return setupAssociation(beanProperty, prepare(traitsSpec, expression));
     }
 
     @SuppressWarnings("unchecked")
@@ -205,9 +197,11 @@ public class JData {
         }
     }
 
-    public <T> T prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression,
-                                    String expression) {
-        return jFactoryDAL.create(traitsSpec, expression, s -> s.collect(reverseAssociationProperty).setValue(query(queryExpression)));
+    @SuppressWarnings("unchecked")
+    public <T> List<T> prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression,
+                                          String expression) {
+        return (List<T>) CollectionHelper.asStream(builderInDAL.create(traitsSpec,
+                expression, s -> s.collect(reverseAssociationProperty).setValue(query(queryExpression)))).collect(toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -241,7 +235,7 @@ public class JData {
     @Given("Exists data:")
     @And("exists data:")
     public void prepare(String data) {
-        jFactoryDAL.createAll(data);
+        builderInDAL.createAll(data);
     }
 
     @假如("数据:")
@@ -287,7 +281,7 @@ public class JData {
         }
     }
 
-    static class DocData {
+    public static class DocData {
         final Type type;
         final Object data;
 

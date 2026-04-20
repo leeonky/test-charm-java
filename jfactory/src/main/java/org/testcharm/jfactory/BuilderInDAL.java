@@ -13,17 +13,13 @@ import java.util.function.Consumer;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.util.function.Consumers.noop;
 
-public class JFactoryDAL {
+public class BuilderInDAL {
     private final JFactory jFactory;
     private final DAL dal;
 
-    public JFactoryDAL(JFactory jFactory, DAL dal) {
+    BuilderInDAL(JFactory jFactory, DAL dal) {
         this.jFactory = jFactory;
         this.dal = dal;
-    }
-
-    public static JFactoryDAL instance(JFactory jFactory) {
-        return new JFactoryDAL(jFactory, DAL.dal("JFactory"));
     }
 
     @SuppressWarnings("unchecked")

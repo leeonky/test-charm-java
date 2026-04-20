@@ -1,5 +1,6 @@
 package org.testcharm.jfactory;
 
+import org.testcharm.dal.DAL;
 import org.testcharm.util.BeanClass;
 import org.testcharm.util.PropertyWriter;
 import org.testcharm.util.TypeReference;
@@ -193,5 +194,13 @@ public class JFactory {
 
     public JFactoryCollector collector(String... traitsSpec) {
         return new JFactoryCollector(this, traitsSpec);
+    }
+
+    public BuilderInDAL useDAL() {
+        return useDAL(DAL.dal("JFactory"));
+    }
+
+    public BuilderInDAL useDAL(DAL dal) {
+        return new BuilderInDAL(this, dal);
     }
 }

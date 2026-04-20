@@ -1,7 +1,6 @@
 dependencies {
     api project(':bean-util')
-
-    testImplementation project(':DAL-java')
+    api project(':DAL-java')
     testImplementation project(':DAL-extension-basic')
     testImplementation project(':DAL-extension-jfactory')
     testImplementation project(':java-compiler-util')

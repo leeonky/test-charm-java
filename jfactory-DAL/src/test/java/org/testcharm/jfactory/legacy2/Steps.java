@@ -3,8 +3,8 @@ package org.testcharm.jfactory.legacy2;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.testcharm.jfactory.BuilderInDAL;
 import org.testcharm.jfactory.JFactory;
-import org.testcharm.jfactory.JFactoryDAL;
 import org.testcharm.jfactory.Spec;
 import org.testcharm.util.Classes;
 
@@ -53,12 +53,12 @@ public class Steps {
             Classes.assignableTypesOf(Spec.class, "org.testcharm.jfactory.legacy2.specs").forEach(this::register);
         }};
 
-        private final JFactoryDAL jFactoryDAL = JFactoryDAL.instance(jFactory);
+        private final BuilderInDAL builderInDAL = jFactory.useDAL();
 
         private Exception e;
 
         public void create(String traitSpec, String dal) {
-            jFactoryDAL.create(traitSpec, dal);
+            builderInDAL.create(traitSpec, dal);
         }
 
         public void shouldBe(String spec, String content) {
@@ -78,7 +78,7 @@ public class Steps {
         }
 
         public void create(String dal) {
-            jFactoryDAL.createAll(dal);
+            builderInDAL.createAll(dal);
         }
     }
 }
