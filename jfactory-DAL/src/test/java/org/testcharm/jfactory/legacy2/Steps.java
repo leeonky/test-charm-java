@@ -53,7 +53,7 @@ public class Steps {
             Classes.assignableTypesOf(Spec.class, "org.testcharm.jfactory.legacy2.specs").forEach(this::register);
         }};
 
-        private final JFactoryDAL jFactoryDAL = new JFactoryDAL(jFactory);
+        private final JFactoryDAL jFactoryDAL = JFactoryDAL.instance(jFactory);
 
         private Exception e;
 

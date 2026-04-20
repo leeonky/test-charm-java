@@ -14,6 +14,7 @@ import org.testcharm.jfactory.Builder;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.jfactory.JFactoryDAL;
 import org.testcharm.util.BeanClass;
+import org.testcharm.util.CollectionHelper;
 import org.testcharm.util.Property;
 
 import java.util.*;
@@ -31,7 +32,7 @@ public class JData {
 
     public JData(JFactory jFactory) {
         this.jFactory = jFactory;
-        jFactoryDAL = new JFactoryDAL(jFactory);
+        jFactoryDAL = JFactoryDAL.instance(jFactory);
     }
 
     static List<Map<String, String>> asMaps(DataTable dataTable) {
@@ -149,8 +150,10 @@ public class JData {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public <T> List<T> prepareAttachments(String beanProperty, String traitsSpec, String expression) {
-        return setupAssociation(beanProperty, prepare(traitsSpec, expression));
+        List<T> attachments = (List<T>) CollectionHelper.asStream(prepare(traitsSpec, expression)).collect(toList());
+        return setupAssociation(beanProperty, attachments);
     }
 
     @SuppressWarnings("unchecked")
@@ -202,8 +205,8 @@ public class JData {
         }
     }
 
-    public <T> List<T> prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression,
-                                          String expression) {
+    public <T> T prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression,
+                                    String expression) {
         return jFactoryDAL.create(traitsSpec, expression, s -> s.collect(reverseAssociationProperty).setValue(query(queryExpression)));
     }
 

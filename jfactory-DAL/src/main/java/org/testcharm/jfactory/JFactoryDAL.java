@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.util.function.Consumers.noop;
 
@@ -23,8 +22,15 @@ public class JFactoryDAL {
         this.dal = dal;
     }
 
-    public JFactoryDAL(JFactory jFactory) {
-        this(jFactory, DAL.dal("JFactory"));
+    public static JFactoryDAL instance(JFactory jFactory) {
+        return new JFactoryDAL(jFactory, DAL.dal("JFactory"));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T create(Class<T> type, String expression) {
+        JFactoryCollector collector = jFactory.collector(type);
+        evaluator(expression).on(collector);
+        return (T) collector.build();
     }
 
     public <T> T create(String traitsSpec, String expressions) {
@@ -33,14 +39,18 @@ public class JFactoryDAL {
 
     public <T> T create(String traitsSpec, String expressions, Consumer<JFactoryCollector> consumer) {
         JFactoryCollector collector = jFactory.collector(Object.class);
+        evaluator(expressions).on(collector);
+        return create(traitsSpec, consumer, collector);
+    }
+
+    public Evaluator evaluator(String expressions) {
         String trim = expressions.trim();
         int codeOffset = 0;
         if (trim.startsWith("{") || trim.startsWith("|") || trim.startsWith("[")) {
             expressions = ":\n" + expressions;
             codeOffset = 2;
         }
-        Evaluator.evaluateAll(expressions).codeOffset(codeOffset).by(dal).on(collector);
-        return create(traitsSpec, consumer, collector);
+        return Evaluator.evaluateAll(expressions).codeOffset(codeOffset).by(dal);
     }
 
     public void createAll(String expressions) {
@@ -56,7 +66,7 @@ public class JFactoryDAL {
                     .map(sub -> sub.traitsSpec(asArray(traitsSpec)).build()).collect(toList());
         else {
             consumer.accept(collector);
-            return (T) singletonList(collector.traitsSpec(asArray(traitsSpec)).build());
+            return (T) collector.traitsSpec(asArray(traitsSpec)).build();
         }
     }
 
