@@ -3,7 +3,6 @@ package org.testcharm.extensions.dal;
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.ast.opt.DALOperator;
 import org.testcharm.dal.runtime.*;
-import org.testcharm.dal.runtime.Extension;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.pf.*;
 import org.testcharm.util.Sneaky;
@@ -11,10 +10,9 @@ import org.testcharm.util.Sneaky;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
-public class ElementExtension implements Extension {
+public class ElementDALOperation implements Extension {
 
     @Override
-    @SuppressWarnings("unchecked")
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerPropertyAccessor(WebElement.class,
@@ -70,15 +68,15 @@ public class ElementExtension implements Extension {
         }
     }
 
-    private static class VerificationInFilter implements Operation<ElementExtension.ElementsFilterable, Object> {
+    private static class VerificationInFilter implements Operation<ElementDALOperation.ElementsFilterable, Object> {
 
         @Override
         public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-            return v1.instanceOf(ElementExtension.ElementsFilterable.class);
+            return v1.instanceOf(ElementDALOperation.ElementsFilterable.class);
         }
 
         @Override
-        public Object operate(Data<ElementExtension.ElementsFilterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+        public Object operate(Data<ElementDALOperation.ElementsFilterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
             return v1.value().filter(operator, v2, context);
         }
     }

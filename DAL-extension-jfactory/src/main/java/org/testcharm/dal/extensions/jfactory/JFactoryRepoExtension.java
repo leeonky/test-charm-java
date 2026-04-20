@@ -1,4 +1,4 @@
-package org.testcharm.extensions.dal;
+package org.testcharm.dal.extensions.jfactory;
 
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.runtime.*;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 
-public class ExtensionForVerification implements Extension {
+public class JFactoryRepoExtension implements Extension {
     @Override
     public void extend(DAL dal) {
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();

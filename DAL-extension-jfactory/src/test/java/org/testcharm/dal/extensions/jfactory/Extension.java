@@ -1,4 +1,4 @@
-package org.testcharm.dal.extensions;
+package org.testcharm.dal.extensions.jfactory;
 
 import org.testcharm.dal.DAL;
 import org.testcharm.jfactory.JFactoryCollector;

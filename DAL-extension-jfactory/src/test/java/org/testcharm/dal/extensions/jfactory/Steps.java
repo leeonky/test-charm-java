@@ -4,8 +4,6 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import org.testcharm.dal.DAL;
-import org.testcharm.dal.extensions.Beans;
-import org.testcharm.dal.extensions.Orders;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.jfactory.cucumber.JData;
 
