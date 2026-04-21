@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public class JFactoryCollector extends Collector {
     protected final JFactory jFactory;
-    protected final Class<?> defaultType;
+    protected Class<?> defaultType;
     protected String[] traitsSpec;
     private boolean isSpecifySpec = false;
     private boolean raw = false;
@@ -53,6 +53,15 @@ public class JFactoryCollector extends Collector {
     public Collector traitsSpec(String[] traitsSpec) {
         isSpecifySpec = true;
         this.traitsSpec = Arrays.copyOf(traitsSpec, traitsSpec.length);
+        return this;
+    }
+
+    public Collector traitsSpec(String traitsSpec) {
+        return traitsSpec(traitsSpec.trim().split(", |,| "));
+    }
+
+    public Collector defaultType(Class<?> defaultType) {
+        this.defaultType = defaultType;
         return this;
     }
 

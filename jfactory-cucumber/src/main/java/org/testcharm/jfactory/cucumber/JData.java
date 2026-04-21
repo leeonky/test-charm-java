@@ -10,7 +10,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.zh_cn.假如;
 import io.cucumber.java.zh_cn.并且;
 import io.cucumber.java.zh_cn.那么;
-import org.testcharm.jfactory.Builder;
 import org.testcharm.jfactory.BuilderInDAL;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.util.BeanClass;
@@ -67,10 +66,6 @@ public class JData {
         return (List<T>) CollectionHelper.asStream(builderInDAL.create(traitsSpec, expressions)).collect(toList());
     }
 
-    private String[] asArray(String traitsSpec) {
-        return traitsSpec.split(", |,| ");
-    }
-
     @SuppressWarnings("unchecked")
     @SafeVarargs
     public final <T> List<T> prepare(String traitsSpec, Map<String, ?>... data) {
@@ -79,7 +74,33 @@ public class JData {
 
     @SuppressWarnings("unchecked")
     public <T> List<T> prepare(String traitsSpec, List<? extends Map<String, ?>> data) {
-        return (List<T>) data.stream().map(map -> toBuild(traitsSpec).properties(map).create()).collect(toList());
+        return (List<T>) data.stream().map(map -> jFactory.spec(traitsSpec.split(", |,| "))
+                .properties(map).create()).collect(toList());
+    }
+
+    public <T> List<T> prepare(Class<T> type, DocData docData) {
+        switch (docData.type) {
+            case EXPRESSION:
+                return prepare(type, docData.expression());
+            case MAP:
+                return prepare(type, docData.maps());
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public final <T> List<T> prepare(Class<T> type, String expressions) {
+        return (List<T>) CollectionHelper.asStream(builderInDAL.create(type, expressions)).collect(toList());
+    }
+
+    @SafeVarargs
+    public final <T> List<T> prepare(Class<T> type, Map<String, ?>... data) {
+        return prepare(type, asList(data));
+    }
+
+    public <T> List<T> prepare(Class<T> type, List<? extends Map<String, ?>> data) {
+        return data.stream().map(map -> jFactory.type(type).properties(map).create()).collect(toList());
     }
 
     private static List<List<String>> removeTransposeSymbol(DataTable dataTable) {
@@ -246,11 +267,6 @@ public class JData {
     @Given("All data should be:")
     public void allDataShouldBe(String dalExpression) {
         expect(jFactory).should(dalExpression);
-    }
-
-
-    private Builder<Object> toBuild(String traitsSpec) {
-        return jFactory.spec(asArray(traitsSpec));
     }
 
     private class QueryExpression {

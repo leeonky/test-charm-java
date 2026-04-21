@@ -22,6 +22,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.testcharm.dal.Assertions.expect;
 
 class JDataTest {
     private final List<Object> persisted = new ArrayList<>();
@@ -60,6 +61,27 @@ class JDataTest {
 
             assertThat(list).isEqualTo(persisted)
                     .extracting("name", "color").containsExactly(tuple("book", "red"), tuple("bicycle", "red"));
+        }
+
+        @Test
+        void persist_object_list_with_type_and_expression() {
+            jData.prepare(Product.class, "[{name: book} {name: bicycle}]");
+
+            expect(persisted).should(": [{name: book} {name: bicycle}]");
+        }
+
+        @Test
+        void persist_object_list_with_type_and_row_list() {
+            jData.prepare(Product.class,
+                    new HashMap<String, Object>() {{
+                        put("name", "book");
+                    }},
+                    new HashMap<String, Object>() {{
+                        put("name", "bicycle");
+                    }}
+            );
+
+            expect(persisted).should(": [{name: book} {name: bicycle}]");
         }
 
         @Test

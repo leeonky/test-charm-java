@@ -58,7 +58,7 @@ public class CollectorInDAL implements org.testcharm.dal.runtime.Extension {
                 })
 
                 .registerDataRemark(JFactoryCollector.class, remarkData ->
-                        remarkData.data().value().traitsSpec(remarkData.remark().split(", |,| ")))
+                        remarkData.data().value().traitsSpec(remarkData.remark()))
                 .registerExclamation(JFactoryCollector.class, runtimeData -> {
                     runtimeData.data().value().intently();
                     return runtimeData.data().value();

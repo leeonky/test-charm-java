@@ -24,9 +24,9 @@ public class BuilderInDAL {
 
     @SuppressWarnings("unchecked")
     public <T> T create(Class<T> type, String expression) {
-        JFactoryCollector collector = jFactory.collector(type);
+        JFactoryCollector collector = jFactory.collector();
         evaluator(expression).on(collector);
-        return (T) collector.build();
+        return create(c -> c.defaultType(type), collector);
     }
 
     public <T> T create(String traitsSpec, String expressions) {
@@ -36,7 +36,8 @@ public class BuilderInDAL {
     public <T> T create(String traitsSpec, String expressions, Consumer<JFactoryCollector> consumer) {
         JFactoryCollector collector = jFactory.collector(Object.class);
         evaluator(expressions).on(collector);
-        return create(traitsSpec, consumer, collector);
+        Consumer<JFactoryCollector> consumer1 = jFactoryCollector -> jFactoryCollector.traitsSpec(traitsSpec);
+        return create(consumer1.andThen(consumer), collector);
     }
 
     public Evaluator evaluator(String expressions) {
@@ -52,22 +53,19 @@ public class BuilderInDAL {
     public void createAll(String expressions) {
         Specs specs = new Specs();
         Evaluator.evaluateAll(expressions).by(dal).on(specs);
-        specs.getCollectors().forEach(pair -> create(pair.getSecond().getTraits() + " " + pair.getFirst(), noop(), pair.getSecond()));
+        specs.getCollectors().forEach(pair -> create(
+                jFactoryCollector -> jFactoryCollector.traitsSpec(pair.getSecond().getTraits() + " " + pair.getFirst()), pair.getSecond()));
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T create(String traitsSpec, Consumer<JFactoryCollector> consumer, JFactoryCollector collector) {
+    private <T> T create(Consumer<JFactoryCollector> consumer, JFactoryCollector collector) {
         if (collector.type() == Collector.Type.LIST)
             return (T) collector.elements().values().stream().peek(consumer)
-                    .map(sub -> sub.traitsSpec(asArray(traitsSpec)).build()).collect(toList());
+                    .map(JFactoryCollector::build).collect(toList());
         else {
             consumer.accept(collector);
-            return (T) collector.traitsSpec(asArray(traitsSpec)).build();
+            return (T) collector.build();
         }
-    }
-
-    private static String[] asArray(String traitsSpec) {
-        return traitsSpec.trim().split(", |,| ");
     }
 
     class Specs implements ProxyObject {
