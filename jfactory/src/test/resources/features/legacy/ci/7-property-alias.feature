@@ -460,3 +460,63 @@ Feature: property alias
     """
     value2= hello
     """
+
+  Scenario: alias in element spec[]
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    Given the following bean class:
+    """
+    public class BeanList {
+      public List<Bean> beans;
+    }
+    """
+    And the following spec class:
+    """
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public class ABean extends Spec<Bean> {
+    }
+    """
+    When build:
+    """
+    jFactory.type(BeanList.class)
+      .property("beans(ABean[])[0].aliasOfValue", "hello")
+      .property("beans(ABean[])[1].aliasOfValue", "world")
+      .create();
+    """
+    Then the result should:
+    """
+    beans.value[]: [hello world]
+    """
+
+  Scenario: alias in root element spec[]
+    Given the following bean class:
+    """
+    public class Bean {
+      public String value;
+    }
+    """
+    And the following spec class:
+    """
+    @PropertyAliases(
+            @PropertyAlias(alias = "aliasOfValue", property = "value")
+    )
+    public class ABean extends Spec<Bean> {
+    }
+    """
+    When build:
+    """
+    jFactory.spec("ABean[]")
+      .property("[0].aliasOfValue", "hello")
+      .property("[1].aliasOfValue", "world")
+      .create();
+    """
+    Then the result should:
+    """
+    value[]: [hello world]
+    """

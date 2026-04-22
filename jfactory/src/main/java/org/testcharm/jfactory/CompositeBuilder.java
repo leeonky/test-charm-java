@@ -21,9 +21,9 @@ abstract class CompositeBuilder extends PropertyNode {
         this.traitsSpec = traitsSpec;
     }
 
-    protected Stream<PropertyNode> createSubNodes(ObjectFactory<?> factory) {
+    public Stream<PropertyNode> createSubNodes(ObjectFactory<?> factory) {
         return subProperties.entrySet().stream().map(e -> PropertyNode.create(e.getKey(), e.getValue(),
-                        BeanClass.cast(this, CollectionNode.class).orElse(null), factory))
+                        BeanClass.cast(this, CollectionNode.class).orElse(null), factory, traitsSpec.isCollectionElementSpec() ? traitsSpec : new TraitsSpec()))
                 .collect(Collectors.groupingBy(PropertyNode::property, LinkedHashMap::new, Collectors.toList())).values().stream()
                 .map(grouped -> grouped.stream().reduce(PropertyNode::mergeTo))
                 .filter(Optional::isPresent).map(Optional::get);

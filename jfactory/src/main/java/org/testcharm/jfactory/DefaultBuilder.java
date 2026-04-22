@@ -11,6 +11,8 @@ import static org.testcharm.jfactory.DefaultBuilder.BuildFrom.SPEC;
 import static org.testcharm.util.function.Extension.firstPresent;
 
 class DefaultBuilder<T> implements Builder<T> {
+    private final TraitsSpec defaultTraitsSpec;
+
     enum BuildFrom {
         TYPE, SPEC
     }
@@ -41,10 +43,15 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory, BuildFrom buildFrom) {
+        this(objectFactory, jFactory, buildFrom, new TraitsSpec());
+    }
+
+    public DefaultBuilder(ObjectFactory<T> objectFactory, JFactory jFactory, BuildFrom buildFrom, TraitsSpec defaultTraitsSpec) {
         this.jFactory = jFactory;
         this.objectFactory = objectFactory;
         properties = new ArrayList<>();
         this.buildFrom = buildFrom;
+        this.defaultTraitsSpec = defaultTraitsSpec;
     }
 
     @Override
@@ -105,7 +112,7 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     private DefaultBuilder<T> clone(ObjectFactory<T> objectFactory, BuildFrom from) {
-        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory, from);
+        DefaultBuilder<T> builder = new DefaultBuilder<>(objectFactory, jFactory, from, defaultTraitsSpec);
         builder.properties.addAll(properties);
         builder.traits.addAll(traits);
         builder.arguments.merge(arguments);
@@ -123,11 +130,11 @@ class DefaultBuilder<T> implements Builder<T> {
             if (isCollection(value)) {
                 List<Object> objects = CollectionHelper.convertToStream(value).collect(Collectors.toList());
                 if (objects.isEmpty() || !property.contains("$"))
-                    newBuilder.properties.add(PropertyNode.create(trimIndexAlias(property), value, null, objectFactory));
+                    newBuilder.properties.add(PropertyNode.create(trimIndexAlias(property), value, null, objectFactory, defaultTraitsSpec));
                 else for (int i = 0; i < objects.size(); i++)
-                    newBuilder.properties.add(PropertyNode.create(property.replaceFirst("\\$", String.valueOf(i)), objects.get(i), null, objectFactory));
+                    newBuilder.properties.add(PropertyNode.create(property.replaceFirst("\\$", String.valueOf(i)), objects.get(i), null, objectFactory, defaultTraitsSpec));
             } else
-                newBuilder.properties.add(PropertyNode.create(property, value, null, objectFactory));
+                newBuilder.properties.add(PropertyNode.create(property, value, null, objectFactory, defaultTraitsSpec));
         });
         return newBuilder;
     }

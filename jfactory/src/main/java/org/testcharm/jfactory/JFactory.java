@@ -79,6 +79,7 @@ public class JFactory {
     }
 
     public <T> Builder<T> spec(String... traitsAndSpec) {
+        TraitsSpec traitsSpec = new TraitsSpec(traitsAndSpec);
         String specName = traitsAndSpec[traitsAndSpec.length - 1];
         if (specName.endsWith("[]")) {
             specName = specName.replace("[]", "");
@@ -86,7 +87,7 @@ public class JFactory {
             ObjectFactory<?> listFactory = new ObjectFactory<>(reify(List.class, specFactory.getType().getType()), factorySet);
             traitsAndSpec[traitsAndSpec.length - 1] = specName;
             listFactory.spec(spec -> spec.property("[]").is(traitsAndSpec));
-            return new DefaultBuilder(listFactory, this, TYPE);
+            return new DefaultBuilder(listFactory, this, TYPE, traitsSpec);
         }
         return new DefaultBuilder<>((ObjectFactory<T>) specFactory(specName), this, SPEC)
                 .traits(Arrays.copyOf(traitsAndSpec, traitsAndSpec.length - 1));

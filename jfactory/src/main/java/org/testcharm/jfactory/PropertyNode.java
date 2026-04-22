@@ -42,8 +42,8 @@ abstract class PropertyNode {
         return this;
     }
 
-    static PropertyNode create(String key, Object value, CollectionNode parentCollectionBuilder, ObjectFactory<?> objectFactory) {
-        return new BuilderParser(key, parentCollectionBuilder, objectFactory).parse(value);
+    static PropertyNode create(String key, Object value, CollectionNode parentCollectionBuilder, ObjectFactory<?> objectFactory, TraitsSpec defaultTraitsSpec) {
+        return new BuilderParser(key, parentCollectionBuilder, objectFactory, defaultTraitsSpec).parse(value);
     }
 
     public PropertyNode forceCreate() {
@@ -62,11 +62,13 @@ class BuilderParser extends TextCursor {
     private static final Pattern INDEX_PATTERN = Pattern.compile("\\[(-?\\d+)\\]");
     private final CollectionNode parent;
     private final ObjectFactory<?> objectFactory;
+    private final TraitsSpec defaultTraitsSpec;
 
-    public BuilderParser(String content, CollectionNode parent, ObjectFactory<?> objectFactory) {
+    public BuilderParser(String content, CollectionNode parent, ObjectFactory<?> objectFactory, TraitsSpec defaultTraitsSpec) {
         super(content);
         this.parent = parent;
         this.objectFactory = objectFactory;
+        this.defaultTraitsSpec = defaultTraitsSpec;
     }
 
     public PropertyNode parse(Object value) {
@@ -78,14 +80,14 @@ class BuilderParser extends TextCursor {
     private PropertyNode createPropertyNode(String property, Object value) {
         if (isEmpty()) {
             if (isEmptyMap(value))
-                return new ObjectNode(property, new TraitsSpec(), false);
+                return new ObjectNode(property, defaultTraitsSpec, false);
             return new ValueNode(property, transform(property, value));
         } else {
             return pop1(PATTERN_TRAIT_SPEC).map(TraitsSpec::new).map(traitsSpec -> {
                 if (isEmpty())
                     return new ObjectNode(property, traitsSpec, false);
                 return checkForceAndCreateNode(value, property, traitsSpec);
-            }).orElseGet(() -> checkForceAndCreateNode(value, property, new TraitsSpec()));
+            }).orElseGet(() -> checkForceAndCreateNode(value, property, defaultTraitsSpec));
         }
     }
 

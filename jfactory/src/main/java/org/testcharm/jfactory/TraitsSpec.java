@@ -27,8 +27,7 @@ class TraitsSpec {
         this.traits.addAll(asList(traits));
     }
 
-    public TraitsSpec(String traitsAndSpec) {
-        String[] items = traitsAndSpec.replace('(', ' ').replace(')', ' ').trim().split(", |,| ");
+    public TraitsSpec(String[] items) {
         originalSpec = items[items.length - 1];
         if (originalSpec != null) {
             collectionSpec = originalSpec.endsWith("[]");
@@ -38,6 +37,10 @@ class TraitsSpec {
             spec = null;
         }
         traits.addAll(asList(items).subList(0, items.length - 1));
+    }
+
+    public TraitsSpec(String traitsAndSpec) {
+        this(traitsAndSpec.replace('(', ' ').replace(')', ' ').trim().split(", |,| "));
     }
 
     public TraitsSpec() {
