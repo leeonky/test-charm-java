@@ -13,12 +13,12 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static org.testcharm.util.Sneaky.execute;
-import static org.testcharm.util.function.Extension.getFirstPresent;
 import static java.util.Comparator.comparing;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
+import static org.testcharm.util.Sneaky.execute;
+import static org.testcharm.util.function.Extension.getFirstPresent;
 
 public class CurryingMethod implements ProxyObject {
     private final List<CandidateMethod> candidateMethods;
@@ -139,6 +139,10 @@ public class CurryingMethod implements ProxyObject {
 
         public Object resolve() {
             resolved = true;
+            return invoke();
+        }
+
+        protected Object invoke() {
             return execute(() -> method.invoke(instance.value(),
                     curryingArguments.stream().map(CurryingArgument::properType).toArray()));
         }
@@ -173,7 +177,7 @@ public class CurryingMethod implements ProxyObject {
         }
 
         @Override
-        public Object resolve() {
+        protected Object invoke() {
             return execute(() -> method.invoke(null, concat(Stream.of(instance.value()),
                     curryingArguments.stream().map(CurryingArgument::properType)).toArray()));
         }
