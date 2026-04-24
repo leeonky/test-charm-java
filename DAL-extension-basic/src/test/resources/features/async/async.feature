@@ -157,6 +157,34 @@ Feature: async
       ::eventually: [ 100 ]
       """
 
+    Scenario: eventually adaptive list
+      Given the following java class:
+        """
+        public class DataList {
+          public static class Data {
+            public int i;
+          }
+          private Instant time = Instant.now();
+
+          public AdaptiveList<Data> getList() {
+            return new StaticAdaptiveList(() -> {
+              if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1) {
+                Data d1 = new Data();
+                d1.i = 1;
+                return new CollectionDALCollection(Arrays.asList(d1));
+              }
+              return new CollectionDALCollection(Arrays.asList());
+            });
+          }
+        }
+        """
+      Then the following should pass:
+        """
+        list::eventually: {
+          i= 1
+        }
+        """
+
   Rule: await
 
     Scenario: await return result ignore exception it default 5 seconds

@@ -3,6 +3,7 @@ package org.testcharm.dal.extensions.basic.list;
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.ast.opt.DALOperator;
 import org.testcharm.dal.extensions.basic.sync.Await;
+import org.testcharm.dal.extensions.basic.sync.Eventually;
 import org.testcharm.dal.runtime.*;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
@@ -23,6 +24,7 @@ public class ListExtension implements Extension {
                 .registerMetaProperty(AdaptiveList.class, "top", metaData -> (Callable<Integer, DALCollection<Object>>)
                         opt2(metaData.data()::list)::limit)
                 .registerMetaProperty(AdaptiveList.class, "await", metaData -> new Await(metaData.data()))
+                .registerMetaProperty(AdaptiveList.class, "eventually", metaData -> new Eventually(metaData.data()))
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())
                 .registerExclamation(Filterable.class, runtimeData -> runtimeData.data().value().requireNotEmpty())

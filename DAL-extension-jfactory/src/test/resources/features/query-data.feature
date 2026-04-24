@@ -43,3 +43,16 @@ Feature: query data
       code= SN1
     }
     """
+
+  Scenario: Eventually query data use jfactory
+    Given "Orders" after 100ms:
+      | id | code |
+      | 1  | SN1  |
+    Then query data by jfactory:
+    """
+    Orders::eventually: {
+      id= 1
+      code= SN1
+    }
+    """
+
