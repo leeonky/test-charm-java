@@ -1,0 +1,5 @@
+dependencies {
+    implementation libs.prod.cucumber7.core
+    testImplementation project(':java-compiler-util')
+    testImplementation project(':DAL-extension-basic')
+}

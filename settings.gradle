@@ -22,5 +22,6 @@ include(
         'page-flow-playwright',
         'page-flow',
         'view-mapper',
-        'feature-summary'
+        'feature-summary',
+        'cucumber-swarm'
 )

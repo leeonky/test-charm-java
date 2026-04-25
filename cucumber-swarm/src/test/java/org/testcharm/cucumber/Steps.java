@@ -1,0 +1,63 @@
+package org.testcharm.cucumber;
+
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import org.testcharm.dal.DAL;
+import org.testcharm.io.TempDirectory;
+import org.testcharm.util.Sneaky;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import static org.testcharm.dal.Assertions.expect;
+import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
+import static org.testcharm.dal.extensions.basic.string.Methods.string;
+
+public class Steps {
+    static final TempDirectory globalTempDirectory = new TempDirectory(Paths.get("src", "test", "generate")).mkdir("cucumber");
+    ThreadLocal<TempDirectory> tempDirectory;
+    private Process process;
+
+    @Before
+    public void clean() {
+        globalTempDirectory.clean();
+        tempDirectory = ThreadLocal.withInitial(() -> globalTempDirectory.mkdir("" + Thread.currentThread().getId()));
+        tempDirectory.get().mkdir("features");
+    }
+
+    @When("run cucumber with the following args:")
+    public void run_cucumber_with_the_following_args(String docString) throws IOException {
+        List<String> args = new ArrayList<>();
+        String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+        String classpath = System.getProperty("java.class.path");
+        args.add(javaBin);
+        args.add("-cp");
+        args.add(classpath);
+        args.add(Main.class.getName());
+        DAL.dal().evaluateAll(null, docString, new HashMap<String, String>() {{
+            put("path", tempDirectory.get().root().toString() + File.separator);
+        }}).forEach(e -> args.add(String.valueOf(e)));
+        process = new ProcessBuilder(args.toArray(new String[0])).start();
+    }
+
+    @Then("the task result should be:")
+    public void the_output_should(String docString) {
+        expect(new HashMap<String, Object>() {{
+            put("code", Sneaky.get(process::waitFor));
+            put("stdout", string(readAllAndClose(process.getInputStream())));
+            put("stderr", string(readAllAndClose(process.getErrorStream())));
+        }}).should(docString);
+    }
+
+    @After
+    public void after() {
+        if (process != null)
+            process.destroyForcibly();
+    }
+}

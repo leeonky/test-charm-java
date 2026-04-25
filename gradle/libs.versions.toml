@@ -24,6 +24,7 @@ prod-cucumber = { module = "io.cucumber:cucumber-java", version.ref = "cucumber"
 prod-selenium = { module = "org.seleniumhq.selenium:selenium-java", version = "3.141.59" }
 prod-playwight = { module = "com.microsoft.playwright:playwright", version = "1.50.0" }
 prod-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+prod-cucumber7-core = { module = "io.cucumber:cucumber-core", version.ref = "cucumber7" }
 
 test-junit = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 test-junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }

@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.nexus.publish)
 }
 
-ext.disabledPublishProjects = ['feature-summary', 'jfactory-DAL']
+ext.disabledPublishProjects = ['feature-summary', 'jfactory-DAL', 'cucumber-swarm']
 
 ext.cucumberProjects = [
         [name: 'interpreter-core', glues: ['org.testcharm.interpreter']],
@@ -19,6 +19,7 @@ ext.cucumberProjects = [
         [name: 'RESTful-cucumber', glues: ['org.testcharm.cucumber.restful', 'org.testcharm.util']],
         [name: 'page-flow', glues: ['org.testcharm.pf.cucumber']],
         [name: 'feature-summary', glues: ['org.testcharm']],
+        [name: 'cucumber-swarm', glues: ['org.testcharm.cucumber']],
 ]
 
 apply from: "$rootDir/gradle/jacoco.gradle"
