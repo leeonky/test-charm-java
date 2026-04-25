@@ -32,6 +32,7 @@ public class ElementDALOperation implements Extension {
                         elementMetaData -> watch(elementMetaData, dal, Element::screenshot))
                 .registerMetaProperty(Panel.class, "watch", (RuntimeDataHandler<MetaData<Panel>>)
                         elementMetaData -> watch(elementMetaData, dal, r -> r.element().screenshot()))
+                .registerCustomSorter(Element.class, Element::text)
         ;
     }
 

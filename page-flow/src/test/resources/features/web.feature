@@ -526,6 +526,25 @@ Feature: web ui
         | selenium   |
         | playwright |
 
+    Scenario Outline: sort element by text
+      Given launch the following web page:
+        """
+        html
+          head
+          body
+            .target Banana
+            .target Apple
+            .target Cherry
+        """
+      Then page in driver <driver> should:
+        """
+        css[.target]: +[Apple Banana Cherry]
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
   Rule: input output
 
     Scenario Outline: web element textarea input select is input
