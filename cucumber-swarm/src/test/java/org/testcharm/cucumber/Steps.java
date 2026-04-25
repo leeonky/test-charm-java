@@ -2,6 +2,7 @@ package org.testcharm.cucumber;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.testcharm.dal.DAL;
@@ -52,12 +53,17 @@ public class Steps {
             put("code", Sneaky.get(process::waitFor));
             put("stdout", string(readAllAndClose(process.getInputStream())));
             put("stderr", string(readAllAndClose(process.getErrorStream())));
-        }}).should(docString);
+        }}).should(docString.replace("$path$", tempDirectory.get().root().toAbsolutePath().toString()));
     }
 
     @After
     public void after() {
         if (process != null)
             process.destroyForcibly();
+    }
+
+    @Given("the feature file {string}:")
+    public void theFeatureFile(String path, String content) {
+        tempDirectory.get().mkdir("features").write(path, content);
     }
 }
