@@ -7,6 +7,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.testcharm.dal.DAL;
 import org.testcharm.io.TempDirectory;
+import org.testcharm.util.JavaExecutor;
 import org.testcharm.util.Sneaky;
 
 import java.io.File;
@@ -15,6 +16,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
@@ -34,10 +37,21 @@ public class Steps {
 
     @When("run cucumber with the following args:")
     public void run_cucumber_with_the_following_args(String docString) throws IOException {
+        JavaExecutor.executor().main().evaluate();
+
         List<String> args = new ArrayList<>();
         String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        String classpath = System.getProperty("java.class.path");
+        String classpath = Stream.of(System.getProperty("java.class.path").split(File.pathSeparator))
+                .filter(p -> {
+                    if (p.contains("test-charm")) {
+                        return p.contains("cucumber-swarm/out/production");
+                    }
+                    return true;
+                })
+                .collect(Collectors.joining(File.pathSeparator));
+        classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
+//        args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
         args.add("-cp");
         args.add(classpath);
         args.add(Main.class.getName());

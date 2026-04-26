@@ -24,6 +24,10 @@ public class JavaExecutor {
 
     private final JavaCompiler javaCompiler;
 
+    public JavaCompiler compiler() {
+        return javaCompiler;
+    }
+
     public JavaExecutor(JavaCompiler javaCompiler) {
         this.javaCompiler = javaCompiler;
     }

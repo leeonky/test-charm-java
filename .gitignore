@@ -62,3 +62,5 @@ out
 .github
 
 .profileconfig.json
+
+cucumber-swarm/src/test/generate/
