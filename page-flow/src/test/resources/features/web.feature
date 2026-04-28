@@ -106,17 +106,31 @@ Feature: web ui
         html
           body
             div unexpected
-            .target expected
+            .target-str str
+            .target-int 100
+            .target-double 1.1
+            .target-long 99999999999999999
         """
       Then page in driver <driver> should:
         """
-        css[.target]: expected
+        css: {
+          '.target-str': str
+          '.target-int': 100
+          '.target-double': 1.1
+          '.target-long': 99999999999999999
+        }
         """
       And logs should:
         """
-        : | level | message                             |
-          | INFO  | Locating: css{html} => css{.target} |
-          | INFO  | Found 1 elements                    |
+        : | level | message                                    |
+          | INFO  | Locating: css{html} => css{.target-str}    |
+          | INFO  | Found 1 elements                           |
+          | INFO  | Locating: css{html} => css{.target-int}    |
+          | INFO  | Found 1 elements                           |
+          | INFO  | Locating: css{html} => css{.target-double} |
+          | INFO  | Found 1 elements                           |
+          | INFO  | Locating: css{html} => css{.target-long}   |
+          | INFO  | Found 1 elements                           |
         """
       Examples:
         | driver     |
