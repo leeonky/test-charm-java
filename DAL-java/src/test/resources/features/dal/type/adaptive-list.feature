@@ -73,6 +73,40 @@ Feature: single or list
         list= [1 2 ...]
         """
 
+    Scenario: intently single
+      Given the following java class:
+        """
+        public class Test {
+          public AdaptiveList<String> getList1() {
+            return AdaptiveList.staticList(Arrays.asList("hello"));
+          }
+
+          public AdaptiveList<String> getList2() {
+            return AdaptiveList.staticList(Arrays.asList("hello", "world"));
+          }
+        }
+        """
+      Then the following verification for the instance of java class "Test" should pass:
+        """
+        list1::single= "hello"
+        """
+      When use a instance of java class "Test" to evaluate:
+        """
+        list2::single= "hello"
+        """
+      Then failed with the message:
+        """
+        This operation requires exactly one element, but found 2: [
+            java.lang.String <hello>,
+            java.lang.String <world>
+        ]
+        """
+      And got the following notation:
+        """
+        list2::single= "hello"
+               ^
+        """
+
   Rule: solo element
 
     Scenario: When accessing the list property, the access is delegated to the sole element of the list

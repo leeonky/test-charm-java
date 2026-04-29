@@ -70,6 +70,9 @@ public class Types implements Extension {
                                 return metaData.delegate(d -> adaptiveListOf(Sneaky.cast(d),
                                         l -> l.map(AdaptiveList::single), ExpressionException::illegalOp2));
                         })
+                .registerMetaProperty(AdaptiveList.class, "single",
+                        (RuntimeDataHandler<MetaData<AdaptiveList>>) metaData ->
+                                adaptiveListOf(Sneaky.cast(metaData.data()), d -> d.map(AdaptiveList::single), ExpressionException::illegalOp2))
         ;
 
         verifySingle(builder.checkerSetForEqualing());

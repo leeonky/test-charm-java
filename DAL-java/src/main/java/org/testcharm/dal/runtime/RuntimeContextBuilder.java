@@ -257,7 +257,7 @@ public class RuntimeContextBuilder {
     }
 
     public <T> RuntimeContextBuilder registerMetaPropertyPattern(Class<T> type, String name, RuntimeHandler<MetaData<T>> function) {
-        localMetaPropertyPatterns.computeIfAbsent(type, k -> new HashMap<>()).put(Pattern.compile(name), cast(function));
+        localMetaPropertyPatterns.computeIfAbsent(type, k -> new LinkedHashMap<>()).put(Pattern.compile(name), cast(function));
         return this;
     }
 
@@ -484,7 +484,9 @@ public class RuntimeContextBuilder {
         }
 
         private Stream<Map.Entry<Class<?>, Map<Pattern, RuntimeHandler<MetaData<?>>>>> metaFunctionPatternsByType(MetaData<?> metaData) {
-            return localMetaPropertyPatterns.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
+            List<Map.Entry<Class<?>, Map<Pattern, RuntimeHandler<MetaData<?>>>>> metas = new ArrayList<>(localMetaPropertyPatterns.entrySet());
+            Collections.reverse(metas);
+            return metas.stream().filter(e -> metaData.isInstance(e.getKey()));
         }
 
         @SuppressWarnings("unchecked")
