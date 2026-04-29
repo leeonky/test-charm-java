@@ -1,12 +1,12 @@
 package org.testcharm.dal.extensions.basic;
 
-import org.testcharm.dal.DAL;
-import io.cucumber.messages.internal.com.google.common.io.Files;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.testcharm.dal.DAL;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static java.nio.file.Files.createTempFile;
@@ -28,7 +28,7 @@ class BinaryExtensionTest {
         DAL dal = DAL.getInstance();
         Path tempFile = createTempFile("", "");
         File file = tempFile.toFile();
-        Files.write("hello".getBytes(), file);
+        Files.write(tempFile, "hello".getBytes());
         assertThat((Object) dal.evaluate(file, "binary")).isEqualTo("hello".getBytes());
         file.delete();
     }
@@ -39,7 +39,7 @@ class BinaryExtensionTest {
         DAL dal = DAL.getInstance();
         Path tempFile = createTempFile("", "");
         File file = tempFile.toFile();
-        Files.write("hello".getBytes(), file);
+        Files.write(tempFile, "hello".getBytes());
         assertThat((Object) dal.evaluate(tempFile, "binary")).isEqualTo("hello".getBytes());
         file.delete();
     }

@@ -58,7 +58,13 @@ public class JData {
     public DocData transform(DataTable dataTable) {
         if (needTranspose(dataTable))
             dataTable = DataTable.create(removeTransposeSymbol(dataTable));
-        return new DocData(dataTable.asMaps());
+        List<String> columns = dataTable.cells().get(0);
+        return new DocData(dataTable.cells().stream().skip(1).map(row -> {
+            Map<String, String> map = new LinkedHashMap<>();
+            for (int i = 0; i < columns.size(); i++)
+                map.put(columns.get(i), row.get(i));
+            return map;
+        }).collect(toList()));
     }
 
     @SuppressWarnings("unchecked")

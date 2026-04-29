@@ -1,21 +1,20 @@
 package org.testcharm.dal.extensions.basic;
 
-import org.testcharm.dal.DAL;
-import io.cucumber.messages.internal.com.google.common.io.Files;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcharm.dal.DAL;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testcharm.dal.extensions.basic.text.Methods.json;
 import static java.nio.file.Files.createTempFile;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testcharm.dal.extensions.basic.text.Methods.json;
 
 class TextExtensionTest {
 
@@ -52,12 +51,11 @@ class TextExtensionTest {
     void file_to_json() {
         DAL dal = DAL.getInstance();
         Path tempFile = createTempFile("", "");
-        File file = tempFile.toFile();
-        Files.write("{\"a\": 1}".getBytes(), file);
-        assertThat((Map) dal.evaluate(file, "json")).isEqualTo(new HashMap<String, Object>() {{
+        Files.write(tempFile, "{\"a\": 1}".getBytes());
+        assertThat((Map) dal.evaluate(tempFile.toFile(), "json")).isEqualTo(new HashMap<String, Object>() {{
             put("a", 1);
         }});
-        file.delete();
+        tempFile.toFile().delete();
     }
 
     @SneakyThrows
@@ -65,12 +63,11 @@ class TextExtensionTest {
     void path_to_json() {
         DAL dal = DAL.getInstance();
         Path tempFile = createTempFile("", "");
-        File file = tempFile.toFile();
-        Files.write("{\"a\": 1}".getBytes(), file);
+        Files.write(tempFile, "{\"a\": 1}".getBytes());
         assertThat((Map) dal.evaluate(tempFile, "json")).isEqualTo(new HashMap<String, Object>() {{
             put("a", 1);
         }});
-        file.delete();
+        tempFile.toFile().delete();
     }
 
     @Nested
