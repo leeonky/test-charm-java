@@ -3,6 +3,8 @@ Feature: swarm
   Scenario: cucumber launcher and verify stdout
     When run cucumber with the following args:
       """
+      '--glue'
+      'steps'
       $path + 'features'
       """
     Then the task result should be:
@@ -26,6 +28,8 @@ Feature: swarm
       """
     When run cucumber with the following args:
       """
+      '--glue'
+      'steps'
       $path + 'features'
       """
     Then the task result should be:

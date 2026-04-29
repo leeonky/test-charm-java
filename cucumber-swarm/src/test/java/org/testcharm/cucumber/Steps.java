@@ -16,8 +16,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
@@ -41,17 +39,9 @@ public class Steps {
 
         List<String> args = new ArrayList<>();
         String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        String classpath = Stream.of(System.getProperty("java.class.path").split(File.pathSeparator))
-                .filter(p -> {
-                    if (p.contains("test-charm")) {
-                        return p.contains("cucumber-swarm/out/production");
-                    }
-                    return true;
-                })
-                .collect(Collectors.joining(File.pathSeparator));
+        String classpath = String.join(File.pathSeparator, System.getProperty("java.class.path").split(File.pathSeparator));
         classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
-//        args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
         args.add("-cp");
         args.add(classpath);
         args.add(Main.class.getName());
