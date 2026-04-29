@@ -151,7 +151,9 @@ Feature: web ui
         """
       Then failed with:
         """
-        Operations can only be performed on a single located element at: css{html} => css{.target}, but is: [
+        Operations can only be performed on a single located element at:
+          css{html} => css{.target}
+        but found 2: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
                 enabled: java.lang.Boolean <true>,
@@ -187,7 +189,9 @@ Feature: web ui
         """
       Then failed with:
         """
-        Operations can only be performed on a single located element at: css{html} => css{.target}, but is: [
+        Operations can only be performed on a single located element at:
+          css{html} => css{.target}
+        but found 2: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
                 enabled: java.lang.Boolean <true>,
@@ -255,7 +259,9 @@ Feature: web ui
         """
       Then failed with:
         """
-        Operations can only be performed on a single located element at: css{html} => css{.target}, but is: []
+        Operations can only be performed on a single located element at:
+          css{html} => css{.target}
+        but found 0: []
         """
       And logs should:
         """

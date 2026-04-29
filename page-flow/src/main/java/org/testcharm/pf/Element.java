@@ -87,7 +87,7 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
 
     @SuppressWarnings("unchecked")
     default Elements<T> find(By locator) {
-        return new Elements<>(locator, (T) this);
+        return new LocatorElements<>(locator, (T) this);
     }
 
     default Elements<T> css(String css) {

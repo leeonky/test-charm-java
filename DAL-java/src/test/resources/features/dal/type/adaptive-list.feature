@@ -110,7 +110,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: [
+        This operation requires exactly one element, but found 2: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]
@@ -128,7 +128,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: [
+        This operation requires exactly one element, but found 2: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]
@@ -273,7 +273,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: [
+        This operation requires exactly one element, but found 2: [
             #package#Data {
                 i: java.lang.Integer <1>,
                 j: java.lang.Integer <2>
@@ -306,7 +306,11 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element
+        This operation requires exactly one element, but the list is infinite: [
+            java.lang.String <1>,
+            java.lang.String <2>,
+            java.lang.String <3>,
+            java.lang.String <4>,
         """
 
     Scenario: verify with a single object, the verification is delegated to the sole element of the list
@@ -342,7 +346,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: [
+        This operation requires exactly one element, but found 2: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]
@@ -358,7 +362,7 @@ Feature: single or list
         """
       Then failed with the message:
         """
-        Expected list can only have one element, but is: [
+        This operation requires exactly one element, but found 2: [
             java.lang.String <hello>,
             java.lang.String <world>
         ]

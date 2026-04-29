@@ -15,7 +15,9 @@ public interface AdaptiveList<T> {
             if (!iterator.hasNext())
                 return next.value();
         }
-        throw new InvalidAdaptiveListException("Expected list can only have one element", list);
+        if (list.infinite())
+            throw new InvalidAdaptiveListException("This operation requires exactly one element, but the list is infinite", list);
+        throw new InvalidAdaptiveListException(String.format("This operation requires exactly one element, but found %d", list.size()), list);
     }
 
     static <T> AdaptiveList<T> staticList(Collection<T> list) {

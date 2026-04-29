@@ -99,7 +99,7 @@ public class Types implements Extension {
         try {
             return function.apply(data);
         } catch (InvalidAdaptiveListException e) {
-            throw exceptionSupplier.apply(e.getMessage() + ", but is: " + data.map(ig -> e.list()).dump());
+            throw exceptionSupplier.apply(e.getMessage() + ": " + data.map(ig -> e.list()).dump());
         }
     }
 }
