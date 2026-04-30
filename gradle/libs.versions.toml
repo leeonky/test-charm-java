@@ -1,9 +1,8 @@
 [versions]
-project = "1.0.0-alpha.20"
+project = "1.0.0-alpha.21"
 jackson = "2.9.0"
 junit = "5.3.1"
 cucumber = "7.30.0"
-cucumber7 = "7.30.0"
 cucumberJunit = "7.20.1"
 jpa = "2.2"
 slf4j = "2.0.17"
@@ -21,10 +20,10 @@ prod-jpa = { module = "javax.persistence:javax.persistence-api", version.ref = "
 prod-orika = { module = "ma.glasnost.orika:orika-core", version = "1.5.4" }
 prod-reflections = { module = "org.reflections:reflections", version = "0.9.11" }
 prod-cucumber = { module = "io.cucumber:cucumber-java", version.ref = "cucumber" }
+prod-cucumber-core = { module = "io.cucumber:cucumber-core", version.ref = "cucumber" }
 prod-selenium = { module = "org.seleniumhq.selenium:selenium-java", version = "3.141.59" }
 prod-playwight = { module = "com.microsoft.playwright:playwright", version = "1.50.0" }
 prod-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
-prod-cucumber7-core = { module = "io.cucumber:cucumber-core", version.ref = "cucumber7" }
 
 test-junit = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 test-junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
@@ -51,7 +50,6 @@ test-cucumber-picocontainer = { module = "io.cucumber:cucumber-picocontainer", v
 test-javalin = { module = "io.javalin:javalin", version.ref = "javalin" }
 test-pug4j = { module = "de.neuland-bfi:pug4j", version = "2.3.1" }
 test-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
-test-cucumber7 = { module = "io.cucumber:cucumber-java", version.ref = "cucumber7" }
 
 [plugins]
 nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }

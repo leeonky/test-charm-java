@@ -1,6 +1,6 @@
 dependencies {
     implementation project(":bean-util")
-    implementation libs.prod.cucumber7.core
+    implementation libs.prod.cucumber.core
     testImplementation project(':java-compiler-util')
     testImplementation project(':DAL-extension-basic')
 }
