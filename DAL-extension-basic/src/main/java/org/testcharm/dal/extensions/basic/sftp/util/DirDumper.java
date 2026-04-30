@@ -8,7 +8,7 @@ public class DirDumper implements Dumper<SFtpFile> {
 
     @Override
     public void dump(Data<SFtpFile> data, DumpingBuffer context) {
-        DumpingBuffer sub = context.append(data.value().remoteInfo()).sub();
+        DumpingBuffer sub = context.append(data.value().remoteInfo()).fork();
         data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 

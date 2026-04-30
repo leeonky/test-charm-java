@@ -2,36 +2,35 @@ package org.testcharm.dal.runtime.inspector;
 
 import org.testcharm.dal.runtime.Data;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import org.testcharm.util.IndentBuffer;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-import static org.testcharm.dal.runtime.DALException.extractException;
 import static java.lang.String.format;
-import static java.util.Collections.nCopies;
+import static org.testcharm.dal.runtime.DALException.extractException;
 
 public class DumpingBuffer {
     private final String path;
-    private final int indent;
-    private final LineBuffer lineBuffer;
-    private StringBuilder splits;
-    private int length = 0;
+    private final IndentBuffer indentBuffer;
     private final DALRuntimeContext runtimeContext;
     private final AtomicInteger dumpedObjectCount;
+    private final Map<DumpingCacheKey, String> caches;
 
-    private DumpingBuffer(String path, int indent, StringBuilder splits, LineBuffer buffer, DALRuntimeContext context, AtomicInteger dumpedObjectCount) {
+    private DumpingBuffer(String path, IndentBuffer indentBuffer, DALRuntimeContext runtimeContext,
+                          AtomicInteger dumpedObjectCount, Map<DumpingCacheKey, String> caches) {
         this.path = path;
-        lineBuffer = buffer;
-        runtimeContext = context;
-        this.indent = indent;
-        this.splits = splits;
+        this.indentBuffer = indentBuffer;
+        this.runtimeContext = runtimeContext;
         this.dumpedObjectCount = dumpedObjectCount;
+        this.caches = caches;
     }
 
     public static DumpingBuffer rootContext(DALRuntimeContext context) {
-        return new DumpingBuffer("root", 0, new StringBuilder(), new LineBuffer(context), context, new AtomicInteger(0));
+        return new DumpingBuffer("root", IndentBuffer.create(context.maxDumpingLineCount()),
+                context, new AtomicInteger(0), new HashMap<>());
     }
 
     public String getPath() {
@@ -68,15 +67,17 @@ public class DumpingBuffer {
     }
 
     public DumpingBuffer index(int index) {
-        return createSub(format("%s[%d]", path, index), 0);
+        return new DumpingBuffer(format("%s[%d]", path, index), indentBuffer.fork(),
+                runtimeContext, dumpedObjectCount, caches);
     }
 
     public DumpingBuffer sub(Object property) {
-        return createSub(format("%s.%s", path, property), 0);
+        return new DumpingBuffer(format("%s.%s", path, property), indentBuffer.fork(),
+                runtimeContext, dumpedObjectCount, caches);
     }
 
     public DumpingBuffer indent() {
-        return createSub(path, 1);
+        return new DumpingBuffer(path, indentBuffer.indent(), runtimeContext, new AtomicInteger(0), caches);
     }
 
     public DumpingBuffer indent(Consumer<DumpingBuffer> subDump) {
@@ -89,27 +90,23 @@ public class DumpingBuffer {
         return this;
     }
 
-    public DumpingBuffer sub() {
-        return createSub(path, 0);
-    }
-
-    private DumpingBuffer createSub(String subPath, int indent) {
-        return new DumpingBuffer(subPath, this.indent + indent, takeSplits(), lineBuffer, runtimeContext,
-                indent == 0 ? dumpedObjectCount : new AtomicInteger(0));
-    }
-
-    private StringBuilder takeSplits() {
-        StringBuilder temp = splits;
-        splits = new StringBuilder();
-        return temp;
+    public DumpingBuffer fork() {
+        return new DumpingBuffer(path, indentBuffer.fork(), runtimeContext, dumpedObjectCount, caches);
     }
 
     public void cached(Data<?> data, Runnable runnable) {
-        lineBuffer.cached(path, data, runnable, p -> append("*reference* " + p));
+        DumpingCacheKey key = new DumpingCacheKey(data);
+        String reference = caches.get(key);
+        if (reference == null) {
+            caches.put(key, path);
+            runnable.run();
+        } else {
+            append("*reference* " + reference);
+        }
     }
 
     public DumpingBuffer append(String s) {
-        length = lineBuffer.append(takeSplits(), s).length();
+        indentBuffer.append(s);
         return this;
     }
 
@@ -118,71 +115,22 @@ public class DumpingBuffer {
     }
 
     public String content() {
-        return lineBuffer.toString();
+        return indentBuffer.content();
     }
 
-    public DumpingBuffer appendThen(String then) {
-        splits.append(then);
+    public DumpingBuffer defer(String then) {
+        indentBuffer.defer(then);
         return this;
     }
 
     public DumpingBuffer newLine() {
-        appendThen("\n" + String.join("", nCopies(indent, "    ")));
+        indentBuffer.newLine();
         return this;
     }
 
     public DumpingBuffer optionalNewLine() {
-        if (length != lineBuffer.length())
-            newLine();
+        indentBuffer.optionalNewLine();
         return this;
-    }
-
-    public static class LineBuffer {
-        private final Map<DumpingCacheKey, String> caches = new HashMap<>();
-        private final DALRuntimeContext runtimeContext;
-        private final StringBuilder stringBuilder = new StringBuilder();
-        private int lineCount = 0;
-        private boolean finished = false;
-
-        public LineBuffer(DALRuntimeContext runtimeContext) {
-            this.runtimeContext = runtimeContext;
-        }
-
-        public void cached(String path, Data<?> data, Runnable dumpAction, Consumer<String> refAction) {
-            DumpingCacheKey key = new DumpingCacheKey(data);
-            String reference = caches.get(key);
-            if (reference == null) {
-                caches.put(key, path);
-                dumpAction.run();
-            } else {
-                refAction.accept(reference);
-            }
-        }
-
-        public int length() {
-            return stringBuilder.length();
-        }
-
-        @Override
-        public String toString() {
-            return stringBuilder.toString();
-        }
-
-        public LineBuffer append(StringBuilder splits, String content) {
-            if (!finished) {
-                if (splits.length() != 0) {
-                    if ((lineCount += splits.chars().filter(c -> c == '\n').count())
-                            >= runtimeContext.maxDumpingLineCount()) {
-                        stringBuilder.append("\n...");
-                        finished = true;
-                        return this;
-                    }
-                    stringBuilder.append(splits);
-                }
-                stringBuilder.append(content);
-            }
-            return this;
-        }
     }
 
     public static class MaximizeDump extends RuntimeException {

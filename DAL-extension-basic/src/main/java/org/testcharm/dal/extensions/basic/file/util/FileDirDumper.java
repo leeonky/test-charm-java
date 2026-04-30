@@ -10,8 +10,8 @@ public class FileDirDumper implements Dumper<File> {
 
     @Override
     public void dump(Data<File> data, DumpingBuffer context) {
-        DumpingBuffer sub = context.append("java.io.File").appendThen(" ")
-                .append(data.value().getPath()).append("/").sub();
+        DumpingBuffer sub = context.append("java.io.File").defer(" ")
+                .append(data.value().getPath()).append("/").fork();
         data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 

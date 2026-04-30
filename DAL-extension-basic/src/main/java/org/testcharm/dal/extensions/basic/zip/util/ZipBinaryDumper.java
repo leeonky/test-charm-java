@@ -8,13 +8,13 @@ public class ZipBinaryDumper implements Dumper<ZipBinary> {
 
     @Override
     public void dump(Data<ZipBinary> data, DumpingBuffer context) {
-        DumpingBuffer sub = context.append("zip archive").sub();
+        DumpingBuffer sub = context.append("zip archive").fork();
         data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 
     @Override
     public void dumpValue(Data<ZipBinary> data, DumpingBuffer context) {
-        DumpingBuffer sub = context.sub();
+        DumpingBuffer sub = context.fork();
         data.list().wraps().values().forEach(subFile -> sub.newLine().dumpValue(subFile));
     }
 }

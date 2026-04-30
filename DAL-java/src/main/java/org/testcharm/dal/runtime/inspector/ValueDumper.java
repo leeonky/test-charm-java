@@ -22,7 +22,7 @@ public class ValueDumper<T> implements Dumper<T> {
     @Override
     public void dumpValue(Data<T> data, DumpingBuffer dumpingBuffer) {
         inspectType(data, dumpingBuffer);
-        dumpingBuffer.appendThen(" ");
+        dumpingBuffer.defer(" ");
         inspectValue(data, dumpingBuffer);
     }
 }

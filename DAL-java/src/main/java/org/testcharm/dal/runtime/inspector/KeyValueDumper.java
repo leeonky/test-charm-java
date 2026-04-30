@@ -15,10 +15,10 @@ public class KeyValueDumper<T> implements Dumper.Cacheable<T> {
     }
 
     private void dumpBody(Data<T> data, DumpingBuffer dumpingBuffer) {
-        DumpingBuffer indentContext = dumpingBuffer.append("{").indent();
+        DumpingBuffer indent = dumpingBuffer.append("{").indent();
         getFieldNames(data).stream().sorted().forEach(fieldName -> {
-            dumpField(data, fieldName, indentContext.sub(fieldName).newLine());
-            indentContext.appendThen(",");
+            dumpField(data, fieldName, indent.sub(fieldName).newLine());
+            indent.defer(",");
         });
         dumpingBuffer.optionalNewLine().append("}");
     }
@@ -45,6 +45,6 @@ public class KeyValueDumper<T> implements Dumper.Cacheable<T> {
 
     protected void dumpType(Data<T> data, DumpingBuffer dumpingBuffer) {
         if (!(data.instanceOf(Map.class)))
-            dumpingBuffer.append(Classes.getClassName(data.value())).appendThen(" ");
+            dumpingBuffer.append(Classes.getClassName(data.value())).defer(" ");
     }
 }

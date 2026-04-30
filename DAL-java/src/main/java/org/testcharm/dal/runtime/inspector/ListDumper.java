@@ -17,12 +17,12 @@ public class ListDumper<T> implements Dumper.Cacheable<T> {
         dumpingBuffer.append("[").indent(indentBuffer ->
                 data.list().wraps().forEach(ie -> {
                     indentBuffer.index(ie.index()).newLine().dumpValue(ie.value());
-                    indentBuffer.appendThen(",");
+                    indentBuffer.defer(",");
                 })).optionalNewLine().append("]");
     }
 
     protected void dumpType(Data<T> data, DumpingBuffer context) {
         if (!data.instanceOf(Iterable.class) && !data.instanceOf(Stream.class) && !data.value().getClass().isArray())
-            context.append(Classes.getClassName(data.value())).appendThen(" ");
+            context.append(Classes.getClassName(data.value())).defer(" ");
     }
 }
