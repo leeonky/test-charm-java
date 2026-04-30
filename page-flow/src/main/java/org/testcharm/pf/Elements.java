@@ -10,6 +10,10 @@ import java.util.function.Predicate;
 public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
 
     default Elements<T> filter(Predicate<T> predicate) {
+        return filter(predicate, "source code");
+    }
+
+    default Elements<T> filter(Predicate<T> predicate, String name) {
         return new Elements<T>() {
             @Override
             public int timeout() {
@@ -18,7 +22,10 @@ public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
 
             @Override
             public DALCollection<T> list() {
-                return Elements.this.list().filter(predicate);
+                DALCollection<T> list = Elements.this.list();
+                DALCollection<T> filtered = list.filter(predicate);
+                Element.logger.info(String.format("Filtered from %d to %d elements by %s", list.size(), filtered.size(), name));
+                return filtered;
             }
 
             @Override
@@ -26,6 +33,10 @@ public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
                 return Elements.this.locateInfo();
             }
         };
+    }
+
+    default Elements<T> visible() {
+        return filter(e -> e.isVisible(), "visible");
     }
 
     @Override

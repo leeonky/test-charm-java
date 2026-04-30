@@ -33,6 +33,8 @@ public class ElementDALOperation implements Extension {
                 .registerMetaProperty(Panel.class, "watch", (RuntimeDataHandler<MetaData<Panel>>)
                         elementMetaData -> watch(elementMetaData, dal, r -> r.element().screenshot()))
                 .registerCustomSorter(Element.class, Element::text)
+                .registerExclamation(Elements.class, (RuntimeDataHandler<RuntimeData<Elements>>)
+                        elementsRuntimeData -> elementsRuntimeData.data().map(Elements::visible))
         ;
     }
 

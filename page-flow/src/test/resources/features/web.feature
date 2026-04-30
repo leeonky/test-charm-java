@@ -345,13 +345,44 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                         |
-          | ...                                     |
-          | INFO  | Locating: css{html} => css{div} |
-          | INFO  | Found 0 elements                |
-          | INFO  | Locating: css{html} => css{div} |
-          | INFO  | Found 2 elements                |
-          | ...                                     |
+        : | level | message                                      |
+          | ...                                                  |
+          | INFO  | Locating: css{html} => css{div}              |
+          | INFO  | Found 0 elements                             |
+          | INFO  | Filtered from 0 to 0 elements by source code |
+          | INFO  | Locating: css{html} => css{div}              |
+          | INFO  | Found 2 elements                             |
+          | INFO  | Filtered from 2 to 1 elements by source code |
+          | ...                                                  |
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: filter visible element
+      Given launch the following web page:
+        """
+        html
+        head
+        body
+          .hidden(style='display:none')
+            .target hello
+          .visible
+            .target world
+        """
+      Then page in driver <driver> should:
+        """
+        css[.target]!: world
+        """
+      And logs should:
+        """
+        : | level | message                                  |
+          | ...                                              |
+          | INFO  | Locating: css{html} => css{.target}      |
+          | INFO  | Found 2 elements                         |
+          | INFO  | Filtered from 2 to 1 elements by visible |
+          | ...                                              |
         """
       Examples:
         | driver     |

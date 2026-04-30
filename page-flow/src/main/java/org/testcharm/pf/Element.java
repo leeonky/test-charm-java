@@ -150,4 +150,5 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
         expect(this).constants(constants).should(expression);
     }
 
+    boolean isVisible();
 }
