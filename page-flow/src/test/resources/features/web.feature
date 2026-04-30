@@ -152,7 +152,7 @@ Feature: web ui
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-          css{html} => css{.target}
+            css{html} => css{.target}
         but found 2: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
@@ -190,7 +190,7 @@ Feature: web ui
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-          css{html} => css{.target}
+            css{html} => css{.target}
         but found 2: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
@@ -260,7 +260,7 @@ Feature: web ui
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-          css{html} => css{.target}
+            css{html} => css{.target}
         but found 0: []
         """
       And logs should:
@@ -345,20 +345,70 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                                      |
-          | ...                                                  |
-          | INFO  | Locating: css{html} => css{div}              |
-          | INFO  | Found 0 elements                             |
-          | INFO  | Filtered from 0 to 0 elements by source code |
-          | INFO  | Locating: css{html} => css{div}              |
-          | INFO  | Found 2 elements                             |
-          | INFO  | Filtered from 2 to 1 elements by source code |
-          | ...                                                  |
+        : | level | message                                                                 |
+          | ...                                                                             |
+          | INFO  | {::should.startsWith: 'Filtering by source code(@'}                     |
+          | INFO  | Locating: css{html} => css{div}                                         |
+          | INFO  | Found 0 elements                                                        |
+          | INFO  | {::should.startsWith: 'Filtered from 0 to 0 elements by source code(@'} |
+          | INFO  | Locating: css{html} => css{div}                                         |
+          | INFO  | Found 2 elements                                                        |
+          | INFO  | {::should.startsWith: 'Filtered from 2 to 1 elements by source code(@'} |
+          | ...                                                                             |
         """
       Examples:
         | driver     |
         | selenium   |
         | playwright |
+
+    Scenario Outline: filter but more than one elements
+      Given launch the following web page:
+        """
+        html
+          body
+            .target unexpected
+            .target unexpected
+        """
+      When try to find element via driver <driver>:
+        """
+        (patience[100ms].css[.target]::filter: {text= unexpected}).text
+        """
+      Then failed with:
+        """
+        Operations can only be performed on a single located element at:
+            Filtering by source code
+                css{html} => css{.target}
+        but found 2: [
+            org.testcharm.pf.cucumber.<type> {
+                dom: java.lang.String <<div class="target">unexpected</div>>,
+                enabled: java.lang.Boolean <true>,
+                input: java.lang.Boolean <false>,
+                locator: css{.target},
+                visible: java.lang.Boolean <true>
+            },
+            org.testcharm.pf.cucumber.<type> {
+                dom: java.lang.String <<div class="target">unexpected</div>>,
+                enabled: java.lang.Boolean <true>,
+                input: java.lang.Boolean <false>,
+                locator: css{.target},
+                visible: java.lang.Boolean <true>
+            }
+        ]
+        """
+      And logs should:
+        """
+        : | level | message                                                               |
+          | ...                                                                           |
+          | INFO  | {::should.startsWith: 'Filtering by source code'}                     |
+          | INFO  | Locating: css{html} => css{.target}                                   |
+          | INFO  | Found 2 elements                                                      |
+          | INFO  | {::should.startsWith: 'Filtered from 2 to 2 elements by source code'} |
+          | ...                                                                           |
+        """
+      Examples:
+        | driver     | type                   |
+        | selenium   | Selenium$SeleniumE     |
+        | playwright | Playwright$PlaywrightE |
 
     Scenario Outline: filter visible element
       Given launch the following web page:
@@ -377,12 +427,49 @@ Feature: web ui
         """
       And logs should:
         """
-        : | level | message                                  |
-          | ...                                              |
-          | INFO  | Locating: css{html} => css{.target}      |
-          | INFO  | Found 2 elements                         |
-          | INFO  | Filtered from 2 to 1 elements by visible |
-          | ...                                              |
+        : | level | message                                                             |
+          | ...                                                                         |
+          | INFO  | {::should.startsWith: 'Filtering by visible(@'}                     |
+          | INFO  | Locating: css{html} => css{.target}                                 |
+          | INFO  | Found 2 elements                                                    |
+          | INFO  | {::should.startsWith: 'Filtered from 2 to 1 elements by visible(@'} |
+          | ...                                                                         |
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: filter visible but more than one elements
+      Given launch the following web page:
+        """
+        html
+        head
+        body
+          .hidden(style='display:none')
+            .target hello
+            .target world
+        """
+      When try to find element via driver <driver>:
+        """
+        patience[100ms].css[.target]!: world
+        """
+      Then failed with:
+        """
+        Operations can only be performed on a single located element at:
+            Filtering by visible
+                css{html} => css{.target}
+        but found 0: []
+        """
+      And logs should:
+        """
+        : | level | message                                                           |
+          | ...                                                                       |
+          | INFO  | {::should.startsWith: 'Filtering by visible'}                     |
+          | INFO  | Locating: css{html} => css{.target}                               |
+          | INFO  | Found 2 elements                                                  |
+          | INFO  | {::should.startsWith: 'Filtered from 2 to 0 elements by visible'} |
+          | ...                                                                       |
         """
       Examples:
         | driver     |
@@ -954,3 +1041,4 @@ Feature: web ui
         | driver     |
         | Selenium   |
         | Playwright |
+

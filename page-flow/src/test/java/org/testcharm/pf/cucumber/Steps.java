@@ -158,7 +158,7 @@ public class Steps {
 
     @Then("failed with:")
     public void failedWith(String message) {
-        expect(lastError.getMessage()).isEqualTo(message);
+        expect(lastError.getMessage().replaceAll("\\(@.*\\)", "")).isEqualTo(message);
     }
 
     @When("perform via driver selenium:")

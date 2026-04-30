@@ -1,5 +1,8 @@
 package org.testcharm.util;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import static java.lang.String.join;
 import static java.util.Collections.nCopies;
 
@@ -20,9 +23,17 @@ public class IndentBuffer {
         return new IndentBuffer(0, new StringBuilder(), new Content(maxLineCount));
     }
 
+    public static IndentBuffer create() {
+        return create(Integer.MAX_VALUE);
+    }
+
     public IndentBuffer append(String s) {
         length = content.append(takePending(), s).length();
         return this;
+    }
+
+    public IndentBuffer append(Object o) {
+        return append(Objects.requireNonNull(o).toString());
     }
 
     public IndentBuffer defer(String then) {
@@ -62,8 +73,31 @@ public class IndentBuffer {
         return content.toString();
     }
 
+    @Override
+    public String toString() {
+        return content();
+    }
+
     public int length() {
         return content.length();
+    }
+
+    public IndentBuffer appendAll(String delimiter, Iterable<?> elements) {
+        IndentBuffer fork = fork();
+        for (Object l : elements) fork.append(String.valueOf(l)).defer(delimiter);
+        return this;
+    }
+
+    public IndentBuffer appendAll(String delimiter, String... elements) {
+        IndentBuffer fork = fork();
+        for (String l : elements) fork.append(String.valueOf(l)).defer(delimiter);
+        return this;
+    }
+
+    public IndentBuffer appendAll(String delimiter, Stream<?> elements) {
+        IndentBuffer fork = fork();
+        elements.forEach(e -> fork.append(String.valueOf(e)).defer(delimiter));
+        return this;
     }
 
     static class Content {

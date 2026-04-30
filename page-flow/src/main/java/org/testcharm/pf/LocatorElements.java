@@ -2,6 +2,7 @@ package org.testcharm.pf;
 
 import org.testcharm.dal.runtime.CollectionDALCollection;
 import org.testcharm.dal.runtime.DALCollection;
+import org.testcharm.util.IndentBuffer;
 import org.testcharm.util.Sneaky;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class LocatorElements<T extends Element<T, ?, ?>> implements Elements<T> 
 
     @Override
     public DALCollection<T> list() {
-        Element.logger.info("Locating: " + locateInfo());
+        Element.logger.info("Locating: " + locateInfo(IndentBuffer.create()));
         List<?> elements = element.findElements(locator);
         Element.logger.info(String.format("Found %d elements", elements.size()));
         return new CollectionDALCollection<>(elements.stream().map(element1 -> {
@@ -35,7 +36,7 @@ public class LocatorElements<T extends Element<T, ?, ?>> implements Elements<T> 
     }
 
     @Override
-    public String locateInfo() {
-        return element.locators().stream().map(By::toString).collect(Collectors.joining(" / ")) + " => " + locator;
+    public IndentBuffer locateInfo(IndentBuffer indentBuffer) {
+        return indentBuffer.appendAll(" / ", element.locators()).append(" => ").append(locator);
     }
 }
