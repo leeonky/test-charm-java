@@ -16,29 +16,7 @@ import static java.lang.System.identityHashCode;
 public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
 
     static <T extends Element<T, ?, ?>> Elements<T> concat(Elements<T> elements1, Elements<T> elements2) {
-        return new Elements<T>() {
-            @Override
-            public int timeout() {
-                return Math.max(elements1.timeout(), elements2.timeout());
-            }
-
-            @Override
-            public IndentBuffer locateInfo(IndentBuffer indentBuffer) {
-                return null;
-            }
-
-            @Override
-            public DALCollection<T> list() {
-                String objectId = Integer.toHexString(identityHashCode(this)).toUpperCase();
-                Element.logger.info(String.format("Group(@%s) locating...", objectId));
-                List<T> list = new ArrayList<T>() {{
-                    addAll(elements1.list().collect());
-                    addAll(elements2.list().collect());
-                }};
-                Element.logger.info(String.format("Group(@%s) found a total of %d elements", objectId, list.size()));
-                return new CollectionDALCollection<>(list);
-            }
-        };
+        return new GroupElements<>(elements1, elements2);
     }
 
     default Elements<T> filter(Predicate<T> predicate) {
@@ -67,7 +45,8 @@ public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
             public IndentBuffer locateInfo(IndentBuffer indentBuffer) {
                 String objectId = Integer.toHexString(identityHashCode(this)).toUpperCase();
                 indentBuffer.append("Filtering by ").append(name).append(String.format("(@%s)", objectId));
-                return Elements.this.locateInfo(indentBuffer.indent().newLine());
+                Elements.this.locateInfo(indentBuffer.indent().newLine());
+                return indentBuffer;
             }
         };
     }
@@ -79,11 +58,12 @@ public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
     @Override
     default T single() {
         try {
+            Element.logger.info(String.format("Locating... (%dms)", timeout()));
             return new Retryer(timeout(), 100).get(AdaptiveList.super::single);
         } catch (InvalidAdaptiveListException ig) {
             IndentBuffer buffer = IndentBuffer.create()
                     .append("Operations can only be performed on a single located element at:");
-            locateInfo(buffer.indent().newLine());
+            locateInfo(buffer.newLine());
             buffer.newLine().append("but found ").append(ig.list().size());
             throw new InvalidAdaptiveListException(buffer.content(), ig.list());
         }
@@ -92,4 +72,51 @@ public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
     int timeout();
 
     IndentBuffer locateInfo(IndentBuffer indentBuffer);
+
+    class GroupElements<T extends Element<T, ?, ?>> implements Elements<T> {
+        private final List<Elements<T>> subElements = new ArrayList<>();
+
+        public GroupElements(Elements<T> elements1, Elements<T> elements2) {
+            addElements(elements1);
+            addElements(elements2);
+        }
+
+        private void addElements(Elements<T> sub) {
+            if (sub instanceof GroupElements)
+                subElements.addAll(((GroupElements<T>) sub).subElements());
+            else
+                subElements.add(sub);
+        }
+
+        List<Elements<T>> subElements() {
+            return subElements;
+        }
+
+        @Override
+        public int timeout() {
+            return subElements.stream().mapToInt(Elements::timeout).max().orElse(0);
+        }
+
+        @Override
+        public IndentBuffer locateInfo(IndentBuffer indentBuffer) {
+            String objectId = Integer.toHexString(identityHashCode(this)).toUpperCase();
+            indentBuffer.append(String.format("Group(@%s):", objectId));
+            IndentBuffer indent = indentBuffer.indent();
+            for (Elements<T> other : subElements)
+                other.locateInfo(indent.newLine());
+            return indentBuffer;
+        }
+
+        @Override
+        public DALCollection<T> list() {
+            String objectId = Integer.toHexString(identityHashCode(this)).toUpperCase();
+            Element.logger.info(String.format("Group(@%s) locating...", objectId));
+            List<T> list = new ArrayList<T>() {{
+                for (Elements<T> other : subElements)
+                    addAll(other.list().collect());
+            }};
+            Element.logger.info(String.format("Group(@%s) found a total of %d elements", objectId, list.size()));
+            return new CollectionDALCollection<>(list);
+        }
+    }
 }

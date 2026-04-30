@@ -16,7 +16,7 @@ Feature: locating
     And logs should:
       """
       : | level | message                             |
-        | INFO  | Locating: css{html} => css{.target} |
+        | INFO  | Selector: css{html} => css{.target} |
         | INFO  | Found 2 elements                    |
       """
     Examples:
@@ -40,7 +40,7 @@ Feature: locating
     And logs should:
       """
       : | level | message                                  |
-        | INFO  | Locating: css{html} => caption{expected} |
+        | INFO  | Selector: css{html} => caption{expected} |
         | INFO  | Found 2 elements                         |
       """
     Examples:
@@ -64,7 +64,7 @@ Feature: locating
     And logs should:
       """
       : | level | message                                        |
-        | INFO  | Locating: css{html} => xpath{//div[@attr='a']} |
+        | INFO  | Selector: css{html} => xpath{//div[@attr='a']} |
         | INFO  | Found 2 elements                               |
       """
     Examples:
@@ -88,7 +88,7 @@ Feature: locating
     And logs should:
       """
       : | level | message                               |
-        | INFO  | Locating: css{html} => placeholder{a} |
+        | INFO  | Selector: css{html} => placeholder{a} |
         | INFO  | Found 2 elements                      |
       """
     Examples:

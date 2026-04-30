@@ -19,7 +19,7 @@ public class LocatorElements<T extends Element<T, ?, ?>> implements Elements<T> 
 
     @Override
     public DALCollection<T> list() {
-        Element.logger.info("Locating: " + locateInfo(IndentBuffer.create()));
+        Element.logger.info("Selector: " + locateInfo(IndentBuffer.create()));
         List<?> elements = element.findElements(locator);
         Element.logger.info(String.format("Found %d elements", elements.size()));
         return new CollectionDALCollection<>(elements.stream().map(element1 -> {

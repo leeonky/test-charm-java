@@ -25,13 +25,17 @@ Feature: locating
       And logs should:
         """
         : | level | message                                    |
-          | INFO  | Locating: css{html} => css{.target-str}    |
+          | INFO  | Locating... (8888ms)                       |
+          | INFO  | Selector: css{html} => css{.target-str}    |
           | INFO  | Found 1 elements                           |
-          | INFO  | Locating: css{html} => css{.target-int}    |
+          | INFO  | Locating... (8888ms)                       |
+          | INFO  | Selector: css{html} => css{.target-int}    |
           | INFO  | Found 1 elements                           |
-          | INFO  | Locating: css{html} => css{.target-double} |
+          | INFO  | Locating... (8888ms)                       |
+          | INFO  | Selector: css{html} => css{.target-double} |
           | INFO  | Found 1 elements                           |
-          | INFO  | Locating: css{html} => css{.target-long}   |
+          | INFO  | Locating... (8888ms)                       |
+          | INFO  | Selector: css{html} => css{.target-long}   |
           | INFO  | Found 1 elements                           |
         """
       Examples:
@@ -54,7 +58,7 @@ Feature: locating
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-            css{html} => css{.target}
+        css{html} => css{.target}
         but found 2: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
@@ -92,7 +96,7 @@ Feature: locating
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-            css{html} => css{.target}
+        css{html} => css{.target}
         but found 2: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
@@ -138,9 +142,10 @@ Feature: locating
         """
         : | level | message                             |
           | ...                                         |
-          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Locating... (1000ms)                |
+          | INFO  | Selector: css{html} => css{.target} |
           | INFO  | Found 0 elements                    |
-          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Selector: css{html} => css{.target} |
           | INFO  | Found 1 elements                    |
           | ...                                         |
         """
@@ -162,16 +167,16 @@ Feature: locating
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-            css{html} => css{.target}
+        css{html} => css{.target}
         but found 0: []
         """
       And logs should:
         """
         : | level | message                             |
           | ...                                         |
-          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Selector: css{html} => css{.target} |
           | INFO  | Found 0 elements                    |
-          | INFO  | Locating: css{html} => css{.target} |
+          | INFO  | Selector: css{html} => css{.target} |
           | INFO  | Found 0 elements                    |
           | ...                                         |
         """
@@ -252,10 +257,10 @@ Feature: locating
         : | level | message                                                                 |
           | ...                                                                             |
           | INFO  | {::should.startsWith: 'Filtering by source code(@'}                     |
-          | INFO  | Locating: css{html} => css{div}                                         |
+          | INFO  | Selector: css{html} => css{div}                                         |
           | INFO  | Found 0 elements                                                        |
           | INFO  | {::should.startsWith: 'Filtered from 0 to 0 elements by source code(@'} |
-          | INFO  | Locating: css{html} => css{div}                                         |
+          | INFO  | Selector: css{html} => css{div}                                         |
           | INFO  | Found 2 elements                                                        |
           | INFO  | {::should.startsWith: 'Filtered from 2 to 1 elements by source code(@'} |
           | ...                                                                             |
@@ -280,8 +285,8 @@ Feature: locating
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-            Filtering by source code
-                css{html} => css{.target}
+        Filtering by source code
+            css{html} => css{.target}
         but found 2: [
             org.testcharm.pf.cucumber.<type> {
                 dom: java.lang.String <<div class="target">unexpected</div>>,
@@ -304,7 +309,7 @@ Feature: locating
         : | level | message                                                               |
           | ...                                                                           |
           | INFO  | {::should.startsWith: 'Filtering by source code'}                     |
-          | INFO  | Locating: css{html} => css{.target}                                   |
+          | INFO  | Selector: css{html} => css{.target}                                   |
           | INFO  | Found 2 elements                                                      |
           | INFO  | {::should.startsWith: 'Filtered from 2 to 2 elements by source code'} |
           | ...                                                                           |
@@ -334,7 +339,7 @@ Feature: locating
         : | level | message                                                             |
           | ...                                                                         |
           | INFO  | {::should.startsWith: 'Filtering by visible(@'}                     |
-          | INFO  | Locating: css{html} => css{.target}                                 |
+          | INFO  | Selector: css{html} => css{.target}                                 |
           | INFO  | Found 2 elements                                                    |
           | INFO  | {::should.startsWith: 'Filtered from 2 to 1 elements by visible(@'} |
           | ...                                                                         |
@@ -361,8 +366,8 @@ Feature: locating
       Then failed with:
         """
         Operations can only be performed on a single located element at:
-            Filtering by visible
-                css{html} => css{.target}
+        Filtering by visible
+            css{html} => css{.target}
         but found 0: []
         """
       And logs should:
@@ -370,7 +375,7 @@ Feature: locating
         : | level | message                                                           |
           | ...                                                                       |
           | INFO  | {::should.startsWith: 'Filtering by visible'}                     |
-          | INFO  | Locating: css{html} => css{.target}                               |
+          | INFO  | Selector: css{html} => css{.target}                               |
           | INFO  | Found 2 elements                                                  |
           | INFO  | {::should.startsWith: 'Filtered from 2 to 0 elements by visible'} |
           | ...                                                                       |
@@ -398,9 +403,9 @@ Feature: locating
         : | level | message                                                             |
           | ...                                                                         |
           | INFO  | /^Group\(@.*\) locating\.\.\.$/                                     |
-          | INFO  | Locating: css{html} => css{.target}                                 |
+          | INFO  | Selector: css{html} => css{.target}                                 |
           | INFO  | Found 1 elements                                                    |
-          | INFO  | Locating: css{html} => css{.any-not-exist}                          |
+          | INFO  | Selector: css{html} => css{.any-not-exist}                          |
           | INFO  | Found 0 elements                                                    |
           | INFO  | /^Group\(@.*\) found a total of 1 elements$/                        |
           | ...                                                                         |
@@ -410,3 +415,87 @@ Feature: locating
         | selenium   |
         | playwright |
 
+    Scenario Outline: use longer waiting time
+      Given launch the following web page:
+        """
+        html
+          script.
+            document.addEventListener('DOMContentLoaded', function() {
+              setTimeout(function() {
+                var newElement = document.createElement('div');
+                newElement.className = 'target';
+                newElement.textContent = 'hello';
+                document.body.appendChild(newElement);
+              }, 500);
+            });
+          body
+        """
+      Then page in driver <driver> should:
+        """
+        (patience[100ms].css[.target] + patience[1s].css[.any-not-exist]).text= hello
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: use longer waiting time not plus
+      Given launch the following web page:
+        """
+        html
+          script.
+            document.addEventListener('DOMContentLoaded', function() {
+              setTimeout(function() {
+                var newElement = document.createElement('div');
+                newElement.className = 'target';
+                newElement.textContent = 'hello';
+                document.body.appendChild(newElement);
+              }, 600);
+            });
+          body
+        """
+      When try to find element via driver <driver>:
+        """
+        (patience[300ms].css[.target] + patience[300ms].css[.any-not-exist]).text= hello
+        """
+      Then failed with:
+        """
+        Operations can only be performed on a single located element at:
+        Group:
+            css{html} => css{.target}
+            css{html} => css{.any-not-exist}
+        but found 0: []
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: elements + elements + elements
+      Given launch the following web page:
+        """
+        html
+          body
+            .target hello
+        """
+      Then page in driver <driver> should:
+        """
+        (css[.target] + css[.any-not-exist1] + css[.any-not-exist2]).text= hello
+        """
+      And logs should:
+        """
+        : | level | message                                                             |
+          | INFO  | Locating... (8888ms)                                                |
+          | INFO  | /^Group\(@.*\) locating\.\.\.$/                                     |
+          | INFO  | Selector: css{html} => css{.target}                                 |
+          | INFO  | Found 1 elements                                                    |
+          | INFO  | Selector: css{html} => css{.any-not-exist1}                         |
+          | INFO  | Found 0 elements                                                    |
+          | INFO  | Selector: css{html} => css{.any-not-exist2}                         |
+          | INFO  | Found 0 elements                                                    |
+          | INFO  | /^Group\(@.*\) found a total of 1 elements$/                        |
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |

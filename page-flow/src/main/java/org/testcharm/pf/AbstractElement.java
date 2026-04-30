@@ -37,10 +37,20 @@ public abstract class AbstractElement<T extends Element<T, E, P>, E, P extends P
         return (T) this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public T patience(String time) {
-        timeout = TimeUtil.parseTime(time);
-        return (T) this;
+        T duplicated = duplicate();
+        ((AbstractElement<T, E, P>) duplicated).timeout = TimeUtil.parseTime(time);
+        return duplicated;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected T duplicate() {
+        T duplicated = newChildren(element);
+        ((AbstractElement<T, E, P>) duplicated).timeout = timeout;
+        ((AbstractElement<T, E, P>) duplicated).locator = locator;
+        return duplicated;
     }
 
     @Override
