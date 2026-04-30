@@ -35,6 +35,18 @@ public class ElementDALOperation implements Extension {
                 .registerCustomSorter(Element.class, Element::text)
                 .registerExclamation(Elements.class, (RuntimeDataHandler<RuntimeData<Elements>>)
                         elementsRuntimeData -> elementsRuntimeData.data().map(Elements::visible))
+
+                .registerOperator(Operators.PLUS, new Operation<Elements, Elements>() {
+                    @Override
+                    public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
+                        return v1.instanceOf(Elements.class) && v2.instanceOf(Elements.class);
+                    }
+
+                    @Override
+                    public Object operate(Data<Elements> v1, DALOperator operator, Data<Elements> v2, DALRuntimeContext context) {
+                        return Elements.concat(v1.value(), v2.value());
+                    }
+                })
         ;
     }
 

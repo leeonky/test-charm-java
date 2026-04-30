@@ -2,15 +2,44 @@ package org.testcharm.pf;
 
 import org.testcharm.dal.extensions.basic.sync.Retryer;
 import org.testcharm.dal.runtime.AdaptiveList;
+import org.testcharm.dal.runtime.CollectionDALCollection;
 import org.testcharm.dal.runtime.DALCollection;
 import org.testcharm.dal.runtime.InvalidAdaptiveListException;
 import org.testcharm.util.IndentBuffer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static java.lang.System.identityHashCode;
 
 public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
+
+    static <T extends Element<T, ?, ?>> Elements<T> concat(Elements<T> elements1, Elements<T> elements2) {
+        return new Elements<T>() {
+            @Override
+            public int timeout() {
+                return Math.max(elements1.timeout(), elements2.timeout());
+            }
+
+            @Override
+            public IndentBuffer locateInfo(IndentBuffer indentBuffer) {
+                return null;
+            }
+
+            @Override
+            public DALCollection<T> list() {
+                String objectId = Integer.toHexString(identityHashCode(this)).toUpperCase();
+                Element.logger.info(String.format("Group(@%s) locating...", objectId));
+                List<T> list = new ArrayList<T>() {{
+                    addAll(elements1.list().collect());
+                    addAll(elements2.list().collect());
+                }};
+                Element.logger.info(String.format("Group(@%s) found a total of %d elements", objectId, list.size()));
+                return new CollectionDALCollection<>(list);
+            }
+        };
+    }
 
     default Elements<T> filter(Predicate<T> predicate) {
         return filter(predicate, "source code");
