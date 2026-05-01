@@ -2,6 +2,7 @@ package org.testcharm.cucumber.swarm.master;
 
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.gherkin.Pickle;
+import org.testcharm.cucumber.swarm.repo.WorkerRepository;
 import org.testcharm.util.Sneaky;
 
 import java.util.Optional;

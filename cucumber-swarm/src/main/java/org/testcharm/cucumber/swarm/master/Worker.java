@@ -28,7 +28,7 @@ public class Worker {
         responseNewPickle(NO_PICKLE);
     }
 
-    public int id() {
+    public Integer id() {
         return id;
     }
 }
