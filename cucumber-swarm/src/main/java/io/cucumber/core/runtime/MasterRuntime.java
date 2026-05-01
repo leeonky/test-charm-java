@@ -14,7 +14,7 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
-import org.testcharm.cucumber.swarm.master.DistributedPickleScheduler;
+import org.testcharm.cucumber.swarm.master.Scheduler;
 
 import java.time.Clock;
 import java.util.Arrays;
@@ -41,10 +41,10 @@ public final class MasterRuntime {
     private final FeatureSupplier featureSupplier;
     private final PickleOrder pickleOrder;
     private final MasterCucumberExecutionContext context;
-    private final DistributedPickleScheduler scheduler;
+    private final Scheduler scheduler;
 
     @Deprecated
-    public DistributedPickleScheduler scheduler() {
+    public Scheduler scheduler() {
         return scheduler;
     }
 
@@ -54,7 +54,7 @@ public final class MasterRuntime {
             final Predicate<Pickle> filter,
             final int limit,
             final FeatureSupplier featureSupplier,
-            final PickleOrder pickleOrder, DistributedPickleScheduler scheduler
+            final PickleOrder pickleOrder, Scheduler scheduler
     ) {
         this.filter = filter;
         this.context = context;
@@ -87,7 +87,7 @@ public final class MasterRuntime {
         if (collect.isEmpty())
             scheduler.forceWaitingWorker();
 
-        collect.forEach(scheduler::execute);
+        collect.forEach(scheduler::responsePickle);
 
         scheduler.exitAll();
     }
@@ -153,14 +153,13 @@ public final class MasterRuntime {
         public MasterRuntime build() {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
-            RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
-            MasterCucumberExecutionContext context = new MasterCucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
+            MasterCucumberExecutionContext context = new MasterCucumberExecutionContext(eventBus, exitStatus);
             Predicate<Pickle> filter = new Filters(runtimeOptions);
             int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
             return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder,
-                    new DistributedPickleScheduler(eventBus));
+                    new Scheduler(eventBus));
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

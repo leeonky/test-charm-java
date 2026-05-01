@@ -2,6 +2,7 @@ package org.testcharm.cucumber.swarm.master;
 
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.gherkin.Pickle;
+import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.repo.WorkerRepository;
 import org.testcharm.util.Sneaky;
 
@@ -9,14 +10,16 @@ import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class DistributedPickleScheduler {
+public class Scheduler {
     private final EventBus eventBus;
     private final BlockingQueue<Worker> idleWorkers = new LinkedBlockingQueue<>();
     private final WorkerRepository workerRepository = new WorkerRepository();
     private final Server server = new Server(this, workerRepository);
+    private final EntityMapper entityMapper = new EntityMapper();
+
     private boolean running = true;
 
-    public DistributedPickleScheduler(EventBus eventBus) {
+    public Scheduler(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
@@ -26,11 +29,11 @@ public class DistributedPickleScheduler {
         return Optional.empty();
     }
 
-    public void execute(Pickle pickle) {
-        Sneaky.get(idleWorkers::take).responseNewPickle(pickle);
+    public void responsePickle(Pickle pickle) {
+        Sneaky.get(idleWorkers::take).responsePickle(pickle);
     }
 
-    public Pickle responsePickle(Worker worker) {
+    public Pickle requestPickle(Worker worker) {
         Sneaky.run(() -> idleWorkers.put(worker));
         return worker.requestPickle();
     }

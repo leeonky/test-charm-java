@@ -1,6 +1,5 @@
 package org.testcharm.cucumber.swarm.worker;
 
-import io.cucumber.core.gherkin.Pickle;
 import org.testcharm.cucumber.swarm.master.Server;
 
 import java.util.Optional;
@@ -12,8 +11,8 @@ public class Client {
         this.server = server;
     }
 
-    public Pickle requestPickle(int workerId) {
-        return server.responsePickle(workerId);
+    public String requestPickle(int workerId) {
+        return server.requestPickle(workerId);
     }
 
     public Optional<Integer> register() {

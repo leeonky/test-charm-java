@@ -28,14 +28,12 @@ public class MasterCucumberExecutionContext {
 
     private final EventBus bus;
     private final ExitStatus exitStatus;
-    private final RunnerSupplier runnerSupplier;
     private final RethrowingThrowableCollector collector = new RethrowingThrowableCollector();
     private Instant start;
 
-    public MasterCucumberExecutionContext(EventBus bus, ExitStatus exitStatus, RunnerSupplier runnerSupplier) {
+    public MasterCucumberExecutionContext(EventBus bus, ExitStatus exitStatus) {
         this.bus = bus;
         this.exitStatus = exitStatus;
-        this.runnerSupplier = runnerSupplier;
     }
 
     @FunctionalInterface

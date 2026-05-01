@@ -50,7 +50,7 @@ subprojects {
                 dependsOn assemble, testClasses
                 environment('CUCUMBER_PUBLISH_QUIET', true)
 //                mainClass = "io.cucumber.core.cli.Main"
-                mainClass = "org.testcharm.cucumber.Main"
+                mainClass = "org.testcharm.cucumber.swarm.Main"
 
                 classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
 

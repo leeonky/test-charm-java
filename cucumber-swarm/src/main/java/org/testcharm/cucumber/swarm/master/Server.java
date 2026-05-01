@@ -1,21 +1,21 @@
 package org.testcharm.cucumber.swarm.master;
 
-import io.cucumber.core.gherkin.Pickle;
+import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.repo.WorkerRepository;
 
 import java.util.Optional;
 
 public class Server {
-    private final DistributedPickleScheduler scheduler;
+    private final Scheduler scheduler;
     private final WorkerRepository workerRepository;
 
-    public Server(DistributedPickleScheduler scheduler, WorkerRepository workerRepository) {
+    public Server(Scheduler scheduler, WorkerRepository workerRepository) {
         this.scheduler = scheduler;
         this.workerRepository = workerRepository;
     }
 
-    public Pickle responsePickle(int workerId) {
-        return scheduler.responsePickle(workerRepository.findById(workerId));
+    public String requestPickle(int workerId) {
+        return EntityMapper.pickleKey(scheduler.requestPickle(workerRepository.findById(workerId)));
     }
 
     public Optional<Integer> register() {

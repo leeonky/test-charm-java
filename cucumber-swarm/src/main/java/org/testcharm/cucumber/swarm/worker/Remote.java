@@ -1,8 +1,12 @@
 package org.testcharm.cucumber.swarm.worker;
 
+import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.messages.types.Envelope;
+import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.master.Server;
+
+import java.util.List;
 
 public class Remote {
     private static final int NOT_EXIST = -1;
@@ -15,13 +19,18 @@ public class Remote {
 
     private int workerId;
     private final Client client;
+    private final EntityMapper entityMapper = new EntityMapper();
 
     public Remote(Client client) {
         this.client = client;
     }
 
     public Pickle requestPickle() {
-        return client.requestPickle(workerId);
+        return entityMapper.pickle(client.requestPickle(workerId));
+    }
+
+    public void setupMapping(List<Feature> features) {
+        entityMapper.mapGherkinFeatures(features);
     }
 
     public boolean register() {

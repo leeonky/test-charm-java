@@ -56,6 +56,7 @@ public final class WorkerRuntime {
     public void run() {
         // Parse the features early. Don't proceed when there are lexer errors
         List<Feature> features = featureSupplier.get();
+        REMOTE.setupMapping(features);
         context.runFeatures(() -> runFeatures(features));
     }
 

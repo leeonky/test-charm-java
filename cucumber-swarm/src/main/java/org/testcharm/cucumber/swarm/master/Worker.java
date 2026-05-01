@@ -16,7 +16,7 @@ public class Worker {
     });
     private final SynchronousQueue<Pickle> queue = new SynchronousQueue<>();
 
-    public void responseNewPickle(Pickle pickle) {
+    public void responsePickle(Pickle pickle) {
         Sneaky.run(() -> queue.put(pickle));
     }
 
@@ -25,7 +25,7 @@ public class Worker {
     }
 
     public void exit() {
-        responseNewPickle(NO_PICKLE);
+        responsePickle(NO_PICKLE);
     }
 
     public Integer id() {
