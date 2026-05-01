@@ -33,7 +33,7 @@ public class Main {
         final MasterRuntime masterRuntime = MasterRuntime.builder()
                 .withRuntimeOptions(master.runtimeOptions)
                 .withClassLoader(() -> classLoader)
-                .build();
+                .build(argvs.swarmArgs);
 
         Result worker = buildRuntimeOption(argvs.workerArgs);
 

@@ -69,6 +69,32 @@ class WorkerArgsPreProcessorTest {
         }
     }
 
+    @Nested
+    class SwarmPort {
+
+        @Test
+        void default_port() {
+            String[] argv = {"features"};
+            ProcessedArgs result = preProcessor.process(argv);
+
+            expect(buildOptions(result.masterArgs)).should(": {...}");
+            expect(buildOptions(result.workerArgs)).should(": {...}");
+
+            expect(result.swarmArgs).should(": {port: 10083}");
+        }
+
+        @Test
+        void set_port() {
+            String[] argv = {"--swarm-port", "8000", "features"};
+            ProcessedArgs result = preProcessor.process(argv);
+
+            expect(buildOptions(result.masterArgs)).should(": {...}");
+            expect(buildOptions(result.workerArgs)).should(": {...}");
+
+            expect(result.swarmArgs).should(": {port: 8000}");
+        }
+    }
+
     private RuntimeOptions buildOptions(String[] argv) {
         return new CommandlineOptionsParser(System.out).parse(argv)
                 .addDefaultSummaryPrinterIfNotDisabled()

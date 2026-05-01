@@ -19,6 +19,8 @@ public class WorkerArgsPreProcessor {
         workerArgs.add("--plugin");
         workerArgs.add("org.testcharm.cucumber.swarm.WorkerForwardingPlugin");
 
+        SwarmArg swarmArgs = new SwarmArg();
+
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
             if (arg.equals("--threads")) {
@@ -27,12 +29,14 @@ public class WorkerArgsPreProcessor {
                 String plugin = args.removeFirst();
                 masterArgs.add(arg);
                 masterArgs.add(plugin);
+            } else if (arg.equals("--swarm-port")) {
+                String port = args.removeFirst();
+                swarmArgs.setPort(Integer.parseInt(port));
             } else {
                 masterArgs.add(arg);
                 workerArgs.add(arg);
             }
         }
-
-        return new ProcessedArgs(masterArgs.toArray(new String[0]), workerArgs.toArray(new String[0]));
+        return new ProcessedArgs(masterArgs.toArray(new String[0]), workerArgs.toArray(new String[0]), swarmArgs);
     }
 }

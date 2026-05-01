@@ -14,13 +14,14 @@ public class Scheduler {
     private final EventBus eventBus;
     private final BlockingQueue<Worker> idleWorkers = new LinkedBlockingQueue<>();
     private final WorkerRepository workerRepository = new WorkerRepository();
-    private final Server server = new Server(this, workerRepository);
+    private final Server server;
     private final EntityMapper entityMapper = new EntityMapper();
 
     private boolean running = true;
 
-    public Scheduler(EventBus eventBus) {
+    public Scheduler(EventBus eventBus, int port) {
         this.eventBus = eventBus;
+        server = new Server(this, workerRepository, port);
     }
 
     public synchronized Optional<Worker> register() {
@@ -41,6 +42,7 @@ public class Scheduler {
     public synchronized void exitAll() {
         running = false;
         workerRepository.findAll().forEach(ig -> Sneaky.get(idleWorkers::take).exit());
+        server.exit();
     }
 
     @Deprecated

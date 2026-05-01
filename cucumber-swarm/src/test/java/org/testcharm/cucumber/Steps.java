@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
@@ -24,6 +25,7 @@ import static org.testcharm.dal.extensions.basic.string.Methods.string;
 
 public class Steps {
     TempDirectory globalTempDirectory, cucumberDirectory, featuresDirectory;
+    private final static AtomicInteger SWARM_PORT = new AtomicInteger(10083);
     private Process process;
 
     @Before
@@ -48,6 +50,8 @@ public class Steps {
         args.add("-cp");
         args.add(classpath);
         args.add(Main.class.getName());
+        args.add("--swarm-port");
+        args.add(String.valueOf(SWARM_PORT.getAndIncrement()));
         DAL.dal().evaluateAll(null, docString, new HashMap<String, String>() {{
             put("path", cucumberDirectory.root().toString() + File.separator);
         }}).forEach(e -> args.add(String.valueOf(e)));

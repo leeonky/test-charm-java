@@ -14,6 +14,7 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
+import org.testcharm.cucumber.swarm.SwarmArg;
 import org.testcharm.cucumber.swarm.master.Scheduler;
 
 import java.time.Clock;
@@ -150,7 +151,7 @@ public final class MasterRuntime {
             return this;
         }
 
-        public MasterRuntime build() {
+        public MasterRuntime build(SwarmArg swarmArgs) {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             MasterCucumberExecutionContext context = new MasterCucumberExecutionContext(eventBus, exitStatus);
@@ -159,7 +160,7 @@ public final class MasterRuntime {
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
             return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder,
-                    new Scheduler(eventBus));
+                    new Scheduler(eventBus, swarmArgs.getPort()));
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {
