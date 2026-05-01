@@ -1,14 +1,12 @@
 package org.testcharm.cucumber.swarm;
 
-import org.testcharm.util.Pair;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class WorkerArgsPreProcessor {
-    public Pair<String[], String[]> process(String[] argv) {
+    public ProcessedArgs process(String[] argv) {
         LinkedList<String> args = new LinkedList<>(Arrays.asList(argv));
         List<String> masterArgs = new ArrayList<>();
         masterArgs.add("--threads");
@@ -35,6 +33,6 @@ public class WorkerArgsPreProcessor {
             }
         }
 
-        return new Pair<>(masterArgs.toArray(new String[0]), workerArgs.toArray(new String[0]));
+        return new ProcessedArgs(masterArgs.toArray(new String[0]), workerArgs.toArray(new String[0]));
     }
 }

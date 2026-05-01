@@ -6,7 +6,6 @@ import io.cucumber.core.options.CucumberPropertiesParser;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.runtime.MasterRuntime;
 import io.cucumber.core.runtime.WorkerRuntime;
-import org.testcharm.util.Pair;
 import org.testcharm.util.Sneaky;
 
 import java.util.Optional;
@@ -23,8 +22,8 @@ public class Main {
     }
 
     public static byte run(String[] argv, ClassLoader classLoader) {
-        Pair<String[], String[]> argvs = new WorkerArgsPreProcessor().process(argv);
-        Result master = buildRuntimeOption(argvs.getFirst());
+        ProcessedArgs argvs = new WorkerArgsPreProcessor().process(argv);
+        Result master = buildRuntimeOption(argvs.masterArgs);
 
         Optional<Byte> exitStatus = master.commandlineOptionsParser.exitStatus();
         if (exitStatus.isPresent()) {
@@ -36,7 +35,7 @@ public class Main {
                 .withClassLoader(() -> classLoader)
                 .build();
 
-        Result worker = buildRuntimeOption(argvs.getSecond());
+        Result worker = buildRuntimeOption(argvs.workerArgs);
 
         exitStatus = worker.commandlineOptionsParser.exitStatus();
         if (exitStatus.isPresent()) {
