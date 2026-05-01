@@ -17,10 +17,7 @@ import io.cucumber.plugin.Plugin;
 
 import java.time.Clock;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -41,9 +38,8 @@ public final class MasterRuntime {
     private final Predicate<Pickle> filter;
     private final int limit;
     private final FeatureSupplier featureSupplier;
-    private final ExecutorService executor;
     private final PickleOrder pickleOrder;
-    private final CucumberExecutionContext context;
+    private final MasterCucumberExecutionContext context;
     private final DistributedPickleScheduler scheduler;
 
     @Deprecated
@@ -53,18 +49,16 @@ public final class MasterRuntime {
 
     private MasterRuntime(
             final ExitStatus exitStatus,
-            final CucumberExecutionContext context,
+            final MasterCucumberExecutionContext context,
             final Predicate<Pickle> filter,
             final int limit,
             final FeatureSupplier featureSupplier,
-            @Deprecated final ExecutorService executor,
             final PickleOrder pickleOrder, DistributedPickleScheduler scheduler
     ) {
         this.filter = filter;
         this.context = context;
         this.limit = limit;
         this.featureSupplier = featureSupplier;
-        this.executor = executor;
         this.exitStatus = exitStatus;
         this.pickleOrder = pickleOrder;
         this.scheduler = scheduler;
@@ -82,13 +76,17 @@ public final class MasterRuntime {
 
     private void runFeatures(List<Feature> features) {
         features.forEach(context::beforeFeature);
-        features.stream()
+        List<Pickle> collect = features.stream()
                 .flatMap(feature -> feature.getPickles().stream())
                 .filter(filter)
                 .collect(collectingAndThen(toList(),
                         list -> pickleOrder.orderPickles(list).stream()))
-                .limit(limit > 0 ? limit : Integer.MAX_VALUE)
-                .forEach(scheduler::execute);
+                .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
+
+        if (collect.isEmpty())
+            scheduler.forceWaitingWorker();
+
+        collect.forEach(scheduler::execute);
 
         scheduler.exitAll();
     }
@@ -155,13 +153,12 @@ public final class MasterRuntime {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
-            CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
+            MasterCucumberExecutionContext context = new MasterCucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
             Predicate<Pickle> filter = new Filters(runtimeOptions);
             int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
-            ExecutorService executor = createExecutorService();
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
-            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, executor, pickleOrder,
+            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder,
                     new DistributedPickleScheduler(eventBus));
         }
 
@@ -227,12 +224,6 @@ public final class MasterRuntime {
             return new FeaturePathFeatureSupplier(classLoader, runtimeOptions, parser);
         }
 
-        private ExecutorService createExecutorService() {
-            return runtimeOptions.isMultiThreaded()
-                    ? Executors.newFixedThreadPool(runtimeOptions.getThreads(), new CucumberThreadFactory())
-                    : new SameThreadExecutorService();
-        }
-
         private Plugins createPlugins() {
             Plugins plugins = new Plugins(new PluginFactory(), runtimeOptions);
             for (Plugin plugin : additionalPlugins) {
@@ -242,53 +233,4 @@ public final class MasterRuntime {
         }
     }
 
-    private static final class CucumberThreadFactory implements ThreadFactory {
-
-        private static final AtomicInteger poolNumber = new AtomicInteger(1);
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix;
-
-        CucumberThreadFactory() {
-            namePrefix = "cucumber-runner-" + poolNumber.getAndIncrement() + "-thread-";
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, namePrefix + threadNumber.getAndIncrement());
-        }
-
-    }
-
-    private static final class SameThreadExecutorService extends AbstractExecutorService {
-
-        @Override
-        public void execute(Runnable command) {
-            command.run();
-        }
-
-        @Override
-        public void shutdown() {
-            // no-op
-        }
-
-        @Override
-        public List<Runnable> shutdownNow() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public boolean isShutdown() {
-            return true;
-        }
-
-        @Override
-        public boolean isTerminated() {
-            return true;
-        }
-
-        @Override
-        public boolean awaitTermination(long timeout, TimeUnit unit) {
-            return true;
-        }
-    }
 }

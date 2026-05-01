@@ -6,10 +6,10 @@ import io.cucumber.core.options.CucumberPropertiesParser;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.runtime.MasterRuntime;
 import io.cucumber.core.runtime.WorkerRuntime;
+import org.testcharm.util.Pair;
 import org.testcharm.util.Sneaky;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 
 public class Main {
@@ -23,7 +23,8 @@ public class Main {
     }
 
     public static byte run(String[] argv, ClassLoader classLoader) {
-        Result master = buildRuntimeOption(argv);
+        Pair<String[], String[]> argvs = new WorkerArgsPreProcessor().process(argv);
+        Result master = buildRuntimeOption(argvs.getFirst());
 
         Optional<Byte> exitStatus = master.commandlineOptionsParser.exitStatus();
         if (exitStatus.isPresent()) {
@@ -35,7 +36,7 @@ public class Main {
                 .withClassLoader(() -> classLoader)
                 .build();
 
-        Result worker = buildRuntimeOption(preProcessWorker(argv));
+        Result worker = buildRuntimeOption(argvs.getSecond());
 
         exitStatus = worker.commandlineOptionsParser.exitStatus();
         if (exitStatus.isPresent()) {
@@ -54,12 +55,6 @@ public class Main {
 
         Sneaky.run(thread::join);
         return masterRuntime.exitStatus();
-    }
-
-    private static String[] preProcessWorker(String[] argv) {
-        return Stream.concat(
-                Stream.of("--no-summary", "--plugin", "org.testcharm.cucumber.WorkerForwardingPlugin"),
-                Stream.of(argv)).toArray(String[]::new);
     }
 
     private static Result buildRuntimeOption(String[] argv) {

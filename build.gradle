@@ -17,9 +17,9 @@ ext.cucumberProjects = [
         [name: 'jfactory-DAL', glues: ['org.testcharm']],
         [name: 'jfactory-cucumber', glues: ['org.testcharm.jfactory.cucumber']],
         [name: 'RESTful-cucumber', glues: ['org.testcharm.cucumber.restful', 'org.testcharm.util']],
-        [name: 'page-flow', glues: ['org.testcharm.pf.cucumber']],
+        [name: 'page-flow', glues: ['org.testcharm.pf.cucumber', 'org.testcharm.util']],
         [name: 'feature-summary', glues: ['org.testcharm']],
-        [name: 'cucumber-swarm', glues: ['org.testcharm.cucumber']],
+        [name: 'cucumber-swarm', glues: ['org.testcharm.cucumber', 'org.testcharm.util']],
 ]
 
 apply from: "$rootDir/gradle/jacoco.gradle"

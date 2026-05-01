@@ -13,8 +13,8 @@ public class Client {
         return server.responsePickle(worker);
     }
 
-    public void register(Worker worker) {
-        server.register(worker);
+    public boolean register(Worker worker) {
+        return server.register(worker);
     }
 
     public void sendEvent(Worker worker, Object event) {

@@ -31,6 +31,7 @@ subprojects {
         if (project.name == name) {
             dependencies {
                 testImplementation libs.test.cucumber
+                testImplementation project(':cucumber-swarm')
             }
 
             configurations {
@@ -48,7 +49,8 @@ subprojects {
             tasks.register('cucumber', JavaExec) {
                 dependsOn assemble, testClasses
                 environment('CUCUMBER_PUBLISH_QUIET', true)
-                mainClass = "io.cucumber.core.cli.Main"
+//                mainClass = "io.cucumber.core.cli.Main"
+                mainClass = "org.testcharm.cucumber.Main"
 
                 classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
 

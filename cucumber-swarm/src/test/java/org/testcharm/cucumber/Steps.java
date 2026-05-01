@@ -23,12 +23,15 @@ import static org.testcharm.dal.extensions.basic.string.Methods.string;
 
 public class Steps {
     static final TempDirectory globalTempDirectory = new TempDirectory(Paths.get("src", "test", "generate")).mkdir("cucumber");
+    static final TempDirectory stepDir = new TempDirectory(Paths.get("src", "test", "generate")).mkdir(JavaExecutor.executor().compiler().getLocation().getName());
     ThreadLocal<TempDirectory> tempDirectory;
     private Process process;
 
     @Before
     public void clean() {
+        JavaExecutor.executor().resetAll();
         globalTempDirectory.clean();
+        stepDir.clean();
         tempDirectory = ThreadLocal.withInitial(() -> globalTempDirectory.mkdir("" + Thread.currentThread().getId()));
         tempDirectory.get().mkdir("features");
     }
@@ -42,7 +45,6 @@ public class Steps {
         String classpath = String.join(File.pathSeparator, System.getProperty("java.class.path").split(File.pathSeparator));
         classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
-//        args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
         args.add("-cp");
         args.add(classpath);
         args.add(Main.class.getName());

@@ -1,6 +1,7 @@
 package io.cucumber.core.runtime;
 
 import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.messages.types.Envelope;
 
 public class Remote {
     public static Remote REMOTE;
@@ -20,11 +21,16 @@ public class Remote {
         return client.requestPickle(worker);
     }
 
-    public void register() {
-        client.register(worker);
+    public boolean register() {
+        return client.register(worker);
     }
 
+    //TODO test: should not forward worker testRunFinished and testRunStarted
     public void sendEvent(Object event) {
-        client.sendEvent(worker, event);
+        if (event instanceof Envelope) {
+            if (!(((Envelope) event).getTestRunFinished().isPresent() || ((Envelope) event).getTestRunStarted().isPresent()))
+                client.sendEvent(worker, event);
+        } else
+            client.sendEvent(worker, event);
     }
 }

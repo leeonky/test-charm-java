@@ -15,13 +15,17 @@ public class DistributedPickleScheduler {
     private final List<Worker> workers = Collections.synchronizedList(new ArrayList<>());
     private final BlockingQueue<Worker> idleWorkers = new LinkedBlockingQueue<>();
     private final Server server = new Server(this);
+    private boolean running = true;
 
     public DistributedPickleScheduler(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
-    public void register(Worker worker) {
-        workers.add(worker);
+    public synchronized boolean register(Worker worker) {
+        if (running) {
+            workers.add(worker);
+        }
+        return running;
     }
 
     public void execute(Pickle pickle) {
@@ -33,7 +37,8 @@ public class DistributedPickleScheduler {
         return worker.requestPickle();
     }
 
-    public void exitAll() {
+    public synchronized void exitAll() {
+        running = false;
         server.stop();
         workers.forEach(ig -> Sneaky.get(idleWorkers::take).exit());
     }
@@ -45,5 +50,10 @@ public class DistributedPickleScheduler {
 
     public void receiveEvent(Worker worker, Object event) {
         eventBus.send(event);
+    }
+
+    public void forceWaitingWorker() {
+        for (int i = 0; i < 100 && workers.isEmpty(); i++)
+            Sneaky.run(() -> Thread.sleep(10));
     }
 }

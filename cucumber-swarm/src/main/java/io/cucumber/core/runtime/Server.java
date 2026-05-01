@@ -13,12 +13,11 @@ public class Server {
         return scheduler.responsePickle(worker);
     }
 
-    public void register(Worker worker) {
-        scheduler.register(worker);
+    public boolean register(Worker worker) {
+        return scheduler.register(worker);
     }
 
     public void stop() {
-
     }
 
     public void receiveEvent(Worker worker, Object event) {

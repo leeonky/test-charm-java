@@ -3,13 +3,11 @@ package io.cucumber.core.runtime;
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.eventbus.UuidGenerator;
 import io.cucumber.core.feature.FeatureParser;
-import io.cucumber.core.filter.Filters;
 import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
 import io.cucumber.core.options.RuntimeOptions;
-import io.cucumber.core.order.PickleOrder;
 import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
@@ -17,11 +15,7 @@ import io.cucumber.plugin.Plugin;
 
 import java.time.Clock;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static io.cucumber.core.runtime.Remote.REMOTE;
@@ -38,29 +32,18 @@ public final class WorkerRuntime {
 
     private final ExitStatus exitStatus;
 
-    private final Predicate<Pickle> filter;
-    private final int limit;
     private final FeatureSupplier featureSupplier;
-    private final ExecutorService executor;
-    private final PickleOrder pickleOrder;
     private final CucumberExecutionContext context;
 
     private WorkerRuntime(
             final ExitStatus exitStatus,
             final CucumberExecutionContext context,
-            final Predicate<Pickle> filter,
-            final int limit,
             final FeatureSupplier featureSupplier,
-            @Deprecated final ExecutorService executor,
-            final PickleOrder pickleOrder, Server server
+            Server server
     ) {
-        this.filter = filter;
         this.context = context;
-        this.limit = limit;
         this.featureSupplier = featureSupplier;
-        this.executor = executor;
         this.exitStatus = exitStatus;
-        this.pickleOrder = pickleOrder;
         Remote.setupRemote(server);
     }
 
@@ -76,12 +59,13 @@ public final class WorkerRuntime {
 
     private void runFeatures(List<Feature> features) {
         features.forEach(context::beforeFeature);
-        REMOTE.register();
-        for (; ; ) {
-            Pickle pickle = REMOTE.requestPickle();
-            if (pickle == NO_PICKLE)
-                break;
-            context.runTestCase(runner -> runner.runPickle(pickle));
+        if (REMOTE.register()) {
+            for (; ; ) {
+                Pickle pickle = REMOTE.requestPickle();
+                if (pickle == NO_PICKLE)
+                    break;
+                context.runTestCase(runner -> runner.runPickle(pickle));
+            }
         }
     }
 
@@ -148,12 +132,8 @@ public final class WorkerRuntime {
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
             CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
-            Predicate<Pickle> filter = new Filters(runtimeOptions);
-            int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
-            ExecutorService executor = createExecutorService();
-            PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
-            return new WorkerRuntime(exitStatus, context, filter, limit, featureSupplier, executor, pickleOrder, server);
+            return new WorkerRuntime(exitStatus, context, featureSupplier, server);
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {
@@ -218,69 +198,12 @@ public final class WorkerRuntime {
             return new FeaturePathFeatureSupplier(classLoader, runtimeOptions, parser);
         }
 
-        private ExecutorService createExecutorService() {
-            return runtimeOptions.isMultiThreaded()
-                    ? Executors.newFixedThreadPool(runtimeOptions.getThreads(), new CucumberThreadFactory())
-                    : new SameThreadExecutorService();
-        }
-
         private Plugins createPlugins() {
             Plugins plugins = new Plugins(new PluginFactory(), runtimeOptions);
             for (Plugin plugin : additionalPlugins) {
                 plugins.addPlugin(plugin);
             }
             return plugins;
-        }
-
-    }
-
-    private static final class CucumberThreadFactory implements ThreadFactory {
-
-        private static final AtomicInteger poolNumber = new AtomicInteger(1);
-        private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final String namePrefix;
-
-        CucumberThreadFactory() {
-            namePrefix = "cucumber-runner-" + poolNumber.getAndIncrement() + "-thread-";
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            return new Thread(r, namePrefix + threadNumber.getAndIncrement());
-        }
-
-    }
-
-    private static final class SameThreadExecutorService extends AbstractExecutorService {
-
-        @Override
-        public void execute(Runnable command) {
-            command.run();
-        }
-
-        @Override
-        public void shutdown() {
-            // no-op
-        }
-
-        @Override
-        public List<Runnable> shutdownNow() {
-            return Collections.emptyList();
-        }
-
-        @Override
-        public boolean isShutdown() {
-            return true;
-        }
-
-        @Override
-        public boolean isTerminated() {
-            return true;
-        }
-
-        @Override
-        public boolean awaitTermination(long timeout, TimeUnit unit) {
-            return true;
         }
     }
 }
