@@ -22,18 +22,17 @@ import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllA
 import static org.testcharm.dal.extensions.basic.string.Methods.string;
 
 public class Steps {
-    static final TempDirectory globalTempDirectory = new TempDirectory(Paths.get("src", "test", "generate")).mkdir("cucumber");
-    static final TempDirectory stepDir = new TempDirectory(Paths.get("src", "test", "generate")).mkdir(JavaExecutor.executor().compiler().getLocation().getName());
-    ThreadLocal<TempDirectory> tempDirectory;
+    TempDirectory globalTempDirectory, cucumberDirectory, featuresDirectory;
     private Process process;
 
     @Before
     public void clean() {
-        JavaExecutor.executor().resetAll();
+        globalTempDirectory = new TempDirectory(Paths.get("src", "test", "generate")).mkdir(JavaExecutor.executor().compiler().getLocation().getName());
         globalTempDirectory.clean();
-        stepDir.clean();
-        tempDirectory = ThreadLocal.withInitial(() -> globalTempDirectory.mkdir("" + Thread.currentThread().getId()));
-        tempDirectory.get().mkdir("features");
+        cucumberDirectory = globalTempDirectory.mkdir("cucumber");
+        featuresDirectory = cucumberDirectory.mkdir("features");
+
+        JavaExecutor.executor().resetAll();
     }
 
     @When("run cucumber with the following args:")
@@ -49,7 +48,7 @@ public class Steps {
         args.add(classpath);
         args.add(Main.class.getName());
         DAL.dal().evaluateAll(null, docString, new HashMap<String, String>() {{
-            put("path", tempDirectory.get().root().toString() + File.separator);
+            put("path", cucumberDirectory.root().toString() + File.separator);
         }}).forEach(e -> args.add(String.valueOf(e)));
         process = new ProcessBuilder(args.toArray(new String[0])).start();
     }
@@ -60,7 +59,7 @@ public class Steps {
             put("code", Sneaky.get(process::waitFor));
             put("stdout", string(readAllAndClose(process.getInputStream())));
             put("stderr", string(readAllAndClose(process.getErrorStream())));
-        }}).should(docString.replace("$path$", tempDirectory.get().root().toAbsolutePath().toString()));
+        }}).should(docString.replace("$path$", cucumberDirectory.root().toAbsolutePath().toString()));
     }
 
     @After
@@ -71,6 +70,6 @@ public class Steps {
 
     @Given("the feature file {string}:")
     public void theFeatureFile(String path, String content) {
-        tempDirectory.get().mkdir("features").write(path, content);
+        featuresDirectory.write(path, content);
     }
 }
