@@ -1,4 +1,4 @@
-package org.testcharm.cucumber;
+package org.testcharm.cucumber.swarm;
 
 import io.cucumber.plugin.ConcurrentEventListener;
 import io.cucumber.plugin.event.EventPublisher;

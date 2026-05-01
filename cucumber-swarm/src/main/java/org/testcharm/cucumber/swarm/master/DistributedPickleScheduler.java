@@ -1,31 +1,28 @@
-package io.cucumber.core.runtime;
+package org.testcharm.cucumber.swarm.master;
 
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.gherkin.Pickle;
 import org.testcharm.util.Sneaky;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class DistributedPickleScheduler {
     private final EventBus eventBus;
-    private final List<Worker> workers = Collections.synchronizedList(new ArrayList<>());
     private final BlockingQueue<Worker> idleWorkers = new LinkedBlockingQueue<>();
-    private final Server server = new Server(this);
+    private final WorkerRepository workerRepository = new WorkerRepository();
+    private final Server server = new Server(this, workerRepository);
     private boolean running = true;
 
     public DistributedPickleScheduler(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
-    public synchronized boolean register(Worker worker) {
-        if (running) {
-            workers.add(worker);
-        }
-        return running;
+    public synchronized Optional<Worker> register() {
+        if (running)
+            return Optional.of(workerRepository.save(new Worker()));
+        return Optional.empty();
     }
 
     public void execute(Pickle pickle) {
@@ -39,8 +36,7 @@ public class DistributedPickleScheduler {
 
     public synchronized void exitAll() {
         running = false;
-        server.stop();
-        workers.forEach(ig -> Sneaky.get(idleWorkers::take).exit());
+        workerRepository.findAll().forEach(ig -> Sneaky.get(idleWorkers::take).exit());
     }
 
     @Deprecated
@@ -53,7 +49,7 @@ public class DistributedPickleScheduler {
     }
 
     public void forceWaitingWorker() {
-        for (int i = 0; i < 100 && workers.isEmpty(); i++)
+        for (int i = 0; i < 100 && workerRepository.isEmpty(); i++)
             Sneaky.run(() -> Thread.sleep(10));
     }
 }

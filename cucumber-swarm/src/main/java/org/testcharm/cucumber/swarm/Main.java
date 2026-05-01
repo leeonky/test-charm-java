@@ -1,4 +1,4 @@
-package org.testcharm.cucumber;
+package org.testcharm.cucumber.swarm;
 
 import io.cucumber.core.options.CommandlineOptionsParser;
 import io.cucumber.core.options.CucumberProperties;

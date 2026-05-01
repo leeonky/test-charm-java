@@ -4,6 +4,7 @@ import io.cucumber.core.options.CommandlineOptionsParser;
 import io.cucumber.core.options.RuntimeOptions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcharm.cucumber.swarm.WorkerArgsPreProcessor;
 import org.testcharm.util.Pair;
 
 import static org.testcharm.dal.Assertions.expect;
@@ -42,7 +43,7 @@ class WorkerArgsPreProcessorTest {
             Pair<String[], String[]> result = preProcessor.process(argv);
 
             expect(buildOptions(result.getFirst())).should("plugins: []");
-            expect(buildOptions(result.getSecond())).should("plugins: [{pluginString: org.testcharm.cucumber.WorkerForwardingPlugin}]");
+            expect(buildOptions(result.getSecond())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
         }
 
         @Test
@@ -51,7 +52,7 @@ class WorkerArgsPreProcessorTest {
             Pair<String[], String[]> result = preProcessor.process(argv);
 
             expect(buildOptions(result.getFirst())).should("plugins: [{pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter}]");
-            expect(buildOptions(result.getSecond())).should("plugins: [{pluginString: org.testcharm.cucumber.WorkerForwardingPlugin}]");
+            expect(buildOptions(result.getSecond())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
         }
     }
 
@@ -64,7 +65,7 @@ class WorkerArgsPreProcessorTest {
             Pair<String[], String[]> result = preProcessor.process(argv);
 
             expect(buildOptions(result.getFirst())).should("plugins: [{pluginString: pretty} {pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter}]");
-            expect(buildOptions(result.getSecond())).should("plugins: [{pluginString: org.testcharm.cucumber.WorkerForwardingPlugin}]");
+            expect(buildOptions(result.getSecond())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
         }
     }
 

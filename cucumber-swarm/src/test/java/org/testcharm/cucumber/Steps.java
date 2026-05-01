@@ -5,6 +5,7 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.testcharm.cucumber.swarm.Main;
 import org.testcharm.dal.DAL;
 import org.testcharm.io.TempDirectory;
 import org.testcharm.util.JavaExecutor;

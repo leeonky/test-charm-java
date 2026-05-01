@@ -12,16 +12,18 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
+import org.testcharm.cucumber.swarm.master.Server;
+import org.testcharm.cucumber.swarm.worker.Remote;
 
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static io.cucumber.core.runtime.Remote.REMOTE;
 import static io.cucumber.core.runtime.SynchronizedEventBus.synchronize;
-import static io.cucumber.core.runtime.Worker.NO_PICKLE;
 import static java.util.Collections.emptyList;
+import static org.testcharm.cucumber.swarm.master.Worker.NO_PICKLE;
+import static org.testcharm.cucumber.swarm.worker.Remote.REMOTE;
 
 /**
  * This is the main entry point for running Cucumber features from the CLI.

@@ -14,6 +14,7 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
+import org.testcharm.cucumber.swarm.master.DistributedPickleScheduler;
 
 import java.time.Clock;
 import java.util.Arrays;

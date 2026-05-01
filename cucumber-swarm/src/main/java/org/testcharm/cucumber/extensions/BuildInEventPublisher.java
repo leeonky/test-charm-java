@@ -1,9 +1,9 @@
 package org.testcharm.cucumber.extensions;
 
-import io.cucumber.core.runtime.Remote;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.plugin.event.*;
-import org.testcharm.cucumber.WorkerForwardingPluginExtension;
+import org.testcharm.cucumber.swarm.WorkerForwardingPluginExtension;
+import org.testcharm.cucumber.swarm.worker.Remote;
 
 public class BuildInEventPublisher implements WorkerForwardingPluginExtension {
     @Override

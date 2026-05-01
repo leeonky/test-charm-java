@@ -1,4 +1,4 @@
-package org.testcharm.cucumber;
+package org.testcharm.cucumber.swarm;
 
 import org.testcharm.util.Pair;
 
@@ -19,7 +19,7 @@ public class WorkerArgsPreProcessor {
         workerArgs.add("1");
         workerArgs.add("--no-summary");
         workerArgs.add("--plugin");
-        workerArgs.add("org.testcharm.cucumber.WorkerForwardingPlugin");
+        workerArgs.add("org.testcharm.cucumber.swarm.WorkerForwardingPlugin");
 
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
