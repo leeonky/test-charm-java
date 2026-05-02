@@ -20,7 +20,18 @@ public class Client {
     }
 
     public String requestPickle(int workerId) {
-        return server.requestPickle(workerId);
+        return Sneaky.get(() -> {
+            URL url = swarmArgs.swarmUrl("/pickle");
+
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestProperty("X-Worker-Id", String.valueOf(workerId));
+
+            return new String(readAll(urlConnection.getInputStream()));
+        });
+
+//        return server.requestPickle(workerId);
     }
 
     private static byte[] readAll(InputStream stream) {
@@ -37,7 +48,8 @@ public class Client {
 
     public Optional<Integer> register() {
         return Sneaky.get(() -> {
-            URL url = new URL("http://" + swarmArgs.getHost() + ":" + swarmArgs.getPort() + "/register");
+            URL url = swarmArgs.swarmUrl("/register");
+
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
             urlConnection.setRequestProperty("Content-Type", "application/json");

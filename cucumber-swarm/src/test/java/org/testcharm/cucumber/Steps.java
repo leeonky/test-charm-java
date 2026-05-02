@@ -47,6 +47,7 @@ public class Steps {
         String classpath = String.join(File.pathSeparator, System.getProperty("java.class.path").split(File.pathSeparator));
         classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
+//        args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
         args.add("-cp");
         args.add(classpath);
         args.add(Main.class.getName());

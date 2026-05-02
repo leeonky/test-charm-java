@@ -14,6 +14,7 @@ public class Worker {
     public static final Pickle NO_PICKLE = (Pickle) Proxy.newProxyInstance(Pickle.class.getClassLoader(), new Class[]{Pickle.class}, (proxy, method, args) -> {
         throw new IllegalStateException("Should not call " + method.getName() + " on NO_PICKLE");
     });
+
     private final SynchronousQueue<Pickle> queue = new SynchronousQueue<>();
 
     public void responsePickle(Pickle pickle) {

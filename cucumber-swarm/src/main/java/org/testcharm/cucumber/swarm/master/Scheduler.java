@@ -6,7 +6,6 @@ import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.repo.WorkerRepository;
 import org.testcharm.util.Sneaky;
 
-import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -24,10 +23,10 @@ public class Scheduler {
         server = new Server(this, workerRepository, port);
     }
 
-    public synchronized Optional<Worker> register() {
+    public synchronized Worker register() {
         if (running)
-            return Optional.of(workerRepository.save(new Worker()));
-        return Optional.empty();
+            return workerRepository.save(new Worker());
+        throw new ServerCloseException();
     }
 
     public void responsePickle(Pickle pickle) {

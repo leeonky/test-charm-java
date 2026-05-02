@@ -1,5 +1,9 @@
 package org.testcharm.cucumber.swarm;
 
+import org.testcharm.util.Sneaky;
+
+import java.net.URL;
+
 public class SwarmArg {
     private int port = 10083;
 
@@ -19,5 +23,9 @@ public class SwarmArg {
 
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public URL swarmUrl(String path) {
+        return Sneaky.get(() -> new URL("http://" + getHost() + ":" + getPort() + path));
     }
 }

@@ -24,4 +24,16 @@ public class RestfulContext {
     public void error(int code) {
         Sneaky.run(() -> exchange.sendResponseHeaders(code, 0));
     }
+
+    public void error(int code, String message) {
+        Sneaky.run(() -> {
+            byte[] bytes = message.getBytes();
+            exchange.sendResponseHeaders(code, bytes.length);
+            exchange.getResponseBody().write(bytes);
+        });
+    }
+
+    public String header(String name) {
+        return exchange.getRequestHeaders().getFirst(name);
+    }
 }

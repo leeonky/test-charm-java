@@ -19,7 +19,11 @@ public class Server {
 
     private void setupRoute() {
         restfulSever.requestHandler("POST", "/register", context ->
-                context.responseOk(String.valueOf(scheduler.register().get().id())));
+                context.responseOk(String.valueOf(scheduler.register().id())));
+
+        restfulSever.requestHandler("GET", "/pickle", context -> {
+            context.responseOk(requestPickle(Integer.parseInt(context.header("X-Worker-Id"))));
+        });
     }
 
     public String requestPickle(int workerId) {
