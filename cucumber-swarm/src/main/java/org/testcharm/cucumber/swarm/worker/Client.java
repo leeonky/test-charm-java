@@ -1,22 +1,53 @@
 package org.testcharm.cucumber.swarm.worker;
 
+import org.testcharm.cucumber.swarm.SwarmArg;
 import org.testcharm.cucumber.swarm.master.Server;
+import org.testcharm.util.Sneaky;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Optional;
 
 public class Client {
     private final Server server;
+    private final SwarmArg swarmArgs;
 
-    public Client(Server server) {
+    public Client(Server server, SwarmArg swarmArgs) {
         this.server = server;
+        this.swarmArgs = swarmArgs;
     }
 
     public String requestPickle(int workerId) {
         return server.requestPickle(workerId);
     }
 
+    private static byte[] readAll(InputStream stream) {
+        return Sneaky.get(() -> {
+            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                int size;
+                byte[] data = new byte[1024];
+                while ((size = stream.read(data, 0, data.length)) != -1)
+                    buffer.write(data, 0, size);
+                return buffer.toByteArray();
+            }
+        });
+    }
+
     public Optional<Integer> register() {
-        return server.register();
+        return Sneaky.get(() -> {
+            URL url = new URL("http://" + swarmArgs.getHost() + ":" + swarmArgs.getPort() + "/register");
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+
+            if (urlConnection.getResponseCode() == 200)
+                return Optional.of(Integer.valueOf(new String(readAll(urlConnection.getInputStream()))));
+            else
+                return Optional.empty();
+
+        });
     }
 
     public void sendEvent(int workerId, Object event) {

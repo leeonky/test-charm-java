@@ -4,7 +4,6 @@ import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.messages.types.Envelope;
 import org.testcharm.cucumber.swarm.EntityMapper;
-import org.testcharm.cucumber.swarm.master.Server;
 
 import java.util.List;
 
@@ -13,8 +12,8 @@ public class Remote {
 
     public static Remote REMOTE;
 
-    public static void setupRemote(Server server) {
-        REMOTE = new Remote(new Client(server));
+    public static void setupRemote(Client client) {
+        REMOTE = new Remote(client);
     }
 
     private int workerId;

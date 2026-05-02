@@ -10,4 +10,14 @@ public class SwarmArg {
     public void setPort(int port) {
         this.port = port;
     }
+
+    private String host = "localhost";
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
 }

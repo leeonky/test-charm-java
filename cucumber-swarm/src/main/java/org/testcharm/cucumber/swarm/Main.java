@@ -45,7 +45,7 @@ public class Main {
         final WorkerRuntime workerRuntime = WorkerRuntime.builder()
                 .withRuntimeOptions(worker.runtimeOptions)
                 .withClassLoader(() -> classLoader)
-                .build(masterRuntime.scheduler().server());
+                .build(masterRuntime.scheduler().server(), argvs.swarmArgs);
 
         Thread thread = new Thread(workerRuntime::run);
         thread.start();

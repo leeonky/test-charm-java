@@ -12,7 +12,9 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
+import org.testcharm.cucumber.swarm.SwarmArg;
 import org.testcharm.cucumber.swarm.master.Server;
+import org.testcharm.cucumber.swarm.worker.Client;
 import org.testcharm.cucumber.swarm.worker.Remote;
 
 import java.time.Clock;
@@ -40,13 +42,11 @@ public final class WorkerRuntime {
     private WorkerRuntime(
             final ExitStatus exitStatus,
             final CucumberExecutionContext context,
-            final FeatureSupplier featureSupplier,
-            Server server
-    ) {
+            final FeatureSupplier featureSupplier, Client client) {
         this.context = context;
         this.featureSupplier = featureSupplier;
         this.exitStatus = exitStatus;
-        Remote.setupRemote(server);
+        Remote.setupRemote(client);
     }
 
     public static Builder builder() {
@@ -130,13 +130,13 @@ public final class WorkerRuntime {
             return this;
         }
 
-        public WorkerRuntime build(Server server) {
+        public WorkerRuntime build(Server server, SwarmArg swarmArgs) {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
             CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
-            return new WorkerRuntime(exitStatus, context, featureSupplier, server);
+            return new WorkerRuntime(exitStatus, context, featureSupplier, new Client(server, swarmArgs));
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {
