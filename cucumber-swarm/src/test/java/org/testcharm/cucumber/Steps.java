@@ -25,7 +25,7 @@ import static org.testcharm.dal.extensions.basic.string.Methods.string;
 
 public class Steps {
     TempDirectory globalTempDirectory, cucumberDirectory, featuresDirectory;
-    private final static AtomicInteger SWARM_PORT = new AtomicInteger(10083);
+    private final static AtomicInteger SWARM_PORT = new AtomicInteger(10084);
     private Process process;
 
     @Before
