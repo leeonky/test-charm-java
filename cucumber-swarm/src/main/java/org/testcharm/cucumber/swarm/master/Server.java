@@ -1,7 +1,8 @@
 package org.testcharm.cucumber.swarm.master;
 
-import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.repo.WorkerRepository;
+
+import static org.testcharm.cucumber.swarm.EntityMapper.pickleKey;
 
 public class Server {
     private final Scheduler scheduler;
@@ -22,12 +23,9 @@ public class Server {
                 context.responseOk(String.valueOf(scheduler.register().id())));
 
         restfulSever.requestHandler("GET", "/pickle", context -> {
-            context.responseOk(requestPickle(Integer.parseInt(context.header("X-Worker-Id"))));
+            Worker worker = workerRepository.findById(Integer.parseInt(context.header("X-Worker-Id")));
+            context.responseOk(pickleKey(scheduler.requestPickle(worker)));
         });
-    }
-
-    public String requestPickle(int workerId) {
-        return EntityMapper.pickleKey(scheduler.requestPickle(workerRepository.findById(workerId)));
     }
 
     public void receiveEvent(int workerId, Object event) {

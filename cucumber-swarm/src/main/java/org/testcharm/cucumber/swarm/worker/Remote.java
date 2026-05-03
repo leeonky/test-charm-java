@@ -2,7 +2,6 @@ package org.testcharm.cucumber.swarm.worker;
 
 import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
-import io.cucumber.messages.types.Envelope;
 import org.testcharm.cucumber.swarm.EntityMapper;
 
 import java.util.List;
@@ -39,10 +38,6 @@ public class Remote {
 
     //TODO test: should not forward worker testRunFinished and testRunStarted
     public void sendEvent(Object event) {
-        if (event instanceof Envelope) {
-            if (!(((Envelope) event).getTestRunFinished().isPresent() || ((Envelope) event).getTestRunStarted().isPresent()))
-                client.sendEvent(workerId, event);
-        } else
-            client.sendEvent(workerId, event);
+        client.sendEvent(workerId, event);
     }
 }
