@@ -2,6 +2,7 @@ package org.testcharm.cucumber;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -13,6 +14,7 @@ import org.testcharm.util.Sneaky;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +37,18 @@ public class Steps {
         cucumberDirectory = globalTempDirectory.mkdir("cucumber");
         featuresDirectory = cucumberDirectory.mkdir("features");
 
+        cucumberDirectory.write("logging.properties", new StringBuilder()
+                .append("handlers= java.util.logging.FileHandler\n")
+                .append(".level= INFO\n")
+                .append("java.util.logging.FileHandler.pattern = ").append(cucumberDirectory.resolve("cucumber.log")).append("\n")
+                .append("java.util.logging.FileHandler.append = true\n")
+                .append("java.util.logging.FileHandler.formatter = java.util.logging.SimpleFormatter\n")
+                .append("java.util.logging.FileHandler.level = ALL\n")
+                .append("io.cucumber.level = INFO\n")
+                .append("io.cucumber.core.level = INFO\n")
+                .append("org.testcharm = INFO\n")
+                .toString());
+
         JavaExecutor.executor().resetAll();
     }
 
@@ -47,6 +61,7 @@ public class Steps {
         String classpath = String.join(File.pathSeparator, System.getProperty("java.class.path").split(File.pathSeparator));
         classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
+        args.add("-Djava.util.logging.config.file=" + cucumberDirectory.resolve("logging.properties").toAbsolutePath());
 //        args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
         args.add("-cp");
         args.add(classpath);
@@ -77,5 +92,10 @@ public class Steps {
     @Given("the feature file {string}:")
     public void theFeatureFile(String path, String content) {
         featuresDirectory.write(path, content);
+    }
+
+    @And("the log should:")
+    public void theLogShould(String expression) throws IOException {
+        expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log")))).should(expression);
     }
 }

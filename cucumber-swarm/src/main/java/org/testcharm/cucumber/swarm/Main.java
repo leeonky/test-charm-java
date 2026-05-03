@@ -33,7 +33,7 @@ public class Main {
         final MasterRuntime masterRuntime = MasterRuntime.builder()
                 .withRuntimeOptions(master.runtimeOptions)
                 .withClassLoader(() -> classLoader)
-                .build(argvs.swarmArgs);
+                .build();
 
         Result worker = buildRuntimeOption(argvs.workerArgs);
 
@@ -45,7 +45,7 @@ public class Main {
         final WorkerRuntime workerRuntime = WorkerRuntime.builder()
                 .withRuntimeOptions(worker.runtimeOptions)
                 .withClassLoader(() -> classLoader)
-                .build(masterRuntime.scheduler().server(), argvs.swarmArgs);
+                .build(argvs.swarmArgs);
 
         Thread thread = new Thread(workerRuntime::run);
         thread.start();

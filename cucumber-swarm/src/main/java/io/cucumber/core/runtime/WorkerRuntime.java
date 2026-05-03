@@ -4,7 +4,6 @@ import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.eventbus.UuidGenerator;
 import io.cucumber.core.feature.FeatureParser;
 import io.cucumber.core.gherkin.Feature;
-import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
 import io.cucumber.core.options.RuntimeOptions;
@@ -13,7 +12,6 @@ import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
 import org.testcharm.cucumber.swarm.SwarmArg;
-import org.testcharm.cucumber.swarm.master.Server;
 import org.testcharm.cucumber.swarm.worker.Client;
 import org.testcharm.cucumber.swarm.worker.Remote;
 
@@ -24,8 +22,6 @@ import java.util.function.Supplier;
 
 import static io.cucumber.core.runtime.SynchronizedEventBus.synchronize;
 import static java.util.Collections.emptyList;
-import static org.testcharm.cucumber.swarm.master.Worker.NO_PICKLE;
-import static org.testcharm.cucumber.swarm.worker.Remote.REMOTE;
 
 /**
  * This is the main entry point for running Cucumber features from the CLI.
@@ -56,20 +52,20 @@ public final class WorkerRuntime {
     public void run() {
         // Parse the features early. Don't proceed when there are lexer errors
         List<Feature> features = featureSupplier.get();
-        REMOTE.setupMapping(features);
+//        REMOTE.setupMapping(features);
         context.runFeatures(() -> runFeatures(features));
     }
 
     private void runFeatures(List<Feature> features) {
         features.forEach(context::beforeFeature);
-        if (REMOTE.register()) {
-            for (; ; ) {
-                Pickle pickle = REMOTE.requestPickle();
-                if (pickle == NO_PICKLE)
-                    break;
-                context.runTestCase(runner -> runner.runPickle(pickle));
-            }
-        }
+//        if (REMOTE.register()) {
+//            for (; ; ) {
+//                Pickle pickle = REMOTE.requestPickle();
+//                if (pickle == NO_PICKLE)
+//                    break;
+//                context.runTestCase(runner -> runner.runPickle(pickle));
+//            }
+//        }
     }
 
     public byte exitStatus() {
@@ -130,13 +126,13 @@ public final class WorkerRuntime {
             return this;
         }
 
-        public WorkerRuntime build(Server server, SwarmArg swarmArgs) {
+        public WorkerRuntime build(SwarmArg swarmArgs) {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
             CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
-            return new WorkerRuntime(exitStatus, context, featureSupplier, new Client(server, swarmArgs));
+            return new WorkerRuntime(exitStatus, context, featureSupplier, new Client(swarmArgs));
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

@@ -7,7 +7,8 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Worker {
+@Deprecated
+public class WorkerDeprecated {
     static final AtomicInteger ID_GENERATOR = new AtomicInteger();
     private final int id = ID_GENERATOR.getAndIncrement();
 

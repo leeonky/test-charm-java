@@ -14,8 +14,7 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
-import org.testcharm.cucumber.swarm.SwarmArg;
-import org.testcharm.cucumber.swarm.master.Scheduler;
+import org.testcharm.cucumber.swarm.master.Master;
 
 import java.time.Clock;
 import java.util.Arrays;
@@ -25,8 +24,6 @@ import java.util.function.Supplier;
 
 import static io.cucumber.core.runtime.SynchronizedEventBus.synchronize;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This is the main entry point for running Cucumber features from the CLI.
@@ -42,12 +39,6 @@ public final class MasterRuntime {
     private final FeatureSupplier featureSupplier;
     private final PickleOrder pickleOrder;
     private final MasterCucumberExecutionContext context;
-    private final Scheduler scheduler;
-
-    @Deprecated
-    public Scheduler scheduler() {
-        return scheduler;
-    }
 
     private MasterRuntime(
             final ExitStatus exitStatus,
@@ -55,7 +46,7 @@ public final class MasterRuntime {
             final Predicate<Pickle> filter,
             final int limit,
             final FeatureSupplier featureSupplier,
-            final PickleOrder pickleOrder, Scheduler scheduler
+            final PickleOrder pickleOrder
     ) {
         this.filter = filter;
         this.context = context;
@@ -63,7 +54,6 @@ public final class MasterRuntime {
         this.featureSupplier = featureSupplier;
         this.exitStatus = exitStatus;
         this.pickleOrder = pickleOrder;
-        this.scheduler = scheduler;
     }
 
     public static Builder builder() {
@@ -77,20 +67,22 @@ public final class MasterRuntime {
     }
 
     private void runFeatures(List<Feature> features) {
-        features.forEach(context::beforeFeature);
-        List<Pickle> collect = features.stream()
-                .flatMap(feature -> feature.getPickles().stream())
-                .filter(filter)
-                .collect(collectingAndThen(toList(),
-                        list -> pickleOrder.orderPickles(list).stream()))
-                .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
-
-        if (collect.isEmpty())
-            scheduler.forceWaitingWorker();
-
-        collect.forEach(scheduler::responsePickle);
-
-        scheduler.exitAll();
+        Master master = new Master();
+        master.waitJobsDone();
+//        features.forEach(context::beforeFeature);
+//        List<Pickle> collect = features.stream()
+//                .flatMap(feature -> feature.getPickles().stream())
+//                .filter(filter)
+//                .collect(collectingAndThen(toList(),
+//                        list -> pickleOrder.orderPickles(list).stream()))
+//                .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
+//
+//        if (collect.isEmpty())
+//            master.forceWaitingWorker();
+//
+//        collect.forEach(master::responsePickle);
+//
+//        master.exitAll();
     }
 
     public byte exitStatus() {
@@ -151,7 +143,7 @@ public final class MasterRuntime {
             return this;
         }
 
-        public MasterRuntime build(SwarmArg swarmArgs) {
+        public MasterRuntime build() {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             MasterCucumberExecutionContext context = new MasterCucumberExecutionContext(eventBus, exitStatus);
@@ -159,8 +151,7 @@ public final class MasterRuntime {
             int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
-            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder,
-                    new Scheduler(eventBus, swarmArgs.getPort()));
+            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder);
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {
