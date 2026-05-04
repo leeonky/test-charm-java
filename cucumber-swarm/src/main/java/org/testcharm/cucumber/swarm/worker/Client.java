@@ -5,6 +5,8 @@ import org.testcharm.util.Sneaky;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class Client {
     private final SwarmHost swarmArgs;
@@ -13,21 +15,24 @@ public class Client {
         this.swarmArgs = swarmArgs;
     }
 
-//    public String requestPickle(int workerId) {
-//        return Sneaky.get(() -> {
-//            URL url = swarmArgs.swarmUrl("/pickle");
-//
-//            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-//            urlConnection.setRequestMethod("GET");
-//            urlConnection.setRequestProperty("Content-Type", "application/json");
-//            urlConnection.setRequestProperty("X-Worker-Id", String.valueOf(workerId));
-//
-//            return new String(readAll(urlConnection.getInputStream()));
-//        });
-//
+    public String httpGet(int workerId, String path) {
+        return Sneaky.get(() -> {
+            URL url = swarmArgs.swarmUrl(path);
 
-    /// /        return server.requestPickle(workerId);
-//    }
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestProperty("X-Worker-Id", String.valueOf(workerId));
+
+            if (urlConnection.getResponseCode() == 200)
+                return new String(readAll(urlConnection.getInputStream()));
+            throw new HttpException(urlConnection);
+        });
+
+
+        //        return server.requestPickle(workerId);
+    }
+
     private static byte[] readAll(InputStream stream) {
         return Sneaky.get(() -> {
             try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {

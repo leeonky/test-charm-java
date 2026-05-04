@@ -14,9 +14,11 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
+import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.SwarmArgs;
 import org.testcharm.cucumber.swarm.master.Master;
 
+import java.net.URI;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +34,6 @@ import static java.util.stream.Collectors.toList;
  * This is the main entry point for running Cucumber features from the CLI.
  */
 public final class MasterRuntime {
-
     private static final Logger log = LoggerFactory.getLogger(MasterRuntime.class);
 
     private final ExitStatus exitStatus;
@@ -42,6 +43,7 @@ public final class MasterRuntime {
     private final FeatureSupplier featureSupplier;
     private final PickleOrder pickleOrder;
     private final SwarmArgs swarmArgs;
+    private final List<URI> featurePaths;
     private final MasterCucumberExecutionContext context;
 
     private MasterRuntime(
@@ -51,7 +53,7 @@ public final class MasterRuntime {
             final int limit,
             final FeatureSupplier featureSupplier,
             final PickleOrder pickleOrder,
-            SwarmArgs swarmArgs) {
+            SwarmArgs swarmArgs, List<URI> featurePaths) {
         this.filter = filter;
         this.context = context;
         this.limit = limit;
@@ -59,6 +61,7 @@ public final class MasterRuntime {
         this.exitStatus = exitStatus;
         this.pickleOrder = pickleOrder;
         this.swarmArgs = swarmArgs;
+        this.featurePaths = featurePaths;
     }
 
     public static Builder builder() {
@@ -78,7 +81,7 @@ public final class MasterRuntime {
                 .collect(collectingAndThen(toList(),
                         list -> pickleOrder.orderPickles(list).stream()))
                 .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
-        Master master = new Master(swarmArgs, pickles);
+        Master master = new Master(swarmArgs, pickles, new EntityMapper(featurePaths));
         master.start();
         master.shutdown();
 //        features.forEach(context::beforeFeature);
@@ -157,7 +160,7 @@ public final class MasterRuntime {
             int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
-            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs);
+            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs, runtimeOptions.getFeaturePaths());
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

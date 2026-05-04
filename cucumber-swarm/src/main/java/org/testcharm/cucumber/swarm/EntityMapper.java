@@ -5,21 +5,38 @@ import io.cucumber.core.gherkin.Pickle;
 import org.testcharm.cucumber.swarm.repo.Repository;
 
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class EntityMapper {
-    private final Repository<String, Pickle> pickleRepository = new Repository<>(EntityMapper::pickleKey);
-    private final Repository<String, Feature> featureRepository = new Repository<>(EntityMapper::featureKey);
+    private final Repository<String, Pickle> pickleRepository = new Repository<>(this::pickleKey);
+    private final Repository<String, Feature> featureRepository = new Repository<>(this::featureKey);
+    private final List<URI> featurePaths;
 
-    private static String relativeUri(URI uri) {
-        return uri.toString();
+    public EntityMapper(List<URI> featurePaths) {
+        this.featurePaths = featurePaths;
     }
 
-    public static String pickleKey(Pickle pickle) {
+    private String relativeUri(URI fileUri) {
+        Path file = Paths.get(fileUri).normalize();
+        return featurePaths.stream()
+                .filter(Objects::nonNull)
+                .map(Paths::get)
+                .map(Path::normalize)
+                .filter(dir -> file.startsWith(dir) && !file.equals(dir))
+                .max(Comparator.comparingInt(Path::getNameCount))
+                .map(dir -> dir.relativize(file).toString())
+                .orElseThrow(() -> new IllegalArgumentException("Cannot relativize file: " + fileUri + " from " + featurePaths));
+    }
+
+    public String pickleKey(Pickle pickle) {
         return relativeUri(pickle.getUri()) + ":" + pickle.getLocation().getLine();
     }
 
-    public static String featureKey(Feature feature) {
+    public String featureKey(Feature feature) {
         return relativeUri(feature.getUri());
     }
 

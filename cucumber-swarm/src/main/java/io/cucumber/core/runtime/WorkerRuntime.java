@@ -4,6 +4,7 @@ import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.eventbus.UuidGenerator;
 import io.cucumber.core.feature.FeatureParser;
 import io.cucumber.core.gherkin.Feature;
+import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
 import io.cucumber.core.options.RuntimeOptions;
@@ -11,10 +12,12 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
+import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.SwarmHost;
 import org.testcharm.cucumber.swarm.worker.Client;
 import org.testcharm.cucumber.swarm.worker.Remote;
 
+import java.net.URI;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +25,7 @@ import java.util.function.Supplier;
 
 import static io.cucumber.core.runtime.SynchronizedEventBus.synchronize;
 import static java.util.Collections.emptyList;
+import static org.testcharm.cucumber.swarm.worker.Remote.REMOTE;
 
 /**
  * This is the main entry point for running Cucumber features from the CLI.
@@ -39,12 +43,12 @@ public final class WorkerRuntime {
     private WorkerRuntime(
             final ExitStatus exitStatus,
             final CucumberExecutionContext context,
-            final FeatureSupplier featureSupplier, Client client, int workerId) {
+            final FeatureSupplier featureSupplier, Client client, int workerId, List<URI> featurePaths) {
         this.context = context;
         this.featureSupplier = featureSupplier;
         this.exitStatus = exitStatus;
         this.workerId = workerId;
-        Remote.setupRemote(client);
+        Remote.setupRemote(client, workerId, new EntityMapper(featurePaths));
     }
 
     public static Builder builder() {
@@ -52,15 +56,20 @@ public final class WorkerRuntime {
     }
 
     public void run() {
-        log.info(() -> String.format("Worker<%d> started", workerId));
+        log.info(() -> String.format("Executor<%d> started", workerId));
         // Parse the features early. Don't proceed when there are lexer errors
         List<Feature> features = featureSupplier.get();
-//        REMOTE.setupMapping(features);
+        REMOTE.setupMapping(features);
         context.runFeatures(() -> runFeatures(features));
+        log.info(() -> String.format("Executor<%d> ended", workerId));
     }
 
     private void runFeatures(List<Feature> features) {
         features.forEach(context::beforeFeature);
+        for (Pickle pickle : REMOTE.pickles())
+            context.runTestCase(runner -> runner.runPickle(pickle));
+
+
 //        if (REMOTE.register()) {
 //            for (; ; ) {
 //                Pickle pickle = REMOTE.requestPickle();
@@ -135,7 +144,7 @@ public final class WorkerRuntime {
             RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
             CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
-            return new WorkerRuntime(exitStatus, context, featureSupplier, new Client(swarmHost), workerId);
+            return new WorkerRuntime(exitStatus, context, featureSupplier, new Client(swarmHost), workerId, runtimeOptions.getFeaturePaths());
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

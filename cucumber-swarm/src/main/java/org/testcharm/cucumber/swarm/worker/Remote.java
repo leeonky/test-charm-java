@@ -1,22 +1,59 @@
 package org.testcharm.cucumber.swarm.worker;
 
+import io.cucumber.core.gherkin.Feature;
+import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.core.logging.Logger;
+import io.cucumber.core.logging.LoggerFactory;
 import org.testcharm.cucumber.swarm.EntityMapper;
 
+import java.util.Iterator;
+import java.util.List;
+
 public class Remote {
-    private static final int NOT_EXIST = -1;
+    private final Logger log = LoggerFactory.getLogger(Remote.class);
 
     public static Remote REMOTE;
 
-    public static void setupRemote(Client client) {
-        REMOTE = new Remote(client);
+    public static void setupRemote(Client client, int workerId, EntityMapper entityMapper) {
+        REMOTE = new Remote(client, workerId, entityMapper);
     }
 
-    //    private int workerId;
     private final Client client;
-    private final EntityMapper entityMapper = new EntityMapper();
+    private final EntityMapper entityMapper;
+    private final int workerId;
 
-    public Remote(Client client) {
+    public Remote(Client client, int workerId, EntityMapper entityMapper) {
         this.client = client;
+        this.workerId = workerId;
+        this.entityMapper = entityMapper;
+    }
+
+    public void setupMapping(List<Feature> features) {
+        entityMapper.mapGherkinFeatures(features);
+    }
+
+    public Iterable<Pickle> pickles() {
+        return () -> new Iterator<Pickle>() {
+            private String pickleKey;
+
+            @Override
+            public boolean hasNext() {
+                log.info(() -> "Requesting pickle...");
+                try {
+                    pickleKey = client.httpGet(workerId, "/pickle");
+                    log.info(() -> String.format("Received pickle<%s>", pickleKey));
+                    return true;
+                } catch (HttpException ig) {
+                    log.info(() -> "No pickle received");
+                    return false;
+                }
+            }
+
+            @Override
+            public Pickle next() {
+                return entityMapper.pickle(pickleKey);
+            }
+        };
     }
 
 //    public Pickle requestPickle() {

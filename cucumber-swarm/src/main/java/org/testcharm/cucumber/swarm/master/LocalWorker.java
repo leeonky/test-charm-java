@@ -19,7 +19,7 @@ public class LocalWorker implements Worker {
     private final int id = Worker.ID_GENERATOR.incrementAndGet();
 
     public LocalWorker(SwarmArgs swarmArgs) {
-        log.info(() -> String.format("Worker<%d> starting...", id));
+        log.info(() -> String.format("Local worker<%d> starting...", id));
         this.swarmArgs = swarmArgs;
         future = CompletableFuture.supplyAsync(() -> {
             Main.Result worker = buildRuntimeOption(swarmArgs.getWorkerArgs());
