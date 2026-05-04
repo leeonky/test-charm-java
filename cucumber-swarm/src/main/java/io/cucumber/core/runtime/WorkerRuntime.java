@@ -11,7 +11,7 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
-import org.testcharm.cucumber.swarm.SwarmArg;
+import org.testcharm.cucumber.swarm.SwarmHost;
 import org.testcharm.cucumber.swarm.worker.Client;
 import org.testcharm.cucumber.swarm.worker.Remote;
 
@@ -34,14 +34,16 @@ public final class WorkerRuntime {
 
     private final FeatureSupplier featureSupplier;
     private final CucumberExecutionContext context;
+    private final int workerId;
 
     private WorkerRuntime(
             final ExitStatus exitStatus,
             final CucumberExecutionContext context,
-            final FeatureSupplier featureSupplier, Client client) {
+            final FeatureSupplier featureSupplier, Client client, int workerId) {
         this.context = context;
         this.featureSupplier = featureSupplier;
         this.exitStatus = exitStatus;
+        this.workerId = workerId;
         Remote.setupRemote(client);
     }
 
@@ -50,6 +52,7 @@ public final class WorkerRuntime {
     }
 
     public void run() {
+        log.info(() -> String.format("Worker<%d> started", workerId));
         // Parse the features early. Don't proceed when there are lexer errors
         List<Feature> features = featureSupplier.get();
 //        REMOTE.setupMapping(features);
@@ -126,13 +129,13 @@ public final class WorkerRuntime {
             return this;
         }
 
-        public WorkerRuntime build(SwarmArg swarmArgs) {
+        public WorkerRuntime build(SwarmHost swarmHost, int workerId) {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
             CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
-            return new WorkerRuntime(exitStatus, context, featureSupplier, new Client(swarmArgs));
+            return new WorkerRuntime(exitStatus, context, featureSupplier, new Client(swarmHost), workerId);
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

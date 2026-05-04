@@ -1,15 +1,15 @@
 package org.testcharm.cucumber.swarm.worker;
 
-import org.testcharm.cucumber.swarm.SwarmArg;
+import org.testcharm.cucumber.swarm.SwarmHost;
 import org.testcharm.util.Sneaky;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class Client {
-    private final SwarmArg swarmArgs;
+    private final SwarmHost swarmArgs;
 
-    public Client(SwarmArg swarmArgs) {
+    public Client(SwarmHost swarmArgs) {
         this.swarmArgs = swarmArgs;
     }
 

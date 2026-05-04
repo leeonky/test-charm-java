@@ -46,6 +46,7 @@ public class Steps {
                 .append("java.util.logging.FileHandler.level = ALL\n")
                 .append("io.cucumber.level = INFO\n")
                 .append("io.cucumber.core.level = INFO\n")
+                .append("io.cucumber.core.runtime.WorkerRuntime.level = INFO\n")
                 .append("org.testcharm = INFO\n")
                 .toString());
 

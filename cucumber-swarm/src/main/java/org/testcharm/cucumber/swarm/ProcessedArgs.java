@@ -2,12 +2,10 @@ package org.testcharm.cucumber.swarm;
 
 public class ProcessedArgs {
     public final String[] masterArgs;
-    public final String[] workerArgs;
-    public final SwarmArg swarmArgs;
+    public final SwarmArgs swarmArgs;
 
-    public ProcessedArgs(String[] masterArgs, String[] workerArgs, SwarmArg swarmArgs) {
+    public ProcessedArgs(String[] masterArgs, SwarmArgs swarmArgs) {
         this.masterArgs = masterArgs;
-        this.workerArgs = workerArgs;
         this.swarmArgs = swarmArgs;
     }
 }

@@ -20,6 +20,21 @@ Feature: Master Worker Coordinate
     And the log should:
       """
       lines: [...
-        'INFO: Master created'
+        'INFO: Master created with 0 scenarios'
+        'INFO: Starting restful server on 0:0:0:0:0:0:0:0:10084...'
+        'INFO: Restful server started'
+        'INFO: Worker<1> starting...'
+        'INFO: Worker<1> started'
+      ...]
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: Shutting down master...'
+        'INFO: Collecting worker<1> exit status'
+        'INFO: Worker<1> exit(0)'
+        'INFO: Shutting down restful server...'
+        'INFO: Restful server shut down'
+        'INFO: Master shut down'
       ...]
       """

@@ -4,7 +4,7 @@ import org.testcharm.util.Sneaky;
 
 import java.net.URL;
 
-public class SwarmArg {
+public class SwarmHost {
     private int port = 10083;
 
     public int getPort() {

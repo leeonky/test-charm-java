@@ -5,8 +5,6 @@ import io.cucumber.core.options.CucumberProperties;
 import io.cucumber.core.options.CucumberPropertiesParser;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.runtime.MasterRuntime;
-import io.cucumber.core.runtime.WorkerRuntime;
-import org.testcharm.util.Sneaky;
 
 import java.util.Optional;
 
@@ -22,7 +20,7 @@ public class Main {
     }
 
     public static byte run(String[] argv, ClassLoader classLoader) {
-        ProcessedArgs argvs = new WorkerArgsPreProcessor().process(argv);
+        ProcessedArgs argvs = new WorkerArgsPreProcessor().process(argv, classLoader);
         Result master = buildRuntimeOption(argvs.masterArgs);
 
         Optional<Byte> exitStatus = master.commandlineOptionsParser.exitStatus();
@@ -33,30 +31,30 @@ public class Main {
         final MasterRuntime masterRuntime = MasterRuntime.builder()
                 .withRuntimeOptions(master.runtimeOptions)
                 .withClassLoader(() -> classLoader)
-                .build();
-
-        Result worker = buildRuntimeOption(argvs.workerArgs);
-
-        exitStatus = worker.commandlineOptionsParser.exitStatus();
-        if (exitStatus.isPresent()) {
-            return exitStatus.get();
-        }
-
-        final WorkerRuntime workerRuntime = WorkerRuntime.builder()
-                .withRuntimeOptions(worker.runtimeOptions)
-                .withClassLoader(() -> classLoader)
                 .build(argvs.swarmArgs);
 
-        Thread thread = new Thread(workerRuntime::run);
-        thread.start();
+//        Result worker = buildRuntimeOption(argvs.workerArgs);
+
+//        exitStatus = worker.commandlineOptionsParser.exitStatus();
+//        if (exitStatus.isPresent()) {
+//            return exitStatus.get();
+//        }
+//
+//        final WorkerRuntime workerRuntime = WorkerRuntime.builder()
+//                .withRuntimeOptions(worker.runtimeOptions)
+//                .withClassLoader(() -> classLoader)
+//                .build(argvs.swarmArgs);
+
+//        Thread thread = new Thread(workerRuntime::run);
+//        thread.start();
 
         masterRuntime.run();
 
-        Sneaky.run(thread::join);
+//        Sneaky.run(thread::join);
         return masterRuntime.exitStatus();
     }
 
-    private static Result buildRuntimeOption(String[] argv) {
+    public static Result buildRuntimeOption(String[] argv) {
         RuntimeOptions propertiesFileOptions = new CucumberPropertiesParser()
                 .parse(CucumberProperties.fromPropertiesFile())
                 .build();
@@ -80,7 +78,7 @@ public class Main {
         return new Result(commandlineOptionsParser, runtimeOptions);
     }
 
-    private static class Result {
+    public static class Result {
         public final CommandlineOptionsParser commandlineOptionsParser;
         public final RuntimeOptions runtimeOptions;
 

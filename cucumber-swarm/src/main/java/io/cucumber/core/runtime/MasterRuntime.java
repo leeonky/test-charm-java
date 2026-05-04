@@ -14,6 +14,7 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
+import org.testcharm.cucumber.swarm.SwarmArgs;
 import org.testcharm.cucumber.swarm.master.Master;
 
 import java.time.Clock;
@@ -24,6 +25,8 @@ import java.util.function.Supplier;
 
 import static io.cucumber.core.runtime.SynchronizedEventBus.synchronize;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This is the main entry point for running Cucumber features from the CLI.
@@ -38,6 +41,7 @@ public final class MasterRuntime {
     private final int limit;
     private final FeatureSupplier featureSupplier;
     private final PickleOrder pickleOrder;
+    private final SwarmArgs swarmArgs;
     private final MasterCucumberExecutionContext context;
 
     private MasterRuntime(
@@ -46,14 +50,15 @@ public final class MasterRuntime {
             final Predicate<Pickle> filter,
             final int limit,
             final FeatureSupplier featureSupplier,
-            final PickleOrder pickleOrder
-    ) {
+            final PickleOrder pickleOrder,
+            SwarmArgs swarmArgs) {
         this.filter = filter;
         this.context = context;
         this.limit = limit;
         this.featureSupplier = featureSupplier;
         this.exitStatus = exitStatus;
         this.pickleOrder = pickleOrder;
+        this.swarmArgs = swarmArgs;
     }
 
     public static Builder builder() {
@@ -67,15 +72,16 @@ public final class MasterRuntime {
     }
 
     private void runFeatures(List<Feature> features) {
-        Master master = new Master();
-        master.waitJobsDone();
+        List<Pickle> pickles = features.stream()
+                .flatMap(feature -> feature.getPickles().stream())
+                .filter(filter)
+                .collect(collectingAndThen(toList(),
+                        list -> pickleOrder.orderPickles(list).stream()))
+                .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
+        Master master = new Master(swarmArgs, pickles);
+        master.start();
+        master.shutdown();
 //        features.forEach(context::beforeFeature);
-//        List<Pickle> collect = features.stream()
-//                .flatMap(feature -> feature.getPickles().stream())
-//                .filter(filter)
-//                .collect(collectingAndThen(toList(),
-//                        list -> pickleOrder.orderPickles(list).stream()))
-//                .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
 //
 //        if (collect.isEmpty())
 //            master.forceWaitingWorker();
@@ -143,7 +149,7 @@ public final class MasterRuntime {
             return this;
         }
 
-        public MasterRuntime build() {
+        public MasterRuntime build(SwarmArgs swarmArgs) {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             MasterCucumberExecutionContext context = new MasterCucumberExecutionContext(eventBus, exitStatus);
@@ -151,7 +157,7 @@ public final class MasterRuntime {
             int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
-            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder);
+            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs);
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

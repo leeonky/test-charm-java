@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class WorkerArgsPreProcessor {
-    public ProcessedArgs process(String[] argv) {
+    public ProcessedArgs process(String[] argv, ClassLoader classLoader) {
         LinkedList<String> args = new LinkedList<>(Arrays.asList(argv));
         List<String> masterArgs = new ArrayList<>();
         masterArgs.add("--threads");
@@ -19,7 +19,7 @@ public class WorkerArgsPreProcessor {
         workerArgs.add("--plugin");
         workerArgs.add("org.testcharm.cucumber.swarm.WorkerForwardingPlugin");
 
-        SwarmArg swarmArgs = new SwarmArg();
+        SwarmHost swarmArgs = new SwarmHost();
 
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
@@ -37,6 +37,7 @@ public class WorkerArgsPreProcessor {
                 workerArgs.add(arg);
             }
         }
-        return new ProcessedArgs(masterArgs.toArray(new String[0]), workerArgs.toArray(new String[0]), swarmArgs);
+        return new ProcessedArgs(masterArgs.toArray(new String[0]),
+                new SwarmArgs(workerArgs.toArray(new String[0]), swarmArgs, classLoader));
     }
 }
