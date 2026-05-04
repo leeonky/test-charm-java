@@ -44,6 +44,7 @@ public final class MasterRuntime {
     private final PickleOrder pickleOrder;
     private final SwarmArgs swarmArgs;
     private final List<URI> featurePaths;
+    private final EventBus eventBus;
     private final MasterCucumberExecutionContext context;
 
     private MasterRuntime(
@@ -53,7 +54,7 @@ public final class MasterRuntime {
             final int limit,
             final FeatureSupplier featureSupplier,
             final PickleOrder pickleOrder,
-            SwarmArgs swarmArgs, List<URI> featurePaths) {
+            SwarmArgs swarmArgs, List<URI> featurePaths, EventBus eventBus) {
         this.filter = filter;
         this.context = context;
         this.limit = limit;
@@ -62,6 +63,7 @@ public final class MasterRuntime {
         this.pickleOrder = pickleOrder;
         this.swarmArgs = swarmArgs;
         this.featurePaths = featurePaths;
+        this.eventBus = eventBus;
     }
 
     public static Builder builder() {
@@ -81,7 +83,7 @@ public final class MasterRuntime {
                 .collect(collectingAndThen(toList(),
                         list -> pickleOrder.orderPickles(list).stream()))
                 .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
-        Master master = new Master(swarmArgs, pickles, new EntityMapper(featurePaths));
+        Master master = new Master(swarmArgs, pickles, new EntityMapper(featurePaths), eventBus);
         master.start();
         master.shutdown();
 //        features.forEach(context::beforeFeature);
@@ -160,7 +162,7 @@ public final class MasterRuntime {
             int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
-            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs, runtimeOptions.getFeaturePaths());
+            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs, runtimeOptions.getFeaturePaths(), eventBus);
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

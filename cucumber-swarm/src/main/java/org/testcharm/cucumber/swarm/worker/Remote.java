@@ -5,6 +5,7 @@ import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
 import org.testcharm.cucumber.swarm.EntityMapper;
+import org.testcharm.cucumber.swarm.master.Master;
 
 import java.util.Iterator;
 import java.util.List;
@@ -14,16 +15,16 @@ public class Remote {
 
     public static Remote REMOTE;
 
-    public static void setupRemote(Client client, int workerId, EntityMapper entityMapper) {
-        REMOTE = new Remote(client, workerId, entityMapper);
+    public static void setupRemote(RestfulClient restfulClient, int workerId, EntityMapper entityMapper) {
+        REMOTE = new Remote(restfulClient, workerId, entityMapper);
     }
 
-    private final Client client;
+    private final RestfulClient restfulClient;
     private final EntityMapper entityMapper;
     private final int workerId;
 
-    public Remote(Client client, int workerId, EntityMapper entityMapper) {
-        this.client = client;
+    public Remote(RestfulClient restfulClient, int workerId, EntityMapper entityMapper) {
+        this.restfulClient = restfulClient;
         this.workerId = workerId;
         this.entityMapper = entityMapper;
     }
@@ -40,7 +41,7 @@ public class Remote {
             public boolean hasNext() {
                 log.info(() -> "Requesting pickle...");
                 try {
-                    pickleKey = client.httpGet(workerId, "/pickle");
+                    pickleKey = restfulClient.httpGet(workerId, "/pickle");
                     log.info(() -> String.format("Received pickle<%s>", pickleKey));
                     return true;
                 } catch (HttpException ig) {
@@ -56,21 +57,9 @@ public class Remote {
         };
     }
 
-//    public Pickle requestPickle() {
-//        return entityMapper.pickle(client.requestPickle(workerId));
-//    }
-//
-//    public void setupMapping(List<Feature> features) {
-//        entityMapper.mapGherkinFeatures(features);
-//    }
-//
-//    public boolean register() {
-//        workerId = client.register().orElse(NOT_EXIST);
-//        return workerId != NOT_EXIST;
-//    }
-
     //TODO test: should not forward worker testRunFinished and testRunStarted
-//    public void sendEvent(Object event) {
-//        client.sendEvent(workerId, event);
-//    }
+    public void sendEvent(Object event) {
+//        TODO need use restful api
+        Master.eventBus.send(event);
+    }
 }

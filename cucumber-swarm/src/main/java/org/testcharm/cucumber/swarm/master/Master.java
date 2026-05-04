@@ -1,5 +1,6 @@
 package org.testcharm.cucumber.swarm.master;
 
+import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
@@ -20,9 +21,13 @@ public class Master {
     private final Controller controller;
     private final Queue<Pickle> pickleQueue;
 
-    public Master(SwarmArgs swarmArgs, List<Pickle> pickles, EntityMapper entityMapper) {
+    @Deprecated
+    public static EventBus eventBus;
+
+    public Master(SwarmArgs swarmArgs, List<Pickle> pickles, EntityMapper entityMapper, EventBus eventBus) {
         this.swarmArgs = swarmArgs;
         pickleQueue = new ConcurrentLinkedQueue<>(pickles);
+        Master.eventBus = eventBus;
         controller = new Controller(this, workers, entityMapper, new RestfulServer(swarmArgs.getSwarmHost().getPort()));
         log.info(() -> String.format("Master created with %d scenarios", pickleQueue.size()));
     }

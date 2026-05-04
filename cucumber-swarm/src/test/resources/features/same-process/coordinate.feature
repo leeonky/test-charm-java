@@ -62,23 +62,22 @@ Feature: Master Worker Coordinate
     Then the task result should be:
       """
       : {
-        code= 0
-#        code= 1
-#        stdout.normalize= ```
-#                          Undefined scenarios:
-#                            1) no step # file://$path$/features/no-step.feature:3
-#
-#                          1 scenarios (1 undefined)
-#                          1 steps (1 undefined)
-#
-#                          You can implement missing steps with the snippets below:
-#
-#                          @Given("a step without implementation")
-#                          public void a_step_without_implementation() {
-#                              // Write code here that turns the phrase above into concrete actions
-#                              throw new io.cucumber.java.PendingException();
-#                          }
-#                          ```
+        code= 1
+        stdout.normalize= ```
+                          Undefined scenarios:
+                            1) no step # file://$path$/features/no-step.feature:3
+
+                          1 scenarios (1 undefined)
+                          1 steps (1 undefined)
+
+                          You can implement missing steps with the snippets below:
+
+                          @Given("a step without implementation")
+                          public void a_step_without_implementation() {
+                              // Write code here that turns the phrase above into concrete actions
+                              throw new io.cucumber.java.PendingException();
+                          }
+                          ```
       }
       """
     And the log should:

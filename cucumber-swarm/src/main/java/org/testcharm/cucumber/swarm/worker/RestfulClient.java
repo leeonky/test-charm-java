@@ -8,10 +8,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class Client {
+public class RestfulClient {
     private final SwarmHost swarmArgs;
 
-    public Client(SwarmHost swarmArgs) {
+    public RestfulClient(SwarmHost swarmArgs) {
         this.swarmArgs = swarmArgs;
     }
 
@@ -28,9 +28,6 @@ public class Client {
                 return new String(readAll(urlConnection.getInputStream()));
             throw new HttpException(urlConnection);
         });
-
-
-        //        return server.requestPickle(workerId);
     }
 
     private static byte[] readAll(InputStream stream) {
