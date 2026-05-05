@@ -20,7 +20,7 @@ public class EventDeserializer {
             case "io.cucumber.plugin.event.TestCaseStarted":
                 Map<String, Object> data = (Map<String, Object>) message.get("data");
                 String testCaseKey = (String) data.get("testCase");
-                return new TestCaseStarted(Instant.ofEpochMilli((Long) data.get("timeInstant")),
+                return new TestCaseStarted(Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue()),
                         dataMapper.testCase(testCaseKey));
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + type);
