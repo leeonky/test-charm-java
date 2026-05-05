@@ -2,6 +2,7 @@ package org.testcharm.cucumber.swarm;
 
 import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.plugin.event.TestCase;
 import org.testcharm.cucumber.swarm.repo.Repository;
 
 import java.net.URI;
@@ -11,12 +12,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class EntityMapper {
+public class DataMapper {
+    protected final List<URI> featurePaths;
     private final Repository<String, Pickle> pickleRepository = new Repository<>(this::pickleKey);
     private final Repository<String, Feature> featureRepository = new Repository<>(this::featureKey);
-    private final List<URI> featurePaths;
 
-    public EntityMapper(List<URI> featurePaths) {
+    public DataMapper(List<URI> featurePaths) {
         this.featurePaths = featurePaths;
     }
 
@@ -40,20 +41,20 @@ public class EntityMapper {
         return relativeUri(feature.getUri());
     }
 
-    public void mapGherkinFeatures(List<Feature> features) {
-        features.forEach(this::mapGherkinFeature);
-    }
-
-    private void mapGherkinFeature(Feature feature) {
+    public void mapGherkinFeature(Feature feature) {
         featureRepository.save(feature);
         feature.getPickles().forEach(this::mapGherkinPickle);
     }
 
-    private void mapGherkinPickle(Pickle instance) {
+    public void mapGherkinPickle(Pickle instance) {
         pickleRepository.save(instance);
     }
 
     public Pickle pickle(String key) {
         return pickleRepository.findById(key);
+    }
+
+    public String testCaseKey(TestCase testCase) {
+        return relativeUri(testCase.getUri()) + ":" + testCase.getLocation().getLine();
     }
 }

@@ -3,6 +3,8 @@ package org.testcharm.cucumber.swarm;
 import com.sun.net.httpserver.HttpExchange;
 import org.testcharm.util.Sneaky;
 
+import static org.testcharm.cucumber.swarm.util.IoUtil.readAll;
+
 public class RestfulContext {
     public HttpExchange exchange;
 
@@ -35,5 +37,15 @@ public class RestfulContext {
 
     public String header(String name) {
         return exchange.getRequestHeaders().getFirst(name);
+    }
+
+    public String body() {
+        return new String(Sneaky.get(() -> readAll(exchange.getRequestBody())));
+    }
+
+    public void responseOk() {
+        Sneaky.run(() -> {
+            exchange.sendResponseHeaders(200, 0);
+        });
     }
 }

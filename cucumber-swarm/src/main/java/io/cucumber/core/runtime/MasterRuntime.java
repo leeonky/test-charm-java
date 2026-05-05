@@ -13,10 +13,11 @@ import io.cucumber.core.order.PickleOrder;
 import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
+import io.cucumber.core.runner.TestCaseFactory;
 import io.cucumber.plugin.Plugin;
-import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.SwarmArgs;
 import org.testcharm.cucumber.swarm.master.Master;
+import org.testcharm.cucumber.swarm.master.MasterDataMapper;
 
 import java.net.URI;
 import java.time.Clock;
@@ -45,6 +46,7 @@ public final class MasterRuntime {
     private final SwarmArgs swarmArgs;
     private final List<URI> featurePaths;
     private final EventBus eventBus;
+    private final TestCaseFactory testCaseFactory;
     private final MasterCucumberExecutionContext context;
 
     private MasterRuntime(
@@ -54,7 +56,7 @@ public final class MasterRuntime {
             final int limit,
             final FeatureSupplier featureSupplier,
             final PickleOrder pickleOrder,
-            SwarmArgs swarmArgs, List<URI> featurePaths, EventBus eventBus) {
+            SwarmArgs swarmArgs, List<URI> featurePaths, EventBus eventBus, TestCaseFactory testCaseFactory) {
         this.filter = filter;
         this.context = context;
         this.limit = limit;
@@ -64,6 +66,7 @@ public final class MasterRuntime {
         this.swarmArgs = swarmArgs;
         this.featurePaths = featurePaths;
         this.eventBus = eventBus;
+        this.testCaseFactory = testCaseFactory;
     }
 
     public static Builder builder() {
@@ -83,17 +86,10 @@ public final class MasterRuntime {
                 .collect(collectingAndThen(toList(),
                         list -> pickleOrder.orderPickles(list).stream()))
                 .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
-        Master master = new Master(swarmArgs, pickles, new EntityMapper(featurePaths), eventBus);
+        Master master = new Master(swarmArgs, pickles, new MasterDataMapper(featurePaths, testCaseFactory), eventBus);
+        master.setupMapping(features);
         master.start();
         master.shutdown();
-//        features.forEach(context::beforeFeature);
-//
-//        if (collect.isEmpty())
-//            master.forceWaitingWorker();
-//
-//        collect.forEach(master::responsePickle);
-//
-//        master.exitAll();
     }
 
     public byte exitStatus() {
@@ -162,7 +158,12 @@ public final class MasterRuntime {
             int limit = runtimeOptions.getLimitCount();
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
             PickleOrder pickleOrder = runtimeOptions.getPickleOrder();
-            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs, runtimeOptions.getFeaturePaths(), eventBus);
+
+            ObjectFactorySupplier objectFactorySupplier = createObjectFactorySupplier();
+            BackendSupplier backendSupplier = createBackendSupplier(objectFactorySupplier);
+            TestCaseFactory testCaseFactory = new TestCaseFactory(eventBus, runtimeOptions, backendSupplier.get());
+            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs, runtimeOptions.getFeaturePaths(),
+                    eventBus, testCaseFactory);
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {

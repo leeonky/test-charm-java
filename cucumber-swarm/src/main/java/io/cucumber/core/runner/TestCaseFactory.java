@@ -1,0 +1,162 @@
+package io.cucumber.core.runner;
+
+import io.cucumber.core.backend.Backend;
+import io.cucumber.core.eventbus.EventBus;
+import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.core.gherkin.Step;
+import io.cucumber.core.logging.Logger;
+import io.cucumber.core.logging.LoggerFactory;
+import io.cucumber.core.snippets.SnippetGenerator;
+import io.cucumber.core.stepexpression.StepTypeRegistry;
+import io.cucumber.messages.types.Envelope;
+import io.cucumber.messages.types.Snippet;
+import io.cucumber.plugin.event.HookType;
+import io.cucumber.plugin.event.SnippetsSuggestedEvent;
+import io.cucumber.plugin.event.SnippetsSuggestedEvent.Suggestion;
+
+import java.net.URI;
+import java.util.*;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+
+public class TestCaseFactory {
+    private static final Logger log = LoggerFactory.getLogger(Runner.class);
+
+    private final CachingGlue glue;
+    private final EventBus bus;
+    private final Options runnerOptions;
+    private final Collection<? extends Backend> backends;
+    private final List<SnippetGenerator> snippetGenerators = new ArrayList<>(1);
+    private final Map<String, Locale> localeCache = new HashMap<>();
+
+    public TestCaseFactory(EventBus bus, Options runnerOptions, Collection<? extends Backend> backends) {
+        glue = new CachingGlue(bus);
+        this.bus = bus;
+        this.runnerOptions = runnerOptions;
+        this.backends = backends;
+
+        List<URI> gluePaths = runnerOptions.getGlue();
+        log.debug(() -> "Loading glue from " + gluePaths);
+        for (Backend backend : backends) {
+            log.debug(() -> "Loading glue for backend " + backend.getClass().getName());
+            backend.loadGlue(glue, gluePaths);
+        }
+    }
+
+    public io.cucumber.plugin.event.TestCase createTestCaseForPickle(Pickle pickle) {
+        glue.prepareGlue(localeForPickle(pickle));
+        snippetGenerators.clear();
+        snippetGenerators.addAll(createSnippetGeneratorsForPickle(pickle.getLanguage(), glue.getStepTypeRegistry()));
+
+        if (pickle.getSteps().isEmpty()) {
+            return new TestCase(bus.generateId(), emptyList(), emptyList(), emptyList(), pickle,
+                    runnerOptions.isDryRun());
+        }
+
+        List<PickleStepTestStep> testSteps = createTestStepsForPickleSteps(pickle);
+        List<HookTestStep> beforeHooks = createTestStepsForBeforeHooks(pickle.getTags());
+        List<HookTestStep> afterHooks = createTestStepsForAfterHooks(pickle.getTags());
+        return new TestCase(bus.generateId(), testSteps, beforeHooks, afterHooks, pickle, runnerOptions.isDryRun());
+    }
+
+    private Locale localeForPickle(Pickle pickle) {
+        String language = pickle.getLanguage();
+        return localeCache.computeIfAbsent(language, (lang) -> new Locale(language));
+    }
+
+    private List<PickleStepTestStep> createTestStepsForPickleSteps(Pickle pickle) {
+        List<PickleStepTestStep> testSteps = new ArrayList<>();
+
+        for (Step step : pickle.getSteps()) {
+            PickleStepDefinitionMatch match = matchStepToStepDefinition(pickle, step);
+            List<HookTestStep> afterStepHookSteps = createAfterStepHooks(pickle.getTags());
+            List<HookTestStep> beforeStepHookSteps = createBeforeStepHooks(pickle.getTags());
+            testSteps.add(new PickleStepTestStep(bus.generateId(), pickle.getUri(), step, beforeStepHookSteps,
+                    afterStepHookSteps, match));
+        }
+
+        return testSteps;
+    }
+
+    private List<HookTestStep> createTestStepsForBeforeHooks(List<String> tags) {
+        return createTestStepsForHooks(tags, glue.getBeforeHooks(), HookType.BEFORE);
+    }
+
+    private List<HookTestStep> createTestStepsForAfterHooks(List<String> tags) {
+        return createTestStepsForHooks(tags, glue.getAfterHooks(), HookType.AFTER);
+    }
+
+    private PickleStepDefinitionMatch matchStepToStepDefinition(Pickle pickle, Step step) {
+        try {
+            PickleStepDefinitionMatch match = glue.stepDefinitionMatch(pickle.getUri(), step);
+            if (match != null) {
+                return match;
+            }
+            emitSnippetSuggestedEvent(pickle, step);
+            return new UndefinedPickleStepDefinitionMatch(pickle.getUri(), step);
+        } catch (AmbiguousStepDefinitionsException e) {
+            return new AmbiguousPickleStepDefinitionsMatch(pickle.getUri(), step, e);
+        }
+    }
+
+    private void emitSnippetSuggestedEvent(Pickle pickle, Step step) {
+        List<Snippet> snippets = generateSnippetsForStep(step);
+        if (snippets.isEmpty()) {
+            return;
+        }
+
+        bus.send(new SnippetsSuggestedEvent(
+                bus.getInstant(),
+                pickle.getUri(),
+                pickle.getLocation(),
+                step.getLocation(),
+                new Suggestion(
+                        step.getText(),
+                        snippets.stream()
+                                .map(Snippet::getCode)
+                                .collect(toList()))));
+
+        bus.send(
+                Envelope.of(
+                        new io.cucumber.messages.types.Suggestion(
+                                bus.generateId().toString(),
+                                step.getId(),
+                                snippets)));
+    }
+
+    private List<HookTestStep> createAfterStepHooks(List<String> tags) {
+        return createTestStepsForHooks(tags, glue.getAfterStepHooks(), HookType.AFTER_STEP);
+    }
+
+    private List<HookTestStep> createBeforeStepHooks(List<String> tags) {
+        return createTestStepsForHooks(tags, glue.getBeforeStepHooks(), HookType.BEFORE_STEP);
+    }
+
+    private List<HookTestStep> createTestStepsForHooks(
+            List<String> tags, Collection<CoreHookDefinition> hooks, HookType hookType
+    ) {
+        return hooks.stream()
+                .filter(hook -> hook.matches(tags))
+                .map(hook -> new HookTestStep(bus.generateId(), hookType, new HookDefinitionMatch(hook)))
+                .collect(toList());
+    }
+
+    private List<Snippet> generateSnippetsForStep(Step step) {
+        return snippetGenerators.stream()
+                .flatMap(generator -> generator.getSnippet(step, runnerOptions.getSnippetType())
+                        .stream()
+                        .map(code -> new Snippet(generator.getLanguage().orElse("unknown"), code)))
+                .collect(toList());
+    }
+
+    private List<SnippetGenerator> createSnippetGeneratorsForPickle(
+            String language, StepTypeRegistry stepTypeRegistry
+    ) {
+        return backends.stream()
+                .map(Backend::getSnippet)
+                .filter(Objects::nonNull)
+                .map(s -> new SnippetGenerator(language, s, stepTypeRegistry.parameterTypeRegistry()))
+                .collect(toList());
+    }
+}

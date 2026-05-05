@@ -5,9 +5,11 @@ import io.cucumber.core.logging.LoggerFactory;
 import io.cucumber.core.runtime.WorkerRuntime;
 import org.testcharm.cucumber.swarm.Main;
 import org.testcharm.cucumber.swarm.SwarmArgs;
+import org.testcharm.util.Sneaky;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static org.testcharm.cucumber.swarm.Main.buildRuntimeOption;
 
@@ -46,11 +48,12 @@ public class LocalWorker implements Worker {
 
     @Override
     public void shutdown() {
-//        try {
-        byte result = future.join();
-        log.info(() -> String.format("Worker<%d> exit(%d)", id, result));
-//        } catch (CompletionException e) {
+        try {
+            byte result = future.join();
+            log.info(() -> String.format("Worker<%d> exit(%d)", id, result));
+        } catch (CompletionException e) {
 //            TODO need test
-//        }
+            Sneaky.sneakyThrow(e.getCause());
+        }
     }
 }

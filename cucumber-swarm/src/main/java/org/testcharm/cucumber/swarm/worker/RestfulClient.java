@@ -1,10 +1,9 @@
 package org.testcharm.cucumber.swarm.worker;
 
 import org.testcharm.cucumber.swarm.SwarmHost;
+import org.testcharm.cucumber.swarm.util.IoUtil;
 import org.testcharm.util.Sneaky;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -25,40 +24,25 @@ public class RestfulClient {
             urlConnection.setRequestProperty("X-Worker-Id", String.valueOf(workerId));
 
             if (urlConnection.getResponseCode() == 200)
-                return new String(readAll(urlConnection.getInputStream()));
+                return new String(IoUtil.readAll(urlConnection.getInputStream()));
             throw new HttpException(urlConnection);
         });
     }
 
-    private static byte[] readAll(InputStream stream) {
-        return Sneaky.get(() -> {
-            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-                int size;
-                byte[] data = new byte[1024];
-                while ((size = stream.read(data, 0, data.length)) != -1)
-                    buffer.write(data, 0, size);
-                return buffer.toByteArray();
-            }
+    public void httpPost(int workerId, String path, String body) {
+        Sneaky.run(() -> {
+            URL url = swarmArgs.swarmUrl(path);
+
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.setRequestProperty("X-Worker-Id", String.valueOf(workerId));
+
+            urlConnection.setDoOutput(true);
+            urlConnection.getOutputStream().write(body.getBytes());
+
+            if (urlConnection.getResponseCode() != 200)
+                throw new HttpException(urlConnection);
         });
     }
-
-//    public Optional<Integer> register() {
-//        return Sneaky.get(() -> {
-//            URL url = swarmArgs.swarmUrl("/register");
-//
-//            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-//            urlConnection.setRequestMethod("POST");
-//            urlConnection.setRequestProperty("Content-Type", "application/json");
-//
-//            if (urlConnection.getResponseCode() == 200)
-//                return Optional.of(Integer.valueOf(new String(readAll(urlConnection.getInputStream()))));
-//            else
-//                return Optional.empty();
-//
-//        });
-//    }
-
-//    public void sendEvent(int workerId, Object event) {
-//        server.receiveEvent(workerId, event);
-//    }
 }

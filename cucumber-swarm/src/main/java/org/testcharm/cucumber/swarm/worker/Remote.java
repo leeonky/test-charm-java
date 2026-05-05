@@ -4,7 +4,6 @@ import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
-import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.master.Master;
 
 import java.util.Iterator;
@@ -15,22 +14,24 @@ public class Remote {
 
     public static Remote REMOTE;
 
-    public static void setupRemote(RestfulClient restfulClient, int workerId, EntityMapper entityMapper) {
-        REMOTE = new Remote(restfulClient, workerId, entityMapper);
+    public static void setupRemote(RestfulClient restfulClient, int workerId, WorkerDataMapper dataMapper) {
+        REMOTE = new Remote(restfulClient, workerId, dataMapper);
     }
 
     private final RestfulClient restfulClient;
-    private final EntityMapper entityMapper;
+    private final WorkerDataMapper dataMapper;
     private final int workerId;
+    private final EventSerializer eventSerializer;
 
-    public Remote(RestfulClient restfulClient, int workerId, EntityMapper entityMapper) {
+    public Remote(RestfulClient restfulClient, int workerId, WorkerDataMapper dataMapper) {
         this.restfulClient = restfulClient;
         this.workerId = workerId;
-        this.entityMapper = entityMapper;
+        this.dataMapper = dataMapper;
+        eventSerializer = new EventSerializer(dataMapper);
     }
 
     public void setupMapping(List<Feature> features) {
-        entityMapper.mapGherkinFeatures(features);
+        features.forEach(dataMapper::mapGherkinFeature);
     }
 
     public Iterable<Pickle> pickles() {
@@ -52,14 +53,21 @@ public class Remote {
 
             @Override
             public Pickle next() {
-                return entityMapper.pickle(pickleKey);
+                return dataMapper.pickle(pickleKey);
             }
         };
     }
 
     //TODO test: should not forward worker testRunFinished and testRunStarted
-    public void sendEvent(Object event) {
+    @Deprecated
+    public void sendEventDeprecated(Object event) {
 //        TODO need use restful api
-        Master.eventBus.send(event);
+        Master.staitcEventBus.send(event);
+    }
+
+    public void sendEvent(Object event) {
+        String serialize = eventSerializer.serialize(event);
+        log.info(() -> String.format("Forwarding event: %s", serialize));
+        restfulClient.httpPost(workerId, "/events", serialize);
     }
 }

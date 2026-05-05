@@ -12,10 +12,10 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
-import org.testcharm.cucumber.swarm.EntityMapper;
 import org.testcharm.cucumber.swarm.SwarmHost;
 import org.testcharm.cucumber.swarm.worker.Remote;
 import org.testcharm.cucumber.swarm.worker.RestfulClient;
+import org.testcharm.cucumber.swarm.worker.WorkerDataMapper;
 
 import java.net.URI;
 import java.time.Clock;
@@ -48,7 +48,7 @@ public final class WorkerRuntime {
         this.featureSupplier = featureSupplier;
         this.exitStatus = exitStatus;
         this.workerId = workerId;
-        Remote.setupRemote(restfulClient, workerId, new EntityMapper(featurePaths));
+        Remote.setupRemote(restfulClient, workerId, new WorkerDataMapper(featurePaths));
     }
 
     public static Builder builder() {
