@@ -9,8 +9,7 @@ import static org.testcharm.cucumber.swarm.worker.Remote.REMOTE;
 public class BuildInEventPublisher implements WorkerForwardingPluginExtension {
     @Override
     public void setEventPublisher(EventPublisher eventPublisher) {
-        eventPublisher.registerHandlerFor(TestCaseStarted.class, event ->
-                REMOTE.sendEvent(event));
+        eventPublisher.registerHandlerFor(TestCaseStarted.class, event -> REMOTE.sendEvent(event));
         eventPublisher.registerHandlerFor(TestCaseFinished.class, event -> REMOTE.sendEventDeprecated(event));
         eventPublisher.registerHandlerFor(TestStepStarted.class, event -> REMOTE.sendEventDeprecated(event));
         eventPublisher.registerHandlerFor(TestStepFinished.class, event -> {
