@@ -2,6 +2,7 @@ package org.testcharm.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +47,29 @@ public class BeanClass<T> {
 
     @SuppressWarnings("unchecked")
     public static <T> Class<T> getClass(T instance) {
-        return (Class<T>) Objects.requireNonNull(instance).getClass();
+        return (Class<T>) resolveConcreteType(Objects.requireNonNull(instance).getClass());
+    }
+
+    private static Class<?> resolveConcreteType(Class<?> type) {
+        if (!isGeneratedClass(type)) return type;
+        if (!Proxy.isProxyClass(type)) {
+            Class<?> superclass = type.getSuperclass();
+            if (superclass != null && superclass != Object.class)
+                return resolveConcreteType(superclass);
+        }
+        for (Class<?> iface : type.getInterfaces())
+            if (!isJdkType(iface)) return iface;
+        return type;
+    }
+
+    private static boolean isGeneratedClass(Class<?> type) {
+        return type.isSynthetic() || type.isAnonymousClass() || type.isLocalClass()
+                || Proxy.isProxyClass(type) || type.getName().contains("$ByteBuddy$");
+    }
+
+    private static boolean isJdkType(Class<?> type) {
+        String name = type.getName();
+        return name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("sun.");
     }
 
     public static <T> BeanClass<T> createFrom(T instance) {

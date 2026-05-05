@@ -188,7 +188,7 @@ public class JData {
     private <T> List<T> setupAssociation(String beanProperty, List<T> attachments) {
         int index = beanProperty.lastIndexOf('.');
         Object bean = query(beanProperty.substring(0, index));
-        Property<Object> property = (Property<Object>) BeanClass.create(bean.getClass()).getProperty(beanProperty.substring(index + 1));
+        Property<Object> property = (Property<Object>) BeanClass.createFrom(bean).getProperty(beanProperty.substring(index + 1));
         if (Collection.class.isAssignableFrom(property.getReaderType().getType()))
             ((Collection<T>) property.getValue(bean)).addAll(attachments);
         else {

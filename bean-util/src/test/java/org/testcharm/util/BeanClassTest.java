@@ -11,12 +11,17 @@ import subtype.Base;
 import subtype.Sub1;
 import subtype.Sub2;
 
+import java.io.Serializable;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -309,5 +314,71 @@ class BeanClassTest {
 
     public static class BeanDy {
         public Object value;
+    }
+
+    interface UserInterface {
+        String getValue();
+    }
+
+    @Nested
+    class GetClass {
+
+        @Test
+        void returns_actual_class_for_normal_instance() {
+            assertThat(BeanClass.getClass(new BeanClassTest())).isEqualTo(BeanClassTest.class);
+        }
+
+        @Test
+        void resolves_superclass_from_anonymous_subclass_of_named_class() {
+            assertThat(BeanClass.getClass(new StringList() {})).isEqualTo(StringList.class);
+        }
+
+        @Test
+        void resolves_superclass_from_local_class() {
+            class LocalList extends StringList {}
+            assertThat(BeanClass.getClass(new LocalList())).isEqualTo(StringList.class);
+        }
+
+        @Test
+        void resolves_interface_from_anonymous_class_implementing_interface() {
+            assertThat(BeanClass.getClass(new UserInterface() {
+                @Override
+                public String getValue() { return null; }
+            })).isEqualTo(UserInterface.class);
+        }
+
+        @Test
+        void resolves_interface_from_lambda() {
+            assertThat(BeanClass.getClass((UserInterface) () -> null)).isEqualTo(UserInterface.class);
+        }
+
+        @Test
+        void resolves_interface_from_jdk_proxy() {
+            UserInterface proxy = (UserInterface) Proxy.newProxyInstance(
+                    UserInterface.class.getClassLoader(),
+                    new Class[]{UserInterface.class},
+                    (p, m, args) -> null);
+            assertThat(BeanClass.getClass(proxy)).isEqualTo(UserInterface.class);
+        }
+
+        @Test
+        void resolves_user_interface_skipping_jdk_interface_from_jdk_proxy() {
+            UserInterface proxy = (UserInterface) Proxy.newProxyInstance(
+                    UserInterface.class.getClassLoader(),
+                    new Class[]{Serializable.class, UserInterface.class},
+                    (p, m, args) -> null);
+            assertThat(BeanClass.getClass(proxy)).isEqualTo(UserInterface.class);
+        }
+
+        @Test
+        void resolves_superclass_from_byte_buddy_subclass() throws Exception {
+            Class<? extends BeanDy> generated = new ByteBuddy()
+                    .subclass(BeanDy.class)
+                    .make()
+                    .load(BeanDy.class.getClassLoader(), ClassLoadingStrategy.Default.INJECTION)
+                    .getLoaded();
+            assertThat(BeanClass.getClass(generated.getDeclaredConstructor().newInstance()))
+                    .isEqualTo(BeanDy.class);
+        }
     }
 }

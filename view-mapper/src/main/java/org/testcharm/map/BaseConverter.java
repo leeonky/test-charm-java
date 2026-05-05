@@ -27,7 +27,7 @@ abstract class BaseConverter extends CustomConverter<Object, Object> {
     static Object getPropertyValue(Object e, String propertyChain) {
         for (String property : propertyChain.split("\\."))
             if (!property.isEmpty())
-                e = ((BeanClass) BeanClass.create(e.getClass())).getPropertyValue(e, property);
+                e = ((BeanClass) BeanClass.createFrom(e)).getPropertyValue(e, property);
         return e;
     }
 
