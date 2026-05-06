@@ -1,10 +1,13 @@
-package org.testcharm.util;
+package org.testcharm.util.property;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcharm.util.BeanClass;
+import org.testcharm.util.NoSuchPropertyException;
+import org.testcharm.util.Property;
 
 import java.util.Map;
 

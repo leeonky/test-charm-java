@@ -2,7 +2,7 @@ package org.testcharm.util;
 
 import java.util.Map;
 
-interface TypeInfo<T> {
+public interface TypeInfo<T> {
 
     static <T> TypeInfo<T> create(BeanClass<T> type, PropertyProxyFactory<T> proxyFactory) {
         if (type.isCollection())

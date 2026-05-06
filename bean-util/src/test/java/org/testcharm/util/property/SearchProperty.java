@@ -1,10 +1,10 @@
-package org.testcharm.util;
+package org.testcharm.util.property;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.testcharm.util.BeanClass.create;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testcharm.util.BeanClass.create;
 
 class SearchProperty {
     public static class SuperField {

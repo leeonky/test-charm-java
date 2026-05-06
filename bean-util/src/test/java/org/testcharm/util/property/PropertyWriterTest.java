@@ -1,4 +1,4 @@
-package org.testcharm;
+package org.testcharm.util.property;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -168,7 +168,7 @@ class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Beans.class).setPropertyValue(beans, "bean", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property org.testcharm.PropertyWriterTest$Beans.bean<org.testcharm.PropertyWriterTest$Bean>");
+                            "property org.testcharm.util.property.PropertyWriterTest$Beans.bean<org.testcharm.util.property.PropertyWriterTest$Bean>");
         }
 
         @Test
@@ -178,7 +178,7 @@ class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Beans.class).setPropertyValue(beans, "beanSetter", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property org.testcharm.PropertyWriterTest$Beans.beanSetter<org.testcharm.PropertyWriterTest$Bean>");
+                            "property org.testcharm.util.property.PropertyWriterTest$Beans.beanSetter<org.testcharm.util.property.PropertyWriterTest$Bean>");
         }
 
         @Test
@@ -187,7 +187,7 @@ class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Bean[].class).setPropertyValue(beans, "0", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property [Lorg.testcharm.PropertyWriterTest$Bean;[0]<org.testcharm.PropertyWriterTest$Bean>");
+                            "property [Lorg.testcharm.util.property.PropertyWriterTest$Bean;[0]<org.testcharm.util.property.PropertyWriterTest$Bean>");
         }
 
         @Test

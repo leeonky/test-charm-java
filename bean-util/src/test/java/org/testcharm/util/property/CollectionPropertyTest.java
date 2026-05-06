@@ -1,7 +1,11 @@
-package org.testcharm.util;
+package org.testcharm.util.property;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcharm.util.BeanClass;
+import org.testcharm.util.CannotSetElementByIndexException;
+import org.testcharm.util.CollectionHelper;
+import org.testcharm.util.Property;
 
 import java.util.*;
 

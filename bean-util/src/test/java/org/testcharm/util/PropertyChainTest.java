@@ -3,6 +3,7 @@ package org.testcharm.util;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class PropertyChainTest {
 
         @Test
         void one_node() {
-            assertThat(Property.toChainNodes("a"))
+            Assertions.assertThat(Property.toChainNodes("a"))
                     .containsOnly("a");
         }
 
@@ -38,7 +39,7 @@ class PropertyChainTest {
 
         @Test
         void get_value_from_property() {
-            assertThat(BeanClass.create(Bean.class).getPropertyChainValue(new Bean().setIntValue(10), "intValue"))
+            Assertions.assertThat(BeanClass.create(Bean.class).getPropertyChainValue(new Bean().setIntValue(10), "intValue"))
                     .isEqualTo(10);
 
             assertThat(BeanClass.create(Bean.class).getPropertyChainValue(new Bean().setBean(new Bean().setIntValue(10)), "bean.intValue"))
