@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static org.testcharm.util.function.Extension.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.any;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.testcharm.util.function.Extension.*;
 
 class ExtensionTest {
     @Nested
@@ -32,7 +31,7 @@ class ExtensionTest {
 
         @Test
         void should_raise_exception() {
-            assertThrows(IllegalStateException.class, () -> notAllowParallelReduce().apply(any(), any()));
+            assertThrows(IllegalStateException.class, () -> notAllowParallelReduce().apply(null, null));
         }
     }
 

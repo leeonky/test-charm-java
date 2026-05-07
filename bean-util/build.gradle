@@ -6,6 +6,7 @@ dependencies {
     implementation libs.prod.json.org
     testImplementation project(':DAL-java')
     testImplementation project(':DAL-extension-basic')
+    testImplementation project(':java-compiler-util')
 }
 
 shadowJar {
