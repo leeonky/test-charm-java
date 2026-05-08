@@ -67,6 +67,7 @@ class PojoTest {
                 @Test
                 void included_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
                     assertThat(properties.keySet()).containsExactly("field");
 
                     Property<?> property = properties.get("field");
@@ -77,6 +78,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -85,7 +87,9 @@ class PojoTest {
                 void get_set_value_by_property() {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
+
                     assertEquals(100, (int) property.getValue(object));
+
                     property.setValue(object, 1000);
                     assertEquals(1000, (int) property.getValue(object));
                 }
@@ -97,6 +101,7 @@ class PojoTest {
                     assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
 
                     beanClass.setPropertyValue(object, "field", 1000);
+
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
                 }
             }
@@ -136,6 +141,7 @@ class PojoTest {
                     assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
 
                     beanClass.setPropertyValue(object, "field", 1000);
+
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
                 }
             }
@@ -157,6 +163,7 @@ class PojoTest {
                 @Test
                 void included_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
                     assertThat(properties.keySet()).containsExactly("field");
 
                     Property<?> property = properties.get("field");
@@ -167,6 +174,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -174,7 +182,9 @@ class PojoTest {
                 @Test
                 void get_value_by_property_and_can_not_set_value() {
                     Object object = beanClass.newInstance();
+
                     Property<Object> property = beanClass.getProperty("field");
+
                     assertEquals(100, (int) property.getValue(object));
 
                     assertThrows(NoSuchAccessorException.class, () -> property.setValue(object, 1000));
@@ -256,6 +266,7 @@ class PojoTest {
                 @Test
                 void can_not_get_set_value_directly() {
                     Object object = beanClass.newInstance();
+
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1));
                 }
@@ -291,6 +302,7 @@ class PojoTest {
                 @Test
                 void can_not_get_set_value_directly() {
                     Object object = beanClass.newInstance();
+
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1));
                 }
@@ -326,6 +338,7 @@ class PojoTest {
                 @Test
                 void can_not_get_set_value_directly() {
                     Object object = beanClass.newInstance();
+
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1));
                 }
@@ -356,6 +369,7 @@ class PojoTest {
                 @Test
                 void included_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
                     assertThat(properties.keySet()).containsExactly("field");
 
                     Property<?> property = properties.get("field");
@@ -366,6 +380,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -374,7 +389,9 @@ class PojoTest {
                 void get_set_value_by_property() {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
+
                     assertEquals(100, (int) property.getValue(object));
+
                     property.setValue(object, 1000);
                     assertEquals(1000, (int) property.getValue(object));
                 }
@@ -386,6 +403,7 @@ class PojoTest {
                     assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
 
                     beanClass.setPropertyValue(object, "field", 1000);
+
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
                 }
 
@@ -413,6 +431,7 @@ class PojoTest {
                 @Test
                 void included_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
                     assertThat(properties.keySet()).containsExactly("field");
 
                     Property<?> property = properties.get("field");
@@ -423,6 +442,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -431,9 +451,11 @@ class PojoTest {
                 void get_set_value_by_property() {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
+
                     assertEquals(100, (int) property.getValue(object));
 
                     property.setValue(object, 1000);
+
                     assertEquals(1000, (int) property.getValue(object));
                 }
 
@@ -444,6 +466,7 @@ class PojoTest {
                     assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
 
                     beanClass.setPropertyValue(object, "field", 1000);
+
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
                 }
 
@@ -617,6 +640,7 @@ class PojoTest {
                 @Test
                 void included_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
                     assertThat(properties.keySet()).containsExactly("field");
 
                     Property<?> property = properties.get("field");
@@ -627,6 +651,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -635,6 +660,7 @@ class PojoTest {
                 void get_value_by_property_and_can_not_set_value() {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
+
                     assertEquals(100, (int) property.getValue(object));
 
                     assertThrows(NoSuchAccessorException.class, () -> property.setValue(object, 1000));
@@ -712,6 +738,7 @@ class PojoTest {
                 @Test
                 void can_not_get_set_value_directly() {
                     Object object = beanClass.newInstance();
+
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1000));
                 }
@@ -745,6 +772,7 @@ class PojoTest {
                 @Test
                 void can_not_get_set_value_directly() {
                     Object object = beanClass.newInstance();
+
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1000));
                 }
@@ -778,6 +806,7 @@ class PojoTest {
                 @Test
                 void can_not_get_set_value_directly() {
                     Object object = beanClass.newInstance();
+
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1000));
                 }
@@ -809,6 +838,7 @@ class PojoTest {
                 @Test
                 void included_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
                     assertThat(properties.keySet()).containsExactly("field");
 
                     Property<?> property = properties.get("field");
@@ -819,6 +849,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -827,6 +858,7 @@ class PojoTest {
                 void get_value_by_property_and_can_not_set_value() {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
+
                     assertEquals(100, (int) property.getValue(object));
 
                     assertThrows(NoSuchAccessorException.class, () -> property.setValue(object, 1000));
@@ -864,6 +896,7 @@ class PojoTest {
                 @Test
                 void included_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
                     assertThat(properties.keySet()).containsExactly("field");
 
                     Property<?> property = properties.get("field");
@@ -874,6 +907,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -882,6 +916,7 @@ class PojoTest {
                 void get_value_by_property_and_can_not_set_value() {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
+
                     assertEquals(100, (int) property.getValue(object));
 
                     assertThrows(NoSuchAccessorException.class, () -> property.setValue(object, 1000));
@@ -902,6 +937,9 @@ class PojoTest {
 
                     assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
                     assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 0));
+                    assertThrows(NoSuchAccessorException.class, () -> baseBeanClass.setPropertyValue(object, "field", 0));
                 }
             }
         }
@@ -1057,6 +1095,7 @@ class PojoTest {
             void get_value_by_property_and_can_not_set_value() {
                 Object object = beanClass.newInstance();
                 Property<Object> property = beanClass.getProperty("field");
+
                 assertEquals(100, (int) property.getValue(object));
 
                 assertThrows(NoSuchAccessorException.class, () -> property.setValue(object, 1000));
@@ -1100,6 +1139,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -1109,21 +1149,20 @@ class PojoTest {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
 
-                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                     property.setValue(object, 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
+
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                 }
 
                 @Test
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     beanClass.setPropertyValue(object, "field", 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
+
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                 }
             }
 
@@ -1158,11 +1197,10 @@ class PojoTest {
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     beanClass.setPropertyValue(object, "field", 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                 }
             }
 
@@ -1196,11 +1234,8 @@ class PojoTest {
                 void can_not_set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1000));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
                 }
             }
 
@@ -1234,11 +1269,8 @@ class PojoTest {
                 void can_not_set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1000));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
                 }
             }
 
@@ -1272,11 +1304,8 @@ class PojoTest {
                 void can_not_set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 1000));
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
                 }
             }
         }
@@ -1317,6 +1346,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -1326,21 +1356,21 @@ class PojoTest {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
 
-                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                     property.setValue(object, 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                 }
 
                 @Test
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
+                    Property<Object> property = beanClass.getProperty("field");
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    beanClass.setPropertyValue(object, "field", 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
+                    property.setValue(object, 1000);
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                 }
             }
 
@@ -1382,6 +1412,7 @@ class PojoTest {
                 @Test
                 void find_property_by_name() {
                     Property<?> property = beanClass.getProperty("field");
+
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
                 }
@@ -1391,21 +1422,20 @@ class PojoTest {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
 
-                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                     property.setValue(object, 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                 }
 
                 @Test
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     beanClass.setPropertyValue(object, "field", 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                 }
 
                 @Test
@@ -1413,17 +1443,16 @@ class PojoTest {
                     BeanClass<? super Object> baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                     Object object = beanClass.newInstance();
 
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    assertThrows(NoSuchAccessorException.class, () -> baseBeanClass.getPropertyValue(object, "field"));
                     beanClass.setPropertyValue(object, "field", 1000);
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    assertThrows(NoSuchAccessorException.class, () -> baseBeanClass.getPropertyValue(object, "field"));
                     assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "value"));
+                    assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
 
                     baseBeanClass.setPropertyValue(object, "field", 2000);
+                    assertEquals(2000, (int) baseBeanClass.getPropertyValue(object, "value"));
+                    assertEquals(2000, (int) beanClass.getPropertyValue(object, "value"));
+
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> baseBeanClass.getPropertyValue(object, "field"));
-                    assertEquals(2000, (int) beanClass.getPropertyValue(object, "value"));
                 }
             }
         }
@@ -1466,7 +1495,6 @@ class PojoTest {
                     assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                     property.setValue(object, asList("hello", "world"));
 
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThat((java.util.List<String>) beanClass.getPropertyValue(object, "value")).containsExactly("hello", "world");
                 }
 
@@ -1475,11 +1503,10 @@ class PojoTest {
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     beanClass.setPropertyValue(object, "field", asList("hello", "world"));
+                    assertThat((java.util.List<String>) beanClass.getPropertyValue(object, "value")).containsExactly("hello", "world");
 
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    assertThat((java.util.List<String>) beanClass.getPropertyValue(object, "value")).containsExactly("hello", "world");
                 }
             }
 
@@ -1518,12 +1545,11 @@ class PojoTest {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
 
-                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                     property.setValue(object, asList(asList("hello", "world")));
-
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThat((java.util.List<java.util.List<String>>) beanClass.getPropertyValue(object, "value"))
                             .containsExactly(asList("hello", "world"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                 }
 
                 @SuppressWarnings("unchecked")
@@ -1531,12 +1557,11 @@ class PojoTest {
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     beanClass.setPropertyValue(object, "field", asList(asList("hello", "world")));
-
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThat((java.util.List<java.util.List<String>>) beanClass.getPropertyValue(object, "value"))
                             .containsExactly(asList("hello", "world"));
+
+                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                 }
             }
 
@@ -1573,11 +1598,10 @@ class PojoTest {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
 
-                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                     property.setValue(object, asList("hello", "world"));
-
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThat((java.util.List<Object>) beanClass.getPropertyValue(object, "value")).containsExactly("hello", "world");
+
+                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                 }
 
                 @SuppressWarnings("unchecked")
@@ -1585,11 +1609,10 @@ class PojoTest {
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
 
-                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     beanClass.setPropertyValue(object, "field", asList("hello", "world"));
+                    assertThat((java.util.List<Object>) beanClass.getPropertyValue(object, "value")).containsExactly("hello", "world");
 
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
-                    assertThat((java.util.List<Object>) beanClass.getPropertyValue(object, "value")).containsExactly("hello", "world");
                 }
             }
         }
