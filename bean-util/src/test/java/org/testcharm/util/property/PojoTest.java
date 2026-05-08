@@ -10,37 +10,14 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.testcharm.util.JavaExecutor.executor;
 
 class PojoTest {
+
     @BeforeEach
     void reset() {
         executor().main().importDependency("org.testcharm.util.BeanClass");
-    }
-
-    @Nested
-    class GetTypeAndName {
-
-        @Test
-        void return_the_given_pojo_type() {
-            givenClass(String.join("\n",
-                    "package p;",
-                    "public class Pojo {",
-                    "    public int pubField;",
-                    "    private int i;",
-                    "    public int getPubField() { return i; }",
-                    "    public void setPubField(int i) { this.pubField = pubField; }",
-                    "}"
-            ));
-
-            Class<?> type = typeOf("p.Pojo");
-
-            assertEquals(type, BeanClass.create(type).getType());
-            assertEquals("Pojo", BeanClass.create(type).getSimpleName());
-            assertEquals("p.Pojo", BeanClass.create(type).getName());
-        }
     }
 
     @Nested
@@ -73,14 +50,8 @@ class PojoTest {
                     Property<?> property = properties.get("field");
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, property.getWriterType().getType());
+                    assertEquals(int.class, property.getReaderType().getType());
                 }
 
                 @Test
@@ -122,7 +93,7 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
@@ -131,11 +102,8 @@ class PojoTest {
                     assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
                 }
 
-                void can_not_get_set_value_by_property() {
-                }
-
                 @Test
-                void get_set_value_directly() {
+                void support_get_set_value_directly() {
                     Object object = beanClass.newInstance();
 
                     assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
@@ -161,7 +129,7 @@ class PojoTest {
                 }
 
                 @Test
-                void included_in_type_properties() {
+                void included_reader_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
 
                     assertThat(properties.keySet()).containsExactly("field");
@@ -169,14 +137,8 @@ class PojoTest {
                     Property<?> property = properties.get("field");
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertThrows(NoSuchAccessorException.class, () -> property.getWriterType());
+                    assertEquals(int.class, property.getReaderType().getType());
                 }
 
                 @Test
@@ -215,16 +177,13 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
                 @Test
                 void can_not_find_property_by_name() {
                     assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
-                }
-
-                void can_not_get_set_value_by_property() {
                 }
 
                 @Test
@@ -251,16 +210,13 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
                 @Test
                 void can_not_find_property_by_name() {
                     assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
-                }
-
-                void can_not_get_set_value_by_property() {
                 }
 
                 @Test
@@ -287,16 +243,13 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
                 @Test
                 void can_not_find_property_by_name() {
                     assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
-                }
-
-                void can_not_get_set_value_by_property() {
                 }
 
                 @Test
@@ -323,16 +276,13 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
                 @Test
                 void can_not_find_property_by_name() {
                     assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
-                }
-
-                void can_not_get_set_value_by_property() {
                 }
 
                 @Test
@@ -375,14 +325,8 @@ class PojoTest {
                     Property<?> property = properties.get("field");
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, property.getWriterType().getType());
+                    assertEquals(int.class, property.getReaderType().getType());
                 }
 
                 @Test
@@ -422,14 +366,14 @@ class PojoTest {
                     ));
                     givenClass(String.join("\n",
                             "public class Pojo extends Base{",
-                            "    public int field = 100;",
+                            "    public long field = 100;",
                             "}"
                     ));
                     beanClass = BeanClass.create(typeOf("Pojo"));
                 }
 
                 @Test
-                void included_in_type_properties() {
+                void include_sub_class_field_in_type_properties() {
                     Map<String, ? extends Property<?>> properties = beanClass.getProperties();
 
                     assertThat(properties.keySet()).containsExactly("field");
@@ -437,14 +381,8 @@ class PojoTest {
                     Property<?> property = properties.get("field");
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(long.class, property.getWriterType().getType());
+                    assertEquals(long.class, property.getReaderType().getType());
                 }
 
                 @Test
@@ -452,22 +390,22 @@ class PojoTest {
                     Object object = beanClass.newInstance();
                     Property<Object> property = beanClass.getProperty("field");
 
-                    assertEquals(100, (int) property.getValue(object));
+                    assertEquals(100L, (long) property.getValue(object));
 
-                    property.setValue(object, 1000);
+                    property.setValue(object, 1000L);
 
-                    assertEquals(1000, (int) property.getValue(object));
+                    assertEquals(1000L, (long) property.getValue(object));
                 }
 
                 @Test
                 void get_set_value_directly() {
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(100L, (long) beanClass.getPropertyValue(object, "field"));
 
-                    beanClass.setPropertyValue(object, "field", 1000);
+                    beanClass.setPropertyValue(object, "field", 1000L);
 
-                    assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(1000L, (long) beanClass.getPropertyValue(object, "field"));
                 }
 
                 @Test
@@ -475,13 +413,110 @@ class PojoTest {
                     BeanClass<? super Object> baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                     Object object = beanClass.newInstance();
 
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(100L, (long) beanClass.getPropertyValue(object, "field"));
                     assertEquals(200, (int) baseBeanClass.getPropertyValue(object, "field"));
 
-                    beanClass.setPropertyValue(object, "field", 1000);
+                    beanClass.setPropertyValue(object, "field", 1000L);
                     baseBeanClass.setPropertyValue(object, "field", 2000);
 
+                    assertEquals(1000L, (long) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(2000, (int) baseBeanClass.getPropertyValue(object, "field"));
+                }
+            }
+
+            @Nested
+            class StaticInBaseClass {
+                private BeanClass<Object> beanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public class Base {",
+                            "    public static int field = 100;",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public class Pojo extends Base{",
+                            "}"
+                    ));
+                    beanClass = BeanClass.create(typeOf("Pojo"));
+                }
+
+                @Test
+                void not_included_in_type_properties() {
+                    assertThat(beanClass.getProperties().keySet()).isEmpty();
+                }
+
+                @Test
+                void can_not_find_property_by_name() {
+                    assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
+                }
+
+                @Test
+                void support_get_set_value_directly() {
+                    Object object = beanClass.newInstance();
+
+                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                    beanClass.setPropertyValue(object, "field", 1000);
+
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+                }
+            }
+
+            @Nested
+            class StaticInBaseAndSubClass {
+
+                private BeanClass<Object> beanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public class Base {",
+                            "    public static int field = 200;",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public class Pojo extends Base{",
+                            "    public static long field = 100;",
+                            "}"
+                    ));
+                    beanClass = BeanClass.create(typeOf("Pojo"));
+                }
+
+                @Test
+                void not_included_in_type_properties() {
+                    assertThat(beanClass.getProperties().keySet()).isEmpty();
+                }
+
+                @Test
+                void can_not_find_property_by_name() {
+                    assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
+                }
+
+                @Test
+                void get_set_value_directly() {
+                    Object object = beanClass.newInstance();
+
+                    assertEquals(100L, (long) beanClass.getPropertyValue(object, "field"));
+
+                    beanClass.setPropertyValue(object, "field", 1000L);
+
+                    assertEquals(1000L, (long) beanClass.getPropertyValue(object, "field"));
+                }
+
+                @Test
+                void get_set_base_class_value() {
+                    BeanClass<? super Object> baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
+                    Object object = beanClass.newInstance();
+
+                    assertEquals(100L, (long) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(200, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                    beanClass.setPropertyValue(object, "field", 1000L);
+                    baseBeanClass.setPropertyValue(object, "field", 2000);
+
+                    assertEquals(1000L, (long) beanClass.getPropertyValue(object, "field"));
                     assertEquals(2000, (int) baseBeanClass.getPropertyValue(object, "field"));
                 }
             }
@@ -613,6 +648,30 @@ class PojoTest {
 
             }
         }
+
+        @Nested
+        class AutoConvert {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int field = 100;",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void auto_convert_to_correct_type() {
+                Object object = beanClass.newInstance();
+
+                beanClass.setPropertyValue(object, "field", "1000");
+
+                assertEquals(1000, beanClass.getPropertyValue(object, "field"));
+            }
+        }
     }
 
     @Nested
@@ -646,14 +705,7 @@ class PojoTest {
                     Property<?> property = properties.get("field");
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, property.getReaderType().getType());
                 }
 
                 @Test
@@ -692,7 +744,7 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
@@ -726,7 +778,7 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
@@ -760,7 +812,7 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
@@ -794,7 +846,7 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
@@ -844,14 +896,7 @@ class PojoTest {
                     Property<?> property = properties.get("field");
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, property.getReaderType().getType());
                 }
 
                 @Test
@@ -902,14 +947,7 @@ class PojoTest {
                     Property<?> property = properties.get("field");
                     assertEquals("field", property.getName());
                     assertEquals(beanClass, property.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, property.getReaderType().getType());
                 }
 
                 @Test
@@ -931,7 +969,7 @@ class PojoTest {
                 }
 
                 @Test
-                void get_base_class_value() {
+                void get_value_always_use_sub_class_getter() {
                     BeanClass<? super Object> baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                     Object object = beanClass.newInstance();
 
@@ -940,6 +978,92 @@ class PojoTest {
 
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 0));
                     assertThrows(NoSuchAccessorException.class, () -> baseBeanClass.setPropertyValue(object, "field", 0));
+                }
+            }
+
+            @Nested
+            class StaticInBaseClass {
+                private BeanClass<Object> beanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public class Base {",
+                            "    private static int field = 100;",
+                            "    public static int getField() { return field; }",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public class Pojo extends Base{",
+                            "}"
+                    ));
+                    beanClass = BeanClass.create(typeOf("Pojo"));
+                }
+
+                @Test
+                void not_included_in_type_properties() {
+                    assertThat(beanClass.getProperties().keySet()).isEmpty();
+                }
+
+                @Test
+                void can_not_find_property_by_name() {
+                    assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
+                }
+
+                @Test
+                void support_get_value_directly() {
+                    Object object = beanClass.newInstance();
+
+                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+                }
+            }
+
+            @Nested
+            class StaticInBaseAndSubClass {
+
+                private BeanClass<Object> beanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public class Base {",
+                            "    private static int field = 200;",
+                            "    public static int getField() { return field; }",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public class Pojo extends Base{",
+                            "    private static int field = 100;",
+                            "    public static int getField() { return field; }",
+                            "}"
+                    ));
+                    beanClass = BeanClass.create(typeOf("Pojo"));
+                }
+
+                @Test
+                void not_included_in_type_properties() {
+                    assertThat(beanClass.getProperties().keySet()).isEmpty();
+                }
+
+                @Test
+                void can_not_find_property_by_name() {
+                    assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
+                }
+
+                @Test
+                void get_value_directly() {
+                    Object object = beanClass.newInstance();
+
+                    assertEquals(100, beanClass.getPropertyValue(object, "field"));
+                }
+
+                @Test
+                void get_base_class_value() {
+                    BeanClass<? super Object> baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
+                    Object object = beanClass.newInstance();
+
+                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(200, (int) baseBeanClass.getPropertyValue(object, "field"));
                 }
             }
         }
@@ -1064,6 +1188,7 @@ class PojoTest {
                     assertThrows(NoSuchAccessorException.class, () -> property.setValue(object, asList("hello", "world")));
                 }
             }
+
         }
 
         @Nested
@@ -1089,6 +1214,7 @@ class PojoTest {
                 Property<?> property = properties.get("field");
                 assertEquals("field", property.getName());
                 assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getReaderType().getType());
             }
 
             @Test
@@ -1134,14 +1260,7 @@ class PojoTest {
                     Property<?> fieldProperty = properties.get("field");
                     assertEquals("field", fieldProperty.getName());
                     assertEquals(beanClass, fieldProperty.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, fieldProperty.getWriterType().getType());
                 }
 
                 @Test
@@ -1184,7 +1303,7 @@ class PojoTest {
                 }
 
                 @Test
-                void not_in_type_properties() {
+                void not_included_in_type_properties() {
                     assertThat(beanClass.getProperties().keySet()).isEmpty();
                 }
 
@@ -1341,14 +1460,7 @@ class PojoTest {
                     Property<?> fieldProperty = properties.get("field");
                     assertEquals("field", fieldProperty.getName());
                     assertEquals(beanClass, fieldProperty.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, fieldProperty.getWriterType().getType());
                 }
 
                 @Test
@@ -1365,12 +1477,11 @@ class PojoTest {
                 @Test
                 void set_value_directly_and_can_not_get_value() {
                     Object object = beanClass.newInstance();
-                    Property<Object> property = beanClass.getProperty("field");
 
-                    property.setValue(object, 1000);
+                    beanClass.setPropertyValue(object, "field", 1000);
                     assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
 
-                    assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
+                    assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                 }
             }
 
@@ -1407,14 +1518,7 @@ class PojoTest {
                     Property<?> fieldProperty = properties.get("field");
                     assertEquals("field", fieldProperty.getName());
                     assertEquals(beanClass, fieldProperty.getBeanType());
-                }
-
-                @Test
-                void find_property_by_name() {
-                    Property<?> property = beanClass.getProperty("field");
-
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, fieldProperty.getWriterType().getType());
                 }
 
                 @Test
@@ -1439,7 +1543,7 @@ class PojoTest {
                 }
 
                 @Test
-                void set_base_class_value_and_can_not_get_value() {
+                void set_value_always_use_sub_class_setter() {
                     BeanClass<? super Object> baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                     Object object = beanClass.newInstance();
 
@@ -1453,6 +1557,98 @@ class PojoTest {
 
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                     assertThrows(NoSuchAccessorException.class, () -> baseBeanClass.getPropertyValue(object, "field"));
+                }
+            }
+
+            @Nested
+            class StaticInBaseClass {
+                private BeanClass<Object> beanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public class Base {",
+                            "    public static int fieldValue = 100;",
+                            "    public static void setField(int i) { fieldValue=i; }",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public class Pojo extends Base{",
+                            "}"
+                    ));
+                    beanClass = BeanClass.create(typeOf("Pojo"));
+                }
+
+                @Test
+                void not_included_in_type_properties() {
+                    assertThat(beanClass.getProperties().keySet()).isEmpty();
+                }
+
+                @Test
+                void can_not_find_property_by_name() {
+                    assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
+                }
+
+                @Test
+                void support_get_value_directly() {
+                    Object object = beanClass.newInstance();
+
+                    beanClass.setPropertyValue(object, "field", 100);
+                    assertEquals(100, beanClass.getPropertyValue(object, "fieldValue"));
+                }
+            }
+
+            @Nested
+            class StaticInBaseAndSubClass {
+
+                private BeanClass<Object> beanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public class Base {",
+                            "    public static int fieldValue;",
+                            "    public static void setField(int i) { fieldValue=i; }",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public class Pojo extends Base{",
+                            "    public static int fieldValue;",
+                            "    public static void setField(int i) { fieldValue=i; }",
+                            "}"
+                    ));
+                    beanClass = BeanClass.create(typeOf("Pojo"));
+                }
+
+                @Test
+                void not_included_in_type_properties() {
+                    assertThat(beanClass.getProperties().keySet()).isEmpty();
+                }
+
+                @Test
+                void can_not_find_property_by_name() {
+                    assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("field"));
+                }
+
+                @Test
+                void set_value_directly() {
+                    Object object = beanClass.newInstance();
+
+                    beanClass.setPropertyValue(object, "field", 100);
+
+                    assertEquals(100, beanClass.getPropertyValue(object, "fieldValue"));
+                }
+
+                @Test
+                void set_base_class_value() {
+                    BeanClass<? super Object> baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
+                    Object object = beanClass.newInstance();
+
+                    beanClass.setPropertyValue(object, "field", 100);
+                    baseBeanClass.setPropertyValue(object, "field", 200);
+
+                    assertEquals(100, (int) beanClass.getPropertyValue(object, "fieldValue"));
+                    assertEquals(200, (int) baseBeanClass.getPropertyValue(object, "fieldValue"));
                 }
             }
         }
@@ -1614,6 +1810,835 @@ class PojoTest {
 
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "field"));
                 }
+            }
+        }
+
+        @Nested
+        class DifferentFieldName {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int value = 100;",
+                        "    public void setField(int f) { value = f; }",
+                        "    public int getValue() { return value; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("field", "value");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+            }
+
+            @Test
+            void set_value_by_property_and_can_not_get_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("field");
+
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "value"));
+
+                assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
+            }
+        }
+
+        @Nested
+        class AutoConvert {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int field = 100;",
+                        "    public void setField(int i) { this.field = i; }",
+                        "    public int getField() { return field; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void auto_convert_to_correct_type() {
+                Object object = beanClass.newInstance();
+
+                beanClass.setPropertyValue(object, "field", "1000");
+
+                assertEquals(1000, beanClass.getPropertyValue(object, "field"));
+            }
+        }
+    }
+
+    @Nested
+    class MixedAccessorAndField {
+
+        @Nested
+        class PublicAccessorAndField {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int value = 0;",
+                        "    public int valueForGetterSetter = 100;",
+
+                        "    public int getValue() { return valueForGetterSetter; }",
+                        "    public void setValue(int i) { valueForGetterSetter = i; }",
+
+                        "    public int getValueField() { return value; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void accessor_over_field() {
+                Object object = beanClass.newInstance();
+
+                assertThat(beanClass.getPropertyValue(object, "value")).isEqualTo(100);
+
+                beanClass.setPropertyValue(object, "value", 1000);
+                assertThat(beanClass.getPropertyValue(object, "value")).isEqualTo(1000);
+                assertThat(beanClass.getPropertyValue(object, "valueForGetterSetter")).isEqualTo(1000);
+
+                assertThat(beanClass.getPropertyValue(object, "valueField")).isEqualTo(0);
+            }
+        }
+
+        @Nested
+        class PublicGetterAndField {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int value = 0;",
+                        "    public int valueForGetterSetter = 100;",
+                        "    public int getValue() { return valueForGetterSetter; }",
+                        "    public int getValueField() { return value; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void getter_over_field() {
+                Object object = beanClass.newInstance();
+
+                assertThat(beanClass.getPropertyValue(object, "value")).isEqualTo(100);
+            }
+
+            @Test
+            void set_value_should_use_field() {
+                Object object = beanClass.newInstance();
+
+                beanClass.setPropertyValue(object, "value", 200);
+
+                assertThat(beanClass.getPropertyValue(object, "valueForGetterSetter")).isEqualTo(100);
+                assertThat(beanClass.getPropertyValue(object, "valueField")).isEqualTo(200);
+            }
+        }
+
+        @Nested
+        class PublicSetterAndField {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int value = 0;",
+                        "    public int valueForGetterSetter = 100;",
+                        "    public void setValue(int i) { valueForGetterSetter = i; }",
+                        "    public int getValueField() { return value; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void setter_over_field() {
+                Object object = beanClass.newInstance();
+
+                beanClass.setPropertyValue(object, "value", 200);
+
+                assertThat(beanClass.getPropertyValue(object, "valueForGetterSetter")).isEqualTo(200);
+                assertThat(beanClass.getPropertyValue(object, "valueField")).isEqualTo(0);
+            }
+
+            @Test
+            void get_value_should_use_field() {
+                Object object = beanClass.newInstance();
+
+                assertThat(beanClass.getPropertyValue(object, "value")).isEqualTo(0);
+            }
+        }
+    }
+
+    @Nested
+    class ValidityAccessor {
+
+        @Nested
+        class SetterWithReturn {
+
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int field;",
+                        "    public int getField() { return field; }",
+                        "    public Pojo setField(int i) { this.field = i; return this; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+            }
+
+            @Test
+            void set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("field");
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) property.getValue(object));
+
+                beanClass.setPropertyValue(object, "field", 2000);
+                assertEquals(2000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+        }
+
+        @Nested
+        class PrimitiveBoolean {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private boolean valid = true;",
+                        "    public boolean isValid() { return valid; }",
+                        "    public void setValid(boolean f) { this.valid=f; }",
+                        "    private boolean inValid = false;",
+                        "    public boolean getInValid() { return inValid; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void start_with_is_should_be_included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("valid");
+
+                Property<?> property = properties.get("valid");
+                assertEquals("valid", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(boolean.class, property.getReaderType().getType());
+                assertEquals(boolean.class, property.getWriterType().getType());
+            }
+
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("valid");
+
+                assertEquals(true, property.getValue(object));
+                assertEquals(true, beanClass.getPropertyValue(object, "valid"));
+
+                property.setValue(object, false);
+                assertEquals(false, beanClass.getPropertyValue(object, "valid"));
+
+            }
+
+            @Test
+            void get_prefix_method_is_not_valid_getter_for_primitive_boolean() {
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(beanClass.newInstance(), "inValid"));
+                assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("inValid"));
+            }
+        }
+
+        @Nested
+        class BoxedBoolean {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private Boolean valid = true;",
+                        "    public Boolean getValid() { return valid; }",
+                        "    public void setValid(Boolean f) { this.valid=f; }",
+                        "    private Boolean inValid = false;",
+                        "    public Boolean isInValid() { return inValid; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void start_with_is_should_be_included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("valid");
+
+                Property<?> property = properties.get("valid");
+                assertEquals("valid", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(Boolean.class, property.getReaderType().getType());
+                assertEquals(Boolean.class, property.getWriterType().getType());
+            }
+
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("valid");
+
+                assertEquals(true, property.getValue(object));
+                assertEquals(true, beanClass.getPropertyValue(object, "valid"));
+
+                property.setValue(object, false);
+                assertEquals(false, beanClass.getPropertyValue(object, "valid"));
+
+            }
+
+            @Test
+            void is_prefix_method_is_not_valid_getter_for_boxed_boolean() {
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(beanClass.newInstance(), "inValid"));
+                assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("inValid"));
+            }
+        }
+
+        @Nested
+        class MoreThanOneUpperCaseLetter {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int i;",
+                        "    public int getINT() { return i; }",
+                        "    public void setINT(int i) { this.i = i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void should_keep_the_original_name() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("INT");
+
+                Property<?> property = properties.get("INT");
+                assertEquals("INT", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getReaderType().getType());
+                assertEquals(int.class, property.getWriterType().getType());
+            }
+
+            @SneakyThrows
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("INT");
+
+                property.setValue(object, 1);
+                assertEquals(1, (int) property.getValue(object));
+
+                beanClass.setPropertyValue(object, "INT", 2);
+                assertEquals(2, beanClass.getPropertyValue(object, "INT"));
+            }
+        }
+
+        @Nested
+        class OneUpperCaseLetter {
+
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int i;",
+                        "    public int getI() { return i; }",
+                        "    public void setI(int i) { this.i = i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void should_keep_the_original_name() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("i");
+
+                Property<?> property = properties.get("i");
+                assertEquals("i", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getReaderType().getType());
+                assertEquals(int.class, property.getWriterType().getType());
+            }
+
+            @SneakyThrows
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("i");
+
+                property.setValue(object, 1);
+                assertEquals(1, (int) property.getValue(object));
+
+                beanClass.setPropertyValue(object, "i", 2);
+                assertEquals(2, beanClass.getPropertyValue(object, "i"));
+            }
+        }
+
+        @Nested
+        class OneLowerCaseLetter {
+
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int i;",
+                        "    public int geti() { return i; }",
+                        "    public void seti(int i) { this.i = i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void should_keep_the_original_name() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("i");
+
+                Property<?> property = properties.get("i");
+                assertEquals("i", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getReaderType().getType());
+                assertEquals(int.class, property.getWriterType().getType());
+            }
+
+            @SneakyThrows
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("i");
+
+                property.setValue(object, 1);
+                assertEquals(1, (int) property.getValue(object));
+
+                beanClass.setPropertyValue(object, "i", 2);
+                assertEquals(2, beanClass.getPropertyValue(object, "i"));
+            }
+        }
+
+        @Nested
+        class FirstLetterLowerCase {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int i;",
+                        "    public int getiValue() { return i; }",
+                        "    public void setiValue(int i) { this.i = i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void should_keep_the_original_name() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("iValue");
+
+                Property<?> property = properties.get("iValue");
+                assertEquals("iValue", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getReaderType().getType());
+                assertEquals(int.class, property.getWriterType().getType());
+            }
+
+            @SneakyThrows
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("iValue");
+
+                property.setValue(object, 1);
+                assertEquals(1, (int) property.getValue(object));
+
+                beanClass.setPropertyValue(object, "iValue", 2);
+                assertEquals(2, beanClass.getPropertyValue(object, "iValue"));
+            }
+        }
+
+        @Nested
+        class EmptyName {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int get() { return 0; }",
+                        "    public void set(int i) { }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void not_included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).isEmpty();
+            }
+
+            @Test
+            void can_not_find_property_by_name() {
+                assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty(""));
+            }
+
+            @Test
+            void cannot_get_set_value() {
+                Object object = beanClass.newInstance();
+
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, ""));
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "", 0));
+            }
+        }
+
+        @Nested
+        class NonAscii {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private int i;",
+                        "    public int get整数() { return i; }",
+                        "    public void set整数(int i) { this.i = i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void should_keep_the_original_name() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("整数");
+
+                Property<?> property = properties.get("整数");
+                assertEquals("整数", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getReaderType().getType());
+                assertEquals(int.class, property.getWriterType().getType());
+            }
+
+            @SneakyThrows
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("整数");
+
+                property.setValue(object, 1);
+                assertEquals(1, (int) property.getValue(object));
+
+                beanClass.setPropertyValue(object, "整数", 2);
+                assertEquals(2, beanClass.getPropertyValue(object, "整数"));
+            }
+        }
+
+        @Nested
+        class GetWithArg {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int getValue(int i) { return 0; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void not_included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).isEmpty();
+            }
+
+            @Test
+            void can_not_find_property_by_name() {
+                assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("value"));
+            }
+
+            @Test
+            void cannot_get_value() {
+                Object object = beanClass.newInstance();
+
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "value"));
+            }
+        }
+
+        @Nested
+        class SetMoreThanOneArg {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public void setValue(int i, int j) { }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void not_included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).isEmpty();
+            }
+
+            @Test
+            void can_not_find_property_by_name() {
+                assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("value"));
+            }
+
+            @Test
+            void cannot_set_value() {
+                Object object = beanClass.newInstance();
+
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "value", 0));
+            }
+        }
+
+        @Nested
+        class SetOverloaded {
+
+            @Test
+            void included_in_type_properties_but_depends_on_class_get_methods() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    private Object value;",
+                        "    public void setValue(String s) {this.value=s;}",
+                        "    public void setValue(int i) {this.value=i;}",
+                        "}"
+                ));
+
+                BeanClass<Object> beanClass = BeanClass.create(typeOf("Pojo"));
+
+                assertNotNull(beanClass.getProperties().get("value"));
+            }
+        }
+
+        @Nested
+        class GetReturnVoid {
+
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public void getValue() {}",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void not_included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).isEmpty();
+            }
+
+            @Test
+            void can_not_find_property_by_name() {
+                assertThrows(NoSuchPropertyException.class, () -> beanClass.getProperty("value"));
+            }
+
+            @Test
+            void cannot_get_value() {
+                Object object = beanClass.newInstance();
+
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "value"));
+            }
+        }
+
+        @Nested
+        class InvalidGetterAndValidSetter {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int i;",
+                        "    public int getValue(int i) { return 0; }",
+                        "    public void setValue(int i) { this.i=i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("i", "value");
+
+                Property<?> property = properties.get("value");
+                assertEquals("value", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+
+                assertThrows(NoSuchAccessorException.class, property::getReaderType);
+            }
+
+            @Test
+            void set_value_but_cannot_get_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("value");
+
+                property.setValue(object, 100);
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "i"));
+
+                assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
+
+                beanClass.setPropertyValue(object, "value", 200);
+                assertEquals(200, (int) beanClass.getPropertyValue(object, "i"));
+
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.getPropertyValue(object, "value"));
+            }
+        }
+
+        @Nested
+        class ValidGetterAndInvalidSetter {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int i=100;",
+                        "    public int getValue() { return i; }",
+                        "    public void setValue(int i, int j) { this.i=i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("i", "value");
+
+                Property<?> property = properties.get("value");
+                assertEquals("value", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getReaderType().getType());
+
+                assertThrows(NoSuchAccessorException.class, property::getWriterType);
+            }
+
+            @Test
+            void get_value_but_cannot_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("value");
+
+                assertEquals(100, (int) property.getValue(object));
+                assertThrows(NoSuchAccessorException.class, property::getWriterType);
+
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "value"));
+                assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "value", 0));
+            }
+        }
+
+        @Nested
+        class DifferentGetterSetterType {
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class Pojo {",
+                        "    public int i=100;",
+                        "    public String getValue() { return String.valueOf(i); }",
+                        "    public void setValue(int i) { this.i=i; }",
+                        "}"
+                ));
+                beanClass = BeanClass.create(typeOf("Pojo"));
+            }
+
+            @Test
+            void included_in_type_properties_with_different_data_type() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactlyInAnyOrder("i", "value");
+
+                Property<?> property = properties.get("value");
+                assertEquals("value", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(String.class, property.getReaderType().getType());
+                assertEquals(int.class, property.getWriterType().getType());
+            }
+
+            @Test
+            void get_set_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("value");
+
+                assertEquals("100", property.getValue(object));
+                property.setValue(object, 1000);
+                assertEquals("1000", property.getValue(object));
+
+                beanClass.setPropertyValue(object, "value", 2000);
+                assertEquals("2000", beanClass.getPropertyValue(object, "value"));
             }
         }
     }

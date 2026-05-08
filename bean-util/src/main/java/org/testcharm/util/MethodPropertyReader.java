@@ -17,9 +17,9 @@ class MethodPropertyReader<T> extends MethodPropertyAccessor<T> implements Prope
 
     static boolean isGetter(Method method) {
         String methodName = method.getName();
-        return method.getParameters().length == 0 &&
-                (method.getReturnType().equals(boolean.class) ?
-                        methodName.startsWith("is") : (methodName.startsWith("get")));
+        return method.getParameters().length == 0 && (!method.getReturnType().equals(void.class))
+                && (method.getReturnType().equals(boolean.class) ?
+                methodName.startsWith("is") : (methodName.startsWith("get") && methodName.length() > 3));
     }
 
     @Override
@@ -36,10 +36,16 @@ class MethodPropertyReader<T> extends MethodPropertyAccessor<T> implements Prope
     public String getName() {
         if (name == null) {
             String methodName = getMethod().getName();
-            return name = unCapitalize(getMethod().getReturnType().equals(boolean.class) ?
+            return name = propertyName(getMethod().getReturnType().equals(boolean.class) ?
                     methodName.substring(BOOLEAN_GETTER_PREFIX_LENGTH) : methodName.substring(GETTER_PREFIX_LENGTH));
         }
         return name;
+    }
+
+    static String propertyName(String name) {
+        if (name.length() > 1 && Character.isUpperCase(name.charAt(0)) && Character.isUpperCase(name.charAt(1)))
+            return name;
+        return unCapitalize(name);
     }
 
     @Override

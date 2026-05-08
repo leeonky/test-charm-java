@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.testcharm.util.Attr;
 import org.testcharm.util.BeanClass;
-import org.testcharm.util.NoSuchAccessorException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,23 +77,11 @@ class PropertyWriterTest {
         BeanWithPubField bean = new BeanWithPubField();
 
         @Test
-        void set_field_value() {
-            beanWithPubFieldBeanClass.setPropertyValue(bean, "field", 100);
-            assertThat(bean.field).isEqualTo(100);
-        }
-
-        @Test
         void set_field_value_via_anonymous_class() {
             BeanWithPubField bean = new BeanWithPubField() {
             };
             createFrom(bean).setPropertyValue(bean, "field", 100);
             assertThat(bean.field).isEqualTo(100);
-        }
-
-        @Test
-        void set_value_via_setter_override_field() {
-            beanWithPubFieldBeanClass.setPropertyValue(bean, "field2", 100);
-            assertThat(bean.field2).isEqualTo(200);
         }
 
         @Test
@@ -138,30 +125,6 @@ class PropertyWriterTest {
         }
 
         @Test
-        void should_raise_error_when_no_reader() {
-            assertThrows(NoSuchAccessorException.class, () ->
-                    beanWithPubFieldBeanClass.setPropertyValue(new BeanWithPubField(), "notExist", null));
-        }
-
-        @Test
-        void should_support_type_convert() {
-            beanWithPubFieldBeanClass.setPropertyValue(bean, "field", "100");
-
-            assertThat(bean.field).isEqualTo(100);
-
-            beanWithPubFieldBeanClass.setPropertyValue(bean, "field2", "100");
-
-            assertThat(bean.field2).isEqualTo(200);
-        }
-
-        @Test
-        void should_override_fields_in_super_class() {
-            SubBeanWithPubField bean = new SubBeanWithPubField();
-            create(SubBeanWithPubField.class).setPropertyValue(bean, "field", 200);
-            assertThat(bean.field).isEqualTo(200);
-        }
-
-        @Test
         void raise_error_when_set_unexpected_type_value_to_field() {
             Beans beans = new Beans();
 
@@ -196,21 +159,6 @@ class PropertyWriterTest {
 
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Bean.class).setPropertyValue(bean, "i", null))).hasMessageContaining("Can not set null to ");
-        }
-
-        @Test
-        void should_not_contain_static_field() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyWriters().keySet()).doesNotContain("staticField");
-        }
-
-        @Test
-        void should_not_contain_static_setter() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyWriters().keySet()).doesNotContain("staticSetter");
-        }
-
-        @Test
-        void should_not_contain_const_field() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyWriters().keySet()).doesNotContain("constField");
         }
     }
 

@@ -75,26 +75,6 @@ class PropertyTest {
     }
 
     @Nested
-    class GetSetValue {
-
-        @Test
-        void set_value_via_property() {
-            Bean bean = new Bean();
-            Property<Bean> property = beanClass.getProperty("str2");
-
-            assertThat(property.setValue(bean, "hello")).isEqualTo(property);
-            assertThat(bean).hasFieldOrPropertyWithValue("str2", "hello");
-        }
-
-        @Test
-        void get_value_via_property() {
-            Bean bean = new Bean().setStr2("hello");
-
-            assertThat((Object) beanClass.getProperty("str2").getValue(bean)).isEqualTo("hello");
-        }
-    }
-
-    @Nested
     class AccessorFilter {
 
         @Test

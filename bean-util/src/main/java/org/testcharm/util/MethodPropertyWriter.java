@@ -4,8 +4,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.BiConsumer;
 
+import static org.testcharm.util.MethodPropertyReader.propertyName;
 import static org.testcharm.util.Sneaky.execute;
-import static org.testcharm.util.StringUtil.unCapitalize;
 
 class MethodPropertyWriter<T> extends MethodPropertyAccessor<T> implements PropertyWriter<T> {
     private static final int SETTER_PREFIX_LENGTH = 3;
@@ -17,7 +17,7 @@ class MethodPropertyWriter<T> extends MethodPropertyAccessor<T> implements Prope
     }
 
     static boolean isSetter(Method method) {
-        return method.getName().startsWith("set") && method.getParameterTypes().length == 1;
+        return method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1;
     }
 
     @Override
@@ -28,7 +28,7 @@ class MethodPropertyWriter<T> extends MethodPropertyAccessor<T> implements Prope
     @Override
     public String getName() {
         if (name == null)
-            return name = unCapitalize(getMethod().getName().substring(SETTER_PREFIX_LENGTH));
+            return name = propertyName(getMethod().getName().substring(SETTER_PREFIX_LENGTH));
         return name;
     }
 

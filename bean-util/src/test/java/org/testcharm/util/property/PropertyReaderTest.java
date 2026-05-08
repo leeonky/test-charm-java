@@ -5,15 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.testcharm.util.AnnotationGetter;
 import org.testcharm.util.Attr;
 import org.testcharm.util.BeanClass;
-import org.testcharm.util.NoSuchAccessorException;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcharm.util.BeanClass.createFrom;
 
 class PropertyReaderTest {
@@ -90,11 +87,6 @@ class PropertyReaderTest {
     class GetSetValue {
 
         @Test
-        void get_field_value() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "field")).isEqualTo(100);
-        }
-
-        @Test
         void get_field_value_of_anonymous_class() {
             BeanWithPubField bean = new BeanWithPubField() {
             };
@@ -122,11 +114,6 @@ class PropertyReaderTest {
         }
 
         @Test
-        void get_value_via_getter_override_field() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "field2")).isEqualTo(200);
-        }
-
-        @Test
         void get_property_via_interface() {
             InterfaceLambda lambda = () -> "hello";
 
@@ -143,37 +130,8 @@ class PropertyReaderTest {
         }
 
         @Test
-        void should_support_boolean_getter() {
-            assertTrue((Boolean) beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "bool"));
-        }
-
-        @Test
-        void should_raise_error_when_no_reader() {
-            assertThrows(NoSuchAccessorException.class, () ->
-                    beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "boolean"));
-
-            assertThrows(NoSuchAccessorException.class, () ->
-                    beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "privateField"));
-        }
-
-        @Test
         void should_not_contain_java_get_class_getter() {
             assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("class");
-        }
-
-        @Test
-        void should_not_contain_static_field() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("staticField");
-        }
-
-        @Test
-        void should_not_contain_static_getter() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("staticGetter");
-        }
-
-        @Test
-        void should_override_fields_in_super_class() {
-            assertThat(BeanClass.create(SubBeanWithPubField.class).getPropertyValue(new SubBeanWithPubField(), "field")).isEqualTo(200);
         }
 
         @Test
@@ -219,49 +177,6 @@ class PropertyReaderTest {
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("field3").getAnnotation(Attr.class)).isNull();
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("field3").annotation(Attr.class)).isEmpty();
             AnnotationGetter.setAnnotationGetter(new AnnotationGetter());
-        }
-    }
-
-    @Nested
-    class GetGenericType {
-
-        @Test
-        void should_return_empty_when_not_specify_generic_type() {
-            assertThat(BeanClass.create(InvalidGenericType.class).getPropertyReader("list").getType().getTypeArguments(0))
-                    .isEmpty();
-        }
-
-        @Test
-        void should_support_get_generic_type_from_setter_field() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericField").getType();
-
-            assertThat(genericType.getType()).isEqualTo(List.class);
-
-            assertThat(genericType.getTypeArguments(0).get().getType()).isEqualTo(Long.class);
-        }
-
-        @Test
-        void should_support_get_generic_type_from_setter_method() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("genericMethod").getType();
-
-            assertThat(genericType.getType()).isEqualTo(List.class);
-
-            assertThat(genericType.getTypeArguments(0).get().getType()).isEqualTo(Long.class);
-        }
-
-        @Test
-        void should_support_nested_generic_parameter() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyReader("nestedGenericField")
-                    .getType().getTypeArguments(0).get().getTypeArguments(0).get().getType()).isEqualTo(Long.class);
-        }
-
-        @Test
-        void should_return_emtpy_when_type_is_not_generic() {
-            BeanClass<?> genericType = beanWithPubFieldBeanClass.getPropertyReader("notGenericField").getType();
-
-            assertThat(genericType.getType()).isEqualTo(List.class);
-
-            assertThat(genericType.getTypeArguments(ANY_INT)).isEmpty();
         }
     }
 }
