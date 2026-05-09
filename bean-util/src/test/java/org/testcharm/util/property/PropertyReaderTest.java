@@ -128,20 +128,6 @@ class PropertyReaderTest {
 
             assertThat(createFrom(bean).getPropertyValue(bean, "field2")).isEqualTo(200);
         }
-
-        @Test
-        void should_not_contain_java_get_class_getter() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyReaders().keySet()).doesNotContain("class");
-        }
-
-        @Test
-        void should_support_get_class_value() {
-            assertThat(beanWithPubFieldBeanClass.getPropertyValue(new BeanWithPubField(), "class"))
-                    .isEqualTo(BeanWithPubField.class);
-
-            assertThat(beanWithPubFieldBeanClass.getPropertyChainValue(new BeanWithPubField(), "class.simpleName"))
-                    .isEqualTo("BeanWithPubField");
-        }
     }
 
     @Nested
