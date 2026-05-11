@@ -30,10 +30,12 @@ public class ClassTypeInfo<T> implements TypeInfo<T> {
 
     private void collectGetterSetters(BeanClass<T> type) {
         for (Method method : named(type.getType()).getMethods()) {
-            if (MethodPropertyReader.isGetter(method))
-                addReaders(new MethodPropertyReader<>(type, method));
-            if (MethodPropertyWriter.isSetter(method))
-                addWriters(new MethodPropertyWriter<>(type, method));
+            if (isValidDeclaringClass(method.getDeclaringClass())) {
+                if (MethodPropertyReader.isGetter(method))
+                    addReaders(new MethodPropertyReader<>(type, method));
+                if (MethodPropertyWriter.isSetter(method))
+                    addWriters(new MethodPropertyWriter<>(type, method));
+            }
         }
     }
 
@@ -41,19 +43,25 @@ public class ClassTypeInfo<T> implements TypeInfo<T> {
         Map<String, Field> addedReaderFields = new HashMap<>();
         Map<String, Field> addedWriterFields = new HashMap<>();
         for (Field field : type.getType().getFields()) {
-            Field addedReaderField = addedReaderFields.get(field.getName());
-            if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
-                addReaders(new FieldPropertyReader<>(type, field));
-                addedReaderFields.put(field.getName(), field);
-            }
-            if (!Modifier.isFinal(field.getModifiers())) {
-                Field addedWriterField = addedWriterFields.get(field.getName());
-                if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
-                    addWriters(new FieldPropertyWriter<>(type, field));
-                    addedWriterFields.put(field.getName(), field);
+            if (isValidDeclaringClass(field.getDeclaringClass())) {
+                Field addedReaderField = addedReaderFields.get(field.getName());
+                if (addedReaderField == null || addedReaderField.getType().equals(type.getType())) {
+                    addReaders(new FieldPropertyReader<>(type, field));
+                    addedReaderFields.put(field.getName(), field);
+                }
+                if (!Modifier.isFinal(field.getModifiers())) {
+                    Field addedWriterField = addedWriterFields.get(field.getName());
+                    if (addedWriterField == null || addedWriterField.getType().equals(type.getType())) {
+                        addWriters(new FieldPropertyWriter<>(type, field));
+                        addedWriterFields.put(field.getName(), field);
+                    }
                 }
             }
         }
+    }
+
+    private boolean isValidDeclaringClass(Class<?> declaringClass) {
+        return !declaringClass.isAnonymousClass() && !declaringClass.isLocalClass();
     }
 
     private void addWriters(PropertyWriter<T> writer) {
