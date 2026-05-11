@@ -2,6 +2,7 @@ package org.testcharm.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +36,7 @@ public class BeanClass<T> {
     }
 
     private static boolean needCache(Class<?> type) {
-        return !type.isAnonymousClass() && !type.isLocalClass() && !type.isSynthetic();
+        return !type.isAnonymousClass() && !type.isLocalClass() && !type.isSynthetic() && !Proxy.isProxyClass(type);
     }
 
     public static <T> Optional<T> cast(Object value, Class<T> type) {

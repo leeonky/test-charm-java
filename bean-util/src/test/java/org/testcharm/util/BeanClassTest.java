@@ -11,6 +11,7 @@ import subtype.Base;
 import subtype.Sub1;
 import subtype.Sub2;
 
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -253,6 +254,27 @@ class BeanClassTest {
             @Test
             void should_use_super_class_when_instance_is_lambda() {
                 assertThat(named(((Supplier<Object>) () -> null).getClass())).isEqualTo(Supplier.class);
+            }
+        }
+
+        @Nested
+        class JdkProxy {
+
+            @Test
+            void should_return_same_class_when_class_is_named_class() {
+                assertThat(named(Supplier.class)).isEqualTo(Supplier.class);
+            }
+
+            @SuppressWarnings("unchecked")
+            @Test
+            void should_use_interface_when_instance_is_jdk_proxy() {
+                Supplier<Object> proxy = (Supplier<Object>) Proxy.newProxyInstance(
+                        getClass().getClassLoader(),
+                        new Class[]{Supplier.class},
+                        (obj, method, args) -> null
+                );
+
+                assertThat(named((Class<? extends Supplier<Object>>) proxy.getClass())).isEqualTo(Supplier.class);
             }
         }
     }

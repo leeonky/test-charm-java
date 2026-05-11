@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Proxy;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -113,6 +114,7 @@ public class Classes {
     @SuppressWarnings("unchecked")
     public static <T> Class<T> named(Class<T> type) {
         return type.getInterfaces().length > 0 && (type.isAnonymousClass() && type.getSuperclass() == Object.class
-                || type.isSynthetic()) ? (Class<T>) type.getInterfaces()[0] : type;
+                || type.isSynthetic()
+                || Proxy.isProxyClass(type)) ? (Class<T>) type.getInterfaces()[0] : type;
     }
 }

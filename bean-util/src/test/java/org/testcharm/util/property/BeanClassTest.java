@@ -3533,6 +3533,121 @@ class BeanClassTest {
         }
     }
 
+    @Nested
+    class JdkProxy {
+
+        @Nested
+        class CacheInstance {
+
+            @Test
+            void should_cache_instance_by_type() {
+                givenClass(String.join("\n",
+                        "public interface IClazz {",
+                        "    int getField();",
+                        "    void setField(int f);",
+                        "}"
+                ));
+                Object instance = valueOf(String.join("\n",
+                        "java.lang.reflect.Proxy.newProxyInstance(",
+                        "    IClazz.class.getClassLoader(),",
+                        "    new Class[]{IClazz.class},",
+                        "    new java.lang.reflect.InvocationHandler() {",
+                        "        private int field = 100;",
+                        "        public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) {",
+                        "            if (method.getName().equals(\"getField\")) return field;",
+                        "            if (method.getName().equals(\"setField\")) { field = (Integer) args[0]; return null; }",
+                        "            if (method.getName().equals(\"toString\")) return \"proxy\";",
+                        "            if (method.getName().equals(\"hashCode\")) return 1;",
+                        "            if (method.getName().equals(\"equals\")) return proxy == args[0];",
+                        "            throw new UnsupportedOperationException(method.toString());",
+                        "        }",
+                        "    }",
+                        ")"));
+                assertTrue(BeanClass.createFrom(instance) != BeanClass.createFrom(instance));
+            }
+        }
+
+        @Nested
+        class PropertyAndAccessor {
+
+            @Nested
+            class PropertyInInterface {
+                private Object object;
+                private BeanClass<Object> beanClass;
+                private BeanClass<Object> baseBeanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public interface IClazz {",
+                            "    int getField();",
+                            "    void setField(int f);",
+                            "}"
+                    ));
+                    object = valueOf(String.join("\n",
+                            "java.lang.reflect.Proxy.newProxyInstance(",
+                            "    IClazz.class.getClassLoader(),",
+                            "    new Class[]{IClazz.class},",
+                            "    new java.lang.reflect.InvocationHandler() {",
+                            "        private int field = 100;",
+                            "        public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) {",
+                            "            if (method.getName().equals(\"getField\")) return field;",
+                            "            if (method.getName().equals(\"setField\")) { field = (Integer) args[0]; return null; }",
+                            "            if (method.getName().equals(\"toString\")) return \"proxy\";",
+                            "            if (method.getName().equals(\"hashCode\")) return 1;",
+                            "            if (method.getName().equals(\"equals\")) return proxy == args[0];",
+                            "            throw new UnsupportedOperationException(method.toString());",
+                            "        }",
+                            "    }",
+                            ")"));
+                    beanClass = BeanClass.createFrom(object);
+                    baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
+                }
+
+                @Test
+                void included_in_type_properties() {
+                    Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                    assertThat(properties.keySet()).containsExactly("field");
+
+                    Property<?> property = properties.get("field");
+                    assertEquals("field", property.getName());
+                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, property.getWriterType().getType());
+                    assertEquals(int.class, property.getReaderType().getType());
+                }
+
+                @Test
+                void get_set_value_by_property() {
+                    Property<Object> property = beanClass.getProperty("field");
+
+                    assertEquals(100, (int) property.getValue(object));
+
+                    property.setValue(object, 1000);
+                    assertEquals(1000, (int) property.getValue(object));
+                }
+
+                @Test
+                void get_set_value_directly() {
+                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                    beanClass.setPropertyValue(object, "field", 1000);
+
+                    assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+                }
+
+                @Test
+                void get_set_value_via_super_bean_class() {
+                    assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                    baseBeanClass.setPropertyValue(object, "field", 1000);
+
+                    assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+                }
+            }
+        }
+    }
+
     private BeanClass<Object> createBeanClass(String name) {
         return BeanClass.create(typeOf(name));
     }
