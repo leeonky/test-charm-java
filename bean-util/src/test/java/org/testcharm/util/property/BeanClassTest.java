@@ -29,9 +29,9 @@ class BeanClassTest {
             @Test
             void should_cache_instance_by_type() {
                 givenClass(String.join("\n",
-                        "public class Pojo {}"
+                        "public class Clazz {}"
                 ));
-                Class<Object> type = typeOf("Pojo");
+                Class<Object> type = typeOf("Clazz");
                 assertTrue(BeanClass.create(type) == BeanClass.create(type));
             }
         }
@@ -53,11 +53,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    public int field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -104,11 +104,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    public static int field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -140,11 +140,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    public final int field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -188,11 +188,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    public static final int field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -221,11 +221,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -254,11 +254,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    protected int field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -287,11 +287,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    int field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -329,10 +329,10 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -384,11 +384,11 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "    public long field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -455,10 +455,10 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -496,11 +496,11 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "    public static long field = 100;",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -551,11 +551,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    public java.util.List<String> field= new java.util.ArrayList();",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -590,11 +590,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    public java.util.List<java.util.List<String>> field= new java.util.ArrayList();",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -633,11 +633,11 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    public java.util.List field= new java.util.ArrayList();",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -675,11 +675,11 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int field = 100;",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -707,12 +707,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    public int getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -754,12 +754,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private static int field = 100;",
                                     "    public static int getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -788,12 +788,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    private int getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -822,12 +822,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    protected int getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -856,12 +856,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    int getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -900,10 +900,10 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -949,12 +949,12 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "    @Override",
                                     "    public int getField() { return 100; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1013,10 +1013,10 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1051,12 +1051,12 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "    private static int field = 100;",
                                     "    public static int getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1097,12 +1097,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private java.util.List<String> field = new java.util.ArrayList();",
                                     "    public java.util.List<String> getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -1135,12 +1135,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private java.util.List<java.util.List<String>> field = new java.util.ArrayList();",
                                     "    public java.util.List<java.util.List<String>> getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -1176,12 +1176,12 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private java.util.List field = new java.util.ArrayList();",
                                     "    public java.util.List getField() { return field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -1217,12 +1217,12 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int value = 100;",
                                 "    public int getField() { return value; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -1262,13 +1262,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    public int getValue() { return field; }",
                                     "    public void setField(int field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1312,13 +1312,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private static int field = 100;",
                                     "    public static int getValue() { return field; }",
-                                    "    public static void setField(int field) { Pojo.field = field; }",
+                                    "    public static void setField(int field) { Clazz.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1349,13 +1349,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    public int getValue() { return field; }",
                                     "    private void setField(int field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1384,13 +1384,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    public int getValue() { return field; }",
                                     "    protected void setField(int field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1419,13 +1419,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private int field = 100;",
                                     "    public int getValue() { return field; }",
                                     "    void setField(int field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1465,10 +1465,10 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1518,7 +1518,7 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "    private int field = 100;",
                                     "    @Override",
                                     "    public int getValue() { return field; }",
@@ -1526,7 +1526,7 @@ class BeanClassTest {
                                     "    public void setField(int field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1592,10 +1592,10 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1631,12 +1631,12 @@ class BeanClassTest {
                                     "}"
                             ));
                             givenClass(String.join("\n",
-                                    "public class Pojo extends Base{",
+                                    "public class Clazz extends Base{",
                                     "    public static int fieldValue;",
                                     "    public static void setField(int i) { fieldValue=i; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @Test
@@ -1682,13 +1682,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private java.util.List<String> field = new java.util.ArrayList();",
                                     "    public java.util.List<String> getValue() { return field; }",
                                     "    public void setField(java.util.List<String> field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -1732,13 +1732,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private java.util.List<java.util.List<String>> field = new java.util.ArrayList();",
                                     "    public java.util.List<java.util.List<String>> getValue() { return field; }",
                                     "    public void setField(java.util.List<java.util.List<String>> field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -1787,13 +1787,13 @@ class BeanClassTest {
                         @BeforeEach
                         void prepareClass() {
                             givenClass(String.join("\n",
-                                    "public class Pojo {",
+                                    "public class Clazz {",
                                     "    private java.util.List field = new java.util.ArrayList();",
                                     "    public java.util.List getValue() { return field; }",
                                     "    public void setField(java.util.List field) { this.field = field; }",
                                     "}"
                             ));
-                            beanClass = createBeanClass("Pojo");
+                            beanClass = createBeanClass("Clazz");
                         }
 
                         @SneakyThrows
@@ -1839,13 +1839,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int value = 100;",
                                 "    public void setField(int f) { value = f; }",
                                 "    public int getValue() { return value; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -1878,13 +1878,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int field = 100;",
                                 "    public void setField(int i) { this.field = i; }",
                                 "    public int getField() { return field; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -1908,7 +1908,7 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int value = 0;",
                                 "    public int valueForGetterSetter = 100;",
 
@@ -1918,7 +1918,7 @@ class BeanClassTest {
                                 "    public int getValueField() { return value; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -1942,14 +1942,14 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int value = 0;",
                                 "    public int valueForGetterSetter = 100;",
                                 "    public int getValue() { return valueForGetterSetter; }",
                                 "    public int getValueField() { return value; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -1977,14 +1977,14 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int value = 0;",
                                 "    public int valueForGetterSetter = 100;",
                                 "    public void setValue(int i) { valueForGetterSetter = i; }",
                                 "    public int getValueField() { return value; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2016,9 +2016,9 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {}"
+                                "public class Clazz {}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2049,13 +2049,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int field;",
                                 "    public int getField() { return field; }",
-                                "    public Pojo setField(int i) { this.field = i; return this; }",
+                                "    public Clazz setField(int i) { this.field = i; return this; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2090,7 +2090,7 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private boolean valid = true;",
                                 "    public boolean isValid() { return valid; }",
                                 "    public void setValid(boolean f) { this.valid=f; }",
@@ -2098,7 +2098,7 @@ class BeanClassTest {
                                 "    public boolean getInValid() { return inValid; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2141,7 +2141,7 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private Boolean valid = true;",
                                 "    public Boolean getValid() { return valid; }",
                                 "    public void setValid(Boolean f) { this.valid=f; }",
@@ -2149,7 +2149,7 @@ class BeanClassTest {
                                 "    public Boolean isInValid() { return inValid; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2192,13 +2192,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int i;",
                                 "    public int getINT() { return i; }",
                                 "    public void setINT(int i) { this.i = i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2236,13 +2236,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int i;",
                                 "    public int getI() { return i; }",
                                 "    public void setI(int i) { this.i = i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2280,13 +2280,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int i;",
                                 "    public int geti() { return i; }",
                                 "    public void seti(int i) { this.i = i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2323,13 +2323,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int i;",
                                 "    public int getiValue() { return i; }",
                                 "    public void setiValue(int i) { this.i = i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2366,12 +2366,12 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int get() { return 0; }",
                                 "    public void set(int i) { }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2402,13 +2402,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private int i;",
                                 "    public int get整数() { return i; }",
                                 "    public void set整数(int i) { this.i = i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2445,11 +2445,11 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int getValue(int i) { return 0; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2479,11 +2479,11 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public void setValue(int i, int j) { }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2512,14 +2512,14 @@ class BeanClassTest {
                     @Test
                     void included_in_type_properties_but_depends_on_class_get_methods() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    private Object value;",
                                 "    public void setValue(String s) {this.value=s;}",
                                 "    public void setValue(int i) {this.value=i;}",
                                 "}"
                         ));
 
-                        BeanClass<Object> beanClass = createBeanClass("Pojo");
+                        BeanClass<Object> beanClass = createBeanClass("Clazz");
 
                         assertNotNull(beanClass.getProperties().get("value"));
                     }
@@ -2533,11 +2533,11 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public void getValue() {}",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2567,13 +2567,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int i;",
                                 "    public int getValue(int i) { return 0; }",
                                 "    public void setValue(int i) { this.i=i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2614,13 +2614,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int i=100;",
                                 "    public int getValue() { return i; }",
                                 "    public void setValue(int i, int j) { this.i=i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2657,13 +2657,13 @@ class BeanClassTest {
                     @BeforeEach
                     void prepareClass() {
                         givenClass(String.join("\n",
-                                "public class Pojo {",
+                                "public class Clazz {",
                                 "    public int i=100;",
                                 "    public String getValue() { return String.valueOf(i); }",
                                 "    public void setValue(int i) { this.i=i; }",
                                 "}"
                         ));
-                        beanClass = createBeanClass("Pojo");
+                        beanClass = createBeanClass("Clazz");
                     }
 
                     @Test
@@ -2705,14 +2705,14 @@ class BeanClassTest {
             @Test
             void should_cache_instance_by_type() {
                 givenClass(String.join("\n",
-                        "public class Pojo {",
+                        "public class Clazz {",
                         "    public Inner inner = new Inner();",
                         "    public class Inner {",
                         "        public int field = 100;",
                         "    }",
                         "}"
                 ));
-                Class<Object> type = typeOf("Pojo.Inner");
+                Class<Object> type = typeOf("Clazz.Inner");
                 assertTrue(BeanClass.create(type) == BeanClass.create(type));
             }
         }
@@ -2730,14 +2730,14 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    public Inner inner = new Inner();",
                             "    public class Inner {",
                             "        public int field = 100;",
                             "    }",
                             "}"
                     ));
-                    beanClass = createBeanClass("Pojo.Inner");
+                    beanClass = createBeanClass("Clazz.Inner");
                     declaringBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getDeclaringClass());
                 }
 
@@ -2787,7 +2787,7 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    public Inner inner = new Inner();",
                             "    public class Inner {",
                             "        private int field = 100;",
@@ -2796,7 +2796,7 @@ class BeanClassTest {
                             "    }",
                             "}"
                     ));
-                    beanClass = createBeanClass("Pojo.Inner");
+                    beanClass = createBeanClass("Clazz.Inner");
                     declaringBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getDeclaringClass());
                 }
 
@@ -2847,12 +2847,12 @@ class BeanClassTest {
             @Test
             void should_cache_instance_by_type() {
                 givenClass(String.join("\n",
-                        "public class Pojo {",
+                        "public class Clazz {",
                         "    public int field = 100;",
                         "}"
                 ));
-                Object instance = valueOf("new Pojo() { }");
-                assertTrue(BeanClass.createFrom(instance) == BeanClass.createFrom(instance));
+                Object instance = valueOf("new Clazz() { }");
+                assertTrue(BeanClass.createFrom(instance) != BeanClass.createFrom(instance));
             }
         }
 
@@ -2868,11 +2868,11 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    public int field = 100;",
                             "}"
                     ));
-                    object = valueOf("new Pojo() { }");
+                    object = valueOf("new Clazz() { }");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                 }
@@ -2928,11 +2928,11 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public abstract class AbstractPojo {",
+                            "public abstract class AbstractClazz {",
                             "    public int field = 100;",
                             "}"
                     ));
-                    object = valueOf("new AbstractPojo() { }");
+                    object = valueOf("new AbstractClazz() { }");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                 }
@@ -2987,9 +2987,9 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class AbstractPojo {}"
+                            "public class AbstractClazz {}"
                     ));
-                    object = valueOf("new AbstractPojo() { public int field = 100;}");
+                    object = valueOf("new AbstractClazz() { public int field = 100;}");
                     beanClass = BeanClass.createFrom(object);
                 }
 
@@ -3020,13 +3020,13 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    private int field = 100;",
                             "    public int getField() { return field; }",
                             "    public void setField(int f) { this.field = f; }",
                             "}"
                     ));
-                    object = valueOf("new Pojo() { }");
+                    object = valueOf("new Clazz() { }");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                 }
@@ -3082,13 +3082,13 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public abstract class Pojo {",
+                            "public abstract class Clazz {",
                             "    private int field = 100;",
                             "    public int getField() { return field; }",
                             "    public void setField(int f) { this.field = f; }",
                             "}"
                     ));
-                    object = valueOf("new Pojo() { }");
+                    object = valueOf("new Clazz() { }");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                 }
@@ -3144,11 +3144,11 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public interface IPojo {",
+                            "public interface IClazz {",
                             "    default int getField() { return 100; }",
                             "}"
                     ));
-                    object = valueOf("new IPojo() { }");
+                    object = valueOf("new IClazz() { }");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
                 }
@@ -3191,9 +3191,9 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {}"
+                            "public class Clazz {}"
                     ));
-                    object = valueOf(String.join("\n", "new Pojo() { ",
+                    object = valueOf(String.join("\n", "new Clazz() { ",
                             "    private int field = 100;",
                             "    public int getField() { return field; }",
                             "    public void setField(int f) { this.field = f; }",
@@ -3225,6 +3225,25 @@ class BeanClassTest {
     class LocalClass {
 
         @Nested
+        class CacheInstance {
+
+            @Test
+            void should_cache_instance_by_type() {
+                givenClass(String.join("\n",
+                        "public class Clazz {",
+                        "    public int field = 100;",
+                        "    public static Object getLocalClassInstance() {",
+                        "        class Local extends Clazz {};",
+                        "        return new Local();",
+                        "    }",
+                        "}"
+                ));
+                Object instance = valueOf("Clazz.getLocalClassInstance()");
+                assertTrue(BeanClass.createFrom(instance) != BeanClass.createFrom(instance));
+            }
+        }
+
+        @Nested
         class PropertyAndAccessor {
 
             @Nested
@@ -3236,16 +3255,16 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    public int field = 100;",
                             "    public static Object getLocalClassInstance() {",
-                            "        class Local extends Pojo {};",
+                            "        class Local extends Clazz {};",
                             "        return new Local();",
                             "    }",
                             "}"
                     ));
 
-                    object = valueOf("Pojo.getLocalClassInstance()");
+                    object = valueOf("Clazz.getLocalClassInstance()");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                 }
@@ -3301,18 +3320,18 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    private int field = 100;",
                             "    public int getField() { return field; }",
                             "    public void setField(int f) { this.field = f; }",
                             "    public static Object getLocalClassInstance() {",
-                            "        class Local extends Pojo {};",
+                            "        class Local extends Clazz {};",
                             "        return new Local();",
                             "    }",
                             "}"
                     ));
 
-                    object = valueOf("Pojo.getLocalClassInstance()");
+                    object = valueOf("Clazz.getLocalClassInstance()");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
                 }
@@ -3367,7 +3386,7 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    public static Object getLocalClassInstance() {",
                             "        class Local {" +
                                     "    public int field = 100;",
@@ -3376,7 +3395,7 @@ class BeanClassTest {
                             "    }",
                             "}"
                     ));
-                    object = valueOf("Pojo.getLocalClassInstance()");
+                    object = valueOf("Clazz.getLocalClassInstance()");
                     beanClass = BeanClass.createFrom(object);
                 }
 
@@ -3406,7 +3425,7 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public class Pojo {",
+                            "public class Clazz {",
                             "    public static Object getLocalClassInstance() {",
                             "        class Local {" +
                                     "    private int field = 100;",
@@ -3417,7 +3436,7 @@ class BeanClassTest {
                             "    }",
                             "}"
                     ));
-                    object = valueOf("Pojo.getLocalClassInstance()");
+                    object = valueOf("Clazz.getLocalClassInstance()");
                     beanClass = BeanClass.createFrom(object);
                 }
 
@@ -3445,61 +3464,20 @@ class BeanClassTest {
     class Lambda {
 
         @Nested
-        class PropertyAndAccessor {
+        class CacheInstance {
 
-            @Nested
-            class PropertyInInterface {
-                private Object object;
-                private BeanClass<Object> beanClass;
-                private BeanClass<Object> baseBeanClass;
-
-                @BeforeEach
-                void prepareClass() {
-                    givenClass(String.join("\n",
-                            "public interface IPojo {",
-                            "    default int getField() { return 100; }",
-                            "    void run();",
-                            "}"
-                    ));
-                    object = valueOf("(IPojo)() -> {}");
-                    beanClass = BeanClass.createFrom(object);
-                    baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
-                }
-
-                @Test
-                void included_in_type_properties() {
-                    Map<String, ? extends Property<?>> properties = beanClass.getProperties();
-
-                    assertThat(properties.keySet()).containsExactly("field");
-
-                    Property<?> property = properties.get("field");
-                    assertEquals("field", property.getName());
-                    assertEquals(beanClass, property.getBeanType());
-                    assertEquals(int.class, property.getReaderType().getType());
-                }
-
-                @Test
-                void get_set_value_by_property() {
-                    Property<Object> property = beanClass.getProperty("field");
-
-                    assertEquals(100, (int) property.getValue(object));
-                }
-
-                @Test
-                void get_set_value_directly() {
-                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
-                }
-
-                @Test
-                void get_set_value_via_super_bean_class() {
-                    assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
-                }
+            @Test
+            void should_cache_instance_by_type() {
+                givenClass(String.join("\n",
+                        "public interface IClazz {",
+                        "    default int getField() { return 100; }",
+                        "    void run();",
+                        "}"
+                ));
+                Object instance = valueOf("(IClazz)() -> {}");
+                assertTrue(BeanClass.createFrom(instance) != BeanClass.createFrom(instance));
             }
         }
-    }
-
-    @Nested
-    class MethodReference {
 
         @Nested
         class PropertyAndAccessor {
@@ -3513,12 +3491,12 @@ class BeanClassTest {
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
-                            "public interface IPojo {",
+                            "public interface IClazz {",
                             "    default int getField() { return 100; }",
                             "    void run();",
                             "}"
                     ));
-                    object = valueOf("(IPojo)() -> {}");
+                    object = valueOf("(IClazz)() -> {}");
                     beanClass = BeanClass.createFrom(object);
                     baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
                 }

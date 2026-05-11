@@ -29,7 +29,13 @@ public class BeanClass<T> {
 
     @SuppressWarnings("unchecked")
     public static <T> BeanClass<T> create(Class<T> type) {
-        return (BeanClass<T>) instanceCache.computeIfAbsent(type, BeanClass::new);
+        if (needCache(type))
+            return (BeanClass<T>) instanceCache.computeIfAbsent(type, BeanClass::new);
+        return new BeanClass<>(type);
+    }
+
+    private static boolean needCache(Class<?> type) {
+        return !type.isAnonymousClass() && !type.isLocalClass() && !type.isSynthetic();
     }
 
     public static <T> Optional<T> cast(Object value, Class<T> type) {
