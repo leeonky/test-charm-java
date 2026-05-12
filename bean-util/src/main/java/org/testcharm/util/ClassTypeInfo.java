@@ -1,12 +1,10 @@
 package org.testcharm.util;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Proxy;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.testcharm.util.Classes.named;
 
@@ -29,14 +27,20 @@ public class ClassTypeInfo<T> implements TypeInfo<T> {
     }
 
     private void collectGetterSetters(BeanClass<T> type) {
-        for (Method method : named(type.getType()).getMethods()) {
-            if (isValidDeclaringClass(method.getDeclaringClass())) {
-                if (MethodPropertyReader.isGetter(method))
-                    addReaders(new MethodPropertyReader<>(type, method));
-                if (MethodPropertyWriter.isSetter(method))
-                    addWriters(new MethodPropertyWriter<>(type, method));
-            }
-        }
+        getterSetterOwnerTypes(type.getType()).flatMap(t -> Arrays.stream(t.getMethods()))
+                .filter(method -> isValidDeclaringClass(method.getDeclaringClass()))
+                .forEach(method -> {
+                    if (MethodPropertyReader.isGetter(method))
+                        addReaders(new MethodPropertyReader<>(type, method));
+                    if (MethodPropertyWriter.isSetter(method))
+                        addWriters(new MethodPropertyWriter<>(type, method));
+                });
+    }
+
+    private Stream<Class<?>> getterSetterOwnerTypes(Class<?> type) {
+        if (Proxy.isProxyClass(type))
+            return Arrays.stream(type.getInterfaces());
+        return Stream.of(named(type));
     }
 
     private void collectFields(BeanClass<T> type) {

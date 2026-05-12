@@ -3218,6 +3218,7 @@ class BeanClassTest {
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 0));
                 }
             }
+
         }
     }
 
@@ -3643,6 +3644,149 @@ class BeanClassTest {
                     baseBeanClass.setPropertyValue(object, "field", 1000);
 
                     assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+                }
+            }
+
+            @Nested
+            class PropertyAcrossInterfaces {
+                private Object object;
+                private BeanClass<Object> beanClass;
+                private BeanClass<Object> readerBeanClass;
+                private BeanClass<Object> writerBeanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public interface IReader {",
+                            "    int getField();",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public interface IWriter {",
+                            "    void setField(int f);",
+                            "}"
+                    ));
+                    object = valueOf(String.join("\n",
+                            "java.lang.reflect.Proxy.newProxyInstance(",
+                            "    IReader.class.getClassLoader(),",
+                            "    new Class[]{IReader.class, IWriter.class},",
+                            "    new java.lang.reflect.InvocationHandler() {",
+                            "        private int field = 100;",
+                            "        public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) {",
+                            "            if (method.getName().equals(\"getField\")) return field;",
+                            "            if (method.getName().equals(\"setField\")) { field = (Integer) args[0]; return null; }",
+                            "            if (method.getName().equals(\"toString\")) return \"proxy\";",
+                            "            if (method.getName().equals(\"hashCode\")) return 1;",
+                            "            if (method.getName().equals(\"equals\")) return proxy == args[0];",
+                            "            throw new UnsupportedOperationException(method.toString());",
+                            "        }",
+                            "    }",
+                            ")"));
+                    beanClass = BeanClass.createFrom(object);
+                    readerBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
+                    writerBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[1]);
+                }
+
+                @Test
+                void included_in_type_properties() {
+                    Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                    assertThat(properties.keySet()).containsExactly("field");
+
+                    Property<?> property = properties.get("field");
+                    assertEquals("field", property.getName());
+                    assertEquals(beanClass, property.getBeanType());
+                    assertEquals(int.class, property.getWriterType().getType());
+                    assertEquals(int.class, property.getReaderType().getType());
+                }
+
+                @Test
+                void get_set_value_by_property() {
+                    Property<Object> property = beanClass.getProperty("field");
+
+                    assertEquals(100, (int) property.getValue(object));
+
+                    property.setValue(object, 1000);
+                    assertEquals(1000, (int) property.getValue(object));
+                }
+
+                @Test
+                void get_set_value_directly() {
+                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                    beanClass.setPropertyValue(object, "field", 1000);
+
+                    assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+                }
+
+                @Test
+                void support_getter_and_setter_via_each_interface_bean_class() {
+                    assertEquals(100, (int) readerBeanClass.getPropertyValue(object, "field"));
+
+                    writerBeanClass.setPropertyValue(object, "field", 1000);
+
+                    assertEquals(1000, (int) readerBeanClass.getPropertyValue(object, "field"));
+                }
+            }
+
+            @Nested
+            class PropertiesInDifferentInterfaces {
+                private Object object;
+                private BeanClass<Object> beanClass;
+
+                @BeforeEach
+                void prepareClass() {
+                    givenClass(String.join("\n",
+                            "public interface IField {",
+                            "    int getField();",
+                            "    void setField(int f);",
+                            "}"
+                    ));
+                    givenClass(String.join("\n",
+                            "public interface ICount {",
+                            "    int getCount();",
+                            "    void setCount(int c);",
+                            "}"
+                    ));
+                    object = valueOf(String.join("\n",
+                            "java.lang.reflect.Proxy.newProxyInstance(",
+                            "    IField.class.getClassLoader(),",
+                            "    new Class[]{IField.class, ICount.class},",
+                            "    new java.lang.reflect.InvocationHandler() {",
+                            "        private int field = 100;",
+                            "        private int count = 10;",
+                            "        public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) {",
+                            "            if (method.getName().equals(\"getField\")) return field;",
+                            "            if (method.getName().equals(\"setField\")) { field = (Integer) args[0]; return null; }",
+                            "            if (method.getName().equals(\"getCount\")) return count;",
+                            "            if (method.getName().equals(\"setCount\")) { count = (Integer) args[0]; return null; }",
+                            "            if (method.getName().equals(\"toString\")) return \"proxy\";",
+                            "            if (method.getName().equals(\"hashCode\")) return 1;",
+                            "            if (method.getName().equals(\"equals\")) return proxy == args[0];",
+                            "            throw new UnsupportedOperationException(method.toString());",
+                            "        }",
+                            "    }",
+                            ")"));
+                    beanClass = BeanClass.createFrom(object);
+                }
+
+                @Test
+                void included_all_interface_properties() {
+                    Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                    assertThat(properties.keySet()).containsExactly("field", "count");
+                }
+
+                @Test
+                void get_set_values_directly() {
+                    assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(10, (int) beanClass.getPropertyValue(object, "count"));
+
+                    beanClass.setPropertyValue(object, "field", 1000);
+                    beanClass.setPropertyValue(object, "count", 20);
+
+                    assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+                    assertEquals(20, (int) beanClass.getPropertyValue(object, "count"));
                 }
             }
         }
