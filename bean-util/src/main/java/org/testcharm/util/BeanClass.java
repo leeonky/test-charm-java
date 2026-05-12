@@ -6,6 +6,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
@@ -19,8 +20,13 @@ public class BeanClass<T> {
 
     @SuppressWarnings("unchecked")
     protected BeanClass(Class<T> type) {
+        this(type, b -> TypeInfo.create(b, PropertyProxyFactory.NO_PROXY));
+    }
+
+    @SuppressWarnings("unchecked")
+    protected BeanClass(Class<T> type, Function<BeanClass<T>, TypeInfo<T>> typeInfoFactory) {
         this.type = Objects.requireNonNull(type);
-        typeInfo = TypeInfo.create(this, PropertyProxyFactory.NO_PROXY);
+        typeInfo = typeInfoFactory.apply(this);
     }
 
     public BeanClass(Class<T> type, PropertyProxyFactory<T> proxyFactory) {
@@ -199,7 +205,7 @@ public class BeanClass<T> {
 
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj.getClass().equals(BeanClass.class) && Objects.equals(((BeanClass<?>) obj).getType(), type);
+        return obj instanceof BeanClass && Objects.equals(((BeanClass<?>) obj).getType(), type);
     }
 
     @SuppressWarnings("unchecked")

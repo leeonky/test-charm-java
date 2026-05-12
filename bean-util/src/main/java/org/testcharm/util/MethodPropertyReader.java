@@ -35,11 +35,15 @@ class MethodPropertyReader<T> extends MethodPropertyAccessor<T> implements Prope
     @Override
     public String getName() {
         if (name == null) {
-            String methodName = getMethod().getName();
-            return name = propertyName(getMethod().getReturnType().equals(boolean.class) ?
-                    methodName.substring(BOOLEAN_GETTER_PREFIX_LENGTH) : methodName.substring(GETTER_PREFIX_LENGTH));
+            return name = passReaderName(getMethod());
         }
         return name;
+    }
+
+    static String passReaderName(Method method) {
+        String methodName = method.getName();
+        return propertyName(method.getReturnType().equals(boolean.class) ?
+                methodName.substring(BOOLEAN_GETTER_PREFIX_LENGTH) : methodName.substring(GETTER_PREFIX_LENGTH));
     }
 
     static String propertyName(String name) {
