@@ -60,7 +60,7 @@ class BeanClassProxyTest {
             }
 
             @Test
-            void auto_populate_writer() {
+            void auto_populate_writer_via_getter() {
                 Map<String, Property<Object>> properties = beanClass.getProperties();
 
                 assertThat(properties.keySet()).containsExactly("field");
@@ -114,6 +114,76 @@ class BeanClassProxyTest {
                 assertEquals(System.identityHashCode(object), object.hashCode());
             }
         }
+
+        @Nested
+        class IgnoreDefaultGetterSetterAction {
+
+            private BeanClass<Object> beanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public interface IClazz {",
+                        "    default int getField() {return 999;}",
+                        "    default void setField(String i) { throw new RuntimeException();}",
+                        "}"
+                ));
+                beanClass = createBeanClass("IClazz");
+            }
+
+            @Test
+            void auto_populate_writer_via_getter() {
+                Map<String, Property<Object>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+                assertEquals(int.class, property.getReaderType().getType());
+            }
+
+            @Test
+            void get_default_primitive_value_before_set() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("field");
+
+                assertEquals(0, (int) property.getValue(object));
+            }
+
+            @Test
+            void set_get_value() {
+                Object object = beanClass.newInstance();
+                Property<Object> property = beanClass.getProperty("field");
+
+                property.setValue(object, 100);
+                assertEquals(100, (int) property.getValue(object));
+
+                beanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+        }
+
+        @Nested
+        class AnnotationFromSetter {
+
+            @Test
+            void get_annotation_from_setter() {
+                givenClass(String.join("\n",
+                        "public interface IClazz {",
+                        "    public int getField();",
+                        "    @Deprecated",
+                        "    public void setField(int i);",
+                        "}"
+                ));
+                BeanClass<Object> beanClass = createBeanClass("IClazz");
+
+                assertThat(beanClass.getPropertyWriter("field").getAnnotation(Deprecated.class))
+                        .isInstanceOf(Deprecated.class);
+            }
+        }
     }
 
     private BeanClass<Object> createBeanClass(String name) {
@@ -125,16 +195,7 @@ class BeanClassProxyTest {
         return (Class<Object>) executor().main().returnExpression(expression + ".class").evaluate();
     }
 
-    @SuppressWarnings("unchecked")
-    private Object valueOf(String expression) {
-        return executor().main().returnExpression(expression).evaluate();
-    }
-
     private void givenClass(String code) {
         executor().addClass(code);
     }
 }
-
-//TODO property setter
-//TODO getGenericType
-//TODO annotation

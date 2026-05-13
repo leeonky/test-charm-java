@@ -6,10 +6,12 @@ import java.util.function.BiConsumer;
 
 public class ProxyPropertyWriter<T> extends AbstractPropertyAccessor<T> implements PropertyWriter<T> {
     private final PropertyReader<T> getter;
+    private final PropertyWriter<T> originalSetter;
 
-    public ProxyPropertyWriter(BeanClass<T> type, PropertyReader<T> getter) {
+    public ProxyPropertyWriter(BeanClass<T> type, PropertyReader<T> getter, PropertyWriter<T> originalSetter) {
         super(type);
         this.getter = getter;
+        this.originalSetter = originalSetter;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class ProxyPropertyWriter<T> extends AbstractPropertyAccessor<T> implemen
 
     @Override
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-        return null;
+        return originalSetter.getAnnotation(annotationClass);
     }
 
     @Override
