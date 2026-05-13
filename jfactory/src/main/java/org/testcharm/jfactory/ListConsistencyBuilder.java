@@ -3,7 +3,7 @@ package org.testcharm.jfactory;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.testcharm.util.BeanClass.create;
+import static org.testcharm.jfactory.JFactory.beanClass;
 
 public class ListConsistencyBuilder<T, C extends Coordinate> {
     protected final Consistency<T, C> main;
@@ -31,7 +31,7 @@ public class ListConsistencyBuilder<T, C extends Coordinate> {
 
         public D1<T, C> normalize(Function<Coordinate.D1, C> aligner,
                                   Function<C, Coordinate.D1> inverseAligner) {
-            listConsistency.normalize(c -> aligner.apply(c.convertTo(create(Coordinate.D1.class))),
+            listConsistency.normalize(c -> aligner.apply(c.convertTo(beanClass(Coordinate.D1.class))),
                     inverseAligner::apply);
             return this;
 
@@ -45,7 +45,7 @@ public class ListConsistencyBuilder<T, C extends Coordinate> {
 
         public D2<T, C> normalize(Function<Coordinate.D2, C> aligner,
                                   Function<C, Coordinate.D2> inverseAligner) {
-            listConsistency.normalize(c -> aligner.apply(c.convertTo(create(Coordinate.D2.class))),
+            listConsistency.normalize(c -> aligner.apply(c.convertTo(beanClass(Coordinate.D2.class))),
                     inverseAligner::apply);
             return this;
         }

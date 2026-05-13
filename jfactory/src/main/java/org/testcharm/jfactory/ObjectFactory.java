@@ -10,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.testcharm.jfactory.JFactory.beanClass;
+
 class ObjectFactory<T> implements Factory<T> {
     private final FactorySet factorySet;
     private final BeanClass<T> type;
@@ -148,7 +150,7 @@ class ObjectFactory<T> implements Factory<T> {
 
     protected Supplier<Transformer> fallback(String name, Supplier<Transformer> fallback) {
         return () -> getType().getType().getSuperclass() == null ? fallback.get()
-                : factorySet.queryObjectFactory(BeanClass.create(getType().getType().getSuperclass()))
+                : factorySet.queryObjectFactory(beanClass(getType().getType().getSuperclass()))
                 .queryTransformer(name, fallback);
     }
 }

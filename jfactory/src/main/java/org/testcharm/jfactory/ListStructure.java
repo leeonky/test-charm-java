@@ -1,8 +1,8 @@
 package org.testcharm.jfactory;
 
-import org.testcharm.util.BeanClass;
-
 import java.util.function.Function;
+
+import static org.testcharm.jfactory.JFactory.beanClass;
 
 public interface ListStructure<T, C extends Coordinate> {
 
@@ -22,7 +22,7 @@ public interface ListStructure<T, C extends Coordinate> {
 
         public D1<T, C> normalize(Function<Coordinate.D1, C> aligner,
                                   Function<C, Coordinate.D1> inverseAligner) {
-            delegate.normalize(c -> aligner.apply(c.convertTo(BeanClass.create(Coordinate.D1.class))),
+            delegate.normalize(c -> aligner.apply(c.convertTo(beanClass(Coordinate.D1.class))),
                     inverseAligner::apply);
             return this;
         }
@@ -36,7 +36,7 @@ public interface ListStructure<T, C extends Coordinate> {
 
         public D2<T, C> normalize(Function<Coordinate.D2, C> aligner,
                                   Function<C, Coordinate.D2> inverseAligner) {
-            delegate.normalize(c -> aligner.apply(c.convertTo(BeanClass.create(Coordinate.D2.class))),
+            delegate.normalize(c -> aligner.apply(c.convertTo(beanClass(Coordinate.D2.class))),
                     inverseAligner::apply);
             return this;
         }

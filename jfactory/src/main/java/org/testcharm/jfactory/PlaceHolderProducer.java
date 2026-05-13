@@ -1,16 +1,15 @@
 package org.testcharm.jfactory;
 
-import org.testcharm.util.BeanClass;
-
 import java.util.Optional;
 
 import static java.util.Optional.of;
+import static org.testcharm.jfactory.JFactory.beanClass;
 
 class PlaceHolderProducer extends Producer<Object> {
     static final Producer<?> PLACE_HOLDER = new PlaceHolderProducer();
 
     public PlaceHolderProducer() {
-        super(BeanClass.create(Object.class));
+        super(beanClass(Object.class));
     }
 
     @Override

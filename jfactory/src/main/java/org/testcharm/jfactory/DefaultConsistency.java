@@ -13,6 +13,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
+import static org.testcharm.jfactory.JFactory.beanClass;
 import static org.testcharm.jfactory.PropertyChain.propertyChain;
 
 class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
@@ -26,7 +27,7 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
     static final Function<Object, Object> LINK_DECOMPOSER = s -> s;
 
     DefaultConsistency(Class<T> type, Class<C> cType) {
-        this(BeanClass.create(type), BeanClass.create(cType));
+        this(beanClass(type), beanClass(cType));
     }
 
     DefaultConsistency(BeanClass<T> type, BeanClass<C> cType) {

@@ -14,9 +14,10 @@ public class BeanClassProxy {
 
     @SuppressWarnings("unchecked")
     public static <T> BeanClass<T> create(Class<T> type) {
-        if (type.isInterface())
+        BeanClass<T> beanClass = BeanClass.create(type);
+        if (!beanClass.isCollection() && type.isInterface())
             return (BeanClass<T>) instanceCache.computeIfAbsent(type, t -> new BeanClass<T>((Class<T>) t,
-                    beanClass -> new InterfaceProxyTypeInfo<T>(beanClass, PropertyProxyFactory.NO_PROXY)) {
+                    instance -> new InterfaceProxyTypeInfo<T>(instance, PropertyProxyFactory.NO_PROXY)) {
                 @Override
                 public T newInstance(Object... args) {
                     Map<String, Object> properties = new HashMap<>();
@@ -43,6 +44,6 @@ public class BeanClassProxy {
                     );
                 }
             });
-        return BeanClass.create(type);
+        return beanClass;
     }
 }

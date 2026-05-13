@@ -9,9 +9,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.testcharm.jfactory.PropertyChain.propertyChain;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.testcharm.jfactory.JFactory.beanClass;
+import static org.testcharm.jfactory.PropertyChain.propertyChain;
 
 public class DefaultListStructure<T, C extends Coordinate> implements ListStructure<T, C> {
     private final List<Item> items = new ArrayList<>();
@@ -19,7 +20,7 @@ public class DefaultListStructure<T, C extends Coordinate> implements ListStruct
     private Item last;
 
     public DefaultListStructure(Class<C> coordinateType) {
-        this.coordinateType = BeanClass.create(coordinateType);
+        this.coordinateType = beanClass(coordinateType);
     }
 
     @Override

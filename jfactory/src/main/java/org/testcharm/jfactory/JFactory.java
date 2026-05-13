@@ -1,13 +1,12 @@
 package org.testcharm.jfactory;
 
 import org.testcharm.dal.DAL;
-import org.testcharm.util.BeanClass;
-import org.testcharm.util.PropertyWriter;
-import org.testcharm.util.TypeReference;
+import org.testcharm.util.*;
 
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.testcharm.jfactory.DefaultBuilder.BuildFrom.SPEC;
@@ -20,6 +19,8 @@ public class JFactory {
     private final DataRepository dataRepository;
     private final Set<Predicate<PropertyWriter<?>>> ignoreDefaultValues = new LinkedHashSet<>();
 
+    private static Function<Class<?>, BeanClass<?>> beanClassFactory = BeanClassProxy::create;
+
     public JFactory() {
         this(new MemoryDataRepository());
     }
@@ -29,12 +30,21 @@ public class JFactory {
         register(EmptyMapSpec.class);
     }
 
+    public static <T> void setBeanClassFactory(Function<Class<T>, BeanClass<T>> beanClassFactory) {
+        JFactory.beanClassFactory = Sneaky.cast(beanClassFactory);
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> BeanClass<T> beanClass(Class<T> type) {
+        return (BeanClass<T>) beanClassFactory.apply(type);
+    }
+
     public DataRepository getDataRepository() {
         return dataRepository;
     }
 
     public <T> Factory<T> factory(Class<T> type) {
-        return factory(BeanClass.create(type));
+        return factory(beanClass(type));
     }
 
     public <T> Factory<T> factory(BeanClass<T> type) {
@@ -42,7 +52,7 @@ public class JFactory {
     }
 
     public <T> Builder<T> type(Class<T> type) {
-        return type(BeanClass.create(type));
+        return type(beanClass(type));
     }
 
     public <T> Builder<T> type(BeanClass<T> type) {
@@ -65,7 +75,7 @@ public class JFactory {
     public <T, S extends Spec<T>> Builder<T[]> specs(Class<S> specClass) {
         Factory<T> specFactory = specFactory(specClass);
         Class<T[]> arrayType = (Class<T[]>) Array.newInstance(specFactory.getType().getType(), 0).getClass();
-        ObjectFactory<T[]> listFactory = new ObjectFactory<>(BeanClass.create(arrayType), factorySet);
+        ObjectFactory<T[]> listFactory = new ObjectFactory<>(beanClass(arrayType), factorySet);
         listFactory.spec(spec -> spec.property("[]").is(specClass));
         return new DefaultBuilder<>(listFactory, this, TYPE);
     }
@@ -154,7 +164,7 @@ public class JFactory {
     }
 
     public AliasSetStore.AliasSet aliasOf(Class<?> type) {
-        return aliasSetStore.aliasSet(BeanClass.create(type));
+        return aliasSetStore.aliasSet(beanClass(type));
     }
 
     public <T, S extends Spec<T>> AliasSetStore.AliasSet aliasOfSpec(Class<S> specClass) {
@@ -162,7 +172,7 @@ public class JFactory {
     }
 
     public JFactory removeGlobalSpec(Class<?> type) {
-        factorySet.removeGlobalSpec(BeanClass.create(type));
+        factorySet.removeGlobalSpec(beanClass(type));
         return this;
     }
 

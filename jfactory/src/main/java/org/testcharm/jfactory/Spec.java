@@ -4,6 +4,7 @@ import org.testcharm.util.BeanClass;
 
 import java.util.function.Consumer;
 
+import static org.testcharm.jfactory.JFactory.beanClass;
 import static org.testcharm.jfactory.PropertyChain.propertyChain;
 
 public class Spec<T> {
@@ -35,7 +36,7 @@ public class Spec<T> {
     @SuppressWarnings("unchecked")
     public BeanClass<T> getType() {
         return getClass().equals(Spec.class) ? specRules.runtimeType() :
-                (BeanClass<T>) BeanClass.create(getClass()).getSuper(Spec.class).getTypeArguments(0)
+                (BeanClass<T>) beanClass(getClass()).getSuper(Spec.class).getTypeArguments(0)
                         .orElseThrow(() -> new IllegalStateException("Cannot guess type via generic type argument, please override Spec::getType"));
     }
 
