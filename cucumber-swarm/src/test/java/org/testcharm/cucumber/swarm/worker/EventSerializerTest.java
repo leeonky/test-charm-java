@@ -6,17 +6,21 @@ import io.cucumber.plugin.event.TestCaseStarted;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.testcharm.cucumber.swarm.DataMapper;
+import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.cucumber.swarm.master.EventDeserializer;
 import org.testcharm.cucumber.swarm.master.MasterDataMapper;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testcharm.dal.Assertions.expect;
+import static org.testcharm.util.JavaExecutor.executor;
 
 class EventSerializerTest {
     private final Path executorRoot = Paths.get("/executor/");
@@ -45,6 +49,49 @@ class EventSerializerTest {
 
             expect(eventDeserializer.deserialize(eventSerializer.serialize(event)))
                     .should(": { class.simpleName: TestCaseStarted, instant: '1970-01-01T00:00:01Z', testCase: { location: { line: 100, column: 0 }, uri: 'file:///master/features/test.feature' } }");
+        }
+    }
+
+    @Nested
+    class SerializeException {
+
+        @Test
+        void support_serialization() {
+            RuntimeException hello = new RuntimeException("hello");
+            Map<String, Object> output = new HashMap<>();
+            ExceptionSerializer.serialize(hello, output, "exception");
+            expect(ExceptionSerializer.deserialize(output, "exception")).should(": {class.simpleName: RuntimeException, message: 'hello', getStackTrace.fileName[]: [EventSerializerTest.java ...]}");
+        }
+
+        @Test
+        void support_null() {
+            Map<String, Object> output = new HashMap<>();
+            ExceptionSerializer.serialize(null, output, "exception");
+
+            expect(ExceptionSerializer.deserialize(output, "exception")).should("= null");
+        }
+
+        @Nested
+        class CannotSerialize {
+
+            @Test
+            void serialize_to_RemoteException() {
+                executor().addClass(String.join("\n",
+                        "public class CustomerException extends RuntimeException {",
+                        "   private Thread thread;",
+                        "   public CustomerException(String message) {",
+                        "     super(message);",
+                        "     this.thread = Thread.currentThread();",
+                        "   }",
+                        "}"
+                ));
+                executor().main().returnExpression("new CustomerException(\"hello\")");
+
+                Map<String, Object> output = new HashMap<>();
+                ExceptionSerializer.serialize((Throwable) executor().main().evaluate(), output, "exception");
+
+                expect(ExceptionSerializer.deserialize(output, "exception")).should(": {class.simpleName: RemoteException, target: CustomerException, message: 'hello', getStackTrace.fileName[]: [Executor.java ...]}");
+            }
         }
     }
 }
