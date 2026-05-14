@@ -79,8 +79,8 @@ public class E2eSteps {
     public void the_output_should(String docString) {
         expect(new HashMap<String, Object>() {{
             put("code", Sneaky.get(process::waitFor));
-            put("stdout", string(readAllAndClose(process.getInputStream())));
-            put("stderr", string(readAllAndClose(process.getErrorStream())));
+            put("stdout", string(readAllAndClose(process.getInputStream())).replace("\t", "\\t"));
+            put("stderr", string(readAllAndClose(process.getErrorStream())).replace("\t", "\\t"));
         }}).should(docString.replace("$path$", cucumberDirectory.root().toAbsolutePath().toString()));
     }
 
