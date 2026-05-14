@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -116,5 +117,12 @@ public class Classes {
         return type.getInterfaces().length > 0 && (type.isAnonymousClass() && type.getSuperclass() == Object.class
                 || type.isSynthetic()
                 || Proxy.isProxyClass(type)) ? (Class<T>) type.getInterfaces()[0] : type;
+    }
+
+    public static boolean isReflective(Class<?> type) {
+        if (!Modifier.isPublic(type.getModifiers()) || type.isAnonymousClass() || type.isLocalClass() || type.isSynthetic())
+            return false;
+        Class<?> enclosing = type.getEnclosingClass();
+        return enclosing == null || isReflective(enclosing);
     }
 }

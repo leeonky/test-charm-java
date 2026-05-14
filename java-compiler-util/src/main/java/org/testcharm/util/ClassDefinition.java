@@ -24,19 +24,19 @@ public class ClassDefinition extends SimpleJavaFileObject {
     private static String guessClassNameWithGenericType(String code) {
         String s = Stream.of(code.split("\n")).filter(l -> l.contains("class") || l.contains("interface"))
                 .findFirst().orElse(null);
-        Matcher matcher = Pattern.compile(".* class\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
+        Matcher matcher = Pattern.compile(".*\\bclass\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* class\\s(.*)\\simplements.*", Pattern.DOTALL).matcher(s);
+        matcher = Pattern.compile(".*\\bclass\\s(.*)\\simplements.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* class\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
+        matcher = Pattern.compile(".*\\bclass\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
+        matcher = Pattern.compile(".*\\binterface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
+        matcher = Pattern.compile(".*\\binterface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
         throw new IllegalStateException("Can not guess class name of code:\n" + code);
