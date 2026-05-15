@@ -71,6 +71,15 @@ public class TempDirectory {
         return root.resolve(name);
     }
 
+    public String readAllText(String name) {
+        Path path = resolve(name);
+        return Sneaky.get(() -> new String(Files.readAllBytes(path)));
+    }
+
+    public boolean exist(String path) {
+        return Files.exists(resolve(path));
+    }
+
     public static class Shared extends TempDirectory {
         private final Path remote;
 

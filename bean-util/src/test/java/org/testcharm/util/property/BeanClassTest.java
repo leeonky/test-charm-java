@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcharm.util.JavaExecutor.executor;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("ALL")
 class BeanClassTest {
 
     @BeforeEach

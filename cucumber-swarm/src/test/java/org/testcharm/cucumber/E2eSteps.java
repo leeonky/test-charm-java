@@ -6,6 +6,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.SneakyThrows;
 import org.testcharm.cucumber.swarm.Main;
 import org.testcharm.dal.DAL;
 import org.testcharm.io.TempDirectory;
@@ -32,7 +33,7 @@ public class E2eSteps {
 
     @Before
     public void clean() {
-        globalTempDirectory = new TempDirectory(Paths.get("src", "test", "generate")).mkdir(JavaExecutor.executor().compiler().getLocation().getName());
+        globalTempDirectory = globalTempDir();
         globalTempDirectory.clean();
         cucumberDirectory = globalTempDirectory.mkdir("cucumber");
         featuresDirectory = cucumberDirectory.mkdir("features");
@@ -53,8 +54,13 @@ public class E2eSteps {
         JavaExecutor.executor().resetAll();
     }
 
+    public static TempDirectory globalTempDir() {
+        return new TempDirectory(Paths.get("src", "test", "generate")).mkdir(JavaExecutor.executor().compiler().getLocation().getName());
+    }
+
+    @SneakyThrows
     @When("run cucumber with the following args:")
-    public void run_cucumber_with_the_following_args(String docString) throws IOException {
+    public void run_cucumber_with_the_following_args(String docString) {
         JavaExecutor.executor().main().evaluate();
 
         List<String> args = new ArrayList<>();
@@ -98,5 +104,17 @@ public class E2eSteps {
     @And("the log should:")
     public void theLogShould(String expression) throws IOException {
         expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log")))).should(expression);
+    }
+
+    @Then("the following event should be emitted after cucumber run:")
+    public void theFollowingEventShouldBeEmittedAfterCucumberRun(String expression) {
+        TempDirectory dir = E2eSteps.globalTempDir().mkdir("dal");
+        dir.write("verify.dal", expression.replace("$path$", cucumberDirectory.root().toAbsolutePath().toString()));
+        run_cucumber_with_the_following_args(String.join("\n", "'--plugin'", "'org.testcharm.cucumber.swarm.EventCollectorPlugin'", "'--glue'", "'steps'", "$path + 'features'"));
+        the_output_should(": {...}");
+
+        if (!dir.exist("passed")) {
+            throw new AssertionError("\n" + dir.readAllText("failed"));
+        }
     }
 }
