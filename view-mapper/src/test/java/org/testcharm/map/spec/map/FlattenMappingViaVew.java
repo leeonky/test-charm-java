@@ -11,7 +11,7 @@ import java.util.*;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class FlattenMappingViaVew {
+public class FlattenMappingViaVew {
     private final Mapper mapper = new Mapper(getClass().getPackage().getName());
     private final Teacher teacherTom = new Teacher().setName("Tom");
     private final Teacher teacherSmith = new Teacher().setName("Smith");

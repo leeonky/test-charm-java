@@ -14,7 +14,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class PropertyTest {
+public class PropertyTest {
     private final BeanClass<Bean> beanClass = BeanClass.create(Bean.class);
 
     @Accessors(chain = true)

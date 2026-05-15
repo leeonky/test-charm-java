@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BasicMapping {
+public class BasicMapping {
     private final Mapper mapper = new Mapper(getClass().getPackage().getName());
     private final Book javaProgrammingBook = new Book().setName("Java Programming").setPrice(new BigDecimal(100));
 
@@ -92,27 +92,27 @@ class BasicMapping {
     @Getter
     @Setter
     @Mapping(from = Book.class, view = View.Summary.class)
-    static class SimpleBookDTO {
+    public static class SimpleBookDTO {
         private String name;
     }
 
     @Getter
     @Setter
     @MappingFrom(Book.class)
-    static class BookNameDTO {
+    public static class BookNameDTO {
         @FromProperty("name")
         private String bookName;
     }
 
     @MappingFrom(Book.class)
-    static class BookPriceDTO {
+    public static class BookPriceDTO {
         public String price;
     }
 
     @Getter
     @Setter
     @Mapping(from = Book.class, view = View.Summary.class, scope = FrontEnd.class)
-    static class FrontEndSimpleBookDTO {
+    public static class FrontEndSimpleBookDTO {
         private String name;
         private BigDecimal price;
     }
@@ -120,7 +120,7 @@ class BasicMapping {
     @Getter
     @Setter
     @MappingView(View.Detail.class)
-    static class DetailBookDTO extends SimpleBookDTO {
+    public static class DetailBookDTO extends SimpleBookDTO {
         private BigDecimal price;
     }
 
@@ -141,7 +141,7 @@ class BasicMapping {
     }
 
     @MappingFrom(Bean.class)
-    static class BeanDTO {
+    public static class BeanDTO {
         public int privateField1;
         public int privateField2;
         @Getter

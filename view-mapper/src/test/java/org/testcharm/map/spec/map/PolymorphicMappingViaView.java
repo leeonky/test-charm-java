@@ -13,7 +13,7 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PolymorphicMappingViaView {
+public class PolymorphicMappingViaView {
     private final Mapper mapper = new Mapper(getClass().getPackage().getName());
     private final Transaction paypalTransaction = new PaypalTransaction()
             .setPaypalId("001")

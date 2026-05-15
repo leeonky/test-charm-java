@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.testcharm.util.BeanClass.create;
 import static org.testcharm.util.BeanClass.createFrom;
 
-class PropertyWriterTest {
+public class PropertyWriterTest {
     private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = create(BeanWithPubField.class);
 
     public interface Interface {

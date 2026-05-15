@@ -1,19 +1,19 @@
 package org.testcharm.map.spec.map;
 
-import org.testcharm.map.FromProperty;
-import org.testcharm.map.Mapper;
-import org.testcharm.map.MappingFrom;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Test;
+import org.testcharm.map.FromProperty;
+import org.testcharm.map.Mapper;
+import org.testcharm.map.MappingFrom;
 
 import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class FlattenMapping {
+public class FlattenMapping {
     private final Mapper mapper = new Mapper(getClass().getPackage().getName());
     private final Teacher teacherTom = new Teacher().setName("Tom");
     private final Teacher teacherSmith = new Teacher().setName("Smith");
@@ -136,7 +136,7 @@ class FlattenMapping {
     }
 
     @MappingFrom(BestStudent.class)
-    static class BestStudentTeacherNameDTO {
+    public static class BestStudentTeacherNameDTO {
 
         @FromProperty("student.teacher.name")
         public String teacherName;

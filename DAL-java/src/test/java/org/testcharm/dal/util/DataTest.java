@@ -24,7 +24,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class DataTest {
+public class DataTest {
 
     @Test
     void check_null_for_customer_schema() {

@@ -1,13 +1,13 @@
 package org.testcharm.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static org.testcharm.util.Classes.isReflective;
 import static org.testcharm.util.Classes.named;
 
 public class ClassTypeInfo<T> extends AbstractTypeInfo<T> {
@@ -20,14 +20,49 @@ public class ClassTypeInfo<T> extends AbstractTypeInfo<T> {
 
     private void collectGetterSetters(BeanClass<T> type) {
         getterSetterOwnerTypes(type.getType()).flatMap(t -> Arrays.stream(t.getMethods()))
-                .filter(method -> isValidDeclaringClass(method.getDeclaringClass()))
                 .forEach(method -> {
                     if (MethodPropertyReader.isGetter(method))
-                        addReaders(new MethodPropertyReader<>(type, method));
+                        findAccessible(method).ifPresent(m -> addReaders(new MethodPropertyReader<>(type, m)));
                     if (MethodPropertyWriter.isSetter(method))
-                        addWriters(new MethodPropertyWriter<>(type, method));
+                        findAccessible(method).ifPresent(m -> addWriters(new MethodPropertyWriter<>(type, m)));
                 });
     }
+
+    private static Optional<Method> findAccessible(Method method) {
+        if (Classes.isReflective(method.getDeclaringClass()))
+            return Optional.of(method);
+
+        ArrayDeque<Class<?>> types = new ArrayDeque<>();
+        addSupers(types, method.getDeclaringClass());
+
+        while (!types.isEmpty()) {
+            Class<?> type = types.removeFirst();
+            Method accessible = findAccessible(method, type);
+            if (accessible != null)
+                return Optional.of(accessible);
+            addSupers(types, type);
+        }
+        return Optional.empty();
+    }
+
+    private static void addSupers(ArrayDeque<Class<?>> types, Class<?> declaringClass) {
+        if (declaringClass.getSuperclass() != null)
+            types.addLast(declaringClass.getSuperclass());
+        for (Class<?> anInterface : declaringClass.getInterfaces()) {
+            types.addLast(anInterface);
+        }
+    }
+
+    private static Method findAccessible(Method target, Class<?> type) {
+        if (isReflective(type))
+            try {
+                return type.getMethod(target.getName(), target.getParameterTypes());
+            } catch (NoSuchMethodException e) {
+                return null;
+            }
+        return null;
+    }
+
 
     private Stream<Class<?>> getterSetterOwnerTypes(Class<?> type) {
         if (Proxy.isProxyClass(type))

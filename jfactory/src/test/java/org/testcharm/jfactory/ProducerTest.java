@@ -12,7 +12,7 @@ import java.util.Objects;
 
 import static org.testcharm.jfactory.PropertyChain.propertyChain;
 
-class ProducerTest {
+public class ProducerTest {
     private final JFactory JFactory = new JFactory();
     private ObjectProducer<Bean> beanProducer;
 

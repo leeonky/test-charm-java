@@ -13,7 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testcharm.util.BeanClass.createFrom;
 
-class PropertyReaderTest {
+public class PropertyReaderTest {
     private static final int ANY_INT = 100;
     private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.create(BeanWithPubField.class);
 

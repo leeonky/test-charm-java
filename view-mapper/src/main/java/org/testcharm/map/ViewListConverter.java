@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-class ViewListConverter extends ViewConverter {
+public class ViewListConverter extends ViewConverter {
     protected final String propertyName;
 
     ViewListConverter(Mapper mapper, Class<?> view, String propertyName) {

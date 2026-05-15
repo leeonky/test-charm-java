@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class PropertyChainTest {
+public class PropertyChainTest {
 
     @Nested
     class ToChain {
@@ -111,7 +111,7 @@ class PropertyChainTest {
     @Getter
     @Setter
     @Accessors(chain = true)
-    class Bean {
+    public class Bean {
         private int intValue;
         private Bean bean;
         private int[] intValues;
@@ -121,7 +121,7 @@ class PropertyChainTest {
     @Getter
     @Setter
     @Accessors(chain = true)
-    class Beans {
+    public class Beans {
         private Bean bean;
         private Bean[] beans;
     }

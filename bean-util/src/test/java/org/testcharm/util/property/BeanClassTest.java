@@ -13,10 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.testcharm.util.JavaExecutor.executor;
 
+@SuppressWarnings("unchecked")
 class BeanClassTest {
 
     @BeforeEach
     void reset() {
+        executor().reset();
         executor().main().importDependency("org.testcharm.util.BeanClass");
     }
 
@@ -568,7 +570,6 @@ class BeanClassTest {
                             assertThat(fieldType.getTypeArguments(0).map(BeanClass::getType)).hasValue(Sneaky.cast(String.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void get_and_set_value() {
                             Object object = beanClass.newInstance();
@@ -610,7 +611,6 @@ class BeanClassTest {
                             assertThat(elementType.getTypeArguments(0).map(BeanClass::getType)).hasValue(Sneaky.cast(String.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void get_and_set_value() {
                             Object object = beanClass.newInstance();
@@ -651,7 +651,6 @@ class BeanClassTest {
                             assertThat(fieldType.getElementType()).isEqualTo(BeanClass.create(Object.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void get_and_set_value() {
                             Object object = beanClass.newInstance();
@@ -1115,7 +1114,6 @@ class BeanClassTest {
                             assertThat(fieldType.getTypeArguments(0).map(BeanClass::getType)).hasValue(Sneaky.cast(String.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void get_value_and_can_not_set() {
                             Object object = beanClass.newInstance();
@@ -1156,7 +1154,6 @@ class BeanClassTest {
                             assertThat(elementType.getTypeArguments(0).map(BeanClass::getType)).hasValue(Sneaky.cast(String.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void get_value_and_can_not_set() {
                             Object object = beanClass.newInstance();
@@ -1195,7 +1192,6 @@ class BeanClassTest {
                             assertThat(fieldType.getElementType()).isEqualTo(BeanClass.create(Object.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void get_value_and_can_not_set() {
                             Object object = beanClass.newInstance();
@@ -1701,7 +1697,6 @@ class BeanClassTest {
                             assertThat(fieldType.getTypeArguments(0).map(BeanClass::getType)).hasValue(Sneaky.cast(String.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void set_value_by_property_and_can_not_get_value() {
                             Object object = beanClass.newInstance();
@@ -1713,7 +1708,6 @@ class BeanClassTest {
                             assertThat((java.util.List<String>) beanClass.getPropertyValue(object, "value")).containsExactly("hello", "world");
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void set_value_directly_and_can_not_get_value() {
                             Object object = beanClass.newInstance();
@@ -1754,7 +1748,6 @@ class BeanClassTest {
                             assertThat(elementType.getTypeArguments(0).map(BeanClass::getType)).hasValue(Sneaky.cast(String.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void set_value_by_property_and_can_not_get_value() {
                             Object object = beanClass.newInstance();
@@ -1767,7 +1760,6 @@ class BeanClassTest {
                             assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void set_value_directly_and_can_not_get_value() {
                             Object object = beanClass.newInstance();
@@ -1807,7 +1799,6 @@ class BeanClassTest {
                             assertThat(fieldType.getElementType()).isEqualTo(BeanClass.create(Object.class));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void set_value_by_property_and_can_not_get_value() {
                             Object object = beanClass.newInstance();
@@ -1819,7 +1810,6 @@ class BeanClassTest {
                             assertThrows(NoSuchAccessorException.class, () -> property.getValue(object));
                         }
 
-                        @SuppressWarnings("unchecked")
                         @Test
                         void set_value_directly_and_can_not_get_value() {
                             Object object = beanClass.newInstance();
@@ -2726,7 +2716,6 @@ class BeanClassTest {
                 private BeanClass<Object> beanClass;
                 private BeanClass<Object> declaringBeanClass;
 
-                @SuppressWarnings("unchecked")
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
@@ -2783,7 +2772,6 @@ class BeanClassTest {
                 private BeanClass<Object> beanClass;
                 private BeanClass<Object> declaringBeanClass;
 
-                @SuppressWarnings("unchecked")
                 @BeforeEach
                 void prepareClass() {
                     givenClass(String.join("\n",
@@ -3218,7 +3206,6 @@ class BeanClassTest {
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 0));
                 }
             }
-
         }
     }
 
@@ -3458,6 +3445,7 @@ class BeanClassTest {
                     assertThrows(NoSuchAccessorException.class, () -> beanClass.setPropertyValue(object, "field", 0));
                 }
             }
+
         }
     }
 
@@ -3792,16 +3780,472 @@ class BeanClassTest {
         }
     }
 
+    @Nested
+    class UnReflectiveClassOverrideProperty {
+
+        @Nested
+        class PropertyInSuperClass {
+            private Object object;
+            private BeanClass<Object> beanClass;
+            private BeanClass<Object> baseBeanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class ClazzBase {",
+                        "    private int field = 100;",
+                        "    public int getField() { return field; }",
+                        "    public void setField(int f) { this.field = f; }",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "public class Clazz {",
+                        "    public static Object getLocalClassInstance() {",
+                        "        class Local extends ClazzBase {",
+                        "            public int getField() { return super.getField(); }",
+                        "            public void setField(int f) { super.setField(f); }",
+                        "        };",
+                        "        return new Local();",
+                        "    }",
+                        "}"
+                ));
+                object = valueOf("Clazz.getLocalClassInstance()");
+                beanClass = BeanClass.createFrom(object);
+                baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+                assertEquals(int.class, property.getReaderType().getType());
+            }
+
+            @Test
+            void get_set_value_by_property() {
+                Property<Object> property = beanClass.getProperty("field");
+
+                assertEquals(100, (int) property.getValue(object));
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) property.getValue(object));
+            }
+
+            @Test
+            void get_set_value_directly() {
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                beanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+
+            @Test
+            void get_set_value_via_super_bean_class() {
+                assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                baseBeanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+            }
+        }
+
+        @Nested
+        class PropertyInInterface {
+            private Object object;
+            private BeanClass<Object> beanClass;
+            private BeanClass<Object> baseBeanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public interface IClazz {",
+                        "    int getField();",
+                        "    void setField(int f);",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "public class Clazz {",
+                        "    public static Object getLocalClassInstance() {",
+                        "        class Local implements IClazz{",
+                        "            private int field = 100;",
+                        "            public int getField() { return field; }",
+                        "            public void setField(int f) { this.field = f; }",
+                        "        };",
+                        "        return new Local();",
+                        "    }",
+                        "}"
+                ));
+                object = valueOf("Clazz.getLocalClassInstance()");
+                beanClass = BeanClass.createFrom(object);
+                baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+                assertEquals(int.class, property.getReaderType().getType());
+            }
+
+            @Test
+            void get_set_value_by_property() {
+                Property<Object> property = beanClass.getProperty("field");
+
+                assertEquals(100, (int) property.getValue(object));
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) property.getValue(object));
+            }
+
+            @Test
+            void get_set_value_directly() {
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                beanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+
+            @Test
+            void get_set_value_via_super_bean_class() {
+                assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                baseBeanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+            }
+        }
+
+        @Nested
+        class PropertyInInterfaceWithSuperClass {
+            private Object object;
+            private BeanClass<Object> beanClass;
+            private BeanClass<Object> baseBeanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public abstract class ClazzBase {",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "public interface IClazz {",
+                        "    int getField();",
+                        "    void setField(int f);",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "public class Clazz {",
+                        "    public static Object getLocalClassInstance() {",
+                        "        class Local extends ClazzBase implements IClazz{",
+                        "            private int field = 100;",
+                        "            public int getField() { return field; }",
+                        "            public void setField(int f) { this.field = f; }",
+                        "        };",
+                        "        return new Local();",
+                        "    }",
+                        "}"
+                ));
+                object = valueOf("Clazz.getLocalClassInstance()");
+                beanClass = BeanClass.createFrom(object);
+                baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+                assertEquals(int.class, property.getReaderType().getType());
+            }
+
+            @Test
+            void get_set_value_by_property() {
+                Property<Object> property = beanClass.getProperty("field");
+
+                assertEquals(100, (int) property.getValue(object));
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) property.getValue(object));
+            }
+
+            @Test
+            void get_set_value_directly() {
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                beanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+
+            @Test
+            void get_set_value_via_super_bean_class() {
+                assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                baseBeanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+            }
+        }
+
+        @Nested
+        class PropertyInSuperSuperClass {
+            private Object object;
+            private BeanClass<Object> beanClass;
+            private BeanClass<Object> baseBeanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public class ClazzBase {",
+                        "    private int field = 100;",
+                        "    public int getField() { return field; }",
+                        "    public void setField(int f) { this.field = f; }",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "class ClazzBase2 extends ClazzBase{",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "public class Clazz {",
+                        "    public static Object getLocalClassInstance() {",
+                        "        class Local extends ClazzBase2 {",
+                        "            public int getField() { return super.getField(); }",
+                        "            public void setField(int f) { super.setField(f); }",
+                        "        };",
+                        "        return new Local();",
+                        "    }",
+                        "}"
+                ));
+                object = valueOf("Clazz.getLocalClassInstance()");
+                beanClass = BeanClass.createFrom(object);
+                baseBeanClass = BeanClass.create(beanClass.getType().getSuperclass());
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+                assertEquals(int.class, property.getReaderType().getType());
+            }
+
+            @Test
+            void get_set_value_by_property() {
+                Property<Object> property = beanClass.getProperty("field");
+
+                assertEquals(100, (int) property.getValue(object));
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) property.getValue(object));
+            }
+
+            @Test
+            void get_set_value_directly() {
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                beanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+
+            @Test
+            void get_set_value_via_super_bean_class() {
+                assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                baseBeanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+            }
+        }
+
+        @Nested
+        class PropertyInSuperInterface {
+            private Object object;
+            private BeanClass<Object> beanClass;
+            private BeanClass<Object> baseBeanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public interface IClazzBase {",
+                        "    int getField();",
+                        "    void setField(int f);",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "interface IClazz extends IClazzBase {",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "public class Clazz {",
+                        "    public static Object getLocalClassInstance() {",
+                        "        class Local implements IClazz {",
+                        "            private int field = 100;",
+                        "            public int getField() { return field; }",
+                        "            public void setField(int f) { this.field = f; }",
+                        "        };",
+                        "        return new Local();",
+                        "    }",
+                        "}"
+                ));
+                object = valueOf("Clazz.getLocalClassInstance()");
+                beanClass = BeanClass.createFrom(object);
+                baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getInterfaces()[0]);
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+                assertEquals(int.class, property.getReaderType().getType());
+            }
+
+            @Test
+            void get_set_value_by_property() {
+                Property<Object> property = beanClass.getProperty("field");
+
+                assertEquals(100, (int) property.getValue(object));
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) property.getValue(object));
+            }
+
+            @Test
+            void get_set_value_directly() {
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                beanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+
+            @Test
+            void get_set_value_via_super_bean_class() {
+                assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                baseBeanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+            }
+        }
+
+        @Nested
+        class PropertyInInterfaceOfSuperClass {
+            private Object object;
+            private BeanClass<Object> beanClass;
+            private BeanClass<Object> baseBeanClass;
+
+            @BeforeEach
+            void prepareClass() {
+                givenClass(String.join("\n",
+                        "public interface IClazz {",
+                        "    int getField();",
+                        "    void setField(int f);",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "abstract class ClazzBase implements IClazz{",
+                        "}"
+                ));
+                givenClass(String.join("\n",
+                        "public class Clazz {",
+                        "    public static Object getLocalClassInstance() {",
+                        "        class Local extends ClazzBase {",
+                        "            private int field = 100;",
+                        "            public int getField() { return field; }",
+                        "            public void setField(int f) { this.field = f; }",
+                        "        };",
+                        "        return new Local();",
+                        "    }",
+                        "}"
+                ));
+                object = valueOf("Clazz.getLocalClassInstance()");
+                beanClass = BeanClass.createFrom(object);
+                baseBeanClass = (BeanClass<Object>) BeanClass.create(beanClass.getType().getSuperclass().getInterfaces()[0]);
+            }
+
+            @Test
+            void included_in_type_properties() {
+                Map<String, ? extends Property<?>> properties = beanClass.getProperties();
+
+                assertThat(properties.keySet()).containsExactly("field");
+
+                Property<?> property = properties.get("field");
+                assertEquals("field", property.getName());
+                assertEquals(beanClass, property.getBeanType());
+                assertEquals(int.class, property.getWriterType().getType());
+                assertEquals(int.class, property.getReaderType().getType());
+            }
+
+            @Test
+            void get_set_value_by_property() {
+                Property<Object> property = beanClass.getProperty("field");
+
+                assertEquals(100, (int) property.getValue(object));
+
+                property.setValue(object, 1000);
+                assertEquals(1000, (int) property.getValue(object));
+            }
+
+            @Test
+            void get_set_value_directly() {
+                assertEquals(100, (int) beanClass.getPropertyValue(object, "field"));
+
+                beanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) beanClass.getPropertyValue(object, "field"));
+            }
+
+            @Test
+            void get_set_value_via_super_bean_class() {
+                assertEquals(100, (int) baseBeanClass.getPropertyValue(object, "field"));
+
+                baseBeanClass.setPropertyValue(object, "field", 1000);
+
+                assertEquals(1000, (int) baseBeanClass.getPropertyValue(object, "field"));
+            }
+        }
+    }
+
     private BeanClass<Object> createBeanClass(String name) {
         return BeanClass.create(typeOf(name));
     }
 
-    @SuppressWarnings("unchecked")
     private Class<Object> typeOf(String expression) {
         return (Class<Object>) executor().main().returnExpression(expression + ".class").evaluate();
     }
 
-    @SuppressWarnings("unchecked")
     private Object valueOf(String expression) {
         return executor().main().returnExpression(expression).evaluate();
     }

@@ -6,7 +6,7 @@ import org.testcharm.map.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MappingAnnotation {
+public class MappingAnnotation {
     private final Mapper mapper = new Mapper(getClass().getPackage().getName());
 
     interface Scope1 {
