@@ -123,10 +123,11 @@ Feature: event serializer
             uri: 'file://$path$/features/test.feature'
             step.location: { line: 3, column: 5 }
           }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
           testCase: {
             location: { line: 2, column: 3 }
             uri: 'file://$path$/features/test.feature'
-            testSteps[0]= ::root[io.cucumber.plugin.event.TestStepStarted][0].testStep
           }
         }]
         """
@@ -161,10 +162,11 @@ Feature: event serializer
             class.name= io.cucumber.core.runner.HookTestStep
             hookType: BEFORE
           }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
           testCase: {
             location: { line: 2, column: 3 }
             uri: 'file://$path$/features/test.feature'
-            testSteps[0]= ::root[io.cucumber.plugin.event.TestStepStarted][0].testStep
           }
         }{
           testStep: {
@@ -172,10 +174,267 @@ Feature: event serializer
             uri: 'file://$path$/features/test.feature'
             step.location: { line: 3, column: 5 }
           }
+          ::this.testStep= ::this.testCase.testSteps[1]
+
           testCase: {
             location: { line: 2, column: 3 }
             uri: 'file://$path$/features/test.feature'
-            testSteps[1]= ::root[io.cucumber.plugin.event.TestStepStarted][1].testStep
+          }
+        }]
+        """
+
+  Rule: test step finished
+
+    Scenario: forward test step PickleStepTestStep finished passed
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+        """
+      Given the following class definition:
+        """
+        package steps;
+        import io.cucumber.java.en.*;
+
+        public class Steps {
+
+          @Given("a step with implementation")
+          public void a_step_with_implementation() {
+              System.out.println("step called");
+          }
+        }
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.plugin.event.TestStepFinished]: [{
+          instant: {...}
+          testStep: {
+            class.name= io.cucumber.core.runner.PickleStepTestStep
+            uri: 'file://$path$/features/test.feature'
+            step.location: { line: 3, column: 5 }
+          }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
+          testCase: {
+            location: { line: 2, column: 3 }
+            uri: 'file://$path$/features/test.feature'
+          }
+          result= {
+            status: PASSED
+            duration: {...}
+            error: null
+          }
+        }]
+        """
+
+    Scenario: forward test step PickleStepTestStep finished failed with serialized exception
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+        """
+      Given the following class definition:
+        """
+        package steps;
+        import io.cucumber.java.en.*;
+
+        public class Steps {
+
+          @Given("a step with implementation")
+          public void a_step_with_implementation() {
+              throw new RuntimeException("step failed");
+          }
+        }
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.plugin.event.TestStepFinished]: [{
+          instant: {...}
+          testStep: {
+            class.name= io.cucumber.core.runner.PickleStepTestStep
+            uri: 'file://$path$/features/test.feature'
+            step.location: { line: 3, column: 5 }
+          }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
+          testCase: {
+            location: { line: 2, column: 3 }
+            uri: 'file://$path$/features/test.feature'
+          }
+          result= {
+            status: FAILED
+            duration: {...}
+            error: {
+              class.simpleName= RuntimeException
+              message= "step failed"
+              stackTrace.fileName[]= [Steps.java ...]
+            }
+          }
+        }]
+        """
+
+    Scenario: forward test step PickleStepTestStep finished skipped
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+            Given another step with implementation
+        """
+      Given the following class definition:
+        """
+        package steps;
+        import io.cucumber.java.en.*;
+
+        public class Steps {
+
+          @Given("a step with implementation")
+          public void a_step_with_implementation() {
+              throw new RuntimeException("step failed");
+          }
+
+          @Given("another step with implementation")
+          public void another_step_with_implementation() {
+          }
+        }
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.plugin.event.TestStepFinished]: [{
+          testStep: {
+            step.location: { line: 3, column: 5 }
+          }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
+          result.status: FAILED
+        } {
+          testStep: {
+            class.name= io.cucumber.core.runner.PickleStepTestStep
+            uri: 'file://$path$/features/test.feature'
+            step.location: { line: 4, column: 5 }
+          }
+          ::this.testStep= ::this.testCase.testSteps[1]
+
+          result= {
+            status: SKIPPED
+            duration: {...}
+            error: null
+          }
+        }]
+        """
+
+    Scenario: forward test step PickleStepTestStep finished pending
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+        """
+      Given the following class definition:
+        """
+        package steps;
+        import io.cucumber.java.en.*;
+
+        public class Steps {
+
+          @Given("a step with implementation")
+          public void a_step_with_implementation() {
+            throw new io.cucumber.java.PendingException("not implemented yet");
+          }
+        }
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.plugin.event.TestStepFinished]: [{
+          testStep: {
+            class.name= io.cucumber.core.runner.PickleStepTestStep
+            uri: 'file://$path$/features/test.feature'
+            step.location: { line: 3, column: 5 }
+          }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
+          result= {
+            status: PENDING
+            duration: {...}
+            error.class.simpleName= PendingException
+          }
+        }]
+        """
+
+    Scenario: forward test step PickleStepTestStep finished undefined
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.plugin.event.TestStepFinished]: [{
+          testStep: {
+            class.name= io.cucumber.core.runner.PickleStepTestStep
+            uri: 'file://$path$/features/test.feature'
+            step.location: { line: 3, column: 5 }
+          }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
+          result= {
+            status: UNDEFINED
+            duration: {...}
+            error: null
+          }
+        }]
+        """
+
+    Scenario: forward test step PickleStepTestStep finished ambiguous
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+        """
+      Given the following class definition:
+        """
+        package steps;
+        import io.cucumber.java.en.*;
+
+        public class Steps {
+
+          @Given("a step with implementation")
+          public void a_step_with_implementation() {
+              System.out.println("step called");
+          }
+
+          @Given("^.* implementation$")
+          public void another_a_step_with_implementation() {
+              System.out.println("step called");
+          }
+        }
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.plugin.event.TestStepFinished]: [{
+          testStep: {
+            class.name= io.cucumber.core.runner.PickleStepTestStep
+            uri: 'file://$path$/features/test.feature'
+            step.location: { line: 3, column: 5 }
+          }
+          ::this.testStep= ::this.testCase.testSteps[0]
+
+          testCase: {
+            location: { line: 2, column: 3 }
+            uri: 'file://$path$/features/test.feature'
+          }
+          result= {
+            status: AMBIGUOUS
+            duration: {...}
+            error.message= ```
+                           "a step with implementation" matches more than one step definition:
+                             "^.* implementation$" in steps.Steps.another_a_step_with_implementation()
+                             "a step with implementation" in steps.Steps.a_step_with_implementation()
+                           ```
           }
         }]
         """

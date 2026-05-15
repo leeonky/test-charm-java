@@ -4,6 +4,7 @@ import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
@@ -17,38 +18,46 @@ public class EventDeserializer {
 
     public Object deserialize(String json) {
         Map<String, Object> message = (Map<String, Object>) MessageConverterRegistry.jsonConverter().deserialize(json);
-        String type = (String) message.get("type");
-        switch (type) {
+        EventParser eventParser = new EventParser(message);
+        switch ((String) message.get("type")) {
             case "io.cucumber.plugin.event.TestCaseStarted":
-                return getTestCaseStarted((Map<String, Object>) message.get("data"));
+                return new TestCaseStarted(eventParser.getInstant(), eventParser.getTestCase());
             case "io.cucumber.plugin.event.TestCaseFinished":
-                return getTestCaseFinished((Map<String, Object>) message.get("data"));
+                return new TestCaseFinished(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getResult());
             case "io.cucumber.plugin.event.TestStepStarted":
-                return getTestStepStarted((Map<String, Object>) message.get("data"));
+                return new TestStepStarted(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getTestStep());
+            case "io.cucumber.plugin.event.TestStepFinished":
+                return new TestStepFinished(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getTestStep(),
+                        eventParser.getResult());
             default:
-                throw new IllegalArgumentException("Unsupported event type: " + type);
+                throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
         }
     }
 
-    private TestStepStarted getTestStepStarted(Map<String, Object> data) {
-        String testCaseKey = (String) data.get("testCase");
-        TestCase testCase = dataMapper.testCase(testCaseKey);
-        return new TestStepStarted(Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue()),
-                testCase, testCase.getTestSteps().get(((Number) data.get("testStep")).intValue()));
-    }
+    private class EventParser {
+        private final Map<String, Object> data;
 
-    private TestCaseStarted getTestCaseStarted(Map<String, Object> data) {
-        String testCaseKey = (String) data.get("testCase");
-        return new TestCaseStarted(Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue()),
-                dataMapper.testCase(testCaseKey));
-    }
+        private EventParser(Map<String, Object> message) {
+            data = (Map<String, Object>) message.get("data");
+        }
 
-    private TestCaseFinished getTestCaseFinished(Map<String, Object> data) {
-        String testCaseKey = (String) data.get("testCase");
-        Map<String, Object> result = (Map<String, Object>) data.get("result");
-        return new TestCaseFinished(Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue()),
-                dataMapper.testCase(testCaseKey), new Result(Status.valueOf(result.get("status").toString()),
-                java.time.Duration.ofMillis(((Number) result.get("duration")).longValue()),
-                ExceptionSerializer.deserialize(result, "error")));
+        private TestCase getTestCase() {
+            return dataMapper.testCase((String) data.get("testCase"));
+        }
+
+        private Instant getInstant() {
+            return Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue());
+        }
+
+        private Result getResult() {
+            Map<String, Object> resultData = (Map<String, Object>) data.get("result");
+            return new Result(Status.valueOf(resultData.get("status").toString()),
+                    Duration.ofMillis(((Number) resultData.get("duration")).longValue()),
+                    ExceptionSerializer.deserialize(resultData, "error"));
+        }
+
+        public TestStep getTestStep() {
+            return getTestCase().getTestSteps().get(((Number) data.get("testStep")).intValue());
+        }
     }
 }

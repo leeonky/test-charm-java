@@ -26,16 +26,19 @@ public class EventCollectorPlugin implements ConcurrentEventListener {
 
         publisher.registerHandlerFor(TestCaseStarted.class, this::saveEvent);
         publisher.registerHandlerFor(TestStepStarted.class, this::saveEvent);
+        publisher.registerHandlerFor(TestStepFinished.class, this::saveEvent);
         publisher.registerHandlerFor(TestCaseFinished.class, this::saveEvent);
 
         publisher.registerHandlerFor(TestRunFinished.class, event -> {
-            TempDirectory dir = new TempDirectory(Paths.get("src", "test", "generate", index)).mkdir("dal");
-            if (dir.exist("verify.dal")) {
-                try {
-                    expect(events).should(dir.readAllText("verify.dal"));
-                    dir.write("passed", "");
-                } catch (Throwable e) {
-                    dir.write("failed", e.getMessage());
+            if (index != null) {
+                TempDirectory dir = new TempDirectory(Paths.get("src", "test", "generate", index)).mkdir("dal");
+                if (dir.exist("verify.dal")) {
+                    try {
+                        expect(events).should(dir.readAllText("verify.dal"));
+                        dir.write("passed", "");
+                    } catch (Throwable e) {
+                        dir.write("failed", e.getMessage());
+                    }
                 }
             }
         });
