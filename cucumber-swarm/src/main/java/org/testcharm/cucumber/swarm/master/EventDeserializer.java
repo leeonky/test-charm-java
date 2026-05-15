@@ -1,9 +1,6 @@
 package org.testcharm.cucumber.swarm.master;
 
-import io.cucumber.plugin.event.Result;
-import io.cucumber.plugin.event.Status;
-import io.cucumber.plugin.event.TestCaseFinished;
-import io.cucumber.plugin.event.TestCaseStarted;
+import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
 
@@ -26,9 +23,18 @@ public class EventDeserializer {
                 return getTestCaseStarted((Map<String, Object>) message.get("data"));
             case "io.cucumber.plugin.event.TestCaseFinished":
                 return getTestCaseFinished((Map<String, Object>) message.get("data"));
+            case "io.cucumber.plugin.event.TestStepStarted":
+                return getTestStepStarted((Map<String, Object>) message.get("data"));
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + type);
         }
+    }
+
+    private TestStepStarted getTestStepStarted(Map<String, Object> data) {
+        String testCaseKey = (String) data.get("testCase");
+        TestCase testCase = dataMapper.testCase(testCaseKey);
+        return new TestStepStarted(Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue()),
+                testCase, testCase.getTestSteps().get(((Number) data.get("testStep")).intValue()));
     }
 
     private TestCaseStarted getTestCaseStarted(Map<String, Object> data) {

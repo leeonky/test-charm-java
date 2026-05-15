@@ -3,6 +3,7 @@ package org.testcharm.cucumber.swarm.worker;
 import io.cucumber.plugin.event.Result;
 import io.cucumber.plugin.event.TestCaseFinished;
 import io.cucumber.plugin.event.TestCaseStarted;
+import io.cucumber.plugin.event.TestStepStarted;
 import org.testcharm.cucumber.swarm.DataMapper;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
@@ -39,6 +40,13 @@ public class EventSerializer {
                     }};
                     ExceptionSerializer.serialize(result.getError(), resultData, "error");
                     put("result", resultData);
+                }});
+            case "io.cucumber.plugin.event.TestStepStarted":
+                TestStepStarted testStepStarted = (TestStepStarted) event;
+                return content(type, new LinkedHashMap<String, Object>() {{
+                    put("testCase", dataMapper.testCaseKey(testStepStarted.getTestCase()));
+                    put("timeInstant", testStepStarted.getInstant().toEpochMilli());
+                    put("testStep", testStepStarted.getTestCase().getTestSteps().indexOf(testStepStarted.getTestStep()));
                 }});
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + type);
