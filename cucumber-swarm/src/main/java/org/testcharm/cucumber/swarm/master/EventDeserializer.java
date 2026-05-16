@@ -1,6 +1,7 @@
 package org.testcharm.cucumber.swarm.master;
 
 import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.core.gherkin.Step;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
@@ -8,8 +9,11 @@ import org.testcharm.message.MessageConverterRegistry;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings("unchecked")
 public class EventDeserializer {
@@ -35,11 +39,24 @@ public class EventDeserializer {
             case "io.cucumber.messages.types.TestCase":
                 TestCase testCase = eventParser.getTestCase();
                 Pickle pickle = eventParser.getPickle();
-                return Envelope.of(new io.cucumber.messages.types.TestCase(testCase.getId().toString(), pickle.getId(), Collections.emptyList(),
-                        eventParser.get("testRunStartedId")));
+                return Envelope.of(new io.cucumber.messages.types.TestCase(testCase.getId().toString(), pickle.getId(),
+                        createTestSteps(testCase), eventParser.get("testRunStartedId")));
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
         }
+    }
+
+    private List<io.cucumber.messages.types.TestStep> createTestSteps(TestCase testCase) {
+        return testCase.getTestSteps().stream().map(this::createTestStep).collect(toList());
+    }
+
+    private io.cucumber.messages.types.TestStep createTestStep(TestStep testStep) {
+        if (testStep instanceof PickleStepTestStep) {
+            PickleStepTestStep pickleStepTestStep = (PickleStepTestStep) testStep;
+            return new io.cucumber.messages.types.TestStep(null, testStep.getId().toString(),
+                    ((Step) pickleStepTestStep.getStep()).getId(), emptyList(), emptyList());
+        }
+        return new io.cucumber.messages.types.TestStep(null, testStep.getId().toString(), null, emptyList(), emptyList());
     }
 
     private class EventParser {
