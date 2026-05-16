@@ -283,3 +283,43 @@ Feature: Master Worker Coordinate
         'INFO: Master shut down'
       ...]
       """
+
+  Scenario: run with feature file name
+    Given the feature file "test.feature":
+      """
+      Feature: test
+
+        Scenario: test
+          Given a step with implementation
+      """
+    Given the following class definition:
+      """
+      package steps;
+      import io.cucumber.java.en.*;
+
+      public class Steps {
+
+        @Given("a step with implementation")
+        public void a_step_with_implementation() {
+          System.out.println("step called");
+        }
+      }
+      """
+    When run cucumber with the following args:
+      """
+      '--glue'
+      'steps'
+      $path + 'features/test.feature'
+      """
+    Then the task result should be:
+      """
+      : {
+        code= 0
+        stdout.normalize= ```
+                          step called
+
+                          1 scenarios (1 passed)
+                          1 steps (1 passed)
+                          ```
+      }
+      """

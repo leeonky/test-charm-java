@@ -11,26 +11,26 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class DataMapper {
-    protected final List<URI> featurePaths;
     private final Repository<String, Pickle> pickleRepository = new Repository<>(this::pickleKey);
     private final Repository<String, Feature> featureRepository = new Repository<>(this::featureKey);
+    private final List<Path> featurePaths;
 
     public DataMapper(List<URI> featurePaths) {
-        this.featurePaths = featurePaths;
+        this.featurePaths = featurePaths.stream().filter(Objects::nonNull)
+                .map(Paths::get).map(Path::normalize).collect(Collectors.toList());
     }
 
     private String relativeUri(URI fileUri) {
         Path file = Paths.get(fileUri).normalize();
-        return featurePaths.stream()
-                .filter(Objects::nonNull)
-                .map(Paths::get)
-                .map(Path::normalize)
-                .filter(dir -> file.startsWith(dir) && !file.equals(dir))
-                .max(Comparator.comparingInt(Path::getNameCount))
-                .map(dir -> dir.relativize(file).toString())
-                .orElseThrow(() -> new IllegalArgumentException("Cannot relativize file: " + fileUri + " from " + featurePaths));
+        return featurePaths.stream().filter(file::equals).findFirst().map(path -> path.getFileName().toString())
+                .orElseGet(() -> featurePaths.stream()
+                        .filter(dir -> file.startsWith(dir) && !file.equals(dir))
+                        .max(Comparator.comparingInt(Path::getNameCount))
+                        .map(dir -> dir.relativize(file).toString())
+                        .orElseThrow(() -> new IllegalArgumentException("Cannot relativize file: " + fileUri + " from " + featurePaths)));
     }
 
     public String pickleKey(Pickle pickle) {
