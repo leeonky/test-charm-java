@@ -33,24 +33,7 @@ public class Main {
                 .withClassLoader(() -> classLoader)
                 .build(argvs.swarmArgs);
 
-//        Result worker = buildRuntimeOption(argvs.workerArgs);
-
-//        exitStatus = worker.commandlineOptionsParser.exitStatus();
-//        if (exitStatus.isPresent()) {
-//            return exitStatus.get();
-//        }
-//
-//        final WorkerRuntime workerRuntime = WorkerRuntime.builder()
-//                .withRuntimeOptions(worker.runtimeOptions)
-//                .withClassLoader(() -> classLoader)
-//                .build(argvs.swarmArgs);
-
-//        Thread thread = new Thread(workerRuntime::run);
-//        thread.start();
-
         masterRuntime.run();
-
-//        Sneaky.run(thread::join);
         return masterRuntime.exitStatus();
     }
 

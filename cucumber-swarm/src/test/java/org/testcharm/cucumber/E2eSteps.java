@@ -106,12 +106,13 @@ public class E2eSteps {
         expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log")))).should(expression);
     }
 
+    @SneakyThrows
     @Then("the following event should be emitted after cucumber run:")
     public void theFollowingEventShouldBeEmittedAfterCucumberRun(String expression) {
         TempDirectory dir = E2eSteps.globalTempDir().mkdir("dal");
         dir.write("verify.dal", expression.replace("$path$", cucumberDirectory.root().toAbsolutePath().toString()));
         run_cucumber_with_the_following_args(String.join("\n", "'--plugin'", "'org.testcharm.cucumber.swarm.EventCollectorPlugin'", "'--glue'", "'steps'", "$path + 'features'"));
-        the_output_should(": {...}");
+        process.waitFor();
 
         if (!dir.exist("passed")) {
             throw new AssertionError("\n" + dir.readAllText("failed"));

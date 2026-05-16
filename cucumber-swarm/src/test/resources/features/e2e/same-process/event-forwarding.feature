@@ -19,6 +19,15 @@ Feature: event serializer
           }
         }]
         """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
+        """
 
     Scenario: forward test case started with one PickleStepTestStep
       Given the feature file "test.feature":
@@ -54,6 +63,16 @@ Feature: event serializer
             }]
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
     Scenario: forward test case started with hook step
@@ -91,6 +110,16 @@ Feature: event serializer
             }]
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.SnippetsSuggestedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
   Rule: test step started
@@ -130,6 +159,16 @@ Feature: event serializer
             uri: 'file://$path$/features/test.feature'
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
     Scenario: forward test step HookTestStep and PickleStepTestStep started
@@ -182,6 +221,16 @@ Feature: event serializer
           }
         }]
         """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
+        """
 
   Rule: test step finished
 
@@ -226,6 +275,16 @@ Feature: event serializer
             error: null
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
     Scenario: forward test step PickleStepTestStep finished failed with serialized exception
@@ -273,6 +332,16 @@ Feature: event serializer
             }
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
     Scenario: forward test step PickleStepTestStep finished skipped
@@ -324,6 +393,17 @@ Feature: event serializer
           }
         }]
         """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
+        """
 
     Scenario: forward test step PickleStepTestStep finished pending
       Given the feature file "test.feature":
@@ -362,6 +442,16 @@ Feature: event serializer
           }
         }]
         """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
+        """
 
     Scenario: forward test step PickleStepTestStep finished undefined
       Given the feature file "test.feature":
@@ -386,6 +476,16 @@ Feature: event serializer
             error: null
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.SnippetsSuggestedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
     Scenario: forward test step PickleStepTestStep finished ambiguous
@@ -438,6 +538,17 @@ Feature: event serializer
           }
         }]
         """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
+        """
 
   Rule: test case finished
 
@@ -462,6 +573,15 @@ Feature: event serializer
             error: null
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
     Scenario: forward test case finished passed and one PickleStepTestStep
@@ -503,6 +623,16 @@ Feature: event serializer
             error: null
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
 
     Scenario: forward test case finished passed and hook step
@@ -550,4 +680,14 @@ Feature: event serializer
             error: null
           }
         }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore event forwarding'}: [
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+        ]
         """
