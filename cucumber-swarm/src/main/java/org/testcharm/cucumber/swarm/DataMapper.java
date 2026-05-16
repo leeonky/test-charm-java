@@ -8,6 +8,7 @@ import org.testcharm.cucumber.swarm.repo.Repository;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -51,10 +52,18 @@ public class DataMapper {
     }
 
     public Pickle pickle(String key) {
-        return pickleRepository.findById(key);
+        return pickleRepository.findByKey(key);
+    }
+
+    public Collection<Pickle> pickles() {
+        return pickleRepository.findAll();
     }
 
     public String testCaseKey(TestCase testCase) {
         return relativeUri(testCase.getUri()) + ":" + testCase.getLocation().getLine();
+    }
+
+    public Pickle pickleById(String pickleId) {
+        return pickleRepository.findBy(p -> p.getId().equals(pickleId)).get();
     }
 }

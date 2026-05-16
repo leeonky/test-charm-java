@@ -32,6 +32,12 @@ public class EventSerializer {
                 return eventBuilder(testStepFinished)
                         .setTestStep(testStepFinished.getTestCase(), testStepFinished.getTestStep())
                         .setResult(testStepFinished.getResult()).build();
+            case "io.cucumber.messages.types.TestCase":
+                io.cucumber.messages.types.TestCase testCase = (io.cucumber.messages.types.TestCase) event;
+                return envelopBuilder(event.getClass().getName())
+                        .setTestCase(testCase)
+                        .put("testRunStartedId", testCase.getTestRunStartedId().orElse(null)).build();
+
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + event.getClass().getName());
         }
@@ -41,13 +47,9 @@ public class EventSerializer {
         return new EventBuilder(event);
     }
 
-    class EventBuilder {
-        private final Map<String, Object> content = new LinkedHashMap<>();
-        private final Map<String, Object> data = new LinkedHashMap<>();
-
+    class EventBuilder extends Builder {
         EventBuilder(TestCaseEvent event) {
-            content.put("type", event.getClass().getName());
-            content.put("data", data);
+            super(event.getClass().getName());
             data.put("testCase", dataMapper.testCaseKey(event.getTestCase()));
             data.put("timeInstant", event.getInstant().toEpochMilli());
         }
@@ -65,6 +67,37 @@ public class EventSerializer {
             ExceptionSerializer.serialize(result.getError(), resultData, "error");
             data.put("result", resultData);
             return this;
+        }
+
+    }
+
+    EnvelopBuilder envelopBuilder(String type) {
+        return new EnvelopBuilder(type);
+    }
+
+    class EnvelopBuilder extends Builder {
+        EnvelopBuilder(String type) {
+            super(type);
+        }
+
+        EnvelopBuilder setTestCase(io.cucumber.messages.types.TestCase testCase) {
+            data.put("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())));
+            return this;
+        }
+
+        EnvelopBuilder put(String key, Object value) {
+            data.put(key, value);
+            return this;
+        }
+    }
+
+    static class Builder {
+        protected final Map<String, Object> content = new LinkedHashMap<>();
+        protected final Map<String, Object> data = new LinkedHashMap<>();
+
+        public Builder(String type) {
+            content.put("type", type);
+            content.put("data", data);
         }
 
         String build() {

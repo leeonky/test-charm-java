@@ -32,8 +32,14 @@ public class BuildInEventPublisher implements WorkerForwardingPluginExtension {
         });
 
         eventPublisher.registerHandlerFor(Envelope.class, event -> {
+            if (event.getTestCase().isPresent()) {
+                REMOTE.sendEvent(event.getTestCase().get());
+                return;
+            }
             if (!(event.getTestRunFinished().isPresent() || event.getTestRunStarted().isPresent()))
                 REMOTE.sendEventDeprecated(event);
+            else
+                log.info(() -> "ignore envelop forwarding: " + event);
         });
     }
 }

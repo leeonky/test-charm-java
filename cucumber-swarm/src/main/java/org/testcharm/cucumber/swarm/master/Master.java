@@ -69,7 +69,7 @@ public class Master {
 
     public void forwardEvent(String eventRecord) {
         Object deserialize = eventDeserializer.deserialize(eventRecord);
-        log.info(() -> "Forwarding event: " + deserialize);
+        log.info(() -> "Forwarding event: " + deserialize.getClass().getName());
         eventBus.send(deserialize);
     }
 }

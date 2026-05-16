@@ -1,11 +1,14 @@
 package org.testcharm.cucumber.swarm.master;
 
+import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.messages.types.Envelope;
 import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -29,6 +32,11 @@ public class EventDeserializer {
             case "io.cucumber.plugin.event.TestStepFinished":
                 return new TestStepFinished(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getTestStep(),
                         eventParser.getResult());
+            case "io.cucumber.messages.types.TestCase":
+                TestCase testCase = eventParser.getTestCase();
+                Pickle pickle = eventParser.getPickle();
+                return Envelope.of(new io.cucumber.messages.types.TestCase(testCase.getId().toString(), pickle.getId(), Collections.emptyList(),
+                        eventParser.get("testRunStartedId")));
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
         }
@@ -45,6 +53,10 @@ public class EventDeserializer {
             return dataMapper.testCase((String) data.get("testCase"));
         }
 
+        private Pickle getPickle() {
+            return dataMapper.pickle((String) data.get("testCase"));
+        }
+
         private Instant getInstant() {
             return Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue());
         }
@@ -58,6 +70,10 @@ public class EventDeserializer {
 
         public TestStep getTestStep() {
             return getTestCase().getTestSteps().get(((Number) data.get("testStep")).intValue());
+        }
+
+        public <T> T get(String key) {
+            return (T) data.get(key);
         }
     }
 }

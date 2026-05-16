@@ -2,6 +2,7 @@ package org.testcharm.cucumber.swarm.repo;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -26,7 +27,11 @@ public class Repository<K, E> {
         return map.isEmpty();
     }
 
-    public E findById(K id) {
+    public E findByKey(K id) {
         return map.get(id);
+    }
+
+    public Optional<E> findBy(Function<E, Boolean> predicate) {
+        return map.values().stream().filter(predicate::apply).findFirst();
     }
 }

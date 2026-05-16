@@ -27,7 +27,7 @@ public class Controller {
         restfulServer.requestHandler("GET", "/pickle", context -> {
             int workerId = Integer.parseInt(context.header("X-Worker-Id"));
             log.info(() -> String.format("Received worker<%d> pickle request", workerId));
-            String pickleKey = dataMapper.pickleKey(master.requestPickle(workerRepository.findById(workerId)));
+            String pickleKey = dataMapper.pickleKey(master.requestPickle(workerRepository.findByKey(workerId)));
             log.info(() -> String.format("Send pickle<%s> to worker<%d>", pickleKey, workerId));
             context.responseOk(pickleKey);
         });

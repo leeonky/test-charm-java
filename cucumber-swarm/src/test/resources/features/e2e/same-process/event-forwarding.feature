@@ -1,4 +1,4 @@
-Feature: event serializer
+Feature: event in io.cucumber.plugin.event forwarding
 
   Rule: test case started
 

@@ -1,5 +1,6 @@
 package org.testcharm.cucumber.swarm;
 
+import io.cucumber.messages.types.Envelope;
 import io.cucumber.plugin.ConcurrentEventListener;
 import io.cucumber.plugin.event.*;
 import org.testcharm.io.TempDirectory;
@@ -28,6 +29,7 @@ public class EventCollectorPlugin implements ConcurrentEventListener {
         publisher.registerHandlerFor(TestStepStarted.class, this::saveEvent);
         publisher.registerHandlerFor(TestStepFinished.class, this::saveEvent);
         publisher.registerHandlerFor(TestCaseFinished.class, this::saveEvent);
+        publisher.registerHandlerFor(Envelope.class, this::saveEvent);
 
         publisher.registerHandlerFor(TestRunFinished.class, event -> {
             if (index != null) {
