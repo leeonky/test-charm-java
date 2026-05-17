@@ -12,6 +12,9 @@ public class WorkerArgsPreProcessor {
         masterArgs.add("--threads");
         masterArgs.add("1");
 
+        masterArgs.add("--plugin");
+        masterArgs.add(MasterPlugin.class.getName());
+
         List<String> workerArgs = new ArrayList<>();
         workerArgs.add("--threads");
         workerArgs.add("1");

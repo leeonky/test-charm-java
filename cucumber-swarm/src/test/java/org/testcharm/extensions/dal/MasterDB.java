@@ -13,7 +13,7 @@ public class MasterDB implements Extension {
         dal.getRuntimeContextBuilder().registerMetaProperty("DB", new RuntimeHandler<MetaData<?>>() {
             @Override
             public Object handle(MetaData<?> metaData) {
-                return MasterDataMapper.getInstanceForTest();
+                return MasterDataMapper.instance();
             }
         });
     }

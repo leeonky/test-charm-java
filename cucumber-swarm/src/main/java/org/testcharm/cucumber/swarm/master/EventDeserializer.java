@@ -3,6 +3,8 @@ package org.testcharm.cucumber.swarm.master;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.gherkin.Step;
 import io.cucumber.messages.types.Envelope;
+import io.cucumber.messages.types.StepMatchArgument;
+import io.cucumber.messages.types.StepMatchArgumentsList;
 import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
@@ -12,8 +14,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.testcharm.util.Zipped.zip;
 
 @SuppressWarnings("unchecked")
 public class EventDeserializer {
@@ -40,24 +43,12 @@ public class EventDeserializer {
                 TestCase testCase = eventParser.getTestCase();
                 Pickle pickle = eventParser.getPickle();
                 return Envelope.of(new io.cucumber.messages.types.TestCase(testCase.getId().toString(), pickle.getId(),
-                        createTestSteps(testCase), eventParser.get("testRunStartedId")));
+                        eventParser.createTestSteps(testCase), eventParser.get("testRunStartedId")));
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
         }
     }
 
-    private List<io.cucumber.messages.types.TestStep> createTestSteps(TestCase testCase) {
-        return testCase.getTestSteps().stream().map(this::createTestStep).collect(toList());
-    }
-
-    private io.cucumber.messages.types.TestStep createTestStep(TestStep testStep) {
-        if (testStep instanceof PickleStepTestStep) {
-            PickleStepTestStep pickleStepTestStep = (PickleStepTestStep) testStep;
-            return new io.cucumber.messages.types.TestStep(null, testStep.getId().toString(),
-                    ((Step) pickleStepTestStep.getStep()).getId(), emptyList(), emptyList());
-        }
-        return new io.cucumber.messages.types.TestStep(null, testStep.getId().toString(), null, emptyList(), emptyList());
-    }
 
     private class EventParser {
         private final Map<String, Object> data;
@@ -92,5 +83,26 @@ public class EventDeserializer {
         public <T> T get(String key) {
             return (T) data.get(key);
         }
+
+        public List<io.cucumber.messages.types.TestStep> createTestSteps(TestCase testCase) {
+            return zip(testCase.getTestSteps(), this.<List<Map<String, Object>>>get("testSteps"))
+                    .stream().map(zippedEntry -> {
+                        PickleStepTestStep pickleStepTestStep = (PickleStepTestStep) zippedEntry.left();
+                        List<String> stepDefinitionIds = (List<String>) zippedEntry.right().get("stepDefinitionIds");
+                        if (stepDefinitionIds != null)
+                            stepDefinitionIds = stepDefinitionIds.stream().map(key -> dataMapper.stepDefinition(key).getId()).collect(toList());
+                        return new io.cucumber.messages.types.TestStep(null, pickleStepTestStep.getId().toString(),
+                                ((Step) pickleStepTestStep.getStep()).getId(), stepDefinitionIds,
+                                singletonList(new StepMatchArgumentsList(pickleStepTestStep.getDefinitionArgument().stream()
+                                        .map(argument -> new StepMatchArgument(createGroup(argument.getGroup()), argument.getParameterTypeName()))
+                                        .collect(toList()))));
+                    }).collect(toList());
+        }
+
+        private io.cucumber.messages.types.Group createGroup(io.cucumber.plugin.event.Group group) {
+            return new io.cucumber.messages.types.Group(group.getChildren().stream().map(this::createGroup).collect(toList()),
+                    (long) group.getStart(), group.getValue());
+        }
+
     }
 }

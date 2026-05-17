@@ -1,7 +1,9 @@
 package org.testcharm.cucumber.swarm;
 
+import io.cucumber.messages.types.Envelope;
 import io.cucumber.plugin.ConcurrentEventListener;
 import io.cucumber.plugin.event.EventPublisher;
+import org.testcharm.cucumber.swarm.worker.WorkerDataMapper;
 import org.testcharm.util.Classes;
 
 import static java.util.stream.Stream.concat;
@@ -15,5 +17,11 @@ public class WorkerForwardingPlugin implements ConcurrentEventListener {
                 subTypesOf(WorkerForwardingPluginExtension.class, "org.testcharm.extensions.cucumber").stream())
                 .map(Classes::newInstance)
                 .forEach(e -> e.setEventPublisher(eventPublisher));
+
+        eventPublisher.registerHandlerFor(Envelope.class, envelop -> {
+            if (envelop.getStepDefinition().isPresent()) {
+                WorkerDataMapper.instance().mapStepDefinition(envelop.getStepDefinition().get());
+            }
+        });
     }
 }

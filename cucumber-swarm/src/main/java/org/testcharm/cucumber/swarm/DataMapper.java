@@ -2,6 +2,7 @@ package org.testcharm.cucumber.swarm;
 
 import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.messages.types.StepDefinition;
 import io.cucumber.plugin.event.TestCase;
 import org.testcharm.cucumber.swarm.repo.Repository;
 
@@ -65,5 +66,9 @@ public class DataMapper {
 
     public Pickle pickleById(String pickleId) {
         return pickleRepository.findBy(p -> p.getId().equals(pickleId)).get();
+    }
+
+    public String stepDefinitionKey(StepDefinition stepDefinition) {
+        return stepDefinition.getPattern().toString() + stepDefinition.getSourceReference().toString();
     }
 }

@@ -6,10 +6,10 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.plugin.event.TestCase;
 import org.testcharm.cucumber.builder.Builder;
-import org.testcharm.cucumber.swarm.DataMapper;
 import org.testcharm.cucumber.swarm.master.EventDeserializer;
 import org.testcharm.cucumber.swarm.master.MasterDataMapper;
 import org.testcharm.cucumber.swarm.worker.EventSerializer;
+import org.testcharm.cucumber.swarm.worker.WorkerDataMapper;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.jfactory.Spec;
 import org.testcharm.jfactory.cucumber.JData;
@@ -47,7 +47,7 @@ public class UTSteps {
 
     public static class UTTestContext {
         private final Path executorRoot = Paths.get("/executor/");
-        private final EventSerializer eventSerializer = new EventSerializer(new DataMapper(singletonList(executorRoot.toUri())));
+        private final EventSerializer eventSerializer = new EventSerializer(new WorkerDataMapper(singletonList(executorRoot.toUri())));
 
         private final Path masterRoot = Paths.get("/master/");
         private final MasterDataMapper masterDataMapper = new MasterDataMapper(singletonList(masterRoot.toUri()), null);

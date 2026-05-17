@@ -1,17 +1,18 @@
 package org.testcharm.cucumber.swarm.worker;
 
 import io.cucumber.plugin.event.*;
-import org.testcharm.cucumber.swarm.DataMapper;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EventSerializer {
-    public final DataMapper dataMapper;
+import static java.util.stream.Collectors.toList;
 
-    public EventSerializer(DataMapper dataMapper) {
+public class EventSerializer {
+    public final WorkerDataMapper dataMapper;
+
+    public EventSerializer(WorkerDataMapper dataMapper) {
         this.dataMapper = dataMapper;
     }
 
@@ -82,12 +83,23 @@ public class EventSerializer {
 
         EnvelopBuilder setTestCase(io.cucumber.messages.types.TestCase testCase) {
             data.put("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())));
+            data.put("testSteps", testCase.getTestSteps().stream().map(this::serializeTestStep).collect(toList()));
             return this;
         }
 
         EnvelopBuilder put(String key, Object value) {
             data.put(key, value);
             return this;
+        }
+
+        private Map<String, Object> serializeTestStep(io.cucumber.messages.types.TestStep testStep) {
+            return new LinkedHashMap<String, Object>() {
+                {
+                    put("stepDefinitionIds", testStep.getStepDefinitionIds().map(ids ->
+                            ids.stream().map(dataMapper::transformStepDefinitionIdToKey).collect(toList())).orElse(null));
+                }
+
+            };
         }
     }
 

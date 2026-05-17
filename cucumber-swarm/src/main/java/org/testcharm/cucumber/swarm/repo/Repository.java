@@ -28,7 +28,11 @@ public class Repository<K, E> {
     }
 
     public E findByKey(K id) {
-        return map.get(id);
+        E e = map.get(id);
+        if (e == null)
+//            TODO test
+            throw new RuntimeException("No instance found for id: " + id);
+        return e;
     }
 
     public Optional<E> findBy(Function<E, Boolean> predicate) {
