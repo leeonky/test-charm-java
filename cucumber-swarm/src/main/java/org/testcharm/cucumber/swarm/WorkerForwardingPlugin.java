@@ -21,6 +21,7 @@ public class WorkerForwardingPlugin implements ConcurrentEventListener {
         eventPublisher.registerHandlerFor(Envelope.class, envelop -> {
             envelop.getStepDefinition().ifPresent(stepDefinition -> WorkerDataMapper.instance().mapStepDefinition(stepDefinition));
             envelop.getHook().ifPresent(hook -> WorkerDataMapper.instance().mapHook(hook));
+            envelop.getTestCase().ifPresent(testCase -> WorkerDataMapper.instance().mapTestCase(testCase));
         });
     }
 }

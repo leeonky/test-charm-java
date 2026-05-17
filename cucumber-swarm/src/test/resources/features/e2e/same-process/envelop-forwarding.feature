@@ -53,6 +53,7 @@ Feature: envelop forwarding
             id: ::DB.testCases[0].id
             pickleId: ::DB.pickles[0].id
             testSteps: [{
+              hookId.present: false
               id: ::DB.testCases[0].testSteps[0].id
               pickleStepId.get: ::DB.pickles[0].steps[0].id
               stepDefinitionIds.get: [::DB.stepDefinitions[0].id]
@@ -205,7 +206,9 @@ Feature: envelop forwarding
             pickleId: ::DB.pickles[0].id
             testSteps: [{
               id: ::DB.testCases[0].testSteps[0].id
+              pickleStepId.present: false
               hookId.get: ::DB.hooks[0].id
+              stepDefinitionIds.get: []
             },
             {
               id: ::DB.testCases[0].testSteps[1].id
@@ -222,3 +225,30 @@ Feature: envelop forwarding
           {contains: 'testRunFinished=TestRunFinished'}
         ]
         """
+
+  Rule: test case started
+
+    Scenario: forward test case started
+      Given the feature file "test.feature":
+          """
+          Feature: test
+          Scenario: test
+          """
+      Then the following event should be emitted after cucumber run:
+          """
+          [io.cucumber.messages.types.Envelope]::filter: {testCaseStarted.present: true}: [{
+            testCaseStarted.get: {
+              id: {...}
+              testCaseId: ::DB.testCases[0].id
+              workerId.get: {...}
+              timestamp: {...}
+            }
+          }]
+          """
+      And the log should:
+          """
+          lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
+            {contains: 'testRunStarted=TestRunStarted'}
+            {contains: 'testRunFinished=TestRunFinished'}
+          ]
+          """

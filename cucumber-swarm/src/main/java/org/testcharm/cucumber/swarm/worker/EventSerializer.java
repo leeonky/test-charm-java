@@ -4,6 +4,7 @@ import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,6 +40,17 @@ public class EventSerializer {
                         .setTestCase(testCase)
                         .put("testRunStartedId", testCase.getTestRunStartedId().orElse(null)).build();
 
+            case "io.cucumber.messages.types.TestCaseStarted":
+                io.cucumber.messages.types.TestCaseStarted testCaseStarted = (io.cucumber.messages.types.TestCaseStarted) event;
+                return envelopBuilder(event.getClass().getName())
+                        .put("attempt", testCaseStarted.getAttempt())
+                        .put("id", testCaseStarted.getId())
+                        .put("testCaseId", dataMapper.transformTestCaseIdToKey(testCaseStarted.getTestCaseId()))
+                        .put("workerId", testCaseStarted.getWorkerId().orElse(null))
+                        .put("timestamp", new HashMap<String, Long>() {{
+                            put("seconds", testCaseStarted.getTimestamp().getSeconds());
+                            put("nanos", testCaseStarted.getTimestamp().getNanos());
+                        }}).build();
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + event.getClass().getName());
         }

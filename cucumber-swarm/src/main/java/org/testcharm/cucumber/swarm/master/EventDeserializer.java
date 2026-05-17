@@ -5,6 +5,7 @@ import io.cucumber.core.gherkin.Step;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.StepMatchArgument;
 import io.cucumber.messages.types.StepMatchArgumentsList;
+import io.cucumber.messages.types.Timestamp;
 import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
@@ -43,6 +44,14 @@ public class EventDeserializer {
                 Pickle pickle = eventParser.getPickle();
                 return Envelope.of(new io.cucumber.messages.types.TestCase(testCase.getId().toString(), pickle.getId(),
                         eventParser.createTestSteps(testCase), eventParser.get("testRunStartedId")));
+            case "io.cucumber.messages.types.TestCaseStarted":
+                return Envelope.of(new io.cucumber.messages.types.TestCaseStarted(
+                        ((Number) eventParser.get("attempt")).longValue(),
+                        eventParser.get("id"),
+                        dataMapper.testCase(eventParser.get("testCaseId")).getId().toString(),
+                        eventParser.get("workerId"),
+                        eventParser.getTimestamp()
+                ));
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
         }
@@ -121,6 +130,11 @@ public class EventDeserializer {
             return new io.cucumber.messages.types.Group(
                     ((List<Map<String, Object>>) group.get("children")).stream().map(this::deserializeGroup).collect(toList()),
                     ((Number) group.get("start")).longValue(), (String) group.get("value"));
+        }
+
+        public Timestamp getTimestamp() {
+            Map<String, Number> timestampData = get("timestamp");
+            return new Timestamp(timestampData.get("seconds").longValue(), timestampData.get("nanos").longValue());
         }
     }
 }
