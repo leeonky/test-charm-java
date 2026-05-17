@@ -93,13 +93,30 @@ public class EventSerializer {
         }
 
         private Map<String, Object> serializeTestStep(io.cucumber.messages.types.TestStep testStep) {
-            return new LinkedHashMap<String, Object>() {
-                {
-                    put("stepDefinitionIds", testStep.getStepDefinitionIds().map(ids ->
-                            ids.stream().map(dataMapper::transformStepDefinitionIdToKey).collect(toList())).orElse(null));
-                }
+            return new LinkedHashMap<String, Object>() {{
+                put("stepDefinitionIds", testStep.getStepDefinitionIds().map(ids ->
+                        ids.stream().map(dataMapper::transformStepDefinitionIdToKey).collect(toList())).orElse(null));
 
-            };
+                put("stepMatchArgumentsLists", testStep.getStepMatchArgumentsLists().map(stepMatchArgumentsLists -> {
+                    return stepMatchArgumentsLists.stream().map(argList -> {
+                        return new LinkedHashMap<String, Object>() {{
+                            put("stepMatchArguments", argList.getStepMatchArguments().stream().map(arg -> new LinkedHashMap<String, Object>() {{
+                                put("group", serializeGroup(arg.getGroup(), new LinkedHashMap<>()));
+                                put("parameterTypeName", arg.getParameterTypeName().orElse(null));
+                            }}).collect(toList()));
+                        }};
+                    }).collect(toList());
+                }).orElse(null));
+            }};
+        }
+
+        private Map<String, Object> serializeGroup(io.cucumber.messages.types.Group group, Map<String, Object> data) {
+            data.put("children", group.getChildren().stream()
+                    .map(child -> serializeGroup(child, new LinkedHashMap<>()))
+                    .collect(toList()));
+            data.put("start", group.getStart().orElse(null));
+            data.put("value", group.getValue().orElse(null));
+            return data;
         }
     }
 

@@ -46,7 +46,7 @@ class WorkerArgsPreProcessorTest {
                 String[] argv = {"--no-summary", "features"};
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
-                expect(buildOptions(result.masterArgs)).should("plugins: []");
+                expect(buildOptions(result.masterArgs)).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.MasterPlugin}]");
                 expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
             }
 
@@ -55,7 +55,8 @@ class WorkerArgsPreProcessorTest {
                 String[] argv = {"features"};
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
-                expect(buildOptions(result.masterArgs)).should("plugins: [{pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter}]");
+                expect(buildOptions(result.masterArgs)).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.MasterPlugin}" +
+                        "{pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter}]");
                 expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
             }
         }
@@ -68,7 +69,11 @@ class WorkerArgsPreProcessorTest {
                 String[] argv = {"--plugin", "pretty", "features"};
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
-                expect(buildOptions(result.masterArgs)).should("plugins: [{pluginString: pretty} {pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter}]");
+                expect(buildOptions(result.masterArgs)).should("plugins: [" +
+                        "{pluginString: org.testcharm.cucumber.swarm.MasterPlugin} " +
+                        "{pluginString: pretty} " +
+                        "{pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter} " +
+                        "]");
                 expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
             }
         }

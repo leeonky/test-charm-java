@@ -15,6 +15,7 @@ import org.testcharm.util.Sneaky;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -69,7 +70,8 @@ public class E2eSteps {
         classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
         args.add("-Djava.util.logging.config.file=" + cucumberDirectory.resolve("logging.properties").toAbsolutePath());
-//        args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
+        if (isDebugging())
+            args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
         args.add("-cp");
         args.add(classpath);
         args.add(Main.class.getName());
@@ -79,6 +81,14 @@ public class E2eSteps {
             put("path", cucumberDirectory.root().toString() + File.separator);
         }}).forEach(e -> args.add(String.valueOf(e)));
         process = new ProcessBuilder(args.toArray(new String[0])).start();
+    }
+
+    public static boolean isDebugging() {
+        List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
+        for (String a : args) {
+            if (a.contains("-agentlib:jdwp")) return true;
+        }
+        return false;
     }
 
     @Then("the task result should be:")

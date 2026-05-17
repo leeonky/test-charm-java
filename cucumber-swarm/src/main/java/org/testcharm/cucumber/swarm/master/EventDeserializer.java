@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.util.Zipped.zip;
 
@@ -87,22 +86,40 @@ public class EventDeserializer {
         public List<io.cucumber.messages.types.TestStep> createTestSteps(TestCase testCase) {
             return zip(testCase.getTestSteps(), this.<List<Map<String, Object>>>get("testSteps"))
                     .stream().map(zippedEntry -> {
-                        PickleStepTestStep pickleStepTestStep = (PickleStepTestStep) zippedEntry.left();
                         List<String> stepDefinitionIds = (List<String>) zippedEntry.right().get("stepDefinitionIds");
                         if (stepDefinitionIds != null)
                             stepDefinitionIds = stepDefinitionIds.stream().map(key -> dataMapper.stepDefinition(key).getId()).collect(toList());
-                        return new io.cucumber.messages.types.TestStep(null, pickleStepTestStep.getId().toString(),
-                                ((Step) pickleStepTestStep.getStep()).getId(), stepDefinitionIds,
-                                singletonList(new StepMatchArgumentsList(pickleStepTestStep.getDefinitionArgument().stream()
-                                        .map(argument -> new StepMatchArgument(createGroup(argument.getGroup()), argument.getParameterTypeName()))
-                                        .collect(toList()))));
+
+                        List<StepMatchArgumentsList> stepMatchArgumentsLists = null;
+                        List<Map<String, List<Map<String, Object>>>> stepMatchArgumentsListsData =
+                                (List<Map<String, List<Map<String, Object>>>>) zippedEntry.right().get("stepMatchArgumentsLists");
+                        if (stepMatchArgumentsListsData != null) {
+                            stepMatchArgumentsLists = stepMatchArgumentsListsData.stream().map(stepMatchArgumentsList -> {
+                                List<StepMatchArgument> collect = stepMatchArgumentsList.get("stepMatchArguments").stream().map(stepMatchArgument -> {
+                                    return new StepMatchArgument(deserializeGroup((Map<String, Object>) stepMatchArgument.get("group")),
+                                            (String) stepMatchArgument.get("parameterTypeName"));
+                                }).collect(toList());
+                                return new StepMatchArgumentsList(collect);
+                            }).collect(toList());
+                        }
+                        String id = zippedEntry.left().getId().toString();
+                        String pickleStepId = null, hookId = null;
+
+                        if (zippedEntry.left() instanceof PickleStepTestStep) {
+                            PickleStepTestStep pickleStepTestStep = (PickleStepTestStep) zippedEntry.left();
+                            pickleStepId = ((Step) pickleStepTestStep.getStep()).getId();
+                        } else if (zippedEntry.left() instanceof HookTestStep) {
+
+                        }
+                        return new io.cucumber.messages.types.TestStep(hookId, id, pickleStepId, stepDefinitionIds,
+                                stepMatchArgumentsLists);
                     }).collect(toList());
         }
 
-        private io.cucumber.messages.types.Group createGroup(io.cucumber.plugin.event.Group group) {
-            return new io.cucumber.messages.types.Group(group.getChildren().stream().map(this::createGroup).collect(toList()),
-                    (long) group.getStart(), group.getValue());
+        private io.cucumber.messages.types.Group deserializeGroup(Map<String, Object> group) {
+            return new io.cucumber.messages.types.Group(
+                    ((List<Map<String, Object>>) group.get("children")).stream().map(this::deserializeGroup).collect(toList()),
+                    ((Number) group.get("start")).longValue(), (String) group.get("value"));
         }
-
     }
 }
