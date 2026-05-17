@@ -2,6 +2,7 @@ package org.testcharm.cucumber.swarm.master;
 
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.runner.TestCaseFactory;
+import io.cucumber.messages.types.Hook;
 import io.cucumber.messages.types.StepDefinition;
 import io.cucumber.plugin.event.TestCase;
 import org.testcharm.cucumber.swarm.DataMapper;
@@ -15,6 +16,7 @@ public class MasterDataMapper extends DataMapper {
     private final Repository<String, TestCase> testCaseRepository = new Repository<>(this::testCaseKey);
     private final TestCaseFactory testCaseFactory;
     private final Repository<String, StepDefinition> stepDefinitionRepository = new Repository<>(this::stepDefinitionKey);
+    private final Repository<String, Hook> hookRepository = new Repository<>(this::hookKey);
 
     private static MasterDataMapper instance;
 
@@ -32,6 +34,10 @@ public class MasterDataMapper extends DataMapper {
         testCaseRepository.save(testCase);
     }
 
+    public void mapHook(Hook hook) {
+        hookRepository.save(hook);
+    }
+
     public TestCase testCase(String key) {
         return testCaseRepository.findByKey(key);
     }
@@ -44,6 +50,10 @@ public class MasterDataMapper extends DataMapper {
         return stepDefinitionRepository.findAll();
     }
 
+    public Collection<Hook> hooks() {
+        return hookRepository.findAll();
+    }
+
     @Override
     public void mapGherkinPickle(Pickle pickle) {
         super.mapGherkinPickle(pickle);
@@ -54,7 +64,11 @@ public class MasterDataMapper extends DataMapper {
         stepDefinitionRepository.save(stepDefinition);
     }
 
-    public StepDefinition stepDefinition(String id) {
-        return stepDefinitionRepository.findByKey(id);
+    public StepDefinition stepDefinition(String key) {
+        return stepDefinitionRepository.findByKey(key);
+    }
+
+    public Hook hook(String key) {
+        return hookRepository.findByKey(key);
     }
 }

@@ -94,6 +94,7 @@ public class EventSerializer {
 
         private Map<String, Object> serializeTestStep(io.cucumber.messages.types.TestStep testStep) {
             return new LinkedHashMap<String, Object>() {{
+                put("hookId", testStep.getHookId().map(dataMapper::transformHookIdToKey).orElse(null));
                 put("stepDefinitionIds", testStep.getStepDefinitionIds().map(ids ->
                         ids.stream().map(dataMapper::transformStepDefinitionIdToKey).collect(toList())).orElse(null));
 

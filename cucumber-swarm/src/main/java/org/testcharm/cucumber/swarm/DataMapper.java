@@ -2,6 +2,7 @@ package org.testcharm.cucumber.swarm;
 
 import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
+import io.cucumber.messages.types.Hook;
 import io.cucumber.messages.types.StepDefinition;
 import io.cucumber.plugin.event.TestCase;
 import org.testcharm.cucumber.swarm.repo.Repository;
@@ -70,5 +71,9 @@ public class DataMapper {
 
     public String stepDefinitionKey(StepDefinition stepDefinition) {
         return stepDefinition.getPattern().toString() + stepDefinition.getSourceReference().toString();
+    }
+
+    public String hookKey(Hook hook) {
+        return hook.getName().orElse(null) + hook.getSourceReference().toString() + hook.getTagExpression().orElse(null) + hook.getType().orElse(null);
     }
 }

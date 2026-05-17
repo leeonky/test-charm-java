@@ -16,8 +16,9 @@ public class MasterPlugin implements ConcurrentEventListener {
                 subTypesOf(MasterPluginExtension.class, "org.testcharm.extensions.cucumber").stream())
                 .map(Classes::newInstance)
                 .forEach(e -> e.setEventPublisher(publisher));
-        publisher.registerHandlerFor(Envelope.class, envelop ->
-                envelop.getStepDefinition().ifPresent(stepDefinition ->
-                        MasterDataMapper.instance().mapStepDefinition(stepDefinition)));
+        publisher.registerHandlerFor(Envelope.class, envelop -> {
+            envelop.getStepDefinition().ifPresent(stepDefinition -> MasterDataMapper.instance().mapStepDefinition(stepDefinition));
+            envelop.getHook().ifPresent(hook -> MasterDataMapper.instance().mapHook(hook));
+        });
     }
 }

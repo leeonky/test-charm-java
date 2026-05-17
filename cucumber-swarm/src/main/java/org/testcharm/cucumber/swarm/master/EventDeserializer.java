@@ -103,14 +103,15 @@ public class EventDeserializer {
                             }).collect(toList());
                         }
                         String id = zippedEntry.left().getId().toString();
-                        String pickleStepId = null, hookId = null;
+                        String pickleStepId = null;
 
                         if (zippedEntry.left() instanceof PickleStepTestStep) {
                             PickleStepTestStep pickleStepTestStep = (PickleStepTestStep) zippedEntry.left();
                             pickleStepId = ((Step) pickleStepTestStep.getStep()).getId();
-                        } else if (zippedEntry.left() instanceof HookTestStep) {
-
                         }
+                        String hookId = (String) zippedEntry.right().get("hookId");
+                        if (hookId != null)
+                            hookId = dataMapper.hook(hookId).getId();
                         return new io.cucumber.messages.types.TestStep(hookId, id, pickleStepId, stepDefinitionIds,
                                 stepMatchArgumentsLists);
                     }).collect(toList());
