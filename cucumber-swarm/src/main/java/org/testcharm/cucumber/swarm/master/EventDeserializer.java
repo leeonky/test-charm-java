@@ -39,11 +39,12 @@ public class EventDeserializer {
             case "io.cucumber.plugin.event.TestStepFinished":
                 return new TestStepFinished(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getTestStep(),
                         eventParser.getResult());
-            case "io.cucumber.messages.types.TestCase":
+            case "io.cucumber.messages.types.TestCase": {
                 TestCase testCase = eventParser.getTestCase();
                 Pickle pickle = eventParser.getPickle();
                 return Envelope.of(new io.cucumber.messages.types.TestCase(testCase.getId().toString(), pickle.getId(),
                         eventParser.createTestSteps(testCase), eventParser.get("testRunStartedId")));
+            }
             case "io.cucumber.messages.types.TestCaseStarted":
                 return Envelope.of(new io.cucumber.messages.types.TestCaseStarted(
                         ((Number) eventParser.get("attempt")).longValue(),
@@ -52,6 +53,14 @@ public class EventDeserializer {
                         eventParser.get("workerId"),
                         eventParser.getTimestamp()
                 ));
+            case "io.cucumber.messages.types.TestStepStarted": {
+                TestCase testCase = eventParser.getTestCase();
+                return Envelope.of(new io.cucumber.messages.types.TestStepStarted(
+                        eventParser.get("testCaseStartedId"),
+                        testCase.getTestSteps().get(eventParser.get("testStepId")).getId().toString(),
+                        eventParser.getTimestamp()
+                ));
+            }
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
         }

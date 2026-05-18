@@ -3,6 +3,7 @@ package org.testcharm.cucumber.swarm.worker;
 import io.cucumber.messages.types.Hook;
 import io.cucumber.messages.types.StepDefinition;
 import io.cucumber.messages.types.TestCase;
+import io.cucumber.messages.types.TestStep;
 import org.testcharm.cucumber.swarm.DataMapper;
 import org.testcharm.cucumber.swarm.repo.Repository;
 
@@ -54,5 +55,10 @@ public class WorkerDataMapper extends DataMapper {
 
     public String transformTestCaseIdToKey(String id) {
         return pickleKey(pickleById(testCaseRepository.findByKey(id).getPickleId()));
+    }
+
+    public TestCase testCaseByStepId(String testStepId) {
+        return testCaseRepository.findBy(testCase ->
+                testCase.getTestSteps().stream().map(TestStep::getId).anyMatch(testStepId::equals)).get();
     }
 }

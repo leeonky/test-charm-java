@@ -6,6 +6,7 @@ import org.testcharm.message.MessageConverterRegistry;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
@@ -34,11 +35,12 @@ public class EventSerializer {
                 return eventBuilder(testStepFinished)
                         .setTestStep(testStepFinished.getTestCase(), testStepFinished.getTestStep())
                         .setResult(testStepFinished.getResult()).build();
-            case "io.cucumber.messages.types.TestCase":
+            case "io.cucumber.messages.types.TestCase": {
                 io.cucumber.messages.types.TestCase testCase = (io.cucumber.messages.types.TestCase) event;
                 return envelopBuilder(event.getClass().getName())
                         .setTestCase(testCase)
                         .put("testRunStartedId", testCase.getTestRunStartedId().orElse(null)).build();
+            }
 
             case "io.cucumber.messages.types.TestCaseStarted":
                 io.cucumber.messages.types.TestCaseStarted testCaseStarted = (io.cucumber.messages.types.TestCaseStarted) event;
@@ -51,6 +53,19 @@ public class EventSerializer {
                             put("seconds", testCaseStarted.getTimestamp().getSeconds());
                             put("nanos", testCaseStarted.getTimestamp().getNanos());
                         }}).build();
+            case "io.cucumber.messages.types.TestStepStarted": {
+                io.cucumber.messages.types.TestStepStarted testStepStartedMessage = (io.cucumber.messages.types.TestStepStarted) event;
+                io.cucumber.messages.types.TestCase testCase = dataMapper.testCaseByStepId(testStepStartedMessage.getTestStepId());
+                List<String> stepIds = testCase.getTestSteps().stream().map(io.cucumber.messages.types.TestStep::getId).collect(toList());
+                return envelopBuilder(event.getClass().getName())
+                        .put("testCaseStartedId", testStepStartedMessage.getTestCaseStartedId())
+                        .put("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())))
+                        .put("testStepId", stepIds.indexOf(testStepStartedMessage.getTestStepId()))
+                        .put("timestamp", new HashMap<String, Long>() {{
+                            put("seconds", testStepStartedMessage.getTimestamp().getSeconds());
+                            put("nanos", testStepStartedMessage.getTimestamp().getNanos());
+                        }}).build();
+            }
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + event.getClass().getName());
         }

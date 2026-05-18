@@ -238,6 +238,7 @@ Feature: envelop forwarding
           """
           [io.cucumber.messages.types.Envelope]::filter: {testCaseStarted.present: true}: [{
             testCaseStarted.get: {
+              attempt: {...}
               id: {...}
               testCaseId: ::DB.testCases[0].id
               workerId.get: {...}
@@ -252,3 +253,43 @@ Feature: envelop forwarding
             {contains: 'testRunFinished=TestRunFinished'}
           ]
           """
+
+  Rule: test step started
+
+    Scenario: forward test step started with one PickleStepTestStep
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+        """
+      Given the following class definition:
+        """
+        package steps;
+        import io.cucumber.java.en.*;
+
+        public class Steps {
+
+          @Given("a step with implementation")
+          public void a_step_with_implementation() {
+            System.out.println("step called");
+          }
+        }
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.messages.types.Envelope]::filter: {testStepStarted.present: true}: [{
+          testStepStarted.get: {
+            testCaseStartedId: (::root[io.cucumber.messages.types.Envelope]::filter: {testCaseStarted.present: true}).testCaseStarted.get.id
+            testStepId: ::DB.testCases[0].testSteps[0].id
+            timestamp: {...}
+          }
+        }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
+          {contains: 'testRunStarted=TestRunStarted'}
+          {contains: 'testRunFinished=TestRunFinished'}
+        ]
+        """

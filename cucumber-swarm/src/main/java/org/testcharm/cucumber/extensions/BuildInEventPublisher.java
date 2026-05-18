@@ -40,6 +40,10 @@ public class BuildInEventPublisher implements WorkerForwardingPluginExtension {
                 REMOTE.sendEvent(event.getTestCaseStarted().get());
                 return;
             }
+            if (event.getTestStepStarted().isPresent()) {
+                REMOTE.sendEvent(event.getTestStepStarted().get());
+                return;
+            }
             if (!(event.getTestRunFinished().isPresent() || event.getTestRunStarted().isPresent()))
                 REMOTE.sendEventDeprecated(event);
             else
