@@ -2,10 +2,14 @@ package org.testcharm.cucumber.swarm.master;
 
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.gherkin.Step;
-import io.cucumber.messages.types.Envelope;
-import io.cucumber.messages.types.StepMatchArgument;
-import io.cucumber.messages.types.StepMatchArgumentsList;
-import io.cucumber.messages.types.Timestamp;
+import io.cucumber.messages.types.Exception;
+import io.cucumber.messages.types.*;
+import io.cucumber.plugin.event.TestCase;
+import io.cucumber.plugin.event.TestCaseFinished;
+import io.cucumber.plugin.event.TestCaseStarted;
+import io.cucumber.plugin.event.TestStep;
+import io.cucumber.plugin.event.TestStepFinished;
+import io.cucumber.plugin.event.TestStepStarted;
 import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
@@ -59,6 +63,24 @@ public class EventDeserializer {
                         eventParser.get("testCaseStartedId"),
                         testCase.getTestSteps().get(eventParser.get("testStepId")).getId().toString(),
                         eventParser.getTimestamp()
+                ));
+            }
+            case "io.cucumber.messages.types.TestStepFinished": {
+                TestCase testCase = eventParser.getTestCase();
+                Map<String, Object> resultData = eventParser.get("result");
+                Map<String, String> exceptionData = (Map<String, String>) resultData.get("exception");
+                Map<String, Number> durationData = (Map<String, Number>) resultData.get("duration");
+                TestStepResult result = new TestStepResult(
+                        new io.cucumber.messages.types.Duration(durationData.get("seconds").longValue(), durationData.get("nanos").longValue()),
+                        (String) resultData.get("message"),
+                        TestStepResultStatus.valueOf(resultData.get("status").toString()),
+                        exceptionData == null ? null : new Exception(exceptionData.get("type"), exceptionData.get("message"), exceptionData.get("stackTrace"))
+                );
+
+                return Envelope.of(new io.cucumber.messages.types.TestStepFinished(
+                        eventParser.get("testCaseStartedId"),
+                        testCase.getTestSteps().get(eventParser.get("testStepId")).getId().toString(),
+                        result, eventParser.getTimestamp()
                 ));
             }
             default:

@@ -1,5 +1,6 @@
 package org.testcharm.cucumber.swarm.worker;
 
+import io.cucumber.messages.types.TestStepResult;
 import io.cucumber.plugin.event.*;
 import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
@@ -65,6 +66,36 @@ public class EventSerializer {
                             put("seconds", testStepStartedMessage.getTimestamp().getSeconds());
                             put("nanos", testStepStartedMessage.getTimestamp().getNanos());
                         }}).build();
+            }
+            case "io.cucumber.messages.types.TestStepFinished": {
+                io.cucumber.messages.types.TestStepFinished testStepFinishedMessage = (io.cucumber.messages.types.TestStepFinished) event;
+                io.cucumber.messages.types.TestCase testCase = dataMapper.testCaseByStepId(testStepFinishedMessage.getTestStepId());
+                List<String> stepIds = testCase.getTestSteps().stream().map(io.cucumber.messages.types.TestStep::getId).collect(toList());
+                TestStepResult testStepResult = testStepFinishedMessage.getTestStepResult();
+                LinkedHashMap<String, Object> resultData = new LinkedHashMap<String, Object>() {{
+                    put("duration", new HashMap<String, Long>() {{
+                        put("seconds", testStepResult.getDuration().getSeconds());
+                        put("nanos", testStepResult.getDuration().getNanos());
+                    }});
+                    put("messages", testStepResult.getMessage().orElse(null));
+                    put("status", testStepResult.getStatus().name());
+                    put("exception", testStepResult.getException().map(e -> new HashMap<String, String>() {{
+                        put("type", e.getType());
+                        put("message", e.getMessage().orElse(null));
+                        put("stackTrace", e.getStackTrace().orElse(null));
+                    }}).orElse(null));
+                }};
+                return envelopBuilder(event.getClass().getName())
+                        .put("testCaseStartedId", testStepFinishedMessage.getTestCaseStartedId())
+                        .put("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())))
+                        .put("testStepId", stepIds.indexOf(testStepFinishedMessage.getTestStepId()))
+                        .put("result", resultData)
+                        .put("timestamp", new HashMap<String, Long>() {{
+                            put("seconds", testStepFinishedMessage.getTimestamp().getSeconds());
+                            put("nanos", testStepFinishedMessage.getTimestamp().getNanos());
+                        }})
+                        .build();
+
             }
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + event.getClass().getName());

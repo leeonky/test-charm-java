@@ -120,7 +120,7 @@ public class E2eSteps {
     @Then("the following event should be emitted after cucumber run:")
     public void theFollowingEventShouldBeEmittedAfterCucumberRun(String expression) {
         TempDirectory dir = E2eSteps.globalTempDir().mkdir("dal");
-        dir.write("verify.dal", expression.replace("$path$", cucumberDirectory.root().toAbsolutePath().toString()));
+        dir.write("verify.dal", expression.replace("$path$", cucumberDirectory.root().toAbsolutePath().toString()).replace("\\t", "\t"));
         run_cucumber_with_the_following_args(String.join("\n", "'--plugin'", "'org.testcharm.cucumber.swarm.EventCollectorPlugin'", "'--glue'", "'steps'", "$path + 'features'"));
         process.waitFor();
 
