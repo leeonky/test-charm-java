@@ -83,6 +83,13 @@ public class EventDeserializer {
                         result, eventParser.getTimestamp()
                 ));
             }
+            case "io.cucumber.messages.types.TestCaseFinished": {
+                return Envelope.of(new io.cucumber.messages.types.TestCaseFinished(
+                        eventParser.get("testCaseStartedId"),
+                        eventParser.getTimestamp(),
+                        eventParser.get("willBeRetried")
+                ));
+            }
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
         }

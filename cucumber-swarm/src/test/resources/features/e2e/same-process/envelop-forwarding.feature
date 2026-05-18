@@ -414,7 +414,7 @@ Feature: envelop forwarding
             testStepResult: {
               status: 'FAILED'
               duration: {...}
-              message.present: false
+              message.get: 'step failed'
               exception.get: {
                 message.get: 'step failed'
                 stackTrace.get: ```
@@ -472,7 +472,7 @@ Feature: envelop forwarding
             testStepResult: {
               status: 'FAILED'
               duration: {...}
-              message.present: false
+              message.get: 'step failed'
               exception.get: {
                 message.get: 'step failed'
                 stackTrace.get: ```
@@ -537,7 +537,7 @@ Feature: envelop forwarding
             testStepResult: {
               status: 'PENDING'
               duration: {...}
-              message.present: false
+              message.get: 'step pending'
               exception.get: {
                 message.get: 'step pending'
                 stackTrace.get: ```
@@ -626,7 +626,11 @@ Feature: envelop forwarding
             testStepResult: {
               status: 'AMBIGUOUS'
               duration: {...}
-              message.present: false
+              message.get: ```
+                           "a step with implementation" matches more than one step definition:
+                             "^.* implementation$" in steps.Steps.another_a_step_with_implementation()
+                             "a step with implementation" in steps.Steps.a_step_with_implementation()
+                           ```
               exception.get: {
                 message.get: ```
                              "a step with implementation" matches more than one step definition:
@@ -646,4 +650,44 @@ Feature: envelop forwarding
             timestamp: {...}
           }
         }]
+        """
+
+  Rule: test case finished
+
+    Scenario: forward test case finished passed
+      Given the feature file "test.feature":
+        """
+        Feature: test
+          Scenario: test
+            Given a step with implementation
+        """
+      Given the following class definition:
+        """
+        package steps;
+        import io.cucumber.java.en.*;
+
+        public class Steps {
+
+          @Given("a step with implementation")
+          public void a_step_with_implementation() {
+              System.out.println("step called");
+          }
+        }
+        """
+      Then the following event should be emitted after cucumber run:
+        """
+        [io.cucumber.messages.types.Envelope]::filter: {testCaseFinished.present: true}: [{
+          testCaseFinished.get: {
+            testCaseStartedId: (::root[io.cucumber.messages.types.Envelope]::filter: {testCaseStarted.present: true}).testCaseStarted.get.id
+            timestamp: {...}
+            willBeRetried: {...}
+          }
+        }]
+        """
+      And the log should:
+        """
+        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
+          {contains: 'testRunStarted=TestRunStarted'}
+          {contains: 'testRunFinished=TestRunFinished'}
+        ]
         """

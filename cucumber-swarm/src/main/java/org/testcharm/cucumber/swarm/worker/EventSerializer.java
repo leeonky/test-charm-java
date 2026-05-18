@@ -77,7 +77,7 @@ public class EventSerializer {
                         put("seconds", testStepResult.getDuration().getSeconds());
                         put("nanos", testStepResult.getDuration().getNanos());
                     }});
-                    put("messages", testStepResult.getMessage().orElse(null));
+                    put("message", testStepResult.getMessage().orElse(null));
                     put("status", testStepResult.getStatus().name());
                     put("exception", testStepResult.getException().map(e -> new HashMap<String, String>() {{
                         put("type", e.getType());
@@ -96,6 +96,17 @@ public class EventSerializer {
                         }})
                         .build();
 
+            }
+            case "io.cucumber.messages.types.TestCaseFinished": {
+                io.cucumber.messages.types.TestCaseFinished testCaseFinishedMessage = (io.cucumber.messages.types.TestCaseFinished) event;
+                return envelopBuilder(event.getClass().getName())
+                        .put("testCaseStartedId", testCaseFinishedMessage.getTestCaseStartedId())
+                        .put("timestamp", new HashMap<String, Long>() {{
+                            put("seconds", testCaseFinishedMessage.getTimestamp().getSeconds());
+                            put("nanos", testCaseFinishedMessage.getTimestamp().getNanos());
+                        }})
+                        .put("willBeRetried", testCaseFinishedMessage.getWillBeRetried())
+                        .build();
             }
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + event.getClass().getName());
