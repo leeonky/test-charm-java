@@ -18,13 +18,6 @@ Feature: envelop forwarding
           }
         }]
         """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
-        """
 
     Scenario: forward test case with one PickleStepTestStep
       Given the feature file "test.feature":
@@ -60,13 +53,6 @@ Feature: envelop forwarding
             }]
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """
 
     Scenario: forward test case with PickleStepTestStep and args
@@ -108,13 +94,6 @@ Feature: envelop forwarding
             }]
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """
 
     Scenario: forward test case with PickleStepTestStep and nested args
@@ -168,13 +147,6 @@ Feature: envelop forwarding
           }
         }]
         """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
-        """
 
     Scenario: forward test case with HookTestStep and PickleStepTestStep
       Given the feature file "test.feature":
@@ -218,13 +190,6 @@ Feature: envelop forwarding
           }
         }]
         """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
-        """
 
   Rule: test case started
 
@@ -245,13 +210,6 @@ Feature: envelop forwarding
               timestamp: {...}
             }
           }]
-          """
-      And the log should:
-          """
-          lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-            {contains: 'testRunStarted=TestRunStarted'}
-            {contains: 'testRunFinished=TestRunFinished'}
-          ]
           """
 
   Rule: test step started
@@ -285,13 +243,6 @@ Feature: envelop forwarding
             timestamp: {...}
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """
 
     Scenario: forward test step started with HookTestStep and PickleStepTestStep
@@ -332,13 +283,6 @@ Feature: envelop forwarding
           }
         }]
         """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
-        """
 
   Rule: test step finished
 
@@ -377,13 +321,6 @@ Feature: envelop forwarding
           }
         }]
         """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
-        """
 
     Scenario: forward test step finished failed
       Given the feature file "test.feature":
@@ -420,7 +357,7 @@ Feature: envelop forwarding
                 stackTrace.get: ```
                                 java.lang.RuntimeException: step failed
                                 \tat steps.Steps.a_step_with_implementation(Steps.java:9)
-                                \tat ✽.a step with implementation(file:///opt/share/test-charm/test-charm-java/cucumber-swarm/src/test/generate/t0/cucumber/features/test.feature:3)
+                                \tat ✽.a step with implementation(file://$path$/features/test.feature:3)
 
                                 ```
                 type: 'java.lang.RuntimeException'
@@ -429,13 +366,6 @@ Feature: envelop forwarding
             timestamp: {...}
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """
 
     Scenario: forward test step finished skipped
@@ -478,7 +408,7 @@ Feature: envelop forwarding
                 stackTrace.get: ```
                                 java.lang.RuntimeException: step failed
                                 \tat steps.Steps.a_step_with_implementation(Steps.java:9)
-                                \tat ✽.a step with implementation(file:///opt/share/test-charm/test-charm-java/cucumber-swarm/src/test/generate/t0/cucumber/features/test.feature:3)
+                                \tat ✽.a step with implementation(file://$path$/features/test.feature:3)
 
                                 ```
                 type: 'java.lang.RuntimeException'
@@ -499,13 +429,6 @@ Feature: envelop forwarding
             timestamp: {...}
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """
 
     Scenario: forward test step finished pending
@@ -543,7 +466,7 @@ Feature: envelop forwarding
                 stackTrace.get: ```
                                 io.cucumber.java.PendingException: step pending
                                 \tat steps.Steps.a_step_with_implementation(Steps.java:9)
-                                \tat ✽.a step with implementation(file:///opt/share/test-charm/test-charm-java/cucumber-swarm/src/test/generate/t0/cucumber/features/test.feature:3)
+                                \tat ✽.a step with implementation(file://$path$/features/test.feature:3)
 
                                 ```
                 type: 'io.cucumber.java.PendingException'
@@ -552,13 +475,6 @@ Feature: envelop forwarding
             timestamp: {...}
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """
 
     Scenario: forward test step finished undefined
@@ -583,13 +499,6 @@ Feature: envelop forwarding
             timestamp: {...}
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """
 
     Scenario: forward test step finished ambiguous
@@ -683,11 +592,4 @@ Feature: envelop forwarding
             willBeRetried: {...}
           }
         }]
-        """
-      And the log should:
-        """
-        lines::filter: {::should.contains: 'ignore envelop forwarding'}::should[]: [
-          {contains: 'testRunStarted=TestRunStarted'}
-          {contains: 'testRunFinished=TestRunFinished'}
-        ]
         """

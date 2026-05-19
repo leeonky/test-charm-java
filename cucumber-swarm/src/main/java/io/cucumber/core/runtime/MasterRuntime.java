@@ -80,6 +80,7 @@ public final class MasterRuntime {
     }
 
     private void runFeatures(List<Feature> features) {
+        features.forEach(context::beforeFeature);
         List<Pickle> pickles = features.stream()
                 .flatMap(feature -> feature.getPickles().stream())
                 .filter(filter)
