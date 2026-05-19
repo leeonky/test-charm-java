@@ -21,9 +21,6 @@ public class Controller {
     }
 
     private void setupRoute() {
-//        restfulServer.requestHandler("POST", "/register", context ->
-//                context.responseOk(String.valueOf(master.register().id())));
-//
         restfulServer.requestHandler("GET", "/pickle", context -> {
             int workerId = Integer.parseInt(context.header("X-Worker-Id"));
             log.info(() -> String.format("Received worker<%d> pickle request", workerId));

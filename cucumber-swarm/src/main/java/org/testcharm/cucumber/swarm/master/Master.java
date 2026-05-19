@@ -21,8 +21,6 @@ public class Master {
     private final Controller controller;
     private final Queue<Pickle> pickleQueue;
     private final MasterDataMapper dataMapper;
-    @Deprecated
-    public static EventBus staitcEventBus;
     private final EventDeserializer eventDeserializer;
     private final EventBus eventBus;
 
@@ -31,7 +29,6 @@ public class Master {
         pickleQueue = new ConcurrentLinkedQueue<>(pickles);
         this.dataMapper = dataMapper;
         this.eventBus = eventBus;
-        Master.staitcEventBus = eventBus;
         controller = new Controller(this, workers, dataMapper, new RestfulServer(swarmArgs.getSwarmHost().getPort()));
         eventDeserializer = new EventDeserializer(dataMapper);
         log.info(() -> String.format("Master created with %d scenarios", pickleQueue.size()));

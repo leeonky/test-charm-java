@@ -14,8 +14,8 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 public class RestfulServer {
-    HttpServer httpServer;
-    private Logger log = LoggerFactory.getLogger(RestfulServer.class);
+    private final HttpServer httpServer;
+    private final Logger log = LoggerFactory.getLogger(RestfulServer.class);
 
     public RestfulServer(int port) {
         httpServer = Sneaky.get(() -> HttpServer.create(new InetSocketAddress(port), 0));

@@ -10,15 +10,17 @@ import static java.util.stream.Stream.concat;
 import static org.testcharm.util.Classes.subTypesOf;
 
 public class MasterPlugin implements ConcurrentEventListener {
+
     @Override
     public void setEventPublisher(EventPublisher publisher) {
-        concat(subTypesOf(MasterPluginExtension.class, "org.testcharm.cucumber.extensions").stream(),
-                subTypesOf(MasterPluginExtension.class, "org.testcharm.extensions.cucumber").stream())
-                .map(Classes::newInstance)
-                .forEach(e -> e.setEventPublisher(publisher));
         publisher.registerHandlerFor(Envelope.class, envelop -> {
             envelop.getStepDefinition().ifPresent(stepDefinition -> MasterDataMapper.instance().mapStepDefinition(stepDefinition));
             envelop.getHook().ifPresent(hook -> MasterDataMapper.instance().mapHook(hook));
         });
+
+        concat(subTypesOf(MasterPluginExtension.class, "org.testcharm.cucumber.extensions").stream(),
+                subTypesOf(MasterPluginExtension.class, "org.testcharm.extensions.cucumber").stream())
+                .map(Classes::newInstance)
+                .forEach(e -> e.setEventPublisher(publisher));
     }
 }

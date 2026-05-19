@@ -4,7 +4,6 @@ import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
-import org.testcharm.cucumber.swarm.master.Master;
 
 import java.util.Iterator;
 import java.util.List;
@@ -56,13 +55,6 @@ public class Remote {
                 return dataMapper.pickle(pickleKey);
             }
         };
-    }
-
-    //TODO test: should not forward worker testRunFinished and testRunStarted
-    @Deprecated
-    public void sendEventDeprecated(Object event) {
-//        TODO need use restful api
-        Master.staitcEventBus.send(event);
     }
 
     public void sendEvent(Object event) {
