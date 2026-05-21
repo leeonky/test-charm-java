@@ -32,6 +32,22 @@ public class Zipped<L, R> implements Iterable<Zipped<L, R>.ZippedEntry> {
 
     private int index = 0;
 
+    public static Iterator<Integer> indexSequence() {
+        return new Iterator<Integer>() {
+            private int i = 0;
+
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                return i++;
+            }
+        };
+    }
+
     @Override
     public Iterator<ZippedEntry> iterator() {
         return new Iterator<ZippedEntry>() {

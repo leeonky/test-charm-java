@@ -5,6 +5,7 @@ import org.testcharm.util.Sneaky;
 import java.io.*;
 import java.util.Base64;
 import java.util.Map;
+import java.util.function.Function;
 
 public class ExceptionSerializer {
     public static void serialize(Throwable throwable, Map<String, Object> output, String key) {
@@ -22,8 +23,12 @@ public class ExceptionSerializer {
     }
 
     public static Throwable deserialize(Map<String, Object> output, String key) {
-        return Sneaky.get(() -> {
-            byte[] data = Base64.getDecoder().decode((String) output.get(key));
+        return toThrowable().apply((String) output.get(key));
+    }
+
+    public static Function<String, Throwable> toThrowable() {
+        return Sneaky.sneakyGet(s -> {
+            byte[] data = Base64.getDecoder().decode(s);
             try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
                 return (Throwable) ois.readObject();
             }

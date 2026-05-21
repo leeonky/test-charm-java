@@ -1,8 +1,9 @@
 package org.testcharm.cucumber.swarm.master;
 
-import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.gherkin.Step;
 import io.cucumber.messages.types.Exception;
+import io.cucumber.messages.types.Group;
+import io.cucumber.messages.types.StepDefinition;
 import io.cucumber.messages.types.*;
 import io.cucumber.plugin.event.TestCase;
 import io.cucumber.plugin.event.TestCaseFinished;
@@ -11,16 +12,17 @@ import io.cucumber.plugin.event.TestStep;
 import io.cucumber.plugin.event.TestStepFinished;
 import io.cucumber.plugin.event.TestStepStarted;
 import io.cucumber.plugin.event.*;
-import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
+import org.testcharm.util.MapView;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-import static java.util.stream.Collectors.toList;
-import static org.testcharm.util.Zipped.zip;
+import static org.testcharm.cucumber.swarm.ExceptionSerializer.toThrowable;
+import static org.testcharm.util.MapView.*;
 
 @SuppressWarnings("unchecked")
 public class EventDeserializer {
@@ -32,147 +34,114 @@ public class EventDeserializer {
 
     public Object deserialize(String json) {
         Map<String, Object> message = (Map<String, Object>) MessageConverterRegistry.jsonConverter().deserialize(json);
-        EventParser eventParser = new EventParser(message);
-        switch ((String) message.get("type")) {
-            case "io.cucumber.plugin.event.TestCaseStarted":
-                return new TestCaseStarted(eventParser.getInstant(), eventParser.getTestCase());
-            case "io.cucumber.plugin.event.TestCaseFinished":
-                return new TestCaseFinished(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getResult());
-            case "io.cucumber.plugin.event.TestStepStarted":
-                return new TestStepStarted(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getTestStep());
-            case "io.cucumber.plugin.event.TestStepFinished":
-                return new TestStepFinished(eventParser.getInstant(), eventParser.getTestCase(), eventParser.getTestStep(),
-                        eventParser.getResult());
-            case "io.cucumber.messages.types.TestCase": {
-                TestCase testCase = eventParser.getTestCase();
-                Pickle pickle = eventParser.getPickle();
-                return Envelope.of(new io.cucumber.messages.types.TestCase(testCase.getId().toString(), pickle.getId(),
-                        eventParser.createTestSteps(testCase), eventParser.get("testRunStartedId")));
-            }
-            case "io.cucumber.messages.types.TestCaseStarted":
-                return Envelope.of(new io.cucumber.messages.types.TestCaseStarted(
-                        ((Number) eventParser.get("attempt")).longValue(),
-                        eventParser.get("id"),
-                        dataMapper.testCase(eventParser.get("testCaseId")).getId().toString(),
-                        eventParser.get("workerId"),
-                        eventParser.getTimestamp()
-                ));
-            case "io.cucumber.messages.types.TestStepStarted": {
-                TestCase testCase = eventParser.getTestCase();
-                return Envelope.of(new io.cucumber.messages.types.TestStepStarted(
-                        eventParser.get("testCaseStartedId"),
-                        testCase.getTestSteps().get(eventParser.get("testStepId")).getId().toString(),
-                        eventParser.getTimestamp()
-                ));
-            }
-            case "io.cucumber.messages.types.TestStepFinished": {
-                TestCase testCase = eventParser.getTestCase();
-                Map<String, Object> resultData = eventParser.get("result");
-                Map<String, String> exceptionData = (Map<String, String>) resultData.get("exception");
-                Map<String, Number> durationData = (Map<String, Number>) resultData.get("duration");
-                TestStepResult result = new TestStepResult(
-                        new io.cucumber.messages.types.Duration(durationData.get("seconds").longValue(), durationData.get("nanos").longValue()),
-                        (String) resultData.get("message"),
-                        TestStepResultStatus.valueOf(resultData.get("status").toString()),
-                        exceptionData == null ? null : new Exception(exceptionData.get("type"), exceptionData.get("message"), exceptionData.get("stackTrace"))
-                );
+        MapView mapView = new MapView(message);
 
-                return Envelope.of(new io.cucumber.messages.types.TestStepFinished(
-                        eventParser.get("testCaseStartedId"),
-                        testCase.getTestSteps().get(eventParser.get("testStepId")).getId().toString(),
-                        result, eventParser.getTimestamp()
-                ));
+        return mapView.get("data", map().andThen(data -> {
+            switch (mapView.get("type", string())) {
+                case "io.cucumber.plugin.event.TestCaseStarted":
+                    return new TestCaseStarted(data.get(timeInstant()), data.get(eventTestCase()));
+                case "io.cucumber.plugin.event.TestCaseFinished":
+                    return new TestCaseFinished(data.get(timeInstant()), data.get(eventTestCase()),
+                            data.get(eventResult()));
+                case "io.cucumber.plugin.event.TestStepStarted":
+                    return new TestStepStarted(data.get(timeInstant()), data.get(eventTestCase()),
+                            data.get(eventTestStep()));
+                case "io.cucumber.plugin.event.TestStepFinished":
+                    return new TestStepFinished(data.get(timeInstant()), data.get(eventTestCase()),
+                            data.get(eventTestStep()), data.get(eventResult()));
+                case "io.cucumber.messages.types.TestCase": {
+                    TestCase testCase = data.get(eventTestCase());
+                    List<io.cucumber.messages.types.TestStep> testSteps = data.get("testSteps", indexedList(index -> map().andThen(testStepData -> {
+                        TestStep testStep = testCase.getTestSteps().get(index);
+                        String hookId = testStepData.get("hookId", string().andThen(dataMapper::hook).andThen(Hook::getId));
+                        String pickleStepId = testStep instanceof PickleStepTestStep ? ((Step) ((PickleStepTestStep) testStep).getStep()).getId() : null;
+                        List<String> stepDefinitionIds = testStepData.get("stepDefinitionIds",
+                                list(string().andThen(dataMapper::stepDefinition).andThen(StepDefinition::getId)));
+                        List<StepMatchArgumentsList> stepMatchArgumentsLists = testStepData.get("stepMatchArgumentsLists",
+                                list(map().andThen(stepMatchArgumentsListData -> new StepMatchArgumentsList(
+                                        stepMatchArgumentsListData.get("stepMatchArguments", list(map().andThen(stepMatchArgumentData ->
+                                                new StepMatchArgument(stepMatchArgumentData.get("group", map().andThen(typeGroup())),
+                                                        stepMatchArgumentData.get("parameterTypeName", string())))))))));
+                        return new io.cucumber.messages.types.TestStep(hookId, testStep.getId().toString(),
+                                pickleStepId, stepDefinitionIds, stepMatchArgumentsLists);
+                    })));
+                    return Envelope.of(new io.cucumber.messages.types.TestCase(
+                            testCase.getId().toString(),
+                            data.get("testCase", string().andThen(dataMapper::pickle)).getId(),
+                            testSteps, data.get("testRunStartedId")));
+                }
+                case "io.cucumber.messages.types.TestCaseStarted":
+                    return Envelope.of(new io.cucumber.messages.types.TestCaseStarted(
+                            data.get("attempt", toLong()), data.get("id"),
+                            data.get("testCaseId", string().andThen(dataMapper::testCase)).getId().toString(),
+                            data.get("workerId"), data.get(timestamp())
+                    ));
+                case "io.cucumber.messages.types.TestStepStarted": {
+                    return Envelope.of(new io.cucumber.messages.types.TestStepStarted(
+                            data.get("testCaseStartedId"),
+                            data.get(typeTestStepId()),
+                            data.get(timestamp())));
+                }
+                case "io.cucumber.messages.types.TestStepFinished":
+                    return Envelope.of(new io.cucumber.messages.types.TestStepFinished(data.get("testCaseStartedId"),
+                            data.get(typeTestStepId()),
+                            data.get("result", map().andThen(resultData -> new TestStepResult(
+                                    resultData.get("duration", map().andThen(durationData -> new io.cucumber.messages.types.Duration(
+                                            durationData.get(seconds()), durationData.get(nanos())))),
+                                    resultData.get("message"),
+                                    resultData.get("status", enumOf(TestStepResultStatus.class)),
+                                    resultData.get("exception", map().andThen(exceptionData -> new Exception(exceptionData.get("type"),
+                                            exceptionData.get("message"), exceptionData.get("stackTrace"))))))),
+                            data.get(timestamp())));
+                case "io.cucumber.messages.types.TestCaseFinished":
+                    return Envelope.of(new io.cucumber.messages.types.TestCaseFinished(
+                            data.get("testCaseStartedId"), data.get(timestamp()), data.get("willBeRetried")));
+                default:
+                    throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
             }
-            case "io.cucumber.messages.types.TestCaseFinished": {
-                return Envelope.of(new io.cucumber.messages.types.TestCaseFinished(
-                        eventParser.get("testCaseStartedId"),
-                        eventParser.getTimestamp(),
-                        eventParser.get("willBeRetried")
-                ));
-            }
-            default:
-                throw new IllegalArgumentException("Unsupported event type: " + message.get("type"));
-        }
+        }));
     }
 
+    public Function<MapView, Instant> timeInstant() {
+        return map -> map.get("timeInstant", toLong().andThen(Instant::ofEpochMilli));
+    }
 
-    private class EventParser {
-        private final Map<String, Object> data;
+    public Function<MapView, TestCase> eventTestCase() {
+        return map -> dataMapper.testCase(map.get("testCase"));
+    }
 
-        private EventParser(Map<String, Object> message) {
-            data = (Map<String, Object>) message.get("data");
-        }
+    public Function<MapView, TestStep> eventTestStep() {
+        return composite(eventTestCase(), map -> map.get("testStep", toInt()),
+                (testCase, testStepIndex) -> testCase.getTestSteps().get(testStepIndex));
+    }
 
-        private TestCase getTestCase() {
-            return dataMapper.testCase((String) data.get("testCase"));
-        }
+    public Function<MapView, Result> eventResult() {
+        return map -> map.get("result", map().andThen(parser -> new Result(
+                parser.get("status", enumOf(Status.class)),
+                parser.get("duration", toLong().andThen(Duration::ofMillis)),
+                parser.get("error", toThrowable()))));
+    }
 
-        private Pickle getPickle() {
-            return dataMapper.pickle((String) data.get("testCase"));
-        }
+    public Function<MapView, Group> typeGroup() {
+        return map -> new Group(map.get("children", list(map().andThen(typeGroup()))),
+                map.get("start", toLong()), map.get("value"));
+    }
 
-        private Instant getInstant() {
-            return Instant.ofEpochMilli(((Number) data.get("timeInstant")).longValue());
-        }
+    public Function<MapView, Long> seconds() {
+        return map -> map.get("seconds", toLong());
+    }
 
-        private Result getResult() {
-            Map<String, Object> resultData = (Map<String, Object>) data.get("result");
-            return new Result(Status.valueOf(resultData.get("status").toString()),
-                    Duration.ofMillis(((Number) resultData.get("duration")).longValue()),
-                    ExceptionSerializer.deserialize(resultData, "error"));
-        }
+    public Function<MapView, Long> nanos() {
+        return map -> map.get("nanos", toLong());
+    }
 
-        public TestStep getTestStep() {
-            return getTestCase().getTestSteps().get(((Number) data.get("testStep")).intValue());
-        }
+    public Function<MapView, Timestamp> timestamp() {
+        return map -> map.get("timestamp", map().andThen(timestampData ->
+                new Timestamp(timestampData.get(seconds()), timestampData.get(nanos()))));
+    }
 
-        public <T> T get(String key) {
-            return (T) data.get(key);
-        }
-
-        public List<io.cucumber.messages.types.TestStep> createTestSteps(TestCase testCase) {
-            return zip(testCase.getTestSteps(), this.<List<Map<String, Object>>>get("testSteps"))
-                    .stream().map(zippedEntry -> {
-                        List<String> stepDefinitionIds = (List<String>) zippedEntry.right().get("stepDefinitionIds");
-                        if (stepDefinitionIds != null)
-                            stepDefinitionIds = stepDefinitionIds.stream().map(key -> dataMapper.stepDefinition(key).getId()).collect(toList());
-
-                        List<StepMatchArgumentsList> stepMatchArgumentsLists = null;
-                        List<Map<String, List<Map<String, Object>>>> stepMatchArgumentsListsData =
-                                (List<Map<String, List<Map<String, Object>>>>) zippedEntry.right().get("stepMatchArgumentsLists");
-                        if (stepMatchArgumentsListsData != null) {
-                            stepMatchArgumentsLists = stepMatchArgumentsListsData.stream().map(stepMatchArgumentsList -> {
-                                List<StepMatchArgument> collect = stepMatchArgumentsList.get("stepMatchArguments").stream().map(stepMatchArgument -> {
-                                    return new StepMatchArgument(deserializeGroup((Map<String, Object>) stepMatchArgument.get("group")),
-                                            (String) stepMatchArgument.get("parameterTypeName"));
-                                }).collect(toList());
-                                return new StepMatchArgumentsList(collect);
-                            }).collect(toList());
-                        }
-                        String id = zippedEntry.left().getId().toString();
-                        String pickleStepId = null;
-
-                        if (zippedEntry.left() instanceof PickleStepTestStep) {
-                            PickleStepTestStep pickleStepTestStep = (PickleStepTestStep) zippedEntry.left();
-                            pickleStepId = ((Step) pickleStepTestStep.getStep()).getId();
-                        }
-                        String hookId = (String) zippedEntry.right().get("hookId");
-                        if (hookId != null)
-                            hookId = dataMapper.hook(hookId).getId();
-                        return new io.cucumber.messages.types.TestStep(hookId, id, pickleStepId, stepDefinitionIds,
-                                stepMatchArgumentsLists);
-                    }).collect(toList());
-        }
-
-        private io.cucumber.messages.types.Group deserializeGroup(Map<String, Object> group) {
-            return new io.cucumber.messages.types.Group(
-                    ((List<Map<String, Object>>) group.get("children")).stream().map(this::deserializeGroup).collect(toList()),
-                    ((Number) group.get("start")).longValue(), (String) group.get("value"));
-        }
-
-        public Timestamp getTimestamp() {
-            Map<String, Number> timestampData = get("timestamp");
-            return new Timestamp(timestampData.get("seconds").longValue(), timestampData.get("nanos").longValue());
-        }
+    public Function<MapView, String> typeTestStepId() {
+        return composite(eventTestCase(), mapView -> mapView.get("testStepId", toInt()),
+                (testCase, testStepIndex) -> testCase.getTestSteps().get(testStepIndex).getId().toString());
     }
 }
