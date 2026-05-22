@@ -1,16 +1,17 @@
 package org.testcharm.cucumber.swarm.worker;
 
 import io.cucumber.messages.types.TestStepResult;
+import io.cucumber.messages.types.Timestamp;
 import io.cucumber.plugin.event.*;
-import org.testcharm.cucumber.swarm.ExceptionSerializer;
 import org.testcharm.message.MessageConverterRegistry;
+import org.testcharm.util.MapView;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
+import static org.testcharm.cucumber.swarm.ExceptionSerializer.serializeError;
+import static org.testcharm.util.MapView.mapView;
 
 public class EventSerializer {
     public final WorkerDataMapper dataMapper;
@@ -19,188 +20,127 @@ public class EventSerializer {
         this.dataMapper = dataMapper;
     }
 
-    public String serialize(Object event) {
+    private Map<String, Object> serializeEvent(Object event) {
+        MapView data = mapView();
         switch (event.getClass().getName()) {
-            case "io.cucumber.plugin.event.TestCaseStarted":
-                return eventBuilder((TestCaseStarted) event).build();
-            case "io.cucumber.plugin.event.TestCaseFinished":
-                TestCaseFinished testCaseFinished = (TestCaseFinished) event;
-                return eventBuilder(testCaseFinished)
-                        .setResult(testCaseFinished.getResult()).build();
-            case "io.cucumber.plugin.event.TestStepStarted":
-                TestStepStarted testStepStarted = (TestStepStarted) event;
-                return eventBuilder(testStepStarted)
-                        .setTestStep(testStepStarted.getTestCase(), testStepStarted.getTestStep()).build();
             case "io.cucumber.plugin.event.TestStepFinished":
-                TestStepFinished testStepFinished = (TestStepFinished) event;
-                return eventBuilder(testStepFinished)
-                        .setTestStep(testStepFinished.getTestCase(), testStepFinished.getTestStep())
-                        .setResult(testStepFinished.getResult()).build();
-            case "io.cucumber.messages.types.TestCase": {
-                io.cucumber.messages.types.TestCase testCase = (io.cucumber.messages.types.TestCase) event;
-                return envelopBuilder(event.getClass().getName())
-                        .setTestCase(testCase)
-                        .put("testRunStartedId", testCase.getTestRunStartedId().orElse(null)).build();
-            }
-
+                return data.set(eventTestCaseEvent((TestCaseEvent) event))
+                        .set(eventTestStep(((TestStepFinished) event).getTestCase(), ((TestStepFinished) event).getTestStep()))
+                        .set(eventResult(((TestStepFinished) event).getResult()));
+            case "io.cucumber.plugin.event.TestStepStarted":
+                return data.set(eventTestCaseEvent((TestCaseEvent) event))
+                        .set(eventTestStep(((TestStepStarted) event).getTestCase(), ((TestStepStarted) event).getTestStep()));
+            case "io.cucumber.plugin.event.TestCaseFinished":
+                return data.set(eventTestCaseEvent((TestCaseEvent) event))
+                        .set(eventResult(((TestCaseFinished) event).getResult()));
+            case "io.cucumber.plugin.event.TestCaseStarted":
+                return data.set(eventTestCaseEvent((TestCaseEvent) event));
+            case "io.cucumber.messages.types.TestCase":
+                return data.set(typeTestCase((io.cucumber.messages.types.TestCase) event));
             case "io.cucumber.messages.types.TestCaseStarted":
                 io.cucumber.messages.types.TestCaseStarted testCaseStarted = (io.cucumber.messages.types.TestCaseStarted) event;
-                return envelopBuilder(event.getClass().getName())
-                        .put("attempt", testCaseStarted.getAttempt())
-                        .put("id", testCaseStarted.getId())
-                        .put("testCaseId", dataMapper.transformTestCaseIdToKey(testCaseStarted.getTestCaseId()))
-                        .put("workerId", testCaseStarted.getWorkerId().orElse(null))
-                        .put("timestamp", new HashMap<String, Long>() {{
-                            put("seconds", testCaseStarted.getTimestamp().getSeconds());
-                            put("nanos", testCaseStarted.getTimestamp().getNanos());
-                        }}).build();
-            case "io.cucumber.messages.types.TestStepStarted": {
+                return data.set("attempt", testCaseStarted.getAttempt())
+                        .set("id", testCaseStarted.getId())
+                        .set("testCaseId", dataMapper.transformTestCaseIdToKey(testCaseStarted.getTestCaseId()))
+                        .set("workerId", testCaseStarted.getWorkerId())
+                        .set(timestamp(testCaseStarted.getTimestamp()));
+            case "io.cucumber.messages.types.TestStepStarted":
                 io.cucumber.messages.types.TestStepStarted testStepStartedMessage = (io.cucumber.messages.types.TestStepStarted) event;
-                io.cucumber.messages.types.TestCase testCase = dataMapper.testCaseByStepId(testStepStartedMessage.getTestStepId());
-                List<String> stepIds = testCase.getTestSteps().stream().map(io.cucumber.messages.types.TestStep::getId).collect(toList());
-                return envelopBuilder(event.getClass().getName())
-                        .put("testCaseStartedId", testStepStartedMessage.getTestCaseStartedId())
-                        .put("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())))
-                        .put("testStepId", stepIds.indexOf(testStepStartedMessage.getTestStepId()))
-                        .put("timestamp", new HashMap<String, Long>() {{
-                            put("seconds", testStepStartedMessage.getTimestamp().getSeconds());
-                            put("nanos", testStepStartedMessage.getTimestamp().getNanos());
-                        }}).build();
-            }
-            case "io.cucumber.messages.types.TestStepFinished": {
+                return data
+                        .set("testCaseStartedId", testStepStartedMessage.getTestCaseStartedId())
+                        .set(eventTestCaseForTypeTestStepId(testStepStartedMessage.getTestStepId()))
+                        .set(typeTestStepId(testStepStartedMessage.getTestStepId()))
+                        .set(timestamp(testStepStartedMessage.getTimestamp()));
+            case "io.cucumber.messages.types.TestStepFinished":
                 io.cucumber.messages.types.TestStepFinished testStepFinishedMessage = (io.cucumber.messages.types.TestStepFinished) event;
-                io.cucumber.messages.types.TestCase testCase = dataMapper.testCaseByStepId(testStepFinishedMessage.getTestStepId());
-                List<String> stepIds = testCase.getTestSteps().stream().map(io.cucumber.messages.types.TestStep::getId).collect(toList());
                 TestStepResult testStepResult = testStepFinishedMessage.getTestStepResult();
-                LinkedHashMap<String, Object> resultData = new LinkedHashMap<String, Object>() {{
-                    put("duration", new HashMap<String, Long>() {{
-                        put("seconds", testStepResult.getDuration().getSeconds());
-                        put("nanos", testStepResult.getDuration().getNanos());
-                    }});
-                    put("message", testStepResult.getMessage().orElse(null));
-                    put("status", testStepResult.getStatus().name());
-                    put("exception", testStepResult.getException().map(e -> new HashMap<String, String>() {{
-                        put("type", e.getType());
-                        put("message", e.getMessage().orElse(null));
-                        put("stackTrace", e.getStackTrace().orElse(null));
-                    }}).orElse(null));
-                }};
-                return envelopBuilder(event.getClass().getName())
-                        .put("testCaseStartedId", testStepFinishedMessage.getTestCaseStartedId())
-                        .put("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())))
-                        .put("testStepId", stepIds.indexOf(testStepFinishedMessage.getTestStepId()))
-                        .put("result", resultData)
-                        .put("timestamp", new HashMap<String, Long>() {{
-                            put("seconds", testStepFinishedMessage.getTimestamp().getSeconds());
-                            put("nanos", testStepFinishedMessage.getTimestamp().getNanos());
-                        }})
-                        .build();
-
-            }
+                return data.set("testCaseStartedId", testStepFinishedMessage.getTestCaseStartedId())
+                        .set(eventTestCaseForTypeTestStepId(testStepFinishedMessage.getTestStepId()))
+                        .set(typeTestStepId(testStepFinishedMessage.getTestStepId()))
+                        .set("result", mapView()
+                                .set("duration", mapView()
+                                        .set("seconds", testStepResult.getDuration().getSeconds())
+                                        .set("nanos", testStepResult.getDuration().getNanos()))
+                                .set("message", testStepResult.getMessage())
+                                .set("status", testStepResult.getStatus().name())
+                                .set("exception", testStepResult.getException().map(e -> mapView()
+                                        .set("type", e.getType())
+                                        .set("message", e.getMessage())
+                                        .set("stackTrace", e.getStackTrace()))))
+                        .set(timestamp(testStepFinishedMessage.getTimestamp()));
             case "io.cucumber.messages.types.TestCaseFinished": {
                 io.cucumber.messages.types.TestCaseFinished testCaseFinishedMessage = (io.cucumber.messages.types.TestCaseFinished) event;
-                return envelopBuilder(event.getClass().getName())
-                        .put("testCaseStartedId", testCaseFinishedMessage.getTestCaseStartedId())
-                        .put("timestamp", new HashMap<String, Long>() {{
-                            put("seconds", testCaseFinishedMessage.getTimestamp().getSeconds());
-                            put("nanos", testCaseFinishedMessage.getTimestamp().getNanos());
-                        }})
-                        .put("willBeRetried", testCaseFinishedMessage.getWillBeRetried())
-                        .build();
+                return data
+                        .set("testCaseStartedId", testCaseFinishedMessage.getTestCaseStartedId())
+                        .set(timestamp(testCaseFinishedMessage.getTimestamp()))
+                        .set("willBeRetried", testCaseFinishedMessage.getWillBeRetried());
             }
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + event.getClass().getName());
         }
     }
 
-    EventBuilder eventBuilder(TestCaseEvent event) {
-        return new EventBuilder(event);
+    private Consumer<MapView> eventTestCaseEvent(TestCaseEvent event) {
+        return map -> map.set("testCase", dataMapper.testCaseKey(event.getTestCase()))
+                .set("timeInstant", event.getInstant().toEpochMilli());
     }
 
-    class EventBuilder extends Builder {
-        EventBuilder(TestCaseEvent event) {
-            super(event.getClass().getName());
-            data.put("testCase", dataMapper.testCaseKey(event.getTestCase()));
-            data.put("timeInstant", event.getInstant().toEpochMilli());
-        }
+    private Consumer<MapView> eventResult(Result result) {
+        return map -> map.set("result", mapView()
+                .set("status", result.getStatus().name())
+                .set("duration", result.getDuration().toMillis())
+                .set("error", serializeError(result.getError())));
+    }
 
-        EventBuilder setTestStep(TestCase testCase, TestStep testStep) {
-            data.put("testStep", testCase.getTestSteps().indexOf(testStep));
-            return this;
-        }
+    private Consumer<MapView> eventTestStep(TestCase testCase, TestStep testStep) {
+        return map -> map.set("testStep", testCase.getTestSteps().indexOf(testStep));
+    }
 
-        EventBuilder setResult(Result result) {
-            LinkedHashMap<String, Object> resultData = new LinkedHashMap<String, Object>() {{
-                put("status", result.getStatus().name());
-                put("duration", result.getDuration().toMillis());
-            }};
-            ExceptionSerializer.serialize(result.getError(), resultData, "error");
-            data.put("result", resultData);
-            return this;
-        }
+    private Consumer<MapView> typeTestCase(io.cucumber.messages.types.TestCase testCase) {
+        return map -> map.set("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())))
+                .set("testSteps", testCase.getTestSteps().stream().map(this::serializeTestStep));
+    }
+
+    private MapView serializeTestStep(io.cucumber.messages.types.TestStep testStep) {
+        return mapView()
+                .set("hookId", testStep.getHookId().map(dataMapper::transformHookIdToKey))
+                .set("stepDefinitionIds", testStep.getStepDefinitionIds().map(ids ->
+                        ids.stream().map(dataMapper::transformStepDefinitionIdToKey)))
+                .set("stepMatchArgumentsLists", testStep.getStepMatchArgumentsLists().map(stepMatchArgumentsLists ->
+                        stepMatchArgumentsLists.stream().map(argList -> mapView()
+                                .set("stepMatchArguments", argList.getStepMatchArguments().stream().map(arg -> mapView()
+                                        .set("group", serializeGroup(arg.getGroup()))
+                                        .set("parameterTypeName", arg.getParameterTypeName()))))));
+    }
+
+    private MapView serializeGroup(io.cucumber.messages.types.Group group) {
+        return mapView().set("children", group.getChildren().stream().map(this::serializeGroup))
+                .set("start", group.getStart())
+                .set("value", group.getValue());
+    }
+
+    private Consumer<MapView> timestamp(Timestamp timestamp) {
+        return map -> map.set("timestamp", mapView()
+                .set("seconds", timestamp.getSeconds())
+                .set("nanos", timestamp.getNanos()));
+    }
+
+    private Consumer<MapView> eventTestCaseForTypeTestStepId(String typeTestStepId) {
+        return map -> map.set("testCase", dataMapper.pickleKey(dataMapper.pickleById(
+                dataMapper.testCaseByStepId(typeTestStepId).getPickleId())));
 
     }
 
-    EnvelopBuilder envelopBuilder(String type) {
-        return new EnvelopBuilder(type);
+    private Consumer<MapView> typeTestStepId(String typeTestStepId) {
+        int testStepIdIndex = dataMapper.testCaseByStepId(typeTestStepId).getTestSteps().stream()
+                .map(io.cucumber.messages.types.TestStep::getId)
+                .collect(toList()).indexOf(typeTestStepId);
+        return map -> map.set("testStepId", testStepIdIndex);
     }
 
-    class EnvelopBuilder extends Builder {
-        EnvelopBuilder(String type) {
-            super(type);
-        }
-
-        EnvelopBuilder setTestCase(io.cucumber.messages.types.TestCase testCase) {
-            data.put("testCase", dataMapper.pickleKey(dataMapper.pickleById(testCase.getPickleId())));
-            data.put("testSteps", testCase.getTestSteps().stream().map(this::serializeTestStep).collect(toList()));
-            return this;
-        }
-
-        EnvelopBuilder put(String key, Object value) {
-            data.put(key, value);
-            return this;
-        }
-
-        private Map<String, Object> serializeTestStep(io.cucumber.messages.types.TestStep testStep) {
-            return new LinkedHashMap<String, Object>() {{
-                put("hookId", testStep.getHookId().map(dataMapper::transformHookIdToKey).orElse(null));
-                put("stepDefinitionIds", testStep.getStepDefinitionIds().map(ids ->
-                        ids.stream().map(dataMapper::transformStepDefinitionIdToKey).collect(toList())).orElse(null));
-
-                put("stepMatchArgumentsLists", testStep.getStepMatchArgumentsLists().map(stepMatchArgumentsLists -> {
-                    return stepMatchArgumentsLists.stream().map(argList -> {
-                        return new LinkedHashMap<String, Object>() {{
-                            put("stepMatchArguments", argList.getStepMatchArguments().stream().map(arg -> new LinkedHashMap<String, Object>() {{
-                                put("group", serializeGroup(arg.getGroup(), new LinkedHashMap<>()));
-                                put("parameterTypeName", arg.getParameterTypeName().orElse(null));
-                            }}).collect(toList()));
-                        }};
-                    }).collect(toList());
-                }).orElse(null));
-            }};
-        }
-
-        private Map<String, Object> serializeGroup(io.cucumber.messages.types.Group group, Map<String, Object> data) {
-            data.put("children", group.getChildren().stream()
-                    .map(child -> serializeGroup(child, new LinkedHashMap<>()))
-                    .collect(toList()));
-            data.put("start", group.getStart().orElse(null));
-            data.put("value", group.getValue().orElse(null));
-            return data;
-        }
-    }
-
-    static class Builder {
-        protected final Map<String, Object> content = new LinkedHashMap<>();
-        protected final Map<String, Object> data = new LinkedHashMap<>();
-
-        public Builder(String type) {
-            content.put("type", type);
-            content.put("data", data);
-        }
-
-        String build() {
-            return MessageConverterRegistry.jsonConverter().serialize(content);
-        }
+    public String serialize(Object event) {
+        return MessageConverterRegistry.jsonConverter().serialize(mapView()
+                .set("type", event.getClass().getName())
+                .set("data", serializeEvent(event)));
     }
 }

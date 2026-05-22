@@ -1,11 +1,10 @@
 package org.testcharm.util;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.util.Zipped.zip;
@@ -16,6 +15,14 @@ public class MapView implements Map<String, Object> {
 
     public MapView(Map<String, Object> map) {
         this.map = map;
+    }
+
+    public MapView() {
+        map = new LinkedHashMap<>();
+    }
+
+    public static MapView mapView() {
+        return new MapView();
     }
 
     @Override
@@ -92,6 +99,29 @@ public class MapView implements Map<String, Object> {
     @SuppressWarnings("unchecked")
     public <R> R get(String key) {
         return (R) map.get(key);
+    }
+
+    public MapView set(String key, Object value) {
+        map.put(key, value);
+        return this;
+    }
+
+    public MapView set(String key, Optional<?> optional) {
+        Object v = optional.orElse(null);
+        if (v instanceof Stream)
+            return set(key, (Stream<?>) v);
+        map.put(key, v);
+        return this;
+    }
+
+    public MapView set(String key, Stream<?> stream) {
+        map.put(key, stream.collect(toList()));
+        return this;
+    }
+
+    public MapView set(Consumer<MapView> consumer) {
+        consumer.accept(this);
+        return this;
     }
 
     public static Function<Object, String> string() {

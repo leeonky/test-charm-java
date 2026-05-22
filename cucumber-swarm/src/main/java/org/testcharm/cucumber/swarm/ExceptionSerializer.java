@@ -9,15 +9,19 @@ import java.util.function.Function;
 
 public class ExceptionSerializer {
     public static void serialize(Throwable throwable, Map<String, Object> output, String key) {
-        Sneaky.run(() -> {
+        output.put(key, serializeError(throwable));
+    }
+
+    public static String serializeError(Throwable throwable) {
+        return Sneaky.get(() -> {
             try {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 try (ObjectOutputStream outputStream = new ObjectOutputStream(stream)) {
                     outputStream.writeObject(throwable);
                 }
-                output.put(key, Base64.getEncoder().encodeToString(stream.toByteArray()));
+                return Base64.getEncoder().encodeToString(stream.toByteArray());
             } catch (NotSerializableException ig) {
-                serialize(new RemoteException(throwable), output, key);
+                return serializeError(new RemoteException(throwable));
             }
         });
     }
