@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.Integer.parseInt;
+
 public class WorkerArgsPreProcessor {
     public ProcessedArgs process(String[] argv, ClassLoader classLoader) {
         LinkedList<String> args = new LinkedList<>(Arrays.asList(argv));
@@ -22,7 +24,9 @@ public class WorkerArgsPreProcessor {
         workerArgs.add("--plugin");
         workerArgs.add("org.testcharm.cucumber.swarm.WorkerForwardingPlugin");
 
-        SwarmHost swarmArgs = new SwarmHost();
+        SwarmHost swarmHost = new SwarmHost();
+        boolean localWorker = true;
+        int remoteWorkerCount = 1;
 
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
@@ -33,14 +37,20 @@ public class WorkerArgsPreProcessor {
                 masterArgs.add(arg);
                 masterArgs.add(plugin);
             } else if (arg.equals("--swarm-port")) {
-                String port = args.removeFirst();
-                swarmArgs.setPort(Integer.parseInt(port));
+                swarmHost.setPort(parseInt(args.removeFirst()));
+            } else if (arg.equals("--local-worker")) {
+                String mode = args.removeFirst();
+                localWorker = mode.equalsIgnoreCase("enable");
+            } else if (arg.equals("--remote-worker-count")) {
+                remoteWorkerCount = parseInt(args.removeFirst());
+            } else if (arg.equals("--")) {
+                break;
             } else {
                 masterArgs.add(arg);
                 workerArgs.add(arg);
             }
         }
         return new ProcessedArgs(masterArgs.toArray(new String[0]),
-                new SwarmArgs(workerArgs.toArray(new String[0]), swarmArgs, classLoader));
+                new SwarmArgs(workerArgs.toArray(new String[0]), swarmHost, classLoader, localWorker, remoteWorkerCount, args));
     }
 }

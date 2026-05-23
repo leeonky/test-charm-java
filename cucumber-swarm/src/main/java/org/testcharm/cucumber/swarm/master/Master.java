@@ -39,6 +39,7 @@ public class Master {
     }
 
     public void start() {
+//        int pickleCount = pickleQueue.size();
         controller.start();
         workers.save(new LocalWorker(swarmArgs));
         while (!pickleQueue.isEmpty())

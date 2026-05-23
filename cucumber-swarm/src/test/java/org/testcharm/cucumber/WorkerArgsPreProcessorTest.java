@@ -17,6 +17,26 @@ class WorkerArgsPreProcessorTest {
     class WithLocalWorker {
 
         @Nested
+        class SwarmMode {
+
+            @Test
+            void default_local_worker() {
+                String[] argv = {"features"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs).should("localWorker: true");
+            }
+
+            @Test
+            void enable_local_worker() {
+                String[] argv = {"--local-worker", "enable", "features"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs).should("localWorker: true");
+            }
+        }
+
+        @Nested
         class ForceSingleThread {
 
             @Test
@@ -25,7 +45,7 @@ class WorkerArgsPreProcessorTest {
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
                 expect(buildOptions(result.masterArgs)).should("threads: 1");
-                expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("threads: 1");
+                expect(buildOptions(result.swarmArgs.getLocalWorkerArgs())).should("threads: 1");
             }
 
             @Test
@@ -34,7 +54,7 @@ class WorkerArgsPreProcessorTest {
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
                 expect(buildOptions(result.masterArgs)).should("threads: 1");
-                expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("threads: 1");
+                expect(buildOptions(result.swarmArgs.getLocalWorkerArgs())).should("threads: 1");
             }
         }
 
@@ -47,7 +67,7 @@ class WorkerArgsPreProcessorTest {
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
                 expect(buildOptions(result.masterArgs)).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.MasterPlugin}]");
-                expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
+                expect(buildOptions(result.swarmArgs.getLocalWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
             }
 
             @Test
@@ -57,7 +77,7 @@ class WorkerArgsPreProcessorTest {
 
                 expect(buildOptions(result.masterArgs)).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.MasterPlugin}" +
                         "{pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter}]");
-                expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
+                expect(buildOptions(result.swarmArgs.getLocalWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
             }
         }
 
@@ -74,7 +94,7 @@ class WorkerArgsPreProcessorTest {
                         "{pluginString: pretty} " +
                         "{pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter} " +
                         "]");
-                expect(buildOptions(result.swarmArgs.getWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
+                expect(buildOptions(result.swarmArgs.getLocalWorkerArgs())).should("plugins: [{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}]");
             }
         }
 
@@ -87,7 +107,7 @@ class WorkerArgsPreProcessorTest {
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
                 expect(buildOptions(result.masterArgs)).should(": {...}");
-                expect(buildOptions(result.swarmArgs.getWorkerArgs())).should(": {...}");
+                expect(buildOptions(result.swarmArgs.getLocalWorkerArgs())).should(": {...}");
 
                 expect(result.swarmArgs).should(": {swarmHost.port: 10083}");
             }
@@ -98,9 +118,65 @@ class WorkerArgsPreProcessorTest {
                 ProcessedArgs result = preProcessor.process(argv, classLoader);
 
                 expect(buildOptions(result.masterArgs)).should(": {...}");
-                expect(buildOptions(result.swarmArgs.getWorkerArgs())).should(": {...}");
+                expect(buildOptions(result.swarmArgs.getLocalWorkerArgs())).should(": {...}");
 
                 expect(result.swarmArgs).should(": {swarmHost.port: 8000}");
+            }
+        }
+    }
+
+    @Nested
+    class WithRemoteWorker {
+
+        @Nested
+        class SwarmMode {
+
+            @Test
+            void disable_local_worker() {
+                String[] argv = {"--local-worker", "disable", "features", "--", "ls"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs).should("localWorker: false");
+            }
+        }
+
+        @Nested
+        class RemoteWorkerCount {
+
+            @Test
+            void default_remote_worker_count() {
+                String[] argv = {"features", "--", "ls"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs).should("remoteWorkerCount: 1");
+            }
+
+            @Test
+            void specify_remote_worker_count() {
+                String[] argv = {"--remote-worker-count", "5", "features", "--", "ls"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs).should("remoteWorkerCount: 5");
+            }
+        }
+
+        @Nested
+        class RemoteWorkerArgs {
+
+            @Test
+            void no_remote_worker_args() {
+                String[] argv = {"features"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs.getRemoteWorkerArgs(43)).should("= []");
+            }
+
+            @Test
+            void remote_worker_args() {
+                String[] argv = {"features", "--", "ls", "{remote-worker-index}"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs.getRemoteWorkerArgs(43)).should(": [ls, '43']");
             }
         }
     }
@@ -111,4 +187,7 @@ class WorkerArgsPreProcessorTest {
                 .enablePublishPlugin()
                 .build(RuntimeOptions.defaultOptions());
     }
+
+//    remote command
+//    remote worker count default 1
 }

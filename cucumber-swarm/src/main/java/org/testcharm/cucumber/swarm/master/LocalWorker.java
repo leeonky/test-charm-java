@@ -22,7 +22,7 @@ public class LocalWorker implements Worker {
     public LocalWorker(SwarmArgs swarmArgs) {
         log.info(() -> String.format("Local worker<%d> starting...", id));
         future = CompletableFuture.supplyAsync(() -> {
-            Main.Result worker = buildRuntimeOption(swarmArgs.getWorkerArgs());
+            Main.Result worker = buildRuntimeOption(swarmArgs.getLocalWorkerArgs());
 
             Optional<Byte> exitStatus = worker.commandlineOptionsParser.exitStatus();
             if (exitStatus.isPresent()) {
