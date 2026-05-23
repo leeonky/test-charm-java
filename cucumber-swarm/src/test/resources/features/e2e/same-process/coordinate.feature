@@ -284,6 +284,284 @@ Feature: Master Worker Coordinate
       ...]
       """
 
+  Scenario: master and local worker with a skipped step scenario
+    Given the feature file "test.feature":
+      """
+      Feature: test
+
+        Scenario: test
+          Given a failed step
+          And a skipped step
+      """
+    Given the following class definition:
+      """
+      package steps;
+      import io.cucumber.java.en.*;
+
+      public class Steps {
+
+        @Given("a failed step")
+        public void a_failed_step() {
+          throw new RuntimeException("step failed");
+        }
+
+        @Given("a skipped step")
+        public void a_skipped_step() {
+          System.out.println("step should be skipped");
+        }
+      }
+      """
+    When run cucumber with the following args:
+      """
+      '--glue'
+      'steps'
+      $path + 'features'
+      """
+    Then the task result should be:
+      """
+      : {
+        code= 1
+        stdout.normalize= ```
+                          Failed scenarios:
+                            1) test # file://$path$/features/test.feature:3
+                                 java.lang.RuntimeException: step failed
+                                 \tat steps.Steps.a_failed_step(Steps.java:9)
+                                 \tat ✽.a failed step(file://$path$/features/test.feature:4)
+
+
+                          1 scenarios (1 failed)
+                          2 steps (1 skipped, 1 failed)
+                          ```
+      }
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: Master created with 1 scenarios',
+        /^INFO: Starting restful server on.*/
+        'INFO: Restful server started'
+        'INFO: Local worker<1> starting...'
+        'INFO: Executor<1> started'
+        'INFO: Requesting pickle...'
+        'INFO: Received worker<1> pickle request'
+        'INFO: Send pickle<test.feature:3> to worker<1>'
+        'INFO: Received pickle<test.feature:3>'
+        'INFO: Requesting pickle...'
+        'INFO: Received worker<1> pickle request'
+        'INFO: No more pickles'
+        'INFO: No pickle received'
+      ...]
+      """
+    And the log should:
+      """
+      lines::should[]: [...
+        {
+          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: '"status":"FAILED"'
+        }
+        {
+          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: '"status":"SKIPPED"'
+        }
+        { contains: 'Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
+      ...]
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: Shutting down master...'
+        'INFO: Waiting and collecting worker<1> exit status'
+        'INFO: Worker<1> exit(1)'
+        'INFO: Shutting down restful server...'
+        'INFO: Restful server shut down'
+        'INFO: Master shut down'
+      ...]
+      """
+
+  Scenario: master and local worker with a pending step scenario
+    Given the feature file "test.feature":
+      """
+      Feature: test
+
+        Scenario: test
+          Given a pending step
+      """
+    Given the following class definition:
+      """
+      package steps;
+      import io.cucumber.java.PendingException;
+      import io.cucumber.java.en.*;
+
+      public class Steps {
+
+        @Given("a pending step")
+        public void a_pending_step() {
+          throw new PendingException("step pending");
+        }
+      }
+      """
+    When run cucumber with the following args:
+      """
+      '--glue'
+      'steps'
+      $path + 'features'
+      """
+    Then the task result should be:
+      """
+      : {
+        code= 1
+        stdout.normalize= ```
+                          Pending scenarios:
+                            1) test # file://$path$/features/test.feature:3
+                                 io.cucumber.java.PendingException: step pending
+                                 \tat steps.Steps.a_pending_step(Steps.java:10)
+                                 \tat ✽.a pending step(file://$path$/features/test.feature:4)
+
+
+                          1 scenarios (1 pending)
+                          1 steps (1 pending)
+                          ```
+      }
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: Master created with 1 scenarios',
+        /^INFO: Starting restful server on.*/
+        'INFO: Restful server started'
+        'INFO: Local worker<1> starting...'
+        'INFO: Executor<1> started'
+        'INFO: Requesting pickle...'
+        'INFO: Received worker<1> pickle request'
+        'INFO: Send pickle<test.feature:3> to worker<1>'
+        'INFO: Received pickle<test.feature:3>'
+        'INFO: Requesting pickle...'
+        'INFO: Received worker<1> pickle request'
+        'INFO: No more pickles'
+        'INFO: No pickle received'
+      ...]
+      """
+    And the log should:
+      """
+      lines::should[]: [...
+        {
+          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: '"status":"PENDING"'
+        }
+        { contains: 'Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
+        {
+          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
+          contains: '"status":"PENDING"'
+        }
+        { contains: 'Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
+      ...]
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: Shutting down master...'
+        'INFO: Waiting and collecting worker<1> exit status'
+        'INFO: Worker<1> exit(1)'
+        'INFO: Shutting down restful server...'
+        'INFO: Restful server shut down'
+        'INFO: Master shut down'
+      ...]
+      """
+
+  Scenario: master and local worker with an ambiguous step scenario
+    Given the feature file "test.feature":
+      """
+      Feature: test
+
+        Scenario: test
+          Given a step with implementation
+      """
+    Given the following class definition:
+      """
+      package steps;
+      import io.cucumber.java.en.*;
+
+      public class Steps {
+
+        @Given("a step with implementation")
+        public void a_step_with_implementation() {
+          System.out.println("step called");
+        }
+
+        @Given("^.* implementation$")
+        public void another_a_step_with_implementation() {
+          System.out.println("step called");
+        }
+      }
+      """
+    When run cucumber with the following args:
+      """
+      '--glue'
+      'steps'
+      $path + 'features'
+      """
+    Then the task result should be:
+      """
+      : {
+        code= 1
+        stdout.normalize::should.startsWith: ```
+                                             Ambiguous scenarios:
+                                               1) test # file://$path$/features/test.feature:3
+                                                    io.cucumber.core.runner.AmbiguousStepDefinitionsException: "a step with implementation" matches more than one step definition:
+                                                      "^.* implementation$" in steps.Steps.another_a_step_with_implementation()
+                                                      "a step with implementation" in steps.Steps.a_step_with_implementation()
+                                             ```
+        stdout.normalize::should.endsWith: ```
+                                           1 scenarios (1 ambiguous)
+                                           1 steps (1 ambiguous)
+                                           ```
+      }
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: Master created with 1 scenarios',
+        /^INFO: Starting restful server on.*/
+        'INFO: Restful server started'
+        'INFO: Local worker<1> starting...'
+        'INFO: Executor<1> started'
+        'INFO: Requesting pickle...'
+        'INFO: Received worker<1> pickle request'
+        'INFO: Send pickle<test.feature:3> to worker<1>'
+        'INFO: Received pickle<test.feature:3>'
+        'INFO: Requesting pickle...'
+        'INFO: Received worker<1> pickle request'
+        'INFO: No more pickles'
+        'INFO: No pickle received'
+      ...]
+      """
+    And the log should:
+      """
+      lines::should[]: [...
+        {
+          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: '"status":"AMBIGUOUS"'
+        }
+        { contains: 'Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
+        {
+          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
+          contains: '"status":"AMBIGUOUS"'
+        }
+        { contains: 'Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
+      ...]
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: Shutting down master...'
+        'INFO: Waiting and collecting worker<1> exit status'
+        'INFO: Worker<1> exit(1)'
+        'INFO: Shutting down restful server...'
+        'INFO: Restful server shut down'
+        'INFO: Master shut down'
+      ...]
+      """
+
   Scenario: run with feature file name
     Given the feature file "test.feature":
       """
