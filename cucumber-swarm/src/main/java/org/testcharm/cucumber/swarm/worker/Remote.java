@@ -62,4 +62,8 @@ public class Remote {
         log.info(() -> String.format("Forwarding event: %s", serialize));
         restfulClient.httpPost(workerId, "/events", serialize);
     }
+
+    public void sayReady() {
+        restfulClient.httpPost(workerId, "/ready", "");
+    }
 }

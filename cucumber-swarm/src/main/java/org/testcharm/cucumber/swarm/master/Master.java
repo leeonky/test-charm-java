@@ -46,12 +46,26 @@ public class Master {
         controller.start();
         if (swarmArgs.isLocalWorker())
             workers.save(new LocalWorker(swarmArgs));
-        while (!pickleQueue.isEmpty()) {
-            if (Instant.now().isAfter(now.plusSeconds(swarmArgs.getWorkerTimeout())) && pickleQueue.size() == pickleCount) {
+        if (swarmArgs.getRemoteWorkerCount() > 0) {
+            workers.save(new RemoteWorker(swarmArgs));
+        }
+
+        while (noWorkerReady()) {
+            if (Instant.now().isAfter(now.plusSeconds(swarmArgs.getWorkerTimeout()))) {
                 String message = String.format("No worker available after waiting for %d seconds", swarmArgs.getWorkerTimeout());
                 log.info(() -> message);
                 throw new IllegalStateException(message);
             }
+            Sneaky.run(() -> Thread.sleep(50));
+        }
+
+        while (!pickleQueue.isEmpty()) {
+//            if (pickleQueue.size() == pickleCount
+//                    && Instant.now().isAfter(now.plusSeconds(swarmArgs.getWorkerTimeout()))) {
+//                String message = String.format("No worker available after waiting for %d seconds", swarmArgs.getWorkerTimeout());
+//                log.info(() -> message);
+//                throw new IllegalStateException(message);
+//            }
             Sneaky.run(() -> Thread.sleep(50));
         }
         log.info(() -> "Pickle queue EMPTY");
@@ -81,5 +95,13 @@ public class Master {
         Object deserialize = eventDeserializer.deserialize(eventRecord);
         log.info(() -> "Forwarding event: " + deserialize.getClass().getName());
         eventBus.send(deserialize);
+    }
+
+    public void workerReady(Worker worker) {
+        worker.ready();
+    }
+
+    private boolean noWorkerReady() {
+        return workers.findAll().stream().noneMatch(Worker::isReady);
     }
 }

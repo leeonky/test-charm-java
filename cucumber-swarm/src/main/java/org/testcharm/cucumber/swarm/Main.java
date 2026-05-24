@@ -5,6 +5,7 @@ import io.cucumber.core.options.CucumberProperties;
 import io.cucumber.core.options.CucumberPropertiesParser;
 import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.runtime.MasterRuntime;
+import io.cucumber.core.runtime.WorkerRuntime;
 
 import java.util.Optional;
 
@@ -21,20 +22,37 @@ public class Main {
 
     public static byte run(String[] argv, ClassLoader classLoader) {
         ProcessedArgs argvs = new WorkerArgsPreProcessor().process(argv, classLoader);
-        Result master = buildRuntimeOption(argvs.masterArgs);
+        if (argvs.swarmArgs.getWorkerId() != null) {
+            Main.Result worker = buildRuntimeOption(argvs.swarmArgs.getWorkerArgs());
 
-        Optional<Byte> exitStatus = master.commandlineOptionsParser.exitStatus();
-        if (exitStatus.isPresent()) {
-            return exitStatus.get();
+            Optional<Byte> exitStatus = worker.commandlineOptionsParser.exitStatus();
+            if (exitStatus.isPresent()) {
+                return exitStatus.get();
+            }
+
+            final WorkerRuntime workerRuntime = WorkerRuntime.builder()
+                    .withRuntimeOptions(worker.runtimeOptions)
+                    .withClassLoader(() -> classLoader)
+                    .build(argvs.swarmArgs.getSwarmHost(), argvs.swarmArgs.getWorkerId());
+
+            workerRuntime.run();
+            return workerRuntime.exitStatus();
+        } else {
+            Result master = buildRuntimeOption(argvs.masterArgs);
+
+            Optional<Byte> exitStatus = master.commandlineOptionsParser.exitStatus();
+            if (exitStatus.isPresent()) {
+                return exitStatus.get();
+            }
+
+            final MasterRuntime masterRuntime = MasterRuntime.builder()
+                    .withRuntimeOptions(master.runtimeOptions)
+                    .withClassLoader(() -> classLoader)
+                    .build(argvs.swarmArgs);
+
+            masterRuntime.run();
+            return masterRuntime.exitStatus();
         }
-
-        final MasterRuntime masterRuntime = MasterRuntime.builder()
-                .withRuntimeOptions(master.runtimeOptions)
-                .withClassLoader(() -> classLoader)
-                .build(argvs.swarmArgs);
-
-        masterRuntime.run();
-        return masterRuntime.exitStatus();
     }
 
     public static Result buildRuntimeOption(String[] argv) {

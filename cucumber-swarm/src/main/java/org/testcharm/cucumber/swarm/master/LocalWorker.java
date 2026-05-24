@@ -13,16 +13,14 @@ import java.util.concurrent.CompletionException;
 
 import static org.testcharm.cucumber.swarm.Main.buildRuntimeOption;
 
-public class LocalWorker implements Worker {
+public class LocalWorker extends AbstractWorker {
     private final CompletableFuture<Byte> future;
     private final Logger log = LoggerFactory.getLogger(LocalWorker.class);
-
-    private final int id = Worker.ID_GENERATOR.incrementAndGet();
 
     public LocalWorker(SwarmArgs swarmArgs) {
         log.info(() -> String.format("Local worker<%d> starting...", id));
         future = CompletableFuture.supplyAsync(() -> {
-            Main.Result worker = buildRuntimeOption(swarmArgs.getLocalWorkerArgs());
+            Main.Result worker = buildRuntimeOption(swarmArgs.getWorkerArgs());
 
             Optional<Byte> exitStatus = worker.commandlineOptionsParser.exitStatus();
             if (exitStatus.isPresent()) {
@@ -37,11 +35,6 @@ public class LocalWorker implements Worker {
             workerRuntime.run();
             return workerRuntime.exitStatus();
         });
-    }
-
-    @Override
-    public int id() {
-        return id;
     }
 
     @Override

@@ -8,4 +8,8 @@ public interface Worker {
     int id();
 
     void shutdown();
+
+    void ready();
+
+    boolean isReady();
 }

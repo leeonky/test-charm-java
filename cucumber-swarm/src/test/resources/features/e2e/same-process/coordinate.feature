@@ -24,6 +24,8 @@ Feature: Master Worker Coordinate
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
         'INFO: Local worker<1> starting...'
+        'INFO: Received worker<1> ready signal'
+        'INFO: Worker<1> is ready'
         'INFO: Executor<1> started'
         'INFO: Requesting pickle...'
         'INFO: Received worker<1> pickle request'

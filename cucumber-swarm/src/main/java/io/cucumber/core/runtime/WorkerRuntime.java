@@ -56,6 +56,7 @@ public final class WorkerRuntime {
     }
 
     public void run() {
+        REMOTE.sayReady();
         log.info(() -> String.format("Executor<%d> started", workerId));
         // Parse the features early. Don't proceed when there are lexer errors
         List<Feature> features = featureSupplier.get();

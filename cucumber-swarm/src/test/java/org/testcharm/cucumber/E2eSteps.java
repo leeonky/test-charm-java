@@ -112,6 +112,7 @@ public class E2eSteps {
     }
 
     @And("the log should:")
+    @And("the master log should:")
     public void theLogShould(String expression) throws IOException {
         expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log")))).should(expression);
     }
@@ -127,5 +128,61 @@ public class E2eSteps {
         if (!dir.exist("passed")) {
             throw new AssertionError("\n" + dir.readAllText("failed"));
         }
+    }
+
+    @SneakyThrows
+    @When("run cucumber in remote mode with the following args:")
+    public void runCucumberInRemoteModeWithTheFollowingArgs(String docString) {
+        JavaExecutor.executor().main().evaluate();
+
+        List<String> args = new ArrayList<>();
+        String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+        String classpath = String.join(File.pathSeparator, System.getProperty("java.class.path").split(File.pathSeparator));
+        classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
+        args.add(javaBin);
+        args.add("-Djava.util.logging.config.file=" + cucumberDirectory.resolve("logging.properties").toAbsolutePath());
+        List<String> remoteArgs = new ArrayList<>(args);
+        if (isDebugging()) {
+            args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
+//            remoteArgs.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5006");
+        }
+        args.add("-cp");
+        args.add(classpath);
+        args.add(Main.class.getName());
+
+        args.add("--swarm-port");
+        int port = SWARM_PORT.getAndIncrement();
+        args.add(String.valueOf(port));
+
+        remoteArgs.add("-cp");
+        remoteArgs.add(classpath);
+        remoteArgs.add(Main.class.getName());
+
+        remoteArgs.add("--swarm-port");
+        remoteArgs.add(String.valueOf(port));
+
+        args.add("--local-worker");
+        args.add("disable");
+
+        remoteArgs.add("--worker-id");
+        remoteArgs.add("{worker-id}");
+
+        DAL.dal().evaluateAll(null, docString, new HashMap<String, String>() {{
+            put("path", cucumberDirectory.root().toString() + File.separator);
+        }}).forEach(e -> {
+            args.add(String.valueOf(e));
+            remoteArgs.add(String.valueOf(e));
+        });
+
+        args.add("--");
+        args.addAll(remoteArgs);
+
+        process = new ProcessBuilder(args.toArray(new String[0])).start();
+    }
+
+    @SneakyThrows
+    @And("the worker {int} log should:")
+    public void theWorkerLogShould(int id, String expression) {
+        expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log." + id)))).should(expression);
     }
 }

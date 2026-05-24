@@ -36,6 +36,13 @@ public class Controller {
             master.forwardEvent(body);
             context.responseOk();
         });
+
+        restfulServer.requestHandler("POST", "/ready", context -> {
+            int workerId = Integer.parseInt(context.header("X-Worker-Id"));
+            log.info(() -> String.format("Received worker<%d> ready signal", workerId));
+            master.workerReady(workerRepository.findByKey(workerId));
+            context.responseOk();
+        });
     }
 
     public void start() {

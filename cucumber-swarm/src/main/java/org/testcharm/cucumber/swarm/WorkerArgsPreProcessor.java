@@ -26,35 +26,51 @@ public class WorkerArgsPreProcessor {
 
         SwarmHost swarmHost = new SwarmHost();
         boolean localWorker = true;
-        int remoteWorkerCount = 1;
-        int workerTimeout = 60;
+        int remoteWorkerCount = 0;
+        int workerTimeout = 5;
+        Integer workerId = null;
 
+        label:
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
-            if (arg.equals("--threads")) {
-                args.removeFirst(); // ignore thread force to 1
-            } else if (arg.equals("--plugin")) {
-                String plugin = args.removeFirst();
-                masterArgs.add(arg);
-                masterArgs.add(plugin);
-            } else if (arg.equals("--swarm-port")) {
-                swarmHost.setPort(popIntValue(args));
-            } else if (arg.equals("--local-worker")) {
-                String mode = args.removeFirst();
-                localWorker = mode.equalsIgnoreCase("enable");
-            } else if (arg.equals("--remote-worker-count")) {
-                remoteWorkerCount = popIntValue(args);
-            } else if (arg.equals("--worker-timeout")) {
-                workerTimeout = popIntValue(args);
-            } else if (arg.equals("--")) {
-                break;
-            } else {
-                masterArgs.add(arg);
-                workerArgs.add(arg);
+            switch (arg) {
+                case "--threads":
+                    args.removeFirst(); // ignore thread force to 1
+                    break;
+                case "--plugin":
+                    String plugin = args.removeFirst();
+                    masterArgs.add(arg);
+                    masterArgs.add(plugin);
+                    break;
+                case "--swarm-port":
+                    swarmHost.setPort(popIntValue(args));
+                    break;
+                case "--local-worker":
+                    String mode = args.removeFirst();
+                    localWorker = mode.equalsIgnoreCase("enable");
+                    break;
+                case "--remote-worker-count":
+                    remoteWorkerCount = popIntValue(args);
+                    break;
+                case "--worker-timeout":
+                    workerTimeout = popIntValue(args);
+                    break;
+                case "--worker-id":
+                    workerId = popIntValue(args);
+                    break;
+                case "--":
+                    break label;
+                default:
+                    masterArgs.add(arg);
+                    workerArgs.add(arg);
+                    break;
             }
         }
+        if (workerId != null)
+            workerArgs.remove("--no-summary");
         return new ProcessedArgs(masterArgs.toArray(new String[0]),
-                new SwarmArgs(workerArgs.toArray(new String[0]), swarmHost, classLoader, localWorker, remoteWorkerCount, args, workerTimeout));
+                new SwarmArgs(workerArgs.toArray(new String[0]), swarmHost, classLoader, localWorker,
+                        remoteWorkerCount, args, workerTimeout, workerId));
     }
 
     private int popIntValue(LinkedList<String> args) {

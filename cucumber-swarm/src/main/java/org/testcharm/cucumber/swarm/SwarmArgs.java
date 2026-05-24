@@ -5,28 +5,29 @@ import java.util.List;
 import static java.lang.String.valueOf;
 
 public class SwarmArgs {
-    private final String[] localWorkerArgs;
+    private final String[] workerArgs;
     private final SwarmHost swarmHost;
     private final ClassLoader classLoader;
-    private int workerId;
     private final boolean localWorker;
     private final int remoteWorkerCount;
     private final List<String> remoteWorkerArgs;
     private final int workerTimeout;
+    private final Integer workerId;
 
-    public SwarmArgs(String[] localWorkerArgs, SwarmHost swarmHost, ClassLoader classLoader, boolean localWorker,
-                     int remoteWorkerCount, List<String> remoteWorkerArgs, int workerTimeout) {
-        this.localWorkerArgs = localWorkerArgs;
+    public SwarmArgs(String[] workerArgs, SwarmHost swarmHost, ClassLoader classLoader, boolean localWorker,
+                     int remoteWorkerCount, List<String> remoteWorkerArgs, int workerTimeout, Integer workerId) {
+        this.workerArgs = workerArgs;
         this.swarmHost = swarmHost;
         this.classLoader = classLoader;
         this.localWorker = localWorker;
         this.remoteWorkerCount = remoteWorkerCount;
         this.remoteWorkerArgs = remoteWorkerArgs;
         this.workerTimeout = workerTimeout;
+        this.workerId = workerId;
     }
 
-    public String[] getLocalWorkerArgs() {
-        return localWorkerArgs;
+    public String[] getWorkerArgs() {
+        return workerArgs;
     }
 
     public SwarmHost getSwarmHost() {
@@ -37,20 +38,12 @@ public class SwarmArgs {
         return classLoader;
     }
 
-    public int getWorkerId() {
-        return workerId;
-    }
-
-    public void setWorkerId(int workerId) {
-        this.workerId = workerId;
-    }
-
     public boolean isLocalWorker() {
         return localWorker;
     }
 
     public String[] getRemoteWorkerArgs(int index) {
-        return remoteWorkerArgs.stream().map(s -> s.replace("{remote-worker-index}", valueOf(index))).toArray(String[]::new);
+        return remoteWorkerArgs.stream().map(s -> s.replace("{worker-id}", valueOf(index))).toArray(String[]::new);
     }
 
     public int getRemoteWorkerCount() {
@@ -59,5 +52,9 @@ public class SwarmArgs {
 
     public int getWorkerTimeout() {
         return workerTimeout;
+    }
+
+    public Integer getWorkerId() {
+        return workerId;
     }
 }
