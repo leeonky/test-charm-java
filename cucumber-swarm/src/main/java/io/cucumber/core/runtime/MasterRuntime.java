@@ -76,21 +76,19 @@ public final class MasterRuntime {
     public void run() {
         // Parse the features early. Don't proceed when there are lexer errors
         List<Feature> features = featureSupplier.get();
-        context.runFeatures(() -> runFeatures(features));
-    }
-
-    private void runFeatures(List<Feature> features) {
-        features.forEach(context::beforeFeature);
-        List<Pickle> pickles = features.stream()
-                .flatMap(feature -> feature.getPickles().stream())
-                .filter(filter)
-                .collect(collectingAndThen(toList(),
-                        list -> pickleOrder.orderPickles(list).stream()))
-                .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
-        Master master = new Master(swarmArgs, pickles, new MasterDataMapper(featurePaths, testCaseFactory), eventBus);
-        master.setupMapping(features);
-        master.start();
-        master.shutdown();
+        context.runFeatures(() -> {
+            features.forEach(context::beforeFeature);
+            List<Pickle> pickles = features.stream()
+                    .flatMap(feature -> feature.getPickles().stream())
+                    .filter(filter)
+                    .collect(collectingAndThen(toList(),
+                            list -> pickleOrder.orderPickles(list).stream()))
+                    .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
+            Master master = new Master(swarmArgs, pickles, new MasterDataMapper(featurePaths, testCaseFactory), eventBus);
+            context.executeAndThrow(() -> master.setupMapping(features));
+            context.executeAndThrow(master::start);
+            context.executeAndThrow(master::shutdown);
+        });
     }
 
     public byte exitStatus() {

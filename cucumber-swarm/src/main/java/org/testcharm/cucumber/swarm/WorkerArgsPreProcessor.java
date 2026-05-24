@@ -27,6 +27,7 @@ public class WorkerArgsPreProcessor {
         SwarmHost swarmHost = new SwarmHost();
         boolean localWorker = true;
         int remoteWorkerCount = 1;
+        int workerTimeout = 60;
 
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
@@ -37,12 +38,14 @@ public class WorkerArgsPreProcessor {
                 masterArgs.add(arg);
                 masterArgs.add(plugin);
             } else if (arg.equals("--swarm-port")) {
-                swarmHost.setPort(parseInt(args.removeFirst()));
+                swarmHost.setPort(popIntValue(args));
             } else if (arg.equals("--local-worker")) {
                 String mode = args.removeFirst();
                 localWorker = mode.equalsIgnoreCase("enable");
             } else if (arg.equals("--remote-worker-count")) {
-                remoteWorkerCount = parseInt(args.removeFirst());
+                remoteWorkerCount = popIntValue(args);
+            } else if (arg.equals("--worker-timeout")) {
+                workerTimeout = popIntValue(args);
             } else if (arg.equals("--")) {
                 break;
             } else {
@@ -51,6 +54,10 @@ public class WorkerArgsPreProcessor {
             }
         }
         return new ProcessedArgs(masterArgs.toArray(new String[0]),
-                new SwarmArgs(workerArgs.toArray(new String[0]), swarmHost, classLoader, localWorker, remoteWorkerCount, args));
+                new SwarmArgs(workerArgs.toArray(new String[0]), swarmHost, classLoader, localWorker, remoteWorkerCount, args, workerTimeout));
+    }
+
+    private int popIntValue(LinkedList<String> args) {
+        return parseInt(args.removeFirst());
     }
 }

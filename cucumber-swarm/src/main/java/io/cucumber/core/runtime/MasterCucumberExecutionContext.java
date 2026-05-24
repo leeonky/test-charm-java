@@ -13,6 +13,7 @@ import io.cucumber.plugin.event.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ResourceBundle;
+import java.util.function.Supplier;
 
 import static io.cucumber.cienvironment.DetectCiEnvironment.detectCiEnvironment;
 import static io.cucumber.core.exception.ExceptionUtils.throwAsUncheckedException;
@@ -117,6 +118,15 @@ public class MasterCucumberExecutionContext {
         Throwable throwable = getThrowable();
         if (throwable != null) {
             throwAsUncheckedException(throwable);
+        }
+    }
+
+    public <T> T executeAndThrow(Supplier<T> supplier) {
+        try {
+            return collector.executeAndThrow(supplier);
+        } catch (Throwable t) {
+            rethrowIfUnrecoverable(t);
+            return null;
         }
     }
 

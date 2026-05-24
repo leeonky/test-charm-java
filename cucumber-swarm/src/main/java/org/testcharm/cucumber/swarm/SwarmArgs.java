@@ -12,15 +12,17 @@ public class SwarmArgs {
     private final boolean localWorker;
     private final int remoteWorkerCount;
     private final List<String> remoteWorkerArgs;
+    private final int workerTimeout;
 
     public SwarmArgs(String[] localWorkerArgs, SwarmHost swarmHost, ClassLoader classLoader, boolean localWorker,
-                     int remoteWorkerCount, List<String> remoteWorkerArgs) {
+                     int remoteWorkerCount, List<String> remoteWorkerArgs, int workerTimeout) {
         this.localWorkerArgs = localWorkerArgs;
         this.swarmHost = swarmHost;
         this.classLoader = classLoader;
         this.localWorker = localWorker;
         this.remoteWorkerCount = remoteWorkerCount;
         this.remoteWorkerArgs = remoteWorkerArgs;
+        this.workerTimeout = workerTimeout;
     }
 
     public String[] getLocalWorkerArgs() {
@@ -53,5 +55,9 @@ public class SwarmArgs {
 
     public int getRemoteWorkerCount() {
         return remoteWorkerCount;
+    }
+
+    public int getWorkerTimeout() {
+        return workerTimeout;
     }
 }

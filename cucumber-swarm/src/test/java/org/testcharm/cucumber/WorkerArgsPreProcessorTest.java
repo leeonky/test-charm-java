@@ -123,6 +123,26 @@ class WorkerArgsPreProcessorTest {
                 expect(result.swarmArgs).should(": {swarmHost.port: 8000}");
             }
         }
+
+        @Nested
+        class WorkerTimeout {
+
+            @Test
+            void default_worker_timeout() {
+                String[] argv = {"features"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs).should("workerTimeout: 60");
+            }
+
+            @Test
+            void worker_timeout() {
+                String[] argv = {"--worker-timeout", "120", "features"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs).should("workerTimeout: 120");
+            }
+        }
     }
 
     @Nested

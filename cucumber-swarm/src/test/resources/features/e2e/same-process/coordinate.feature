@@ -601,3 +601,54 @@ Feature: Master Worker Coordinate
                           ```
       }
       """
+
+  Scenario: raise error when no worker after time out
+    Given the feature file "test.feature":
+      """
+      Feature: test
+
+        Scenario: test
+          Given a step with implementation
+      """
+    Given the following class definition:
+      """
+      package steps;
+      import io.cucumber.java.en.*;
+
+      public class Steps {
+
+        @Given("a step with implementation")
+        public void a_step_with_implementation() {
+          System.out.println("step called");
+        }
+      }
+      """
+    When run cucumber with the following args:
+      """
+      '--worker-timeout'
+      '2'
+      '--local-worker'
+      'disable'
+      '--glue'
+      'steps'
+      $path + 'features'
+      """
+    Then the task result should be:
+      """
+      : {
+        code= 1
+        stderr.normalize::should.startsWith: ```
+                                             Exception in thread "main" java.lang.IllegalStateException: No worker available after waiting for 2 seconds
+                                             ```
+      }
+      """
+    And the log should:
+      """
+      lines: [...
+        'INFO: No worker available after waiting for 2 seconds',
+        'INFO: Shutting down master...'
+        'INFO: Shutting down restful server...'
+        'INFO: Restful server shut down'
+        'INFO: Master shut down'
+      ...]
+      """

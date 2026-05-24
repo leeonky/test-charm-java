@@ -9,6 +9,7 @@ import org.testcharm.cucumber.swarm.SwarmArgs;
 import org.testcharm.cucumber.swarm.repo.Repository;
 import org.testcharm.util.Sneaky;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -34,20 +35,30 @@ public class Master {
         log.info(() -> String.format("Master created with %d scenarios", pickleQueue.size()));
     }
 
-    public void setupMapping(List<Feature> features) {
+    public Master setupMapping(List<Feature> features) {
         features.forEach(dataMapper::mapGherkinFeature);
+        return this;
     }
 
-    public void start() {
-//        int pickleCount = pickleQueue.size();
+    public Master start() {
+        int pickleCount = pickleQueue.size();
+        Instant now = Instant.now();
         controller.start();
-        workers.save(new LocalWorker(swarmArgs));
-        while (!pickleQueue.isEmpty())
+        if (swarmArgs.isLocalWorker())
+            workers.save(new LocalWorker(swarmArgs));
+        while (!pickleQueue.isEmpty()) {
+            if (Instant.now().isAfter(now.plusSeconds(swarmArgs.getWorkerTimeout())) && pickleQueue.size() == pickleCount) {
+                String message = String.format("No worker available after waiting for %d seconds", swarmArgs.getWorkerTimeout());
+                log.info(() -> message);
+                throw new IllegalStateException(message);
+            }
             Sneaky.run(() -> Thread.sleep(50));
+        }
         log.info(() -> "Pickle queue EMPTY");
+        return this;
     }
 
-    public void shutdown() {
+    public Master shutdown() {
         log.info(() -> "Shutting down master...");
         for (Worker worker : workers.findAll()) {
             log.info(() -> String.format("Waiting and collecting worker<%d> exit status", worker.id()));
@@ -55,6 +66,7 @@ public class Master {
         }
         controller.shutdown();
         log.info(() -> "Master shut down");
+        return this;
     }
 
     public Pickle requestPickle(Worker worker) {
