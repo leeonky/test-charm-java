@@ -240,6 +240,4 @@ class WorkerArgsPreProcessorTest {
                 .enablePublishPlugin()
                 .build(RuntimeOptions.defaultOptions());
     }
-
-//    remote command
 }

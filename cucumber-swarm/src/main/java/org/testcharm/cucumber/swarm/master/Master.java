@@ -41,14 +41,13 @@ public class Master {
     }
 
     public Master start() {
-        int pickleCount = pickleQueue.size();
         Instant now = Instant.now();
         controller.start();
+        for (int i = swarmArgs.getRemoteWorkerCount(); i > 0; i--)
+            workers.save(new RemoteWorker(swarmArgs));
+
         if (swarmArgs.isLocalWorker())
             workers.save(new LocalWorker(swarmArgs));
-        if (swarmArgs.getRemoteWorkerCount() > 0) {
-            workers.save(new RemoteWorker(swarmArgs));
-        }
 
         while (noWorkerReady()) {
             if (Instant.now().isAfter(now.plusSeconds(swarmArgs.getWorkerTimeout()))) {
@@ -59,15 +58,8 @@ public class Master {
             Sneaky.run(() -> Thread.sleep(50));
         }
 
-        while (!pickleQueue.isEmpty()) {
-//            if (pickleQueue.size() == pickleCount
-//                    && Instant.now().isAfter(now.plusSeconds(swarmArgs.getWorkerTimeout()))) {
-//                String message = String.format("No worker available after waiting for %d seconds", swarmArgs.getWorkerTimeout());
-//                log.info(() -> message);
-//                throw new IllegalStateException(message);
-//            }
+        while (!pickleQueue.isEmpty())
             Sneaky.run(() -> Thread.sleep(50));
-        }
         log.info(() -> "Pickle queue EMPTY");
         return this;
     }
