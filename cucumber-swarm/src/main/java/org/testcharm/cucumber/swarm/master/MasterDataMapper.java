@@ -8,9 +8,8 @@ import io.cucumber.plugin.event.TestCase;
 import org.testcharm.cucumber.swarm.DataMapper;
 import org.testcharm.cucumber.swarm.repo.Repository;
 
-import java.net.URI;
+import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.List;
 
 public class MasterDataMapper extends DataMapper {
     private final Repository<String, TestCase> testCaseRepository = new Repository<>(this::testCaseKey);
@@ -24,8 +23,8 @@ public class MasterDataMapper extends DataMapper {
         return instance;
     }
 
-    public MasterDataMapper(List<URI> featurePaths, TestCaseFactory testCaseFactory) {
-        super(featurePaths);
+    public MasterDataMapper(TestCaseFactory testCaseFactory, String workingDir) {
+        super(Paths.get(workingDir));
         this.testCaseFactory = testCaseFactory;
         instance = this;
     }

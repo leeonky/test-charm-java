@@ -19,7 +19,6 @@ import org.testcharm.cucumber.swarm.SwarmArgs;
 import org.testcharm.cucumber.swarm.master.Master;
 import org.testcharm.cucumber.swarm.master.MasterDataMapper;
 
-import java.net.URI;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +43,6 @@ public final class MasterRuntime {
     private final FeatureSupplier featureSupplier;
     private final PickleOrder pickleOrder;
     private final SwarmArgs swarmArgs;
-    private final List<URI> featurePaths;
     private final EventBus eventBus;
     private final TestCaseFactory testCaseFactory;
     private final MasterCucumberExecutionContext context;
@@ -56,7 +54,7 @@ public final class MasterRuntime {
             final int limit,
             final FeatureSupplier featureSupplier,
             final PickleOrder pickleOrder,
-            SwarmArgs swarmArgs, List<URI> featurePaths, EventBus eventBus, TestCaseFactory testCaseFactory) {
+            SwarmArgs swarmArgs, EventBus eventBus, TestCaseFactory testCaseFactory) {
         this.filter = filter;
         this.context = context;
         this.limit = limit;
@@ -64,7 +62,6 @@ public final class MasterRuntime {
         this.exitStatus = exitStatus;
         this.pickleOrder = pickleOrder;
         this.swarmArgs = swarmArgs;
-        this.featurePaths = featurePaths;
         this.eventBus = eventBus;
         this.testCaseFactory = testCaseFactory;
     }
@@ -84,7 +81,7 @@ public final class MasterRuntime {
                     .collect(collectingAndThen(toList(),
                             list -> pickleOrder.orderPickles(list).stream()))
                     .limit(limit > 0 ? limit : Integer.MAX_VALUE).collect(toList());
-            Master master = new Master(swarmArgs, pickles, new MasterDataMapper(featurePaths, testCaseFactory), eventBus);
+            Master master = new Master(swarmArgs, pickles, new MasterDataMapper(testCaseFactory, swarmArgs.getWorkingDir()), eventBus);
             context.executeAndThrow(() -> master.setupMapping(features));
             context.executeAndThrow(master::start);
             context.executeAndThrow(master::shutdown);
@@ -161,7 +158,7 @@ public final class MasterRuntime {
             ObjectFactorySupplier objectFactorySupplier = createObjectFactorySupplier();
             BackendSupplier backendSupplier = createBackendSupplier(objectFactorySupplier);
             TestCaseFactory testCaseFactory = new TestCaseFactory(eventBus, runtimeOptions, backendSupplier.get());
-            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs, runtimeOptions.getFeaturePaths(),
+            return new MasterRuntime(exitStatus, context, filter, limit, featureSupplier, pickleOrder, swarmArgs,
                     eventBus, testCaseFactory);
         }
 

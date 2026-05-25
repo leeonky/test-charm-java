@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,7 +115,9 @@ public class E2eSteps {
     @And("the log should:")
     @And("the master log should:")
     public void theLogShould(String expression) throws IOException {
-        expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log")))).should(expression);
+        Path relativize = Paths.get(System.getProperty("user.dir")).relativize(cucumberDirectory.root().toAbsolutePath());
+        expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log"))))
+                .should(expression.replace("$r_path$", relativize.toString()));
     }
 
     @SneakyThrows
@@ -144,7 +147,7 @@ public class E2eSteps {
         List<String> remoteArgs = new ArrayList<>(args);
         if (isDebugging()) {
             args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
-//            remoteArgs.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5006");
+            remoteArgs.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5006");
         }
         args.add("-cp");
         args.add(classpath);
@@ -183,6 +186,8 @@ public class E2eSteps {
     @SneakyThrows
     @And("the worker {int} log should:")
     public void theWorkerLogShould(int id, String expression) {
-        expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log." + id)))).should(expression);
+        Path relativize = Paths.get(System.getProperty("user.dir")).relativize(cucumberDirectory.root().toAbsolutePath());
+        expect(new String(Files.readAllBytes(cucumberDirectory.resolve("cucumber.log." + id))))
+                .should(expression.replace("$r_path$", relativize.toString()));
     }
 }

@@ -30,7 +30,7 @@ public class LocalWorker extends AbstractWorker {
             final WorkerRuntime workerRuntime = WorkerRuntime.builder()
                     .withRuntimeOptions(worker.runtimeOptions)
                     .withClassLoader(swarmArgs::classLoader)
-                    .build(swarmArgs.getSwarmHost(), id);
+                    .build(id, swarmArgs);
 
             workerRuntime.run();
             return workerRuntime.exitStatus();

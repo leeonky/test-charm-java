@@ -13,9 +13,10 @@ public class SwarmArgs {
     private final List<String> remoteWorkerArgs;
     private final int workerTimeout;
     private final Integer workerId;
+    private final String workingDir;
 
     public SwarmArgs(String[] workerArgs, SwarmHost swarmHost, ClassLoader classLoader, boolean localWorker,
-                     int remoteWorkerCount, List<String> remoteWorkerArgs, int workerTimeout, Integer workerId) {
+                     int remoteWorkerCount, List<String> remoteWorkerArgs, int workerTimeout, Integer workerId, String workingDir) {
         this.workerArgs = workerArgs;
         this.swarmHost = swarmHost;
         this.classLoader = classLoader;
@@ -24,6 +25,7 @@ public class SwarmArgs {
         this.remoteWorkerArgs = remoteWorkerArgs;
         this.workerTimeout = workerTimeout;
         this.workerId = workerId;
+        this.workingDir = workingDir;
     }
 
     public String[] getWorkerArgs() {
@@ -56,5 +58,9 @@ public class SwarmArgs {
 
     public Integer getWorkerId() {
         return workerId;
+    }
+
+    public String getWorkingDir() {
+        return workingDir;
     }
 }

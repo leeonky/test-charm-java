@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testcharm.dal.Assertions.expect;
@@ -23,10 +22,10 @@ import static org.testcharm.util.JavaExecutor.executor;
 
 class EventSerializerTest {
     private final Path executorRoot = Paths.get("/executor/");
-    private final EventSerializer eventSerializer = new EventSerializer(new WorkerDataMapper(singletonList(executorRoot.toUri())));
+    private final EventSerializer eventSerializer = new EventSerializer(new WorkerDataMapper(executorRoot.toString()));
 
     private final Path masterRoot = Paths.get("/master/");
-    private final MasterDataMapper masterDataMapper = new MasterDataMapper(singletonList(masterRoot.toUri()), null);
+    private final MasterDataMapper masterDataMapper = new MasterDataMapper(null, masterRoot.toString());
     private final EventDeserializer eventDeserializer = new EventDeserializer(masterDataMapper);
 
     @Nested

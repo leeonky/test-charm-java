@@ -143,6 +143,26 @@ class WorkerArgsPreProcessorTest {
                 expect(result.swarmArgs).should("workerTimeout: 120");
             }
         }
+
+        @Nested
+        class WorkingPath {
+
+            @Test
+            void default_working_path_is_current_project_path() {
+                String[] argv = {"features"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+            }
+
+            @Test
+            void specify_working_path() {
+                String[] argv = {"--working-dir", "/tmp", "features"};
+                ProcessedArgs result = preProcessor.process(argv, classLoader);
+
+                expect(result.swarmArgs.getWorkingDir()).isEqualTo("/tmp");
+            }
+        }
     }
 
     @Nested

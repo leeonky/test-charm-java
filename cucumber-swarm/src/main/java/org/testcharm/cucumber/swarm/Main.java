@@ -33,7 +33,7 @@ public class Main {
             final WorkerRuntime workerRuntime = WorkerRuntime.builder()
                     .withRuntimeOptions(worker.runtimeOptions)
                     .withClassLoader(() -> classLoader)
-                    .build(argvs.swarmArgs.getSwarmHost(), argvs.swarmArgs.getWorkerId());
+                    .build(argvs.swarmArgs.getWorkerId(), argvs.swarmArgs);
 
             workerRuntime.run();
             return workerRuntime.exitStatus();

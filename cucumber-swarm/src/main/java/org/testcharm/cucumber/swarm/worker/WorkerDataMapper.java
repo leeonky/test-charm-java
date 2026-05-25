@@ -7,8 +7,7 @@ import io.cucumber.messages.types.TestStep;
 import org.testcharm.cucumber.swarm.DataMapper;
 import org.testcharm.cucumber.swarm.repo.Repository;
 
-import java.net.URI;
-import java.util.List;
+import java.nio.file.Paths;
 
 public class WorkerDataMapper extends DataMapper {
     private static WorkerDataMapper instance;
@@ -16,8 +15,8 @@ public class WorkerDataMapper extends DataMapper {
     private final Repository<String, Hook> hookRepository = new Repository<>(Hook::getId);
     private final Repository<String, TestCase> testCaseRepository = new Repository<>(TestCase::getId);
 
-    public WorkerDataMapper(List<URI> featurePaths) {
-        super(featurePaths);
+    public WorkerDataMapper(String workingDir) {
+        super(Paths.get(workingDir));
         instance = this;
     }
 

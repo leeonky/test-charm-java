@@ -19,7 +19,6 @@ import org.testcharm.util.Sneaky;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static java.util.Collections.singletonList;
 import static org.testcharm.dal.Assertions.expect;
 
 public class UTSteps {
@@ -47,10 +46,10 @@ public class UTSteps {
 
     public static class UTTestContext {
         private final Path executorRoot = Paths.get("/executor/");
-        private final EventSerializer eventSerializer = new EventSerializer(new WorkerDataMapper(singletonList(executorRoot.toUri())));
+        private final EventSerializer eventSerializer = new EventSerializer(new WorkerDataMapper(executorRoot.toString()));
 
         private final Path masterRoot = Paths.get("/master/");
-        private final MasterDataMapper masterDataMapper = new MasterDataMapper(singletonList(masterRoot.toUri()), null);
+        private final MasterDataMapper masterDataMapper = new MasterDataMapper(null, masterRoot.toString());
         private final EventDeserializer eventDeserializer = new EventDeserializer(masterDataMapper);
         private final JFactory jFactory = new JFactory();
         private final JData jData = new JData(jFactory);

@@ -29,6 +29,7 @@ public class WorkerArgsPreProcessor {
         int remoteWorkerCount = 0;
         int workerTimeout = 5;
         Integer workerId = null;
+        String workingDir = System.getProperty("user.dir");
 
         label:
         while (!args.isEmpty()) {
@@ -58,6 +59,9 @@ public class WorkerArgsPreProcessor {
                 case "--worker-id":
                     workerId = popIntValue(args);
                     break;
+                case "--working-dir":
+                    workingDir = args.removeFirst();
+                    break;
                 case "--":
                     break label;
                 default:
@@ -70,7 +74,7 @@ public class WorkerArgsPreProcessor {
             workerArgs.remove("--no-summary");
         return new ProcessedArgs(masterArgs.toArray(new String[0]),
                 new SwarmArgs(workerArgs.toArray(new String[0]), swarmHost, classLoader, localWorker,
-                        remoteWorkerCount, args, workerTimeout, workerId));
+                        remoteWorkerCount, args, workerTimeout, workerId, workingDir));
     }
 
     private int popIntValue(LinkedList<String> args) {

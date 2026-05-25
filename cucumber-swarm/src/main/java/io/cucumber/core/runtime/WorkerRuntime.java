@@ -12,12 +12,11 @@ import io.cucumber.core.plugin.PluginFactory;
 import io.cucumber.core.plugin.Plugins;
 import io.cucumber.core.resource.ClassLoaders;
 import io.cucumber.plugin.Plugin;
-import org.testcharm.cucumber.swarm.SwarmHost;
+import org.testcharm.cucumber.swarm.SwarmArgs;
 import org.testcharm.cucumber.swarm.worker.Remote;
 import org.testcharm.cucumber.swarm.worker.RestfulClient;
 import org.testcharm.cucumber.swarm.worker.WorkerDataMapper;
 
-import java.net.URI;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
@@ -43,12 +42,12 @@ public final class WorkerRuntime {
     private WorkerRuntime(
             final ExitStatus exitStatus,
             final CucumberExecutionContext context,
-            final FeatureSupplier featureSupplier, RestfulClient restfulClient, int workerId, List<URI> featurePaths) {
+            final FeatureSupplier featureSupplier, RestfulClient restfulClient, int workerId, SwarmArgs swarmArgs) {
         this.context = context;
         this.featureSupplier = featureSupplier;
         this.exitStatus = exitStatus;
         this.workerId = workerId;
-        Remote.setupRemote(restfulClient, workerId, new WorkerDataMapper(featurePaths));
+        Remote.setupRemote(restfulClient, workerId, new WorkerDataMapper(swarmArgs.getWorkingDir()));
     }
 
     public static Builder builder() {
@@ -127,13 +126,14 @@ public final class WorkerRuntime {
             return this;
         }
 
-        public WorkerRuntime build(SwarmHost swarmHost, int workerId) {
+        public WorkerRuntime build(int workerId, SwarmArgs swarmArgs) {
             EventBus eventBus = synchronize(createEventBus());
             ExitStatus exitStatus = createPluginsAndExitStatus(eventBus);
             RunnerSupplier runnerSupplier = createRunnerSupplier(eventBus);
             CucumberExecutionContext context = new CucumberExecutionContext(eventBus, exitStatus, runnerSupplier);
             FeatureSupplier featureSupplier = createFeatureSupplier(eventBus);
-            return new WorkerRuntime(exitStatus, context, featureSupplier, new RestfulClient(swarmHost), workerId, runtimeOptions.getFeaturePaths());
+            return new WorkerRuntime(exitStatus, context, featureSupplier, new RestfulClient(swarmArgs.getSwarmHost()),
+                    workerId, swarmArgs);
         }
 
         private ExitStatus createPluginsAndExitStatus(EventBus eventBus) {
