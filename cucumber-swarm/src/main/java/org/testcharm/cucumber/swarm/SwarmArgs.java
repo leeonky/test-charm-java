@@ -45,6 +45,8 @@ public class SwarmArgs {
     }
 
     public String[] getRemoteWorkerArgs(int index) {
+        if (remoteWorkerArgs == null)
+            throw new IllegalArgumentException("Missing remote worker args");
         return remoteWorkerArgs.stream().map(s -> s.replace("{worker-id}", valueOf(index))).toArray(String[]::new);
     }
 

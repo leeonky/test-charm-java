@@ -164,8 +164,7 @@ public class E2eSteps {
         remoteArgs.add("--swarm-port");
         remoteArgs.add(String.valueOf(port));
 
-        args.add("--local-worker");
-        args.add("disable");
+        args.add("--disable-local-worker");
 
         remoteArgs.add("--worker-id");
         remoteArgs.add("{worker-id}");

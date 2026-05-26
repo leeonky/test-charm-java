@@ -629,8 +629,7 @@ Feature: Master Worker Coordinate
       """
       '--worker-timeout'
       '2'
-      '--local-worker'
-      'disable'
+      '--disable-local-worker'
       '--glue'
       'steps'
       $path + 'features'
