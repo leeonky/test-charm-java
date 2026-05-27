@@ -1,6 +1,7 @@
 package org.testcharm.cucumber.swarm;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.lang.String.valueOf;
 
@@ -14,9 +15,11 @@ public class SwarmArgs {
     private final int workerTimeout;
     private final Integer workerId;
     private final String workingDir;
+    private final List<String> targets;
 
     public SwarmArgs(String[] workerArgs, SwarmHost swarmHost, ClassLoader classLoader, boolean localWorker,
-                     int remoteWorkerCount, List<String> remoteWorkerArgs, int workerTimeout, Integer workerId, String workingDir) {
+                     int remoteWorkerCount, List<String> remoteWorkerArgs, int workerTimeout, Integer workerId,
+                     String workingDir, List<String> targets) {
         this.workerArgs = workerArgs;
         this.swarmHost = swarmHost;
         this.classLoader = classLoader;
@@ -26,6 +29,7 @@ public class SwarmArgs {
         this.workerTimeout = workerTimeout;
         this.workerId = workerId;
         this.workingDir = workingDir;
+        this.targets = targets;
     }
 
     public String[] getWorkerArgs() {
@@ -47,7 +51,8 @@ public class SwarmArgs {
     public String[] getRemoteWorkerArgs(int index) {
         if (remoteWorkerArgs == null)
             throw new IllegalArgumentException("Missing remote worker args");
-        return remoteWorkerArgs.stream().map(s -> s.replace("{worker-id}", valueOf(index))).toArray(String[]::new);
+        return Stream.concat(remoteWorkerArgs.stream().map(s -> s.replace("{worker-id}", valueOf(index))),
+                targets.stream()).toArray(String[]::new);
     }
 
     public int getRemoteWorkerCount() {
@@ -64,5 +69,9 @@ public class SwarmArgs {
 
     public String getWorkingDir() {
         return workingDir;
+    }
+
+    public boolean isRemoteWorker() {
+        return getWorkerId() != null;
     }
 }

@@ -16,7 +16,6 @@ public class WorkerArgsPreProcessor {
 
         List<String> workerArgs = new ArrayList<>();
         workerArgs.addAll(asList("--threads", "1"));
-        workerArgs.add("--no-summary");
         workerArgs.addAll(asList("--plugin", WorkerForwardingPlugin.class.getName()));
 
         SwarmHost swarmHost = new SwarmHost();
@@ -24,13 +23,16 @@ public class WorkerArgsPreProcessor {
         int remoteWorkerCount = 0;
         int workerTimeout = 5;
         Integer workerId = null;
+        String swarmHostStr = null;
         String workingDir = System.getProperty("user.dir");
 
         String remoteLauncher = null;
         List<String> remoteWorkerArgs = new ArrayList<>();
         remoteWorkerArgs.addAll(asList("--threads", "1"));
+        remoteWorkerArgs.addAll(asList("--worker-id", "{worker-id}"));
 
-        label:
+        List<String> targets = new ArrayList<>();
+
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
             switch (arg) {
@@ -41,9 +43,7 @@ public class WorkerArgsPreProcessor {
                     localWorker = false;
                     break;
                 case "--swarm-host":
-                    String host = args.removeFirst();
-                    swarmHost.setHost(host);
-                    remoteWorkerArgs.addAll(asList("--swarm-host", host));
+                    swarmHostStr = args.removeFirst();
                     break;
                 case "--swarm-port":
                     int port = popIntValue(args);
@@ -53,35 +53,45 @@ public class WorkerArgsPreProcessor {
                 case "--threads":
                     args.removeFirst(); // ignore thread force to 1
                     break;
-
-
+                case "--worker-timeout":
+                    workerTimeout = popIntValue(args);
+                    break;
                 case "--plugin":
                     String plugin = args.removeFirst();
                     masterArgs.add(arg);
                     masterArgs.add(plugin);
                     break;
-                case "--remote-worker-count":
-                    remoteWorkerCount = popIntValue(args);
-                    break;
-                case "--worker-timeout":
-                    workerTimeout = popIntValue(args);
-                    break;
-                case "--worker-id":
-                    workerId = popIntValue(args);
+                case "--no-summary":
+                    masterArgs.add(arg);
                     break;
                 case "--working-dir":
                     workingDir = args.removeFirst();
                     break;
-                case "--":
-                    break label;
+                case "--remote-worker-count":
+                    remoteWorkerCount = popIntValue(args);
+                    break;
+                case "--remote-working-dir":
+                    remoteWorkerArgs.addAll(asList("--working-dir", args.removeFirst()));
+                    break;
+                case "--worker-id":
+                    workerId = popIntValue(args);
+                    break;
                 default:
                     masterArgs.add(arg);
                     workerArgs.add(arg);
+                    targets.add(arg);
                     break;
             }
         }
-        if (workerId != null)
-            workerArgs.remove("--no-summary");
+
+        if (workerId != null) {
+            if (swarmHostStr != null)
+                swarmHost.setHost(swarmHostStr);
+        } else {
+            workerArgs.add(0, "--no-summary");
+            if (swarmHostStr != null)
+                remoteWorkerArgs.addAll(asList("--swarm-host", swarmHostStr));
+        }
 
         List<String> remoteWorkerLauncherAndArgs = null;
         if (remoteLauncher != null) {
@@ -91,7 +101,7 @@ public class WorkerArgsPreProcessor {
         }
         return new ProcessedArgs(masterArgs.toArray(new String[0]),
                 new SwarmArgs(workerArgs.toArray(new String[0]), swarmHost, classLoader, localWorker,
-                        remoteWorkerCount, remoteWorkerLauncherAndArgs, workerTimeout, workerId, workingDir));
+                        remoteWorkerCount, remoteWorkerLauncherAndArgs, workerTimeout, workerId, workingDir, targets));
     }
 
     private int popIntValue(LinkedList<String> args) {

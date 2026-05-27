@@ -22,7 +22,7 @@ public class Main {
 
     public static byte run(String[] argv, ClassLoader classLoader) {
         ProcessedArgs argvs = new WorkerArgsPreProcessor().process(argv, classLoader);
-        if (argvs.swarmArgs.getWorkerId() != null) {
+        if (argvs.swarmArgs.isRemoteWorker()) {
             Main.Result worker = buildRuntimeOption(argvs.swarmArgs.getWorkerArgs());
 
             Optional<Byte> exitStatus = worker.commandlineOptionsParser.exitStatus();
