@@ -1,5 +1,7 @@
 package org.testcharm.cucumber.swarm;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -51,8 +53,10 @@ public class SwarmArgs {
     public String[] getRemoteWorkerArgs(int index) {
         if (remoteWorkerArgs == null)
             throw new IllegalArgumentException("Missing remote worker args");
+        Path workingPath = Paths.get(workingDir);
         return Stream.concat(remoteWorkerArgs.stream().map(s -> s.replace("{worker-id}", valueOf(index))),
-                targets.stream()).toArray(String[]::new);
+                targets.stream().map(Paths::get).map(p -> p.isAbsolute() ? workingPath.relativize(p).toString() : p.toString())
+        ).toArray(String[]::new);
     }
 
     public int getRemoteWorkerCount() {

@@ -1,5 +1,7 @@
 package org.testcharm.cucumber.swarm;
 
+import org.testcharm.message.MessageConverterRegistry;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,14 +66,19 @@ public class WorkerArgsPreProcessor {
                 case "--no-summary":
                     masterArgs.add(arg);
                     break;
-                case "--working-dir":
-                    workingDir = args.removeFirst();
-                    break;
+//                case "--working-dir":
+//                    workingDir = args.removeFirst();
+//                    break;
                 case "--remote-worker-count":
                     remoteWorkerCount = popIntValue(args);
                     break;
-                case "--remote-working-dir":
-                    remoteWorkerArgs.addAll(asList("--working-dir", args.removeFirst()));
+//                case "--remote-working-dir":
+//                    remoteWorkerArgs.addAll(asList("--working-dir", args.removeFirst()));
+//                    break;
+                case "--remote-options-json":
+                    //noinspection unchecked
+                    List<Object> options = (List<Object>) MessageConverterRegistry.jsonConverter().deserialize(args.removeFirst());
+                    options.stream().map(String::valueOf).forEach(remoteWorkerArgs::add);
                     break;
                 case "--worker-id":
                     workerId = popIntValue(args);

@@ -101,6 +101,60 @@ class WorkerArgsPreProcessorTest {
 
                     expect(remoteArgs).should(": [... 'features/a.feature']");
                 }
+
+                @Test
+                void multiple_targets() {
+                    String[] remoteArgs = preProcessor.process(new String[]{"--remote-worker-launcher", "run-cucumber.sh", "features/a.feature", "features/b.feature"},
+                            classLoader).swarmArgs.getRemoteWorkerArgs(43);
+
+                    expect(remoteArgs).should(": [... 'features/a.feature' 'features/b.feature']");
+                }
+
+                @Test
+                void file_with_line() {
+                    String[] remoteArgs = preProcessor.process(new String[]{"--remote-worker-launcher", "run-cucumber.sh", "features/a.feature:10"},
+                            classLoader).swarmArgs.getRemoteWorkerArgs(43);
+
+                    expect(remoteArgs).should(": [... 'features/a.feature:10']");
+                }
+            }
+
+            @Nested
+            class AbsolutePath {
+
+                @Test
+                void auto_append_feature_dir() {
+                    String[] remoteArgs = preProcessor.process(new String[]{"--remote-worker-launcher", "run-cucumber.sh",
+                            System.getProperty("user.dir") + "/features"}, classLoader).swarmArgs.getRemoteWorkerArgs(43);
+
+                    expect(remoteArgs).should(": [... features]");
+                }
+
+                @Test
+                void auto_append_feature_file() {
+                    String[] remoteArgs = preProcessor.process(new String[]{"--remote-worker-launcher", "run-cucumber.sh",
+                            System.getProperty("user.dir") + "/features/a.feature"}, classLoader).swarmArgs.getRemoteWorkerArgs(43);
+
+                    expect(remoteArgs).should(": [... features/a.feature]");
+                }
+
+                @Test
+                void multiple_targets() {
+                    String[] remoteArgs = preProcessor.process(new String[]{"--remote-worker-launcher", "run-cucumber.sh",
+                                    System.getProperty("user.dir") + "/features/a.feature", System.getProperty("user.dir") + "/features/b.feature"},
+                            classLoader).swarmArgs.getRemoteWorkerArgs(43);
+
+                    expect(remoteArgs).should(": [... features/a.feature features/b.feature]");
+                }
+
+                @Test
+                void file_with_line() {
+                    String[] remoteArgs = preProcessor.process(new String[]{"--remote-worker-launcher", "run-cucumber.sh",
+                                    System.getProperty("user.dir") + "/features/a.feature:10"},
+                            classLoader).swarmArgs.getRemoteWorkerArgs(43);
+
+                    expect(remoteArgs).should(": [... features/a.feature:10]");
+                }
             }
         }
     }
@@ -1297,25 +1351,20 @@ class WorkerArgsPreProcessorTest {
     }
 
     @Nested
-    class OptionWorkingPath {
+    class OptionRemoteOptionsJson {
 
         @Nested
         class WithoutRemoteWorker {
 
             @Nested
-            class DefaultArg {
+            class NoArg {
                 private final String[] argv = {"features"};
                 private final ProcessedArgs master = preProcessor.process(argv, classLoader);
 
                 @Test
                 void should_not_contains_in_args() {
-                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
-                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
-                }
-
-                @Test
-                void default_working_dir() {
-                    expect(master.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+                    expect(master.masterArgs).should("::should::not.contains: '--remote-options-json'");
+                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-options-json'");
                 }
 
                 @Test
@@ -1331,19 +1380,14 @@ class WorkerArgsPreProcessorTest {
             }
 
             @Nested
-            class SpecifyArg {
-                private final String[] argv = {"--working-dir", "/tmp", "features"};
+            class SetArg {
+                private final String[] argv = {"--remote-options-json", "[]", "features"};
                 private final ProcessedArgs master = preProcessor.process(argv, classLoader);
 
                 @Test
                 void should_not_contains_in_args() {
-                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
-                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
-                }
-
-                @Test
-                void working_dir() {
-                    expect(master.swarmArgs.getWorkingDir()).isEqualTo("/tmp");
+                    expect(master.masterArgs).should("::should::not.contains: '--remote-options-json'");
+                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-options-json'");
                 }
 
                 @Test
@@ -1363,19 +1407,14 @@ class WorkerArgsPreProcessorTest {
         class WithRemoteWorker {
 
             @Nested
-            class DefaultArg {
+            class NoArg {
                 private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "features"};
                 private final ProcessedArgs master = preProcessor.process(argv, classLoader);
 
                 @Test
                 void should_not_contains_in_args() {
-                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
-                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
-                }
-
-                @Test
-                void default_working_dir() {
-                    expect(master.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+                    expect(master.masterArgs).should("::should::not.contains: '--remote-options-json'");
+                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-options-json'");
                 }
 
                 @Test
@@ -1391,35 +1430,21 @@ class WorkerArgsPreProcessorTest {
 
                     @Test
                     void remote_worker_should_contains_worker_forwarding_plugin() {
-                        expect(remoteArgs).should("::should::not.contains: '--working-dir'");
-                    }
-
-                    @Test
-                    void build_option_with_no_error() {
-                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
-                    }
-
-                    @Test
-                    void default_working_dir() {
-                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+                        expect(remoteArgs).should("::should::not.contains: '--remote-options-json'");
+                        expect(remote.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-options-json'");
                     }
                 }
             }
 
             @Nested
-            class SpecifyArg {
-                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "--working-dir", "/tmp", "features"};
+            class SetArg {
+                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "--remote-options-json", "[\"--key\", 100]", "features"};
                 private final ProcessedArgs master = preProcessor.process(argv, classLoader);
 
                 @Test
                 void should_not_contains_in_args() {
-                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
-                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
-                }
-
-                @Test
-                void default_swarm_host() {
-                    expect(master.swarmArgs.getWorkingDir()).isEqualTo("/tmp");
+                    expect(master.masterArgs).should("::should::not.contains: '--remote-options-json'");
+                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-options-json'");
                 }
 
                 @Test
@@ -1428,145 +1453,292 @@ class WorkerArgsPreProcessorTest {
                     expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
                 }
 
+
                 @Nested
                 class RemoteArgs {
                     private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
-                    private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
 
                     @Test
                     void remote_worker_should_contains_worker_forwarding_plugin() {
-                        expect(remoteArgs).should("::should::not.contains: '--working-dir'");
-                    }
-
-                    @Test
-                    void build_option_with_no_error() {
-                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
-                    }
-
-                    @Test
-                    void default_working_dir() {
-                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+                        expect(remoteArgs).should(": [... '--key' '100' ...]");
                     }
                 }
             }
         }
+
     }
 
-    @Nested
-    class OptionRemoteWorkingPath {
-
-        @Nested
-        class WithoutRemoteWorker {
-
-            @Nested
-            class SpecifyArg {
-                private final String[] argv = {"--remote-working-dir", "/tmp", "features"};
-                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
-
-                @Test
-                void should_not_contains_in_args() {
-                    expect(master.masterArgs).should("::should::not.contains: '--remote-working-dir'");
-                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-working-dir'");
-                }
-
-                @Test
-                void build_option_with_no_error() {
-                    expect(buildOptions(master.masterArgs)).should(": {...}");
-                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
-                }
-
-                @Test
-                void raise_error_when_get_remote_worker_args() {
-                    expectRun(() -> master.swarmArgs.getRemoteWorkerArgs(1)).should("::throw.class.simpleName= IllegalArgumentException");
-                }
-            }
-        }
-
-        @Nested
-        class WithRemoteWorker {
-
-            @Nested
-            class DefaultArg {
-                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "features"};
-                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
-
-                @Test
-                void should_not_contains_in_args() {
-                    expect(master.masterArgs).should("::should::not.contains: '--remote--working-dir'");
-                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote--working-dir'");
-                }
-
-                @Test
-                void build_option_with_no_error() {
-                    expect(buildOptions(master.masterArgs)).should(": {...}");
-                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
-                }
-
-                @Nested
-                class RemoteArgs {
-                    private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
-                    private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
-
-                    @Test
-                    void should_not_contains_in_args() {
-                        expect(remoteArgs).should("::should::not.contains: '--working-dir'");
-                        expect(remoteArgs).should("::should::not.contains: '--remote--working-dir'");
-                    }
-
-                    @Test
-                    void build_option_with_no_error() {
-                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
-                    }
-
-                    @Test
-                    void default_working_dir() {
-                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
-                    }
-                }
-            }
-
-            @Nested
-            class SpecifyArg {
-                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "--remote-working-dir", "/tmp", "features"};
-                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
-
-                @Test
-                void should_not_contains_in_args() {
-                    expect(master.masterArgs).should("::should::not.contains: '--remote-working-dir'");
-                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-working-dir'");
-                }
-
-                @Test
-                void build_option_with_no_error() {
-                    expect(buildOptions(master.masterArgs)).should(": {...}");
-                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
-                }
-
-                @Nested
-                class RemoteArgs {
-                    private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
-                    private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
-
-                    @Test
-                    void should_change_option_to_remote_working_dir() {
-                        expect(remoteArgs).should("::should::not.contains: '--remote--working-dir'");
-                        expect(remoteArgs).should(": [... '--working-dir' '/tmp' ...]");
-                    }
-
-                    @Test
-                    void build_option_with_no_error() {
-                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
-                    }
-
-                    @Test
-                    void change_working_dir() {
-                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo("/tmp");
-                    }
-                }
-            }
-        }
-    }
-
+    //    @Nested
+//    class OptionWorkingPath {
+//
+//        @Nested
+//        class WithoutRemoteWorker {
+//
+//            @Nested
+//            class DefaultArg {
+//                private final String[] argv = {"features"};
+//                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+//
+//                @Test
+//                void should_not_contains_in_args() {
+//                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
+//                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
+//                }
+//
+//                @Test
+//                void default_working_dir() {
+//                    expect(master.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+//                }
+//
+//                @Test
+//                void build_option_with_no_error() {
+//                    expect(buildOptions(master.masterArgs)).should(": {...}");
+//                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
+//                }
+//
+//                @Test
+//                void raise_error_when_get_remote_worker_args() {
+//                    expectRun(() -> master.swarmArgs.getRemoteWorkerArgs(1)).should("::throw.class.simpleName= IllegalArgumentException");
+//                }
+//            }
+//
+//            @Nested
+//            class SpecifyArg {
+//                private final String[] argv = {"--working-dir", "/tmp", "features"};
+//                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+//
+//                @Test
+//                void should_not_contains_in_args() {
+//                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
+//                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
+//                }
+//
+//                @Test
+//                void working_dir() {
+//                    expect(master.swarmArgs.getWorkingDir()).isEqualTo("/tmp");
+//                }
+//
+//                @Test
+//                void build_option_with_no_error() {
+//                    expect(buildOptions(master.masterArgs)).should(": {...}");
+//                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
+//                }
+//
+//                @Test
+//                void raise_error_when_get_remote_worker_args() {
+//                    expectRun(() -> master.swarmArgs.getRemoteWorkerArgs(1)).should("::throw.class.simpleName= IllegalArgumentException");
+//                }
+//            }
+//        }
+//
+//        @Nested
+//        class WithRemoteWorker {
+//
+//            @Nested
+//            class DefaultArg {
+//                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "features"};
+//                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+//
+//                @Test
+//                void should_not_contains_in_args() {
+//                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
+//                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
+//                }
+//
+//                @Test
+//                void default_working_dir() {
+//                    expect(master.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+//                }
+//
+//                @Test
+//                void build_option_with_no_error() {
+//                    expect(buildOptions(master.masterArgs)).should(": {...}");
+//                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
+//                }
+//
+//                @Nested
+//                class RemoteArgs {
+//                    private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
+//                    private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
+//
+//                    @Test
+//                    void remote_worker_should_contains_worker_forwarding_plugin() {
+//                        expect(remoteArgs).should("::should::not.contains: '--working-dir'");
+//                    }
+//
+//                    @Test
+//                    void build_option_with_no_error() {
+//                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
+//                    }
+//
+//                    @Test
+//                    void default_working_dir() {
+//                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+//                    }
+//                }
+//            }
+//
+//            @Nested
+//            class SpecifyArg {
+//                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "--working-dir", "/tmp", "features"};
+//                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+//
+//                @Test
+//                void should_not_contains_in_args() {
+//                    expect(master.masterArgs).should("::should::not.contains: '--working-dir'");
+//                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--working-dir'");
+//                }
+//
+//                @Test
+//                void default_swarm_host() {
+//                    expect(master.swarmArgs.getWorkingDir()).isEqualTo("/tmp");
+//                }
+//
+//                @Test
+//                void build_option_with_no_error() {
+//                    expect(buildOptions(master.masterArgs)).should(": {...}");
+//                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
+//                }
+//
+//                @Nested
+//                class RemoteArgs {
+//                    private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
+//                    private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
+//
+//                    @Test
+//                    void remote_worker_should_contains_worker_forwarding_plugin() {
+//                        expect(remoteArgs).should("::should::not.contains: '--working-dir'");
+//                    }
+//
+//                    @Test
+//                    void build_option_with_no_error() {
+//                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
+//                    }
+//
+//                    @Test
+//                    void default_working_dir() {
+//                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    @Nested
+//    class OptionRemoteWorkingPath {
+//
+//        @Nested
+//        class WithoutRemoteWorker {
+//
+//            @Nested
+//            class SpecifyArg {
+//                private final String[] argv = {"--remote-working-dir", "/tmp", "features"};
+//                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+//
+//                @Test
+//                void should_not_contains_in_args() {
+//                    expect(master.masterArgs).should("::should::not.contains: '--remote-working-dir'");
+//                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-working-dir'");
+//                }
+//
+//                @Test
+//                void build_option_with_no_error() {
+//                    expect(buildOptions(master.masterArgs)).should(": {...}");
+//                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
+//                }
+//
+//                @Test
+//                void raise_error_when_get_remote_worker_args() {
+//                    expectRun(() -> master.swarmArgs.getRemoteWorkerArgs(1)).should("::throw.class.simpleName= IllegalArgumentException");
+//                }
+//            }
+//        }
+//
+//        @Nested
+//        class WithRemoteWorker {
+//
+//            @Nested
+//            class DefaultArg {
+//                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "features"};
+//                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+//
+//                @Test
+//                void should_not_contains_in_args() {
+//                    expect(master.masterArgs).should("::should::not.contains: '--remote--working-dir'");
+//                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote--working-dir'");
+//                }
+//
+//                @Test
+//                void build_option_with_no_error() {
+//                    expect(buildOptions(master.masterArgs)).should(": {...}");
+//                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
+//                }
+//
+//                @Nested
+//                class RemoteArgs {
+//                    private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
+//                    private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
+//
+//                    @Test
+//                    void should_not_contains_in_args() {
+//                        expect(remoteArgs).should("::should::not.contains: '--working-dir'");
+//                        expect(remoteArgs).should("::should::not.contains: '--remote--working-dir'");
+//                    }
+//
+//                    @Test
+//                    void build_option_with_no_error() {
+//                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
+//                    }
+//
+//                    @Test
+//                    void default_working_dir() {
+//                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo(System.getProperty("user.dir"));
+//                    }
+//                }
+//            }
+//
+//            @Nested
+//            class SpecifyArg {
+//                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "--remote-working-dir", "/tmp", "features"};
+//                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+//
+//                @Test
+//                void should_not_contains_in_args() {
+//                    expect(master.masterArgs).should("::should::not.contains: '--remote-working-dir'");
+//                    expect(master.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--remote-working-dir'");
+//                }
+//
+//                @Test
+//                void build_option_with_no_error() {
+//                    expect(buildOptions(master.masterArgs)).should(": {...}");
+//                    expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
+//                }
+//
+//                @Nested
+//                class RemoteArgs {
+//                    private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
+//                    private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
+//
+//                    @Test
+//                    void should_change_option_to_remote_working_dir() {
+//                        expect(remoteArgs).should("::should::not.contains: '--remote--working-dir'");
+//                        expect(remoteArgs).should(": [... '--working-dir' '/tmp' ...]");
+//                    }
+//
+//                    @Test
+//                    void build_option_with_no_error() {
+//                        expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should(": {...}");
+//                    }
+//
+//                    @Test
+//                    void change_working_dir() {
+//                        expect(remote.swarmArgs.getWorkingDir()).isEqualTo("/tmp");
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
     private RuntimeOptions buildOptions(String[] argv) {
         return new CommandlineOptionsParser(System.out).parse(argv)
                 .addDefaultSummaryPrinterIfNotDisabled()
