@@ -5,6 +5,7 @@ import org.testcharm.message.MessageConverterRegistry;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
@@ -34,6 +35,7 @@ public class WorkerArgsPreProcessor {
         remoteWorkerArgs.addAll(asList("--worker-id", "{worker-id}"));
 
         List<String> targets = new ArrayList<>();
+        List<Object> remoteOptions = new ArrayList<>();
 
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
@@ -77,8 +79,7 @@ public class WorkerArgsPreProcessor {
 //                    break;
                 case "--remote-options-json":
                     //noinspection unchecked
-                    List<Object> options = (List<Object>) MessageConverterRegistry.jsonConverter().deserialize(args.removeFirst());
-                    options.stream().map(String::valueOf).forEach(remoteWorkerArgs::add);
+                    remoteOptions = (List<Object>) MessageConverterRegistry.jsonConverter().deserialize(args.removeFirst());
                     break;
                 case "--worker-id":
                     workerId = popIntValue(args);
@@ -104,6 +105,7 @@ public class WorkerArgsPreProcessor {
         if (remoteLauncher != null) {
             remoteWorkerLauncherAndArgs = new ArrayList<>();
             remoteWorkerLauncherAndArgs.add(remoteLauncher);
+            remoteWorkerLauncherAndArgs.addAll(remoteOptions.stream().map(String::valueOf).collect(Collectors.toList()));
             remoteWorkerLauncherAndArgs.addAll(remoteWorkerArgs);
         }
         return new ProcessedArgs(masterArgs.toArray(new String[0]),

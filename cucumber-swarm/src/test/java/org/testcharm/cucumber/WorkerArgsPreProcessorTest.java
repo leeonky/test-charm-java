@@ -1453,7 +1453,6 @@ class WorkerArgsPreProcessorTest {
                     expect(buildOptions(master.swarmArgs.getWorkerArgs())).should(": {...}");
                 }
 
-
                 @Nested
                 class RemoteArgs {
                     private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
@@ -1462,10 +1461,14 @@ class WorkerArgsPreProcessorTest {
                     void remote_worker_should_contains_worker_forwarding_plugin() {
                         expect(remoteArgs).should(": [... '--key' '100' ...]");
                     }
+
+                    @Test
+                    void should_after_remote_worker_launcher() {
+                        expect(remoteArgs).should(": ['run-cucumber.sh' '--key' '100' ...]");
+                    }
                 }
             }
         }
-
     }
 
     //    @Nested

@@ -10,6 +10,7 @@ import lombok.SneakyThrows;
 import org.testcharm.cucumber.swarm.Main;
 import org.testcharm.dal.DAL;
 import org.testcharm.io.TempDirectory;
+import org.testcharm.message.MessageConverterRegistry;
 import org.testcharm.util.JavaExecutor;
 import org.testcharm.util.Sneaky;
 
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Arrays.asList;
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.extensions.basic.binary.BinaryExtension.readAllAndClose;
 import static org.testcharm.dal.extensions.basic.string.Methods.string;
@@ -144,10 +146,11 @@ public class E2eSteps {
         classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
         args.add("-Djava.util.logging.config.file=" + cucumberDirectory.resolve("logging.properties").toAbsolutePath());
-        List<String> remoteArgs = new ArrayList<>(args);
+        List<String> remoteOptions = new ArrayList<>(args);
+        remoteOptions.remove(0);
         if (isDebugging()) {
             args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
-            remoteArgs.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5006");
+            remoteOptions.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5006");
         }
         args.add("-cp");
         args.add(classpath);
@@ -157,27 +160,18 @@ public class E2eSteps {
         int port = SWARM_PORT.getAndIncrement();
         args.add(String.valueOf(port));
 
-        remoteArgs.add("-cp");
-        remoteArgs.add(classpath);
-        remoteArgs.add(Main.class.getName());
-
-        remoteArgs.add("--swarm-port");
-        remoteArgs.add(String.valueOf(port));
+        remoteOptions.add("-cp");
+        remoteOptions.add(classpath);
+        remoteOptions.add(Main.class.getName());
 
         args.add("--disable-local-worker");
 
-        remoteArgs.add("--worker-id");
-        remoteArgs.add("{worker-id}");
-
         DAL.dal().evaluateAll(null, docString, new HashMap<String, String>() {{
             put("path", cucumberDirectory.root().toString() + File.separator);
-        }}).forEach(e -> {
-            args.add(String.valueOf(e));
-            remoteArgs.add(String.valueOf(e));
-        });
+        }}).forEach(e -> args.add(String.valueOf(e)));
 
-        args.add("--");
-        args.addAll(remoteArgs);
+        args.addAll(asList("--remote-options-json", MessageConverterRegistry.jsonConverter().serialize(remoteOptions)));
+        args.addAll(asList("--remote-worker-launcher", javaBin));
 
         process = new ProcessBuilder(args.toArray(new String[0])).start();
     }

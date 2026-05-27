@@ -52,7 +52,7 @@ public class SwarmArgs {
 
     public String[] getRemoteWorkerArgs(int index) {
         if (remoteWorkerArgs == null)
-            throw new IllegalArgumentException("Missing remote worker args");
+            throw new IllegalArgumentException("Missing option --remote-worker-launcher");
         Path workingPath = Paths.get(workingDir);
         return Stream.concat(remoteWorkerArgs.stream().map(s -> s.replace("{worker-id}", valueOf(index))),
                 targets.stream().map(Paths::get).map(p -> p.isAbsolute() ? workingPath.relativize(p).toString() : p.toString())
