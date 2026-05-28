@@ -4,9 +4,10 @@ import io.cucumber.core.gherkin.Feature;
 import io.cucumber.core.gherkin.Pickle;
 import io.cucumber.core.logging.Logger;
 import io.cucumber.core.logging.LoggerFactory;
+import org.testcharm.util.IterableBlockingQueue;
 
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class Remote {
     private final Logger log = LoggerFactory.getLogger(Remote.class);
@@ -34,27 +35,21 @@ public class Remote {
     }
 
     public Iterable<Pickle> pickles() {
-        return () -> new Iterator<Pickle>() {
-            private String pickleKey;
-
-            @Override
-            public boolean hasNext() {
-                log.info(() -> "Requesting pickle...");
+        IterableBlockingQueue<Pickle> pickles = new IterableBlockingQueue<>(new ArrayBlockingQueue<>(1));
+        new Thread(() -> {
+            for (; ; ) {
                 try {
-                    pickleKey = restfulClient.httpGet(workerId, "/pickle");
+                    log.info(() -> "Requesting pickle...");
+                    String pickleKey = restfulClient.httpGet(workerId, "/pickle");
+                    pickles.put(dataMapper.pickle(pickleKey));
                     log.info(() -> String.format("Received pickle<%s>", pickleKey));
-                    return true;
                 } catch (HttpException ig) {
                     log.info(() -> "No pickle received");
-                    return false;
+                    pickles.close();
                 }
             }
-
-            @Override
-            public Pickle next() {
-                return dataMapper.pickle(pickleKey);
-            }
-        };
+        }).start();
+        return pickles;
     }
 
     public void sendEvent(Object event) {

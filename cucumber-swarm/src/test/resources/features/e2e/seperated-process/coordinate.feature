@@ -25,7 +25,7 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 0 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Remote worker<1> starting...'
+        {::should.startsWith: 'INFO: Remote worker<1> starting'}
         'INFO: Received worker<1> pickle request'
         'INFO: No more pickles'
       ...]
@@ -95,7 +95,7 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Remote worker<1> starting...'
+        {::should.startsWith: 'INFO: Remote worker<1> starting'}
         'INFO: Received worker<1> pickle request'
         'INFO: Send pickle<$r_path$/features/no-step.feature:3> to worker<1>'
         'INFO: Received worker<1> pickle request'

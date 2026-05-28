@@ -12,8 +12,9 @@ public class RemoteWorker extends AbstractWorker {
     private final Logger log = LoggerFactory.getLogger(RemoteWorker.class);
 
     public RemoteWorker(SwarmArgs swarmArgs) {
-        log.info(() -> String.format("Remote worker<%d> starting...", id));
-        process = Sneaky.get(() -> new ProcessBuilder(swarmArgs.getRemoteWorkerArgs(id())).start());
+        String[] remoteWorkerArgs = swarmArgs.getRemoteWorkerArgs(id());
+        log.info(() -> String.format("Remote worker<%d> starting with <%s>...", id, remoteWorkerArgs));
+        process = Sneaky.get(() -> new ProcessBuilder(remoteWorkerArgs).start());
     }
 
     @Override
