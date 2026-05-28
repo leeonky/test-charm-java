@@ -23,16 +23,16 @@ public class Controller {
     private void setupRoute() {
         restfulServer.requestHandler("GET", "/pickle", context -> {
             int workerId = Integer.parseInt(context.header("X-Worker-Id"));
-            log.info(() -> String.format("Received worker<%d> pickle request", workerId));
+            log.debug(() -> String.format("Received worker<%d> pickle request", workerId));
             String pickleKey = dataMapper.pickleKey(master.requestPickle(workerRepository.findByKey(workerId)));
-            log.info(() -> String.format("Send pickle<%s> to worker<%d>", pickleKey, workerId));
+            log.debug(() -> String.format("Send pickle<%s> to worker<%d>", pickleKey, workerId));
             context.responseOk(pickleKey);
         });
 
         restfulServer.requestHandler("POST", "/events", context -> {
             int workerId = Integer.parseInt(context.header("X-Worker-Id"));
             String body = context.body();
-            log.info(() -> String.format("Received worker<%d> event: %s", workerId, body));
+            log.debug(() -> String.format("Received worker<%d> event: %s", workerId, body));
             master.forwardEvent(body);
             context.responseOk();
         });

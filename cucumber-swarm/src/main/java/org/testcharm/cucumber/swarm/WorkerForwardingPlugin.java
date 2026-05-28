@@ -39,7 +39,7 @@ public class WorkerForwardingPlugin implements ConcurrentEventListener {
             if (forwardingEventNames.contains(event.getClass()))
                 REMOTE.sendEvent(event);
             else
-                log.info(() -> "ignore event forwarding: " + event.getClass().getName());
+                log.debug(() -> "ignore event forwarding: " + event.getClass().getName());
         });
 
         eventPublisher.registerHandlerFor(Envelope.class, event -> {

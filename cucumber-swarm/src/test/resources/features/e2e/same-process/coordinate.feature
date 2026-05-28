@@ -27,10 +27,10 @@ Feature: Master Worker Coordinate
         'INFO: Received worker<1> ready signal'
         'INFO: Worker<1> is ready'
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
+        'FINE: No pickle received'
         'INFO: Executor<1> ended'
       ...]
       """
@@ -90,14 +90,14 @@ Feature: Master Worker Coordinate
         'INFO: Restful server started'
         'INFO: Local worker<1> starting...'
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/no-step.feature:3> to worker<1>'
-        'INFO: Received pickle<$r_path$/features/no-step.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/no-step.feature:3> to worker<1>'
+        'FINE: Received pickle<$r_path$/features/no-step.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
+        'FINE: No pickle received'
       ...]
       """
     And the log should:
@@ -159,28 +159,28 @@ Feature: Master Worker Coordinate
         'INFO: Restful server started'
         'INFO: Local worker<1> starting...'
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
-        'INFO: Received pickle<$r_path$/features/test.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received pickle<$r_path$/features/test.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
+        'FINE: No pickle received'
       ...]
       """
     And the log should:
       """
       lines::should[]: [...
         {
-          contains: 'Forwarding event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Forwarding event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
       ...]
       """
     And the log should:
@@ -250,28 +250,28 @@ Feature: Master Worker Coordinate
         'INFO: Restful server started'
         'INFO: Local worker<1> starting...'
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
-        'INFO: Received pickle<$r_path$/features/test.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received pickle<$r_path$/features/test.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
+        'FINE: No pickle received'
       ...]
       """
     And the log should:
       """
       lines::should[]: [...
         {
-          contains: 'Forwarding event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Forwarding event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
       ...]
       """
     And the log should:
@@ -344,28 +344,28 @@ Feature: Master Worker Coordinate
         'INFO: Restful server started'
         'INFO: Local worker<1> starting...'
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
-        'INFO: Received pickle<$r_path$/features/test.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received pickle<$r_path$/features/test.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
+        'FINE: No pickle received'
       ...]
       """
     And the log should:
       """
       lines::should[]: [...
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"FAILED"'
         }
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"SKIPPED"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
       ...]
       """
     And the log should:
@@ -433,29 +433,29 @@ Feature: Master Worker Coordinate
         'INFO: Restful server started'
         'INFO: Local worker<1> starting...'
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
-        'INFO: Received pickle<$r_path$/features/test.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received pickle<$r_path$/features/test.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
+        'FINE: No pickle received'
       ...]
       """
     And the log should:
       """
       lines::should[]: [...
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"PENDING"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
           contains: '"status":"PENDING"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
       ...]
       """
     And the log should:
@@ -527,29 +527,29 @@ Feature: Master Worker Coordinate
         'INFO: Restful server started'
         'INFO: Local worker<1> starting...'
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
-        'INFO: Received pickle<$r_path$/features/test.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received pickle<$r_path$/features/test.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
+        'FINE: No pickle received'
       ...]
       """
     And the log should:
       """
       lines::should[]: [...
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"AMBIGUOUS"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
           contains: '"status":"AMBIGUOUS"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
       ...]
       """
     And the log should:

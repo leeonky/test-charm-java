@@ -65,6 +65,7 @@ public final class WorkerRuntime {
             for (Pickle pickle : REMOTE.pickles())
                 context.runTestCase(runner -> runner.runPickle(pickle));
         });
+        REMOTE.exit();
         log.info(() -> String.format("Executor<%d> ended", workerId));
     }
 

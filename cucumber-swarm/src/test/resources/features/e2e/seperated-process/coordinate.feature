@@ -26,8 +26,8 @@ Feature: Master Worker Coordinate
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
         {::should.startsWith: 'INFO: Remote worker<1> starting'}
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
       ...]
       """
     And the master log should:
@@ -46,8 +46,8 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: No pickle received'
         'INFO: Executor<1> ended'
       ...]
       """
@@ -96,10 +96,10 @@ Feature: Master Worker Coordinate
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
         {::should.startsWith: 'INFO: Remote worker<1> starting'}
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/no-step.feature:3> to worker<1>'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/no-step.feature:3> to worker<1>'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
       ...]
       """
     And the master log should:
@@ -117,10 +117,10 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received pickle<$r_path$/features/no-step.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received pickle<$r_path$/features/no-step.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: No pickle received'
         'INFO: Executor<1> ended'
       ...]
       """
@@ -170,20 +170,20 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Received worker<1> pickle request'
-        'INFO: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
-        'INFO: Received worker<1> pickle request'
-        'INFO: No more pickles'
+        'FINE: Received worker<1> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received worker<1> pickle request'
+        'FINE: No more pickles'
       ...]
       """
     And the log should:
       """
       lines::should[]: [...
         {
-          contains: 'Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
-        { contains: 'Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
+        { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
       ...]
       """
     And the log should:
@@ -201,10 +201,10 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Executor<1> started'
-        'INFO: Requesting pickle...'
-        'INFO: Received pickle<$r_path$/features/test.feature:3>'
-        'INFO: Requesting pickle...'
-        'INFO: No pickle received'
+        'FINE: Requesting pickle...'
+        'FINE: Received pickle<$r_path$/features/test.feature:3>'
+        'FINE: Requesting pickle...'
+        'FINE: No pickle received'
         'INFO: Executor<1> ended'
       ...]
       """
@@ -212,7 +212,7 @@ Feature: Master Worker Coordinate
       """
       lines::should[]: [...
         {
-          contains: 'Forwarding event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Forwarding event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
       ...]

@@ -79,13 +79,13 @@ public class Master {
         Pickle poll = pickleQueue.poll();
         if (poll != null)
             return poll;
-        log.info(() -> "No more pickles");
+        log.debug(() -> "No more pickles");
         throw new NoSuchElementException();
     }
 
     public void forwardEvent(String eventRecord) {
         Object deserialize = eventDeserializer.deserialize(eventRecord);
-        log.info(() -> "Forwarding event: " + deserialize.getClass().getName());
+        log.debug(() -> "Forwarding event: " + deserialize.getClass().getName());
         eventBus.send(deserialize);
     }
 

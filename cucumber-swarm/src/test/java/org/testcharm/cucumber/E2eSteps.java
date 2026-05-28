@@ -52,7 +52,7 @@ public class E2eSteps {
                 .append("io.cucumber.level = INFO\n")
                 .append("io.cucumber.core.level = INFO\n")
                 .append("io.cucumber.core.runtime.WorkerRuntime.level = INFO\n")
-                .append("org.testcharm = INFO\n")
+                .append("org.testcharm.level = FINE\n")
                 .toString());
 
         JavaExecutor.executor().resetAll();

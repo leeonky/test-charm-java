@@ -22,10 +22,10 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -67,11 +67,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -114,11 +114,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.SnippetsSuggestedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.SnippetsSuggestedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -163,11 +163,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -224,11 +224,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -279,11 +279,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -336,11 +336,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -396,12 +396,12 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -445,11 +445,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -480,11 +480,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.SnippetsSuggestedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.SnippetsSuggestedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -541,12 +541,12 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -577,10 +577,10 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -627,11 +627,11 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
 
@@ -684,10 +684,10 @@ Feature: event in io.cucumber.plugin.event forwarding
       And the log should:
         """
         lines::filter: {::should.contains: 'ignore event forwarding'}: [
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
-          'INFO: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunStarted'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceRead'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestSourceParsed'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.StepDefinedEvent'
+          'FINE: ignore event forwarding: io.cucumber.plugin.event.TestRunFinished'
         ]
         """
