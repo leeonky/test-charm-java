@@ -1,38 +1,128 @@
 # cucumber-swarm
 
-`cucumber-swarm` 在标准 Cucumber CLI 之上增加了一层 **master / worker 协调器**。  
-master 负责解析 feature、生成待执行场景队列、启动 HTTP 协调服务；worker 负责真正执行场景，并把执行过程中的事件回传给 master，再由 master 转发到本地 `EventBus`，所以最终的插件、summary 和退出码仍然从 master 侧产出。
+**Primary language:** English. For Chinese, see [README.zh-CN.md](README.zh-CN.md).
 
-本文档依据以下来源整理：
+`cucumber-swarm` runs Cucumber with a **master / worker execution model**.  
+It was created for end-to-end test suites that need higher throughput, but cannot safely rely on Cucumber's built-in
+multi-threaded execution against a single shared system under test.
 
-- `src/test/resources/features/` 下全部 BDD 测试
-- `src/test/java/` 下参数与序列化测试
-- `src/main/java/` 下实现代码
+## Overview
 
-## 1. 与标准 Cucumber 相比新增的参数
+The motivation is practical. Cucumber's built-in parallel execution is thread-based, but many end-to-end systems cannot
+reliably support multiple tests running at the same time against a single shared deployment. In those cases, increasing
+throughput usually means preparing **multiple equivalent test environments**—for example several docker-compose
+stacks—and distributing scenarios across them.
 
-这些参数由 `org.testcharm.cucumber.swarm.WorkerArgsPreProcessor` 预处理。
+That changes the problem from "how to use more threads in one runtime" to "how to coordinate execution across several
+isolated environments while still treating the outcome as one Cucumber run". `cucumber-swarm` addresses that problem by
+moving scheduling and execution into separate roles. The **master** plans the run, manages the scenario queue, and
+collects results. **Workers** execute scenarios in their own runtime and report execution information back. The master
+then republishes that aggregated result stream to summaries and master-side plugins.
 
-| 参数 | 默认值 | 作用 |
-| --- | --- | --- |
-| `--swarm-port <port>` | `10083` | master 内置 REST 服务端口，worker 通过它领取场景并回传事件。 |
-| `--local-worker enable\|disable` | `enable` | 是否在 master 进程内再启动一个本地 worker。 |
-| `--remote-worker-count <n>` | `0` | 让 master 额外拉起多少个远程 worker 进程。 |
-| `--worker-timeout <seconds>` | `5` | master 等待首个 worker ready 的超时时间。超时直接失败。 |
-| `--working-dir <path>` | 当前 `user.dir` | master / worker 做路径映射时使用的工作目录。决定 pickle key、test case key 等相对路径长什么样。 |
-| `--worker-id <id>` | 无 | 标识当前进程是 worker 侧进程。这个参数通常由 master 注入，不是给普通使用者单独跑 master 时用的。 |
+Compared with plain Cucumber, this keeps the mental model of one test run, but changes where work is done. That makes
+`cucumber-swarm` a better fit when the goal is centralized scheduling, execution across local or remote workers, and a
+single aggregated result for reporting.
 
-### 额外约定
+### What stays familiar
 
-1. `--threads` 会被强制改成 `1`，无论是否显式传入。master 和 worker 都是单线程执行。
-2. `--plugin` 只会保留在 master 侧；worker 侧会改成固定插件 `org.testcharm.cucumber.swarm.WorkerForwardingPlugin`。
-3. `--no-summary` 对 master 侧生效；本地 worker 默认总是 `--no-summary`，避免重复输出 summary。
-4. 在命令中使用 `--` 之后的内容，不再当作 Cucumber 参数，而是当作 **远程 worker 启动命令模板**。
-5. 远程 worker 启动参数模板里支持占位符 `{worker-id}`，master 启动每个远程 worker 时会替换成实际 id。
+`cucumber-swarm` still preserves most of the behaviors users expect from a normal Cucumber run: standard scenario and
+step results, passed / failed / skipped / pending / undefined / ambiguous outcomes, undefined-step snippets in the
+final output, feature-directory and single-feature targets, and one final exit status for the whole run.
 
-## 2. 最常见的启动方式
+### What changes
 
-### 2.1 本地单 worker 模式
+The execution model is different in ways that matter operationally:
+
+| Aspect              | Plain Cucumber                    | cucumber-swarm                          |
+|---------------------|-----------------------------------|-----------------------------------------|
+| Scenario scheduling | local runtime decides what to run | master assigns work                     |
+| Scenario execution  | same process that planned the run | worker process/runtime                  |
+| Initialization      | one runtime initializes once      | each worker initializes its own runtime |
+| Plugin observation  | local execution stream            | master-side aggregated stream           |
+| Output ownership    | same runtime that executes        | summary/result owned by master          |
+| Remote execution    | not the default model             | built into the workflow                 |
+
+## Can you treat it like plain Cucumber?
+
+**Often yes, but not always.**
+
+For many usage patterns, it is reasonable to think of `cucumber-swarm` as "Cucumber with distributed execution behind
+one master result stream". That mental model works best when your main concern is scenario and step lifecycle results,
+one overall summary, and final pass/fail reporting. It is still not a perfect drop-in replacement for every
+single-process assumption, so compatibility should be judged with some care.
+
+### Plugin compatibility
+
+The safest expectation is that `cucumber-swarm` fits best with plugins and tooling that care about scenario execution
+and final results. It needs more careful evaluation when a plugin depends on process-local behavior, worker-local
+stdout, or the full set of internal runtime events.
+
+In the current implementation, the master always adds `MasterPlugin`, workers always add `WorkerForwardingPlugin`, and
+user-supplied `--plugin` options remain on the master side. Worker execution is forwarded back primarily as test-case
+and test-step lifecycle information, with selected Cucumber message payloads also being forwarded. Some worker-local
+events are intentionally not forwarded as-is. In practice, that means plugins that only need the aggregated run outcome
+are more likely to behave well than plugins that assume they are attached directly to the runtime that executed the
+step.
+
+### Output compatibility
+
+One important practical difference is **stdout behavior**. In **local-worker mode**, step-level `System.out.println(...)`
+output appears in the final run output. In **remote-worker mode**, the final stdout shows the master summary, but
+worker-side `System.out.println(...)` output is not merged into that final stdout in the same way. If your workflow
+depends on worker console output being part of the main terminal output, remote mode needs extra care.
+
+### Initialization compatibility
+
+Because workers execute the scenarios, the worker environment must contain everything the test run needs: feature
+targets, glue, hooks, runtime dependencies, and any launcher-specific JVM or process options. This is especially
+important in remote mode. A master can coordinate the run, but a worker still needs a complete executable Cucumber
+environment.
+
+## What distributed execution changes in practice
+
+### 1. Execution and initialization are separated
+
+The master does not execute steps. Workers do.
+
+That means anything tied to step execution happens in worker runtimes, including:
+
+- glue loading
+- hook execution
+- object initialization needed for step execution
+- worker-local stdout/stderr behavior
+
+### 2. The master is the aggregation point
+
+The master is where the run is coordinated and where the final result is assembled.
+
+That is why the master remains the best place for:
+
+- final summary output
+- centralized result interpretation
+- master-side plugin consumption
+- startup timeout and worker availability handling
+
+### 3. Remote mode should be treated as a deployment concern, not only a Cucumber option
+
+Remote mode is not simply a CLI variation. It is a deployment and orchestration concern: you are deciding how each
+worker is started, which environment it runs in, and how that environment reaches the master.
+
+The examples in this README use `java` because that is the lowest-level form and matches the module's own test setup.
+In real projects, workers are often launched through higher-level commands instead of invoking the JVM directly. Common
+patterns include:
+
+- `docker-compose exec` into a dedicated test container and run a Gradle or Maven Cucumber task
+- `ssh` to another machine and run the project's standard test command there
+- wrap the worker start logic in a script that prepares the expected runtime and then invokes Cucumber
+
+For that reason, `--remote-worker-launcher` should be understood as the entry command for your remote execution model,
+not as something that is inherently tied to `java`. The practical concerns are the same either way: runtime bootstrap,
+build-tool task selection, logging, environment-specific configuration, and host / port reachability back to the
+master.
+
+## Running cucumber-swarm
+
+### Local worker mode
 
 ```bash
 java ... org.testcharm.cucumber.swarm.Main \
@@ -40,332 +130,182 @@ java ... org.testcharm.cucumber.swarm.Main \
   features
 ```
 
-效果：
+Behavior:
 
-- master 启动
-- 自动再起一个本地 worker
-- 本地 worker 从 master 领场景执行
-- 所有 summary 和插件输出仍由 master 统一产出
+- the master starts
+- one local worker is created by default
+- the worker requests scenarios from the master
+- the final exit code is produced by the master run
 
-### 2.2 远程 worker 模式
+This form is useful for understanding the execution model. In a build, the same invocation may be wrapped by a Gradle
+or Maven task rather than being called directly through `java`.
+
+### Remote worker mode
+
+At the lowest level, a remote worker launch can look like this:
 
 ```bash
 java ... org.testcharm.cucumber.swarm.Main \
-  --local-worker disable \
-  --remote-worker-count 2 \
+  --swarm-port 20000 \
+  --disable-local-worker \
+  --remote-worker-count 1 \
+  --remote-options-json '["-Djava.util.logging.config.file=/tmp/cucumber/logging.properties","-cp","...","org.testcharm.cucumber.swarm.Main"]' \
+  --remote-worker-launcher java \
   --glue steps \
-  features \
-  -- \
-  java -cp app.jar org.testcharm.cucumber.swarm.Main \
-    --swarm-port 10083 \
-    --worker-id {worker-id} \
-    --glue steps \
-    features
+  features
 ```
 
-这里 `--` 后面的命令是远程 worker 模板。master 会把 `{worker-id}` 替换成 `1`、`2` 等实际值后分别启动。
+Meaning:
 
-## 3. 基本架构
+- `--remote-worker-launcher` supplies the entry command used to start a worker
+- `--remote-options-json` supplies the fixed launcher/runtime prefix
+- swarm appends worker identity, swarm connection options, and normalized feature targets
 
-```text
-                +--------------------+
-                |       Master       |
-                |--------------------|
-                | FeatureSupplier    |
-                | Pickle queue       |
-                | MasterPlugin       |
-                | MasterDataMapper   |
-                | RestfulServer      |
-                +----+----------+----+
-                     |          |
-          GET /pickle|          |POST /events, /ready
-                     |          |
-          +----------v--+   +---v-----------+
-          |   Worker 1  |   |   Worker N    |
-          |-------------|   |---------------|
-          | WorkerRuntime|  | WorkerRuntime |
-          | ForwardPlugin|  | ForwardPlugin |
-          | WorkerDataMap|  | WorkerDataMap |
-          +-------------+   +---------------+
+In practice, many teams will point `--remote-worker-launcher` to a script, a `docker-compose` command, or an `ssh`
+command that eventually runs the project's normal Gradle or Maven Cucumber task in the target environment.
+
+## CLI options
+
+| Option                               | Default     | Meaning                                                              |
+|--------------------------------------|-------------|----------------------------------------------------------------------|
+| `--remote-worker-launcher <bin>`     | none        | Executable used to start each remote worker process                  |
+| `--disable-local-worker`             | off         | Disable the default in-process local worker                          |
+| `--swarm-host <host>`                | `localhost` | Hostname used by remote workers to reach the master                  |
+| `--swarm-port <port>`                | `10083`     | Master coordination port                                             |
+| `--worker-timeout <seconds>`         | `5`         | How long the master waits for a worker to register and become available |
+| `--remote-worker-count <n>`          | `0`         | Number of remote workers to launch                                   |
+| `--remote-options-json <json-array>` | `[]`        | Extra launcher/runtime arguments inserted after the launcher command |
+| `--worker-id <id>`                   | none        | Marks a process as a worker instance                                 |
+
+## Operational notes and limitations
+
+### Threads are forced to 1
+
+The current preprocessing forces:
+
+```bash
+--threads 1
 ```
 
-### 3.1 master 做什么
+for master and worker runtimes.
 
-- 解析 feature，筛选并排序 pickle
-- 用 `TestCaseFactory` 预先把 pickle 映射成 `TestCase`
-- 启动 `RestfulServer`
-- 启动本地 worker 和/或远程 worker
-- 维护一个待执行 `pickleQueue`
-- 接收 worker 回传事件
-- 把回传事件反序列化后重新发到 master 的 `EventBus`
+### Plugin routing is deliberate
 
-关键类：
+`cucumber-swarm` does not let every process behave like an ordinary plugin host.
 
-- `Main`
-- `io.cucumber.core.runtime.MasterRuntime`
-- `io.cucumber.core.runtime.MasterCucumberExecutionContext`
-- `org.testcharm.cucumber.swarm.master.Master`
-- `org.testcharm.cucumber.swarm.master.Controller`
-- `org.testcharm.cucumber.swarm.master.RestfulServer`
+- the **master** owns the aggregated event stream and final reporting surface
+- the **worker** owns execution and forwarding
+- the worker-side forwarding plugin is always present so the master can rebuild a coherent run
 
-### 3.2 worker 做什么
+This is one of the main reasons lifecycle-oriented reporting tends to fit better than plugins that depend on fully local
+execution internals.
 
-- 启动后先向 master 发送 ready 信号
-- 通过 `/pickle` 逐个领取待执行场景
-- 在本地运行 Cucumber 场景
-- 通过 `WorkerForwardingPlugin` 把需要的事件序列化并回传给 master
+### Feature targets are normalized for remote workers
 
-关键类：
+Remote workers support:
 
-- `io.cucumber.core.runtime.WorkerRuntime`
-- `org.testcharm.cucumber.swarm.worker.Remote`
-- `org.testcharm.cucumber.swarm.worker.RestfulClient`
-- `org.testcharm.cucumber.swarm.WorkerForwardingPlugin`
-- `org.testcharm.cucumber.swarm.worker.EventSerializer`
+- feature directories
+- single feature files
+- feature files with line selectors
+- multiple targets
+- automatic normalization from absolute paths to relative targets for generated remote worker args
 
-### 3.3 路径映射为什么重要
+### Worker startup is coordinated explicitly
 
-master 和 worker 都通过 `DataMapper` 把对象映射成相对路径 key，例如：
-
-- `features/test.feature:3`
-
-这个 key 被用于：
-
-- pickle 分发
-- `TestCase` 对齐
-- step definition / hook / test step 回填
-- 跨进程把 worker 侧路径重新映射回 master 侧路径
-
-`--working-dir` 的意义就是保证两边生成的 key 一致。
-
-## 4. master 与 worker 之间的 REST 协议
-
-`Controller` 只暴露 3 个接口：
-
-| 方法 | 路径 | 请求头 | 请求体 | 返回 |
-| --- | --- | --- | --- | --- |
-| `GET` | `/pickle` | `X-Worker-Id` | 无 | 200 时返回一个 pickle key；没有更多场景时返回 404。 |
-| `POST` | `/events` | `X-Worker-Id` | 一个 JSON 事件记录 | 200 表示 master 已接收并转发。 |
-| `POST` | `/ready` | `X-Worker-Id` | 空串 | 200 表示 worker 已标记为 ready。 |
-
-### 启动和关闭时序
-
-典型日志顺序如下：
-
-1. master 创建并记录场景数
-2. REST 服务启动
-3. worker 启动
-4. worker 发送 ready
-5. worker 循环请求 `/pickle`
-6. master 队列清空后关闭
-7. master 等待所有 worker 退出
-8. REST 服务关闭
-
-当没有 worker 在 `workerTimeout` 内 ready 时，master 会直接抛出：
+Before the master starts assigning scenarios, it waits for at least one worker to register that it is available to
+accept work. The `--worker-timeout` option controls how long the master waits for that initial worker availability.
+If no worker becomes available within that window, the run stops with:
 
 ```text
 No worker available after waiting for <n> seconds
 ```
 
-## 5. worker 会回传哪些消息
+This is relevant in both local and remote execution, but it matters most in remote mode, where startup may depend on
+container scheduling, remote command execution, network access, or build-tool bootstrap time.
 
-分两层理解：
+### Remote workers need an explicit launch command
 
-### 5.1 协调消息
+If you request remote workers, you must also provide the command used to start them. Without that command, swarm cannot
+materialize a remote worker process and the run stops with:
 
-这类消息不是 Cucumber 事件，而是 master / worker 协议本身：
-
-- `ready`：worker 已可接活
-- `pickle request`：worker 请求下一个场景
-- `pickle key`：master 返回一个待执行场景标识
-- `no pickle`：没有更多场景，worker 结束
-
-### 5.2 回传到 master EventBus 的 Cucumber 事件
-
-worker 只转发下面 4 类 `io.cucumber.plugin.event` 事件：
-
-- `TestCaseStarted`
-- `TestStepStarted`
-- `TestStepFinished`
-- `TestCaseFinished`
-
-其他事件不会转发，日志中会看到 `ignore event forwarding`，测试覆盖了这些典型例子：
-
-- `TestRunStarted`
-- `TestSourceRead`
-- `TestSourceParsed`
-- `StepDefinedEvent`
-- `SnippetsSuggestedEvent`
-- `TestRunFinished`
-
-### 5.3 同时回传的 message 层对象
-
-除了上面的 plugin event，worker 还会把对应的 `io.cucumber.messages.types` 对象一并回传，当前覆盖到：
-
-- `TestCase`
-- `TestCaseStarted`
-- `TestStepStarted`
-- `TestStepFinished`
-- `TestCaseFinished`
-
-这部分由 `Envelope` 事件触发，master 收到后会反序列化成 `Envelope.of(...)` 再送回本地总线。
-
-## 6. 各类回传消息包含什么字段
-
-### 6.1 `io.cucumber.plugin.event.TestCaseStarted`
-
-master 侧最终拿到的是完整 `TestCase` 对象，测试证明会保留：
-
-- `instant`
-- `testCase.location`
-- `testCase.uri`
-- `testCase.testSteps`
-
-`testSteps` 里可能出现两类步骤：
-
-- `PickleStepTestStep`
-- `HookTestStep`
-
-### 6.2 `io.cucumber.plugin.event.TestStepStarted`
-
-会带回：
-
-- `testCase`
-- `testStep`
-
-并且 `testStep` 能和 `testCase.testSteps[index]` 对应上。
-
-### 6.3 `io.cucumber.plugin.event.TestStepFinished`
-
-会带回：
-
-- `testCase`
-- `testStep`
-- `result.status`
-- `result.duration`
-- `result.error`
-
-测试覆盖的状态包括：
-
-- `PASSED`
-- `FAILED`
-- `SKIPPED`
-- `PENDING`
-- `UNDEFINED`
-- `AMBIGUOUS`
-
-异常会被序列化后再恢复：
-
-- 普通异常保留类型、message、stack trace
-- 无法原样反序列化的异常会退化成 `RemoteException`
-
-### 6.4 `io.cucumber.plugin.event.TestCaseFinished`
-
-会带回：
-
-- `instant`
-- `testCase`
-- `result.status`
-- `result.duration`
-- `result.error`
-
-### 6.5 `io.cucumber.messages.types.TestCase`
-
-会带回结构化 message 版本的测试用例定义，重点字段包括：
-
-- `id`
-- `pickleId`
-- `testSteps`
-- `hookId`
-- `pickleStepId`
-- `stepDefinitionIds`
-- `stepMatchArgumentsLists`
-
-这使 master 侧既能恢复普通步骤，也能恢复 hook 步骤，还能保留正则/参数化匹配信息。
-
-### 6.6 `io.cucumber.messages.types.TestCaseStarted`
-
-会带回：
-
-- `attempt`
-- `id`
-- `testCaseId`
-- `workerId`
-- `timestamp`
-
-### 6.7 `io.cucumber.messages.types.TestStepStarted`
-
-会带回：
-
-- `testCaseStartedId`
-- `testStepId`
-- `timestamp`
-
-### 6.8 `io.cucumber.messages.types.TestStepFinished`
-
-会带回：
-
-- `testCaseStartedId`
-- `testStepId`
-- `timestamp`
-- `result.duration`
-- `result.message`
-- `result.status`
-- `result.exception`
-
-### 6.9 `io.cucumber.messages.types.TestCaseFinished`
-
-会带回：
-
-- `testCaseStartedId`
-- `timestamp`
-- `willBeRetried`
-
-## 7. 参数和插件行为上的几个容易忽略的点
-
-### 7.1 master 与 worker 的插件分工
-
-- master 固定注入 `MasterPlugin`
-- worker 固定注入 `WorkerForwardingPlugin`
-- 用户自己传的 `--plugin` 只加在 master
-
-这样可以避免 worker 直接打印 summary 或重复消费事件。
-
-### 7.2 本地 worker 与远程 worker 的 summary 行为不同
-
-- 本地 worker 默认强制 `--no-summary`
-- 远程 worker 进程因为是显式 `--worker-id` 模式，预处理后不会保留那条强制禁用逻辑，所以最终仍由实际 worker 参数决定
-
-### 7.3 指定 feature 文件路径是支持的
-
-测试覆盖了直接执行单个 feature 文件：
-
-```bash
-... features/test.feature
+```text
+Missing option --remote-worker-launcher
 ```
 
-不是必须传目录。
+## Implementation notes
 
-## 8. 已被测试验证的行为
+You do not need these details to use the library, but they help explain the compatibility model.
 
-- 空 feature 也能完整走完 master / worker 生命周期
-- undefined step 会返回 snippet，并让总体退出码为 `1`
-- passed / failed / skipped / pending / ambiguous 都能正确汇总到 master
-- hook step 与普通 pickle step 能一起正确回传
-- 参数化 step 的匹配参数和嵌套 group 能完整回传
-- worker 超时未就绪时会直接失败
-- 本地 worker 和远程 worker 两种模式都已覆盖
+### Coordination protocol
 
-## 9. 读代码时最值得先看的文件
+The master exposes three endpoints:
 
-如果要继续维护这个模块，建议按这个顺序看：
+| Method | Path      | Purpose                                                     |
+|--------|-----------|-------------------------------------------------------------|
+| `GET`  | `/pickle` | worker requests the next scenario                           |
+| `POST` | `/events` | worker reports execution information back                   |
+| `POST` | `/ready`  | worker confirms that it has completed startup and can accept scenarios |
 
-1. `org.testcharm.cucumber.swarm.WorkerArgsPreProcessor`
-2. `org.testcharm.cucumber.swarm.Main`
-3. `io.cucumber.core.runtime.MasterRuntime`
-4. `io.cucumber.core.runtime.WorkerRuntime`
-5. `org.testcharm.cucumber.swarm.master.Master`
-6. `org.testcharm.cucumber.swarm.master.Controller`
-7. `org.testcharm.cucumber.swarm.WorkerForwardingPlugin`
-8. `org.testcharm.cucumber.swarm.worker.EventSerializer`
-9. `org.testcharm.cucumber.swarm.master.EventDeserializer`
+Workers repeatedly request scenarios through `/pickle` until no more work remains. The separate `/ready` step is what
+allows the master to distinguish "worker process was launched" from "worker runtime is initialized and available for
+execution".
+
+### What is forwarded back from workers
+
+At the plugin-event level, the current implementation forwards worker execution primarily as:
+
+- `io.cucumber.plugin.event.TestCaseStarted`
+- `io.cucumber.plugin.event.TestStepStarted`
+- `io.cucumber.plugin.event.TestStepFinished`
+- `io.cucumber.plugin.event.TestCaseFinished`
+
+At the Cucumber message level, the forwarded envelope payloads include:
+
+- `io.cucumber.messages.types.TestCase`
+- `io.cucumber.messages.types.TestCaseStarted`
+- `io.cucumber.messages.types.TestStepStarted`
+- `io.cucumber.messages.types.TestStepFinished`
+- `io.cucumber.messages.types.TestCaseFinished`
+
+This is why `cucumber-swarm` can still present a meaningful aggregated run to the master side, but it is also why plugin
+compatibility should be evaluated with the distributed model in mind rather than assumed automatically.
+
+### Delivery is queued, then flushed before worker exit
+
+Workers do not synchronously POST every event inline with step execution.  
+They enqueue events, a dedicated forwarding thread sends them to the master, and the worker waits for that queue to
+flush before exiting.
+
+That reduces coupling between step execution and HTTP delivery, but it also means the worker is not simply "running a
+plugin locally and printing everything directly".
+
+### Why remapping exists
+
+Workers do not send back live in-process Java objects. They send serialized execution information.
+
+The master rebuilds the corresponding aggregated objects so that:
+
+- scenario / step identity can be recovered
+- paths can be mapped back consistently
+- master-side summaries and plugins can observe one coherent run
+
+### Remote exceptions are preserved as far as possible
+
+When a worker-side failure is serializable, swarm forwards the original throwable data.  
+If it is not serializable, swarm falls back to a `RemoteException` wrapper that preserves the remote exception type,
+message, and stack trace as transport-safe data.
+
+### There are built-in swarm extension hooks
+
+In addition to normal Cucumber plugins, swarm also scans for:
+
+- `MasterPluginExtension`
+- `WorkerForwardingPluginExtension`
+
+under:
+
+- `org.testcharm.cucumber.extensions`
+- `org.testcharm.extensions.cucumber`
+
+Most users will not need these APIs, but they are relevant if you are extending swarm-aware behavior rather than only
+consuming the aggregated master-side run.
