@@ -55,18 +55,21 @@ public final class WorkerRuntime {
     }
 
     public void run() {
-        REMOTE.sayReady();
-        log.info(() -> String.format("Executor<%d> started", workerId));
-        // Parse the features early. Don't proceed when there are lexer errors
-        List<Feature> features = featureSupplier.get();
-        REMOTE.setupMapping(features);
-        context.runFeatures(() -> {
-            features.forEach(context::beforeFeature);
-            for (Pickle pickle : REMOTE.pickles())
-                context.runTestCase(runner -> runner.runPickle(pickle));
-        });
-        REMOTE.exit();
-        log.info(() -> String.format("Executor<%d> ended", workerId));
+        try {
+            REMOTE.sayReady();
+            log.info(() -> String.format("Executor<%d> started", workerId));
+            // Parse the features early. Don't proceed when there are lexer errors
+            List<Feature> features = featureSupplier.get();
+            REMOTE.setupMapping(features);
+            context.runFeatures(() -> {
+                features.forEach(context::beforeFeature);
+                for (Pickle pickle : REMOTE.pickles())
+                    context.runTestCase(runner -> runner.runPickle(pickle));
+            });
+            log.info(() -> String.format("Executor<%d> ended", workerId));
+        } finally {
+            REMOTE.exit();
+        }
     }
 
     public byte exitStatus() {
