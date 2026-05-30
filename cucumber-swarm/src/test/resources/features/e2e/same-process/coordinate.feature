@@ -20,18 +20,19 @@ Feature: Master Worker Coordinate
     And the log should:
       """
       lines: [...
+        'INFO: Master run with args: [--threads, 1, --plugin, org.testcharm.cucumber.swarm.MasterPlugin, --glue, steps, $r_path$/features]',
         'INFO: Master created with 0 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Local worker<1> starting...'
-        'INFO: Received worker<1> ready signal'
-        'INFO: Worker<1> is ready'
-        'INFO: Executor<1> started'
+        'INFO: Local worker<0> starting...'
+        'INFO: Received worker<0> ready signal'
+        'INFO: Worker<0> is ready'
+        'INFO: Executor<0> started'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
+        'FINE: Received worker<0> pickle request'
         'FINE: No more pickles'
         'FINE: No pickle received'
-        'INFO: Executor<1> ended'
+        'INFO: Executor<0> ended'
       ...]
       """
     And the log should:
@@ -39,8 +40,8 @@ Feature: Master Worker Coordinate
       lines: [...
         'INFO: Pickle queue EMPTY'
         'INFO: Shutting down master...'
-        'INFO: Waiting and collecting worker<1> exit status'
-        'INFO: Worker<1> exit(0)'
+        'INFO: Waiting and collecting worker<0> exit status'
+        'INFO: Worker<0> exit(0)'
         'INFO: Shutting down restful server...'
         'INFO: Restful server shut down'
         'INFO: Master shut down'
@@ -88,14 +89,14 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Local worker<1> starting...'
-        'INFO: Executor<1> started'
+        'INFO: Local worker<0> starting...'
+        'INFO: Executor<0> started'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
-        'FINE: Send pickle<$r_path$/features/no-step.feature:3> to worker<1>'
+        'FINE: Received worker<0> pickle request'
+        'FINE: Send pickle<$r_path$/features/no-step.feature:3> to worker<0>'
         'FINE: Received pickle<$r_path$/features/no-step.feature:3>'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
+        'FINE: Received worker<0> pickle request'
         'FINE: No more pickles'
         'FINE: No pickle received'
       ...]
@@ -104,8 +105,8 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Shutting down master...'
-        'INFO: Waiting and collecting worker<1> exit status'
-        'INFO: Worker<1> exit(1)'
+        'INFO: Waiting and collecting worker<0> exit status'
+        'INFO: Worker<0> exit(1)'
         'INFO: Shutting down restful server...'
         'INFO: Restful server shut down'
         'INFO: Master shut down'
@@ -157,14 +158,14 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Local worker<1> starting...'
-        'INFO: Executor<1> started'
+        'INFO: Local worker<0> starting...'
+        'INFO: Executor<0> started'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
-        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received worker<0> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<0>'
         'FINE: Received pickle<$r_path$/features/test.feature:3>'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
+        'FINE: Received worker<0> pickle request'
         'FINE: No more pickles'
         'FINE: No pickle received'
       ...]
@@ -177,7 +178,7 @@ Feature: Master Worker Coordinate
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
         { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
@@ -187,8 +188,8 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Shutting down master...'
-        'INFO: Waiting and collecting worker<1> exit status'
-        'INFO: Worker<1> exit(0)'
+        'INFO: Waiting and collecting worker<0> exit status'
+        'INFO: Worker<0> exit(0)'
         'INFO: Shutting down restful server...'
         'INFO: Restful server shut down'
         'INFO: Master shut down'
@@ -248,14 +249,14 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Local worker<1> starting...'
-        'INFO: Executor<1> started'
+        'INFO: Local worker<0> starting...'
+        'INFO: Executor<0> started'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
-        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received worker<0> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<0>'
         'FINE: Received pickle<$r_path$/features/test.feature:3>'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
+        'FINE: Received worker<0> pickle request'
         'FINE: No more pickles'
         'FINE: No pickle received'
       ...]
@@ -268,7 +269,7 @@ Feature: Master Worker Coordinate
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestCaseStarted","data":{"timeInstant"'
           contains: '"testCase":"$r_path$/features/test.feature:3"'
         }
         { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseStarted' }
@@ -278,8 +279,8 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Shutting down master...'
-        'INFO: Waiting and collecting worker<1> exit status'
-        'INFO: Worker<1> exit(1)'
+        'INFO: Waiting and collecting worker<0> exit status'
+        'INFO: Worker<0> exit(1)'
         'INFO: Shutting down restful server...'
         'INFO: Restful server shut down'
         'INFO: Master shut down'
@@ -342,14 +343,14 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Local worker<1> starting...'
-        'INFO: Executor<1> started'
+        'INFO: Local worker<0> starting...'
+        'INFO: Executor<0> started'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
-        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received worker<0> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<0>'
         'FINE: Received pickle<$r_path$/features/test.feature:3>'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
+        'FINE: Received worker<0> pickle request'
         'FINE: No more pickles'
         'FINE: No pickle received'
       ...]
@@ -358,11 +359,11 @@ Feature: Master Worker Coordinate
       """
       lines::should[]: [...
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"FAILED"'
         }
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"SKIPPED"'
         }
         { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
@@ -372,8 +373,8 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Shutting down master...'
-        'INFO: Waiting and collecting worker<1> exit status'
-        'INFO: Worker<1> exit(1)'
+        'INFO: Waiting and collecting worker<0> exit status'
+        'INFO: Worker<0> exit(1)'
         'INFO: Shutting down restful server...'
         'INFO: Restful server shut down'
         'INFO: Master shut down'
@@ -431,14 +432,14 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Local worker<1> starting...'
-        'INFO: Executor<1> started'
+        'INFO: Local worker<0> starting...'
+        'INFO: Executor<0> started'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
-        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received worker<0> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<0>'
         'FINE: Received pickle<$r_path$/features/test.feature:3>'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
+        'FINE: Received worker<0> pickle request'
         'FINE: No more pickles'
         'FINE: No pickle received'
       ...]
@@ -447,12 +448,12 @@ Feature: Master Worker Coordinate
       """
       lines::should[]: [...
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"PENDING"'
         }
         { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
           contains: '"status":"PENDING"'
         }
         { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
@@ -462,8 +463,8 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Shutting down master...'
-        'INFO: Waiting and collecting worker<1> exit status'
-        'INFO: Worker<1> exit(1)'
+        'INFO: Waiting and collecting worker<0> exit status'
+        'INFO: Worker<0> exit(1)'
         'INFO: Shutting down restful server...'
         'INFO: Restful server shut down'
         'INFO: Master shut down'
@@ -525,14 +526,14 @@ Feature: Master Worker Coordinate
         'INFO: Master created with 1 scenarios',
         /^INFO: Starting restful server on.*/
         'INFO: Restful server started'
-        'INFO: Local worker<1> starting...'
-        'INFO: Executor<1> started'
+        'INFO: Local worker<0> starting...'
+        'INFO: Executor<0> started'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
-        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<1>'
+        'FINE: Received worker<0> pickle request'
+        'FINE: Send pickle<$r_path$/features/test.feature:3> to worker<0>'
         'FINE: Received pickle<$r_path$/features/test.feature:3>'
         'FINE: Requesting pickle...'
-        'FINE: Received worker<1> pickle request'
+        'FINE: Received worker<0> pickle request'
         'FINE: No more pickles'
         'FINE: No pickle received'
       ...]
@@ -541,12 +542,12 @@ Feature: Master Worker Coordinate
       """
       lines::should[]: [...
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestStepFinished"'
           contains: '"status":"AMBIGUOUS"'
         }
         { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestStepFinished' }
         {
-          contains: 'FINE: Received worker<1> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
+          contains: 'FINE: Received worker<0> event: {"type":"io.cucumber.plugin.event.TestCaseFinished"'
           contains: '"status":"AMBIGUOUS"'
         }
         { contains: 'FINE: Forwarding event: io.cucumber.plugin.event.TestCaseFinished' }
@@ -556,8 +557,8 @@ Feature: Master Worker Coordinate
       """
       lines: [...
         'INFO: Shutting down master...'
-        'INFO: Waiting and collecting worker<1> exit status'
-        'INFO: Worker<1> exit(1)'
+        'INFO: Waiting and collecting worker<0> exit status'
+        'INFO: Worker<0> exit(1)'
         'INFO: Shutting down restful server...'
         'INFO: Restful server shut down'
         'INFO: Master shut down'

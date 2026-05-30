@@ -1,5 +1,7 @@
 package org.testcharm.cucumber.swarm;
 
+import io.cucumber.core.logging.Logger;
+import io.cucumber.core.logging.LoggerFactory;
 import io.cucumber.core.options.CommandlineOptionsParser;
 import io.cucumber.core.options.CucumberProperties;
 import io.cucumber.core.options.CucumberPropertiesParser;
@@ -7,10 +9,12 @@ import io.cucumber.core.options.RuntimeOptions;
 import io.cucumber.core.runtime.MasterRuntime;
 import io.cucumber.core.runtime.WorkerRuntime;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String... argv) {
         System.exit(run(argv));
@@ -23,6 +27,8 @@ public class Main {
     public static byte run(String[] argv, ClassLoader classLoader) {
         ProcessedArgs argvs = new WorkerArgsPreProcessor().process(argv, classLoader);
         if (argvs.swarmArgs.isRemoteWorker()) {
+            // TODO log need test
+            log.info(() -> String.format("Worker run with args: %s", Arrays.toString(argvs.swarmArgs.getWorkerArgs())));
             Main.Result worker = buildRuntimeOption(argvs.swarmArgs.getWorkerArgs());
 
             Optional<Byte> exitStatus = worker.commandlineOptionsParser.exitStatus();
@@ -38,6 +44,7 @@ public class Main {
             workerRuntime.run();
             return workerRuntime.exitStatus();
         } else {
+            log.info(() -> String.format("Master run with args: %s", Arrays.toString(argvs.masterArgs)));
             Result master = buildRuntimeOption(argvs.masterArgs);
 
             Optional<Byte> exitStatus = master.commandlineOptionsParser.exitStatus();

@@ -6,10 +6,10 @@ import org.testcharm.cucumber.swarm.DataMapper;
 import org.testcharm.cucumber.swarm.repo.Repository;
 
 public class Controller {
+    private static final Logger log = LoggerFactory.getLogger(Controller.class);
     private final Master master;
     private final RestfulServer restfulServer;
     private final Repository<Integer, Worker> workerRepository;
-    private final Logger log = LoggerFactory.getLogger(Controller.class);
     private final DataMapper dataMapper;
 
     public Controller(Master master, Repository<Integer, Worker> workerRepository, DataMapper dataMapper, RestfulServer restfulServer) {

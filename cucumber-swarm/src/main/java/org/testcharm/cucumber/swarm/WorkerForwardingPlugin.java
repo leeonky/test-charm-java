@@ -18,7 +18,7 @@ import static org.testcharm.util.Classes.subTypesOf;
 
 public class WorkerForwardingPlugin implements ConcurrentEventListener {
 
-    private final Logger log = LoggerFactory.getLogger(WorkerForwardingPlugin.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkerForwardingPlugin.class);
 
     private static final Set<Class<?>> forwardingEventNames = new HashSet<>(Arrays.asList(
             TestCaseStarted.class,

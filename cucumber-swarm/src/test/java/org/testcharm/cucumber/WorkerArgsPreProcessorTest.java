@@ -782,7 +782,7 @@ class WorkerArgsPreProcessorTest {
 
                 @Test
                 void default_worker_timeout() {
-                    expect(master.swarmArgs).should("workerTimeout= 5");
+                    expect(master.swarmArgs).should("workerTimeout= 40");
                 }
 
                 @Test
@@ -842,7 +842,7 @@ class WorkerArgsPreProcessorTest {
 
                 @Test
                 void default_worker_timeout() {
-                    expect(master.swarmArgs).should("workerTimeout= 5");
+                    expect(master.swarmArgs).should("workerTimeout= 40");
                 }
 
                 @Test
@@ -870,7 +870,7 @@ class WorkerArgsPreProcessorTest {
                     @Test
                     void default_swarm_part() {
                         // not use in remote worker
-                        expect(remote.swarmArgs).should("workerTimeout= 5");
+                        expect(remote.swarmArgs).should("workerTimeout= 40");
                     }
                 }
             }
@@ -915,7 +915,7 @@ class WorkerArgsPreProcessorTest {
                     @Test
                     void default_swarm_part() {
                         // not use in remote worker
-                        expect(remote.swarmArgs).should("workerTimeout= 5");
+                        expect(remote.swarmArgs).should("workerTimeout= 40");
                     }
                 }
             }

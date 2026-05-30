@@ -11,14 +11,9 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class Remote {
-    private final Logger log = LoggerFactory.getLogger(Remote.class);
+    private static final Logger log = LoggerFactory.getLogger(Remote.class);
 
     public static Remote REMOTE;
-
-    public static void setupRemote(RestfulClient restfulClient, int workerId, WorkerDataMapper dataMapper) {
-        REMOTE = new Remote(restfulClient, workerId, dataMapper);
-    }
-
     private final RestfulClient restfulClient;
     private final WorkerDataMapper dataMapper;
     private final int workerId;
@@ -40,6 +35,10 @@ public class Remote {
             }
         });
         eventConsumerThread.start();
+    }
+
+    public static void setupRemote(RestfulClient restfulClient, int workerId, WorkerDataMapper dataMapper) {
+        REMOTE = new Remote(restfulClient, workerId, dataMapper);
     }
 
     public void setupMapping(List<Feature> features) {

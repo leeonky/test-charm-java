@@ -16,9 +16,9 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Master {
+    private static final Logger log = LoggerFactory.getLogger(Master.class);
     private final Repository<Integer, Worker> workers = new Repository<>(Worker::id);
     private final SwarmArgs swarmArgs;
-    private final Logger log = LoggerFactory.getLogger(Master.class);
     private final Controller controller;
     private final Queue<Pickle> pickleQueue;
     private final MasterDataMapper dataMapper;

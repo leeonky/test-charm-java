@@ -24,7 +24,7 @@ public class WorkerArgsPreProcessor {
         SwarmHost swarmHost = new SwarmHost();
         boolean localWorker = true;
         int remoteWorkerCount = 0;
-        int workerTimeout = 5;
+        int workerTimeout = 40;
         Integer workerId = null;
         String swarmHostStr = null;
         String workingDir = System.getProperty("user.dir");
