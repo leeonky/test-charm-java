@@ -57,6 +57,7 @@ public class Remote {
                 } catch (HttpException ig) {
                     log.debug(() -> "No pickle received");
                     pickles.close();
+                    break;
                 }
             }
         }).start();
