@@ -161,10 +161,10 @@ java ... org.testcharm.cucumber.swarm.Main \
 | `--disable-local-worker`             | 关闭          | 禁用默认本地 in-process worker     |
 | `--swarm-host <host>`                | `localhost` | 远程 worker 回连 master 使用的 host |
 | `--swarm-port <port>`                | `10083`     | master 协调端口                  |
-| `--worker-timeout <seconds>`         | `5`         | master 等待 worker 完成启动并进入可用状态的时间 |
+| `--worker-timeout <seconds>`         | `40`        | master 等待 worker 完成启动并进入可用状态的时间 |
 | `--remote-worker-count <n>`          | `0`         | 启动远程 worker 的数量              |
 | `--remote-options-json <json-array>` | `[]`        | 插入到 launcher 后面的额外启动参数       |
-| `--worker-id <id>`                   | 无           | 标记某个进程为 worker               |
+| `--worker-id <id>`                   | 无           | 标记某个进程为 worker；本地 worker 固定为 `0`，远程 worker 从 `1` 开始递增 |
 
 ## 使用上的注意事项与限制
 
@@ -209,6 +209,13 @@ No worker available after waiting for <n> seconds
 
 这一点在本地和远程模式下都成立，但在远程模式下尤其重要，因为远端启动往往还会受到容器调度、远程命令执行、网络连通性或构建
 工具启动时间的影响。
+
+### worker id 按角色固定分配
+
+内置本地 worker 的 id 永远是 `0`。
+
+远程 worker 的 id 从 `1` 开始，按启动顺序逐个递增。这样日志、HTTP 请求头和回传执行数据里，可以稳定地区分默认本地 worker
+与所有远程 worker。
 
 ### 远程 worker 必须提供明确的启动命令
 
@@ -255,6 +262,15 @@ worker 会通过 `/pickle` 持续请求待执行场景，直到没有剩余工�
 
 这也是为什么 `cucumber-swarm` 能在 master 侧继续呈现一个有意义的聚合运行结果；但也正因为它是“转发 + 聚合”，plugin
 兼容性不应被默认假设，而应结合分布式运行模型来判断。
+
+### master 当前不会把事件重排成 Cucumber 的规范顺序
+
+原始 `io.cucumber.core.cli.Main` 在多线程模式下，并不会把原始到达顺序直接暴露给普通 `EventListener` plugin。它会先通过
+Cucumber 的 canonical ordering publisher 缓存事件，并在 `TestRunFinished` 时一次性按串行运行应看到的顺序刷给这些
+plugin。
+
+`cucumber-swarm` 目前没有做等价的 master 侧重排。worker 回传的事件会按到达 master 的顺序直接再发布。因此，如果某些工具
+依赖这种“规范串行顺序”——例如部分 IDE 的测试树格式化器——就可能出现同一个 feature 被拆成多个节点之类的顺序敏感 UI 差异。
 
 ### 事件传输是排队并在退出前刷完的
 

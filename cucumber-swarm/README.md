@@ -172,10 +172,10 @@ command that eventually runs the project's normal Gradle or Maven Cucumber task 
 | `--disable-local-worker`             | off         | Disable the default in-process local worker                          |
 | `--swarm-host <host>`                | `localhost` | Hostname used by remote workers to reach the master                  |
 | `--swarm-port <port>`                | `10083`     | Master coordination port                                             |
-| `--worker-timeout <seconds>`         | `5`         | How long the master waits for a worker to register and become available |
+| `--worker-timeout <seconds>`         | `40`        | How long the master waits for a worker to register and become available |
 | `--remote-worker-count <n>`          | `0`         | Number of remote workers to launch                                   |
 | `--remote-options-json <json-array>` | `[]`        | Extra launcher/runtime arguments inserted after the launcher command |
-| `--worker-id <id>`                   | none        | Marks a process as a worker instance                                 |
+| `--worker-id <id>`                   | none        | Marks a process as a worker instance; local worker is always `0`, remote workers start at `1` and increment |
 
 ## Operational notes and limitations
 
@@ -223,6 +223,13 @@ No worker available after waiting for <n> seconds
 This is relevant in both local and remote execution, but it matters most in remote mode, where startup may depend on
 container scheduling, remote command execution, network access, or build-tool bootstrap time.
 
+### Worker ids are stable by role
+
+The built-in local worker always uses id `0`.
+
+Remote workers are assigned ids starting at `1`, increasing by one for each launched remote process. This keeps the
+default local worker distinct from all remote workers in logs, HTTP headers, and forwarded execution data.
+
 ### Remote workers need an explicit launch command
 
 If you request remote workers, you must also provide the command used to start them. Without that command, swarm cannot
@@ -269,6 +276,16 @@ At the Cucumber message level, the forwarded envelope payloads include:
 
 This is why `cucumber-swarm` can still present a meaningful aggregated run to the master side, but it is also why plugin
 compatibility should be evaluated with the distributed model in mind rather than assumed automatically.
+
+### Master forwarding does not currently canonicalize event order
+
+Plain `io.cucumber.core.cli.Main` in multi-threaded mode does not expose raw arrival order directly to ordinary
+`EventListener` plugins. It buffers events through Cucumber's canonical ordering publisher and flushes them at
+`TestRunFinished`, producing the serial order those plugins would have seen in a single-threaded run.
+
+`cucumber-swarm` does not currently perform an equivalent master-side reorder step. Worker events are forwarded to the
+master and then republished in the order they arrive. As a result, tools that depend on canonical serial ordering—such
+as some IDE test-tree formatters—may show split feature nodes or other ordering-sensitive UI differences.
 
 ### Delivery is queued, then flushed before worker exit
 
