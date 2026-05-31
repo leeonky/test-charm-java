@@ -1,6 +1,6 @@
 # cucumber-swarm
 
-**Primary language:** English. For Chinese, see [README.zh-CN.md](README.zh-CN.md).
+[简体中文](README.zh-CN.md)
 
 `cucumber-swarm` runs Cucumber with a **master / worker execution model**.  
 It was created for end-to-end test suites that need higher throughput, but cannot safely rely on Cucumber's built-in

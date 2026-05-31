@@ -1,6 +1,6 @@
 # TestCharm for Java
 
-[简体中文](README.zh-CN.md)
+[English](README.md)
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/test-charm/test-charm-java/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/test-charm/test-charm-java/tree/main)
 [![codecov](https://codecov.io/gh/test-charm/test-charm-java/graph/badge.svg?token=R5F98WSH6F)](https://codecov.io/gh/test-charm/test-charm-java)
@@ -11,11 +11,11 @@
 [![jfactory](https://img.shields.io/maven-central/v/org.test-charm/jfactory.svg?label=jfactory)](https://search.maven.org/artifact/org.test-charm/jfactory)
 [![DAL-java](https://img.shields.io/maven-central/v/org.test-charm/DAL-java.svg?label=DAL-java)](https://search.maven.org/artifact/org.test-charm/DAL-java)
 
-TestCharm is a set of testing libraries for Java. Its core idea is simple: **bring the data, rules, and expected results that truly matter to a business scenario into the same test file**, so tests can stay expressive and maintainable at the same time.
+TestCharm 是一组面向 Java 的测试工具库。它的核心是：**把一个业务场景真正需要的数据、规则和验证结果收敛到同一个测试文件里**，让测试既能表达业务，又能长期维护。
 
-## Start with a concrete requirement
+## 从一个具体需求开始
 
-Assume the system has the following business relationships:
+假设系统里有如下业务关系：
 
 ```text
 Order
@@ -47,19 +47,19 @@ Order
 └─ createdAt
 ```
 
-Now imagine an API that exports order shipment information directly as an `.xlsx` file. The requirement itself is not complicated: prepare one order with nested related data, call the export endpoint, then verify the Excel table content.
+现在有一个导出订单快递信息的接口，直接返回 `.xlsx` 文件。需求本身并不复杂：准备一条带多层关联数据的订单，请求导出接口，然后验证导出的 Excel 表格内容。
 
-The difficulty starts exactly there. For many automation approaches, this kind of requirement immediately splits into three different problems:
+困难恰恰出现在这里。对很多自动化测试方案来说，这类需求会立刻分裂成三件不同的事：
 
-- prepare a deeply nested set of test data
-- call an HTTP API
-- parse an Excel file, which is not an in-memory object, and verify cells one by one
+- 准备一组嵌套很深的测试数据
+- 调用 HTTP 接口
+- 解析一个非内存对象的 Excel 文件并逐格校验
 
-Using the same requirement, the following sections walk through several common styles and why they are still not ideal.
+下面用同一个需求，依次看几种常见写法，以及它们为什么仍然不够理想。
 
-### The most direct Python implementation
+### 最直接的 Python 实现
 
-The most direct implementation often turns into one full block of fixture setup, API calls, and Excel parsing code:
+最直接的实现方式，往往会落到一段完整的 fixture + API 调用 + Excel 解析代码上：
 
 ```python
 import pytest
@@ -127,11 +127,11 @@ def test_export_tracking_packages(client, setup_order_data):
     ]
 ```
 
-This works, of course, but test data setup, API invocation, and assertion logic are all mixed together. As scenarios grow, the code expands quickly, and the actual point of the test gets buried under implementation detail.
+这种写法当然能工作，但测试数据准备、接口调用和断言逻辑完全揉在一起。随着场景增多，代码会很快膨胀，测试表达的重点也会被技术实现细节盖住。
 
-### Data-driven API testing
+### 数据驱动的接口测试
 
-The next common step is to move data and expectations into JSON, CSV, or SQL files and run them through parameterization. On the surface, this separates code from data:
+进一步的常见做法，是把数据和预期抽到 JSON、CSV 或 SQL 文件里，再配合参数化执行。形式上看，代码和数据分离了：
 
 ```json
 [
@@ -227,15 +227,15 @@ def test_order_export_case(client, db_session, setup_order, case_id, case_data, 
             assert cell_equal(a, e)
 ```
 
-This is more organized than the first style, but the problem has only moved:
+这比第一种方式更规整，但问题并没有消失，只是换了位置：
 
-- data files gradually become structures filled in for database validity rather than for the business facts the scenario actually cares about
-- the business rule is still split across three places: data file, loading logic, and assertion code
-- the result feels more like an API regression sample than a scenario people can read and discuss directly
+- 数据文件会越来越像“为了数据库合法而填写的结构”，而不是场景真正关心的业务数据
+- 业务规则仍然被拆成“数据文件 + 装载逻辑 + 断言代码”三段
+- 用例更像接口回归样本，而不像一个可以直接阅读和讨论的业务场景
 
-### Traditional BDD
+### 传统 BDD
 
-One step further, teams usually turn to BDD so that tests describe business scenarios instead of only checking interfaces:
+再往前一步，团队通常会想到 BDD，希望测试不只是接口校验，而是直接描述业务场景：
 
 ```gherkin
 Feature: Exporting tracking packages
@@ -260,23 +260,23 @@ Feature: Exporting tracking packages
       | ORD-001  | 2024-01-01T00:00:00+08:00 | 2024-01-01T08:00:00+08:00 | TO_BE_PICKED_UP | TN-002          | PICKED_UP       |
 ```
 
-Traditional BDD improves business readability significantly, but it has its own costs:
+传统 BDD 显著提升了业务可读性，但它也有自己的代价：
 
-- scenarios can become more like natural-language descriptions than dense specifications
-- exact data and exact assertions still usually need extra step implementations underneath
-- the number of steps tends to grow continuously, bringing repetition, semantic drift, and maintenance overhead
+- 场景更像自然语言说明，信息密度不一定高
+- 精确数据和精确断言通常还是要靠额外 step 实现补齐
+- step 数量容易不断增长，出现重复、语义漂移和维护成本上升
 
-### The TestCharm style
+### TestCharm 的写法
 
-The nature of automated testing is not especially complicated. In the end, every test is dealing with three things:
+自动化测试的本质并不复杂。所有的测试最终都在处理三件事：
 
-1. prepare data
-2. execute an action
-3. verify the result
+1. 准备数据
+2. 执行操作
+3. 验证结果
 
-This is also the core idea behind BDD.
+这也是 BDD 的核心内涵。
 
-TestCharm aims to keep BDD's ability to express business scenarios while increasing the density of data expression and the efficiency of automation. For the same requirement, the scenario can be written like this:
+TestCharm 希望保留 BDD 对业务场景的表达力，同时提高数据表达的密度和自动化实现效率。对于同样的需求，可以写成下面这样：
 
 ```gherkin
 Feature: Tracking package export
@@ -309,116 +309,116 @@ Feature: Tracking package export
       """
 ```
 
-The core of this style is to extract the most important business points and verification intent from the scenario precisely, then express the real decision points through concise, accurate, and reusable data. Necessary technical cue words are still present, but only to provide context; they do not distract from the clarity or focus of the business expression itself.
+这种范式的核心，在于精准提取场景中最关键的业务要点和验证意图，通过简洁、准确且可复用的数据表达真正的业务决策点，并辅以必要的技术性提示词，帮助读者快速理解上下文，同时不影响业务表达本身的清晰度与专注度。
 
-It does not deliberately try to turn test cases into the kind of "pure business natural language" story script often associated with traditional BDD, and it also avoids reducing tests to something as cold as an "interface acceptance tool" or a "data-table feeding mechanism." The goal is to strike a better balance among business readability, automation efficiency, and long-term maintainability, so that tests can truly serve as a way to express and verify requirements and business rules.
+它并不刻意追求把测试用例写成传统 BDD 那种“纯业务自然语言”的故事剧本，也避免把测试退化成“接口验收工具”或“数据表填鸭式执行”那样偏冷冰冰的技术校验。它希望在业务可读性、自动化实现效率和长期维护能力之间取得更好的平衡，让测试真正成为需求和业务规则的表达与验证工具。
 
-An ideal test case is more like reading notes than a book filled wall-to-wall with text:
+理想的测试用例，更像“读书笔记”，而不是一本写满文字的书：
 
-- **focused**: it stays centered on the key scenario, main path, and expected result instead of surrounding them with too much setup narrative
-- **data-rich**: it shows the actual business rules, inputs, and outputs directly, making validation, regression, and discussion easier
-- **lightly technical where needed**: technical hints are there for navigation and support, but they do not dominate the document
+- **有重点**：聚焦关键场景、主路径和断言结果，而不是铺陈过多背景与说明
+- **有数据**：直接呈现实际业务规则、输入和输出，便于校验、回归和讨论
+- **有简明的技术提示**：只承担导航和补充作用，不喧宾夺主
 
-The benefits are practical:
+由此带来的好处也很直接：
 
-- **simple**: a plain text file can carry the full business explanation without depending on an external tool or IDE
-- **diff-friendly**: changes show up directly in git diff, making it easy to review what data changed and what rule was added
-- **AI-friendly**: large language models can read feature files directly to understand the business without first running code or loading a database
-- **self-contained**: each scenario carries only the data it needs, so scenarios do not interfere with one another, and failures make it easier to see which data led to which unexpected result
+- **简单**：不依赖额外工具或 IDE，一个文本文件就能承载完整的业务说明
+- **可 diff**：用例变更直接体现在 git diff 里，数据改了什么、规则加了什么，code review 一目了然
+- **AI 友好**：大语言模型可以直接读取 feature 文件理解业务，不需要先运行代码或加载数据库
+- **自包含**：每个场景只携带自己需要的数据，场景之间互不干扰，失败时也更容易看出“因为什么数据，导致什么结果不符合预期”
 
 ## TestCharm
 
-Against that background, TestCharm emerged with two core design goals:
+基于以上的目标，TestCharm 库应运而生。其核心设计在于两点：
 
-- allow developers to focus only on the smallest critical subset of complex test data, while the framework fills in the default and validity data required by the rest of the object graph
-- ensure that test data and assertions can be expressed in a concise, precise, and readable form
+- 允许开发者仅关注和定义复杂测试数据中的关键最小子集，框架自动补全其它所需的默认和合法性数据；
+- 保障测试数据及断言能够以简洁明了、精准的方式进行表达与展现。
 
-At the same time, the framework allows test authors to prepare and verify data for complex scenarios efficiently and clearly without having to write step definition code.
+同时，测试编写者借由这个框架，无需编写步骤实现（step definition）代码，即可高效、清晰地完成复杂场景的数据准备与验证。
 
-TestCharm is centered on two core modules.
+TestCharm 的核心由两个模块组成。
 
 ### JFactory
 
-[jfactory](jfactory/README.md) is the test data preparation library. Through Specs, Traits, cascading creation, and repository reuse, it lets tests define only the data that matters to the current scenario while leaving defaults, validity requirements, and object relationships to the framework.
+[jfactory](jfactory/README.zh-CN.md) 是测试数据准备库。它通过 Spec、Trait、级联创建和 repository 复用等机制，让测试只写当前场景真正关心的数据，而把默认值、合法性和对象关系交给框架处理。
 
-If you want to go deeper into JFactory usage, repository reuse, and how data setup works in Cucumber, the best next documents are:
+如果想进一步了解 JFactory 的使用方式、Repository 复用能力以及在 Cucumber 中如何准备数据，建议继续阅读：
 
-- [jfactory](jfactory/README.md)
-- [jfactory-cucumber](jfactory-cucumber/README.md)
-- [jfactory-repo-jpa](jfactory-repo-jpa/README.md)
+- [jfactory](jfactory/README.zh-CN.md)
+- [jfactory-cucumber](jfactory-cucumber/README.zh-CN.md)
+- [jfactory-repo-jpa](jfactory-repo-jpa/README.zh-CN.md)
 
 ### DAL-java
 
-[DAL-java](DAL-java/README.md) is the data description and assertion engine. It provides a language that is close to JSON, but better suited to testing, and uses that language to describe objects, lists, tables, files, HTTP responses, database results, and UI data in a consistent way.
+[DAL-java](DAL-java/README.zh-CN.md) 是数据描述和断言引擎。它提供一套接近 JSON、但更适合测试表达的数据语言，用来统一描述对象、列表、表格、文件、HTTP 响应、数据库结果和 UI 数据。
 
-Common extensions around DAL include:
+围绕 DAL 的常见扩展包括：
 
-- [DAL-extension-basic](DAL-extension-basic/README.md): common extensions for files, ZIP archives, asynchronous assertions, and related tasks
-- [DAL-extension-jdbc](DAL-extension-jdbc/README.md): direct access to and assertions against relational table data
-- [DAL-extension-jfactory](DAL-extension-jfactory/README.md): query JFactory repository data directly from DAL
+- [DAL-extension-basic](DAL-extension-basic/README.zh-CN.md)：文件、ZIP、异步断言等常用扩展
+- [DAL-extension-jdbc](DAL-extension-jdbc/README.zh-CN.md)：直接访问和断言数据库表数据
+- [DAL-extension-jfactory](DAL-extension-jfactory/README.zh-CN.md)：从 DAL 直接查询 JFactory repository 数据
 
-## Related modules
+## 相关模块
 
-In addition to JFactory and DAL-java, the repository includes a set of supporting modules for common testing scenarios:
+除了 JFactory 和 DAL-java，仓库还包含一组面向常见测试场景的配套模块：
 
-| Module | Purpose |
-| --- | --- |
-| [RESTful-cucumber](RESTful-cucumber/README.md) | Reuse HTTP request and response verification steps, connecting REST API tests to DAL |
-| [page-flow](page-flow/README.md) | Organize UI locating, interaction, and assertions as structured data expressions |
-| [bean-util](bean-util/README.md) | Low-level bean and reflection utilities reused by the core libraries |
+| 模块                                                   | 作用                                      |
+|------------------------------------------------------|-----------------------------------------|
+| [RESTful-cucumber](RESTful-cucumber/README.zh-CN.md) | 复用 HTTP 请求与响应验证步骤，把 REST API 测试接到 DAL 上 |
+| [page-flow](page-flow/README.zh-CN.md)               | 将 UI 定位、操作和断言组织成结构化数据表达                 |
+| [bean-util](bean-util/README.zh-CN.md)               | 供核心库复用的底层 bean 与反射工具                    |
 
-If you want a practical reading order, a natural path is usually:
+如果从使用顺序来看，一个更自然的阅读路径通常是：
 
-1. [DAL-java](DAL-java/README.md)
-2. [jfactory](jfactory/README.md)
-3. [RESTful-cucumber](RESTful-cucumber/README.md) or [page-flow](page-flow/README.md)
-4. Then move to the database-related extensions as needed
+1. [DAL-java](DAL-java/README.zh-CN.md)
+2. [jfactory](jfactory/README.zh-CN.md)
+3. [RESTful-cucumber](RESTful-cucumber/README.zh-CN.md) 或 [page-flow](page-flow/README.zh-CN.md)
+4. 再按需要进入数据库相关扩展
 
-## TestCharm and Cucumber
+## TestCharm 与 Cucumber 的关系
 
-TestCharm is often used together with Cucumber because Gherkin is a good fit for scenario-based, data-centered test expression.
+TestCharm 经常与 Cucumber 搭配使用，因为 Gherkin 很适合承载场景化、数据化的测试表达。
 
-However, the TestCharm core—JFactory and DAL—consists of independent Java libraries and does not depend on Cucumber to be useful. The Cucumber-related modules are better understood as integration and reuse layers, not the only way to use the project.
+但 TestCharm 的核心——JFactory 和 DAL——本身都是独立的 Java 库，并不依赖 Cucumber 才能使用。Cucumber 相关模块更适合作为接入层和复用层，而不是唯一使用方式。
 
-## Running the project tests
+## 运行项目测试
 
-The repository contains both plain unit tests and tests that rely on extra environment setup. To reproduce CI locally as closely as practical, prepare the following first.
+仓库里既有纯单元测试，也有依赖额外环境的测试。若要在本地尽量复现 CI 的执行环境，建议先准备以下条件。
 
-### Requirements
+### 环境要求
 
-- JDK 17 installed locally
-- Docker and Docker Compose
-- permission to edit `/etc/hosts`
-- a writable `/tmp/testcharm` directory
+- 本地安装 JDK 17
+- 安装 Docker 与 Docker Compose
+- 可以修改 `/etc/hosts`
+- 本地存在可写的 `/tmp/testcharm` 目录
 
-Although the published libraries target Java 8, the repository tests run on JDK 17 in CI, and CI also executes Java 17 module-safety checks.
+虽然发布出去的库以 Java 8 为目标版本，但仓库测试在 CI 中使用 JDK 17，并额外执行 Java 17 的模块安全检查。
 
-### Services required by the test suite
+### 测试依赖的服务
 
-`docker-compose.yml` starts the same helper services used in CI:
+`docker-compose.yml` 会启动与 CI 相同的辅助服务：
 
-- an SSH service on port `2222`
-- a Selenium Chromium service on port `4444`
-- a Playwright service on port `3000`
+- `2222` 端口上的 SSH 服务
+- `4444` 端口上的 Selenium Chromium 服务
+- `3000` 端口上的 Playwright 服务
 
-Start them with:
+启动命令：
 
 ```bash
 docker-compose up -d
 ```
 
-### hosts configuration
+### hosts 配置
 
-CI adds the following host mappings before running tests:
+CI 在运行测试前会加入以下 hosts 映射：
 
 ```bash
 echo '127.0.0.1 www.s.com' | sudo tee -a /etc/hosts
 echo '127.0.0.1 www.a.com' | sudo tee -a /etc/hosts
 ```
 
-The Java 17 module-safety tasks require at least `www.a.com`; the full build job also adds `www.s.com`.
+其中 Java 17 模块安全相关任务至少需要 `www.a.com`；完整构建任务还会加入 `www.s.com`。
 
-### A CI-like local run
+### 接近 CI 的完整运行方式
 
 ```bash
 mkdir -p /tmp/testcharm
@@ -428,15 +428,15 @@ export DAL_INSPECTOR_WAITING_TIME=30000
 ./gradlew test build --parallel
 ```
 
-### Common commands
+### 常用命令
 
-Run the full build:
+运行完整构建：
 
 ```bash
 ./gradlew build
 ```
 
-Run tests for a specific module:
+按模块运行测试：
 
 ```bash
 ./gradlew :DAL-java:test
@@ -444,14 +444,14 @@ Run tests for a specific module:
 ./gradlew :RESTful-cucumber:test
 ```
 
-Run Cucumber scenarios for a module:
+运行某个模块的 Cucumber 场景：
 
 ```bash
 ./gradlew :DAL-java:cucumber
 ./gradlew :jfactory:cucumber
 ```
 
-Run the Java 17 module-safety checks:
+运行 Java 17 模块安全检查：
 
 ```bash
 echo '127.0.0.1 www.a.com' | sudo tee -a /etc/hosts
@@ -459,9 +459,9 @@ echo '127.0.0.1 www.a.com' | sudo tee -a /etc/hosts
 ./gradlew testRequiresAddOpens
 ```
 
-## Contact
+## 联系方式
 
-If you want to learn more about a module or capability, the most direct references are still the module documentation and example tests in the repository. You can also contact the authors directly:
+如果你希望进一步了解某个模块或能力，最直接的资料仍然是仓库中的模块文档和示例测试，也可以直接联系作者：
 
 - `leeonky@gmail.com`
 - `joseph.yao.ruozhou@gmail.com`

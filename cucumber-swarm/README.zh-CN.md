@@ -1,6 +1,6 @@
 # cucumber-swarm
 
-**辅助文档：中文。英文主文档见 [README.md](README.md)。**
+[English](README.md)
 
 `cucumber-swarm` 让 Cucumber 以 **master / worker** 的方式运行。  
 它的出发点是解决这样一类端到端测试问题：希望提升执行速度，但又不能把 Cucumber 内置的多线程并发，直接施加到同一套被测系统和环境上。
