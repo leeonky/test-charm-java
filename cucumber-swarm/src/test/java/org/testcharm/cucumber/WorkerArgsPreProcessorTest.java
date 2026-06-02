@@ -1347,6 +1347,29 @@ class WorkerArgsPreProcessorTest {
                     }
                 }
             }
+
+            @Nested
+            class RemoteWorkerPlugin {
+                private final String[] argv = {"--remote-worker-launcher", "run-cucumber.sh", "--remote-options-json", "[\"--plugin\",\"pretty\"]", "features"};
+                private final ProcessedArgs master = preProcessor.process(argv, classLoader);
+
+                private final String[] remoteArgs = master.swarmArgs.getRemoteWorkerArgs(43);
+                private final ProcessedArgs remote = preProcessor.process(remoteArgs, classLoader);
+
+                @Test
+                void remote_worker_should_contains_worker_forwarding_plugin_and_pretty() {
+                    expect(remoteArgs).should("::should::not.contains: '--no-summary'");
+                    expect(remoteArgs).should(": [... '--plugin' pretty ...]");
+
+                    expect(remote.swarmArgs.getWorkerArgs()).should(": [... '--plugin' pretty '--plugin' 'org.testcharm.cucumber.swarm.WorkerForwardingPlugin' ...]");
+                    expect(remote.swarmArgs.getWorkerArgs()).should("::should::not.contains: '--no-summary'");
+
+                    expect(buildOptions(remote.swarmArgs.getWorkerArgs())).should("plugins: " +
+                            "[{pluginString: pretty}" +
+                            "{pluginString: org.testcharm.cucumber.swarm.WorkerForwardingPlugin}" +
+                            "{pluginString: io.cucumber.core.plugin.DefaultSummaryPrinter}]");
+                }
+            }
         }
     }
 

@@ -302,3 +302,43 @@ Feature: Master Worker Coordinate
         'SEVERE: Failed to POST to http://not-exist.com:20000/ready'
       ...]
       """
+# TODO need test remote stdout
+#  Scenario: pretty in remote worker
+#    Given the feature file "test.feature":
+#      """
+#      Feature: test
+#
+#        Scenario: test
+#          Given a step with implementation
+#      """
+#    Given the following class definition:
+#      """
+#      package steps;
+#      import io.cucumber.java.en.*;
+#
+#      public class Steps {
+#
+#        @Given("a step with implementation")
+#        public void a_step_with_implementation() {
+#          System.out.println("step called");
+#        }
+#      }
+#      """
+#    When run cucumber in remote mode with the following args:
+#      """
+#      '--remote-worker-count'
+#      '1'
+#      '--glue'
+#      'steps'
+#      $path + 'features'
+#      """
+#    Then the task result should be:
+#      """
+#      : {
+#        code= 0
+#        stdout.normalize= ```
+#                          1 scenario (1 passed)
+#                          1 step (1 passed)
+#                          ```
+#      }
+#      """

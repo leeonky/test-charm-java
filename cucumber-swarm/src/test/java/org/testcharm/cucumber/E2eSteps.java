@@ -170,6 +170,10 @@ public class E2eSteps {
             put("path", cucumberDirectory.root().toString() + File.separator);
         }}).forEach(e -> args.add(String.valueOf(e)));
 
+
+        remoteOptions.add("--plugin");
+        remoteOptions.add("pretty");
+
         args.addAll(asList("--remote-options-json", MessageConverterRegistry.jsonConverter().serialize(remoteOptions)));
         args.addAll(asList("--remote-worker-launcher", javaBin));
 

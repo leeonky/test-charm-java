@@ -37,6 +37,8 @@ public class WorkerArgsPreProcessor {
         List<String> targets = new ArrayList<>();
         List<Object> remoteOptions = new ArrayList<>();
 
+        List<String> additionalPlugins = new ArrayList<>();
+
         while (!args.isEmpty()) {
             String arg = args.removeFirst();
             switch (arg) {
@@ -64,6 +66,8 @@ public class WorkerArgsPreProcessor {
                     String plugin = args.removeFirst();
                     masterArgs.add(arg);
                     masterArgs.add(plugin);
+                    additionalPlugins.add(arg);
+                    additionalPlugins.add(plugin);
                     break;
                 case "--no-summary":
                     masterArgs.add(arg);
@@ -95,6 +99,7 @@ public class WorkerArgsPreProcessor {
         if (workerId != null) {
             if (swarmHostStr != null)
                 swarmHost.setHost(swarmHostStr);
+            workerArgs.addAll(0, additionalPlugins);
         } else {
             workerArgs.add(0, "--no-summary");
             if (swarmHostStr != null)

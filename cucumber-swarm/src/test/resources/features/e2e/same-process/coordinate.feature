@@ -654,3 +654,47 @@ Feature: Master Worker Coordinate
         'INFO: Master shut down'
       ...]
       """
+
+  Scenario: pretty out put
+    Given the feature file "test.feature":
+      """
+      Feature: test
+        Scenario: test
+          Given a step with implementation
+      """
+    Given the following class definition:
+      """
+      package steps;
+      import io.cucumber.java.en.*;
+
+      public class Steps {
+
+        @Given("a step with implementation")
+        public void a_step_with_implementation() {
+          System.out.println("step called");
+        }
+      }
+      """
+    When run cucumber with the following args:
+      """
+      '--glue'
+      'steps'
+      '--plugin'
+      'pretty'
+      $path + 'features'
+      """
+    Then the task result should be:
+      """
+      : {
+        code= 0
+        stdout.normalize= ```
+                          step called
+
+                          Scenario: test                       # file://$path$/features/test.feature:2
+                            ✔ Given a step with implementation # steps.Steps.a_step_with_implementation()
+
+                          1 scenarios (1 passed)
+                          1 steps (1 passed)
+                          ```
+      }
+      """
