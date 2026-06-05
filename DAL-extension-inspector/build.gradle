@@ -5,6 +5,7 @@ dependencies {
     testImplementation project(':RESTful-cucumber')
     testImplementation project(':page-flow-selenium')
     testImplementation project(':page-flow-playwright')
+    testImplementation project(':java-compiler-util')
     testImplementation libs.test.awaitility
     testImplementation libs.test.slf4j.simple
 }

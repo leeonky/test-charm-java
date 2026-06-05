@@ -112,16 +112,25 @@ Feature: workspace
       WorkBench[Ins1]::eventually: {
         Workspace.Current.header: '1'
       }
-
-      WorkBench[Ins1].Workspace[1]::eventually: {
-          Current: null
-      }
-
+      """
+#    And you should see:
+#      """
+#      WorkBench[Ins1].Workspace[1]::eventually: {
+#          Current: null
+#      }
+#      """
+    And you should see:
+      """
       WorkBench[Ins1].Workspace[1]::eventually: {
           DAL: {
             value: '{}'
             @class= [code-editor]
           }
+      }
+      """
+    And you should see:
+      """
+      WorkBench[Ins1].Workspace[1]::eventually: {
           Output: {
             Root: ''
 

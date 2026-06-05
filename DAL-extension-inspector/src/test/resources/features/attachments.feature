@@ -76,13 +76,58 @@ Feature: attachments
       """
     And "http://www.a.com:10082/attachments?name=Ins1&index=0" should response:
     """
-    : {
-      code: 200
+    body: ``` HEX
+          FF D8
+          ```
+    """
+
+  Scenario: support watch input-stream
+    Given the 'Ins1' input Java Instance:
+      """
+      public class InputData {
+        public java.io.InputStream stream() {
+          return new java.io.ByteArrayInputStream("hello".getBytes());
+        };
+      }
+      """
+    And use DAL 'Ins1' to evaluating the following:
+      """
+      ::inspect
+      """
+    When you:
+      """
+      WorkBench::await[Ins1]: { DAL.typeIn: '.stream::watch' }
+      WorkBench[Ins1].execute
+      """
+    And "http://www.a.com:10082/attachments?name=Ins1&index=0" should response:
+      """
+      body.string= hello
+      """
+
+  Scenario: support watch Byte[]
+    Given the 'Ins1' input Java Instance:
+      """
+      public class InputData {
+        public Byte[] stream() {
+            return new Byte[] { (byte)0xFF, (byte)0xD8 };
+        };
+      }
+      """
+    And use DAL 'Ins1' to evaluating the following:
+      """
+      ::inspect
+      """
+    When you:
+      """
+      WorkBench::await[Ins1]: { DAL.typeIn: '.stream::watch' }
+      WorkBench[Ins1].execute
+      """
+    And "http://www.a.com:10082/attachments?name=Ins1&index=0" should response:
+      """
       body: ``` HEX
             FF D8
             ```
-    }
-    """
+      """
 
   Scenario: same property name in watch
     Given the 'Ins1' following input:

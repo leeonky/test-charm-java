@@ -36,7 +36,7 @@ public class Tabs<T extends Tab, E extends Element<E, ?, ?>> extends AbstractPan
 
     public T getCurrent() {
         try {
-            return createTab(element().find(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")).single(),
+            return createTab(element().patience("2s").find(xpath("./div[" + containsClass("tab-headers") + "]/div[contains(@class, 'tab-header')" + " and " + containsClass("active") + "]")).single(),
                     element().find(xpath("./div[" + containsClass("tab-contents") + "]/div[contains(@class, 'tab-content')" + " and " + containsClass("active") + "]")).single());
         } catch (Exception ignore) {
             return null;

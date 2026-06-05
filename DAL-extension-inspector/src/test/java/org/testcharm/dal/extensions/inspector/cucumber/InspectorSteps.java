@@ -15,6 +15,7 @@ import org.testcharm.dal.extensions.inspector.Inspector;
 import org.testcharm.dal.extensions.inspector.InspectorExtension;
 import org.testcharm.dal.extensions.inspector.cucumber.page.MainPage;
 import org.testcharm.interpreter.InterpreterException;
+import org.testcharm.util.JavaExecutor;
 
 import java.util.HashMap;
 
@@ -129,5 +130,12 @@ public class InspectorSteps {
     @Given("the following constants for DAL {string} evaluating:")
     public void theFollowingConstantsForDALInsEvaluating(String dalIns, String constantsJson) {
         testContext.addConstants(dalIns, json(constantsJson));
+    }
+
+    @SneakyThrows
+    @Given("the {string} input Java Instance:")
+    public void theInsInputJavaInstance(String dalIns, String clazz) {
+        String type = JavaExecutor.executor().addClass(clazz);
+        testContext.addInput(dalIns, JavaExecutor.executor().classOf(type).newInstance());
     }
 }

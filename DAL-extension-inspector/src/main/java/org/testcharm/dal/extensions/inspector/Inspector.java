@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 import static java.util.Optional.ofNullable;
 import static org.testcharm.util.Sneaky.sneakyGet;
@@ -50,10 +51,7 @@ public class Inspector {
     }
 
     private Attachment responseAttachment(String name, int index) {
-        DALInstance dalInstance = dalInstances.get(name);
-        if (dalInstance == null || index < 0 || index >= dalInstance.watches.size()) {
-            return null;
-        }
+        DALInstance dalInstance = Objects.requireNonNull(dalInstances.get(name));
 
         Watch watch = dalInstance.watches.get(index);
         if (!(watch instanceof DALInstance.BinaryWatch)) {
@@ -70,21 +68,15 @@ public class Inspector {
     }
 
     public static void watch(DAL dal, String property, Data value) {
-        if (inspector != null)
-            inspector.watchInner(dal, property, value);
+        inspector.watchInner(dal, property, value);
     }
 
     private void watchInner(DAL dal, String property, Data value) {
-        if (inspector.calledFromInspector())
-            dalInstances.get(dal.getName()).watch(property, value);
+        dalInstances.get(dal.getName()).watch(property, value);
     }
 
     private void pass(String name) {
-        if (!"Try It!".equals(name)) {
-            DALInstance remove = dalInstances.remove(name);
-            if (remove != null)
-                remove.pass();
-        }
+        dalInstances.remove(name).pass();
     }
 
     private void waitForReady() {
@@ -543,16 +535,7 @@ public class Inspector {
                 return HttpResponse.text(request(request.query("name")));
             }
             if ("GET".equals(request.method) && "/attachments".equals(request.path)) {
-                int index;
-                try {
-                    index = Integer.parseInt(request.query("index"));
-                } catch (Exception e) {
-                    return HttpResponse.notFound();
-                }
-                Attachment attachment = responseAttachment(request.query("name"), index);
-                if (attachment == null) {
-                    return HttpResponse.notFound();
-                }
+                Attachment attachment = responseAttachment(request.query("name"), parseInt(request.query("index")));
                 return HttpResponse.binary(attachment.body, attachment.contentType);
             }
 
@@ -563,11 +546,7 @@ public class Inspector {
         }
 
         private HttpResponse staticResource(String path) {
-            String normalized = "/".equals(path) ? "/index.html" : path;
-            if (normalized.contains("..")) {
-                return HttpResponse.notFound();
-            }
-            String resourcePath = "/public" + normalized;
+            String resourcePath = "/public" + ("/".equals(path) ? "/index.html" : path);
             InputStream resource = Inspector.class.getResourceAsStream(resourcePath);
             if (resource == null) {
                 return HttpResponse.notFound();
@@ -828,7 +807,7 @@ public class Inspector {
             int contentLength = 0;
             if (headers.containsKey("content-length")) {
                 try {
-                    contentLength = Integer.parseInt(headers.get("content-length"));
+                    contentLength = parseInt(headers.get("content-length"));
                 } catch (NumberFormatException ignore) {
                     contentLength = 0;
                 }

@@ -34,7 +34,7 @@ public class JavaExecutor {
 
     private ExecutorMain executorMain = new ExecutorMain(this);
 
-    public void addClass(String sourceCode) {
+    public String addClass(String sourceCode) {
         sourceCode = String.join("\n", dependencies) + "\n" + sourceCode;
         String className = guessClassName(sourceCode);
         Optional<ClassDefinition> compiled = findDefinition(allCompiled, className);
@@ -47,6 +47,7 @@ public class JavaExecutor {
         } else {
             unCompiled.put(className, sourceCode);
         }
+        return className;
     }
 
     public ExecutorMain main() {

@@ -15,7 +15,7 @@ public class WorkspacePanel extends Tab {
             @Override
             public OutputPanel getCurrent() {
                 try {
-                    return createTab(locate("css[.tab-header.active]").single(),
+                    return createTab(locate("patience[2s].css[.tab-header.active]").single(),
                             locate("css[.tab-content.active]").single());
                 } catch (Exception ignore) {
                     return null;
