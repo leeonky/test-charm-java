@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import static org.testcharm.util.Sneaky.execute;
-import static org.testcharm.util.StringUtil.unCapitalize;
 
 class MethodPropertyReader<T> extends MethodPropertyAccessor<T> implements PropertyReader<T> {
     private static final int BOOLEAN_GETTER_PREFIX_LENGTH = 2;
@@ -49,7 +48,7 @@ class MethodPropertyReader<T> extends MethodPropertyAccessor<T> implements Prope
     static String propertyName(String name) {
         if (name.length() > 1 && Character.isUpperCase(name.charAt(0)) && Character.isUpperCase(name.charAt(1)))
             return name;
-        return unCapitalize(name);
+        return name.toLowerCase().charAt(0) + name.substring(1);
     }
 
     @Override

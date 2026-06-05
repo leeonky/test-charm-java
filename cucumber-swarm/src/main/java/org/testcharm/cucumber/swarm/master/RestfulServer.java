@@ -51,8 +51,6 @@ public class RestfulServer {
             else {
                 try {
                     handler.accept(restfulContext);
-                } catch (ServerCloseException e) {
-                    restfulContext.error(409);
                 } catch (NoSuchElementException e) {
                     restfulContext.error(404);
                 } catch (Exception e) {
