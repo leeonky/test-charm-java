@@ -10,6 +10,9 @@ subprojects {
     }
 
     tasks.withType(JacocoReport).configureEach { jacocoReportTask ->
+        // Include additional exec files produced by child JVMs (e.g. cucumber-swarm remote workers)
+        executionData.from(fileTree(dir: "${project.buildDir}", includes: ["jacoco/test.exec", "jacoco/test.exec.*"]))
+
         reports {
             xml.required = true
             csv.required = false

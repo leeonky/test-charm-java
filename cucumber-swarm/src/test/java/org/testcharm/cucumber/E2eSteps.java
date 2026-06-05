@@ -72,6 +72,7 @@ public class E2eSteps {
         String classpath = String.join(File.pathSeparator, System.getProperty("java.class.path").split(File.pathSeparator));
         classpath += File.pathSeparator + JavaExecutor.executor().compiler().getLocation().getAbsolutePath();
         args.add(javaBin);
+        org.testcharm.cucumber.swarm.util.JacocoAgentSupport.injectJacocoAgentIntoJavaCommand(args);
         args.add("-Djava.util.logging.config.file=" + cucumberDirectory.resolve("logging.properties").toAbsolutePath());
         if (isDebugging())
             args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
@@ -148,6 +149,8 @@ public class E2eSteps {
         args.add("-Djava.util.logging.config.file=" + cucumberDirectory.resolve("logging.properties").toAbsolutePath());
         List<String> remoteOptions = new ArrayList<>(args);
         remoteOptions.remove(0);
+        org.testcharm.cucumber.swarm.util.JacocoAgentSupport.injectJacocoAgentIntoJavaCommand(args);
+        org.testcharm.cucumber.swarm.util.JacocoAgentSupport.childProcessJacocoAgentArg().ifPresent(a -> remoteOptions.add(0, a));
         if (isDebugging()) {
             args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005");
             remoteOptions.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5006");
