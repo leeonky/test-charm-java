@@ -134,6 +134,7 @@ public class MasterCucumberExecutionContext {
         try {
             runnable.run();
         } catch (Throwable t) {
+            log.info(t, () -> "Exception thrown while executing features");
             // Collected in CucumberExecutionContext
             rethrowIfUnrecoverable(t);
         }
