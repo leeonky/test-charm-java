@@ -6,10 +6,10 @@ Feature: async
       Given the following java class:
       """
       public class Data {
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         public int getInt() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1 )
+          if(System.currentTimeMillis() - time >= 1000 )
             return 100;
            return -1;
         }
@@ -30,10 +30,10 @@ Feature: async
             Eventually.setDefaultWaitingTime(100);
         }
 
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         public int getInt() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1 )
+          if(System.currentTimeMillis() - time >= 1000 )
             return 100;
            return -1;
         }
@@ -68,10 +68,10 @@ Feature: async
       Given the following java class:
       """
       public class Data {
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         public int getInt() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 2 )
+          if(System.currentTimeMillis() - time >= 2000 )
             return 100;
            return -1;
         }
@@ -142,11 +142,11 @@ Feature: async
       Given the following java class:
       """
       public class Data implements Iterable {
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         @Override
         public Iterator iterator() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1 )
+          if(System.currentTimeMillis() - time >= 1000 )
             return Arrays.asList(100).iterator();
            return Arrays.asList().iterator();
         }
@@ -164,11 +164,11 @@ Feature: async
           public static class Data {
             public int i;
           }
-          private Instant time = Instant.now();
+          private long time = System.currentTimeMillis();
 
           public AdaptiveList<Data> getList() {
             return new StaticAdaptiveList(() -> {
-              if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1) {
+              if(System.currentTimeMillis() - time >= 1000) {
                 Data d1 = new Data();
                 d1.i = 1;
                 return new CollectionDALCollection(Arrays.asList(d1));
@@ -194,10 +194,10 @@ Feature: async
         public static class Data {
           public int i,j;
         }
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         public List<Data> getList() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1) {
+          if(System.currentTimeMillis() - time >= 1000) {
             Data d1 = new Data();
             d1.i = 1;
             d1.j = 100;
@@ -230,10 +230,10 @@ Feature: async
         public static class Data {
           public int i,j;
         }
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         public List<Data> getList() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 2) {
+          if(System.currentTimeMillis() - time >= 2000) {
             Data d1 = new Data();
             d1.i = 1;
             d1.j = 100;
@@ -269,10 +269,10 @@ Feature: async
         public static class Data {
           public int i,j;
         }
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         public List<Data> getList() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 2) {
+          if(System.currentTimeMillis() - time >= 2000) {
             Data d1 = new Data();
             d1.i = 1;
             d1.j = 100;
@@ -305,7 +305,6 @@ Feature: async
       Given the following java class:
       """
       public class Data {
-        private Instant time = Instant.now();
         private int i = 0;
 
         public int getInt() {
@@ -333,10 +332,10 @@ Feature: async
       Given the following java class:
       """
       public class Data {
-        private Instant time = Instant.now();
+        private long time = System.currentTimeMillis();
 
         public int getInt() {
-          if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1 )
+          if(System.currentTimeMillis() - time >= 1000 )
             return 100;
           throw new java.lang.RuntimeException();
         }
@@ -436,11 +435,11 @@ Feature: async
           public static class Data {
             public int i;
           }
-          private Instant time = Instant.now();
+          private long time = System.currentTimeMillis();
 
           public AdaptiveList<Data> getList() {
             return new StaticAdaptiveList(() -> {
-              if(Instant.now().getEpochSecond() - time.getEpochSecond() >= 1) {
+              if(System.currentTimeMillis() - time >= 1000) {
                 Data d1 = new Data();
                 d1.i = 1;
                 return new CollectionDALCollection(Arrays.asList(d1));
