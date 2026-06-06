@@ -237,8 +237,8 @@ class MapViewTest {
             @Test
             void set_modify_original_map() {
                 Map<String, Object> source = new LinkedHashMap<>();
-                MapView mapView = new MapView(source)
-                        .set("key", "value");
+
+                new MapView(source).set("key", "value");
 
                 expect(source).should("= {key: value}");
             }
