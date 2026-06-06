@@ -1,6 +1,5 @@
 package org.testcharm.util;
 
-import org.assertj.core.api.Java6Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -100,13 +99,18 @@ class NumberTypeTest {
 
         @Test
         void box_class() {
-            Java6Assertions.assertThat(NumberType.boxedClass(char.class)).isEqualTo(Character.class);
-            Java6Assertions.assertThat(NumberType.boxedClass(int.class)).isEqualTo(Integer.class);
-            Java6Assertions.assertThat(NumberType.boxedClass(short.class)).isEqualTo(Short.class);
-            Java6Assertions.assertThat(NumberType.boxedClass(long.class)).isEqualTo(Long.class);
-            Java6Assertions.assertThat(NumberType.boxedClass(float.class)).isEqualTo(Float.class);
-            Java6Assertions.assertThat(NumberType.boxedClass(double.class)).isEqualTo(Double.class);
-            Java6Assertions.assertThat(NumberType.boxedClass(boolean.class)).isEqualTo(Boolean.class);
+            assertThat(NumberType.boxedClass(char.class)).isEqualTo(Character.class);
+            assertThat(NumberType.boxedClass(int.class)).isEqualTo(Integer.class);
+            assertThat(NumberType.boxedClass(short.class)).isEqualTo(Short.class);
+            assertThat(NumberType.boxedClass(long.class)).isEqualTo(Long.class);
+            assertThat(NumberType.boxedClass(float.class)).isEqualTo(Float.class);
+            assertThat(NumberType.boxedClass(double.class)).isEqualTo(Double.class);
+            assertThat(NumberType.boxedClass(boolean.class)).isEqualTo(Boolean.class);
+        }
+
+        @Test
+        void box_boxed_class() {
+            assertThat(NumberType.boxedClass(Integer.class)).isEqualTo(Integer.class);
         }
     }
 
@@ -136,6 +140,32 @@ class NumberTypeTest {
             void different_type() {
                 assertSub(3, 1L, 2L);
                 assertSub(3.0, BigDecimal.valueOf(1), BigDecimal.valueOf(2.0));
+            }
+        }
+
+        @Nested
+        class Plus {
+
+            void assertPlus(Number left, Number right, Number result) {
+                assertThat(new NumberType().plus(left, right)).isEqualTo(result);
+            }
+
+            @Test
+            void same_type() {
+                assertPlus((byte) 3, (byte) 1, 4);
+                assertPlus((short) 3, (short) 1, 4);
+                assertPlus(3, 1, 4);
+                assertPlus(3L, 1L, 4L);
+                assertPlus(3f, 1f, 4f);
+                assertPlus(3d, 1d, 4d);
+                assertPlus(BigInteger.valueOf(3), BigInteger.valueOf(1), BigInteger.valueOf(4));
+                assertPlus(BigDecimal.valueOf(3), BigDecimal.valueOf(1), BigDecimal.valueOf(4));
+            }
+
+            @Test
+            void different_type() {
+                assertPlus(3, 1L, 4L);
+                assertPlus(3.0, BigDecimal.valueOf(1), BigDecimal.valueOf(4.0));
             }
         }
 
@@ -228,6 +258,22 @@ class NumberTypeTest {
             }
 
             @Test
+            void set_double_epsilon_affects_compare() {
+                NumberType numberType = new NumberType();
+                numberType.setDoubleEpsilon(0.5d);
+                // difference 0.4 < 0.5 => considered equal
+                assertCompare(numberType, 1.0, 1.4, 0);
+                // difference 0.6 > 0.5 => less than
+                assertCompare(numberType, 1.0, 1.6, -1);
+
+                numberType.setDoubleEpsilon(0.01d);
+                // difference 0.005 < 0.01 => equal
+                assertCompare(numberType, 1.0, 1.005, 0);
+                // difference 0.02 > 0.01 => less than
+                assertCompare(numberType, 1.0, 1.02, -1);
+            }
+
+            @Test
             void compare_float_with_epsilon() {
                 NumberType numberType = new NumberType();
                 assertCompare(numberType, 1.0f, 1.0f, 0);
@@ -235,6 +281,22 @@ class NumberTypeTest {
                 assertCompare(numberType, 1.0f, 1.0f - numberType.getFloatEpsilon() / 10, 0);
                 assertCompare(numberType, 1.0f, 1.0f + numberType.getFloatEpsilon() + numberType.getFloatEpsilon(), -1);
                 assertCompare(numberType, 1.0f, 1.0f - numberType.getFloatEpsilon() - numberType.getFloatEpsilon(), 1);
+            }
+
+            @Test
+            void set_float_epsilon_affects_compare() {
+                NumberType numberType = new NumberType();
+                numberType.setFloatEpsilon(0.5f);
+                // difference 0.4 < 0.5 => considered equal
+                assertCompare(numberType, 1.0f, 1.4f, 0);
+                // difference 0.6 > 0.5 => less than
+                assertCompare(numberType, 1.0f, 1.6f, -1);
+
+                numberType.setFloatEpsilon(0.01f);
+                // difference 0.005 < 0.01 => equal
+                assertCompare(numberType, 1.0f, 1.005f, 0);
+                // difference 0.02 > 0.01 => less than
+                assertCompare(numberType, 1.0f, 1.02f, -1);
             }
 
             private void assertCompare(NumberType numberType, Number left, Number right, int expected) {
@@ -1242,6 +1304,12 @@ class NumberTypeTest {
                 assertThatThrownBy(() -> numberType.convert(new BigDecimal("1.1"), BigInteger.class))
                         .hasMessageContaining("Cannot convert 1.1 to java.math.BigInteger");
             }
+
+            @Test
+            void test_coverage_big_integer() {
+                BigInteger number = new BigInteger("100");
+                assertThat(new NumberType().bigIntegerValue(number)).isSameAs(number);
+            }
         }
 
         @Nested
@@ -1281,6 +1349,12 @@ class NumberTypeTest {
 
                 assertThatThrownBy(() -> numberType.convert(1.0 / 0, BigDecimal.class))
                         .hasMessageContaining("Cannot convert Infinity to java.math.BigDecimal");
+            }
+
+            @Test
+            void test_coverage_big_decimal() {
+                BigDecimal number = new BigDecimal(100);
+                assertThat(new NumberType().bigDecimalValue(number)).isSameAs(number);
             }
         }
 

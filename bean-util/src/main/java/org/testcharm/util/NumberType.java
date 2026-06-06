@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.testcharm.util.Suppressor.assertLastEqualsCase;
 
 public class NumberType {
     private static final List<Class<?>> NUMBER_TYPES = asList(Byte.class, Short.class, Integer.class, Long.class,
@@ -39,8 +40,8 @@ public class NumberType {
                 return Float.class;
             if (source == double.class)
                 return Double.class;
-            if (source == boolean.class)
-                return Boolean.class;
+            assertLastEqualsCase(source, boolean.class);
+            return Boolean.class;
         }
         return source;
     }
@@ -63,9 +64,8 @@ public class NumberType {
             return (double) leftInSameType + (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).add((BigInteger) rightInSameType);
-        if (type.equals(BigDecimal.class))
-            return ((BigDecimal) leftInSameType).add((BigDecimal) rightInSameType);
-        throw new IllegalArgumentException("unsupported type " + type);
+        assertLastEqualsCase(type, BigDecimal.class);
+        return ((BigDecimal) leftInSameType).add((BigDecimal) rightInSameType);
     }
 
     public Number subtract(Number left, Number right) {
@@ -86,9 +86,8 @@ public class NumberType {
             return (double) leftInSameType - (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).subtract((BigInteger) rightInSameType);
-        if (type.equals(BigDecimal.class))
-            return ((BigDecimal) leftInSameType).subtract((BigDecimal) rightInSameType);
-        throw new IllegalArgumentException("unsupported type " + type);
+        assertLastEqualsCase(type, BigDecimal.class);
+        return ((BigDecimal) leftInSameType).subtract((BigDecimal) rightInSameType);
     }
 
     public Number divide(Number left, Number right) {
@@ -109,9 +108,8 @@ public class NumberType {
             return (double) leftInSameType / (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).divide((BigInteger) rightInSameType);
-        if (type.equals(BigDecimal.class))
-            return ((BigDecimal) leftInSameType).divide((BigDecimal) rightInSameType);
-        throw new IllegalArgumentException("unsupported type " + type);
+        assertLastEqualsCase(type, BigDecimal.class);
+        return ((BigDecimal) leftInSameType).divide((BigDecimal) rightInSameType);
     }
 
     public Number multiply(Number left, Number right) {
@@ -132,9 +130,8 @@ public class NumberType {
             return (double) leftInSameType * (double) rightInSameType;
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).multiply((BigInteger) rightInSameType);
-        if (type.equals(BigDecimal.class))
-            return ((BigDecimal) leftInSameType).multiply((BigDecimal) rightInSameType);
-        throw new IllegalArgumentException("unsupported type " + type);
+        assertLastEqualsCase(type, BigDecimal.class);
+        return ((BigDecimal) leftInSameType).multiply((BigDecimal) rightInSameType);
     }
 
     public int compare(Number left, Number right) {
@@ -151,25 +148,24 @@ public class NumberType {
             return Long.compare((long) leftInSameType, (long) rightInSameType);
         if (type.equals(Float.class)) {
             float sub = (float) leftInSameType - (float) rightInSameType;
-            if (sub > floatEpsilon)
+            if (sub > getFloatEpsilon())
                 return 1;
-            if (sub < -floatEpsilon)
+            if (sub < -getFloatEpsilon())
                 return -1;
             return 0;
         }
         if (type.equals(Double.class)) {
             double sub = (double) leftInSameType - (double) rightInSameType;
-            if (sub > doubleEpsilon)
+            if (sub > getDoubleEpsilon())
                 return 1;
-            if (sub < -doubleEpsilon)
+            if (sub < -getDoubleEpsilon())
                 return -1;
             return 0;
         }
         if (type.equals(BigInteger.class))
             return ((BigInteger) leftInSameType).compareTo((BigInteger) rightInSameType);
-        if (type.equals(BigDecimal.class))
-            return ((BigDecimal) leftInSameType).compareTo((BigDecimal) rightInSameType);
-        throw new IllegalArgumentException("unsupported type " + type);
+        assertLastEqualsCase(type, BigDecimal.class);
+        return ((BigDecimal) leftInSameType).compareTo((BigDecimal) rightInSameType);
     }
 
     public Number negate(Number left) {
@@ -188,9 +184,8 @@ public class NumberType {
             return -(double) left;
         if (type.equals(BigInteger.class))
             return ((BigInteger) left).negate();
-        if (type.equals(BigDecimal.class))
-            return ((BigDecimal) left).negate();
-        throw new IllegalArgumentException("unsupported type " + type);
+        assertLastEqualsCase(type, BigDecimal.class);
+        return ((BigDecimal) left).negate();
     }
 
     public double getDoubleEpsilon() {
@@ -236,13 +231,13 @@ public class NumberType {
     }
 
     public BigDecimal bigDecimalValue(Number number) {
+        if (number instanceof BigDecimal)
+            return (BigDecimal) number;
         if (number instanceof Byte
                 || number instanceof Short
                 || number instanceof Integer
                 || number instanceof Long)
             return BigDecimal.valueOf(number.longValue());
-        if (number instanceof BigDecimal)
-            return (BigDecimal) number;
         if (number instanceof BigInteger)
             return new BigDecimal((BigInteger) number);
         if (number instanceof Float && Float.isFinite(number.floatValue()))
