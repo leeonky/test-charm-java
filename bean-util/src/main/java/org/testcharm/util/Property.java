@@ -43,38 +43,4 @@ public interface Property<T> {
     default <P> P getValue(T instance) {
         return (P) getReader().getValue(instance);
     }
-
-    default Property<T> decorateReaderType(BeanClass<?> newType) {
-        PropertyReader<T> reader = getReader();
-        if (reader.getType().equals(newType))
-            return this;
-        Class<?> type = reader.getOriginType().getType();
-        if (newType.isInheritedFrom(type))
-            return new PropertyDecorator<T>(this) {
-                @Override
-                public PropertyReader<T> getReader() {
-                    return reader.decorateType(newType);
-                }
-            };
-        throw new IllegalStateException("Type " + newType.getType() + " is not inherited from " + type);
-    }
-
-    default Property<T> decorateWriterType(BeanClass<?> newType) {
-        PropertyWriter<T> writer = getWriter();
-        if (writer.getType().equals(newType))
-            return this;
-        Class<?> type = writer.getOriginType().getType();
-        if (newType.isInheritedFrom(type))
-            return new PropertyDecorator<T>(this) {
-                @Override
-                public PropertyWriter<T> getWriter() {
-                    return writer.decorateType(newType);
-                }
-            };
-        throw new IllegalStateException("Type " + newType.getType() + " is not inherited from " + type);
-    }
-
-    default Property<T> decorateType(BeanClass<?> newType) {
-        return decorateWriterType(newType).decorateReaderType(newType);
-    }
 }
