@@ -2,20 +2,24 @@ package org.testcharm.util.property;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.testcharm.util.AnnotationGetter;
-import org.testcharm.util.Attr;
-import org.testcharm.util.BeanClass;
+import org.testcharm.util.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.testcharm.util.BeanClass.create;
 import static org.testcharm.util.BeanClass.createFrom;
 
 public class PropertyReaderTest {
     private static final int ANY_INT = 100;
-    private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = BeanClass.create(BeanWithPubField.class);
+    private BeanClass<BeanWithPubField> beanWithPubFieldBeanClass = create(BeanWithPubField.class);
 
     public interface Interface {
         void setValue(String value);
@@ -25,6 +29,10 @@ public class PropertyReaderTest {
 
     public interface InterfaceLambda {
         String getValue();
+    }
+
+    public static class Bean {
+        public int i;
     }
 
     public static class BeanWithPubField {
@@ -163,6 +171,113 @@ public class PropertyReaderTest {
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("field3").getAnnotation(Attr.class)).isNull();
             assertThat(beanWithPubFieldBeanClass.getPropertyReader("field3").annotation(Attr.class)).isEmpty();
             AnnotationGetter.setAnnotationGetter(new AnnotationGetter());
+        }
+    }
+
+    @Nested
+    class Decorator {
+        PropertyReader<?> reader = mock(PropertyReader.class);
+        PropertyReaderDecorator<?> decorator = new PropertyReaderDecorator<>(reader);
+
+        @Nested
+        class Forwarding {
+            @Test
+            void should_forward_get_name() {
+                when(reader.getName()).thenReturn("propertyName");
+
+                assertEquals("propertyName", decorator.getName());
+            }
+
+            @Test
+            void should_forward_get_annotation() {
+                Attr annotation = mock(Attr.class);
+                when(reader.getAnnotation(Attr.class)).thenReturn(annotation);
+
+                assertEquals(annotation, decorator.getAnnotation(Attr.class));
+            }
+
+            @Test
+            void should_forward_isBeanProperty() {
+                when(reader.isBeanProperty()).thenReturn(true);
+
+                assertThat(decorator.isBeanProperty()).isTrue();
+            }
+
+            @Test
+            void should_forward_getBeanType() {
+                BeanClass<?> beanType = create(String.class);
+                when(reader.getBeanType()).thenReturn(Sneaky.cast(beanType));
+
+                assertEquals(beanType, decorator.getBeanType());
+            }
+
+            @Test
+            void should_forward_getGenericType() {
+                Type genericType = mock(Type.class);
+                when(reader.getGenericType()).thenReturn(genericType);
+
+                assertEquals(genericType, decorator.getGenericType());
+            }
+
+            @Test
+            void should_forward_getOriginType() {
+                BeanClass<?> originType = create(String.class);
+                when(reader.getOriginType()).thenReturn(Sneaky.cast(originType));
+
+                assertEquals(originType, decorator.getOriginType());
+            }
+
+            @Test
+            void should_forwarding_getValue() {
+                Object value = new Object();
+                when(reader.getValue(any())).thenReturn(value);
+                Object instance = new Object();
+
+                assertEquals(value, decorator.getValue(Sneaky.cast(instance)));
+
+                verify(reader).getValue(Sneaky.cast(instance));
+            }
+
+            @Test
+            void should_forwarding_getPropertyChainReader() {
+                PropertyReader<?> chainReader = mock(PropertyReader.class);
+                when(reader.getPropertyChainReader(any())).thenReturn(Sneaky.cast(chainReader));
+
+                List<Object> chain = new ArrayList<>();
+
+                assertEquals(chainReader, decorator.getPropertyChainReader(chain));
+
+                verify(reader).getPropertyChainReader(chain);
+            }
+        }
+
+        @Nested
+        class Overriding {
+
+            @Test
+            void getType_should_return_from_self_getGenericType() {
+                when(reader.getType()).thenThrow(new RuntimeException());
+
+                Type genericType = new ArrayList<String>() {
+                }.getClass().getGenericSuperclass();
+                when(reader.getGenericType()).thenReturn(genericType);
+
+                assertEquals(genericType, decorator.getType().getGenericType());
+            }
+
+            @Test
+            void tryConvert_should_use_self_getType() {
+                when(reader.getType()).thenReturn(Sneaky.cast(create(Long.class)));
+
+                PropertyReaderDecorator<?> decorator = new PropertyReaderDecorator(reader) {
+                    @Override
+                    public BeanClass getType() {
+                        return create(Integer.class);
+                    }
+                };
+
+                assertEquals(100, decorator.tryConvert("100"));
+            }
         }
     }
 }

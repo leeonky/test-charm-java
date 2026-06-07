@@ -2,14 +2,18 @@ package org.testcharm.util.property;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.testcharm.util.Attr;
-import org.testcharm.util.BeanClass;
+import org.testcharm.util.*;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testcharm.util.BeanClass.create;
 import static org.testcharm.util.BeanClass.createFrom;
 
@@ -208,6 +212,160 @@ public class PropertyWriterTest {
             assertThat(genericType.getType()).isEqualTo(List.class);
 
             assertThat(genericType.getTypeArguments(0).get().getType()).isEqualTo(Long.class);
+        }
+    }
+
+    @Nested
+    class Decorator {
+        PropertyWriter<?> writer = mock(PropertyWriter.class);
+        PropertyWriterDecorator<?> decorator = new PropertyWriterDecorator<>(writer);
+
+        @Nested
+        class Forwarding {
+            @Test
+            void should_forward_get_name() {
+                when(writer.getName()).thenReturn("propertyName");
+
+                assertEquals("propertyName", decorator.getName());
+            }
+
+            @Test
+            void should_forward_get_annotation() {
+                Attr annotation = mock(Attr.class);
+                when(writer.getAnnotation(Attr.class)).thenReturn(annotation);
+
+                assertEquals(annotation, decorator.getAnnotation(Attr.class));
+            }
+
+            @Test
+            void should_forward_isBeanProperty() {
+                when(writer.isBeanProperty()).thenReturn(true);
+
+                assertThat(decorator.isBeanProperty()).isTrue();
+            }
+
+            @Test
+            void should_forward_getBeanType() {
+                BeanClass<?> beanType = create(String.class);
+                when(writer.getBeanType()).thenReturn(Sneaky.cast(beanType));
+
+                assertEquals(beanType, decorator.getBeanType());
+            }
+
+            @Test
+            void should_forward_getGenericType() {
+                Type genericType = mock(Type.class);
+                when(writer.getGenericType()).thenReturn(genericType);
+
+                assertEquals(genericType, decorator.getGenericType());
+            }
+
+            @Test
+            void should_forward_getOriginType() {
+                BeanClass<?> originType = create(String.class);
+                when(writer.getOriginType()).thenReturn(Sneaky.cast(originType));
+
+                assertEquals(originType, decorator.getOriginType());
+            }
+        }
+
+        @Nested
+        class Overriding {
+
+            @Test
+            void getType_should_return_from_self_getGenericType() {
+                when(writer.getType()).thenThrow(new RuntimeException());
+
+                Type genericType = new ArrayList<String>() {
+                }.getClass().getGenericSuperclass();
+                when(writer.getGenericType()).thenReturn(genericType);
+
+                assertEquals(genericType, decorator.getType().getGenericType());
+            }
+
+            @Test
+            void tryConvert_should_use_self_getType() {
+                when(writer.getType()).thenReturn(Sneaky.cast(BeanClass.create(Long.class)));
+
+                PropertyWriterDecorator<?> decorator = new PropertyWriterDecorator(writer) {
+                    @Override
+                    public BeanClass getType() {
+                        return BeanClass.create(Integer.class);
+                    }
+                };
+
+                assertEquals(100, decorator.tryConvert("100"));
+            }
+        }
+
+        @Nested
+        class SetValue {
+
+            @Test
+            void set_value_from_decorator_writer() {
+                Bean bean = new Bean();
+                PropertyWriter<Bean> writer = create(Bean.class).getPropertyWriter("i");
+                PropertyWriterDecorator<Bean> decorator = new PropertyWriterDecorator<>(writer);
+
+                decorator.setValue(bean, 100);
+
+                assertThat(bean.i).isEqualTo(100);
+            }
+
+            @Test
+            void set_value_via_self_tryConvert() {
+                Bean bean = new Bean();
+                PropertyWriter<Bean> writer = create(Bean.class).getPropertyWriter("i");
+                PropertyWriterDecorator<Bean> decorator = new PropertyWriterDecorator(writer) {
+                    @Override
+                    public Object tryConvert(Object value) {
+                        return (int) value + 100;
+                    }
+                };
+
+                decorator.setValue(bean, 100);
+
+                assertThat(bean.i).isEqualTo(200);
+            }
+
+            @Test
+            void forwarding_CannotSetElementByIndexException() {
+                PropertyWriter<Bean> writer = create(Bean.class).getPropertyWriter("i");
+                CannotSetElementByIndexException cannotSetElementByIndexException = new CannotSetElementByIndexException(Object.class);
+                PropertyWriterDecorator<?> decorator = new PropertyWriterDecorator(writer) {
+                    @Override
+                    public BiConsumer setter() {
+                        return (o, o2) -> {
+                            throw cannotSetElementByIndexException;
+                        };
+                    }
+                };
+
+                CannotSetElementByIndexException thrown = assertThrows(CannotSetElementByIndexException.class, () ->
+                        decorator.setValue(Sneaky.cast(new Object()), new Object()));
+
+                assertEquals(cannotSetElementByIndexException, thrown);
+            }
+
+            @Test
+            void forwarding_IllegalArgumentException() {
+                PropertyWriter<Bean> writer = create(Bean.class).getPropertyWriter("i");
+                IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
+                PropertyWriterDecorator<Bean> decorator = new PropertyWriterDecorator<Bean>(writer) {
+                    @Override
+                    public BiConsumer<Bean, Object> setter() {
+                        return (o, o2) -> {
+                            throw illegalArgumentException;
+                        };
+                    }
+                };
+
+                IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
+                        decorator.setValue(new Bean(), 100));
+
+                assertEquals(illegalArgumentException, thrown.getCause());
+                assertEquals("Can not set java.lang.Integer[100] to property org.testcharm.util.property.PropertyWriterTest$Bean.i<int>", thrown.getMessage());
+            }
         }
     }
 }

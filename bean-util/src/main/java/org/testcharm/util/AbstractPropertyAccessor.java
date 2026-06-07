@@ -7,6 +7,10 @@ abstract class AbstractPropertyAccessor<T> implements PropertyAccessor<T> {
         this.beanClass = beanClass;
     }
 
+    static String propertyNameInChain(PropertyAccessor<?> accessor) {
+        return accessor.getBeanType().isCollection() ? "[" + accessor.getName() + "]" : "." + accessor.getName();
+    }
+
     @Override
     public Object tryConvert(Object value) {
         return BeanClass.getConverter().tryConvert(getType().getType(), value);
