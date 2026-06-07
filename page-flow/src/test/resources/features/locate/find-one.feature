@@ -280,7 +280,7 @@ Feature: locating
         """
       When try to find element via driver <driver>:
         """
-        (patience[100ms].css[.target]::filter: {text= unexpected}).text
+        (patience[200ms].css[.target]::filter: {text= unexpected}).text
         """
       Then failed with:
         """
@@ -361,7 +361,7 @@ Feature: locating
         """
       When try to find element via driver <driver>:
         """
-        patience[100ms].css[.target]!: world
+        patience[200ms].css[.target]!: world
         """
       Then failed with:
         """
@@ -432,7 +432,7 @@ Feature: locating
         """
       Then page in driver <driver> should:
         """
-        (patience[100ms].css[.target] + patience[1s].css[.any-not-exist]).text= hello
+        (patience[200ms].css[.target] + patience[1s].css[.any-not-exist]).text= hello
         """
       Examples:
         | driver     |
