@@ -468,8 +468,14 @@ echo '127.0.0.1 www.a.com' | sudo tee -a /etc/hosts
 
 ## 第三方开源声明
 
-- `bean-util` 将 `org.json`（JSON-java）做了 shaded 处理并重定位到 `org.testcharm.shaded.org.json`；详见 `bean-util/src/main/resources/META-INF/NOTICE` 和 `bean-util/src/main/resources/META-INF/LICENSE-THIRD-PARTY`。
-- `cucumber-swarm` 包含复制自 `cucumber-core` 并在本地修改后的源码。
+本仓库包含第三方软件及第三方源码改造，相关版权声明与许可证文本已按模块保留在源码树与产物中：
+
+| 组件 | 使用方式 | 许可证 | 合规文件 |
+| --- | --- | --- | --- |
+| `bean-util` | 将 `org.json`（JSON-java）shaded 并重定位到 `org.testcharm.shaded.org.json` | JSON License | `bean-util/src/main/resources/META-INF/NOTICE`、`bean-util/src/main/resources/META-INF/LICENSE-THIRD-PARTY` |
+| `cucumber-swarm` | 基于 `io.cucumber:cucumber-core` 的源码改造（`io/cucumber/core/**`） | Apache License 2.0 | `cucumber-swarm/src/main/resources/META-INF/NOTICE`、`cucumber-swarm/src/main/resources/META-INF/LICENSE-THIRD-PARTY` |
+
+仓库级汇总请见 [NOTICE](NOTICE)。
 
 ## License
 

@@ -128,7 +128,8 @@ String name = (String) customerType.getPropertyValue(order.getCustomer(), "name"
 
 ## 第三方开源声明
 
-`bean-util` 将 `org.json`（JSON-java）做了 shaded 处理并重定位到 `org.testcharm.shaded.org.json`。随包提供的声明文件位于：
+`bean-util` 通过 shaded + relocation 的方式引入了 `org.json`（JSON-java，重定位包名为 `org.testcharm.shaded.org.json`）。
+原始版权声明与完整许可证文本已随包保留在：
 
 - [`src/main/resources/META-INF/NOTICE`](src/main/resources/META-INF/NOTICE)
 - [`src/main/resources/META-INF/LICENSE-THIRD-PARTY`](src/main/resources/META-INF/LICENSE-THIRD-PARTY)

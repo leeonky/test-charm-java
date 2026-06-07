@@ -128,7 +128,8 @@ If you want to see the exact behavior in the repository, these files are the mos
 
 ## Third-party notices
 
-`bean-util` shades `org.json` (JSON-java) into `org.testcharm.shaded.org.json`. The bundled notices are in:
+`bean-util` includes `org.json` (JSON-java) via shading and relocation (`org.testcharm.shaded.org.json`).
+The original copyright notice and full license text are bundled in:
 
 - [`src/main/resources/META-INF/NOTICE`](src/main/resources/META-INF/NOTICE)
 - [`src/main/resources/META-INF/LICENSE-THIRD-PARTY`](src/main/resources/META-INF/LICENSE-THIRD-PARTY)

@@ -1,0 +1,15 @@
+Test Charm - cucumber-swarm
+Copyright 2024 Test Charm Contributors
+
+This product includes software derived from cucumber-core.
+
+Component:
+  io.cucumber:cucumber-core (version 7.30.0)
+  Copyright (c) Cucumber contributors
+  License: Apache License, Version 2.0
+  License URL: https://www.apache.org/licenses/LICENSE-2.0
+
+Scope of adaptation in this module:
+  Source files under src/main/java/io/cucumber/core/**
+  are adapted from cucumber-core and modified by
+  Test Charm Contributors for the master/worker swarm execution model.

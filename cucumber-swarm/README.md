@@ -329,5 +329,10 @@ consuming the aggregated master-side run.
 
 ## Third-party notices
 
-Some source files in `cucumber-swarm` were copied from `cucumber-core` and modified locally (Apache License 2.0). See
-the individual source headers and the upstream Cucumber project for the original implementation.
+`cucumber-swarm` contains source code adapted from `io.cucumber:cucumber-core` (Apache License 2.0), mainly under
+`src/main/java/io/cucumber/core/**`.
+
+The third-party attribution and full license text are retained in:
+
+- [`src/main/resources/META-INF/NOTICE`](src/main/resources/META-INF/NOTICE)
+- [`src/main/resources/META-INF/LICENSE-THIRD-PARTY`](src/main/resources/META-INF/LICENSE-THIRD-PARTY)

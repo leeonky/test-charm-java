@@ -468,8 +468,15 @@ If you want to learn more about a module or capability, the most direct referenc
 
 ## Third-party notices
 
-- `bean-util` shades `org.json` (JSON-java) into `org.testcharm.shaded.org.json`; see `bean-util/src/main/resources/META-INF/NOTICE` and `bean-util/src/main/resources/META-INF/LICENSE-THIRD-PARTY`.
-- `cucumber-swarm` includes source code copied from `cucumber-core` and modified locally.
+This repository includes third-party software and source code adaptations. Copyright and license texts are retained in
+the corresponding module artifacts and source tree:
+
+| Component | Type | License | Compliance files |
+| --- | --- | --- | --- |
+| `bean-util` | `org.json` (JSON-java) shaded and relocated to `org.testcharm.shaded.org.json` | JSON License | `bean-util/src/main/resources/META-INF/NOTICE`, `bean-util/src/main/resources/META-INF/LICENSE-THIRD-PARTY` |
+| `cucumber-swarm` | Source code adapted from `io.cucumber:cucumber-core` (`io/cucumber/core/**`) | Apache License 2.0 | `cucumber-swarm/src/main/resources/META-INF/NOTICE`, `cucumber-swarm/src/main/resources/META-INF/LICENSE-THIRD-PARTY` |
+
+For a repository-level summary, see [NOTICE](NOTICE).
 
 ## License
 

@@ -1,0 +1,19 @@
+Test Charm for Java
+Copyright 2024 Test Charm Contributors
+
+This repository includes third-party software and source adaptations.
+The corresponding notices and license texts are retained as follows:
+
+1) bean-util
+   - Includes org.json (JSON-java), shaded and relocated to
+     org.testcharm.shaded.org.json.
+   - See:
+     bean-util/src/main/resources/META-INF/NOTICE
+     bean-util/src/main/resources/META-INF/LICENSE-THIRD-PARTY
+
+2) cucumber-swarm
+   - Includes source code adapted from io.cucumber:cucumber-core
+     (notably src/main/java/io/cucumber/core/**).
+   - See:
+     cucumber-swarm/src/main/resources/META-INF/NOTICE
+     cucumber-swarm/src/main/resources/META-INF/LICENSE-THIRD-PARTY
