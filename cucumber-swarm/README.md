@@ -326,3 +326,8 @@ under:
 
 Most users will not need these APIs, but they are relevant if you are extending swarm-aware behavior rather than only
 consuming the aggregated master-side run.
+
+## Third-party notices
+
+Some source files in `cucumber-swarm` were copied from `cucumber-core` and modified locally (Apache License 2.0). See
+the individual source headers and the upstream Cucumber project for the original implementation.

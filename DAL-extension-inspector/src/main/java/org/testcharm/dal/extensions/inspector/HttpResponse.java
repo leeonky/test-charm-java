@@ -1,13 +1,11 @@
 package org.testcharm.dal.extensions.inspector;
 
-import javax.annotation.Generated;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-@Generated("AI generated")
 class HttpResponse {
     private final int code;
     private final String status;

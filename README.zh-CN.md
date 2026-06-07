@@ -466,6 +466,11 @@ echo '127.0.0.1 www.a.com' | sudo tee -a /etc/hosts
 - `leeonky@gmail.com`
 - `joseph.yao.ruozhou@gmail.com`
 
+## 第三方开源声明
+
+- `bean-util` 将 `org.json`（JSON-java）做了 shaded 处理并重定位到 `org.testcharm.shaded.org.json`；详见 `bean-util/src/main/resources/META-INF/NOTICE` 和 `bean-util/src/main/resources/META-INF/LICENSE-THIRD-PARTY`。
+- `cucumber-swarm` 包含复制自 `cucumber-core` 并在本地修改后的源码。
+
 ## License
 
 [Apache License 2.0](LICENSE)

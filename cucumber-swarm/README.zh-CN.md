@@ -307,3 +307,7 @@ master 会把这些信息重新组装成聚合后的运行对象，以便：
 - `org.testcharm.extensions.cucumber`
 
 大多数使用者并不需要直接使用这些 API；但如果你要做的是“扩展 swarm 感知能力”，而不只是消费 master 侧聚合结果，它们就会有意义。
+
+## 第三方开源声明
+
+`cucumber-swarm` 中部分源码复制自 `cucumber-core` 并在本地修改（Apache License 2.0）。原始实现和许可信息请参考对应源码头部注释及上游 Cucumber 项目。

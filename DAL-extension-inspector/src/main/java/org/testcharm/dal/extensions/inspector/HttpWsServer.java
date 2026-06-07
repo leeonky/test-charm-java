@@ -2,7 +2,6 @@ package org.testcharm.dal.extensions.inspector;
 
 import org.testcharm.util.Sneaky;
 
-import javax.annotation.Generated;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -12,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-@Generated("AI generated")
 class HttpWsServer {
     void defaultGetHandler(Function<HttpRequest, HttpResponse> handler) {
         defaultHandler(request -> "GET".equals(request.method())

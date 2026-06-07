@@ -26,9 +26,6 @@ import static io.cucumber.core.runtime.SynchronizedEventBus.synchronize;
 import static java.util.Collections.emptyList;
 import static org.testcharm.cucumber.swarm.worker.Remote.REMOTE;
 
-/**
- * This is the main entry point for running Cucumber features from the CLI.
- */
 public final class WorkerRuntime {
 
     private static final Logger log = LoggerFactory.getLogger(WorkerRuntime.class);

@@ -1,3 +1,8 @@
+ext.jacocoExcludes = [
+        'io/cucumber/core/runtime/**',
+        'io/cucumber/core/runner/**',
+]
+
 dependencies {
     implementation project(":bean-util")
     implementation libs.prod.cucumber.core

@@ -2,7 +2,6 @@ package org.testcharm.dal.extensions.inspector;
 
 import org.testcharm.util.Sneaky;
 
-import javax.annotation.Generated;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.util.*;
 
 import static java.lang.Integer.parseInt;
 
-@Generated("AI generated")
 class HttpRequest {
     private final String method;
     private final String path;

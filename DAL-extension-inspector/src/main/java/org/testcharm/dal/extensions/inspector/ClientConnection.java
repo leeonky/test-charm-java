@@ -2,7 +2,6 @@ package org.testcharm.dal.extensions.inspector;
 
 import org.testcharm.util.Sneaky;
 
-import javax.annotation.Generated;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +9,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
-@Generated("AI generated")
 class ClientConnection {
     private final String sessionId;
     private final Socket socket;

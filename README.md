@@ -466,6 +466,11 @@ If you want to learn more about a module or capability, the most direct referenc
 - `leeonky@gmail.com`
 - `joseph.yao.ruozhou@gmail.com`
 
+## Third-party notices
+
+- `bean-util` shades `org.json` (JSON-java) into `org.testcharm.shaded.org.json`; see `bean-util/src/main/resources/META-INF/NOTICE` and `bean-util/src/main/resources/META-INF/LICENSE-THIRD-PARTY`.
+- `cucumber-swarm` includes source code copied from `cucumber-core` and modified locally.
+
 ## License
 
 [Apache License 2.0](LICENSE)

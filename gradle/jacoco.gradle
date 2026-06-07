@@ -13,6 +13,14 @@ subprojects {
         // Include additional exec files produced by child JVMs (e.g. cucumber-swarm remote workers)
         executionData.from(fileTree(dir: "${project.buildDir}", includes: ["jacoco/test.exec", "jacoco/test.exec.*"]))
 
+        def excludes = project.ext.has('jacocoExcludes') ? project.ext.jacocoExcludes : []
+        if (!excludes.isEmpty()) {
+            def filteredClassDirs = files(jacocoReportTask.classDirectories.files.collect { dir ->
+                fileTree(dir: dir, excludes: excludes)
+            })
+            jacocoReportTask.classDirectories.setFrom(filteredClassDirs)
+        }
+
         reports {
             xml.required = true
             csv.required = false
@@ -32,18 +40,15 @@ tasks.register('jacocoRootReport', JacocoReport) {
     }).filter { it.exists() }
 
     def allSourceDirs = files(subprojects.collect { it.sourceSets.main.allSource.srcDirs })
-    def allClassDirs = files(subprojects.collect { it.sourceSets.main.output })
-
-    def excludes = [
-            'org/testcharm/dal/extensions/basic/string/jsonsource/**'
-    ]
-
     executionData.from(execFiles)
     additionalSourceDirs.from(allSourceDirs)
     sourceDirectories.from(allSourceDirs)
 
-    def filteredClassDirs = files(allClassDirs.files.collect { dir ->
-        fileTree(dir: dir, excludes: excludes)
+    def filteredClassDirs = files(subprojects.collectMany { subproject ->
+        def excludes = subproject.ext.has('jacocoExcludes') ? subproject.ext.jacocoExcludes : []
+        subproject.sourceSets.main.output.classesDirs.files.collect { dir ->
+            fileTree(dir: dir, excludes: excludes)
+        }
     })
 
     classDirectories.from(filteredClassDirs)

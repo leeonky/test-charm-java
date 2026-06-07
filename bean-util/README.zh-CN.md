@@ -125,3 +125,10 @@ String name = (String) customerType.getPropertyValue(order.getCustomer(), "name"
 
 - [DAL-java](../DAL-java/README.zh-CN.md)：在这里的 bean 规则之上构建完整的数据语言。
 - [jfactory](../jfactory/README.zh-CN.md)：用同一套属性模型去创建和填充数据。
+
+## 第三方开源声明
+
+`bean-util` 将 `org.json`（JSON-java）做了 shaded 处理并重定位到 `org.testcharm.shaded.org.json`。随包提供的声明文件位于：
+
+- [`src/main/resources/META-INF/NOTICE`](src/main/resources/META-INF/NOTICE)
+- [`src/main/resources/META-INF/LICENSE-THIRD-PARTY`](src/main/resources/META-INF/LICENSE-THIRD-PARTY)

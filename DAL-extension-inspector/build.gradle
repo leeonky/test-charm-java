@@ -1,3 +1,10 @@
+ext.jacocoExcludes = [
+        'org/testcharm/dal/extensions/inspector/ClientConnection.class',
+        'org/testcharm/dal/extensions/inspector/HttpRequest.class',
+        'org/testcharm/dal/extensions/inspector/HttpResponse.class',
+        'org/testcharm/dal/extensions/inspector/HttpWsServer.class',
+]
+
 dependencies {
     implementation project(':DAL-java')
 

@@ -125,3 +125,10 @@ If you want to see the exact behavior in the repository, these files are the mos
 
 - [DAL-java](../DAL-java/README.md): builds a full data language on top of these bean rules.
 - [jfactory](../jfactory/README.md): uses the same property model to create and populate data.
+
+## Third-party notices
+
+`bean-util` shades `org.json` (JSON-java) into `org.testcharm.shaded.org.json`. The bundled notices are in:
+
+- [`src/main/resources/META-INF/NOTICE`](src/main/resources/META-INF/NOTICE)
+- [`src/main/resources/META-INF/LICENSE-THIRD-PARTY`](src/main/resources/META-INF/LICENSE-THIRD-PARTY)

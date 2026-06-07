@@ -30,9 +30,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
-/**
- * This is the main entry point for running Cucumber features from the CLI.
- */
 public final class MasterRuntime {
     private static final Logger log = LoggerFactory.getLogger(MasterRuntime.class);
 
