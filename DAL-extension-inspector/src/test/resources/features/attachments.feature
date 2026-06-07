@@ -52,7 +52,7 @@ Feature: attachments
   Scenario: support watch binary as image
     Given the 'Ins1' binary input:
       """
-      FF D8
+      FF D8 FF E0 EE
       """
     And use DAL 'Ins1' to evaluating the following:
       """
@@ -75,11 +75,17 @@ Feature: attachments
       }
       """
     And "http://www.a.com:10082/attachments?name=Ins1&index=0" should response:
-    """
-    body: ``` HEX
-          FF D8
-          ```
-    """
+      """
+      : {
+        headers: {
+          'Content-Type': 'image/jpeg'
+        }
+
+        body: ``` HEX
+              FF D8 FF E0 EE
+              ```
+      }
+      """
 
   Scenario: support watch input-stream
     Given the 'Ins1' input Java Instance:
@@ -109,7 +115,7 @@ Feature: attachments
       """
       public class InputData {
         public Byte[] stream() {
-            return new Byte[] { (byte)0xFF, (byte)0xD8 };
+            return new Byte[] { (byte)0x01, (byte)0x02 };
         };
       }
       """
@@ -125,7 +131,7 @@ Feature: attachments
     And "http://www.a.com:10082/attachments?name=Ins1&index=0" should response:
       """
       body: ``` HEX
-            FF D8
+            01 02
             ```
       """
 

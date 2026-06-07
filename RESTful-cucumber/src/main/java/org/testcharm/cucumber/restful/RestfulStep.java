@@ -563,6 +563,7 @@ public class RestfulStep {
         public final int code;
         public final byte[] body;
         public final HttpURLConnection raw;
+        private Map<String, Object> headers;
 
         public Response(HttpURLConnection connection) {
             raw = connection;
@@ -572,9 +573,12 @@ public class RestfulStep {
         }
 
         public Map<String, Object> getHeaders() {
-            return raw.getHeaderFields().entrySet().stream()
-                    .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue() != null && entry.getValue().size() == 1 ? entry.getValue().get(0) : entry.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            if (headers == null)
+                headers = raw.getHeaderFields().entrySet().stream()
+                        .filter(entry -> entry.getKey() != null)
+                        .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue() != null && entry.getValue().size() == 1 ? entry.getValue().get(0) : entry.getValue()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            return headers;
         }
 
         public String fileName() {
