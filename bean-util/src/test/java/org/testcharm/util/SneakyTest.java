@@ -7,6 +7,7 @@ import java.util.function.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SneakyTest {
 
@@ -22,7 +23,6 @@ class SneakyTest {
             throw exception;
         }))).isEqualTo(exception);
     }
-
 
     private boolean called = false;
 
@@ -47,6 +47,20 @@ class SneakyTest {
         assertThat(assertThrows(Exception.class, () -> Sneaky.execute(() -> {
             throw new InvocationTargetException(exception);
         }))).isEqualTo(exception);
+    }
+
+    @Test
+    void execute_throw_exception() {
+        Exception exception = new Exception();
+        assertThat(assertThrows(Exception.class, () -> Sneaky.execute(() -> {
+            throw exception;
+        }))).isEqualTo(exception);
+    }
+
+    @Test
+    void execute_throwable_run() {
+        Sneaky.executeVoid(() -> called = true);
+        assertTrue(called);
     }
 
     @Test

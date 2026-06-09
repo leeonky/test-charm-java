@@ -80,7 +80,7 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
     T parent(T parent);
 
     default Object value() {
-        throw new IllegalStateException("Not support operation");
+        throw new UnsupportedOperationException("Not support operation");
     }
 
     byte[] screenshot();
@@ -147,7 +147,7 @@ public interface Element<T extends Element<T, E, P>, E, P extends PageFlow> {
     }
 
     default void should(String expression, Object constants) {
-        expect(this).constants(constants).should(expression);
+        expect(this).use(pageFlow().dal()).constants(constants).should(expression);
     }
 
     boolean isVisible();

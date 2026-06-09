@@ -66,7 +66,7 @@ public interface Panel<E extends Element<E, ?, ?>> {
     }
 
     default void should(String expression, Object constants) {
-        expect(this).constants(constants).should(expression);
+        expect(this).use(element().pageFlow().dal()).constants(constants).should(expression);
     }
 
     default String text() {
