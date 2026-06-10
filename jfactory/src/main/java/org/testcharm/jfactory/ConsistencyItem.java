@@ -1,24 +1,27 @@
 package org.testcharm.jfactory;
 
+import org.testcharm.util.IndentBuffer;
+
 import java.util.*;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static org.testcharm.jfactory.DefaultConsistency.dumpStackTraceElement;
 
 class ConsistencyItem<T> {
     private final Set<PropertyChain> properties;
-    private final Consistency<T, ?> consistency;
+    private final DefaultConsistency<T, ?> consistency;
     private final StackTraceElement location;
     private StackTraceElement composerLocation;
     private StackTraceElement decomposerLocation;
     private DefaultConsistency.Composer<T> composer;
     private DefaultConsistency.Decomposer<T> decomposer;
 
-    ConsistencyItem(Collection<PropertyChain> properties, Consistency<T, ?> consistency) {
+    ConsistencyItem(Collection<PropertyChain> properties, DefaultConsistency<T, ?> consistency) {
         this(properties, consistency, guessCustomerPositionStackTrace());
     }
 
-    ConsistencyItem(Collection<PropertyChain> properties, Consistency<T, ?> consistency, StackTraceElement location) {
+    ConsistencyItem(Collection<PropertyChain> properties, DefaultConsistency<T, ?> consistency, StackTraceElement location) {
         this.properties = new LinkedHashSet<>(properties);
         this.consistency = consistency;
         this.location = location;
@@ -64,21 +67,6 @@ class ConsistencyItem<T> {
                         || isSame(composer, another.composer) && isBothNull(decomposer, another.decomposer));
     }
 
-    private String getPosition() {
-        return location.getClassName() + "." + location.getMethodName() +
-                "(" + location.getFileName() + ":" + location.getLineNumber() + ")";
-    }
-
-    private String composerLocation() {
-        return composerLocation == null ? "null" :
-                "(" + composerLocation.getFileName() + ":" + composerLocation.getLineNumber() + ")";
-    }
-
-    private String decomposerLocation() {
-        return decomposerLocation == null ? "null" :
-                "(" + decomposerLocation.getFileName() + ":" + decomposerLocation.getLineNumber() + ")";
-    }
-
     public ConsistencyItem<T> absoluteProperty(PropertyChain base) {
         ConsistencyItem<T> absolute = new ConsistencyItem<>(properties.stream().map(base::concat).collect(toList()), consistency, location);
         absolute.decomposer = decomposer;
@@ -88,16 +76,29 @@ class ConsistencyItem<T> {
         return absolute;
     }
 
-    @Override
-    public String toString() {
-        return properties.stream().map(Objects::toString).collect(joining(", ")) +
-                " => " + consistency.type().getName() +
-                (composer != null ? " with composer" : "") +
-                (decomposer != null ? " with decomposer" : "");
-    }
-
     Resolver resolver(ObjectProducer<?> root, DefaultConsistency<T, ?>.Resolver consistency) {
         return new Resolver(root, consistency);
+    }
+
+    String buildErrorMessageForProvider(boolean composerError) {
+        IndentBuffer indentBuffer = IndentBuffer.create().append("Got error in consistency resolving:").indent().newLine();
+        consistency.dump(indentBuffer, this, composerError);
+        return indentBuffer.toString();
+    }
+
+    enum ErrorType {
+        NO_ERROR, COMPOSER_ERROR, DECOMPOSER_ERROR
+    }
+
+    void dump(IndentBuffer indentBuffer, ErrorType type) {
+        IndentBuffer indent = indentBuffer.append("- ").append(properties.stream().map(Objects::toString).collect(joining(", ")))
+                .append(" => ").append(dumpStackTraceElement(location)).indent().newLine();
+        indent.append("composer: ").append(dumpStackTraceElement(composerLocation)).newLine();
+        if (type == ErrorType.COMPOSER_ERROR)
+            indent.append("^^^^^^^^^").newLine();
+        indent.append("decomposer: ").append(dumpStackTraceElement(decomposerLocation)).newLine();
+        if (type == ErrorType.DECOMPOSER_ERROR)
+            indent.append("^^^^^^^^^").newLine();
     }
 
     class Resolver {
@@ -121,13 +122,17 @@ class ConsistencyItem<T> {
         }
 
         private T compose() {
-            return composer.apply(properties.stream().map(root::descendantForRead).map(Producer::getValue).toArray());
+            try {
+                return composer.apply(properties.stream().map(root::descendantForRead).map(Producer::getValue).toArray());
+            } catch (Exception e) {
+                throw new ConsistencyProviderException(ConsistencyItem.this, e);
+            }
         }
 
-        Object[] decompose(Resolver provider) {
+        Object decompose(Resolver provider, int index) {
             if (cached == null)
                 cached = decomposer.apply(provider.compose());
-            return cached;
+            return cached[index];
         }
 
         boolean hasComposer() {

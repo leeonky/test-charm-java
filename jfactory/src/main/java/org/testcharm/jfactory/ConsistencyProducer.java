@@ -8,7 +8,7 @@ class ConsistencyProducer<T, CT> extends Producer<T> {
     private final ConsistencyItem<CT>.Resolver provider;
     private final ConsistencyItem<CT>.Resolver consumer;
     private final int index;
-    private final Set<Producer<?>> stack = new HashSet<>();
+    private final Set<Producer<?>> stackOverflowGuard = new HashSet<>();
 
     ConsistencyProducer(Producer<T> origin, ConsistencyItem<CT>.Resolver provider,
                         ConsistencyItem<CT>.Resolver consumer, int index) {
@@ -22,10 +22,10 @@ class ConsistencyProducer<T, CT> extends Producer<T> {
     @Override
     @SuppressWarnings("unchecked")
     protected T produce() {
-        if (stack.contains(this))
+        if (stackOverflowGuard.contains(this))
             return origin.produce();
-        stack.add(this);
-        return (T) consumer.decompose(provider)[index];
+        stackOverflowGuard.add(this);
+        return (T) consumer.decompose(provider, index);
     }
 
     @Override

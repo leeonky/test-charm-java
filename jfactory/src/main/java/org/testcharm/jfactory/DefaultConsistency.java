@@ -1,6 +1,7 @@
 package org.testcharm.jfactory;
 
 import org.testcharm.util.BeanClass;
+import org.testcharm.util.IndentBuffer;
 import org.testcharm.util.Sneaky;
 
 import java.util.*;
@@ -8,10 +9,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+import static org.testcharm.jfactory.ConsistencyItem.ErrorType.*;
 import static org.testcharm.jfactory.ConsistencyItem.guessCustomerPositionStackTrace;
 import static org.testcharm.jfactory.JFactory.beanClass;
 import static org.testcharm.jfactory.PropertyChain.propertyChain;
@@ -87,19 +90,17 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
         return false;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("  ").append(type().getName()).append(":");
-        for (StackTraceElement location : locations) {
-            builder.append("\n    ").append(location.getClassName()).append(".").append(location.getMethodName())
-                    .append("(").append(location.getFileName()).append(":").append(location.getLineNumber()).append(")");
-        }
+    static String dumpStackTraceElement(StackTraceElement element) {
+        return format("%s.%s(%s:%d)", element.getClassName(), element.getMethodName(), element.getFileName(), element.getLineNumber());
+    }
 
-        for (ConsistencyItem<T> item : items) {
-            builder.append("\n    - ").append(item);
-        }
-        return builder.toString();
+    void dump(IndentBuffer indentBuffer, ConsistencyItem<T> error, boolean composerError) {
+        IndentBuffer indent = indentBuffer.append(type().getName()).append(":").indent();
+        for (StackTraceElement location : locations)
+            indent.newLine().append(dumpStackTraceElement(location));
+
+        for (ConsistencyItem<T> item : items)
+            item.dump(indent.newLine(), item == error ? (composerError ? COMPOSER_ERROR : DECOMPOSER_ERROR) : NO_ERROR);
     }
 
     DefaultConsistency<T, C> absoluteProperty(PropertyChain root) {
