@@ -30,11 +30,7 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
     static final Function<Object, Object> LINK_DECOMPOSER = s -> s;
 
     DefaultConsistency(Class<T> type, Class<C> cType) {
-        this(beanClass(type), beanClass(cType));
-    }
-
-    DefaultConsistency(BeanClass<T> type, BeanClass<C> cType) {
-        this(type, cType, singletonList(guessCustomerPositionStackTrace()));
+        this(beanClass(type), beanClass(cType), singletonList(guessCustomerPositionStackTrace()));
     }
 
     DefaultConsistency(BeanClass<T> type, BeanClass<C> cType, List<StackTraceElement> locations) {
@@ -91,16 +87,8 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
     }
 
     static String dumpStackTraceElement(StackTraceElement element) {
-        return format("%s.%s(%s:%d)", element.getClassName(), element.getMethodName(), element.getFileName(), element.getLineNumber());
-    }
-
-    void dump(IndentBuffer indentBuffer, ConsistencyItem<T> error, boolean composerError) {
-        IndentBuffer indent = indentBuffer.append(type().getName()).append(":").indent();
-        for (StackTraceElement location : locations)
-            indent.newLine().append(dumpStackTraceElement(location));
-
-        for (ConsistencyItem<T> item : items)
-            item.dump(indent.newLine(), item == error ? (composerError ? COMPOSER_ERROR : DECOMPOSER_ERROR) : NO_ERROR);
+        return format("%s.%s(%s:%d)", element.getClassName(), element.getMethodName(), element.getFileName(),
+                element.getLineNumber());
     }
 
     DefaultConsistency<T, C> absoluteProperty(PropertyChain root) {
@@ -201,6 +189,14 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
 
         Optional<ConsistencyItem<T>.Resolver> propertyRelated(PropertyChain property) {
             return providerCandidates.stream().filter(p -> p.containsProperty(property)).findFirst();
+        }
+
+        void dump(IndentBuffer indentBuffer, ConsistencyItem<T> error, boolean composerError) {
+            IndentBuffer indent = indentBuffer.append(type().getName()).append(":").indent();
+            for (StackTraceElement location : locations)
+                indent.newLine().append(dumpStackTraceElement(location));
+            for (ConsistencyItem<T> item : items)
+                item.dump(indent.newLine(), item == error ? (composerError ? COMPOSER_ERROR : DECOMPOSER_ERROR) : NO_ERROR);
         }
     }
 }

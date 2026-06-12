@@ -80,12 +80,6 @@ class ConsistencyItem<T> {
         return new Resolver(root, consistency);
     }
 
-    String buildErrorMessageForProvider(boolean composerError) {
-        IndentBuffer indentBuffer = IndentBuffer.create().append("Got error in consistency resolving:").indent().newLine();
-        consistency.dump(indentBuffer, this, composerError);
-        return indentBuffer.toString();
-    }
-
     enum ErrorType {
         NO_ERROR, COMPOSER_ERROR, DECOMPOSER_ERROR
     }
@@ -93,12 +87,16 @@ class ConsistencyItem<T> {
     void dump(IndentBuffer indentBuffer, ErrorType type) {
         IndentBuffer indent = indentBuffer.append("- ").append(properties.stream().map(Objects::toString).collect(joining(", ")))
                 .append(" => ").append(dumpStackTraceElement(location)).indent().newLine();
-        indent.append("composer: ").append(dumpStackTraceElement(composerLocation)).newLine();
-        if (type == ErrorType.COMPOSER_ERROR)
-            indent.append("^^^^^^^^^").newLine();
-        indent.append("decomposer: ").append(dumpStackTraceElement(decomposerLocation)).newLine();
-        if (type == ErrorType.DECOMPOSER_ERROR)
-            indent.append("^^^^^^^^^").newLine();
+        dumpFunction(indent, "composer", composerLocation, type == ErrorType.COMPOSER_ERROR);
+        dumpFunction(indent, "decomposer", decomposerLocation, type == ErrorType.DECOMPOSER_ERROR);
+    }
+
+    private void dumpFunction(IndentBuffer indent, String title, StackTraceElement stackTraceElement, boolean errorFlag) {
+        if (stackTraceElement != null) {
+            indent.append(title + ": ").append(dumpStackTraceElement(stackTraceElement)).newLine();
+            if (errorFlag)
+                indent.append(String.join("", Collections.nCopies(title.length() + 1, "^"))).newLine();
+        }
     }
 
     class Resolver {
@@ -125,13 +123,18 @@ class ConsistencyItem<T> {
             try {
                 return composer.apply(properties.stream().map(root::descendantForRead).map(Producer::getValue).toArray());
             } catch (Exception e) {
-                throw new ConsistencyProviderException(ConsistencyItem.this, e);
+                throw new ConsistencyException(this, true, e);
             }
         }
 
         Object decompose(Resolver provider, int index) {
-            if (cached == null)
+            if (cached == null) {
                 cached = decomposer.apply(provider.compose());
+                if (cached.length != properties.size())
+                    throw new ConsistencyException(this, false,
+                            String.format("Writer at %s should return an array with size %d but got an array with size %d",
+                                    dumpStackTraceElement(decomposerLocation), properties.size(), cached.length));
+            }
             return cached[index];
         }
 
@@ -179,6 +182,25 @@ class ConsistencyItem<T> {
 
         DefaultConsistency<T, ?>.Resolver consistencyResolver() {
             return consistency;
+        }
+
+        String buildErrorMessageForProvider(boolean composerError, String string) {
+            IndentBuffer indentBuffer = IndentBuffer.create();
+            if (composerError)
+                indentBuffer.append("Got an error when composing the intermediate value from the properties <");
+            else
+                indentBuffer.append("Got an error when decomposing the intermediate value to the properties <");
+
+            indentBuffer.append(propertiesInfo())
+                    .append(">:");
+            indentBuffer.indent().newLine().append(string);
+            consistency.dump(indentBuffer.newLine().newLine().append("Consistency:").indent().newLine(),
+                    ConsistencyItem.this, composerError);
+            return indentBuffer.toString();
+        }
+
+        String propertiesInfo() {
+            return properties.stream().map(property -> root.getType().getName() + "." + property).collect(joining(", "));
         }
     }
 }

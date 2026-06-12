@@ -63,7 +63,6 @@ public class ClassTypeInfo<T> extends AbstractTypeInfo<T> {
         return null;
     }
 
-
     private Stream<Class<?>> getterSetterOwnerTypes(Class<?> type) {
         if (Proxy.isProxyClass(type))
             return Arrays.stream(type.getInterfaces());
