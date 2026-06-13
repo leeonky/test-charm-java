@@ -52,9 +52,10 @@ public class ClassDefinition extends SimpleJavaFileObject {
         return Objects.hash(ClassDefinition.class, "", name);
     }
 
+    @SuppressWarnings("EqualsDoesntCheckParameterClass")
     @Override
     public boolean equals(Object o) {
-        return o instanceof ClassDefinition && Objects.equals(name, ((ClassDefinition) o).name);
+        return Classes.equals(this, o, ClassDefinition.class, (self, another) -> Objects.equals(self.name, another.name));
     }
 
     public String className() {

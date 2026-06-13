@@ -57,9 +57,11 @@ public class GenericBeanClass<T> extends BeanClass<T> {
         return Objects.hash(GenericBeanClass.class, genericType);
     }
 
+    @SuppressWarnings("EqualsDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof GenericBeanClass && Objects.equals(genericType, ((GenericBeanClass) obj).genericType);
+        return Classes.equals(this, obj, GenericBeanClass.class, (self, another) ->
+                Objects.equals(self.genericType, another.genericType));
     }
 
     @Override

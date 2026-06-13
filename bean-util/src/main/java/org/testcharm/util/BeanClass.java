@@ -203,9 +203,10 @@ public class BeanClass<T> {
         return Objects.hash(BeanClass.class, type);
     }
 
+    @SuppressWarnings("EqualsDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BeanClass && Objects.equals(((BeanClass<?>) obj).getType(), type);
+        return Classes.equals(this, obj, BeanClass.class, (self, another) -> Objects.equals(self.type, another.type));
     }
 
     @SuppressWarnings("unchecked")

@@ -46,9 +46,10 @@ public class GenericType {
         return Objects.hash(GenericType.class, type);
     }
 
+    @SuppressWarnings("EqualsDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof GenericType && Objects.equals(type, ((GenericType) obj).type);
+        return Classes.equals(this, obj, GenericType.class, (self, another) -> Objects.equals(self.type, another.type));
     }
 
     public Type getGenericType() {

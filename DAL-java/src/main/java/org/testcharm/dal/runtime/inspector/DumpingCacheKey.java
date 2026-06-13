@@ -1,6 +1,7 @@
 package org.testcharm.dal.runtime.inspector;
 
 import org.testcharm.dal.runtime.Data;
+import org.testcharm.util.Classes;
 
 import java.util.Objects;
 
@@ -16,9 +17,10 @@ class DumpingCacheKey {
         return Objects.hash(data.value());
     }
 
+    @SuppressWarnings("EqualsDoesntCheckParameterClass")
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof DumpingCacheKey)) return false;
-        return ((DumpingCacheKey) obj).data.value() == data.value();
+        return Classes.equals(this, obj, DumpingCacheKey.class, (self, another) ->
+                self.data.value() == another.data.value());
     }
 }

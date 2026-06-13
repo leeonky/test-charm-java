@@ -1,5 +1,7 @@
 package org.testcharm.jfactory;
 
+import org.testcharm.util.Classes;
+
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -55,7 +57,8 @@ public class PropertyChain {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PropertyChain && Objects.equals(property, ((PropertyChain) obj).property);
+        return Classes.equals(this, obj, PropertyChain.class,
+                (self, another) -> Objects.equals(self.property, another.property));
     }
 
     @Override

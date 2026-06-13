@@ -9,6 +9,7 @@ import java.lang.reflect.Proxy;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -124,5 +125,9 @@ public class Classes {
             return false;
         Class<?> enclosing = type.getEnclosingClass();
         return enclosing == null || isReflective(enclosing);
+    }
+
+    public static <T, X> boolean equals(T self, Object other, Class<X> type, BiPredicate<T, X> predicate) {
+        return self == other || type.isInstance(other) && predicate.test(self, type.cast(other));
     }
 }

@@ -1,5 +1,6 @@
 package org.testcharm.jfactory;
 
+import org.testcharm.util.Classes;
 import org.testcharm.util.IndentBuffer;
 
 import java.util.*;
@@ -167,9 +168,9 @@ class ConsistencyItem<T> {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("EqualsDoesntCheckParameterClass")
         public boolean equals(Object o) {
-            return o instanceof ConsistencyItem.Resolver && same(((Resolver) o).outer());
+            return Classes.equals(this, o, Resolver.class, (self, another) -> self.outer().same(another.outer()));
         }
 
         boolean hasFixed() {

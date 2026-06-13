@@ -1,7 +1,8 @@
 package org.testcharm.map;
 
-import org.testcharm.util.BeanClass;
 import ma.glasnost.orika.CustomConverter;
+import org.testcharm.util.BeanClass;
+import org.testcharm.util.Classes;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,8 +46,10 @@ abstract class BaseConverter extends CustomConverter<Object, Object> {
         return buildConvertId().hashCode();
     }
 
+    @SuppressWarnings("EqualsDoesntCheckParameterClass")
     @Override
     public boolean equals(Object other) {
-        return (other instanceof ViewConverter) && buildConvertId().equals(((ViewConverter) other).buildConvertId());
+        return Classes.equals(this, other, BaseConverter.class, (self, another) ->
+                self.buildConvertId().equals(another.buildConvertId()));
     }
 }
