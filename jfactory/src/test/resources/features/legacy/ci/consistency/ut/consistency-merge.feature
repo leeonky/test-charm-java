@@ -454,3 +454,117 @@ Feature: consistency merge
         """
         str1= /^str4.*/, str2= /^str4.*/, str3= /^str3.*/, str4= /^str4.*/, str5= hello
         """
+
+    Scenario: same property, same type, no composer, different decomposer not merge
+      Given the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              Function<String,String> toUpper = String::toUpperCase;
+              Function<String,String> toLower = String::toLowerCase;
+
+              consistent(String.class)
+              .<String>property("str1")
+                .write(toLower)
+              .direct("str2");
+
+              consistent(String.class)
+              .<String>property("str1")
+                .write(toUpper)
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "Hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= Hello
+          str2= /^str2.*/
+          str3= /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= hello
+          str2= HELLO
+          str3= /^str3.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= HELLO
+          str2= /^str2.*/
+          str3= hello
+        }
+        """
+
+    Scenario: same property, same type, different composer, no decomposer not merge
+      Given the following spec class:
+        """
+        public class ABean extends Spec<Bean> {
+          public void main() {
+              Function<String,String> toUpper = String::toUpperCase;
+              Function<String,String> toLower = String::toLowerCase;
+
+              consistent(String.class)
+              .<String>property("str1")
+                .read(toUpper)
+              .direct("str2");
+
+              consistent(String.class)
+              .<String>property("str1")
+                .read(toLower)
+              .direct("str3");
+          }
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str1", "Hello").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= Hello
+          str2= HELLO
+          str3= hello
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str2", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= /^str1.*/
+          str2= HELLO
+          str3= /^str1.*/
+        }
+        """
+      When build:
+        """
+        jFactory.clear().spec(ABean.class).property("str3", "HELLO").create();
+        """
+      Then the result should:
+        """
+        : {
+          str1= /^str1.*/
+          str2= /^STR1.*/
+          str3= HELLO
+        }
+        """

@@ -138,12 +138,10 @@ class DefaultConsistency<T, C extends Coordinate> implements Consistency<T, C> {
     }
 
     interface Identity {
-        default Object identity() {
-            return this;
-        }
+        Object identity();
 
         default boolean same(Identity another) {
-            return another != null && identity() == another.identity();
+            return identity() == another.identity();
         }
 
         StackTraceElement getLocation();
