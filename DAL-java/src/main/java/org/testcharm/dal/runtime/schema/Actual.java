@@ -6,6 +6,7 @@ import org.testcharm.dal.format.Type;
 import org.testcharm.dal.format.Value;
 import org.testcharm.dal.runtime.DALRuntimeException;
 import org.testcharm.dal.runtime.Data;
+import org.testcharm.dal.runtime.IllegalTypeException;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.dal.type.Schema;
 import org.testcharm.dal.type.SubType;
@@ -15,9 +16,10 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.testcharm.util.Classes.getClassName;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.testcharm.dal.runtime.schema.Verification.buildError;
+import static org.testcharm.util.Classes.getClassName;
 
 public class Actual {
     private final String property;
@@ -40,10 +42,6 @@ public class Actual {
         return actual.isNull();
     }
 
-    public Actual sub(Integer index) {
-        return new Actual(property + "[" + index + "]", actual.property(index));
-    }
-
     private final static Compiler compiler = new Compiler();
 
     @SuppressWarnings("unchecked")
@@ -60,22 +58,21 @@ public class Actual {
         return new IllegalStateException(format("%s should specify generic type", property));
     }
 
-    public boolean convertAble(BeanClass<?> type, String inspect) {
+    public void convertAble(BeanClass<?> type, String inspect) {
         if (isNull())
-            return Verification.errorLog("Can not convert null field `%s` to %s, " +
+            throw buildError("Can not convert null field `%s` to %s, " +
                     "use @AllowNull to verify nullable field", property, inspect);
         try {
             actual.convert(type.getType());
-            return true;
         } catch (Exception ignore) {
-            return Verification.errorLog("Can not convert field `%s` (%s: %s) to %s", property,
+            throw buildError("Can not convert field `%s` (%s: %s) to %s", property,
                     getClassName(actual.value()), actual.value(), inspect);
         }
     }
 
-    public boolean verifyValue(Value<Object> value, BeanClass<?> type) {
-        if (value.verify(value.convertAs(actual, type))) return true;
-        return Verification.errorLog(value.errorMessage(property, actual.value()));
+    public void verifyValue(Value<Object> value, BeanClass<?> type) {
+        if (!value.verify(value.convertAs(actual, type)))
+            throw buildError(value.errorMessage(property, actual.value()));
     }
 
     public Stream<?> fieldNames() {
@@ -86,49 +83,49 @@ public class Actual {
         return actual.list().wraps().stream().map(data -> new Actual(property + "[" + data.index() + "]", data.value()));
     }
 
-    public boolean verifyFormatter(Formatter<Object, Object> formatter) {
-        return formatter.isValid(actual.value())
-                || Verification.errorLog("Expected field `%s` to be formatter `%s`\nActual: %s", property,
-                formatter.getFormatterName(), actual.dump());
+    public void verifyFormatter(Formatter<Object, Object> formatter) {
+        if (!formatter.isValid(actual.value()))
+            throw buildError("Expected field `%s` to be formatter `%s`\nActual: %s", property,
+                    formatter.getFormatterName(), actual.dump());
     }
 
-    boolean verifySize(Function<Actual, Stream<?>> actualStream, int expectSize) {
-        return actualStream.apply(this).count() == expectSize
-                || Verification.errorLog("Expected field `%s` to be size <%d>, but was size <%d>",
-                property, expectSize, actualStream.apply(this).count());
+    void verifySize(Function<Actual, Stream<?>> actualStream, int expectSize) {
+        if (actualStream.apply(this).count() != expectSize)
+            throw buildError("Expected field `%s` to be size <%d>, but was size <%d>",
+                    property, expectSize, actualStream.apply(this).count());
     }
 
-    boolean moreExpectSize(int size) {
-        return Verification.errorLog("Collection Field `%s` size was only <%d>, expected too more",
+    public IllegalTypeException moreExpectSizeError(int size) {
+        return buildError("Collection Field `%s` size was only <%d>, expected too more",
                 property, size);
     }
 
-    public boolean lessExpectSize(int size) {
-        return Verification.errorLog("Expected collection field `%s` to be size <%d>, but too many elements", property, size);
+    public IllegalTypeException lessExpectSizeError(int size) {
+        return buildError("Expected collection field `%s` to be size <%d>, but too many elements", property, size);
     }
 
-    boolean verifyType(Type<Object> expect) {
-        if (expect.verify(actual.value())) return true;
-        return Verification.errorLog(expect.errorMessage(property, actual.value()));
+    void verifyType(Type<Object> expect) {
+        if (!expect.verify(actual.value()))
+            throw buildError(expect.errorMessage(property, actual.value()));
     }
 
-    boolean inInstanceOf(BeanClass<?> type) {
-        return type.isInstance(actual.value()) ||
-                Verification.errorLog(String.format("Expected field `%s` to be %s\nActual: %s", property,
-                        type.getName(), actual.dump()));
+    void inInstanceOf(BeanClass<?> type) {
+        if (!type.isInstance(actual.value()))
+            throw buildError(String.format("Expected field `%s` to be %s\nActual: %s", property,
+                    type.getName(), actual.dump()));
     }
 
-    public boolean equalsExpect(Object expect, DALRuntimeContext runtimeContext) {
-        return Objects.equals(expect, actual.value()) ||
-                Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
-                        runtimeContext.data(expect).dump(), actual.dump()));
+    public void equalsExpect(Object expect, DALRuntimeContext runtimeContext) {
+        if (!Objects.equals(expect, actual.value()))
+            throw buildError(format("Expected field `%s` to be %s\nActual: %s", property,
+                    runtimeContext.data(expect).dump(), actual.dump()));
     }
 
     public void verifySchema(Schema expect) {
         try {
             expect.verify(actual);
         } catch (Throwable throwable) {
-            Verification.errorLog(throwable.getMessage());
+            throw buildError(throwable.getMessage());
         }
     }
 }

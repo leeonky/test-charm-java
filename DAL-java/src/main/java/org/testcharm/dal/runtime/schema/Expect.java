@@ -14,12 +14,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiPredicate;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.joining;
+import static org.testcharm.dal.runtime.schema.Verification.buildError;
 
 public class Expect {
     protected final BeanClass<Object> type;
@@ -94,8 +95,8 @@ public class Expect {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean verifyValue(BiPredicate<Value<Object>, BeanClass<?>> predicate) {
-        return predicate.test((Value<Object>) expect, getGenericType(0).orElse(null));
+    public void verifyValue(BiConsumer<Value<Object>, BeanClass<?>> predicate) {
+        predicate.accept((Value<Object>) expect, getGenericType(0).orElse(null));
     }
 
     @SuppressWarnings("unchecked")
@@ -115,16 +116,16 @@ public class Expect {
         return (Type<Object>) expect;
     }
 
-    public boolean isInstanceOf(Actual actual) {
-        return actual.inInstanceOf(type);
+    public void isInstanceOf(Actual actual) {
+        actual.inInstanceOf(type);
     }
 
-    public boolean isInstanceType(Actual actual) {
-        return actual.inInstanceOf(getGenericType(0).orElseThrow(actual::invalidGenericType));
+    public void isInstanceType(Actual actual) {
+        actual.inInstanceOf(getGenericType(0).orElseThrow(actual::invalidGenericType));
     }
 
-    public boolean equals(Actual actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
-        return actual.equalsExpect(expect, runtimeContext);
+    public void equals(Actual actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
+        actual.equalsExpect(expect, runtimeContext);
     }
 
     public Stream<PropertyReader<Object>> propertyReaders() {
@@ -135,7 +136,7 @@ public class Expect {
         return expect == null;
     }
 
-    public SchemaExpect asSchema(Actual actual) {
+    SchemaExpect asSchema(Actual actual) {
         return new SchemaExpect(actual.polymorphicSchemaType(type.getType()), expect);
     }
 
@@ -144,41 +145,42 @@ public class Expect {
             super(BeanClass.create(schemaType), expect == null ? Classes.newInstance(schemaType) : expect);
         }
 
-        public boolean noMoreUnexpectedField(Set<String> actualFields) {
+        public void noMoreUnexpectedField(Set<String> actualFields) {
             if (type.getAnnotation(Partial.class) != null)
-                return true;
+                return;
             Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
                 propertyReaders().map(PropertyAccessor::getName).forEach(this::remove);
             }};
-            return expectFields.isEmpty() || Verification.errorLog("Unexpected field %s for schema %s",
-                    expectFields.stream().collect(joining("`, `", "`", "`")), inspectFullType());
+            if (!expectFields.isEmpty())
+                throw buildError("Unexpected field %s for schema %s",
+                        expectFields.stream().collect(joining("`, `", "`", "`")), inspectFullType());
         }
 
-        public boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
-            return propertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null)
-                    .allMatch(field -> actualFields.contains(field.getName())
-                            || Verification.errorLog("Expected field `%s` to be in type %s, but does not exist", field.getName(),
-                            inspectFullType()));
-        }
-
-        public boolean allPropertyValueShouldBeValid(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual) {
-            return propertyReaders().allMatch(propertyReader -> {
-                Actual subActual = actual.sub(propertyReader.getName());
-                return propertyReader.getAnnotation(AllowNull.class) != null && subActual.isNull()
-                        || Verification.expect(sub(propertyReader)).verify(runtimeContext, subActual);
+        public void allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
+            propertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null).forEach(field -> {
+                if (!actualFields.contains(field.getName()))
+                    throw buildError("Expected field `%s` to be in type %s, but does not exist", field.getName(),
+                            inspectFullType());
             });
         }
 
-        public boolean verifySchemaInstance(Actual actual) {
-            getSchema().ifPresent(actual::verifySchema);
-            return true;
+        public void allPropertyValueShouldBeValid(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual) {
+            propertyReaders().forEach(propertyReader -> {
+                Actual subActual = actual.sub(propertyReader.getName());
+                if (propertyReader.getAnnotation(AllowNull.class) == null || !subActual.isNull())
+                    Verification.expect(sub(propertyReader)).verify(runtimeContext, subActual);
+            });
         }
 
-        public boolean verify(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual, Set<String> actualFields) {
-            return noMoreUnexpectedField(actualFields)
-                    && allMandatoryPropertyShouldBeExist(actualFields)
-                    && allPropertyValueShouldBeValid(runtimeContext, actual)
-                    && verifySchemaInstance(actual);
+        public void verifySchemaInstance(Actual actual) {
+            getSchema().ifPresent(actual::verifySchema);
+        }
+
+        public void verify(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual, Set<String> actualFields) {
+            noMoreUnexpectedField(actualFields);
+            allMandatoryPropertyShouldBeExist(actualFields);
+            allPropertyValueShouldBeValid(runtimeContext, actual);
+            verifySchemaInstance(actual);
         }
     }
 }

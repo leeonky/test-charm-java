@@ -172,6 +172,25 @@ Feature: single schema when verification failed
     is Data
     """
 
+  Scenario: @AllowNull on non null field
+    Given the following json:
+    """
+      {
+        "value": 100
+      }
+    """
+    Given the following schema class:
+    """
+    public class Data implements Schema {
+        @AllowNull
+        public Integer value = Integer.valueOf(100);
+    }
+    """
+    Then the following verification should pass:
+    """
+    is Data
+    """
+
   Scenario: compare type in un-boxed type
     Given the following schema class:
     """

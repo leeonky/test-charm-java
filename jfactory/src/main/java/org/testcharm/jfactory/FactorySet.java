@@ -77,10 +77,6 @@ class FactorySet {
         return defaultValueFactories.query(type.getType());
     }
 
-    public <T> DefaultValueFactory<T> getDefaultValueFactory(BeanClass<T> type) {
-        return queryDefaultValueFactory(type).orElseGet(() -> new DefaultValueFactories.DefaultTypeFactory<>(type));
-    }
-
     public TypeSequence.Sequence sequence(Class<?> type) {
         return typeSequence.register(type);
     }

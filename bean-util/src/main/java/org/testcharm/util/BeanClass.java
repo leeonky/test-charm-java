@@ -23,7 +23,6 @@ public class BeanClass<T> {
         this(type, b -> TypeInfo.create(b, PropertyProxyFactory.NO_PROXY));
     }
 
-    @SuppressWarnings("unchecked")
     protected BeanClass(Class<T> type, Function<BeanClass<T>, TypeInfo<T>> typeInfoFactory) {
         this.type = Objects.requireNonNull(type);
         typeInfo = typeInfoFactory.apply(this);

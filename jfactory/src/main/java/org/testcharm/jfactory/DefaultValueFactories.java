@@ -220,22 +220,4 @@ public class DefaultValueFactories {
             return enumConstants[(objectProperty.instance().getSequence() - 1) % enumConstants.length];
         }
     }
-
-    public static class DefaultTypeFactory<V> implements DefaultValueFactory<V> {
-        private final BeanClass<V> type;
-
-        public DefaultTypeFactory(BeanClass<V> type) {
-            this.type = type;
-        }
-
-        @Override
-        public <T> V create(BeanClass<T> beanType, ObjectProperty<T> objectProperty) {
-            return type.createDefault();
-        }
-
-        @Override
-        public Class<V> getType() {
-            return type.getType();
-        }
-    }
 }
