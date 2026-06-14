@@ -24,6 +24,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static org.testcharm.dal.Assertions.expect;
+import static org.testcharm.util.Suppressor.assertLastEqualsCase;
 
 public class JData {
     private final JFactory jFactory;
@@ -39,14 +40,10 @@ public class JData {
     @Given("Exists data {string}:")
     @And("exists data {string}:")
     public <T> List<T> prepare(String traitsSpec, DocData docData) {
-        switch (docData.type) {
-            case EXPRESSION:
-                return prepare(traitsSpec, docData.expression());
-            case MAP:
-                return prepare(traitsSpec, docData.maps());
-            default:
-                throw new IllegalStateException();
-        }
+        if (Objects.requireNonNull(docData.type) == DocData.Type.EXPRESSION)
+            return prepare(traitsSpec, docData.expression());
+        assertLastEqualsCase(docData.type, DocData.Type.MAP);
+        return prepare(traitsSpec, docData.maps());
     }
 
     @DocStringType
@@ -85,14 +82,10 @@ public class JData {
     }
 
     public <T> List<T> prepare(Class<T> type, DocData docData) {
-        switch (docData.type) {
-            case EXPRESSION:
-                return prepare(type, docData.expression());
-            case MAP:
-                return prepare(type, docData.maps());
-            default:
-                throw new IllegalStateException();
-        }
+        if (Objects.requireNonNull(docData.type) == DocData.Type.EXPRESSION)
+            return prepare(type, docData.expression());
+        assertLastEqualsCase(docData.type, DocData.Type.MAP);
+        return prepare(type, docData.maps());
     }
 
     @SuppressWarnings("unchecked")
@@ -159,15 +152,11 @@ public class JData {
     @Given("Exists {string} as data {string}:")
     @And("exists {string} as data {string}:")
     public void prepareAttachments(String beanProperty, String traitsSpec, DocData docData) {
-        switch (docData.type) {
-            case EXPRESSION:
-                prepareAttachments(beanProperty, traitsSpec, docData.expression());
-                break;
-            case MAP:
-                prepareAttachments(beanProperty, traitsSpec, docData.maps());
-                break;
-            default:
-                throw new IllegalStateException();
+        if (Objects.requireNonNull(docData.type) == DocData.Type.EXPRESSION)
+            prepareAttachments(beanProperty, traitsSpec, docData.expression());
+        else {
+            assertLastEqualsCase(docData.type, DocData.Type.MAP);
+            prepareAttachments(beanProperty, traitsSpec, docData.maps());
         }
     }
 
@@ -212,15 +201,11 @@ public class JData {
     @Given("Exists following data {string}, and its {string} is {string}:")
     @And("exists following data {string}, and its {string} is {string}:")
     public void prepareAttachments(String traitsSpec, String reverseAssociationProperty, String queryExpression, DocData docData) {
-        switch (docData.type) {
-            case EXPRESSION:
-                prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, docData.expression());
-                break;
-            case MAP:
-                prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, docData.maps());
-                break;
-            default:
-                throw new IllegalStateException();
+        if (Objects.requireNonNull(docData.type) == DocData.Type.EXPRESSION)
+            prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, docData.expression());
+        else {
+            assertLastEqualsCase(docData.type, DocData.Type.MAP);
+            prepareAttachments(traitsSpec, reverseAssociationProperty, queryExpression, docData.maps());
         }
     }
 

@@ -19,6 +19,7 @@ class IndentBufferTest {
             buffer.append("hello");
 
             assertEquals("hello", buffer.content());
+            assertEquals(5, buffer.length());
         }
 
         @Test
@@ -28,6 +29,7 @@ class IndentBufferTest {
             buffer.append("foo").append("bar").append("baz");
 
             assertEquals("foobarbaz", buffer.content());
+            assertEquals(9, buffer.length());
         }
     }
 

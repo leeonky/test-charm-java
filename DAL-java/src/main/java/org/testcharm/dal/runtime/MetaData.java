@@ -5,11 +5,10 @@ import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
-import static org.testcharm.dal.runtime.ExpressionException.illegalOp2;
 import static java.lang.String.format;
+import static org.testcharm.dal.runtime.ExpressionException.illegalOp2;
 
 public class MetaData<T> extends RuntimeData<T> {
     private DALNode inputNode;
@@ -73,15 +72,15 @@ public class MetaData<T> extends RuntimeData<T> {
 //        return runtimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
 //    }
 
-    private void checkType(Object data) {
-        Class<?> expect = this.data.value().getClass();
-        Class<?> actual = Objects.requireNonNull(data).getClass();
-        if (actual.isAnonymousClass())
-            actual = actual.getSuperclass();
-        if (!actual.equals(expect))
-            throw illegalOp2(format("Do not allow change data type in callSuper, expect %s but %s",
-                    expect.getName(), actual.getName()));
-    }
+//    private void checkType(Object data) {
+//        Class<?> expect = this.data.value().getClass();
+//        Class<?> actual = Objects.requireNonNull(data).getClass();
+//        if (actual.isAnonymousClass())
+//            actual = actual.getSuperclass();
+//        if (!actual.equals(expect))
+//            throw illegalOp2(format("Do not allow change data type in callSuper, expect %s but %s",
+//                    expect.getName(), actual.getName()));
+//    }
 
     public void addCallType(Class<?> callType) {
         callTypes.add(callType);

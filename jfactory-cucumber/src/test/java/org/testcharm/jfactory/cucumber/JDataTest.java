@@ -65,14 +65,15 @@ class JDataTest {
 
         @Test
         void persist_object_list_with_type_and_expression() {
-            jData.prepare(Product.class, "[{name: book} {name: bicycle}]");
+            List<Product> prepare = jData.prepare(Product.class, "[{name: book} {name: bicycle}]");
 
             expect(persisted).should(": [{name: book} {name: bicycle}]");
+            expect(prepare).isEqualTo(persisted);
         }
 
         @Test
         void persist_object_list_with_type_and_row_list() {
-            jData.prepare(Product.class,
+            List<Product> prepare = jData.prepare(Product.class,
                     new HashMap<String, Object>() {{
                         put("name", "book");
                     }},
@@ -82,6 +83,7 @@ class JDataTest {
             );
 
             expect(persisted).should(": [{name: book} {name: bicycle}]");
+            expect(prepare).isEqualTo(persisted);
         }
 
         @Test
@@ -95,6 +97,30 @@ class JDataTest {
                     .allMatch(Product.class::isInstance);
         }
 
+        @Test
+        void persist_object_list_with_type_and_expression_doc_data() {
+            List<Product> prepare = jData.prepare(Product.class, new JData.DocData("[{name: book} {name: bicycle}]"));
+
+            expect(persisted).should(": [{name: book} {name: bicycle}]");
+            expect(prepare).isEqualTo(persisted);
+        }
+
+        @Test
+        void persist_object_list_with_type_and_row_list_doc_data() {
+            List<Product> prepare = jData.prepare(Product.class, new JData.DocData(
+                    asList(new HashMap<String, String>() {{
+                               put("name", "book");
+                           }},
+                            new HashMap<String, String>() {{
+                                put("name", "bicycle");
+                            }}
+                    )));
+
+            expect(persisted).should(": [{name: book} {name: bicycle}]");
+            expect(prepare).isEqualTo(persisted);
+        }
+
+
         @Nested
         class Attachment {
             private final JFactory jFactory = new JFactory();
@@ -105,11 +131,10 @@ class JDataTest {
                 jFactory.register(Products.商品.class);
                 Cart cart = jFactory.spec(Carts.购物车.class).property("customer", "Tom").create();
 
-                List<Product> products = jData.prepareAttachments("购物车.customer[Tom].products", "商品", asList(
+                List<Product> products = jData.prepareAttachments("购物车.customer[Tom].products", "商品",
                         new HashMap<String, Object>() {{
                             put("name", "book");
-                        }}
-                ));
+                        }});
 
                 assertThat(cart.getProducts()).containsAll(products);
             }
@@ -119,11 +144,9 @@ class JDataTest {
                 jFactory.register(Products.商品.class);
                 Order order = jFactory.spec(Orders.订单.class).property("customer", "Tom").create();
 
-                List<Product> products = jData.prepareAttachments("订单.customer[Tom].product", "商品", asList(
-                        new HashMap<String, Object>() {{
-                            put("name", "book");
-                        }}
-                ));
+                List<Product> products = jData.prepareAttachments("订单.customer[Tom].product", "商品", new HashMap<String, Object>() {{
+                    put("name", "book");
+                }});
 
                 assertThat(order.getProduct()).isEqualTo(products.get(0));
             }
@@ -143,11 +166,11 @@ class JDataTest {
                 jFactory.register(ProductStocks.库存.class);
                 Product product = jFactory.spec(Products.商品.class).property("name", "book").create();
 
-                List<ProductStock> stocks = jData.prepareAttachments("库存", "product", "商品.name[book]", asList(
+                List<ProductStock> stocks = jData.prepareAttachments("库存", "product", "商品.name[book]",
                         new HashMap<String, Object>() {{
                             put("size", "A4");
                         }}
-                ));
+                );
 
                 assertThat(stocks)
                         .hasSize(1)
@@ -173,13 +196,13 @@ class JDataTest {
                 jFactory.spec(Orders.订单.class).property("customer", "Tom").create();
 
                 assertThrows(RuntimeException.class, () -> jData.prepareAttachments("订单.customer[Tom].product", "商品",
-                        asList(new HashMap<String, Object>() {{
-                                   put("name", "book");
-                               }},
-                                new HashMap<String, Object>() {{
-                                    put("name", "bicycle");
-                                }}
-                        )));
+                        new HashMap<String, Object>() {{
+                            put("name", "book");
+                        }},
+                        new HashMap<String, Object>() {{
+                            put("name", "bicycle");
+                        }}
+                ));
             }
         }
     }

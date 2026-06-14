@@ -1,7 +1,6 @@
 package org.testcharm.util;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
 import static java.lang.String.join;
 import static java.util.Collections.nCopies;
@@ -84,26 +83,15 @@ public class IndentBuffer {
 
     public IndentBuffer appendAll(String delimiter, Iterable<?> elements) {
         IndentBuffer fork = fork();
-        for (Object l : elements) fork.append(String.valueOf(l)).defer(delimiter);
-        return this;
-    }
-
-    public IndentBuffer appendAll(String delimiter, String... elements) {
-        IndentBuffer fork = fork();
-        for (String l : elements) fork.append(String.valueOf(l)).defer(delimiter);
-        return this;
-    }
-
-    public IndentBuffer appendAll(String delimiter, Stream<?> elements) {
-        IndentBuffer fork = fork();
-        elements.forEach(e -> fork.append(String.valueOf(e)).defer(delimiter));
+        for (Object l : elements)
+            fork.append(String.valueOf(l)).defer(delimiter);
         return this;
     }
 
     static class Content {
         private final StringBuilder stringBuilder = new StringBuilder();
-        private final int maxLineCount;
-        private int lineCount = 0;
+        private final long maxLineCount;
+        private long lineCount = 0;
         private boolean finished = false;
 
         Content(int maxLineCount) {
