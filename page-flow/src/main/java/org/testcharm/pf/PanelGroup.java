@@ -3,7 +3,6 @@ package org.testcharm.pf;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO need test
 public class PanelGroup<P extends Panel<? extends Element<?, ?, ?>>> {
     protected List<P> opened = new ArrayList<>();
 
