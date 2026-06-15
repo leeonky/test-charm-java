@@ -499,3 +499,23 @@ Feature: locating
         | driver     |
         | selenium   |
         | playwright |
+
+    Scenario Outline: invalid operator + for multiple locator
+      Given launch the following web page:
+        """
+        html
+          body
+            .target hello
+        """
+      When try to find element via driver <driver>:
+        """
+        css[.target] + 1
+        """
+      Then failed with:
+        """
+        No operation `PLUS` between 'org.testcharm.pf.LocatorElements' and 'java.lang.Integer'
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |

@@ -207,3 +207,60 @@ Feature: operation
         | selenium   |
         | playwright |
 
+  Rule: element attribute
+
+    Scenario Outline: access element attribute by @ + attribute name
+      Given launch the following web page:
+        """
+        html
+        head
+        body
+          .target(attr='value')
+        """
+      Then page in driver <driver> should:
+        """
+        css[.target].@attr= value
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: @class should be an array
+      Given launch the following web page:
+        """
+        html
+        head
+        body
+          div(class='class1 class2')
+        """
+      Then page in driver <driver> should:
+        """
+        css[div].@class= [class1 class2]
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+
+    Scenario Outline: ::watch should invoke org.testcharm.dal.extensions.inspector.Inspector::watch with screen shot
+      Given launch the following web page:
+        """
+        html
+        head
+        body
+          div hello
+        """
+      When perform via driver <driver>:
+        """
+        css.div::watch,
+        ::global[css.div]= {
+          class.simpleName: 'byte[]'
+          string::should.contains: 'PNG'
+        }
+        """
+      Examples:
+        | driver     |
+        | selenium   |
+        | playwright |
+

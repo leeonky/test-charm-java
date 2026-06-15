@@ -5,6 +5,7 @@ import org.testcharm.dal.ast.opt.DALOperator;
 import org.testcharm.dal.runtime.*;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.pf.*;
+import org.testcharm.util.BeanClass;
 import org.testcharm.util.Sneaky;
 
 import java.lang.reflect.Method;
@@ -19,7 +20,7 @@ public class ElementDALOperation implements Extension {
                         new JavaClassPropertyAccessor<WebElement<?, ?, ?>>() {
                             @Override
                             public Object getValue(WebElement<?, ?, ?> webElement, Object property) {
-                                if (property instanceof String && ((String) property).startsWith("@"))
+                                if (BeanClass.cast(property, String.class).map(s -> s.startsWith("@")).orElse(false))
                                     return webElement.attribute(((String) property).substring(1));
                                 return super.getValue(webElement, property);
                             }
