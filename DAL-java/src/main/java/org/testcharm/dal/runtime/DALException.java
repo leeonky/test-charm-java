@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
 
+import static org.testcharm.util.Strings.nullOrEmpty;
+
 public class DALException extends InterpreterException {
     private final Throwable cause;
 
@@ -13,13 +15,13 @@ public class DALException extends InterpreterException {
         this(message, position, Position.Type.CHAR, null);
     }
 
-    public DALException(String message, int position, Throwable cause) {
-        this(message, position, Position.Type.CHAR, cause);
-    }
-
-    public DALException(String message, int position, Position.Type type) {
-        this(message, position, type, null);
-    }
+//    public DALException(String message, int position, Throwable cause) {
+//        this(message, position, Position.Type.CHAR, cause);
+//    }
+//
+//    public DALException(String message, int position, Position.Type type) {
+//        this(message, position, type, null);
+//    }
 
     public DALException(String message, int position, Position.Type type, Throwable cause) {
         super(message, position, type);
@@ -30,9 +32,9 @@ public class DALException extends InterpreterException {
         this(null, position, Position.Type.CHAR, cause);
     }
 
-    public DALException(int position, Position.Type type, Throwable cause) {
-        this(null, position, type, cause);
-    }
+//    public DALException(int position, Position.Type type, Throwable cause) {
+//        this(null, position, type, cause);
+//    }
 
     public static Optional<Throwable> extractException(Throwable e) {
         if (e instanceof UserRuntimeException)
@@ -58,7 +60,7 @@ public class DALException extends InterpreterException {
     }
 
     public static String buildMessage(Throwable e, String message) {
-        if (message != null && !message.isEmpty()) {
+        if (!nullOrEmpty(message)) {
             Throwable cause = e.getCause();
             if (cause != null)
                 return message + "\n" + clauseInfo(cause);

@@ -68,7 +68,7 @@ Feature: should
       """
     Then failed with the message:
       """
-      Failed to invoke predicate method `test`, maybe missing parameters, all candidate methods are:
+      Not enough parameters for Predicate method <test>:
           instance: #package#Bean {}
           public boolean #package#Bean.test(java.lang.String,java.lang.String)
               java.lang.String <any1>
@@ -130,9 +130,9 @@ Feature: should
       """
     Then failed with the message:
       """
-      Predicate method `test` should return boolean but java.lang.Integer
+      Predicate method should return boolean but java.lang.Integer
       <5>
-      all candidate methods are:
+      Predicate method <test>:
           instance: #package#Bean {}
           -> public int #package#Bean.test(java.lang.String)
               java.lang.String <hello>

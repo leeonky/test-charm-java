@@ -4,9 +4,10 @@ import org.testcharm.dal.runtime.CurryingMethod;
 import org.testcharm.dal.runtime.DALRuntimeException;
 import org.testcharm.dal.runtime.MetaData;
 import org.testcharm.dal.runtime.ProxyObject;
+import org.testcharm.dal.runtime.inspector.DumpingBuffer;
 
-import static org.testcharm.dal.runtime.inspector.DumpingBuffer.rootContext;
 import static java.lang.String.format;
+import static org.testcharm.dal.runtime.inspector.DumpingBuffer.rootContext;
 
 public class MetaShould implements ProxyObject {
     private final MetaData<?> metaData;
@@ -44,17 +45,18 @@ public class MetaShould implements ProxyObject {
         public boolean should() {
             Object result = curryingMethod.resolve();
             if (result instanceof CurryingMethod)
-                throw new DALRuntimeException(rootContext(metaData.runtimeContext())
-                        .append("Failed to invoke predicate method `").append(methodName.toString())
-                        .append("`, maybe missing parameters, all candidate methods are:")
-                        .indent(curryingMethod::dumpCandidates).content());
+                throw new DALRuntimeException(dump(rootContext(metaData.runtimeContext())
+                        .append("Not enough parameters for ")).content());
             if (result instanceof Boolean)
                 return negative != (boolean) result;
-            throw new DALRuntimeException(rootContext(metaData.runtimeContext())
-                    .append("Predicate method `").append(methodName.toString()).append("` should return boolean but ")
-                    .dump(metaData.runtimeContext().data(result)).newLine()
-                    .append("all candidate methods are:")
-                    .indent(curryingMethod::dumpCandidates).content());
+            throw new DALRuntimeException(dump(rootContext(metaData.runtimeContext())
+                    .append("Predicate method should return boolean but ")
+                    .dump(metaData.runtimeContext().data(result)).newLine()).content());
+        }
+
+        public DumpingBuffer dump(DumpingBuffer buffer) {
+            return buffer.append("Predicate method <").append(methodName.toString()).append(">:")
+                    .indent(curryingMethod::dumpCandidates);
         }
 
         public String errorMessage() {

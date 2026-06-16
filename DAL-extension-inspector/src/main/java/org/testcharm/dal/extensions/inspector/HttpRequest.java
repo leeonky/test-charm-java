@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
+import static org.testcharm.util.Strings.nullOrEmpty;
 
 class HttpRequest {
     private final String method;
@@ -143,7 +144,7 @@ class HttpRequest {
 
     private static Map<String, String> parseQuery(String query) {
         Map<String, String> values = new HashMap<>();
-        if (query == null || query.isEmpty()) {
+        if (nullOrEmpty(query)) {
             return values;
         }
         for (String item : query.split("&")) {

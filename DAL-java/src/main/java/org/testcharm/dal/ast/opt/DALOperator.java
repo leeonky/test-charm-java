@@ -7,6 +7,8 @@ import org.testcharm.dal.runtime.Operators;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.interpreter.Operator;
 
+import static org.testcharm.util.Strings.nullOrEmpty;
+
 public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, DALOperator, DALExpression> {
     private final boolean needInspect;
     private final Operators type;
@@ -31,7 +33,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     }
 
     public String inspect(String node1, String node2) {
-        if (node1 == null || node1.isEmpty())
+        if (nullOrEmpty(node1))
             return String.format("%s %s", label, node2);
         return String.format("%s %s %s", node1, label, node2);
     }

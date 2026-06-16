@@ -33,14 +33,6 @@ public class DumpingBuffer {
                 context, new AtomicInteger(0), new HashMap<>());
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public DALRuntimeContext getRuntimeContext() {
-        return runtimeContext;
-    }
-
     private void checkCount() {
         if (dumpedObjectCount.getAndIncrement() == runtimeContext.maxDumpingObjectSize())
             throw new MaximizeDump();

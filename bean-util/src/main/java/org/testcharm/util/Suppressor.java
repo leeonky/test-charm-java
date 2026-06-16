@@ -29,4 +29,20 @@ public class Suppressor {
                     "Unexpected case in fallback branch: expected <" + expect + "> but got <" + actual + "> - "
                             + "this may indicate a new case type was added but not handled in the condition chain");
     }
+
+    public static <T> T getIgnoring(ThrowingSupplier<T> supplier, T defaultValue) {
+        try {
+            return supplier.get();
+        } catch (Throwable e) {
+            return defaultValue;
+        }
+    }
+
+    public static void runIgnoring(ThrowingRunnable runnable) {
+        try {
+            runnable.run();
+        } catch (Throwable e) {
+            // ignore
+        }
+    }
 }

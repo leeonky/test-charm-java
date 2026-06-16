@@ -15,39 +15,37 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.testcharm.util.Suppressor.getIgnoring;
+import static org.testcharm.util.Suppressor.runIgnoring;
 import static org.testcharm.util.function.Extension.getFirstPresent;
 
 public class Classes {
     public static List<Class<?>> allTypesIn(String packageName) {
         return new ArrayList<>(new HashSet<Class<?>>() {{
-            try {
+            runIgnoring(() -> {
                 Enumeration<URL> resources = getClassLoader().getResources(packageName.replaceAll("[.]", "/"));
                 while (resources.hasMoreElements())
                     addAll(getClasses(packageName, resources.nextElement()));
-            } catch (Exception ignore) {
-            }
+            });
         }});
     }
 
     private static ClassLoader getClassLoader() {
-        return getFirstPresent(() -> classLoader(Thread.currentThread()::getContextClassLoader),
-                () -> classLoader(Classes.class::getClassLoader),
-                () -> classLoader(ClassLoader::getSystemClassLoader))
+        return getFirstPresent(classLoader2(Thread.currentThread()::getContextClassLoader),
+                classLoader2(Classes.class::getClassLoader),
+                classLoader2(ClassLoader::getSystemClassLoader))
                 .orElseThrow(IllegalStateException::new);
     }
 
-    private static Optional<ClassLoader> classLoader(Supplier<ClassLoader> factory) {
-        ClassLoader classLoader = null;
-        try {
-            classLoader = factory.get();
-        } catch (Throwable ignore) {
-        }
-        return Optional.ofNullable(classLoader);
+    private static Supplier<Optional<ClassLoader>> classLoader2(Supplier<ClassLoader> factory) {
+        return () -> getIgnoring(() -> ofNullable(factory.get()), empty());
     }
 
     private static List<Class<?>> getClasses(String packageName, URL resource) {
-        try {
+        return getIgnoring(() -> {
             if ("jar".equals(resource.getProtocol()))
                 return ((JarURLConnection) resource.openConnection()).getJarFile().stream()
                         .map(jarEntry -> jarEntry.getName().replace('/', '.'))
@@ -63,9 +61,7 @@ public class Classes {
                         .flatMap(List::stream), lines.stream().filter(line -> line.endsWith(".class"))
                         .map(line -> toClass(line, packageName))).collect(toList());
             }
-        } catch (Exception ignore) {
-            return emptyList();
-        }
+        }, emptyList());
     }
 
     private static Class<?> toClass(String className, String packageName) {

@@ -29,19 +29,8 @@ public class Dumpers implements Extension {
         dal.getRuntimeContextBuilder()
                 .registerDumper(CharSequence.class, data -> STRING_DUMPER)
                 .registerDumper(StackTraceElement[].class, data -> STACK_TRACE_DUMPER)
-                .registerDumper(MetaShould.PredicateMethod.class, predicateMethodData -> new Dumper<MetaShould.PredicateMethod>() {
-                    @Override
-                    public void dump(Data<MetaShould.PredicateMethod> data, DumpingBuffer dumpingBuffer) {
-                        dumpingBuffer.append(data.value().getClass().getName()).append(" {")
-                                .indent(data.value().curryingMethodGroup()::dumpCandidates)
-                                .newLine().append("}");
-                    }
-
-                    @Override
-                    public void dumpValue(Data<MetaShould.PredicateMethod> data, DumpingBuffer dumpingBuffer) {
-                        Dumper.super.dumpValue(data, dumpingBuffer);
-                    }
-                })
+                .registerDumper(MetaShould.PredicateMethod.class, predicateMethodData ->
+                        (data, dumpingBuffer) -> data.value().dump(dumpingBuffer))
         ;
     }
 
