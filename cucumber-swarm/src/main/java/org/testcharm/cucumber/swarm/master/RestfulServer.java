@@ -6,12 +6,11 @@ import io.cucumber.core.logging.LoggerFactory;
 import org.testcharm.cucumber.swarm.RestfulContext;
 import org.testcharm.util.Sneaky;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.time.Duration;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+
+import static java.time.Duration.ofSeconds;
 
 public class RestfulServer {
     private static final Logger log = LoggerFactory.getLogger(RestfulServer.class);
@@ -25,22 +24,8 @@ public class RestfulServer {
         log.info(() -> String.format("Starting restful server on %s...",
                 httpServer.getAddress().getAddress().getHostAddress() + ":" + httpServer.getAddress().getPort()));
         httpServer.start();
-        Sneaky.run(this::testServer);
+        new SocketProbe("Restful server", new InetSocketAddress("localhost", httpServer.getAddress().getPort()), ofSeconds(5)).testConnection();
         log.info(() -> "Restful server started");
-    }
-
-    private void testServer() throws InterruptedException {
-        Duration timeout = Duration.ofSeconds(5);
-        long deadline = System.nanoTime() + timeout.toNanos();
-        while (System.nanoTime() < deadline) {
-            try (Socket socket = new Socket()) {
-                socket.connect(new InetSocketAddress("localhost", httpServer.getAddress().getPort()), 200);
-                return;
-            } catch (IOException e) {
-                Thread.sleep(50);
-            }
-        }
-        throw new IllegalStateException("Restful server did not become ready within " + timeout);
     }
 
     public void requestHandler(String method, String path, Consumer<RestfulContext> handler) {

@@ -945,7 +945,7 @@ Feature: Basic Request With Body Steps
         """
       When <method> "/index":
         """ dal:application/octet-stream
-        ::files[图片1]
+        ::uploadFiles[图片1]
         """
       Then got request:
         """

@@ -10,6 +10,7 @@ import org.testcharm.io.VirtualFile;
 import org.testcharm.jfactory.JFactory;
 import org.testcharm.message.MessageConverter;
 import org.testcharm.util.BeanClass;
+import org.testcharm.util.Classes;
 import org.testcharm.util.PropertyReader;
 import org.testcharm.util.Sneaky;
 
@@ -29,8 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.testcharm.dal.Assertions.expect;
@@ -48,6 +47,99 @@ public class RestfulStep {
     private HttpURLConnection connection;
     private final MessageConverter jsonConverter = messageConverterRegistry().moduleOrDefault("RESTful-Step", json());
     private JFactory jFactory;
+    private TextBodyWriter defaultTextBodyWriter;
+    private final LinkedList<BodyRequestBuilder<TextBodyWriter>> textBodyRequestBuilders = new LinkedList<>();
+    private final LinkedList<BodyRequestBuilder<ObjectBodyWriter>> objectBodyRequestBuilders = new LinkedList<>();
+    private String defaultDocType;
+
+    public RestfulStep() {
+        setDefaultDocType("application/json");
+        setDefaultTextBodyWriter((outputStream, content) -> outputStream.write(content.getBytes(UTF_8)));
+
+        addTextBodyRequestBuilder(new BodyRequestBuilder<TextBodyWriter>() {
+            @Override
+            public boolean matches(String contentType) {
+                return contentType.startsWith("multipart/form-data");
+            }
+
+            @Override
+            public TextBodyWriter writer(String contentType) {
+                return (outputStream, content) -> outputStream.write(String.join("\r\n", content.split(System.lineSeparator())).getBytes());
+            }
+        });
+
+        addObjectBodyRequestBuilder(new BodyRequestBuilder<ObjectBodyWriter>() {
+            @Override
+            public boolean matches(String contentType) {
+                return contentType.equals("application/json");
+            }
+
+            @Override
+            public ObjectBodyWriter writer(String contentType) {
+                return (outputStream, object) -> outputStream.write(jsonConverter.serialize(object).getBytes(UTF_8));
+            }
+        });
+        addObjectBodyRequestBuilder(new BodyRequestBuilder<ObjectBodyWriter>() {
+            @Override
+            public boolean matches(String contentType) {
+                return contentType.equals("multipart/form-data");
+            }
+
+            @Override
+            public ObjectBodyWriter writer(String contentType) {
+                String boundary = UUID.randomUUID().toString();
+                return new ObjectBodyWriter() {
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public void write(OutputStream outputStream, Object object) {
+                        HttpStream httpStream = new HttpStream(outputStream, UTF_8);
+                        if (object instanceof Map) {
+                            DAL.dal().wrap(object).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
+                        } else {
+                            BeanClass<Object> type = BeanClass.createFrom(object);
+                            DAL.dal().wrap(object).toMap().forEach((key, value) -> {
+                                        Optional<PropertyReader<Object>> linkName = ((BeanClass<Object>) type.getPropertyReader(key).getType()).getPropertyReaders().values()
+                                                .stream().filter(p -> p.annotation(FormFileLinkName.class).isPresent()).findFirst();
+                                        if (linkName.isPresent())
+                                            appendEntry(httpStream, "@" + key, linkName.get().getValue(value), boundary);
+                                        else
+                                            appendEntry(httpStream, key, value, boundary);
+                                    }
+                            );
+                        }
+                        httpStream.close(boundary);
+                    }
+
+                    @Override
+                    public String contentType(String contentType) {
+                        return "multipart/form-data; boundary=" + boundary;
+                    }
+                };
+            }
+        });
+        addObjectBodyRequestBuilder(new BodyRequestBuilder<ObjectBodyWriter>() {
+            @Override
+            public boolean matches(String contentType) {
+                return contentType.equals("application/octet-stream");
+            }
+
+            @Override
+            public ObjectBodyWriter writer(String contentType) {
+                return (outputStream, object) -> {
+                    if (object instanceof String)
+                        outputStream.write(((String) object).getBytes());
+                    else if (object instanceof byte[])
+                        outputStream.write((byte[]) object);
+                    else if (object instanceof UploadFile)
+                        outputStream.write(((UploadFile) object).getContent());
+                    else if (object instanceof VirtualFile)
+                        outputStream.write(((VirtualFile) object).binary());
+                    else
+                        throw new IllegalArgumentException("Unsupported object type for application/octet-stream: " + Classes.getClassName(object));
+                };
+            }
+        });
+    }
 
     public void setDefaultDocType(String defaultDocType) {
         this.defaultDocType = defaultDocType;
@@ -57,101 +149,13 @@ public class RestfulStep {
         this.defaultTextBodyWriter = defaultTextBodyWriter;
     }
 
-    private String defaultDocType = "application/json";
-
-    private final LinkedList<BodyRequestBuilder<ObjectBodyWriter>> objectBodyRequestBuilders = new LinkedList<>(asList(
-            new BodyRequestBuilder<ObjectBodyWriter>() {
-                @Override
-                public boolean matches(String contentType) {
-                    return contentType.equals("application/json");
-                }
-
-                @Override
-                public ObjectBodyWriter writer(String contentType) {
-                    return (outputStream, object) -> outputStream.write(jsonConverter.serialize(object).getBytes(UTF_8));
-                }
-            }, new BodyRequestBuilder<ObjectBodyWriter>() {
-                @Override
-                public boolean matches(String contentType) {
-                    return contentType.equals("multipart/form-data");
-                }
-
-                @Override
-                public ObjectBodyWriter writer(String contentType) {
-                    String boundary = UUID.randomUUID().toString();
-                    return new ObjectBodyWriter() {
-                        @SuppressWarnings("unchecked")
-                        @Override
-                        public void write(OutputStream outputStream, Object object) {
-                            HttpStream httpStream = new HttpStream(outputStream, UTF_8);
-                            if (object instanceof Map) {
-                                DAL.dal().wrap(object).toMap().forEach((key, value) -> appendEntry(httpStream, key, value, boundary));
-                            } else {
-                                BeanClass<Object> type = BeanClass.createFrom(object);
-                                DAL.dal().wrap(object).toMap().forEach((key, value) -> {
-                                            Optional<PropertyReader<Object>> linkName = ((BeanClass<Object>) type.getPropertyReader(key).getType()).getPropertyReaders().values()
-                                                    .stream().filter(p -> p.annotation(FormFileLinkName.class).isPresent()).findFirst();
-                                            if (linkName.isPresent())
-                                                appendEntry(httpStream, "@" + key, linkName.get().getValue(value), boundary);
-                                            else
-                                                appendEntry(httpStream, key, value, boundary);
-                                        }
-                                );
-                            }
-                            httpStream.close(boundary);
-                        }
-
-                        @Override
-                        public String contentType(String contentType) {
-                            return "multipart/form-data; boundary=" + boundary;
-                        }
-                    };
-                }
-            }, new BodyRequestBuilder<ObjectBodyWriter>() {
-                @Override
-                public boolean matches(String contentType) {
-                    return contentType.equals("application/octet-stream");
-                }
-
-                @Override
-                public ObjectBodyWriter writer(String contentType) {
-                    return (outputStream, object) -> {
-                        if (object instanceof String)
-                            outputStream.write(((String) object).getBytes());
-                        else if (object instanceof byte[])
-                            outputStream.write((byte[]) object);
-                        else if (object instanceof UploadFile)
-                            outputStream.write(((UploadFile) object).getContent());
-                        else if (object instanceof VirtualFile)
-                            outputStream.write(((VirtualFile) object).binary());
-                    };
-                }
-            }
-    ));
-
     public void addObjectBodyRequestBuilder(BodyRequestBuilder<ObjectBodyWriter> builder) {
         objectBodyRequestBuilders.addFirst(builder);
     }
 
-    private final LinkedList<BodyRequestBuilder<TextBodyWriter>> textBodyRequestBuilders = new LinkedList<>(singletonList(
-            new BodyRequestBuilder<TextBodyWriter>() {
-                @Override
-                public boolean matches(String contentType) {
-                    return contentType.startsWith("multipart/form-data");
-                }
-
-                @Override
-                public TextBodyWriter writer(String contentType) {
-                    return (outputStream, content) -> outputStream.write(String.join("\r\n", content.split(System.lineSeparator())).getBytes());
-                }
-            }
-    ));
-
     public void addTextBodyRequestBuilder(BodyRequestBuilder<TextBodyWriter> builder) {
         textBodyRequestBuilders.addFirst(builder);
     }
-
-    private TextBodyWriter defaultTextBodyWriter = (outputStream, content) -> outputStream.write(content.getBytes());
 
     private static Stream<String> getParamString(Map.Entry<String, Object> entry) {
         if (entry.getValue() instanceof List) {
@@ -491,11 +495,9 @@ public class RestfulStep {
             return clazz.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {
             Class<?> superClass = clazz.getSuperclass();
-            if (superClass == null) {
-                throw new RuntimeException("Failed to get field " + fieldName + " from " + clazz, e);
-            } else {
+            if (superClass != null)
                 return getField(superClass, fieldName);
-            }
+            throw new RuntimeException("Failed to get field " + fieldName + " from " + clazz, e);
         }
     }
 
@@ -568,15 +570,16 @@ public class RestfulStep {
         public Response(HttpURLConnection connection) {
             raw = connection;
             code = Sneaky.get(connection::getResponseCode);
-            InputStream stream = Sneaky.get(() -> 100 <= code && code <= 399 ? raw.getInputStream() : raw.getErrorStream());
+            InputStream stream = Sneaky.get(() -> code >= 300 ? raw.getErrorStream() : raw.getInputStream());
             body = stream == null ? null : readAllAndClose(stream);
         }
 
         public Map<String, Object> getHeaders() {
             if (headers == null)
                 headers = raw.getHeaderFields().entrySet().stream()
-                        .filter(entry -> entry.getKey() != null)
-                        .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue() != null && entry.getValue().size() == 1 ? entry.getValue().get(0) : entry.getValue()))
+                        .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                        .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(),
+                                entry.getValue().size() == 1 ? entry.getValue().get(0) : entry.getValue()))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             return headers;
         }

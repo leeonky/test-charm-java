@@ -9,6 +9,6 @@ public class JDataExtension implements org.testcharm.dal.runtime.Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty(RequestCollector.class, "headers", metaData -> metaData.data().value().headerCollector())
-                .registerMetaProperty(RequestCollector.class, "files", metaData -> metaData.data().value().files());
+                .registerMetaProperty(RequestCollector.class, "uploadFiles", metaData -> metaData.data().value().files());
     }
 }

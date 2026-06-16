@@ -9,4 +9,5 @@ dependencies {
     testImplementation project(':java-compiler-util')
     testImplementation project(':DAL-extension-basic')
     testImplementation project(':jfactory-cucumber')
+    testImplementation project(':RESTful-cucumber')
 }
