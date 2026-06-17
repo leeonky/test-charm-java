@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
-public class DataBase implements AutoCloseable, ProxyObject {
+public class DataBase implements ProxyObject {
     public final Connection connection;
     public final DataBaseBuilder builder;
     public Set<String> queriedTables = new LinkedHashSet<>();
@@ -35,11 +35,6 @@ public class DataBase implements AutoCloseable, ProxyObject {
 
     public String getUrl() {
         return Sneaky.get(() -> connection.getMetaData().getURL());
-    }
-
-    @Override
-    public void close() throws Exception {
-        connection.close();
     }
 
     @Override

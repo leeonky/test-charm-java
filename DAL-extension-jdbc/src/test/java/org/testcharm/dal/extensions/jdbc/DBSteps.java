@@ -1,6 +1,5 @@
 package org.testcharm.dal.extensions.jdbc;
 
-import org.testcharm.dal.DAL;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -8,6 +7,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
+import org.testcharm.dal.DAL;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -43,6 +43,7 @@ public class DBSteps {
         builder.tablesProvider(statement -> tables.asList());
     }
 
+    @SneakyThrows
     @Then("db should:")
     public void dbShould(String expression) {
         expect(builder.connect(connection)).should(expression);

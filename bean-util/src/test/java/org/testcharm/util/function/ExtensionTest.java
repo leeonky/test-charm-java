@@ -93,4 +93,15 @@ class ExtensionTest {
             assertThat(If.firstNonNull(null, 1, 2)).isEqualTo(1);
         }
     }
+
+    @Nested
+    class Adapt {
+
+        @Test
+        void runnable_to_supplier() {
+            StringBuilder sb = new StringBuilder();
+            adapt(() -> sb.append("hello")).get();
+            assertThat(sb.toString()).isEqualTo("hello");
+        }
+    }
 }

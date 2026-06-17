@@ -61,8 +61,8 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<DumperFactory<?>> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
     private final CheckerSet checkerSetForEqualing = new CheckerSet(CheckerSet::defaultEqualing);
-    private int maxDumpingLineSize = 2000;
-    private int maxDumpingObjectSize = 255;
+    private int maxDumpingLineSize;
+    private int maxDumpingObjectSize;
     private ErrorHook errorHook = (i, code, e, c) -> false;
     private final Map<Class<?>, Map<Object, RuntimeHandler<MetaData<?>>>> localMetaProperties
             = new TreeMap<>(Classes::compareByExtends);
@@ -72,6 +72,11 @@ public class RuntimeContextBuilder {
     private final Features features = new Features();
     private Consumer<Data<?>> returnHook = x -> {
     };
+
+    public RuntimeContextBuilder() {
+        setMaxDumpingObjectSize(255);
+        setMaxDumpingLineSize(2000);
+    }
 
     public RuntimeContextBuilder registerMetaProperty(Object property, RuntimeHandler<MetaData<?>> function) {
         metaProperties.put(property, function);
@@ -216,7 +221,7 @@ public class RuntimeContextBuilder {
     }
 
     public void mergeTextFormatter(String name, String other, String... others) {
-        TextFormatter formatter = textFormatterMap.get(other);
+        TextFormatter<?, ?> formatter = textFormatterMap.get(other);
         for (String o : others)
             formatter = formatter.merge(textFormatterMap.get(o));
         registerTextFormatter(name, delegateFormatter(formatter, "Merged from " + other + " " + String.join(" ", others)));
@@ -509,11 +514,11 @@ public class RuntimeContextBuilder {
         @SuppressWarnings("unchecked")
         public <T> Dumper<T> fetchDumper(Data<T> data) {
             return dumperFactories.tryGetData(data.value()).map(factory -> ((DumperFactory<T>) factory).apply(data)).orElseGet(() -> {
-                if (data.isNull())
+                if (data.value() == null || data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
                     return (Dumper<T>) Dumper.LIST_DUMPER;
-                if (data.value() != null && data.value().getClass().isEnum())
+                if (data.value().getClass().isEnum())
                     return (Dumper<T>) Dumper.VALUE_DUMPER;
                 return (Dumper<T>) Dumper.MAP_DUMPER;
             });

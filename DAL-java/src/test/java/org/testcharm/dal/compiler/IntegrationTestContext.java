@@ -307,6 +307,7 @@ public class IntegrationTestContext {
 
     @SneakyThrows
     public void verifyDumpedData(String verification) {
+        evaluate("");
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(input);
 
         assertThat(runtimeContext.getThis().dumpValue()).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));

@@ -1,14 +1,36 @@
 package org.testcharm.dal;
 
+import org.junit.jupiter.api.Test;
 import org.testcharm.dal.runtime.RuntimeContextBuilder;
 import org.testcharm.dal.runtime.TextAttribute;
 import org.testcharm.dal.runtime.TextFormatter;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class TextFormatterTest {
+
+    @Test
+    void support_format_pipeline() {
+        DAL dal = new DAL().extend();
+        dal.getRuntimeContextBuilder().registerTextFormatter("Int", new TextFormatter<String, Integer>() {
+            @Override
+            protected Integer format(String content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
+                return new Integer(content);
+            }
+        });
+
+        dal.getRuntimeContextBuilder().registerTextFormatter("INC", new TextFormatter<Integer, Integer>() {
+            @Override
+            protected Integer format(Integer content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
+                return content + 1;
+            }
+        });
+
+        dal.evaluate("", "``` Int INC\n" +
+                "1\n" +
+                "```= 2");
+    }
 
     @Test
     void support_merge_format() {
@@ -26,8 +48,9 @@ public class TextFormatterTest {
                 return content + 1;
             }
         });
+        dal.getRuntimeContextBuilder().mergeTextFormatter("MG", "Int", "INC");
 
-        dal.evaluate("", "``` Int INC\n" +
+        dal.evaluate("", "``` MG\n" +
                 "1\n" +
                 "```= 2");
     }

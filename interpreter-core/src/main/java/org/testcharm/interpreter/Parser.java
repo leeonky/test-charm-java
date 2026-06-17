@@ -17,7 +17,7 @@ public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA
 
     @SuppressWarnings("unchecked")
     static <P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
-            MA extends Parser.Mandatory<P, PA, MA, T>, T> PA oneOf(PA... parsers) {
+            MA extends Mandatory<P, PA, MA, T>, T> PA oneOf(PA... parsers) {
         return parsers[0].castParser(procedure -> Stream.of(parsers).map(parser -> parser.parse(procedure)).
                 filter(Optional::isPresent).findFirst().orElse(empty()));
     }
@@ -38,7 +38,7 @@ public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA
         throw new IllegalStateException();
     }
 
-    default MA castMandatory(Parser.Mandatory<P, PA, MA, T> mandatory) {
+    default MA castMandatory(Mandatory<P, PA, MA, T> mandatory) {
         throw new IllegalStateException();
     }
 
@@ -66,7 +66,7 @@ public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA
             throw new IllegalStateException();
         }
 
-        default MA castMandatory(Parser.Mandatory<P, PA, MA, T> mandatory) {
+        default MA castMandatory(Mandatory<P, PA, MA, T> mandatory) {
             throw new IllegalStateException();
         }
 

@@ -1,20 +1,20 @@
 package org.testcharm.dal;
 
-import org.testcharm.dal.runtime.Data;
-import org.testcharm.dal.type.FieldAlias;
-import org.testcharm.dal.type.FieldAliases;
-import org.testcharm.dal.type.Partial;
-import org.testcharm.dal.type.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcharm.dal.runtime.Data;
+import org.testcharm.dal.type.FieldAlias;
+import org.testcharm.dal.type.FieldAliases;
+import org.testcharm.dal.type.Partial;
+import org.testcharm.dal.type.Schema;
 
-import static org.testcharm.dal.Assertions.expect;
-import static org.testcharm.dal.Assertions.expectRun;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.testcharm.dal.Assertions.expect;
+import static org.testcharm.dal.Assertions.expectRun;
 
 public class AssertionsTest {
 
@@ -74,6 +74,14 @@ public class AssertionsTest {
             dal.getRuntimeContextBuilder().registerSchema(BeanSchema.class);
 
             expect(new Bean[]{new Bean().setValue(1)}).use(dal).is("[BeanSchema]").should("[0].aliasOfValue= 1");
+        }
+
+        @Test
+        void raise_error_when_specified_schema_not_registered() {
+            DAL dal = new DAL().extend();
+
+            assertThatThrownBy(() -> expect(new Bean().setValue(1)).use(dal).is("BeanSchema").should("aliasOfValue= 1"))
+                    .hasMessageContaining("Unknown schema 'BeanSchema'");
         }
     }
 

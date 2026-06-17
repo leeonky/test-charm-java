@@ -470,3 +470,29 @@ Feature: dump-data
         e: #package#Data$E <A>
     }
     """
+
+  Scenario: dump customer null
+    Given the following java class:
+      """
+      public class NullObject {}
+      """
+    Given the following java class:
+      """
+      public class Data {
+        public NullObject obj = new NullObject();
+      }
+      """
+    And register DAL:
+      """
+      dal.getRuntimeContextBuilder().registerPropertyAccessor(NullObject.class, new org.testcharm.dal.runtime.PropertyAccessor<NullObject>() {
+        public boolean isNull(NullObject instance) {
+            return true;
+        }
+      });
+      """
+    Then dumped instance of java class "Data" should be:
+      """
+      #package#Data {
+          obj: null
+      }
+      """

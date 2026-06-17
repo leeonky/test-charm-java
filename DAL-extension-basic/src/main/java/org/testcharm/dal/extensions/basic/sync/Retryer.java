@@ -33,29 +33,21 @@ public class Retryer {
         Instant start = Instant.now();
         do {
             try {
-                return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime * 2, defaultTimeout), MILLISECONDS);
+                return CompletableFuture.supplyAsync(s).get(Math.max(waitingTime * 2, defaultTimeout()), MILLISECONDS);
             } catch (ExecutionException e) {
                 exception = e.getCause();
             } catch (Throwable e) {
                 exception = e;
             }
-        } while (timeout(start) && sleep());
+        } while (timeout(start));
         return Sneaky.sneakyThrow(exception);
     }
 
     private boolean timeout(Instant now) {
-        return Duration.between(now, Instant.now()).toMillis() < waitingTime;
-    }
-
-    private boolean sleep() {
-        Sneaky.run(() -> Thread.sleep(interval));
-        return true;
-    }
-
-    public void run(Runnable runnable) throws Throwable {
-        get(() -> {
-            runnable.run();
-            return null;
-        });
+        if (Duration.between(now, Instant.now()).toMillis() < waitingTime) {
+            Sneaky.run(() -> Thread.sleep(interval));
+            return true;
+        }
+        return false;
     }
 }

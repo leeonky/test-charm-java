@@ -61,4 +61,11 @@ public class Extension {
         map.forEach((k, v) -> result.put(k, mapper.apply(v)));
         return result;
     }
+
+    public static <T> Supplier<T> adapt(Runnable runnable) {
+        return () -> {
+            runnable.run();
+            return null;
+        };
+    }
 }
