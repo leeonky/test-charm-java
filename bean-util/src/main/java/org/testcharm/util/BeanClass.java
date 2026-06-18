@@ -1,5 +1,6 @@
 package org.testcharm.util;
 
+import javax.annotation.Generated;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Proxy;
@@ -14,9 +15,13 @@ import static java.util.stream.Collectors.toList;
 
 public class BeanClass<T> {
     private final static Map<Class<?>, BeanClass<?>> instanceCache = new ConcurrentHashMap<>();
-    private static Converter converter = Converter.getInstance();
+    private static Converter converter;
     private final TypeInfo<T> typeInfo;
     private final Class<T> type;
+
+    static {
+        setConverter(Converter.getInstance());
+    }
 
     @SuppressWarnings("unchecked")
     protected BeanClass(Class<T> type) {
@@ -262,6 +267,7 @@ public class BeanClass<T> {
     }
 
     @Override
+    @Generated("ignore jacoco")
     public String toString() {
         return getType().toString();
     }

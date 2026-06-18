@@ -50,7 +50,7 @@ public class RowHeader extends DALNode {
     }
 
     public RowType resolveRowType() {
-        return indexOrProperty.map(DALNode::guessTableHeaderType).orElse(DEFAULT_INDEX);
+        return indexOrProperty.map(DALNode::guessTableHeaderType).orElseGet(this::guessTableHeaderType);
     }
 
     public Optional<Integer> position() {

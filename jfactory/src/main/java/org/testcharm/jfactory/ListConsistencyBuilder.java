@@ -37,17 +37,4 @@ public class ListConsistencyBuilder<T, C extends Coordinate> {
 
         }
     }
-
-    public static class D2<T, C extends Coordinate> extends ListConsistencyBuilder<T, C> {
-        D2(Consistency<T, C> main, DefaultListConsistency<T, C> listConsistency) {
-            super(main, listConsistency);
-        }
-
-        public D2<T, C> normalize(Function<Coordinate.D2, C> aligner,
-                                  Function<C, Coordinate.D2> inverseAligner) {
-            listConsistency.normalize(c -> aligner.apply(c.convertTo(beanClass(Coordinate.D2.class))),
-                    inverseAligner::apply);
-            return this;
-        }
-    }
 }

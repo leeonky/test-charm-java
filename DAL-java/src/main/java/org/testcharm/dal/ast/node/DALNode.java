@@ -8,6 +8,7 @@ import org.testcharm.dal.runtime.ExpectationFactory;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.interpreter.NodeBase;
 
+import javax.annotation.Generated;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -76,6 +77,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     @Override
+    @Generated("ignore jacoco")
     public String toString() {
         return inspect();
     }
