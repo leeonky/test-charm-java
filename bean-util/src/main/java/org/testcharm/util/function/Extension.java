@@ -1,5 +1,8 @@
 package org.testcharm.util.function;
 
+import org.testcharm.util.ThrowingRunnable;
+import org.testcharm.util.ThrowingSupplier;
+
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -63,6 +66,13 @@ public class Extension {
     }
 
     public static <T> Supplier<T> adapt(Runnable runnable) {
+        return () -> {
+            runnable.run();
+            return null;
+        };
+    }
+
+    public static <T> ThrowingSupplier<T> adaptThrowing(ThrowingRunnable runnable) {
         return () -> {
             runnable.run();
             return null;

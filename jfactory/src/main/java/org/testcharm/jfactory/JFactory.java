@@ -19,7 +19,11 @@ public class JFactory {
     private final DataRepository dataRepository;
     private final Set<Predicate<PropertyWriter<?>>> ignoreDefaultValues = new LinkedHashSet<>();
 
-    private static Function<Class<?>, BeanClass<?>> beanClassFactory = BeanClassProxy::create;
+    private static Function<Class<?>, BeanClass<?>> beanClassFactory;
+
+    static {
+        setBeanClassFactory(BeanClassProxy::create);
+    }
 
     public JFactory() {
         this(new MemoryDataRepository());

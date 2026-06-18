@@ -1,5 +1,6 @@
 package org.testcharm.util.function;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -101,6 +102,14 @@ class ExtensionTest {
         void runnable_to_supplier() {
             StringBuilder sb = new StringBuilder();
             adapt(() -> sb.append("hello")).get();
+            assertThat(sb.toString()).isEqualTo("hello");
+        }
+
+        @SneakyThrows
+        @Test
+        void runnable_to_throwing_supplier() {
+            StringBuilder sb = new StringBuilder();
+            adaptThrowing(() -> sb.append("hello")).get();
             assertThat(sb.toString()).isEqualTo("hello");
         }
     }

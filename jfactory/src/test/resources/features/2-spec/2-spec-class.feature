@@ -656,3 +656,73 @@ Feature: Spec Class - Define Type Rules in a Separate Spec Class
         """
         bean.value= input-property
         """
+
+  Rule: Simple API for Spec Creation
+
+    Background:
+      Given the following bean definition:
+        """
+        public class Bean {
+          public String str1, str2;
+        }
+        """
+      And the following spec definition:
+        """
+        public class BeanSpec extends Spec<Bean> {
+          @Trait
+          public void hello() {
+            property("str1").value("hello");
+          }
+
+          @Trait
+          public void world() {
+            property("str2").value("world");
+          }
+        }
+        """
+      And register as follows:
+        """
+        jFactory.register(BeanSpec.class);
+        """
+
+    Scenario: Create as Spec
+      When evaluating the following code:
+        """
+        jFactory.createAs(BeanSpec.class);
+        """
+      Then the result should be:
+        """
+        : {
+          str1= /^str1.*/
+          str2= /^str2.*/
+        }
+        """
+
+    Scenario: Create as Spec with Trait
+      When evaluating the following code:
+        """
+        jFactory.createAs(BeanSpec.class, spec-> {
+          spec.hello();
+          spec.world();
+        });
+        """
+      Then the result should be:
+        """
+        : {
+          str1= hello
+          str2= world
+        }
+        """
+
+    Scenario: Create as Spec with Trait in string
+      When evaluating the following code:
+        """
+        jFactory.createAs("hello", "world", "BeanSpec");
+        """
+      Then the result should be:
+        """
+        : {
+          str1= hello
+          str2= world
+        }
+        """

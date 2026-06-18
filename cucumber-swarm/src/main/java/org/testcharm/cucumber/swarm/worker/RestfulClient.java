@@ -5,10 +5,12 @@ import io.cucumber.core.logging.LoggerFactory;
 import org.testcharm.cucumber.swarm.SwarmHost;
 import org.testcharm.cucumber.swarm.util.IoUtil;
 import org.testcharm.util.Sneaky;
+import org.testcharm.util.ThrowingSupplier;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import static org.testcharm.util.function.Extension.adaptThrowing;
 
 public class RestfulClient {
     private static final Logger log = LoggerFactory.getLogger(RestfulClient.class);
@@ -20,8 +22,7 @@ public class RestfulClient {
 
     public String httpGet(int workerId, String path) {
         URL url = swarmArgs.swarmUrl(path);
-
-        try {
+        return httpRequest(() -> {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("Content-Type", "application/json");
@@ -30,15 +31,12 @@ public class RestfulClient {
             if (urlConnection.getResponseCode() == 200)
                 return new String(IoUtil.readAll(urlConnection.getInputStream()));
             throw new HttpException(urlConnection);
-        } catch (IOException e) {
-            log.error(() -> "Failed to GET from " + url + "\n" + e);
-            return Sneaky.sneakyThrow(e);
-        }
+        }, "GET from " + url);
     }
 
     public void httpPost(int workerId, String path, String body) {
         URL url = swarmArgs.swarmUrl(path);
-        try {
+        httpRequest(adaptThrowing(() -> {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("POST");
             urlConnection.setRequestProperty("Content-Type", "application/json");
@@ -49,9 +47,17 @@ public class RestfulClient {
 
             if (urlConnection.getResponseCode() != 200)
                 throw new HttpException(urlConnection);
-        } catch (IOException e) {
-            log.error(() -> "Failed to POST to " + url + "\n" + e);
-            Sneaky.sneakyThrow(e);
+        }), "POST to " + url);
+    }
+
+    private <T> T httpRequest(ThrowingSupplier<T> action, String requestInfo) {
+        try {
+            return action.get();
+        } catch (HttpException e) {
+            throw e;
+        } catch (Throwable e) {
+            log.error(() -> "Failed to " + requestInfo + "\n" + e);
+            return Sneaky.sneakyThrow(e);
         }
     }
 }
