@@ -1,4 +1,4 @@
-package org.testcharm.util.property;
+package org.testcharm.util.property.legacy;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -135,7 +135,7 @@ public class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Beans.class).setPropertyValue(beans, "bean", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property org.testcharm.util.property.PropertyWriterTest$Beans.bean<org.testcharm.util.property.PropertyWriterTest$Bean>");
+                            "property org.testcharm.util.property.legacy.PropertyWriterTest$Beans.bean<org.testcharm.util.property.legacy.PropertyWriterTest$Bean>");
         }
 
         @Test
@@ -145,7 +145,7 @@ public class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Beans.class).setPropertyValue(beans, "beanSetter", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property org.testcharm.util.property.PropertyWriterTest$Beans.beanSetter<org.testcharm.util.property.PropertyWriterTest$Bean>");
+                            "property org.testcharm.util.property.legacy.PropertyWriterTest$Beans.beanSetter<org.testcharm.util.property.legacy.PropertyWriterTest$Bean>");
         }
 
         @Test
@@ -154,7 +154,7 @@ public class PropertyWriterTest {
             assertThat(assertThrows(IllegalArgumentException.class, () ->
                     create(Bean[].class).setPropertyValue(beans, "0", "unexpected value")))
                     .hasMessageContaining("Can not set java.lang.String[unexpected value] to " +
-                            "property [Lorg.testcharm.util.property.PropertyWriterTest$Bean;[0]<org.testcharm.util.property.PropertyWriterTest$Bean>");
+                            "property [Lorg.testcharm.util.property.legacy.PropertyWriterTest$Bean;[0]<org.testcharm.util.property.legacy.PropertyWriterTest$Bean>");
         }
 
         @Test
@@ -364,7 +364,7 @@ public class PropertyWriterTest {
                         decorator.setValue(new Bean(), 100));
 
                 assertEquals(illegalArgumentException, thrown.getCause());
-                assertEquals("Can not set java.lang.Integer[100] to property org.testcharm.util.property.PropertyWriterTest$Bean.i<int>", thrown.getMessage());
+                assertEquals("Can not set java.lang.Integer[100] to property org.testcharm.util.property.legacy.PropertyWriterTest$Bean.i<int>", thrown.getMessage());
             }
         }
     }

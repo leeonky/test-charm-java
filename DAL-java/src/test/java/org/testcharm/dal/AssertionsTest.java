@@ -3,6 +3,7 @@ package org.testcharm.dal;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.testcharm.dal.runtime.Data;
@@ -13,10 +14,16 @@ import org.testcharm.dal.type.Schema;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.testcharm.dal.Assertions.expect;
 import static org.testcharm.dal.Assertions.expectRun;
 
 public class AssertionsTest {
+
+    @BeforeEach
+    void reset_dump_input() {
+        Assertions.dumpInput(true);
+    }
 
     @Test
     void disable_dump_input() {
@@ -40,6 +47,14 @@ public class AssertionsTest {
                     .hasMessageContaining("Failed")
                     .hasMessageContaining("The root value was")
                     .hasMessageContaining("value: java.lang.Integer <100>");
+        }
+
+        @Test
+        void verify_input_by_root_schema_no_dump() {
+            Assertions.dumpInput(false);
+            assertThatThrownBy(() -> expect(new Bean().setValue(100)).is(BeanSchema.class))
+                    .hasMessageContaining("Failed")
+                    .hasMessageNotContaining("The root value was");
         }
 
         @Test
@@ -77,12 +92,40 @@ public class AssertionsTest {
         }
 
         @Test
+        void invalid_schema_list() {
+            DAL dal = new DAL().extend();
+            dal.getRuntimeContextBuilder().registerSchema(BeanSchema.class);
+
+            assertThat(
+                    assertThrows(IllegalArgumentException.class, () ->
+                            expect(new Bean[]{new Bean().setValue(1)}).use(dal).is("[BeanSchema"))
+            ).hasMessage("Invalid schema: [BeanSchema");
+
+        }
+
+        @Test
         void raise_error_when_specified_schema_not_registered() {
             DAL dal = new DAL().extend();
 
             assertThatThrownBy(() -> expect(new Bean().setValue(1)).use(dal).is("BeanSchema").should("aliasOfValue= 1"))
                     .hasMessageContaining("Unknown schema 'BeanSchema'");
         }
+    }
+
+    @Test
+    void is_equal_to_pass() {
+        expect(1).isEqualTo(1);
+    }
+
+    @Test
+    void is_equal_to_fail() {
+        assertThatThrownBy(() -> expect(1).isEqualTo(2))
+                .hasMessage("Expected to be equal to: java.lang.Integer\n" +
+                        "<2>\n" +
+                        " ^\n" +
+                        "Actual: java.lang.Integer\n" +
+                        "<1>\n" +
+                        " ^");
     }
 
     @Getter
@@ -105,8 +148,4 @@ public class AssertionsTest {
                 throw new AssertionError("Failed");
         }
     }
-
-//    List schema
-//    use string schema
-//    use string schema in list
 }

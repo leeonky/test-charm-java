@@ -1,4 +1,4 @@
-package org.testcharm.util.property;
+package org.testcharm.util.property.legacy;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

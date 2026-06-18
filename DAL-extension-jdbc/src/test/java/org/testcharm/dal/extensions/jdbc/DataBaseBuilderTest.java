@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
-import static org.testcharm.dal.Assertions.expect;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testcharm.dal.Assertions.expect;
 
 class DataBaseBuilderTest {
     private final DataBaseBuilder builder = new DataBaseBuilder();

@@ -23,9 +23,13 @@ public class Assertions {
     private final InputCode<Object> inputCode;
     public static boolean dumpInput = true;
     private DAL dal;
-    private static Supplier<DAL> dalFactory = DAL::dal;
+    private static Supplier<DAL> dalFactory;
     private Class<?> schema;
     private Object constants;
+
+    static {
+        setDALFactory(DAL::dal);
+    }
 
     public static void setDALFactory(Supplier<DAL> dalFactory) {
         Assertions.dalFactory = dalFactory;
@@ -64,13 +68,8 @@ public class Assertions {
         } catch (InterpreterException e) {
             String detailMessage = e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + getDAL().getRuntimeContextBuilder().build(inputCode).getThis().dump();
-            throw new AssertionError(detailMessage) {
-                @Override
-                public String toString() {
-                    return AssertionError.class.getName() + ":\n" + getMessage();
-                }
-            };
+                detailMessage += "\n\nThe root value was: " + getDAL().getRuntimeContextBuilder().build(inputCode).getThis().dump() + "\n";
+            throw new AssertionError(detailMessage);
         }
     }
 
@@ -106,9 +105,12 @@ public class Assertions {
     }
 
     public Assertions is(String schema) {
-        if (schema.startsWith("[") && schema.endsWith("]"))
-            return is(Array.newInstance(getDAL().getRuntimeContextBuilder().schemaType(
-                    schema.replace('[', ' ').replace(']', ' ').trim()).getType(), 0).getClass());
+        if (schema.startsWith("["))
+            if (schema.endsWith("]"))
+                return is(Array.newInstance(getDAL().getRuntimeContextBuilder().schemaType(
+                        schema.replace('[', ' ').replace(']', ' ').trim()).getType(), 0).getClass());
+            else
+                throw new IllegalArgumentException("Invalid schema: " + schema);
         return is(getDAL().getRuntimeContextBuilder().schemaType(schema).getType());
     }
 
