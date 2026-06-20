@@ -1,6 +1,5 @@
 package org.testcharm.util;
 
-import javax.annotation.Generated;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Proxy;
@@ -267,7 +266,6 @@ public class BeanClass<T> {
     }
 
     @Override
-    @Generated("ignore jacoco")
     public String toString() {
         return getType().toString();
     }

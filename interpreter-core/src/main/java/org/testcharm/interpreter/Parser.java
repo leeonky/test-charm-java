@@ -1,6 +1,5 @@
 package org.testcharm.interpreter;
 
-import javax.annotation.Generated;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -35,12 +34,10 @@ public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA
 
     Optional<T> parse(P procedure);
 
-    @Generated("ignore jacoco")
     default PA castParser(Parser<P, PA, MA, T> parser) {
         throw new IllegalStateException();
     }
 
-    @Generated("ignore jacoco")
     default MA castMandatory(Mandatory<P, PA, MA, T> mandatory) {
         throw new IllegalStateException();
     }
@@ -65,12 +62,10 @@ public interface Parser<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA
     interface Mandatory<P extends Procedure<?, ?, ?, ?>, PA extends Parser<P, PA, MA, T>,
             MA extends Mandatory<P, PA, MA, T>, T> extends MapAble<MA, T> {
 
-        @Generated("ignore jacoco")
         default PA castParser(Parser<P, PA, MA, T> parser) {
             throw new IllegalStateException();
         }
 
-        @Generated("ignore jacoco")
         default MA castMandatory(Mandatory<P, PA, MA, T> mandatory) {
             throw new IllegalStateException();
         }

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.testcharm.dal.DAL;
 import org.testcharm.util.Sneaky;
 
+import java.util.HashMap;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -182,6 +184,26 @@ class PanelTest {
                 assertEquals(panel, Sneaky.get(argument));
                 return true;
             }), eq("operations"), isNull());
+        }
+    }
+
+    @Nested
+    class FillIn {
+
+        @Test
+        void fill_in_all_by() {
+            Elements elements = mock(Elements.class);
+            Element fieldElement = mock(Element.class);
+            when(elements.single()).thenReturn(fieldElement);
+            when(element.placeholder(anyString())).thenReturn(elements);
+            when(pageFlow.dal()).thenReturn(DAL.dal());
+
+            panel.fillInBy(Element::placeholder, new HashMap<String, Object>() {{
+                put("Int", 100);
+            }});
+
+            verify(element).placeholder("Int");
+            verify(fieldElement).fillIn(100);
         }
     }
 }
