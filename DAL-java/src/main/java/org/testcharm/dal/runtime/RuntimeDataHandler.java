@@ -6,6 +6,6 @@ public interface RuntimeDataHandler<R extends RuntimeData<?>> extends RuntimeHan
 
     @Override
     default Object handle(R r) {
-        return null;
+        return handleData(r).value();
     }
 }

@@ -26,7 +26,7 @@ import static org.testcharm.pf.By.css;
 public class InspectorSteps {
     private TestContext testContext;
     private MainPage mainPage;
-    private final DAL dal = DAL.create(InspectorExtension.class);
+    private final DAL dal = DAL.create("Default", InspectorExtension.class);
 
 //    private final BrowserSelenium browser = new BrowserSelenium(() ->
 //            Sneaky.get(() -> new RemoteWebDriver(new URL("http://www.s.com:4444"), DesiredCapabilities.chrome())));

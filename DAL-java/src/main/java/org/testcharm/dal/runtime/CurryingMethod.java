@@ -48,16 +48,17 @@ public class CurryingMethod implements ProxyObject {
     private Optional<CandidateMethod> selectCurryingMethod(Predicate<CandidateMethod> predicate) {
         List<CandidateMethod> methods = candidateMethods.stream().filter(predicate).collect(toList());
         if (methods.size() > 1) {
-            List<CandidateMethod> highPriorityMethod = methods.stream().filter(StaticCandidateMethod.class::isInstance).collect(toList());
+            List<StaticCandidateMethod> highPriorityMethod = methods.stream().filter(StaticCandidateMethod.class::isInstance)
+                    .map(StaticCandidateMethod.class::cast).collect(toList());
             return of(getFirstPresent(() -> getOnlyOne(highPriorityMethod),
-                    () -> getOnlyOne(highPriorityMethod.stream().filter(CandidateMethod::isSameInstanceType).collect(toList())))
+                    () -> getOnlyOne(highPriorityMethod.stream().filter(StaticCandidateMethod::isSameInstanceType).collect(toList())))
                     .orElseThrow(() -> new InvalidPropertyException(DumpingBuffer.rootContext(runtimeContext)
                             .append("More than one currying method:").indent(this::dumpCandidates).content())));
         }
         return methods.stream().findFirst();
     }
 
-    private Optional<CandidateMethod> getOnlyOne(List<CandidateMethod> list) {
+    private Optional<CandidateMethod> getOnlyOne(List<? extends CandidateMethod> list) {
         if (list.size() == 1)
             return of(list.get(0));
         return Optional.empty();
@@ -152,10 +153,6 @@ public class CurryingMethod implements ProxyObject {
             return (resolved ? "-> " : "") + method.toString();
         }
 
-        public boolean isSameInstanceType() {
-            return true;
-        }
-
         public void dumpArguments(DumpingBuffer indentBuffer) {
             curryingArguments.forEach(argument -> argument.dumpParameter(indentBuffer));
         }
@@ -182,8 +179,7 @@ public class CurryingMethod implements ProxyObject {
                     curryingArguments.stream().map(CurryingArgument::properType)).toArray()));
         }
 
-        @Override
-        public boolean isSameInstanceType() {
+        private boolean isSameInstanceType() {
             return method.getParameters()[0].getType().equals(NumberType.boxedClass(instance.value().getClass()));
         }
     }

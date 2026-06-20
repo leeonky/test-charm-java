@@ -125,3 +125,14 @@ Feature: expect - assertion
         key: java.lang.Integer <100>
     }
     """
+
+  Scenario: more than one expression
+    When expect matching by the following code:
+      """
+      a b
+      """
+    Then assert error with the message:
+      """
+      a b
+        ^
+      """

@@ -86,7 +86,7 @@ Feature: commons
     And register DAL:
     """
     dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "beanMeta", meta-> "Super");
-    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", meta-> meta.callSuper());
+    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", (RuntimeDataHandler<MetaData<SubBean>>)meta-> meta.callSuper());
     """
     Then the following verification for the instance of java class "SubBean" should pass:
     """
@@ -112,8 +112,8 @@ Feature: commons
     And register DAL:
     """
     dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "beanMeta", meta-> "Super");
-    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", meta-> meta.callSuper());
-    dal.getRuntimeContextBuilder().registerMetaProperty(SubSubBean.class, "beanMeta", meta-> meta.callSuper());
+    dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", (RuntimeDataHandler<MetaData<SubBean>>)meta-> meta.callSuper());
+    dal.getRuntimeContextBuilder().registerMetaProperty(SubSubBean.class, "beanMeta", (RuntimeDataHandler<MetaData<SubSubBean>>)meta-> meta.callSuper());
     """
     Then the following verification for the instance of java class "SubSubBean" should pass:
     """
@@ -241,7 +241,7 @@ Feature: commons
     """
     And register DAL:
     """
-    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
+    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", (RuntimeDataHandler<MetaData<Data>>)meta-> {
       return meta.callGlobal();
     }
     );

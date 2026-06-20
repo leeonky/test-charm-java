@@ -39,14 +39,6 @@ public class DAL {
         return dal();
     }
 
-    @Deprecated
-    public static DAL create(Class<?>... exceptExtensions) {
-        Iterator<DALFactory> iterator = ServiceLoader.load(DALFactory.class).iterator();
-        if (iterator.hasNext())
-            return iterator.next().newInstance();
-        return new DAL().extend(exceptExtensions);
-    }
-
     public static DAL dal() {
         return instance.get();
     }
@@ -123,17 +115,13 @@ public class DAL {
     public DALNode compileSingle(String expression, DALRuntimeContext runtimeContext) {
         List<DALNode> nodes = compile(expression, runtimeContext);
         if (nodes.size() > 1)
-            throw new SyntaxException("more than one expression", getOperandPosition(nodes.get(1)));
+            throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
         return nodes.get(0);
     }
 
     public List<DALNode> compile(String expression, DALRuntimeContext runtimeContext) {
         return compiler.compile(new SourceCode(format(expression), Notations.LINE_COMMENTS),
                 runtimeContext);
-    }
-
-    private int getOperandPosition(DALNode node) {
-        return node.getPositionBegin() == 0 ? node.getOperandPosition() : node.getPositionBegin();
     }
 
     private String format(String expression) {

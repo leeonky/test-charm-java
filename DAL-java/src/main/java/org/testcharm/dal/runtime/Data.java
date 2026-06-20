@@ -91,21 +91,22 @@ public class Data<T> {
     }
 
     public Data<?> tryConvert(Class<?>... targets) {
-        return map(object -> {
-            ConvertException e = null;
-            for (Class<?> target : targets) {
-                try {
-                    return context.getConverter().convert(target, object);
-                } catch (ConvertException convertException) {
-                    e = convertException;
-                }
-            }
-            throw e;
-        });
+        return map(object -> convert(0, targets, object));
     }
 
+    private Object convert(int index, Class<?>[] targets, Object object) {
+        try {
+            return context.getConverter().convert(targets[index], object);
+        } catch (ConvertException e) {
+            if (index == targets.length - 1)
+                throw e;
+            return convert(index + 1, targets, object);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public <N> Data<N> convert(Class<N> target) {
-        return map(object -> context.getConverter().convert(target, object));
+        return (Data<N>) tryConvert(target);
     }
 
     public <N> Data<N> map(Function<T, N> mapper) {

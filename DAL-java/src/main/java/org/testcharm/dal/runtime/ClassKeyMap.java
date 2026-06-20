@@ -23,9 +23,9 @@ public class ClassKeyMap<T> {
                 .map(Map.Entry::getValue).findFirst();
     }
 
-    public boolean containsType(Object object) {
-        return tryGetData(object).isPresent();
-    }
+//    public boolean containsType(Object object) {
+//        return tryGetData(object).isPresent();
+//    }
 
     public T getData(Object instance) {
         return tryGetData(instance).orElseThrow(IllegalArgumentException::new);

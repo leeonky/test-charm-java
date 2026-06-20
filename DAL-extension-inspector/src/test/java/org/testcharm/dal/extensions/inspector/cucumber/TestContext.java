@@ -17,7 +17,7 @@ import static org.awaitility.Awaitility.await;
 public class TestContext {
     private final Map<String, Executor> executors = new HashMap<>();
     private final Map<String, Object> constantsMap = new HashMap<>();
-    private final DAL dal = DAL.create(InspectorExtension.class);
+    private final DAL dal = DAL.create("Default", InspectorExtension.class);
 
     public void addInput(String dalIns, Object data) {
         executors.get(dalIns).setInput(data);
