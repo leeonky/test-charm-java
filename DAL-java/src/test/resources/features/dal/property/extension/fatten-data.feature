@@ -171,3 +171,53 @@ Feature: flatten-data
       age= 18
     }
     """
+
+  Scenario: raiser error when ambiguous property name in parent data
+    Given the following java class:
+      """
+      public class User implements org.testcharm.dal.runtime.PartialObject {
+        public String name;
+        public int age;
+      }
+      """
+    And the following java class:
+      """
+      public class Order {
+        public String userName = "Tom";
+        public int userAge = 18;
+        public int userage = 18;
+        public String id = "001";
+
+        public static User user(Order order) {
+          User user = new User();
+          user.name = order.userName;
+          user.age = order.userAge;
+          return user;
+        }
+      }
+      """
+    When use a instance of java class "Order" to evaluate:
+      """
+      = {
+        id= '001'
+        user= {
+          name= Tom
+          age= 18
+        }
+      }
+      """
+    Then failed with the message:
+      """
+      Ambiguous fields: [userAge, userage] during `=` validation for PartialObject <#package#User>
+      """
+    And got the following notation:
+      """
+      = {
+      ^
+        id= '001'
+        user= {
+          name= Tom
+          age= 18
+        }
+      }
+      """

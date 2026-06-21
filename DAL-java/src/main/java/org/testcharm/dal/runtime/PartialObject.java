@@ -6,15 +6,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface PartialObject {
-    default Optional<String> removeExpectedField(Set<?> fields, Object prefix, Object postfix) {
+    default Optional<String> findExpectedField(Set<?> fields, Object prefix, Object postfix) {
         if (postfix instanceof String) {
-            List<String> removed = fields.stream().filter(String.class::isInstance).map(Object::toString)
+            List<String> matched = fields.stream().filter(String.class::isInstance).map(Object::toString)
                     .filter(field -> predicate(field, buildField(prefix, postfix)))
                     .collect(Collectors.toList());
-            if (removed.size() > 1)
-                //        TODO need test
-                throw new IllegalArgumentException("More than one expected field found: " + removed);
-            return removed.stream().findFirst();
+            if (matched.size() > 1)
+                throw new AmbiguousFieldException(matched, getClass());
+            return matched.stream().findFirst();
         }
         return Optional.empty();
     }

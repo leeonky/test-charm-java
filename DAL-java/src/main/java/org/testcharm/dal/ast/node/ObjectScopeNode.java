@@ -1,8 +1,6 @@
 package org.testcharm.dal.ast.node;
 
-import org.testcharm.dal.runtime.AssertionFailure;
-import org.testcharm.dal.runtime.Data;
-import org.testcharm.dal.runtime.ExpectationFactory;
+import org.testcharm.dal.runtime.*;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.interpreter.SyntaxException;
 
@@ -85,10 +83,16 @@ public class ObjectScopeNode extends DALNode {
         };
     }
 
-    private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
-        return new LinkedHashSet<Object>(data.fieldNames()) {{
-            Stream.concat(collectFields(data), context.collectPartialProperties(data).stream()).forEach(this::remove);
-        }};
+    private Set<Object> collectUnexpectedFields(Data<?> data, DALRuntimeContext context) {
+        try {
+            return new LinkedHashSet<Object>(data.fieldNames()) {{
+                Stream.concat(collectFields(data), context.collectPartialProperties(data).stream()).forEach(this::remove);
+            }};
+        } catch (AmbiguousFieldException e) {
+            throw exception(expression ->
+                    new DALException(format("Ambiguous fields: %s during `=` validation for PartialObject <%s>",
+                            e.getFields(), e.getType().getName()), expression.operator().getPosition()));
+        }
     }
 
     @Override

@@ -18,10 +18,8 @@ class PartialProperties {
 
     public Set<String> collectPartialProperties(Data data) {
         postfixes.addAll(partialPropertyStack.collectPartialProperties(partialData));
-        return postfixes.stream().map(property -> {
-                    return ((PartialObject) partialData.value())
-                            .removeExpectedField(data.fieldNames(), prefix, property);
-                })
+        return postfixes.stream().map(property -> ((PartialObject) partialData.value())
+                        .findExpectedField(data.fieldNames(), prefix, property))
                 .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
     }
 
