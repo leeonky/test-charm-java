@@ -89,8 +89,8 @@ public class Row extends DALNode {
         return isEllipsis() || isRowWildcard();
     }
 
-    public RowType mergeRowTypeBy(RowType rowType) {
-        return rowType.merge(rowHeader.resolveRowType());
+    public RowType mergeRowTypeBy(RowType lastRowType) {
+        return lastRowType.merge(rowHeader.resolveRowType());
     }
 
     public void checkSize(int size) {

@@ -49,7 +49,7 @@ Feature: syntax error
             ^
     """
 
-  Scenario: should raise error when invalid table
+  Scenario: invalid table - invalid ellipsis
     When evaluate by:
     """
     = | name   | age |
@@ -98,6 +98,48 @@ Feature: syntax error
         ^
       | 'Tom'  | 10  |
     """
+
+  Scenario: invalid table - default index and specify index
+    When evaluate by:
+    """
+    = | name   |
+      | 'Tom'  |
+    1 | 'John' |
+    """
+    Then failed with the message:
+    """
+    Row index should be consistent
+    """
+    And got the following notation:
+    """
+    = | name   |
+      | 'Tom'  |
+    ^^^^^^^^^^^^^
+    1 | 'John' |
+    ^^^^^^^^^^^^^
+    """
+
+  Scenario: invalid table - default index and specify property
+    When evaluate by:
+    """
+    =   | name   |
+        | 'Tom'  |
+    key | 'John' |
+    """
+    Then failed with the message:
+    """
+    Row index should be consistent
+    """
+    And got the following notation:
+    """
+    =   | name   |
+        | 'Tom'  |
+    ^^^^^^^^^^^^^^^
+    key | 'John' |
+    ^^^^^^^^^^^^^^^
+    """
+
+  Scenario: invalid table - specify index and default index
     When evaluate by:
     """
     = | name   |
@@ -115,4 +157,24 @@ Feature: syntax error
     ^^^^^^^^^^^^^
       | 'John' |
     ^^^^^^^^^^^^^
+    """
+
+  Scenario: invalid table - specify property and default index
+    When evaluate by:
+    """
+    =   | name   |
+    key | 'Tom'  |
+        | 'John' |
+    """
+    Then failed with the message:
+    """
+    Row index should be consistent
+    """
+    And got the following notation:
+    """
+    =   | name   |
+    key | 'Tom'  |
+    ^^^^^^^^^^^^^^^
+        | 'John' |
+    ^^^^^^^^^^^^^^^
     """
