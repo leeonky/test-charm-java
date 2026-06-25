@@ -7,6 +7,7 @@ import org.testcharm.dal.type.Schema;
 import org.testcharm.message.MessageConverter;
 import org.testcharm.message.MessageConverterRegistry;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,7 @@ class VerifySchemaFormatterField extends Base {
     }
 
     public static class IntegerValue implements Schema {
-        public final Formatters.Integer integer1 = Formatters.Integer.equalTo(1);
-        public Formatters.Integer integer2 = Formatters.Integer.equalTo(2);
+        public final Formatters.Integer integer = Formatters.Integer.equalTo(1);
     }
 
     public static class IntegerListValue implements Schema {
@@ -71,13 +71,11 @@ class VerifySchemaFormatterField extends Base {
         void support_verify_integer() {
             dal.getRuntimeContextBuilder().registerSchema(IntegerValue.class);
             assertPass(jsonConverter.deserialize("{" +
-                    "\"integer1\": 1," +
-                    " \"integer2\": 2" +
+                    "\"integer\": 1" +
                     "}"), "is IntegerValue");
 
             assertFailed(jsonConverter.deserialize("{" +
-                    "\"integer1\": 2," +
-                    " \"integer2\": 1" +
+                    "\"integer\": 2" +
                     "}"), "is IntegerValue");
         }
 
@@ -162,6 +160,31 @@ class VerifySchemaFormatterField extends Base {
                     "\"integer\": -1" +
                     "}"), "is NegativeIntegerValue");
         }
+
+        @Test
+        void invalid_integer() {
+            dal.getRuntimeContextBuilder().registerSchema(IntegerValue.class);
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("integer", 1.0D);
+            }}, "is IntegerValue");
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("integer", 1.0F);
+            }}, "is IntegerValue");
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("integer", new BigDecimal("1.0"));
+            }}, "is IntegerValue");
+
+            assertPass(new HashMap<String, Object>() {{
+                put("integer", new BigDecimal("1"));
+            }}, "is IntegerValue");
+
+            assertPass(new HashMap<String, Object>() {{
+                put("integer", new BigDecimal("1"));
+            }}, "is IntegerValue");
+        }
     }
 
     @Nested
@@ -172,6 +195,7 @@ class VerifySchemaFormatterField extends Base {
             dal.getRuntimeContextBuilder().registerSchema(InstantNowValue.class);
             assertPass(jsonConverter.deserialize("{\"instant\": \"" + java.time.Instant.now().toString() + "\"}"), "is InstantNowValue");
             assertFailed(jsonConverter.deserialize("{\"instant\": \"" + java.time.Instant.now().plusSeconds(100).toString() + "\"}"), "is InstantNowValue");
+            assertFailed(jsonConverter.deserialize("{\"instant\": \"" + java.time.Instant.now().plusSeconds(-100).toString() + "\"}"), "is InstantNowValue");
         }
     }
 

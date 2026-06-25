@@ -1,10 +1,10 @@
 package org.testcharm.dal.spec;
 
-import org.testcharm.dal.format.Formatters;
-import org.testcharm.dal.type.Schema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcharm.dal.format.Formatters;
+import org.testcharm.dal.type.Schema;
 
 import java.util.HashMap;
 
@@ -48,6 +48,7 @@ class VerifyValueFormat extends Base {
             assertPass(null, "0 is ZeroNumber");
             assertPass(null, "0.0 is ZeroNumber");
             assertPass(0.0, " is ZeroNumber");
+            assertFailed(1, " is ZeroNumber");
         }
     }
 

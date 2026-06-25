@@ -6,6 +6,7 @@ import org.testcharm.dal.runtime.*;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.interpreter.Clause;
 import org.testcharm.interpreter.SyntaxException;
+import org.testcharm.util.Suppressor;
 import org.testcharm.util.Zipped;
 
 import java.util.ArrayList;
@@ -28,7 +29,6 @@ import static org.testcharm.util.Zipped.zip;
 
 public class ListScopeNode extends DALNode {
     private List<DALNode> verificationExpressions;
-    private List<DALNode> inputExpressions;
     private List<Clause<DALNode>> inputClauses;
     private final Type type;
     private final Style style;
@@ -42,7 +42,7 @@ public class ListScopeNode extends DALNode {
     }
 
     public ListScopeNode(List<DALNode> verificationExpressions, Type type, Comparator<Data<?>> comparator, Style style) {
-        this.verificationExpressions = inputExpressions = new ArrayList<>(verificationExpressions);
+        this.verificationExpressions = new ArrayList<>(verificationExpressions);
         this.type = type;
         this.comparator = comparator;
         this.style = style;
@@ -58,8 +58,6 @@ public class ListScopeNode extends DALNode {
     }
 
     private List<DALNode> buildVerificationExpressions(Data<?>.DataList list, Data<?> actual, DALRuntimeContext context) {
-        if (inputExpressions != null)
-            return inputExpressions;
         return new ArrayList<DALNode>() {
             {
                 List<Clause<DALNode>> usefulInputClauses = new ArrayList<>(inputClauses);
@@ -69,7 +67,8 @@ public class ListScopeNode extends DALNode {
                 else if (type == Type.LAST_N_ITEMS)
                     for (int i = usefulInputClauses.size() - 1; i >= 0; i--)
                         add(0, buildIndexExpression(usefulInputClauses.get(i), i - usefulInputClauses.size(), context));
-                else if (type == Type.ALL_ITEMS) {
+                else {
+                    Suppressor.assertLastEqualsCase(type, Type.ALL_ITEMS);
                     Zipped<Clause<DALNode>, Integer> zipped = zip(usefulInputClauses, list.indexes());
                     zipped.forEachElement((clause, index) -> add(buildIndexExpression(clause, index, context)));
                     if (zipped.hasLeft())
@@ -129,24 +128,6 @@ public class ListScopeNode extends DALNode {
         return comparator;
     }
 
-    //    TODO tobe refactored
-    private List<DALNode> buildVerificationExpressions() {
-        if (inputExpressions != null)
-            return inputExpressions;
-        return new ArrayList<DALNode>() {{
-            if (type == Type.LAST_N_ITEMS) {
-                int negativeIndex = -1;
-                for (int i = inputClauses.size() - 1; i >= 0; i--) {
-                    add(0, inputClauses.get(i).expression(expression(InputNode.Placeholder.INSTANCE,
-                            Factory.executable(Notations.EMPTY), new SymbolNode(negativeIndex--, BRACKET))));
-                }
-            } else {
-                for (int i = 0; i < inputClauses.size(); i++)
-                    add(inputClauses.get(i).expression(expression(InputNode.Placeholder.INSTANCE,
-                            Factory.executable(Notations.EMPTY), new SymbolNode(i, BRACKET))));
-            }
-        }};
-    }
 
     private Type guessType(List<Clause<DALNode>> clauses) {
         List<Boolean> isListEllipsis = clauses.stream().map(this::isListEllipsis).collect(toList());
@@ -170,7 +151,19 @@ public class ListScopeNode extends DALNode {
         if (type == Type.CONTAINS)
             return inputClauses.stream().map(clause -> clause.expression(InputNode.Placeholder.INSTANCE).inspect())
                     .collect(joining(", ", "[", "]"));
-        return buildVerificationExpressions().stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
+        return new ArrayList<DALNode>() {{
+            if (type == Type.LAST_N_ITEMS) {
+                int negativeIndex = -1;
+                for (int i = inputClauses.size() - 1; i >= 0; i--) {
+                    add(0, inputClauses.get(i).expression(expression(InputNode.Placeholder.INSTANCE,
+                            Factory.executable(Notations.EMPTY), new SymbolNode(negativeIndex--, BRACKET))));
+                }
+            } else {
+                for (int i = 0; i < inputClauses.size(); i++)
+                    add(inputClauses.get(i).expression(expression(InputNode.Placeholder.INSTANCE,
+                            Factory.executable(Notations.EMPTY), new SymbolNode(i, BRACKET))));
+            }
+        }}.stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
     }
 
     private Data<?> verifyContainElement(DALRuntimeContext context, Data<?>.DataList list, Data<?> actual) {

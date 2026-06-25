@@ -3,9 +3,6 @@ package org.testcharm.dal.ast.node;
 import org.testcharm.dal.runtime.Data;
 import org.testcharm.dal.runtime.RuntimeContextBuilder;
 
-import java.util.Collections;
-import java.util.List;
-
 public abstract class InputNode extends DALNode {
 
     @Override
@@ -16,11 +13,6 @@ public abstract class InputNode extends DALNode {
     @Override
     public String inspect() {
         return "";
-    }
-
-    @Override
-    public List<Object> propertyChain() {
-        return Collections.emptyList();
     }
 
     public static class Root extends InputNode {

@@ -79,6 +79,19 @@ Feature: syntax error
       | 'Tom'  | 10  |
       | ...          |
     """
+    Then failed with the message:
+    """
+    Invalid ellipsis
+    """
+    And got the following notation:
+    """
+    = | name   | age |
+      | 'Lily' | 20  |
+      | ...          |
+      | 'Tom'  | 10  |
+      | ...          |
+        ^
+    """
     When evaluate by:
     """
     = | name   | age |
@@ -97,6 +110,29 @@ Feature: syntax error
       | ...          |
         ^
       | 'Tom'  | 10  |
+    """
+    When evaluate by:
+    """
+    = | name   | age |
+      | ...          |
+      | 'Lily' | 20  |
+      | ...          |
+      | 'Tom'  | 10  |
+      | ...          |
+    """
+    Then failed with the message:
+    """
+    Invalid ellipsis
+    """
+    And got the following notation:
+    """
+    = | name   | age |
+      | ...          |
+      | 'Lily' | 20  |
+      | ...          |
+      | 'Tom'  | 10  |
+      | ...          |
+        ^
     """
 
   Scenario: invalid table - default index and specify index

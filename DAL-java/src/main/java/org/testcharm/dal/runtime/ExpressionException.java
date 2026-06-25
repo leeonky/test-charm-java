@@ -1,7 +1,6 @@
 package org.testcharm.dal.runtime;
 
 import org.testcharm.dal.ast.node.DALExpression;
-import org.testcharm.interpreter.InterpreterException;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -10,8 +9,8 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
     public static <T> T opt1(Supplier<T> supplier) {
         try {
             return supplier.get();
-        } catch (InterpreterException e) {
-            throw e;
+//        } catch (InterpreterException e) {
+//            throw e;
         } catch (Exception e) {
             throw exception(expression -> new DALException(expression.left().getOperandPosition(), e));
         }
@@ -20,8 +19,8 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
     public static <T> T opt2(Supplier<T> supplier) {
         try {
             return supplier.get();
-        } catch (InterpreterException e) {
-            throw e;
+//        } catch (InterpreterException e) {
+//            throw e;
         } catch (Exception e) {
             throw exception(expression -> new DALException(expression.right().getOperandPosition(), e));
         }

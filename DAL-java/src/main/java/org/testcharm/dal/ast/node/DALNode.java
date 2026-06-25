@@ -8,6 +8,7 @@ import org.testcharm.dal.runtime.ExpectationFactory;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.interpreter.NodeBase;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -30,7 +31,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public List<Object> propertyChain() {
-        throw new IllegalStateException();
+        return Collections.emptyList();
     }
 
     public Stream<Object> collectFields(Data<?> data) {
