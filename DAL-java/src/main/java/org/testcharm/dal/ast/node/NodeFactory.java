@@ -1,11 +1,9 @@
 package org.testcharm.dal.ast.node;
 
 import org.testcharm.dal.util.TextUtil;
-import org.testcharm.interpreter.SyntaxException;
 import org.testcharm.interpreter.Token;
 import org.testcharm.util.NumberParser;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,18 +74,6 @@ public class NodeFactory {
 
     public static LiteralNode literalNumber(Token token) {
         return new LiteralNode(numberParser.parse(token.getContent()));
-    }
-
-    public static LiteralNode literalInteger(Token token) {
-        Number number = numberParser.parse(token.getContent());
-        if (number != null) {
-            Class<? extends Number> type = number.getClass();
-            if (type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class)
-                    || type.equals(Byte.class) || type.equals(BigInteger.class)) {
-                return new LiteralNode(number);
-            }
-        }
-        throw new SyntaxException("expect an integer", token.getPosition());
     }
 
     public static DALNode createVerificationGroup(List<DALNode> list) {

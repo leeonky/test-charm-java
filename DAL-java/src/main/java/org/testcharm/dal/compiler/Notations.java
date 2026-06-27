@@ -11,10 +11,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.testcharm.interpreter.Notation.notation;
 import static java.util.Arrays.asList;
+import static org.testcharm.interpreter.Notation.notation;
 
 public class Notations {
+
+    public Notations() {
+    }
 
 
     public static class Keywords {

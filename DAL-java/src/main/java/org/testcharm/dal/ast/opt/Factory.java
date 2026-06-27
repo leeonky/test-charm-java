@@ -45,7 +45,7 @@ public class Factory {
     public static DALOperator executable(Notation<?, ?, ?, ?, ?> notation) {
         return new DALOperator(Precedence.PROPERTY, notation.getLabel(), false, Operators.NA) {
             @Override
-            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
                 return ((ExecutableNode) expression.right()).getValue(expression.left(), context);
             }
 
@@ -59,7 +59,7 @@ public class Factory {
     public static DALOperator is() {
         return new DALOperator(Precedence.VERIFICATION, Notations.Operators.IS.getLabel(), true, Operators.NA) {
             @Override
-            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
                 return ((SchemaComposeNode) expression.right()).verify(expression.left(), context);
             }
         };
@@ -68,7 +68,7 @@ public class Factory {
     public static DALOperator which() {
         return new DALOperator(Precedence.WHICH, Notations.Operators.WHICH.getLabel(), true, Operators.NA) {
             @Override
-            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
                 return expression.left().evaluateData(context).execute(() -> expression.right().evaluateData(context));
             }
         };
@@ -78,7 +78,7 @@ public class Factory {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "DATA_REMARK", false, Operators.NA) {
 
             @Override
-            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
                 return context.invokeDataRemark(new RemarkData(expression.left().evaluateData(context), context,
                         expression.right().inspect()));
             }
@@ -94,7 +94,7 @@ public class Factory {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "CONST_REMARK", false, Operators.NA) {
 
             @Override
-            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
                 Data<?> leftValue = expression.left().evaluateData(context);
                 Data<?> rightValue = expression.right().evaluateData(context);
                 if (Objects.equals(leftValue.value(), rightValue.value()))
@@ -114,7 +114,7 @@ public class Factory {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "EXCLAMATION", false, Operators.NA) {
 
             @Override
-            public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+            public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
                 return context.invokeExclamations(new ExclamationData<>(expression.left().evaluateData(context),
                         expression.right(), context));
             }
@@ -194,7 +194,7 @@ public class Factory {
         }
 
         @Override
-        public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+        public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
             return operation.apply(expression, context);
         }
     }
@@ -209,7 +209,7 @@ public class Factory {
         }
 
         @Override
-        public Data<?> calculateData(DALExpression expression, DALRuntimeContext context) {
+        public Data<?> calculate(DALExpression expression, DALRuntimeContext context) {
             return expression.right().verify(expression.operator(), expression.left(), context);
         }
 

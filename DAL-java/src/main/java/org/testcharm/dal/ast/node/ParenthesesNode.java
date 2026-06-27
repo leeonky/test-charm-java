@@ -3,9 +3,6 @@ package org.testcharm.dal.ast.node;
 import org.testcharm.dal.runtime.Data;
 import org.testcharm.dal.runtime.RuntimeContextBuilder;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 public class ParenthesesNode extends DALNode {
     private final DALNode node;
 
@@ -23,24 +20,8 @@ public class ParenthesesNode extends DALNode {
         return "(" + node.inspect() + ")";
     }
 
-
-    @Override
-    public Object getRootSymbolName() {
-        return node.getRootSymbolName();
-    }
-
     @Override
     public int getOperandPosition() {
         return node.getPositionBegin();
-    }
-
-    @Override
-    public List<Object> propertyChain() {
-        return node.propertyChain();
-    }
-
-    @Override
-    public Stream<Object> collectFields(Data<?> data) {
-        return node.collectFields(data);
     }
 }
