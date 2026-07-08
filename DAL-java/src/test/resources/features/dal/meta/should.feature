@@ -343,3 +343,48 @@ Feature: should
       ::should.test[t2][t3]: any
                              ^
       """
+
+  Scenario: raise error when ambiguous method
+    Given the following java class:
+      """
+      public class Bean {
+        public boolean test(String s1, String s2) {
+          return true;
+        }
+        public boolean test(String s1, Integer s2) {
+          return true;
+        }
+      }
+      """
+    When use a instance of java class "Bean" to evaluate:
+      """
+      ::should.test[any1]: null
+      """
+    Then failed with the message:
+      """
+      More than one currying method:
+          instance: #package#Bean {}
+          public boolean #package#Bean.test(java.lang.String,java.lang.Integer)
+              java.lang.String <any1>
+              null
+          public boolean #package#Bean.test(java.lang.String,java.lang.String)
+              java.lang.String <any1>
+              null
+      """
+
+  Scenario: null with primitive type
+    Given the following java class:
+      """
+      public class Bean {
+        public boolean test(String s1, String s2) {
+          return true;
+        }
+        public boolean test(String s1, int s2) {
+          return false;
+        }
+      }
+      """
+    Then the following verification for the instance of java class "Bean" should pass:
+      """
+      ::should.test[any1]: null
+      """

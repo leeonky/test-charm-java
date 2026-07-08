@@ -16,11 +16,17 @@ import static org.testcharm.interpreter.Notation.notation;
 
 public class Notations {
 
+    @GeneratedForJacocoIgnore
     public Notations() {
     }
 
 
     public static class Keywords {
+
+        @GeneratedForJacocoIgnore
+        public Keywords() {
+        }
+
         public static final Notation<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
                 WHICH = notation("which"),
                 IS = notation("is"),
@@ -36,6 +42,11 @@ public class Notations {
     }
 
     public static class Operators {
+
+        @GeneratedForJacocoIgnore
+        public Operators() {
+        }
+
         public static final Notation<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
                 WILDCARD = notation("*"),
                 ROW_WILDCARD = notation("***"),

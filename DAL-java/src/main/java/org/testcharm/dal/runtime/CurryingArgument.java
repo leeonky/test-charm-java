@@ -18,11 +18,13 @@ public class CurryingArgument {
     }
 
     public boolean isSameType() {
-        return data.value() != null && boxedClass(data.value().getClass()).equals(boxedClass(parameter.getType()));
+        if (data.value() == null)
+            return !parameter.getType().isPrimitive();
+        return boxedClass(data.value().getClass()).equals(boxedClass(parameter.getType()));
     }
 
     public boolean isSuperType() {
-        return data.value() != null && boxedClass(parameter.getType()).isInstance(data.value());
+        return boxedClass(parameter.getType()).isInstance(data.value());
     }
 
     public boolean isConvertibleType() {
@@ -48,21 +50,6 @@ public class CurryingArgument {
 
         public Extraneous(Data<Object> data) {
             super(null, data);
-        }
-
-        @Override
-        public boolean isConvertibleType() {
-            return false;
-        }
-
-        @Override
-        public boolean isSameType() {
-            return false;
-        }
-
-        @Override
-        public boolean isSuperType() {
-            return false;
         }
 
         @Override
