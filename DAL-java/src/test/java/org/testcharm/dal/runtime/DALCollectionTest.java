@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 import static org.testcharm.dal.Assertions.expect;
 
@@ -89,6 +90,13 @@ class DALCollectionTest {
                     };
 
                     expect(collection.filter(i -> i < 2)).should(": { values= [0 1 ...] firstIndex: 1}");
+                }
+
+                @Test
+                void always_not_empty() {
+                    InfiniteDALCollection<Integer> collection = new InfiniteDALCollection<>(() -> 0);
+
+                    assertFalse(collection.isEmpty());
                 }
             }
         }
