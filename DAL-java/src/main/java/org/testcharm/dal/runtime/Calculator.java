@@ -1,6 +1,7 @@
 package org.testcharm.dal.runtime;
 
 import org.testcharm.dal.ast.opt.DALOperator;
+import org.testcharm.dal.compiler.GeneratedForJacocoIgnore;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.util.NumberType;
 import org.testcharm.util.Pair;
@@ -18,6 +19,11 @@ import static org.testcharm.util.Pair.same;
 import static org.testcharm.util.function.Extension.getFirstPresent;
 
 public class Calculator {
+
+    @GeneratedForJacocoIgnore
+    private Calculator() {
+    }
+
     private static final NumberType numberType = new NumberType();
 
     private static int compare(Pair.Same<Data<?>> pair, DALRuntimeContext context) {

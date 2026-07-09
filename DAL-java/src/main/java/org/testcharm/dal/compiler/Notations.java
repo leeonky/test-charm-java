@@ -17,14 +17,14 @@ import static org.testcharm.interpreter.Notation.notation;
 public class Notations {
 
     @GeneratedForJacocoIgnore
-    public Notations() {
+    private Notations() {
     }
 
 
     public static class Keywords {
 
         @GeneratedForJacocoIgnore
-        public Keywords() {
+        private Keywords() {
         }
 
         public static final Notation<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
@@ -44,7 +44,7 @@ public class Notations {
     public static class Operators {
 
         @GeneratedForJacocoIgnore
-        public Operators() {
+        private Operators() {
         }
 
         public static final Notation<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>

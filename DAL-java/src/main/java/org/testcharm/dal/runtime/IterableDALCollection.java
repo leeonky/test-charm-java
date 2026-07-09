@@ -20,21 +20,14 @@ public class IterableDALCollection<E> extends DALCollectionBase<E> {
         iterator = null;
         return new Iterator<IndexedElement<E>>() {
             private int index = firstIndex();
-            private int position = 0;
 
             @Override
             public boolean hasNext() {
-                if (position < cached.size()) {
-                    return true;
-                }
                 return getIterator().hasNext();
             }
 
             @Override
             public IndexedElement<E> next() {
-                if (position < cached.size())
-                    return new IndexedElement<>(index++, cached.get(position++));
-                position++;
                 return new IndexedElement<>(index++, getNext());
             }
         };
