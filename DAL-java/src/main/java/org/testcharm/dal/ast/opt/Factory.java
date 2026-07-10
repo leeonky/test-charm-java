@@ -3,6 +3,7 @@ package org.testcharm.dal.ast.opt;
 import org.testcharm.dal.ast.node.DALExpression;
 import org.testcharm.dal.ast.node.ExecutableNode;
 import org.testcharm.dal.ast.node.SchemaComposeNode;
+import org.testcharm.dal.compiler.GeneratedForJacocoIgnore;
 import org.testcharm.dal.compiler.Notations;
 import org.testcharm.dal.runtime.*;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -17,6 +18,11 @@ import java.util.function.Supplier;
 import static org.testcharm.dal.runtime.DALException.locateError;
 
 public class Factory {
+
+    @GeneratedForJacocoIgnore
+    private Factory() {
+    }
+
     public static DALOperator logical(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.SupplierSupplierData logical) {
         return new Operator(Precedence.LOGICAL, notation, ExpressionContextData.adapt(logical), true, Operators.NA);
     }

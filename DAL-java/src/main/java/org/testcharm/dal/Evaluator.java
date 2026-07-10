@@ -8,9 +8,13 @@ public class Evaluator {
     private final String expression;
     private final Type type;
     private DAL dal;
-    private static Supplier<DAL> dalFactory = DAL::dal;
+    private static Supplier<DAL> dalFactory;
     private Object constants;
     private int codeOffset = 0;
+
+    static {
+        setDALFactory(DAL::dal);
+    }
 
     public static void setDALFactory(Supplier<DAL> dalFactory) {
         Evaluator.dalFactory = dalFactory;

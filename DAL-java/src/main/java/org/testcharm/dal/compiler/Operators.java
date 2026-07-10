@@ -10,6 +10,8 @@ import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.interpreter.OperatorParser;
 import org.testcharm.interpreter.Procedure;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.testcharm.dal.ast.opt.Factory.ExpressionContextData.adapt;
 import static org.testcharm.dal.ast.opt.Factory.*;
 import static org.testcharm.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
@@ -17,10 +19,13 @@ import static org.testcharm.dal.compiler.Notations.COMMA;
 import static org.testcharm.dal.compiler.Notations.Operators.*;
 import static org.testcharm.interpreter.Parser.oneOf;
 import static org.testcharm.util.function.Extension.not;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 public class Operators {
+
+    @GeneratedForJacocoIgnore
+    private Operators() {
+    }
+
     private static final OperatorParser<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
             DEFAULT_OPERATOR = Procedure::currentOperator,
             MAYBE_PROPERTY_SLASH = SLASH.operator(() -> Factory.executable(SLASH));

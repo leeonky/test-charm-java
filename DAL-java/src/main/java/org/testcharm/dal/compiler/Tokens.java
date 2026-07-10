@@ -18,6 +18,11 @@ import static org.testcharm.interpreter.TokenSpec.tokenSpec;
 import static org.testcharm.util.function.Extension.not;
 
 public class Tokens {
+
+    @GeneratedForJacocoIgnore
+    private Tokens() {
+    }
+
     private static final NumberParser numberParser = new NumberParser();
 
     private static boolean isNumber(Token token) {

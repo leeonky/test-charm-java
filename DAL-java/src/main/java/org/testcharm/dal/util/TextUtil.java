@@ -1,10 +1,17 @@
 package org.testcharm.dal.util;
 
+import org.testcharm.dal.compiler.GeneratedForJacocoIgnore;
+
 import java.util.List;
 
 import static java.util.Arrays.asList;
 
 public class TextUtil {
+
+    @GeneratedForJacocoIgnore
+    private TextUtil() {
+    }
+
     public static List<String> lines(String content) {
         return asList(content.split("\n\r|\r\n|\r|\n"));
     }

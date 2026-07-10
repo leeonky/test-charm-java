@@ -1,6 +1,13 @@
 package org.testcharm.dal.ast.opt;
 
+import org.testcharm.dal.compiler.GeneratedForJacocoIgnore;
+
 public class Precedence {
+
+    @GeneratedForJacocoIgnore
+    private Precedence() {
+    }
+
     static final int WHICH = 100;
     static final int LOGICAL = 200;
     static final int VERIFICATION = 210;

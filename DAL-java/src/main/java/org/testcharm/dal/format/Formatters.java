@@ -1,5 +1,6 @@
 package org.testcharm.dal.format;
 
+import org.testcharm.dal.compiler.GeneratedForJacocoIgnore;
 import org.testcharm.dal.runtime.IllegalTypeException;
 import org.testcharm.util.Sneaky;
 import org.testcharm.util.function.Comparator;
@@ -12,6 +13,11 @@ import static java.lang.Enum.valueOf;
 import static java.lang.String.format;
 
 public class Formatters {
+
+    @GeneratedForJacocoIgnore
+    private Formatters() {
+    }
+
     /**
      * Use org.testcharm.dal.format.Type
      */

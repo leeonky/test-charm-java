@@ -8,6 +8,11 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 public class Constants {
+
+    @GeneratedForJacocoIgnore
+    private Constants() {
+    }
+
     public static final Set<Character> DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
             '&', '|', '!', ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n', '\r', '#', '\'', '"'));
     //    TODO missing testing \r

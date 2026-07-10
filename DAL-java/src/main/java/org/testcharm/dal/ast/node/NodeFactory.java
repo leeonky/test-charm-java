@@ -1,5 +1,6 @@
 package org.testcharm.dal.ast.node;
 
+import org.testcharm.dal.compiler.GeneratedForJacocoIgnore;
 import org.testcharm.dal.util.TextUtil;
 import org.testcharm.interpreter.Token;
 import org.testcharm.util.NumberParser;
@@ -8,6 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class NodeFactory {
+
+    @GeneratedForJacocoIgnore
+    private NodeFactory() {
+    }
+
     private static final NumberParser numberParser = new NumberParser();
 
     public static DALNode stringSymbol(DALNode dalNode) {
