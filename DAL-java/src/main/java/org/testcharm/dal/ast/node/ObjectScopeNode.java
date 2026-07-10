@@ -75,11 +75,11 @@ public class ObjectScopeNode extends DALNode {
                 }
                 return execute;
             }
-
-            @Override
-            public ExpectationFactory.Type type() {
-                return ExpectationFactory.Type.OBJECT;
-            }
+//
+//            @Override
+//            public ExpectationFactory.Type type() {
+//                return ExpectationFactory.Type.OBJECT;
+//            }
         };
     }
 

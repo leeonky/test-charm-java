@@ -116,11 +116,11 @@ public class ListScopeNode extends DALNode {
                     throw exception(expression -> locateError(e, expression.left().getOperandPosition()));
                 }
             }
-
-            @Override
-            public ExpectationFactory.Type type() {
-                return ExpectationFactory.Type.LIST;
-            }
+//
+//            @Override
+//            public ExpectationFactory.Type type() {
+//                return ExpectationFactory.Type.LIST;
+//            }
         };
     }
 

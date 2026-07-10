@@ -7,9 +7,9 @@ import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static org.testcharm.dal.runtime.ExpressionException.illegalOperation;
 import static org.testcharm.dal.runtime.ExpressionException.opt2;
-import static java.lang.String.format;
 
 public class RegexNode extends DALNode {
     private final Pattern pattern;
@@ -43,11 +43,11 @@ public class RegexNode extends DALNode {
                     return actual;
                 throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual.value()), getPositionBegin());
             }
-
-            @Override
-            public ExpectationFactory.Type type() {
-                return ExpectationFactory.Type.REGEX;
-            }
+//
+//            @Override
+//            public ExpectationFactory.Type type() {
+//                return ExpectationFactory.Type.REGEX;
+//            }
         };
     }
 }

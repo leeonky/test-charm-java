@@ -45,11 +45,11 @@ public class TableNode extends DALNode {
                         throw rowAssertionFailure.linePositionException(TableNode.this);
                     }
                 }
-
-                @Override
-                public ExpectationFactory.Type type() {
-                    return verificationExpectation.type();
-                }
+//
+//                @Override
+//                public ExpectationFactory.Type type() {
+//                    return verificationExpectation.type();
+//                }
             };
         };
     }

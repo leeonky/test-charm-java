@@ -56,11 +56,11 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
             public Data<?> equalTo() {
                 return context.fetchEqualsChecker(expected, actual).verify(expected, actual, context);
             }
-
-            @Override
-            public ExpectationFactory.Type type() {
-                return ExpectationFactory.Type.VALUE;
-            }
+//
+//            @Override
+//            public ExpectationFactory.Type type() {
+//                return ExpectationFactory.Type.VALUE;
+//            }
         };
     }
 

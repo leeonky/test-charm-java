@@ -10,10 +10,10 @@ public interface ExpectationFactory {
 
         Data<?> equalTo();
 
-        Type type();
+//        Type type();
     }
 
-    enum Type {
-        OBJECT, REGEX, VALUE, LIST
-    }
+//    enum Type {
+//        OBJECT, REGEX, VALUE, LIST
+//    }
 }

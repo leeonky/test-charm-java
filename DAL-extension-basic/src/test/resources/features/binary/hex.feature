@@ -43,6 +43,10 @@ Feature: hex
                                                         E4 BD A0 E5 A5 BD
                                                         ```
     """
+    Then the following should pass:
+    """
+    "file:/tmp/work/test/dir/file1.txt".url.openStream[0]= -28y
+    """
 
   Scenario: raise error when input-stream not equal
     Given root folder "/tmp/work/test/dir"

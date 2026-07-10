@@ -40,11 +40,11 @@ public class TransposedTableNode extends DALNode {
                         throw rowAssertionFailure.columnPositionException(TransposedTableNode.this);
                     }
                 }
-
-                @Override
-                public ExpectationFactory.Type type() {
-                    return expectation.type();
-                }
+//
+//                @Override
+//                public ExpectationFactory.Type type() {
+//                    return expectation.type();
+//                }
             };
         };
     }
