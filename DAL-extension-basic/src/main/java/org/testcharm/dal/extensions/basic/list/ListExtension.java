@@ -82,15 +82,10 @@ public class ListExtension implements Extension {
         }
     }
 
-    private static class VerificationInFilter implements Operation<Filterable, Object> {
+    private static class VerificationInFilter extends AbstractOperation<Filterable, Object> {
 
         @Override
-        public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-            return v1.instanceOf(Filterable.class);
-        }
-
-        @Override
-        public Object operate(Data<Filterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+        public Object operateObject(Data<Filterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
             return v1.value().filter(operator, v2, context);
         }
     }

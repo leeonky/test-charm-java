@@ -2,10 +2,10 @@ package org.testcharm.dal.extensions;
 
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.ast.opt.DALOperator;
+import org.testcharm.dal.runtime.AbstractOperation;
 import org.testcharm.dal.runtime.Data;
 import org.testcharm.dal.runtime.ExpectationFactory;
 import org.testcharm.dal.runtime.Extension;
-import org.testcharm.dal.runtime.Operation;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import org.testcharm.util.NumberType;
 import org.testcharm.util.function.TriFunction;
@@ -32,15 +32,10 @@ public class Operators implements Extension {
     }
 
     private void assertMatch(DAL dal) {
-        dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation<Object, ExpectationFactory>() {
+        dal.getRuntimeContextBuilder().registerOperator(MATCH, new AbstractOperation<Object, ExpectationFactory>() {
 
             @Override
-            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-                return v2.instanceOf(ExpectationFactory.class);
-            }
-
-            @Override
-            public Data<?> operateData(Data<Object> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
+            public Data<?> operate(Data<Object> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
                 v2.value().create(operator, v1).matches().value();
                 return v1;
             }
@@ -48,15 +43,10 @@ public class Operators implements Extension {
     }
 
     private void assertEqual(DAL dal) {
-        dal.getRuntimeContextBuilder().registerOperator(EQUAL, new Operation<Object, ExpectationFactory>() {
+        dal.getRuntimeContextBuilder().registerOperator(EQUAL, new AbstractOperation<Object, ExpectationFactory>() {
 
             @Override
-            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-                return v2.instanceOf(ExpectationFactory.class);
-            }
-
-            @Override
-            public Data<?> operateData(Data<Object> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
+            public Data<?> operate(Data<Object> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
                 v2.value().create(operator, v1).equalTo().value();
                 return v1;
             }
@@ -64,7 +54,7 @@ public class Operators implements Extension {
     }
 
     private void stringPlus(DAL dal) {
-        dal.getRuntimeContextBuilder().registerOperator(PLUS, new Operation<Object, Object>() {
+        dal.getRuntimeContextBuilder().registerOperator(PLUS, new AbstractOperation<Object, Object>() {
 
             @Override
             public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
@@ -72,7 +62,7 @@ public class Operators implements Extension {
             }
 
             @Override
-            public Object operate(Data<Object> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+            public Object operateObject(Data<Object> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
                 return String.valueOf(v1.value()) + v2.value();
             }
         });
@@ -80,15 +70,10 @@ public class Operators implements Extension {
 
     private void numberCalculator(DAL dal, org.testcharm.dal.runtime.Operators operator,
                                   TriFunction<NumberType, Number, Number, Number> action) {
-        dal.getRuntimeContextBuilder().registerOperator(operator, new Operation<Number, Number>() {
+        dal.getRuntimeContextBuilder().registerOperator(operator, new AbstractOperation<Number, Number>() {
 
             @Override
-            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-                return v1.instanceOf(Number.class) && v2.instanceOf(Number.class);
-            }
-
-            @Override
-            public Object operate(Data<Number> v1, DALOperator operator, Data<Number> v2, DALRuntimeContext context) {
+            public Object operateObject(Data<Number> v1, DALOperator operator, Data<Number> v2, DALRuntimeContext context) {
                 return action.apply(context.getNumberType(), v1.value(), v2.value());
             }
         });

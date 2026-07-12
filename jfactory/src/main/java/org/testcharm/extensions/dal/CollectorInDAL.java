@@ -43,15 +43,10 @@ public class CollectorInDAL implements org.testcharm.dal.runtime.Extension {
                 })
                 .registerDumper(Collector.class, DumperFactory.skip())
 
-                .registerOperator(Operators.EQUAL, new Operation<JFactoryCollector, ExpectationFactory>() {
+                .registerOperator(Operators.EQUAL, new AbstractOperation<JFactoryCollector, ExpectationFactory>() {
                     @Override
-                    public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, RuntimeContextBuilder.DALRuntimeContext context) {
-                        return v1.instanceOf(JFactoryCollector.class) && v2.instanceOf(ExpectationFactory.class);
-                    }
-
-                    @Override
-                    public Data<?> operateData(Data<JFactoryCollector> v1, DALOperator operator, Data<ExpectationFactory> v2,
-                                               RuntimeContextBuilder.DALRuntimeContext context) {
+                    public Data<?> operate(Data<JFactoryCollector> v1, DALOperator operator, Data<ExpectationFactory> v2,
+                                           RuntimeContextBuilder.DALRuntimeContext context) {
                         v1.value().raw();
                         return v2.value().create(operator, v1).equalTo();
                     }

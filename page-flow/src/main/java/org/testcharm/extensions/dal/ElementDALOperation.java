@@ -37,14 +37,14 @@ public class ElementDALOperation implements Extension {
                 .registerExclamation(Elements.class, (RuntimeDataHandler<RuntimeData<Elements>>)
                         elementsRuntimeData -> elementsRuntimeData.data().map(Elements::visible))
 
-                .registerOperator(Operators.PLUS, new Operation<Elements, Elements>() {
+                .registerOperator(Operators.PLUS, new AbstractOperation<Elements, Elements>() {
                     @Override
                     public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
                         return v1.instanceOf(Elements.class) && v2.instanceOf(Elements.class);
                     }
 
                     @Override
-                    public Object operate(Data<Elements> v1, DALOperator operator, Data<Elements> v2, DALRuntimeContext context) {
+                    public Object operateObject(Data<Elements> v1, DALOperator operator, Data<Elements> v2, DALRuntimeContext context) {
                         return Elements.concat(v1.value(), v2.value());
                     }
                 })
@@ -84,15 +84,9 @@ public class ElementDALOperation implements Extension {
         }
     }
 
-    private static class VerificationInFilter implements Operation<ElementDALOperation.ElementsFilterable, Object> {
-
+    private static class VerificationInFilter extends AbstractOperation<ElementsFilterable, Object> {
         @Override
-        public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-            return v1.instanceOf(ElementDALOperation.ElementsFilterable.class);
-        }
-
-        @Override
-        public Object operate(Data<ElementDALOperation.ElementsFilterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
+        public Object operateObject(Data<ElementDALOperation.ElementsFilterable> v1, DALOperator operator, Data<Object> v2, DALRuntimeContext context) {
             return v1.value().filter(operator, v2, context);
         }
     }

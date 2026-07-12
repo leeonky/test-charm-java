@@ -118,15 +118,10 @@ public class MetaProperties implements Extension {
                     }
                 }));
 
-        dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation<CurryingMethod, ExpectationFactory>() {
+        dal.getRuntimeContextBuilder().registerOperator(MATCH, new AbstractOperation<CurryingMethod, ExpectationFactory>() {
 
             @Override
-            public boolean match(Data<?> v1, DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-                return v1.instanceOf(CurryingMethod.class) && v2.instanceOf(ExpectationFactory.class);
-            }
-
-            @Override
-            public Data<?> operateData(Data<CurryingMethod> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
+            public Data<?> operate(Data<CurryingMethod> v1, DALOperator operator, Data<ExpectationFactory> v2, DALRuntimeContext context) {
                 return v2.value().create(operator, v1).matches();
             }
         });
