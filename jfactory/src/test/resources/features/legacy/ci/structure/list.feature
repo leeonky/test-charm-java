@@ -60,7 +60,7 @@ Feature: populate list depends on another list
       Then the result should:
         """
         : {
-          beans1: [{...} {str= world}]
+          beans1: [null {str= world}]
           beans2: [{str= hello} {...}]
         }
         """
@@ -127,16 +127,46 @@ Feature: populate list depends on another list
         }
         """
 
-    Scenario: populate by spec
+# feature changed: use element spec in parent spec ListStructure::spec removed
+#    Scenario: populate by spec
+#      And the following spec class:
+#        """
+#        public class BeanSpec extends Spec<Bean> {
+#          public void main() {
+#            property("str").value("hello");
+#          }
+#
+#          @Trait
+#          public void Default() {
+#            property("num").value(100);
+#          }
+#        }
+#        """
+#      And register:
+#        """
+#        jFactory.factory(Beans.class).spec(spec -> {
+#          spec.structure()
+#            .list("beans1")
+#            .list("beans2").spec("Default", "BeanSpec");
+#        });
+#        """
+#      When build:
+#        """
+#        jFactory.clear().type(Beans.class).property("beans1[0].str", "world").create();
+#        """
+#      Then the result should:
+#        """
+#        : {
+#          beans1: [{str= world}]
+#          beans2: [{str= hello, num= 100}]
+#        }
+#        """
+    Scenario: populate by parent spec
       And the following spec class:
         """
         public class BeanSpec extends Spec<Bean> {
           public void main() {
             property("str").value("hello");
-          }
-
-          @Trait
-          public void Default() {
             property("num").value(100);
           }
         }
@@ -144,9 +174,10 @@ Feature: populate list depends on another list
       And register:
         """
         jFactory.factory(Beans.class).spec(spec -> {
+          spec.property("beans2[]").is(BeanSpec.class);
           spec.structure()
             .list("beans1")
-            .list("beans2").spec("Default", "BeanSpec");
+            .list("beans2");
         });
         """
       When build:
