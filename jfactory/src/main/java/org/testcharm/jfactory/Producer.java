@@ -108,6 +108,12 @@ abstract class Producer<T> {
     protected <R> void setupAssociation(String association, ObjectInstance<R> instance, ListPersistable cachedChildren) {
     }
 
+    protected void processReverseAssociations() {
+    }
+
+    protected void processStructures() {
+    }
+
     protected boolean isFixed() {
         return false;
     }

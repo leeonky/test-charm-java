@@ -122,6 +122,16 @@ class CollectionProducer<T, C> extends Producer<C> {
                 objectProducer.setupAssociation(association, instance, cachedChildren));
     }
 
+    @Override
+    protected void processReverseAssociations() {
+        children.forEach(Producer::processReverseAssociations);
+    }
+
+    @Override
+    protected void processStructures() {
+        children.forEach(Producer::processStructures);
+    }
+
     public int childrenCount() {
         return children.size();
     }

@@ -161,6 +161,7 @@ Feature: populate list depends on another list
 #          beans2: [{str= hello, num= 100}]
 #        }
 #        """
+
     Scenario: populate by parent spec
       And the following spec class:
         """
@@ -247,6 +248,74 @@ Feature: populate list depends on another list
         """
         : {
           beans: null
+        }
+        """
+
+    Scenario: reverse association should work for sub object
+      Given the following bean class:
+        """
+        public class Order {
+          public String id;
+          public OrderLine lines[];
+          public SourceOrder sourceOrder;
+        }
+        """
+      Given the following bean class:
+        """
+        public class OrderLine {
+          public Order order;
+          public String product;
+        }
+        """
+      Given the following bean class:
+        """
+        public class SourceOrder {
+          public String id;
+          public SourceOrderLine lines[];
+        }
+        """
+      Given the following bean class:
+        """
+        public class SourceOrderLine {
+          public SourceOrder order;
+        }
+        """
+      And register:
+        """
+        jFactory.factory(Order.class).spec(spec -> {
+          spec.property("sourceOrder").byFactory();
+          spec.structure()
+            .list("lines")
+            .list("sourceOrder.lines");
+          spec.property("lines").reverseAssociation("order");
+        });
+        """
+      And register:
+        """
+        jFactory.factory(SourceOrder.class).spec(spec -> {
+          spec.property("lines").reverseAssociation("order");
+        });
+        """
+      When build:
+        """
+        jFactory.clear().type(Order.class)
+          .property("id", "order1")
+          .property("lines[0].product", "product1")
+          .property("sourceOrder.id", "sourceOrder1")
+          .create();
+        """
+      Then the result should:
+        """
+        : {
+          id: order1
+          lines: | order.id | product    |
+                 | order1   | product1   |
+
+          sourceOrder: {
+            id: sourceOrder1
+            lines: | order.id       |
+                   | sourceOrder1   |
+          }
         }
         """
 

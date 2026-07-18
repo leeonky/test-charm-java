@@ -38,10 +38,6 @@ class ObjectProducer<T> extends Producer<T> {
         builder.collectSpec(this, instance.specRules());
         builder.processInputProperty(this);
         resolveBuilderValueProducer();
-        instance.specRules().applyPropertyStructureDefinitions(jFactory, this, factory);
-        processListStructures();
-        setupReverseAssociations();
-
 //        reverseAssociation.ifPresent(reverseAssociation1 -> {
 //            reverseAssociations.forEach((r, a) -> {
 //                if (reverseAssociation1.matches(a, getType().getPropertyWriter(r.toString()).getType().getElementOrPropertyType())) {
@@ -54,8 +50,11 @@ class ObjectProducer<T> extends Producer<T> {
 //        });
     }
 
-    private void processListStructures() {
+    @Override
+    protected void processStructures() {
+        instance.specRules().applyPropertyStructureDefinitions(jFactory, this, factory);
         listStructures.forEach(listStructure -> listStructure.process(this, jFactory));
+        children.values().forEach(Producer::processStructures);
     }
 
     //        TODO refactor duplicated call
@@ -83,9 +82,18 @@ class ObjectProducer<T> extends Producer<T> {
         }
     }
 
-    private void setupReverseAssociations() {
+    @Override
+    protected void processReverseAssociations() {
         reverseAssociations.forEach((child, association) ->
                 descendantForUpdate(child).setupAssociation(association, instance, cachedChildren));
+        children.values().forEach(Producer::processReverseAssociations);
+    }
+
+    public ObjectProducer<T> processForRoot() {
+        processStructures();
+        processReverseAssociations();
+        processConsistent();
+        return this;
     }
 
     @Override
@@ -140,10 +148,9 @@ class ObjectProducer<T> extends Producer<T> {
         });
     }
 
-    public ObjectProducer<T> processConsistent() {
+    protected void processConsistent() {
         collectConsistent(this, propertyChain(""));
         consistencySet.resolve(this);
-        return this;
     }
 
     @Override
