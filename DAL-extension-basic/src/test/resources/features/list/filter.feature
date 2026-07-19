@@ -254,7 +254,7 @@ Feature: filter
     ]
     """
 
-  Scenario: filter result is adaptive list
+  Scenario: filter result is solo list
     Given the following json:
     """
     [{
@@ -274,12 +274,12 @@ Feature: filter
       }
     """
 
-  Scenario: filter adaptive list
+  Scenario: filter solo list
     Given the following java class:
       """
       public class Test {
-        public AdaptiveList<String> getList() {
-          return AdaptiveList.staticList(Arrays.asList("a", "abc"));
+        public SoloList<String> getList() {
+          return SoloList.soloList(Arrays.asList("a", "abc"));
         }
       }
       """
@@ -289,14 +289,14 @@ Feature: filter
       = [abc]
       """
 
-  Rule: For adaptive list
+  Rule: For solo list
 
     Scenario: filter is lazy evaluation
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList getList() {
-            return AdaptiveList.staticList(new ErrorList());
+          public SoloList getList() {
+            return SoloList.soloList(new ErrorList());
           }
 
           public static class ErrorList extends ArrayList<String> {

@@ -20,11 +20,11 @@ public class ListExtension implements Extension {
                 .registerMetaProperty("top", metaData -> (Callable<Integer, DALCollection<Object>>)
                         opt2(metaData.data()::list)::limit)
                 .registerMetaProperty("filter", metaData -> new Filterable(metaData.data()))
-                .registerMetaProperty(AdaptiveList.class, "filter", metaData -> new Filterable(metaData.data()))
-                .registerMetaProperty(AdaptiveList.class, "top", metaData -> (Callable<Integer, DALCollection<Object>>)
+                .registerMetaProperty(SoloList.class, "filter", metaData -> new Filterable(metaData.data()))
+                .registerMetaProperty(SoloList.class, "top", metaData -> (Callable<Integer, DALCollection<Object>>)
                         opt2(metaData.data()::list)::limit)
-                .registerMetaProperty(AdaptiveList.class, "await", metaData -> new Await(metaData.data()))
-                .registerMetaProperty(AdaptiveList.class, "eventually", metaData -> new Eventually(metaData.data()))
+                .registerMetaProperty(SoloList.class, "await", metaData -> new Await(metaData.data()))
+                .registerMetaProperty(SoloList.class, "eventually", metaData -> new Eventually(metaData.data()))
                 .registerOperator(Operators.MATCH, new VerificationInFilter())
                 .registerOperator(Operators.EQUAL, new VerificationInFilter())
                 .registerExclamation(Filterable.class, runtimeData -> runtimeData.data().value().requireNotEmpty())
@@ -39,8 +39,8 @@ public class ListExtension implements Extension {
             this.data = data;
         }
 
-        public AdaptiveList<Object> filter(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
-            return new StaticAdaptiveList<>(filterList(operator, v2, context));
+        public SoloList<Object> filter(DALOperator operator, Data<?> v2, DALRuntimeContext context) {
+            return new DefaultSoloList<>(filterList(operator, v2, context));
         }
 
         protected DALCollection<Object> filterList(DALOperator operator, Data<?> v2, DALRuntimeContext context) {

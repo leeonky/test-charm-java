@@ -1,9 +1,9 @@
 package org.testcharm.dal.runtime;
 
-public class InvalidAdaptiveListException extends RuntimeException {
+public class InvalidSoloListException extends RuntimeException {
     private final DALCollection<?> list;
 
-    public InvalidAdaptiveListException(String message, DALCollection<?> list) {
+    public InvalidSoloListException(String message, DALCollection<?> list) {
         super(message);
         this.list = list;
     }

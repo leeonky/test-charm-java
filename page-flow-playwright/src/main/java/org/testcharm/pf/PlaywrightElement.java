@@ -2,7 +2,7 @@ package org.testcharm.pf;
 
 import com.microsoft.playwright.Download;
 import com.microsoft.playwright.Locator;
-import org.testcharm.dal.runtime.AdaptiveList;
+import org.testcharm.dal.runtime.SoloList;
 import org.testcharm.io.VirtualFile;
 import org.testcharm.util.CollectionHelper;
 
@@ -95,7 +95,7 @@ public abstract class PlaywrightElement<T extends PlaywrightElement<T, P>, P ext
         if (checkAble())
             return raw().isChecked();
         if (selectAble())
-            return AdaptiveList.staticList((Collection<?>)
+            return SoloList.soloList((Collection<?>)
                     raw().evaluate("select => Array.from(select.selectedOptions).map(option => option.text)"));
         return raw().inputValue();
     }

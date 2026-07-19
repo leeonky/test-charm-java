@@ -6,8 +6,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<Integer> getList() {
-            return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
+          public SoloList<Integer> getList() {
+            return SoloList.soloList(Arrays.asList(1, 2, 3));
           }
         }
         """
@@ -24,7 +24,7 @@ Feature: single or list
         Unexpected list size
         Expected: <2>
         Actual: <3>
-        Actual list: org.testcharm.dal.runtime.StaticAdaptiveList [
+        Actual list: org.testcharm.dal.runtime.DefaultSoloList [
             java.lang.Integer <1>,
             java.lang.Integer <2>,
             java.lang.Integer <3>
@@ -35,8 +35,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<Integer> getList() {
-            return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
+          public SoloList<Integer> getList() {
+            return SoloList.soloList(Arrays.asList(1, 2, 3));
           }
         }
         """
@@ -63,8 +63,8 @@ Feature: single or list
         """
         public class Test {
           int i = 1;
-          public AdaptiveList<Integer> getList() {
-            return AdaptiveList.staticList(()-> i++);
+          public SoloList<Integer> getList() {
+            return SoloList.soloList(()-> i++);
           }
         }
         """
@@ -77,12 +77,12 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<String> getList1() {
-            return AdaptiveList.staticList(Arrays.asList("hello"));
+          public SoloList<String> getList1() {
+            return SoloList.soloList(Arrays.asList("hello"));
           }
 
-          public AdaptiveList<String> getList2() {
-            return AdaptiveList.staticList(Arrays.asList("hello", "world"));
+          public SoloList<String> getList2() {
+            return SoloList.soloList(Arrays.asList("hello", "world"));
           }
         }
         """
@@ -113,8 +113,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<String> getList() {
-            return AdaptiveList.staticList(Arrays.asList("hello"));
+          public SoloList<String> getList() {
+            return SoloList.soloList(Arrays.asList("hello"));
           }
         }
         """
@@ -133,8 +133,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<String> getList() {
-            return AdaptiveList.staticList(Arrays.asList("hello", "world"));
+          public SoloList<String> getList() {
+            return SoloList.soloList(Arrays.asList("hello", "world"));
           }
         }
         """
@@ -185,8 +185,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<Data> getList() {
-            return AdaptiveList.staticList(Arrays.asList(new Data()));
+          public SoloList<Data> getList() {
+            return SoloList.soloList(Arrays.asList(new Data()));
           }
         }
         """
@@ -225,8 +225,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<Data> getList() {
-            return AdaptiveList.staticList(Arrays.asList(new Data()));
+          public SoloList<Data> getList() {
+            return SoloList.soloList(Arrays.asList(new Data()));
           }
         }
         """
@@ -296,8 +296,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<Data> getList() {
-              return AdaptiveList.staticList(Arrays.asList(new Data(), new Data()));
+          public SoloList<Data> getList() {
+              return SoloList.soloList(Arrays.asList(new Data(), new Data()));
           }
         }
         """
@@ -329,8 +329,8 @@ Feature: single or list
         """
         public class Test {
           private int i = 0;
-          public AdaptiveList<String> getList() {
-            return AdaptiveList.staticList(()-> String.valueOf(i++));
+          public SoloList<String> getList() {
+            return SoloList.soloList(()-> String.valueOf(i++));
           }
         }
         """
@@ -351,8 +351,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<String> getList() {
-            return AdaptiveList.staticList(Arrays.asList("hello"));
+          public SoloList<String> getList() {
+            return SoloList.soloList(Arrays.asList("hello"));
           }
         }
         """
@@ -369,8 +369,8 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<String> getList() {
-            return AdaptiveList.staticList(Arrays.asList("hello", "world"));
+          public SoloList<String> getList() {
+            return SoloList.soloList(Arrays.asList("hello", "world"));
           }
         }
         """
@@ -411,12 +411,12 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<Integer> getList3() {
-            return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
+          public SoloList<Integer> getList3() {
+            return SoloList.soloList(Arrays.asList(1, 2, 3));
           }
 
-          public AdaptiveList<Integer> getList1() {
-            return AdaptiveList.staticList(Arrays.asList(1));
+          public SoloList<Integer> getList1() {
+            return SoloList.soloList(Arrays.asList(1));
           }
         }
         """
@@ -454,12 +454,12 @@ Feature: single or list
       Given the following java class:
         """
         public class Test {
-          public AdaptiveList<Integer> getList3() {
-              return AdaptiveList.staticList(Arrays.asList(1, 2, 3));
+          public SoloList<Integer> getList3() {
+              return SoloList.soloList(Arrays.asList(1, 2, 3));
           }
 
-          public AdaptiveList<Integer> getList1() {
-              return AdaptiveList.staticList(Arrays.asList(1));
+          public SoloList<Integer> getList1() {
+              return SoloList.soloList(Arrays.asList(1));
           }
         }
         """

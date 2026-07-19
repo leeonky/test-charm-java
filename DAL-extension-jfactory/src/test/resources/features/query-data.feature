@@ -22,7 +22,7 @@ Feature: query data
     """
     = ```
       org.testcharm.dal.extensions.jfactory.Steps$1 {
-          Orders: org.testcharm.dal.runtime.StaticAdaptiveList [
+          Orders: org.testcharm.dal.runtime.DefaultSoloList [
               org.testcharm.dal.extensions.jfactory.entity.Order {
                   code: java.lang.String <SN1>,
                   id: java.lang.Integer <1>
@@ -32,7 +32,7 @@ Feature: query data
       ```
     """
 
-  Scenario: use adaptive list in query all result
+  Scenario: use solo list in query all result
     Given "Orders":
       | id | code |
       | 1  | SN1  |

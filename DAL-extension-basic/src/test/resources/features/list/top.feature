@@ -32,12 +32,12 @@ Feature: top n lit
     The root value was: null
     """
 
-  Scenario: top n for adaptive list
+  Scenario: top n for solo list
     Given the following java class:
       """
       public class Test {
-        public AdaptiveList<String> getList() {
-          return AdaptiveList.staticList(Arrays.asList("a", "abc"));
+        public SoloList<String> getList() {
+          return SoloList.soloList(Arrays.asList("a", "abc"));
         }
       }
       """

@@ -47,7 +47,7 @@ public class MetaProperties implements Extension {
     }
 
     private static Object values(MetaData<?> metaData) {
-        return new StaticAdaptiveList<>(new IterableDALCollection<>(() -> metaData.data().fieldNames().stream().map(k ->
+        return new DefaultSoloList<>(new IterableDALCollection<>(() -> metaData.data().fieldNames().stream().map(k ->
                 metaData.data().property(k).value()).iterator()));
     }
 

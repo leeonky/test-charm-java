@@ -49,30 +49,30 @@ public class Types implements Extension {
                     }
                 })
                 .registerReturnHook(d -> d.cast(Scoped.class).ifPresent(Scoped::onExit))
-                .registerDALCollectionFactory(AdaptiveList.class, AdaptiveList::list)
-                .registerPropertyAccessor(AdaptiveList.class, new PropertyAccessor<AdaptiveList<?>>() {
+                .registerDALCollectionFactory(SoloList.class, SoloList::list)
+                .registerPropertyAccessor(SoloList.class, new PropertyAccessor<SoloList<?>>() {
 
                     @Override
-                    public Data<?> getData(Data<AdaptiveList<?>> data, Object property) {
-                        return adaptiveListOf(data, d -> d.map(AdaptiveList::single).property(property), ExpressionException::illegalOp2);
+                    public Data<?> getData(Data<SoloList<?>> data, Object property) {
+                        return adaptiveListOf(data, d -> d.map(SoloList::single).property(property), ExpressionException::illegalOp2);
                     }
 
                     @Override
-                    public Set<?> getPropertyNames(Data<AdaptiveList<?>> data) {
-                        return adaptiveListOf(data, d -> d.map(AdaptiveList::single).fieldNames(), ExpressionException::illegalOp2);
+                    public Set<?> getPropertyNames(Data<SoloList<?>> data) {
+                        return adaptiveListOf(data, d -> d.map(SoloList::single).fieldNames(), ExpressionException::illegalOp2);
                     }
                 })
-                .registerMetaPropertyPattern(AdaptiveList.class, ".*",
-                        (RuntimeDataHandler<MetaData<AdaptiveList>>) metaData -> {
+                .registerMetaPropertyPattern(SoloList.class, ".*",
+                        (RuntimeDataHandler<MetaData<SoloList>>) metaData -> {
                             if (metaData.name().equals("size") || metaData.name().equals("this"))
-                                return metaData.delegate(d -> d.map(AdaptiveList::list));
+                                return metaData.delegate(d -> d.map(SoloList::list));
                             else
                                 return metaData.delegate(d -> adaptiveListOf(Sneaky.cast(d),
-                                        l -> l.map(AdaptiveList::single), ExpressionException::illegalOp2));
+                                        l -> l.map(SoloList::single), ExpressionException::illegalOp2));
                         })
-                .registerMetaProperty(AdaptiveList.class, "single",
-                        (RuntimeDataHandler<MetaData<AdaptiveList>>) metaData ->
-                                adaptiveListOf(Sneaky.cast(metaData.data()), d -> d.map(AdaptiveList::single), ExpressionException::illegalOp2))
+                .registerMetaProperty(SoloList.class, "single",
+                        (RuntimeDataHandler<MetaData<SoloList>>) metaData ->
+                                adaptiveListOf(Sneaky.cast(metaData.data()), d -> d.map(SoloList::single), ExpressionException::illegalOp2))
         ;
 
         verifySingle(builder.checkerSetForEqualing());
@@ -82,8 +82,8 @@ public class Types implements Extension {
     @SuppressWarnings("unchecked")
     private void verifySingle(CheckerSet checkerSet) {
         checkerSet.register((expected, actual) -> {
-            if (actual.instanceOf(AdaptiveList.class)) {
-                Data<Object> single = adaptiveListOf((Data<AdaptiveList<?>>) actual, l -> l.map(AdaptiveList::single),
+            if (actual.instanceOf(SoloList.class)) {
+                Data<Object> single = adaptiveListOf((Data<SoloList<?>>) actual, l -> l.map(SoloList::single),
                         ExpressionException::illegalOp1);
                 Checker checkerOfElement = checkerSet.fetch(expected, single);
                 return of(new Checker() {
@@ -97,11 +97,11 @@ public class Types implements Extension {
         });
     }
 
-    private <T> T adaptiveListOf(Data<AdaptiveList<?>> data, Function<Data<AdaptiveList<?>>, T> function,
+    private <T> T adaptiveListOf(Data<SoloList<?>> data, Function<Data<SoloList<?>>, T> function,
                                  Function<String, ExpressionException> exceptionSupplier) {
         try {
             return function.apply(data);
-        } catch (InvalidAdaptiveListException e) {
+        } catch (InvalidSoloListException e) {
             throw exceptionSupplier.apply(e.getMessage() + ": " + data.map(ig -> e.list()).dump());
         }
     }

@@ -1,10 +1,10 @@
 package org.testcharm.pf;
 
 import org.testcharm.dal.extensions.basic.sync.Retryer;
-import org.testcharm.dal.runtime.AdaptiveList;
 import org.testcharm.dal.runtime.CollectionDALCollection;
 import org.testcharm.dal.runtime.DALCollection;
-import org.testcharm.dal.runtime.InvalidAdaptiveListException;
+import org.testcharm.dal.runtime.InvalidSoloListException;
+import org.testcharm.dal.runtime.SoloList;
 import org.testcharm.util.IndentBuffer;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 
 import static java.lang.System.identityHashCode;
 
-public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
+public interface Elements<T extends Element<T, ?, ?>> extends SoloList<T> {
 
     static <T extends Element<T, ?, ?>> Elements<T> concat(Elements<T> elements1, Elements<T> elements2) {
         return new GroupElements<>(elements1, elements2);
@@ -59,13 +59,13 @@ public interface Elements<T extends Element<T, ?, ?>> extends AdaptiveList<T> {
     default T single() {
         try {
             Element.logger.info(String.format("Locating... (%dms)", timeout()));
-            return new Retryer(timeout(), 100).get(AdaptiveList.super::single);
-        } catch (InvalidAdaptiveListException ig) {
+            return new Retryer(timeout(), 100).get(SoloList.super::single);
+        } catch (InvalidSoloListException ig) {
             IndentBuffer buffer = IndentBuffer.create()
                     .append("Operations can only be performed on a single located element at:");
             locateInfo(buffer.newLine());
             buffer.newLine().append("but found ").append(ig.list().size());
-            throw new InvalidAdaptiveListException(buffer.content(), ig.list());
+            throw new InvalidSoloListException(buffer.content(), ig.list());
         }
     }
 

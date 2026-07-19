@@ -157,7 +157,7 @@ Feature: async
       ::eventually: [ 100 ]
       """
 
-    Scenario: eventually adaptive list
+    Scenario: eventually solo list
       Given the following java class:
         """
         public class DataList {
@@ -166,8 +166,8 @@ Feature: async
           }
           private long time = System.currentTimeMillis();
 
-          public AdaptiveList<Data> getList() {
-            return new StaticAdaptiveList(() -> {
+          public SoloList<Data> getList() {
+            return new DefaultSoloList(() -> {
               if(System.currentTimeMillis() - time >= 1000) {
                 Data d1 = new Data();
                 d1.i = 1;
@@ -428,7 +428,7 @@ Feature: async
       }
       """
 
-    Scenario: await adaptive list
+    Scenario: await solo list
       Given the following java class:
         """
         public class DataList {
@@ -437,8 +437,8 @@ Feature: async
           }
           private long time = System.currentTimeMillis();
 
-          public AdaptiveList<Data> getList() {
-            return new StaticAdaptiveList(() -> {
+          public SoloList<Data> getList() {
+            return new DefaultSoloList(() -> {
               if(System.currentTimeMillis() - time >= 1000) {
                 Data d1 = new Data();
                 d1.i = 1;

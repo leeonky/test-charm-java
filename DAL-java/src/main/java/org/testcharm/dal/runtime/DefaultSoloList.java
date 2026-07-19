@@ -2,14 +2,14 @@ package org.testcharm.dal.runtime;
 
 import java.util.function.Supplier;
 
-public class StaticAdaptiveList<T> implements AdaptiveList<T> {
+public class DefaultSoloList<T> implements SoloList<T> {
     private final Supplier<DALCollection<T>> list;
 
-    public StaticAdaptiveList(DALCollection<T> list) {
+    public DefaultSoloList(DALCollection<T> list) {
         this.list = () -> list;
     }
 
-    public StaticAdaptiveList(Supplier<DALCollection<T>> list) {
+    public DefaultSoloList(Supplier<DALCollection<T>> list) {
         this.list = list;
     }
 

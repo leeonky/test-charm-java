@@ -3,7 +3,7 @@ package org.testcharm.pf;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.support.ui.Select;
-import org.testcharm.dal.runtime.AdaptiveList;
+import org.testcharm.dal.runtime.SoloList;
 import org.testcharm.io.TempDirectory;
 import org.testcharm.io.VirtualFile;
 import org.testcharm.util.CollectionHelper;
@@ -102,7 +102,7 @@ public abstract class SeleniumElement<T extends SeleniumElement<T, P>, P extends
         if (checkAble())
             return raw().isSelected();
         else if (selectAble())
-            return AdaptiveList.staticList(new Select(raw()).getAllSelectedOptions().stream()
+            return SoloList.soloList(new Select(raw()).getAllSelectedOptions().stream()
                     .map(org.openqa.selenium.WebElement::getText).collect(Collectors.toList()));
         return WebElement.super.value();
     }
