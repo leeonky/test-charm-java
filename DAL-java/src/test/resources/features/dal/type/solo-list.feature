@@ -107,6 +107,23 @@ Feature: single or list
                ^
         """
 
+    Scenario: flat solo list
+      Given the following java class:
+        """
+        public class Test {
+          public SoloList<List<String>> getList() {
+              return SoloList.soloList(Arrays.asList(
+                Arrays.asList("hello", "world"),
+                Arrays.asList("goodbye")
+              ));
+          }
+        }
+        """
+      Then the following verification for the instance of java class "Test" should pass:
+        """
+        list::flat: [hello world goodbye]
+        """
+
   Rule: solo element
 
     Scenario: When accessing the list property, the access is delegated to the sole element of the list
