@@ -37,387 +37,6 @@ class NumberParserTest {
     }
 
     @Nested
-    class IntegerNumber {
-
-        @Nested
-        class Radix10 {
-
-            @Test
-            void parse_int_number() {
-                assertParse("0", 0);
-                assertParse("1", 1);
-                assertParse("2", 2);
-                assertParse("3", 3);
-                assertParse("4", 4);
-                assertParse("5", 5);
-                assertParse("6", 6);
-                assertParse("7", 7);
-                assertParse("8", 8);
-                assertParse("9", 9);
-                assertParse("24", 24);
-                assertParse("1_000", 1_000);
-                assertParse("+24", 24);
-                assertParse("2147483647", 2147483647);
-                assertParse("1234567890", 1234567890);
-            }
-
-            @Test
-            void negative() {
-                assertParse("-24", -24);
-                assertParse("-2147483648", -2147483648);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("2147483648", 2147483648L);
-                assertParse("2147483657", 2147483657L);
-                assertParse("-2147483649", -2147483649L);
-                assertParse("-2147483658", -2147483658L);
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse(null, null);
-                assertParse("+", null);
-                assertParse("-", null);
-                assertParse("1_", null);
-                assertParse("1x", null);
-                assertParse("F", null);
-                assertParse("e", null);
-                assertParse("y", null);
-                assertParse("s", null);
-                assertParse("l", null);
-                assertParse("bi", null);
-                assertParse("bd", null);
-                assertParse("d", null);
-                assertParse("-F", null);
-                assertParse("-y", null);
-                assertParse("-s", null);
-                assertParse("-l", null);
-                assertParse("-bi", null);
-                assertParse("-bd", null);
-                assertParse("-d", null);
-            }
-        }
-
-        @Nested
-        class Radix16 {
-
-            @Test
-            void parse_int_number() {
-                assertParse("0x0", 0);
-                assertParse("0x1", 1);
-                assertParse("0x2", 2);
-                assertParse("0x3", 3);
-                assertParse("0x4", 4);
-                assertParse("0x5", 5);
-                assertParse("0x6", 6);
-                assertParse("0x7", 7);
-                assertParse("0x8", 8);
-                assertParse("0x9", 9);
-                assertParse("0xa", 0xa);
-                assertParse("0xb", 0xb);
-                assertParse("0xc", 0xc);
-                assertParse("0xd", 0xd);
-                assertParse("0xe", 0xe);
-                assertParse("0xf", 0xf);
-                assertParse("0XF", 0XF);
-                assertParse("0xd", 0xd);
-                assertParse("0xbd", 0xbd);
-                assertParse("0x1_000", 0x1_000);
-                assertParse("+0xff", 0xff);
-                assertParse("0x7fffffff", 2147483647);
-            }
-
-            @Test
-            void negative() {
-                assertParse("-0x1f", -0x1f);
-                assertParse("-0x80000000", -0x80000000);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("0x80000000", 0x80000000L);
-                assertParse("-0x80000001", -0x80000001L);
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("0x", null);
-                assertParse("+0x", null);
-                assertParse("-0x", null);
-                assertParse("0x1_", null);
-                assertParse("0x1x", null);
-                assertParse("0xG", null);
-            }
-        }
-
-        @Nested
-        class Radix2 {
-
-            @Test
-            void parse_int_number() {
-                assertParse("0b0", 0);
-                assertParse("0b1", 1);
-                assertParse("0b10", 2);
-                assertParse("0b1000_1000", 0x88);
-            }
-
-            @Test
-            void negative() {
-                assertParse("-0B10", -2);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("0b1000_0000_0000_0000_0000_0000_0000_0000", 0x80000000L);
-                assertParse("-0b1000_0000_0000_0000_0000_0000_0000_0001", -0x80000001L);
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("0b", null);
-                assertParse("+0b", null);
-                assertParse("-0b", null);
-                assertParse("0b1_", null);
-                assertParse("0b1b", null);
-                assertParse("0b2", null);
-            }
-        }
-
-        @Nested
-        class Radix8 {
-
-            @Test
-            void parse_int_number() {
-                assertParse("00", 0);
-                assertParse("01", 1);
-                assertParse("02", 2);
-                assertParse("03", 3);
-                assertParse("04", 4);
-                assertParse("05", 5);
-                assertParse("06", 6);
-                assertParse("07", 7);
-                assertParse("010", 8);
-                assertParse("0170", 120);
-                assertParse("+0170", 120);
-                assertParse("+0_171", 121);
-                assertParse("0_172", 122);
-            }
-
-            @Test
-            void negative() {
-                assertParse("-0170", -120);
-                assertParse("-0_171", -121);
-                assertParse("-0_172", -122);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("020000000000", 0x80000000L);
-                assertParse("-020000000001", -0x80000001L);
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("08", null);
-                assertParse("07_", null);
-            }
-        }
-    }
-
-    @Nested
-    class ParseLong {
-
-        @Nested
-        class Radix10 {
-
-            @Test
-            void parse_long() {
-                assertParse("100000000005", 100000000005L);
-                assertParse("100000000005_000", 100000000005_000L);
-                assertParse("9223372036854775807", 9223372036854775807L);
-            }
-
-            @Test
-            void negative() {
-                assertParse("0x80000010", 0x80000010L);
-                assertParse("-0x80000010", -0x80000010L);
-                assertParse("-9223372036854775808", -9223372036854775808L);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("9223372036854775808", new BigInteger("9223372036854775808"));
-                assertParse("9223372036854775811", new BigInteger("9223372036854775811"));
-                assertParse("-9223372036854775809", new BigInteger("-9223372036854775809"));
-                assertParse("-9223372036854775811", new BigInteger("-9223372036854775811"));
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("100000000005_", null);
-                assertParse("100000000005xx", null);
-            }
-        }
-
-        @Nested
-        class Radix16 {
-
-            @Test
-            void parse_long() {
-                assertParse("0xfffffffffff", 0xfffffffffffL);
-                assertParse("0xfff_ffff_ffff", 0xfff_ffff_ffffL);
-                assertParse("0x7fffffffffffffff", 9223372036854775807L);
-            }
-
-            @Test
-            void negative() {
-                assertParse("0x80000010", 0x80000010L);
-                assertParse("-0x80000010", -0x80000010L);
-                assertParse("-0x8000000000000000", -9223372036854775808L);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("0x8000000000000000", new BigInteger("9223372036854775808"));
-                assertParse("-0x8000000000000001", new BigInteger("-9223372036854775809"));
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("100000000005_", null);
-                assertParse("100000000005xx", null);
-            }
-        }
-
-        @Nested
-        class Radix2 {
-
-            @Test
-            void parse_long() {
-                assertParse("0b1000_0000_0000_0000_0000_0000_0000_0000_0000", 0x800000000L);
-                assertParse("-0b1000_0000_0000_0000_0000_0000_0000_0001_0000", -0x800000010L);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000", new BigInteger("9223372036854775808"));
-                assertParse("-0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0001", new BigInteger("-9223372036854775809"));
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_", null);
-                assertParse("0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000b", null);
-            }
-        }
-
-
-        @Nested
-        class Radix8 {
-
-            @Test
-            void parse_long() {
-                assertParse("0377777777777777", 0xfffffffffffL);
-                assertParse("0377_7777_7777_7777", 0xfff_ffff_ffffL);
-                assertParse("0777777777777777777777", 9223372036854775807L);
-            }
-
-            @Test
-            void negative() {
-                assertParse("-01000000000000000000000", -9223372036854775808L);
-            }
-
-            @Test
-            void over_flow() {
-                assertParse("01000000000000000000000", new BigInteger("9223372036854775808"));
-                assertParse("-01000000000000000000001", new BigInteger("-9223372036854775809"));
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("01000000000000000000_", null);
-            }
-        }
-    }
-
-    @Nested
-    class ParseBigInteger {
-
-        @Nested
-        class Radix10 {
-
-            @Test
-            void parse_big_int() {
-                assertParse("10000000000000000005", new BigInteger("10000000000000000005"));
-                assertParse("100000000000000000015", new BigInteger("100000000000000000015"));
-                assertParse("100000000000000000_00_05", new BigInteger("1000000000000000000005"));
-            }
-
-            @Test
-            void negative() {
-                assertParse("-10000000000000000005", new BigInteger("-10000000000000000005"));
-                assertParse("-1000000000000000_00_05", new BigInteger("-10000000000000000005"));
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("10000000000000000005_", null);
-                assertParse("10000000000000000005xx", null);
-            }
-        }
-
-        @Nested
-        class Radix16 {
-
-            @Test
-            void parse_big_int() {
-                assertParse("0x80000000000000001", new BigInteger("80000000000000001", 16));
-                assertParse("0x800000000000000012", new BigInteger("800000000000000012", 16));
-                assertParse("0x800000000000_000_012", new BigInteger("800000000000000012", 16));
-            }
-
-            @Test
-            void negative() {
-                assertParse("-0x10000000000000000005", new BigInteger("-10000000000000000005", 16));
-                assertParse("-0x1000000000000000_00_05", new BigInteger("-10000000000000000005", 16));
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("0x10000000000000000005_", null);
-                assertParse("0x10000000000000000005xx", null);
-            }
-        }
-
-        @Nested
-        class Radix2 {
-
-            @Test
-            void parse_big_integer() {
-                assertParse("0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000", new BigInteger("80000000000000000", 16));
-                assertParse("-0b1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0001_0000", new BigInteger("-80000000000000010", 16));
-            }
-        }
-
-        @Nested
-        class Radix8 {
-
-            @Test
-            void parse_big_int() {
-                assertParse("01000000000000000000_0000", new BigInteger("9223372036854775808").multiply(BigInteger.valueOf(8)));
-                assertParse("-01000000000000000000_0010", new BigInteger("-9223372036854775809").multiply(BigInteger.valueOf(8)));
-            }
-
-            @Test
-            void invalid_number() {
-                assertParse("01000000000000000000_0000_", null);
-            }
-        }
-    }
-
-    @Nested
     class ParseFloat {
 
         @Test
@@ -611,7 +230,7 @@ class NumberParserTest {
     }
 
     @Nested
-    class Postfix {
+    class WithPostfix {
 
         @Test
         void invalid_postfix_number() {
@@ -654,6 +273,16 @@ class NumberParserTest {
 
                 assertParseOverflow("32768s");
                 assertParseOverflow("-32769s");
+            }
+
+            @Test
+            void as_int() {
+                assertParse("0i", 0);
+                assertParse("1I", 1);
+                assertParse("-1I", -1);
+
+                assertParseOverflow("2147483648i");
+                assertParseOverflow("-2147483649i");
             }
 
             @Test
@@ -760,8 +389,10 @@ class NumberParserTest {
 
             @Test
             void as_long() {
-                assertParseOverflow("0x8000_0000_0000_0000l");
-                assertParseOverflow("-0x8000_0000_0000_0001l");
+//                assertParseOverflow("0x8000_0000_0000_0000l");
+//                assertParseOverflow("-0x8000_0000_0000_0001l");
+                assertParseOverflow("9223372036854775808L");
+                assertParseOverflow("-9223372036854775809L");
             }
 
             @Test
@@ -900,5 +531,477 @@ class NumberParserTest {
                 assertParseOverflow("1E400d");
             }
         }
+
+        @Nested
+        class UnsignedForNonDecRadix {
+
+            @Nested
+            class IntegerParse {
+
+                @Test
+                void as_byte() {
+                    assertParse("0xffy", (byte) -1);
+                    assertParse("0xffs", (short) 255);
+                    assertParseOverflow("0x100y");
+                    assertParseOverflow("-0x81y");
+
+                    assertParse("0377y", (byte) -1);
+                    assertParseOverflow("0400y");
+                    assertParseOverflow("-0201y");
+
+                    assertParse("0b11111111y", (byte) -1);
+                    assertParseOverflow("0b100000000y");
+                    assertParseOverflow("-0b100000001y");
+                }
+
+                @Test
+                void as_short() {
+                    assertParse("0xffffs", (short) -1);
+                    assertParse("0xffffi", 65535);
+                    assertParseOverflow("0x10000s");
+                    assertParseOverflow("-0x8001s");
+
+                    assertParse("0177777s", (short) -1);
+                    assertParseOverflow("0200000s");
+                    assertParseOverflow("-0200001s");
+
+                    assertParse("0b1111111111111111s", (short) -1);
+                    assertParseOverflow("0b10000000000000000s");
+                    assertParseOverflow("-0b10000000000000001s");
+                }
+
+                @Test
+                void as_integer() {
+                    assertParse("0xffffffffi", -1);
+                    assertParse("0xffffffffl", 0xffffffffL);
+                    assertParseOverflow("0x100000000i");
+                    assertParseOverflow("-0x80000001i");
+
+                    assertParse("037777777777i", -1);
+                    assertParseOverflow("040000000000i");
+                    assertParseOverflow("-020000000001s");
+
+                    assertParse("0b11111111111111111111111111111111i", -1);
+                    assertParseOverflow("0b100000000000000000000000000000000i");
+                    assertParseOverflow("-0b100000000000000000000000000000001i");
+                }
+
+                @Test
+                void as_long() {
+                    assertParse("0xffffffffffffffffl", -1L);
+                    assertParse("0xffffffffffffffffbi", new BigInteger("18446744073709551615"));
+                    assertParseOverflow("0x10000000000000000l");
+                    assertParseOverflow("-0x8000000000000001l");
+
+                    assertParse("01777777777777777777777L", -1L);
+                    assertParse("01000000000000000000000L", Long.MIN_VALUE);
+                    assertParseOverflow("02000000000000000000000L");
+                    assertParseOverflow("-01000000000000000000001L");
+
+                    assertParse("0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L", -1L);
+                    assertParse("0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L", Long.MIN_VALUE);
+                    assertParseOverflow("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L");
+                    assertParseOverflow("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001L");
+                }
+            }
+        }
+    }
+
+    @Nested
+    class WithoutPostfix {
+
+        @Nested
+        class IntegerParse {
+
+            @Nested
+            class Radix10 {
+
+                @Nested
+                class ToJavaInteger {
+
+                    @Test
+                    void single_number_char() {
+                        assertParse("0", 0);
+                        assertParse("1", 1);
+                        assertParse("2", 2);
+                        assertParse("3", 3);
+                        assertParse("4", 4);
+                        assertParse("5", 5);
+                        assertParse("6", 6);
+                        assertParse("7", 7);
+                        assertParse("8", 8);
+                        assertParse("9", 9);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("2147483647", Integer.MAX_VALUE);
+                        assertParse("-2147483648", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+24", 24);
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse(null, null);
+                        assertParse("+", null);
+                        assertParse("-", null);
+                        assertParse("1_", null);
+                        assertParse("1x", null);
+                        assertParse("F", null);
+                        assertParse("e", null);
+                        assertParse("y", null);
+                        assertParse("s", null);
+                        assertParse("l", null);
+                        assertParse("bi", null);
+                        assertParse("bd", null);
+                        assertParse("d", null);
+                        assertParse("-F", null);
+                        assertParse("-y", null);
+                        assertParse("-s", null);
+                        assertParse("-l", null);
+                        assertParse("-bi", null);
+                        assertParse("-bd", null);
+                        assertParse("-d", null);
+                    }
+                }
+
+                @Nested
+                class ToJavaLong {
+                    @Test
+                    void supported_number_range() {
+                        assertParse("9223372036854775807", Long.MAX_VALUE);
+                        assertParse("2147483648", Integer.MAX_VALUE + 1L);
+                        assertParse("-2147483649", Integer.MIN_VALUE - 1L);
+                        assertParse("-9223372036854775808", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+9223372036854775807", 9223372036854775807L);
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("100000000005_", null);
+                        assertParse("100000000005xx", null);
+                    }
+                }
+
+                @Nested
+                class ToJavaBigInteger {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("9223372036854775808", BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.valueOf(1)));
+                        assertParse("-9223372036854775809", BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.valueOf(1)));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+10000000000000000005", new BigInteger("+10000000000000000005"));
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("10000000000000000005_", null);
+                        assertParse("10000000000000000005xx", null);
+                    }
+                }
+
+            }
+
+            @Nested
+            class Radix16 {
+
+                @Nested
+                class ToJavaInteger {
+
+                    @Test
+                    void single_number_char() {
+                        assertParse("0x0", 0);
+                        assertParse("0x1", 1);
+                        assertParse("0x2", 2);
+                        assertParse("0x3", 3);
+                        assertParse("0x4", 4);
+                        assertParse("0X5", 5);
+                        assertParse("0X6", 6);
+                        assertParse("0X7", 7);
+                        assertParse("0X8", 8);
+                        assertParse("0X9", 9);
+                        assertParse("0Xa", 0xa);
+                        assertParse("0xb", 0xb);
+                        assertParse("0xc", 0xc);
+                        assertParse("0xd", 0xd);
+                        assertParse("0xe", 0xe);
+                        assertParse("0xf", 0xf);
+                        assertParse("0xA", 0xa);
+                        assertParse("0xB", 0xb);
+                        assertParse("0xC", 0xc);
+                        assertParse("0xD", 0xd);
+                        assertParse("0xE", 0xe);
+                        assertParse("0xF", 0xf);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x7fffffff", Integer.MAX_VALUE);
+                        assertParse("-0x80000000", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void supported_unsigned_number_range() {
+                        assertParse("0xffffffff", -1);
+                        assertParse("0x80000000", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0xff", 0xff);
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("0x", null);
+                        assertParse("+0x", null);
+                        assertParse("-0x", null);
+                        assertParse("0x1_", null);
+                        assertParse("0x1x", null);
+                        assertParse("0xG", null);
+                    }
+                }
+
+                @Nested
+                class ToJavaLong {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x7FFFFFFFFFFFFFFF", Long.MAX_VALUE);
+                        assertParse("0x100000000", 0x100000000L);
+
+                        assertParse("-0x80000001", Integer.MIN_VALUE - 1L);
+                        assertParse("-0x8000000000000000", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void supported_unsigned_number_range() {
+                        assertParse("0xFFFFFFFFFFFFFFFF", -1L);
+                        assertParse("0x8000000000000000", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0xfffffffffff", 0xfffffffffffL);
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("100000000005_", null);
+                        assertParse("100000000005xx", null);
+                    }
+                }
+
+                @Nested
+                class ToJavaBigInteger {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x10000000000000000", new BigInteger("10000000000000000", 16));
+                        assertParse("-0x8000000000000001", new BigInteger("-8000000000000001", 16));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0x20000000000000000", new BigInteger("20000000000000000", 16));
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("0x10000000000000000005_", null);
+                        assertParse("0x10000000000000000005xx", null);
+                    }
+                }
+            }
+
+            @Nested
+            class Radix2 {
+
+                @Nested
+                class ToJavaInteger {
+
+                    @Test
+                    void single_number_char() {
+                        assertParse("0b0", 0);
+                        assertParse("0B1", 1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b0111_1111_1111_1111_1111_1111_1111_1111", Integer.MAX_VALUE);
+                        assertParse("-0b1000_0000_0000_0000_0000_0000_0000_0000", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void supported_unsigned_number_range() {
+                        assertParse("0b1111_1111_1111_1111_1111_1111_1111_1111", -1);
+                        assertParse("0b1000_0000_0000_0000_0000_0000_0000_0000", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b11", 3);
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("0b0111_1111_1111_1111_1111_1111_1111_", null);
+                        assertParse("0b0111_1111_1111_1111_1111_1111_1111_x", null);
+                    }
+                }
+
+                @Nested
+                class ToJavaLong {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111", Long.MAX_VALUE);
+                        assertParse("0b1_00000000_00000000_00000000_00000000", 0x100000000L);
+                        assertParse("-0b10000000_00000000_00000000_00000001", Integer.MIN_VALUE - 1L);
+                        assertParse("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void supported_unsigned_number_range() {
+                        assertParse("0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111", -1L);
+                        assertParse("0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b00001111_11111111_11111111_11111111_11111111_11111111", 0xfff_ffff_ffffL);
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_1111_", null);
+                        assertParse("0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_1111x", null);
+                    }
+                }
+
+                @Nested
+                class ToJavaBigInteger {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000", new BigInteger("10000000000000000", 16));
+                        assertParse("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001", new BigInteger("-9223372036854775809"));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000", new BigInteger("10000000000000000", 16));
+                    }
+
+                    @Test
+                    void invalid_number() {
+                        assertParse("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_0000_", null);
+                        assertParse("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_0000b", null);
+                    }
+                }
+            }
+
+            @Nested
+            class Radix8 {
+
+                @Nested
+                class ToJavaInteger {
+
+                    @Test
+                    void single_number_char() {
+                        assertParse("00", 0);
+                        assertParse("01", 1);
+                        assertParse("02", 2);
+                        assertParse("03", 3);
+                        assertParse("04", 4);
+                        assertParse("05", 5);
+                        assertParse("06", 6);
+                        assertParse("07", 7);
+                        assertParse("010", 8);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("017777777777", Integer.MAX_VALUE);
+                        assertParse("-020000000000", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void supported_unsigned_number_range() {
+                        assertParse("037777777777", -1);
+                        assertParse("020000000000", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+017777777777", Integer.MAX_VALUE);
+                    }
+
+                }
+
+                @Nested
+                class ToJavaLong {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0777777777777777777777", Long.MAX_VALUE);
+                        assertParse("040000000000", 0x100000000L);
+
+                        assertParse("-020000000001", Integer.MIN_VALUE - 1L);
+                        assertParse("-01000000000000000000000", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void supported_unsigned_number_range() {
+                        assertParse("01777777777777777777777", -1L);
+                        assertParse("01000000000000000000000", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0777777777777777777777", Long.MAX_VALUE);
+                    }
+                }
+
+                @Nested
+                class ToJavaBigInteger {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("02000000000000000000000", new BigInteger("10000000000000000", 16));
+                        assertParse("-01000000000000000000001", new BigInteger("-8000000000000001", 16));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+02000000000000000000000", new BigInteger("10000000000000000", 16));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void delimiter() {
+        assertParse("1_000", 1_000);
+        assertParse("1_000_000", 1_000_000);
+        assertParse("1_000_000_000_000", 1_000_000_000_000L);
+        assertParse("1_000_000_000_000_000_000_000_000", new BigInteger("1000000000000000000000000"));
+
+        assertParse("0x1_000", 0x1_000);
+        assertParse("0xfff_ffff_ffff", 0xfff_ffff_ffffL);
+        assertParse("0x800000000000_000_012", new BigInteger("800000000000000012", 16));
     }
 }

@@ -6,27 +6,56 @@ import java.math.BigInteger;
 public class NumberParser {
     private static final PrimitiveIntegerPostfix BYTE_POSTFIX = new PrimitiveIntegerPostfix(1) {
         @Override
-        public Number convertFrom(int number, String content) {
-            if (number > Byte.MAX_VALUE || number < Byte.MIN_VALUE)
+        public Number convertFrom(int number, String content, int radix) {
+            if (radix == 10 && (number > Byte.MAX_VALUE || number < Byte.MIN_VALUE))
+                throw new NumberOverflowException(content);
+            if (number > Byte.MAX_VALUE - Byte.MIN_VALUE || number < Byte.MIN_VALUE)
                 throw new NumberOverflowException(content);
             return (byte) number;
         }
     }, SHORT_POSTFIX = new PrimitiveIntegerPostfix(1) {
         @Override
-        public Number convertFrom(int number, String content) {
-            if (number > Short.MAX_VALUE || number < Short.MIN_VALUE)
+        public Number convertFrom(int number, String content, int radix) {
+            if (radix == 10 && (number > Short.MAX_VALUE || number < Short.MIN_VALUE))
+                throw new NumberOverflowException(content);
+            if (number > Short.MAX_VALUE - Short.MIN_VALUE || number < Short.MIN_VALUE)
                 throw new NumberOverflowException(content);
             return (short) number;
         }
     }, LONG_POSTFIX = new PrimitiveIntegerPostfix(1) {
         @Override
-        public Number convertFrom(int number, String content) {
+        public Number convertFrom(int number, String content, int radix) {
             return (long) number;
         }
 
         @Override
-        public Number convertFrom(long number, String content) {
+        public Number convertFrom(long number, String content, int radix) {
             return number;
+        }
+
+        @Override
+        public Number convertFromBigInteger(String numberString, int radix, String content) {
+            BigInteger bigInteger = new BigInteger(numberString, radix);
+            if (radix == 10 && (bigInteger.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) > 0 || bigInteger.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) < 0))
+                throw new NumberOverflowException(content);
+            if (bigInteger.compareTo(BigInteger.valueOf(Long.MAX_VALUE).subtract(BigInteger.valueOf(Long.MIN_VALUE))) > 0
+                    || bigInteger.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) < 0)
+                throw new NumberOverflowException(content);
+            return bigInteger.longValue();
+        }
+    }, INTEGER_POSTFIX = new PrimitiveIntegerPostfix(1) {
+        @Override
+        public Number convertFrom(int number, String content, int radix) {
+            return number;
+        }
+
+        @Override
+        public Number convertFrom(long number, String content, int radix) {
+            if (radix == 10 && (number > Integer.MAX_VALUE || number < Short.MIN_VALUE))
+                throw new NumberOverflowException(content);
+            if (number > (long) Integer.MAX_VALUE - Integer.MIN_VALUE || number < Integer.MIN_VALUE)
+                throw new NumberOverflowException(content);
+            return (int) number;
         }
     };
     private static final StringNumberPostfix BIG_INTEGER_POSTFIX = new StringNumberPostfix(2) {
@@ -132,6 +161,9 @@ public class NumberParser {
             case 's':
             case 'S':
                 return SHORT_POSTFIX;
+            case 'i':
+            case 'I':
+                return INTEGER_POSTFIX;
             case 'l':
             case 'L':
                 return LONG_POSTFIX;
@@ -190,7 +222,7 @@ public class NumberParser {
         }
         if (sign == 1)
             number = -number;
-        return postfix != null ? postfix.convertFrom(number, content) : number;
+        return postfix != null ? postfix.convertFrom(number, content, radix) : number;
     }
 
     private Number parseDoubleWithPower(String content, int index, int length, StringBuilder stringBuilder, StringNumberPostfix postfix) {
@@ -299,7 +331,12 @@ public class NumberParser {
         }
         if (sign == 1)
             number = -number;
-        return postfix == null ? number : postfix.convertFrom(number, content);
+        if (postfix == null) {
+            if (radix != 10 && number <= (long) Integer.MAX_VALUE - Integer.MIN_VALUE && number > 0)
+                return (int) number;
+            return number;
+        }
+        return postfix.convertFrom(number, content, radix);
     }
 
     private Number continueParseBigInteger(int radix, int index, String content, int length,
@@ -318,8 +355,15 @@ public class NumberParser {
             }
             stringBuilder.append(c);
         }
-        return postfix == null ? new BigInteger(stringBuilder.toString(), radix)
-                : postfix.convertFromBigInteger(stringBuilder.toString(), radix, content);
+        if (postfix == null) {
+            BigInteger bigInteger = new BigInteger(stringBuilder.toString(), radix);
+            if (radix != 10 &&
+                    bigInteger.compareTo(BigInteger.valueOf(Long.MAX_VALUE).subtract(BigInteger.valueOf(Long.MIN_VALUE))) <= 0
+                    && bigInteger.compareTo(BigInteger.ZERO) > 0)
+                return bigInteger.longValue();
+            return bigInteger;
+        }
+        return postfix.convertFromBigInteger(stringBuilder.toString(), radix, content);
     }
 
     private StringBuilder toStringBuilder(int radix, int sign, long number, int length) {
@@ -368,9 +412,9 @@ public class NumberParser {
             super(length);
         }
 
-        public abstract Number convertFrom(int number, String content);
+        public abstract Number convertFrom(int number, String content, int radix);
 
-        public Number convertFrom(long number, String content) {
+        public Number convertFrom(long number, String content, int radix) {
             throw new NumberOverflowException(content);
         }
     }

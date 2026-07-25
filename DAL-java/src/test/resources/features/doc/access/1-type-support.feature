@@ -90,7 +90,7 @@ Feature: basic data and type
   Scenario: use proper type (int, long, biginteger) to hold int value
     * the following verification should pass:
     """
-    0x80000000 = 0x80000000L,
+    0x800000000 = 0x800000000L,
     0x7fffffffffffffff = 0x7fffffffffffffffL,
     0x80000000000000000 = 0x80000000000000000BI
     """
