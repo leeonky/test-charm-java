@@ -36,7 +36,7 @@ public class NumberParser {
         @Override
         public Number convertFromBigInteger(String numberString, int radix, String content) {
             BigInteger bigInteger = new BigInteger(numberString, radix);
-            if (radix == 10 && (bigInteger.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) > 0 || bigInteger.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) < 0))
+            if (radix == 10)
                 throw new NumberOverflowException(content);
             if (bigInteger.compareTo(BigInteger.valueOf(Long.MAX_VALUE).subtract(BigInteger.valueOf(Long.MIN_VALUE))) > 0
                     || bigInteger.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) < 0)
@@ -51,7 +51,7 @@ public class NumberParser {
 
         @Override
         public Number convertFrom(long number, String content, int radix) {
-            if (radix == 10 && (number > Integer.MAX_VALUE || number < Short.MIN_VALUE))
+            if (radix == 10)
                 throw new NumberOverflowException(content);
             if (number > (long) Integer.MAX_VALUE - Integer.MIN_VALUE || number < Integer.MIN_VALUE)
                 throw new NumberOverflowException(content);

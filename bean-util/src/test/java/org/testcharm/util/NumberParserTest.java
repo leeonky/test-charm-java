@@ -24,7 +24,7 @@ class NumberParserTest {
 
     private void assertParseOverflow(String code) {
         assertThat(assertThrows(NumberOverflowException.class, () -> new NumberParser().parse(code)))
-                .hasMessageContaining(String.format("Cannon save [%s] with the given postfix type", code));
+                .hasMessageContaining(String.format("Cannot parse [%s] with the given postfix type", code));
     }
 
     private void assertParse(String inputCode, Number expected) {
@@ -244,62 +244,7 @@ class NumberParserTest {
         }
 
         @Nested
-        class IntegerParse {
-
-            @Test
-            void as_byte() {
-                assertParse("0y", (byte) 0);
-                assertParse("1y", (byte) 1);
-                assertParse("-1y", (byte) -1);
-                assertParse("-128y", (byte) -128);
-                assertParse("127y", (byte) 127);
-                assertParse("-0x80y", (byte) -128);
-                assertParse("0x7fy", (byte) 127);
-
-                assertParse("0Y", (byte) 0);
-                assertParse("1Y", (byte) 1);
-
-                assertParseOverflow("128y");
-                assertParseOverflow("-129y");
-            }
-
-            @Test
-            void as_short() {
-                assertParse("0s", (short) 0);
-                assertParse("1s", (short) 1);
-                assertParse("-1s", (short) -1);
-                assertParse("-0x8000s", (short) -32768);
-                assertParse("0x7fffs", (short) 32767);
-
-                assertParseOverflow("32768s");
-                assertParseOverflow("-32769s");
-            }
-
-            @Test
-            void as_int() {
-                assertParse("0i", 0);
-                assertParse("1I", 1);
-                assertParse("-1I", -1);
-
-                assertParseOverflow("2147483648i");
-                assertParseOverflow("-2147483649i");
-            }
-
-            @Test
-            void as_long() {
-                assertParse("0l", 0L);
-                assertParse("1l", 1L);
-                assertParse("-1l", -1L);
-                assertParse("-0x8000_0000l", -2147483648L);
-                assertParse("0x7fff_ffffl", 2147483647L);
-            }
-
-            @Test
-            void as_big_integer() {
-                assertParse("0bi", BigInteger.valueOf(0));
-                assertParse("10bi", BigInteger.valueOf(10));
-                assertParse("-10bi", BigInteger.valueOf(-10));
-            }
+        class IntegerParse_ {
 
             @Test
             void as_big_decimal() {
@@ -327,33 +272,6 @@ class NumberParserTest {
         class LongParse {
 
             @Test
-            void as_byte() {
-                assertParseOverflow("0xffff_ffff_ffy");
-                assertParseOverflow("-0xffff_ffff_ffy");
-            }
-
-            @Test
-            void as_short() {
-                assertParseOverflow("0xffff_ffff_ffs");
-                assertParseOverflow("-0xffff_ffff_ffs");
-            }
-
-            @Test
-            void as_long() {
-                assertParse("-0x8000_0001l", -2147483649L);
-                assertParse("0x8000_0000l", 2147483648L);
-
-                assertParse("-0x8000_0000_0000_0000l", 0x8000_0000_0000_0000L);
-                assertParse("0x7fff_ffff_ffff_ffff", 0x7fff_ffff_ffff_ffffL);
-            }
-
-            @Test
-            void as_big_integer() {
-                assertParse("0xffff_ffff_ffbi", new BigInteger("ffffffffff", 16));
-                assertParse("-0xffff_ffff_ffbi", new BigInteger("-ffffffffff", 16));
-            }
-
-            @Test
             void as_big_decimal() {
                 assertParse("2147483648bd", BigDecimal.valueOf(2147483648L));
                 assertParse("-2147483649bd", BigDecimal.valueOf(-2147483649L));
@@ -374,32 +292,6 @@ class NumberParserTest {
 
         @Nested
         class BigIntegerParser {
-
-            @Test
-            void as_byte() {
-                assertParseOverflow("0x8000_0000_0000_0000y");
-                assertParseOverflow("-0x8000_0000_0000_0001y");
-            }
-
-            @Test
-            void as_short() {
-                assertParseOverflow("0x8000_0000_0000_0000s");
-                assertParseOverflow("-0x8000_0000_0000_0001s");
-            }
-
-            @Test
-            void as_long() {
-//                assertParseOverflow("0x8000_0000_0000_0000l");
-//                assertParseOverflow("-0x8000_0000_0000_0001l");
-                assertParseOverflow("9223372036854775808L");
-                assertParseOverflow("-9223372036854775809L");
-            }
-
-            @Test
-            void as_big_integer() {
-                assertParse("0x8000_0000_0000_0000bi", new BigInteger("8000000000000000", 16));
-                assertParse("-0x8000_0000_0000_0001bi", new BigInteger("-8000000000000001", 16));
-            }
 
             @Test
             void as_big_decimal() {
@@ -533,75 +425,734 @@ class NumberParserTest {
         }
 
         @Nested
-        class UnsignedForNonDecRadix {
+        class IntegerParse {
 
             @Nested
-            class IntegerParse {
+            class Radix10 {
 
-                @Test
-                void as_byte() {
-                    assertParse("0xffy", (byte) -1);
-                    assertParse("0xffs", (short) 255);
-                    assertParseOverflow("0x100y");
-                    assertParseOverflow("-0x81y");
+                @Nested
+                class BytePostfix {
 
-                    assertParse("0377y", (byte) -1);
-                    assertParseOverflow("0400y");
-                    assertParseOverflow("-0201y");
+                    @Test
+                    void postfix() {
+                        assertParse("0y", (byte) 0);
+                        assertParse("1Y", (byte) 1);
+                        assertParse("-1y", (byte) -1);
+                    }
 
-                    assertParse("0b11111111y", (byte) -1);
-                    assertParseOverflow("0b100000000y");
-                    assertParseOverflow("-0b100000001y");
+                    @Test
+                    void supported_number_range() {
+                        assertParse("127y", Byte.MAX_VALUE);
+                        assertParse("-128y", Byte.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+24y", (byte) 24);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("128y");
+                        assertParseOverflow("-129y");
+
+                        assertParseOverflow("2147483648y");
+                        assertParseOverflow("-2147483649y");
+
+                        assertParseOverflow("9223372036854775808y");
+                        assertParseOverflow("-9223372036854775809y");
+                    }
+
+                    @Test
+                    void invalid() {
+                        assertParseOverflow("1.1y");
+                    }
                 }
 
-                @Test
-                void as_short() {
-                    assertParse("0xffffs", (short) -1);
-                    assertParse("0xffffi", 65535);
-                    assertParseOverflow("0x10000s");
-                    assertParseOverflow("-0x8001s");
+                @Nested
+                class ShortPostfix {
 
-                    assertParse("0177777s", (short) -1);
-                    assertParseOverflow("0200000s");
-                    assertParseOverflow("-0200001s");
+                    @Test
+                    void postfix() {
+                        assertParse("0s", (short) 0);
+                        assertParse("1S", (short) 1);
+                        assertParse("-1s", (short) -1);
+                    }
 
-                    assertParse("0b1111111111111111s", (short) -1);
-                    assertParseOverflow("0b10000000000000000s");
-                    assertParseOverflow("-0b10000000000000001s");
+                    @Test
+                    void supported_number_range() {
+                        assertParse("32767s", Short.MAX_VALUE);
+                        assertParse("-32768s", Short.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+24s", (short) 24);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("32768s");
+                        assertParseOverflow("-32769s");
+
+                        assertParseOverflow("2147483648s");
+                        assertParseOverflow("-2147483649s");
+
+                        assertParseOverflow("9223372036854775808s");
+                        assertParseOverflow("-9223372036854775809s");
+                    }
+
+                    @Test
+                    void invalid() {
+                        assertParseOverflow("1.1s");
+                    }
                 }
 
-                @Test
-                void as_integer() {
-                    assertParse("0xffffffffi", -1);
-                    assertParse("0xffffffffl", 0xffffffffL);
-                    assertParseOverflow("0x100000000i");
-                    assertParseOverflow("-0x80000001i");
+                @Nested
+                class IntPostfix {
 
-                    assertParse("037777777777i", -1);
-                    assertParseOverflow("040000000000i");
-                    assertParseOverflow("-020000000001s");
+                    @Test
+                    void postfix() {
+                        assertParse("0i", 0);
+                        assertParse("1I", 1);
+                        assertParse("-1i", -1);
+                    }
 
-                    assertParse("0b11111111111111111111111111111111i", -1);
-                    assertParseOverflow("0b100000000000000000000000000000000i");
-                    assertParseOverflow("-0b100000000000000000000000000000001i");
+                    @Test
+                    void supported_number_range() {
+                        assertParse("2147483647i", Integer.MAX_VALUE);
+                        assertParse("-2147483648i", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+24i", 24);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("2147483648i");
+                        assertParseOverflow("-2147483649i");
+
+                        assertParseOverflow("9223372036854775808i");
+                        assertParseOverflow("-9223372036854775809i");
+                    }
+
+                    @Test
+                    void invalid() {
+                        assertParseOverflow("1.1i");
+                    }
                 }
 
-                @Test
-                void as_long() {
-                    assertParse("0xffffffffffffffffl", -1L);
-                    assertParse("0xffffffffffffffffbi", new BigInteger("18446744073709551615"));
-                    assertParseOverflow("0x10000000000000000l");
-                    assertParseOverflow("-0x8000000000000001l");
+                @Nested
+                class LongPostfix {
 
-                    assertParse("01777777777777777777777L", -1L);
-                    assertParse("01000000000000000000000L", Long.MIN_VALUE);
-                    assertParseOverflow("02000000000000000000000L");
-                    assertParseOverflow("-01000000000000000000001L");
+                    @Test
+                    void postfix() {
+                        assertParse("0l", 0L);
+                        assertParse("1L", 1L);
+                        assertParse("-1l", -1L);
+                    }
 
-                    assertParse("0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L", -1L);
-                    assertParse("0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L", Long.MIN_VALUE);
-                    assertParseOverflow("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L");
-                    assertParseOverflow("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001L");
+                    @Test
+                    void supported_number_range() {
+                        assertParse("9223372036854775807l", Long.MAX_VALUE);
+                        assertParse("-9223372036854775808l", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+24l", 24L);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("9223372036854775808l");
+                        assertParseOverflow("-9223372036854775809l");
+                    }
+
+                    @Test
+                    void invalid() {
+                        assertParseOverflow("1.1l");
+                    }
+                }
+
+                @Nested
+                class BigIntegerPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0bi", BigInteger.valueOf(0));
+                        assertParse("1BI", BigInteger.valueOf(1));
+                        assertParse("-1bi", BigInteger.valueOf(-1));
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("9223372036854775808bi", new BigInteger("9223372036854775808"));
+                        assertParse("-9223372036854775809bi", new BigInteger("-9223372036854775809"));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+24bi", new BigInteger("24"));
+                    }
+
+                    @Test
+                    void long_as_biginteger() {
+                        assertParse("9223372036854775807bi", BigInteger.valueOf(Long.MAX_VALUE));
+                    }
+
+                    @Test
+                    void invalid() {
+                        assertParseOverflow("1.1bi");
+                    }
+                }
+            }
+
+            @Nested
+            class Radix16 {
+
+                @Nested
+                class BytePostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0x0y", (byte) 0);
+                        assertParse("0x1Y", (byte) 1);
+                        assertParse("-0x1y", (byte) -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x7fy", Byte.MAX_VALUE);
+                        assertParse("-0x80y", Byte.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0xffy", (byte) -1);
+                        assertParse("0x80y", Byte.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0xffy", (byte) -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0x100y");
+                        assertParseOverflow("-0x81y");
+
+                        assertParseOverflow("0x100000000y");
+                        assertParseOverflow("-0x80000001y");
+
+                        assertParseOverflow("0x10000000000000000y");
+                        assertParseOverflow("-0x8000000000000001y");
+                    }
+                }
+
+                @Nested
+                class ShortPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0x0s", (short) 0);
+                        assertParse("0x1S", (short) 1);
+                        assertParse("-0x1s", (short) -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x7fffs", Short.MAX_VALUE);
+                        assertParse("-0x8000s", Short.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0xffffs", (short) -1);
+                        assertParse("0x8000s", Short.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0xffffs", (short) -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0x10000s");
+                        assertParseOverflow("-0x8001s");
+
+                        assertParseOverflow("0x100000000s");
+                        assertParseOverflow("-0x80000001s");
+
+                        assertParseOverflow("0x10000000000000000s");
+                        assertParseOverflow("-0x8000000000000001s");
+                    }
+                }
+
+                @Nested
+                class IntPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0x0i", 0);
+                        assertParse("0x1I", 1);
+                        assertParse("-0x1i", -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x7fffffffI", Integer.MAX_VALUE);
+                        assertParse("-0x80000000i", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0xffffffffi", -1);
+                        assertParse("0x80000000i", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0xffi", 255);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0x100000000i");
+                        assertParseOverflow("-0x80000001i");
+
+                        assertParseOverflow("0x10000000000000000i");
+                        assertParseOverflow("-0x8000000000000001i");
+                    }
+                }
+
+                @Nested
+                class LongPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0x0l", 0L);
+                        assertParse("0x1L", 1L);
+                        assertParse("-0x1l", -1L);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x7fffffffffffffffL", Long.MAX_VALUE);
+                        assertParse("-0x8000000000000000l", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0xffffffffffffffffl", -1L);
+                        assertParse("0x8000000000000000l", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0xffffffffffffffffl", -1L);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0x10000000000000000l");
+                        assertParseOverflow("-0x8000000000000001l");
+                    }
+                }
+
+                @Nested
+                class BigIntegerPostfix {
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0x10000000000000000bi", new BigInteger("10000000000000000", 16));
+                        assertParse("-0x8000000000000001bi", new BigInteger("-8000000000000001", 16));
+                    }
+
+                    @Test
+                    void postfix() {
+                        assertParse("0x0bi", BigInteger.valueOf(0));
+                        assertParse("0x1BI", BigInteger.valueOf(1));
+                        assertParse("-0x1bi", BigInteger.valueOf(-1));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0xffffffffffffffffbi", new BigInteger("ffffffffffffffff", 16));
+                    }
+
+                    @Test
+                    void long_as_biginteger() {
+                        assertParse("0x7fffffffffffffffbi", BigInteger.valueOf(Long.MAX_VALUE));
+                    }
+                }
+            }
+
+            @Nested
+            class Radix8 {
+
+                @Nested
+                class BytePostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0y", (byte) 0);
+                        assertParse("01Y", (byte) 1);
+                        assertParse("-01y", (byte) -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0177y", Byte.MAX_VALUE);
+                        assertParse("-0200y", Byte.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0377y", (byte) -1);
+                        assertParse("0200y", Byte.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0377y", (byte) -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0400y");
+                        assertParseOverflow("-0201y");
+
+                        assertParseOverflow("040000000000y");
+                        assertParseOverflow("-020000000001y");
+
+                        assertParseOverflow("02000000000000000000000y");
+                        assertParseOverflow("-01000000000000000000001y");
+                    }
+                }
+
+                @Nested
+                class ShortPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0s", (short) 0);
+                        assertParse("01S", (short) 1);
+                        assertParse("-01s", (short) -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("077777s", Short.MAX_VALUE);
+                        assertParse("-0100000s", Short.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0177777s", (short) -1);
+                        assertParse("0100000s", Short.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0177777s", (short) -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0200000s");
+                        assertParseOverflow("-0100001s");
+
+                        assertParseOverflow("040000000000s");
+                        assertParseOverflow("-020000000001s");
+
+                        assertParseOverflow("02000000000000000000000s");
+                        assertParseOverflow("-01000000000000000000001s");
+                    }
+                }
+
+                @Nested
+                class IntPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0i", 0);
+                        assertParse("01I", 1);
+                        assertParse("-01i", -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("017777777777i", Integer.MAX_VALUE);
+                        assertParse("-020000000000i", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("037777777777i", -1);
+                        assertParse("020000000000i", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+037777777777i", -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("040000000000i");
+                        assertParseOverflow("-020000000001i");
+
+                        assertParseOverflow("02000000000000000000000i");
+                        assertParseOverflow("-01000000000000000000001i");
+                    }
+                }
+
+                @Nested
+                class LongPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0l", 0L);
+                        assertParse("01L", 1L);
+                        assertParse("-01l", -1L);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0777777777777777777777L", Long.MAX_VALUE);
+                        assertParse("-01000000000000000000000l", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("01777777777777777777777l", -1L);
+                        assertParse("01000000000000000000000l", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+01777777777777777777777l", -1L);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("02000000000000000000000l");
+                        assertParseOverflow("-01000000000000000000001l");
+                    }
+                }
+
+                @Nested
+                class BigIntegerPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0bi", BigInteger.valueOf(0));
+                        assertParse("01BI", BigInteger.valueOf(1));
+                        assertParse("-01bi", BigInteger.valueOf(-1));
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("02000000000000000000000bi", new BigInteger("10000000000000000", 16));
+                        assertParse("-01000000000000000000001bi", new BigInteger("-8000000000000001", 16));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+01777777777777777777777bi", new BigInteger("1777777777777777777777", 8));
+                    }
+
+                    @Test
+                    void long_as_biginteger() {
+                        assertParse("0777777777777777777777bi", BigInteger.valueOf(Long.MAX_VALUE));
+                    }
+                }
+            }
+
+            @Nested
+            class Radix2 {
+
+                @Nested
+                class BytePostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0y", (byte) 0);
+                        assertParse("0b1Y", (byte) 1);
+                        assertParse("-0b1y", (byte) -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b01111111y", Byte.MAX_VALUE);
+                        assertParse("-0b10000000y", Byte.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0b11111111y", (byte) -1);
+                        assertParse("0b10000000y", Byte.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b11111111y", (byte) -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0b100000000y");
+                        assertParseOverflow("-0b100000001y");
+
+                        assertParseOverflow("0b1000000000000000000000000000000000y");
+                        assertParseOverflow("-0b1000000000000000000000000000000001y");
+
+                        assertParseOverflow("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000y");
+                        assertParseOverflow("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001y");
+                    }
+                }
+
+                @Nested
+                class ShortPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0s", (short) 0);
+                        assertParse("0b1S", (short) 1);
+                        assertParse("-0b1s", (short) -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b0111111111111111s", Short.MAX_VALUE);
+                        assertParse("-0b1000000000000000s", Short.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0b1111111111111111s", (short) -1);
+                        assertParse("0b1000000000000000s", Short.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b1111111111111111s", (short) -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0b10000000000000000s");
+                        assertParseOverflow("-0b10000000000000001s");
+
+                        assertParseOverflow("0b1000000000000000000000000000000000s");
+                        assertParseOverflow("-0b1000000000000000000000000000000001s");
+
+                        assertParseOverflow("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000s");
+                        assertParseOverflow("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001s");
+                    }
+                }
+
+                @Nested
+                class IntPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0i", 0);
+                        assertParse("0b1I", 1);
+                        assertParse("-0b1i", -1);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b01111111111111111111111111111111i", Integer.MAX_VALUE);
+                        assertParse("-0b10000000000000000000000000000000i", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0b11111111111111111111111111111111i", -1);
+                        assertParse("0b10000000000000000000000000000000i", Integer.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b11111111111111111111111111111111i", -1);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0b1000000000000000000000000000000000i");
+                        assertParseOverflow("-0b1000000000000000000000000000000001i");
+
+                        assertParseOverflow("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000i");
+                        assertParseOverflow("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001i");
+                    }
+                }
+
+                @Nested
+                class LongPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0l", 0L);
+                        assertParse("0b1L", 1L);
+                        assertParse("-0b1l", -1L);
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L", Long.MAX_VALUE);
+                        assertParse("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void unsigned_supported_number_range() {
+                        assertParse("0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111L", -1L);
+                        assertParse("0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L", Long.MIN_VALUE);
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b00001111_11111111_11111111_11111111_11111111_11111111", 0xfff_ffff_ffffL);
+                    }
+
+                    @Test
+                    void overflow() {
+                        assertParseOverflow("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L");
+                        assertParseOverflow("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001L");
+                    }
+                }
+
+                @Nested
+                class BigIntegerPostfix {
+
+                    @Test
+                    void postfix() {
+                        assertParse("0bi", BigInteger.ZERO);
+                        assertParse("0b1bi", BigInteger.ONE);
+                        assertParse("-0b1BI", BigInteger.ONE.negate());
+                    }
+
+                    @Test
+                    void supported_number_range() {
+                        assertParse("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000bi", new BigInteger("10000000000000000", 16));
+                        assertParse("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001bi", new BigInteger("-9223372036854775809"));
+                    }
+
+                    @Test
+                    void positive() {
+                        assertParse("+0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000bi", new BigInteger("10000000000000000", 16));
+                    }
+
+                    @Test
+                    void long_as_biginteger() {
+                        assertParse("0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111bi", BigInteger.valueOf(Long.MAX_VALUE));
+                    }
                 }
             }
         }
