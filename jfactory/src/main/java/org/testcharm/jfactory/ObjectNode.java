@@ -40,7 +40,12 @@ class ObjectNode extends CompositeBuilder {
     public boolean matches(Object object, ObjectFactory<?> objectFactory) {
         if (force)
             return false;
-        Object propertyValue = BeanClass.createFrom(object).getPropertyValue(object, property());
+        Object propertyValue;
+        try {
+            propertyValue = BeanClass.createFrom(object).getPropertyValue(object, property());
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
         Matcher objectMatcher = new Matcher<>(createSubNodes(objectFactory).collect(Collectors.toList()));
         return objectMatcher.matches(propertyValue, objectFactory);
     }

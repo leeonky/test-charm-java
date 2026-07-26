@@ -492,6 +492,114 @@ Feature: input property
       message: 'The format of property `!empty` is invalid.'
       """
 
+    Scenario: bug - sub query index out of range
+      Given the following declarations:
+        """
+        JFactory jFactory = new JFactory();
+        """
+      Given the following bean definition:
+        """
+        public class Transaction {
+          public Order order;
+        }
+        """
+      Given the following bean definition:
+        """
+        public class Order {
+          public java.util.List<OrderLine> lines = new java.util.ArrayList<>();
+        }
+        """
+      Given the following bean definition:
+        """
+        public class OrderLine {
+          public String item;
+        }
+        """
+      And register as follows:
+        """
+        jFactory.create(Order.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Transaction.class).property("order.lines[0].item", "item1").property("order.lines[1].item", "item2").create();
+        """
+      Then the result should be:
+        """
+        order.lines.item[]= [item1 item2]
+        """
+
+    Scenario: bug - sub list is null
+      Given the following declarations:
+        """
+        JFactory jFactory = new JFactory();
+        """
+      Given the following bean definition:
+        """
+        public class Transaction {
+          public Order order;
+        }
+        """
+      Given the following bean definition:
+        """
+        public class Order {
+          public OrderLine[] lines;
+        }
+        """
+      Given the following bean definition:
+        """
+        public class OrderLine {
+          public String item;
+        }
+        """
+      And register as follows:
+        """
+        jFactory.create(Order.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Transaction.class).property("order.lines[0].item", "item1").property("order.lines[1].item", "item2").create();
+        """
+      Then the result should be:
+        """
+        order.lines.item[]= [item1 item2]
+        """
+
+    Scenario: bug - sub object is null
+      Given the following declarations:
+        """
+        JFactory jFactory = new JFactory();
+        """
+      Given the following bean definition:
+        """
+        public class Transaction {
+          public Order order;
+        }
+        """
+      Given the following bean definition:
+        """
+        public class Order {
+          public Product product;
+        }
+        """
+      Given the following bean definition:
+        """
+        public class Product {
+          public String name;
+        }
+        """
+      And register as follows:
+        """
+        jFactory.create(Order.class);
+        """
+      When evaluating the following code:
+        """
+        jFactory.type(Transaction.class).property("order.product.name", "iphone").create();
+        """
+      Then the result should be:
+        """
+        order.product.name= iphone
+        """
+
   Rule: collection property
 
     Scenario: support input collection element property

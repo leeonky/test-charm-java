@@ -25,11 +25,8 @@ class ValueNode extends PropertyNode {
 
     @Override
     public boolean matches(Object object, ObjectFactory<?> objectFactory) {
-        if (object != null) {
-            PropertyReader<Object> propertyReader = BeanClass.createFrom(object).getPropertyReader(property());
-            return Objects.equals(propertyReader.tryConvert(value), propertyReader.getValue(object));
-        }
-        return false;
+        PropertyReader<Object> propertyReader = BeanClass.createFrom(object).getPropertyReader(property());
+        return Objects.equals(propertyReader.tryConvert(value), propertyReader.getValue(object));
     }
 
 

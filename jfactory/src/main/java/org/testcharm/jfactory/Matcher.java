@@ -12,6 +12,8 @@ public class Matcher<T> {
     }
 
     public boolean matches(T object, ObjectFactory<T> objectFactory) {
+        if (object == null)
+            return false;
         return expressions.stream().allMatch(e -> e.matches(object, objectFactory));
     }
 }
