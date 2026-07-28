@@ -26,11 +26,11 @@ public class Tokens {
     private static final NumberParser numberParser = new NumberParser();
 
     private static boolean isNumber(Token token) {
-        return numberParser.parse(token.getContent()) != null;
+        return numberParser.parseNumber(token.getContent()) != null;
     }
 
     private static boolean isPureInteger(Token token) {
-        Number parse = numberParser.parse(token.getContent());
+        Number parse = numberParser.parseNumber(token.getContent());
         return parse instanceof Integer;
     }
 

@@ -1,13 +1,13 @@
 package org.testcharm.dal.compiler;
 
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.testcharm.dal.DAL;
 import org.testcharm.dal.runtime.Result;
 import org.testcharm.dal.runtime.RuntimeContextBuilder;
 import org.testcharm.dal.runtime.UserLiteralRule;
 import org.testcharm.interpreter.SourceCode;
 import org.testcharm.util.NumberParser;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -89,7 +89,7 @@ class CompilerTest {
                 @Override
                 public Result compile(String token) {
                     if (token.startsWith("0x") || token.startsWith("0X")) {
-                        return Result.of(new NumberParser().parse(token).toString());
+                        return Result.of(new NumberParser().parseNumber(token).toString());
                     }
                     return Result.empty();
                 }

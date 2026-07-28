@@ -9,6 +9,7 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.testcharm.dal.Assertions.expect;
 
 class NumberParserTest {
 
@@ -23,12 +24,18 @@ class NumberParserTest {
     }
 
     private void assertParseOverflow(String code) {
-        assertThat(assertThrows(NumberOverflowException.class, () -> new NumberParser().parse(code)))
+        assertThat(assertThrows(NumberOverflowException.class, () -> new NumberParser().parseNumber(code)))
                 .hasMessageContaining(String.format("Cannot parse [%s] with the given postfix type", code));
     }
 
     private void assertParse(String inputCode, Number expected) {
-        assertThat(new NumberParser().parse(inputCode)).isEqualTo(expected);
+        assertThat(new NumberParser().parseNumber(inputCode)).isEqualTo(expected);
+    }
+
+    private void assertFormat(String inputCode, int sign, int radix) {
+        NumberFormat format = new NumberParser().parse(inputCode).format;
+        expect(format.sign).isEqualTo(sign);
+        expect(format.radix).isEqualTo(radix);
     }
 
     @Test
@@ -434,6 +441,12 @@ class NumberParserTest {
                 class BytePostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("1Y", 1, 10);
+                        assertFormat("-1y", -1, 10);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0y", (byte) 0);
                         assertParse("1Y", (byte) 1);
@@ -471,6 +484,12 @@ class NumberParserTest {
 
                 @Nested
                 class ShortPostfix {
+
+                    @Test
+                    void format() {
+                        assertFormat("1s", 1, 10);
+                        assertFormat("-1s", -1, 10);
+                    }
 
                     @Test
                     void postfix() {
@@ -512,6 +531,12 @@ class NumberParserTest {
                 class IntPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("1i", 1, 10);
+                        assertFormat("-1i", -1, 10);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0i", 0);
                         assertParse("1I", 1);
@@ -548,6 +573,12 @@ class NumberParserTest {
                 class LongPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("1L", 1, 10);
+                        assertFormat("-1L", -1, 10);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0l", 0L);
                         assertParse("1L", 1L);
@@ -579,6 +610,12 @@ class NumberParserTest {
 
                 @Nested
                 class BigIntegerPostfix {
+
+                    @Test
+                    void format() {
+                        assertFormat("1BI", 1, 10);
+                        assertFormat("-1bi", -1, 10);
+                    }
 
                     @Test
                     void postfix() {
@@ -615,6 +652,12 @@ class NumberParserTest {
 
                 @Nested
                 class BytePostfix {
+
+                    @Test
+                    void format() {
+                        assertFormat("0x1y", 1, 16);
+                        assertFormat("-0x1y", -1, 16);
+                    }
 
                     @Test
                     void postfix() {
@@ -657,6 +700,12 @@ class NumberParserTest {
                 class ShortPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("0x1s", 1, 16);
+                        assertFormat("-0x1s", -1, 16);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0x0s", (short) 0);
                         assertParse("0x1S", (short) 1);
@@ -697,6 +746,12 @@ class NumberParserTest {
                 class IntPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("0x1i", 1, 16);
+                        assertFormat("-0x1i", -1, 16);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0x0i", 0);
                         assertParse("0x1I", 1);
@@ -734,6 +789,12 @@ class NumberParserTest {
                 class LongPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("0x1L", 1, 16);
+                        assertFormat("-0x1L", -1, 16);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0x0l", 0L);
                         assertParse("0x1L", 1L);
@@ -768,6 +829,12 @@ class NumberParserTest {
                 class BigIntegerPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("0x1bi", 1, 16);
+                        assertFormat("-0x1bi", -1, 16);
+                    }
+
+                    @Test
                     void supported_number_range() {
                         assertParse("0x10000000000000000bi", new BigInteger("10000000000000000", 16));
                         assertParse("-0x8000000000000001bi", new BigInteger("-8000000000000001", 16));
@@ -797,6 +864,12 @@ class NumberParserTest {
 
                 @Nested
                 class BytePostfix {
+
+                    @Test
+                    void format() {
+                        assertFormat("01Y", 1, 8);
+                        assertFormat("-01y", -1, 8);
+                    }
 
                     @Test
                     void postfix() {
@@ -839,6 +912,12 @@ class NumberParserTest {
                 class ShortPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("01s", 1, 8);
+                        assertFormat("-01s", -1, 8);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0s", (short) 0);
                         assertParse("01S", (short) 1);
@@ -879,6 +958,12 @@ class NumberParserTest {
                 class IntPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("01I", 1, 8);
+                        assertFormat("-01I", -1, 8);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0i", 0);
                         assertParse("01I", 1);
@@ -916,6 +1001,12 @@ class NumberParserTest {
                 class LongPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("01L", 1, 8);
+                        assertFormat("-01L", -1, 8);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0l", 0L);
                         assertParse("01L", 1L);
@@ -950,6 +1041,12 @@ class NumberParserTest {
                 class BigIntegerPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("01bi", 1, 8);
+                        assertFormat("-01bi", -1, 8);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0bi", BigInteger.valueOf(0));
                         assertParse("01BI", BigInteger.valueOf(1));
@@ -979,6 +1076,12 @@ class NumberParserTest {
 
                 @Nested
                 class BytePostfix {
+
+                    @Test
+                    void format() {
+                        assertFormat("0b1y", 1, 2);
+                        assertFormat("-0b1y", -1, 2);
+                    }
 
                     @Test
                     void postfix() {
@@ -1021,6 +1124,12 @@ class NumberParserTest {
                 class ShortPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("0b1s", 1, 2);
+                        assertFormat("-0b1s", -1, 2);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0s", (short) 0);
                         assertParse("0b1S", (short) 1);
@@ -1061,6 +1170,12 @@ class NumberParserTest {
                 class IntPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("0b1I", 1, 2);
+                        assertFormat("-0b1I", -1, 2);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0i", 0);
                         assertParse("0b1I", 1);
@@ -1098,6 +1213,12 @@ class NumberParserTest {
                 class LongPostfix {
 
                     @Test
+                    void format() {
+                        assertFormat("0b1L", 1, 2);
+                        assertFormat("-0b1L", -1, 2);
+                    }
+
+                    @Test
                     void postfix() {
                         assertParse("0l", 0L);
                         assertParse("0b1L", 1L);
@@ -1130,6 +1251,12 @@ class NumberParserTest {
 
                 @Nested
                 class BigIntegerPostfix {
+
+                    @Test
+                    void format() {
+                        assertFormat("0b1BI", 1, 2);
+                        assertFormat("-0b1BI", -1, 2);
+                    }
 
                     @Test
                     void postfix() {
@@ -1169,6 +1296,13 @@ class NumberParserTest {
 
                 @Nested
                 class ToJavaInteger {
+
+                    @Test
+                    void format() {
+                        assertFormat("0", 1, 10);
+                        assertFormat("1", 1, 10);
+                        assertFormat("-1", -1, 10);
+                    }
 
                     @Test
                     void single_number_char() {
@@ -1222,6 +1356,13 @@ class NumberParserTest {
 
                 @Nested
                 class ToJavaLong {
+
+                    @Test
+                    void format() {
+                        assertFormat("9223372036854775807", 1, 10);
+                        assertFormat("-9223372036854775808", -1, 10);
+                    }
+
                     @Test
                     void supported_number_range() {
                         assertParse("9223372036854775807", Long.MAX_VALUE);
@@ -1246,6 +1387,12 @@ class NumberParserTest {
                 class ToJavaBigInteger {
 
                     @Test
+                    void format() {
+                        assertFormat("10000000000000000005", 1, 10);
+                        assertFormat("-10000000000000000005", -1, 10);
+                    }
+
+                    @Test
                     void supported_number_range() {
                         assertParse("9223372036854775808", BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.valueOf(1)));
                         assertParse("-9223372036854775809", BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.valueOf(1)));
@@ -1262,7 +1409,6 @@ class NumberParserTest {
                         assertParse("10000000000000000005xx", null);
                     }
                 }
-
             }
 
             @Nested
@@ -1270,6 +1416,12 @@ class NumberParserTest {
 
                 @Nested
                 class ToJavaInteger {
+
+                    @Test
+                    void format() {
+                        assertFormat("0x1", 1, 16);
+                        assertFormat("-0x2", -1, 16);
+                    }
 
                     @Test
                     void single_number_char() {
@@ -1329,6 +1481,12 @@ class NumberParserTest {
                 class ToJavaLong {
 
                     @Test
+                    void format() {
+                        assertFormat("0x7FFFFFFFFFFFFFFF", 1, 16);
+                        assertFormat("-0x8000000000000000", -1, 16);
+                    }
+
+                    @Test
                     void supported_number_range() {
                         assertParse("0x7FFFFFFFFFFFFFFF", Long.MAX_VALUE);
                         assertParse("0x100000000", 0x100000000L);
@@ -1359,6 +1517,12 @@ class NumberParserTest {
                 class ToJavaBigInteger {
 
                     @Test
+                    void format() {
+                        assertFormat("0x10000000000000000", 1, 16);
+                        assertFormat("-0x8000000000000001", -1, 16);
+                    }
+
+                    @Test
                     void supported_number_range() {
                         assertParse("0x10000000000000000", new BigInteger("10000000000000000", 16));
                         assertParse("-0x8000000000000001", new BigInteger("-8000000000000001", 16));
@@ -1382,6 +1546,12 @@ class NumberParserTest {
 
                 @Nested
                 class ToJavaInteger {
+
+                    @Test
+                    void format() {
+                        assertFormat("0b0", 1, 2);
+                        assertFormat("-0b1", -1, 2);
+                    }
 
                     @Test
                     void single_number_char() {
@@ -1417,6 +1587,12 @@ class NumberParserTest {
                 class ToJavaLong {
 
                     @Test
+                    void format() {
+                        assertFormat("0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111", 1, 2);
+                        assertFormat("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000", -1, 2);
+                    }
+
+                    @Test
                     void supported_number_range() {
                         assertParse("0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111", Long.MAX_VALUE);
                         assertParse("0b1_00000000_00000000_00000000_00000000", 0x100000000L);
@@ -1446,6 +1622,12 @@ class NumberParserTest {
                 class ToJavaBigInteger {
 
                     @Test
+                    void format() {
+                        assertFormat("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000", 1, 2);
+                        assertFormat("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001", -1, 2);
+                    }
+
+                    @Test
                     void supported_number_range() {
                         assertParse("0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000", new BigInteger("10000000000000000", 16));
                         assertParse("-0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001", new BigInteger("-9223372036854775809"));
@@ -1469,6 +1651,12 @@ class NumberParserTest {
 
                 @Nested
                 class ToJavaInteger {
+
+                    @Test
+                    void format() {
+                        assertFormat("01", 1, 8);
+                        assertFormat("-01", -1, 8);
+                    }
 
                     @Test
                     void single_number_char() {
@@ -1506,6 +1694,12 @@ class NumberParserTest {
                 class ToJavaLong {
 
                     @Test
+                    void format() {
+                        assertFormat("040000000000", 1, 8);
+                        assertFormat("-040000000000", -1, 8);
+                    }
+
+                    @Test
                     void supported_number_range() {
                         assertParse("0777777777777777777777", Long.MAX_VALUE);
                         assertParse("040000000000", 0x100000000L);
@@ -1528,6 +1722,12 @@ class NumberParserTest {
 
                 @Nested
                 class ToJavaBigInteger {
+
+                    @Test
+                    void format() {
+                        assertFormat("02000000000000000000000", 1, 8);
+                        assertFormat("-01000000000000000000001", -1, 8);
+                    }
 
                     @Test
                     void supported_number_range() {

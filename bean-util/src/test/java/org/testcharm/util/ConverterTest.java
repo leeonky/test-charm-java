@@ -12,12 +12,12 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.testcharm.util.Converter.getInstance;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.testcharm.util.Converter.getInstance;
 
 class ConverterTest {
     private Converter converter = new Converter();
@@ -335,7 +335,7 @@ class ConverterTest {
 
         @Test
         void convert_to_number() {
-            converter.addTypeConverter(NumberString.class, Number.class, n -> new NumberParser().parse(n.string));
+            converter.addTypeConverter(NumberString.class, Number.class, n -> new NumberParser().parseNumber(n.string));
             assertThat(converter.convert(Number.class, new NumberString() {{
                 string = "1000L";
             }})).isEqualTo(1000L);

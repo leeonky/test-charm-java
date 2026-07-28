@@ -10,7 +10,7 @@ public class Methods {
     public static final NumberParser NUMBER_PARSER = new NumberParser();
 
     public static Number number(String content) {
-        return NUMBER_PARSER.parse(content);
+        return NUMBER_PARSER.parseNumber(content);
     }
 
     @ExtensionName("byte")
