@@ -75,11 +75,11 @@ public class NodeFactory {
     }
 
     public static DALNode literalNull(String token) {
-        return new LiteralNode(null);
+        return new LiteralNode();
     }
 
     public static LiteralNode literalNumber(Token token) {
-        return new LiteralNode(numberParser.parseNumber(token.getContent()));
+        return new LiteralNode(numberParser.parse(token.getContent()));
     }
 
     public static DALNode createVerificationGroup(List<DALNode> list) {

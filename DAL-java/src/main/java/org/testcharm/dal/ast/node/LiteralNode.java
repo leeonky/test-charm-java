@@ -3,13 +3,27 @@ package org.testcharm.dal.ast.node;
 import org.testcharm.dal.ast.node.table.RowHeader;
 import org.testcharm.dal.ast.node.table.RowType;
 import org.testcharm.dal.runtime.RuntimeContextBuilder;
+import org.testcharm.util.NumberFormat;
+import org.testcharm.util.NumberWithFormat;
 
 public class LiteralNode extends DALNode {
 
     private final Object value;
+    private final NumberFormat numberFormat;
 
     public LiteralNode(Object value) {
         this.value = value;
+        numberFormat = null;
+    }
+
+    public LiteralNode(NumberWithFormat numberWithFormat) {
+        value = numberWithFormat.number;
+        numberFormat = numberWithFormat.format;
+    }
+
+    public LiteralNode() {
+        value = null;
+        numberFormat = null;
     }
 
     public Object getValue() {
