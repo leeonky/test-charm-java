@@ -50,6 +50,52 @@ Feature: should
                     ^
       """
 
+  Scenario: predicate method not exist in List
+    Given the following json:
+      """
+      {
+        "value": ["hello"]
+      }
+      """
+    When evaluate by:
+      """
+      value::should.notExist: any
+      """
+    Then failed with the message:
+      """
+      Predicate method notExist not exist in java.util.ArrayList [
+          java.lang.String <hello>
+      ]
+      """
+    And got the following notation:
+      """
+      value::should.notExist: any
+                    ^
+      """
+
+  Scenario: predicate method not exist in Map
+    Given the following json:
+      """
+      {
+        "value": { "key": "hello"}
+      }
+      """
+    When evaluate by:
+      """
+      value::should.notExist: any
+      """
+    Then failed with the message:
+      """
+      Predicate method notExist not exist in java.util.LinkedHashMap {
+          key: java.lang.String <hello>
+      }
+      """
+    And got the following notation:
+      """
+      value::should.notExist: any
+                    ^
+      """
+
   Scenario: raise error when missing parameter
     Given the following java class:
       """

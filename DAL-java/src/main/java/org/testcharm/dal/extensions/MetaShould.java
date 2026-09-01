@@ -26,7 +26,7 @@ public class MetaShould implements ProxyObject {
     public Object getValue(Object property) {
         return metaData.data().currying(property).map(curryingMethod -> new PredicateMethod(curryingMethod, property))
                 .orElseThrow(() -> new DALRuntimeException(format("Predicate method %s not exist in %s",
-                        property, metaData.data().dump())));
+                        property, metaData.data().dump(true))));
     }
 
     public MetaShould negative() {

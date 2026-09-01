@@ -129,6 +129,10 @@ public class Data<T> {
         return DumpingBuffer.rootContext(context).dump(this).content();
     }
 
+    public String dump(boolean forcePresentType) {
+        return DumpingBuffer.rootContext(context, forcePresentType).dump(this).content();
+    }
+
     public String dumpValue() {
         return DumpingBuffer.rootContext(context).dumpValue(this).content();
     }

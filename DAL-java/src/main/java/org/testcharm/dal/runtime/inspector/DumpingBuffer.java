@@ -18,19 +18,25 @@ public class DumpingBuffer {
     private final DALRuntimeContext runtimeContext;
     private final AtomicInteger dumpedObjectCount;
     private final Map<DumpingCacheKey, String> caches;
+    private final boolean forcePresentType;
 
     private DumpingBuffer(String path, IndentBuffer indentBuffer, DALRuntimeContext runtimeContext,
-                          AtomicInteger dumpedObjectCount, Map<DumpingCacheKey, String> caches) {
+                          AtomicInteger dumpedObjectCount, Map<DumpingCacheKey, String> caches, boolean forcePresentType) {
         this.path = path;
         this.indentBuffer = indentBuffer;
         this.runtimeContext = runtimeContext;
         this.dumpedObjectCount = dumpedObjectCount;
         this.caches = caches;
+        this.forcePresentType = forcePresentType;
     }
 
     public static DumpingBuffer rootContext(DALRuntimeContext context) {
+        return rootContext(context, false);
+    }
+
+    public static DumpingBuffer rootContext(DALRuntimeContext context, boolean forcePresentType) {
         return new DumpingBuffer("root", IndentBuffer.create(context.maxDumpingLineCount()),
-                context, new AtomicInteger(0), new HashMap<>());
+                context, new AtomicInteger(0), new HashMap<>(), forcePresentType);
     }
 
     private void checkCount() {
@@ -60,16 +66,16 @@ public class DumpingBuffer {
 
     public DumpingBuffer index(int index) {
         return new DumpingBuffer(format("%s[%d]", path, index), indentBuffer.fork(),
-                runtimeContext, dumpedObjectCount, caches);
+                runtimeContext, dumpedObjectCount, caches, false);
     }
 
     public DumpingBuffer sub(Object property) {
         return new DumpingBuffer(format("%s.%s", path, property), indentBuffer.fork(),
-                runtimeContext, dumpedObjectCount, caches);
+                runtimeContext, dumpedObjectCount, caches, false);
     }
 
     public DumpingBuffer indent() {
-        return new DumpingBuffer(path, indentBuffer.indent(), runtimeContext, new AtomicInteger(0), caches);
+        return new DumpingBuffer(path, indentBuffer.indent(), runtimeContext, new AtomicInteger(0), caches, false);
     }
 
     public DumpingBuffer indent(Consumer<DumpingBuffer> subDump) {
@@ -83,7 +89,7 @@ public class DumpingBuffer {
     }
 
     public DumpingBuffer fork() {
-        return new DumpingBuffer(path, indentBuffer.fork(), runtimeContext, dumpedObjectCount, caches);
+        return new DumpingBuffer(path, indentBuffer.fork(), runtimeContext, dumpedObjectCount, caches, false);
     }
 
     public void cached(Data<?> data, Runnable runnable) {
@@ -123,6 +129,10 @@ public class DumpingBuffer {
     public DumpingBuffer optionalNewLine() {
         indentBuffer.optionalNewLine();
         return this;
+    }
+
+    public boolean isForcePresentType() {
+        return forcePresentType;
     }
 
     public static class MaximizeDump extends RuntimeException {

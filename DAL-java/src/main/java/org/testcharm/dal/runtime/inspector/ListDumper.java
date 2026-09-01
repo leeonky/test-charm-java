@@ -8,9 +8,9 @@ import java.util.stream.Stream;
 public class ListDumper<T> implements Dumper.Cacheable<T> {
 
     @Override
-    public void cachedInspect(Data<T> data, DumpingBuffer context) {
-        dumpType(data, context);
-        dumpBody(data, context);
+    public void cachedInspect(Data<T> data, DumpingBuffer dumpingBuffer) {
+        dumpType(data, dumpingBuffer);
+        dumpBody(data, dumpingBuffer);
     }
 
     private void dumpBody(Data<T> data, DumpingBuffer dumpingBuffer) {
@@ -21,8 +21,9 @@ public class ListDumper<T> implements Dumper.Cacheable<T> {
                 })).optionalNewLine().append("]");
     }
 
-    protected void dumpType(Data<T> data, DumpingBuffer context) {
-        if (!data.instanceOf(Iterable.class) && !data.instanceOf(Stream.class) && !data.value().getClass().isArray())
-            context.append(Classes.getClassName(data.value())).defer(" ");
+    protected void dumpType(Data<T> data, DumpingBuffer dumpingBuffer) {
+        if (dumpingBuffer.isForcePresentType() ||
+                !data.instanceOf(Iterable.class) && !data.instanceOf(Stream.class) && !data.value().getClass().isArray())
+            dumpingBuffer.append(Classes.getClassName(data.value())).defer(" ");
     }
 }
