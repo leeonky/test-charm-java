@@ -496,3 +496,113 @@ Feature: dump-data
           obj: null
       }
       """
+
+  Scenario: dump data through Dumpable
+    Given the following java class:
+    """
+    public class Value implements Dumpable{
+      public void dump(org.testcharm.dal.runtime.inspector.DumpingBuffer dumpingBuffer) {
+         dumpingBuffer.append("dumped");
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class Data {
+      public Value value = new Value();
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    #package#Data {
+        value: dumped
+    }
+    """
+    Then dumped instance of java class "Value" should be:
+    """
+    dumped
+    """
+
+  Scenario: skip dumping via annotation
+    Given the following java class:
+    """
+    @SkipDump
+    public class Value { }
+    """
+    Given the following java class:
+    """
+    public class Data {
+      public Value value = new Value();
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    #package#Data {
+        value: *skipped*
+    }
+    """
+    Then dumped instance of java class "Value" should be:
+    """
+    *skipped*
+    """
+
+  Scenario: Dumpable interface > skip annotation
+    Given the following java class:
+    """
+    @SkipDump
+    public class Value implements Dumpable{
+      public void dump(org.testcharm.dal.runtime.inspector.DumpingBuffer dumpingBuffer) {
+         dumpingBuffer.append("dumped");
+      }
+    }
+    """
+    Then dumped instance of java class "Value" should be:
+    """
+    dumped
+    """
+
+  Scenario: Dumpable interface > Dumper
+    Given the following java class:
+      """
+      @SkipDump
+      public class Value implements Dumpable{
+        {
+          org.testcharm.dal.DAL.dal().getRuntimeContextBuilder().registerDumper(Value.class, data ->
+          new org.testcharm.dal.runtime.inspector.Dumper(){
+            public void dump(org.testcharm.dal.runtime.Data data,
+              org.testcharm.dal.runtime.inspector.DumpingBuffer dumpingBuffer) {
+              dumpingBuffer.append("dumped by dumper");
+            }
+          });
+        }
+
+        public void dump(org.testcharm.dal.runtime.inspector.DumpingBuffer dumpingBuffer) {
+           dumpingBuffer.append("dumped");
+        }
+      }
+      """
+    Then dumped instance of java class "Value" should be:
+      """
+      dumped
+      """
+
+  Scenario: Skip annotation > Dumper
+    Given the following java class:
+      """
+      @SkipDump
+      public class Value {
+        {
+          org.testcharm.dal.DAL.dal().getRuntimeContextBuilder().registerDumper(Value.class, data ->
+          new org.testcharm.dal.runtime.inspector.Dumper(){
+            public void dump(org.testcharm.dal.runtime.Data data,
+              org.testcharm.dal.runtime.inspector.DumpingBuffer dumpingBuffer) {
+              dumpingBuffer.append("dumped by dumper");
+            }
+          });
+        }
+      }
+      """
+    Then dumped instance of java class "Value" should be:
+      """
+      *skipped*
+      """

@@ -2,6 +2,7 @@ package org.testcharm.dal.runtime.inspector;
 
 import org.testcharm.dal.runtime.Data;
 import org.testcharm.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import org.testcharm.dal.type.Dumpable;
 import org.testcharm.util.IndentBuffer;
 
 import java.util.HashMap;
@@ -47,7 +48,10 @@ public class DumpingBuffer {
     public <T> DumpingBuffer dump(Data<T> data) {
         checkCount();
         try {
-            runtimeContext.fetchDumper(data).dump(data, this);
+            if (data.instanceOf(Dumpable.class))
+                data.cast(Dumpable.class).ifPresent(dumpable -> dumpable.dump(this));
+            else
+                runtimeContext.fetchDumper(data).dump(data, this);
         } catch (Throwable e) {
             append(e);
         }
@@ -57,7 +61,10 @@ public class DumpingBuffer {
     public <T> DumpingBuffer dumpValue(Data<T> data) {
         checkCount();
         try {
-            runtimeContext.fetchDumper(data).dumpValue(data, this);
+            if (data.instanceOf(Dumpable.class))
+                data.cast(Dumpable.class).ifPresent(dumpable -> dumpable.dumpValue(this));
+            else
+                runtimeContext.fetchDumper(data).dumpValue(data, this);
         } catch (Throwable e) {
             append(e);
         }

@@ -11,6 +11,7 @@ import org.testcharm.dal.runtime.schema.Expect;
 import org.testcharm.dal.type.ExtensionName;
 import org.testcharm.dal.type.InputCode;
 import org.testcharm.dal.type.Schema;
+import org.testcharm.dal.type.SkipDump;
 import org.testcharm.interpreter.RuntimeContext;
 import org.testcharm.interpreter.SyntaxException;
 import org.testcharm.util.*;
@@ -513,6 +514,8 @@ public class RuntimeContextBuilder {
 
         @SuppressWarnings("unchecked")
         public <T> Dumper<T> fetchDumper(Data<T> data) {
+            if (data.value() != null && data.value().getClass().getAnnotation(SkipDump.class) != null)
+                return (((DumperFactory<T>) DumperFactory.skip()).apply(data));
             return dumperFactories.tryGetData(data.value()).map(factory -> ((DumperFactory<T>) factory).apply(data)).orElseGet(() -> {
                 if (data.value() == null || data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
